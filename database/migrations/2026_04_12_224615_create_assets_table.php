@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('serial_number')->unique();
             $table->boolean('is_available')->default(true);
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

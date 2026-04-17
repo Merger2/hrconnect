@@ -17,15 +17,19 @@ return new class extends Migration
             $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('employees')->nullOnDelete();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
+            $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
             $table->foreignId('department_id')->constrained('departments')->cascadeOnDelete();
-            $table->foreignId('position_id')->constrained('positions')->cascadeOnDelete();
+            $table->foreignId('position_id')->constrained('positions')->restrictOnDelete();
             // Data Pribadi
             $table->string('employee_number')->unique();
             $table->string('full_name');
-            $table->string('nik')->unique();
-            $table->string('gender');
-            $table->string('employee_status')->default('active');
+
+            // [PENTING] Implementasi Keamanan NIK (Encrypted at Rest & Blind Index)
+            $table->text('nik'); // Akan menyimpan string enkripsi yang panjang
+            $table->string('nik_hash')->unique(); // Untuk pencarian & validasi unique
+
+            $table->string('gender', 10); 
+            $table->string('status', 20)->default('active');
             $table->date('birth_date');
             $table->date('join_date');
             $table->date('resign_date')->nullable();
@@ -33,13 +37,13 @@ return new class extends Migration
             $table->text('address');
             $table->string('photo')->nullable();
             // pendidikan
-            $table->string('education_level');
+            $table->string('education_level', 20);
             $table->string('institution_name');
             $table->string('major')->nullable();
             $table->integer('graduation_year');
-            $table->string('salary_type');
-            $table->softDeletes();
+            $table->string('salary_type', 20);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

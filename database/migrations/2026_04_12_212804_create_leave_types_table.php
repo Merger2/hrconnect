@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->integer('max_days');
             $table->boolean('is_paid')->default(true);
-            $table->softDeletes();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

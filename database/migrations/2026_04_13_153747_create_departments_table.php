@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             // Foreign Key ke tabel branches
-            $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
+            $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
             $table->string('name');
             $table->string('code')->unique();
             $table->text('description');

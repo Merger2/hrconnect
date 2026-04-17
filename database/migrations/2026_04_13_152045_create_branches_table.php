@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
             // Foreign Key ke tabel companies
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignId('company_id')->constrained('companies')->restrictOnDelete();
             $table->string('name');
             $table->text('address');
             $table->boolean('is_main')->default(false);
-            $table->softDeletes();
             $table->timestamps();
         });
     }

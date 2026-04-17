@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('date')->unique();
             $table->string('name');
-            $table->softDeletes();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
