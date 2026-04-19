@@ -16,31 +16,36 @@ return new class extends Migration
             // Relasi
             $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('employees')->nullOnDelete();
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignId('company_id')->constrained('companies')->restrictOnDelete();
             $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
-            $table->foreignId('department_id')->constrained('departments')->cascadeOnDelete();
+            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
             $table->foreignId('position_id')->constrained('positions')->restrictOnDelete();
             // Data Pribadi
-            $table->string('employee_number')->unique();
+            $table->string('employee_number',50)->unique();
             $table->string('full_name');
-
-            // [PENTING] Implementasi Keamanan NIK (Encrypted at Rest & Blind Index)
+            $table->string('phone');
+            $table->string('phone_hash')->unique();
+            $table->text('bank_account_number');
+            $table->string('bank_account_number_hash')->unique();
+            $table->string('bank_name',100);
+            $table->text('npwp');
+            $table->string('npwp_hash')->unique();
             $table->text('nik'); // Akan menyimpan string enkripsi yang panjang
             $table->string('nik_hash')->unique(); // Untuk pencarian & validasi unique
-
-            $table->string('gender', 10); 
+            $table->string('marital_status',20)->default('single');
+            $table->string('blood_type',5)->nullable();
+            $table->char('gender', 1); 
             $table->string('status', 20)->default('active');
             $table->date('birth_date');
             $table->date('join_date');
             $table->date('resign_date')->nullable();
-            $table->string('phone');
             $table->text('address');
             $table->string('photo')->nullable();
             // pendidikan
             $table->string('education_level', 20);
             $table->string('institution_name');
             $table->string('major')->nullable();
-            $table->integer('graduation_year');
+            $table->year('graduation_year');
             $table->string('salary_type', 20);
             $table->timestamps();
             $table->softDeletes();

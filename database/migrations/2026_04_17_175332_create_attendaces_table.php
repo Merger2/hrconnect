@@ -16,16 +16,19 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->foreignId('shift_id')->constrained('shifts')->restrictOnDelete();
             $table->date('date');
-            $table->time('clock_in');
-            $table->time('clock_out')->nullable();
+            $table->timestamp('clock_in');
+            $table->timestamp('clock_out')->nullable();
             $table->decimal('lat_in',10,8)->nullable();
             $table->decimal('long_in',11,8)->nullable();
             $table->decimal('lat_out',10,8)->nullable();
             $table->decimal('long_out',11,8)->nullable();
-            $table->string('status', 30)->default('on_time');
+            $table->string('status', 20)->default('on_time');
             $table->boolean('is_wfa')->default(false);
             $table->string('photo_selfie_in')->nullable();
             $table->string('photo_selfie_out')->nullable();
+            $table->index('date');
+            $table->index(['employee_id','date']);
+            $table->index('status');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -36,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendaces');
+        Schema::dropIfExists('attendances');
     }
 };
