@@ -26,9 +26,9 @@ return new class extends Migration
             $table->boolean('is_wfa')->default(false);
             $table->string('photo_selfie_in')->nullable();
             $table->string('photo_selfie_out')->nullable();
+            $table->unique(['employee_id','date']);
+            $table->index(['date','status']);
             $table->index('date');
-            $table->index(['employee_id','date']);
-            $table->index('status');
             $table->timestamps();
             $table->softDeletes();
         });

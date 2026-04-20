@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimbursements', function (Blueprint $table) {
+        Schema::create('approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
-            $table->string('title');
-            $table->decimal('amount',15,2);
-            $table->string('receipt_file')->nullable();
+            $table->foreignId('approver_id')->constrained('employees')->restrictOnDelete();
+            $table->timestamp('approved_at')->nullable();
+            $table->morphs('approvable');
+            $table->integer('level');
             $table->string('status',20)->default('pending');
+            $table->index('status');
+            $table->text('notes')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimbursements');
+        Schema::dropIfExists('approvals');
     }
 };

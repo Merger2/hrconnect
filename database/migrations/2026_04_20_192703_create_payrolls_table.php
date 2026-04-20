@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimbursements', function (Blueprint $table) {
+        Schema::create('payrolls', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
-            $table->string('title');
-            $table->decimal('amount',15,2);
-            $table->string('receipt_file')->nullable();
-            $table->string('status',20)->default('pending');
-            $table->timestamps();
+            $table->string('period');
+            $table->decimal('basic_salary',15,2);
+            $table->decimal('total_allowance',15,2);
+            $table->decimal('total_deduction',15,2);
+            $table->decimal('net_salary',15,2);
+            $table->string('status',20)->default('draft');
+            $table->index('period');
+            $table->index('status');
             $table->softDeletes();
+            $table->timestamps();
         });
     }
 
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimbursements');
+        Schema::dropIfExists('payrolls');
     }
 };

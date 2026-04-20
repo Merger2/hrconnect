@@ -20,6 +20,12 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
             $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
             $table->foreignId('position_id')->constrained('positions')->restrictOnDelete();
+
+            // indexing
+            $table->index('full_name');
+            $table->index('status');
+            $table->index('join_date');
+
             // Data Pribadi
             $table->string('employee_number',50)->unique();
             $table->string('full_name');
@@ -47,6 +53,10 @@ return new class extends Migration
             $table->string('major')->nullable();
             $table->year('graduation_year');
             $table->string('salary_type', 20);
+
+            // audit trail
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

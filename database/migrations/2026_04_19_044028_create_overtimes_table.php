@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('total_hours',5,2);
             $table->decimal('calculated_pay',15,2);
-            $table->string('status',20);
+            $table->string('status',20)->default('pending');
             $table->softDeletes();
             $table->timestamps();
         });

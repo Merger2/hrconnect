@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('loans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
+            $table->text('rejection_reason')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->decimal('amount',15,2);
             $table->integer('tenor_months');
             $table->decimal('monthly_installment',15,2);
-            $table->string('status',20);
+            $table->string('status',20)->default('pending');
             $table->boolean('is_settled')->default(false);
             $table->softDeletes();
             $table->timestamps();
