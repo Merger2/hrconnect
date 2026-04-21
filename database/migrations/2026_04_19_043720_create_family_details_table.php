@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('job')->nullable();
             $table->text('phone');
             $table->string('phone_hash')->unique();
+            $table->text('emergency_contact_address')->nullable();
             $table->boolean('is_emergency')->default(false);
             $table->timestamps();
         });

@@ -57,6 +57,8 @@ return new class extends Migration
             $table->index('full_name');
             $table->index('status');
             $table->index('join_date');
+            $table->index('province_id');
+            $table->index('city_id');
             // audit trail
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();

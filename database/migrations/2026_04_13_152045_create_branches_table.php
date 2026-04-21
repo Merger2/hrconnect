@@ -16,7 +16,12 @@ return new class extends Migration
             // Foreign Key ke tabel companies
             $table->foreignId('company_id')->constrained('companies')->restrictOnDelete();
             $table->string('name');
-            $table->text('address');
+            $table->foreignId('province_id')->nullable()->constrained('indonesia_provinces')->restrictOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained('indonesia_cities')->restrictOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained('indonesia_districts')->restrictOnDelete();
+            $table->foreignId('village_id')->nullable()->constrained('indonesia_villages')->restrictOnDelete();
+            $table->string('postal_code', 10)->nullable();
+            $table->text('address_detail');
             $table->boolean('is_main')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('province_id')->nullable()->constrained('indonesia_provinces')->restrictOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained('indonesia_cities')->restrictOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained('indonesia_districts')->restrictOnDelete();
+            $table->foreignId('village_id')->nullable()->constrained('indonesia_villages')->restrictOnDelete();
+            $table->string('postal_code', 10)->nullable();
+            $table->text('address_detail');
             $table->string('name');
             $table->string('phone');
             $table->string('email');
@@ -20,7 +26,6 @@ return new class extends Migration
             $table->text('npwp');
             $table->string('npwp_hash');
             $table->string('code')->unique();
-            $table->text('address');
             $table->text('logo')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
