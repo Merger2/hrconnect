@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('relationship');
             $table->date('birth_date')->nullable();
             $table->string('job')->nullable();
-            $table->string('phone');
+            $table->text('phone');
             $table->string('phone_hash')->unique();
             $table->boolean('is_emergency')->default(false);
             $table->timestamps();

@@ -20,10 +20,17 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
             $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
             $table->foreignId('position_id')->constrained('positions')->restrictOnDelete();
+            // --- ALAMAT(LARAVOLT) ---
+            $table->foreignId('province_id')->nullable()->constrained('indonesia_provinces')->restrictOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained('indonesia_cities')->restrictOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained('indonesia_districts')->restrictOnDelete();
+            $table->foreignId('village_id')->nullable()->constrained('indonesia_villages')->restrictOnDelete();
+            $table->string('postal_code', 10)->nullable();
+            $table->text('address_detail');
             // Data Pribadi
             $table->string('employee_number',50)->unique();
             $table->string('full_name');
-            $table->string('phone');
+            $table->text('phone');
             $table->string('phone_hash')->unique();
             $table->text('bank_account_number');
             $table->string('bank_account_number_hash')->unique();
@@ -39,7 +46,6 @@ return new class extends Migration
             $table->date('birth_date');
             $table->date('join_date');
             $table->date('resign_date')->nullable();
-            $table->text('address');
             $table->string('photo')->nullable();
             // pendidikan
             $table->string('education_level', 20);
