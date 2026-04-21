@@ -9,19 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+public function up(): void
     {
         Schema::create('family_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
             $table->string('name');
-            $table->string('relationship');
+            $table->string('relationship', 50);
+            $table->char('gender', 1)->nullable(); 
+            $table->text('nik')->nullable(); 
+            $table->string('nik_hash')->nullable();
             $table->date('birth_date')->nullable();
             $table->string('job')->nullable();
-            $table->text('phone');
-            $table->string('phone_hash')->unique();
-            $table->text('emergency_contact_address')->nullable();
-            $table->boolean('is_emergency')->default(false);
+            $table->text('phone')->nullable();
+            $table->string('phone_hash')->nullable();
+            $table->text('address')->nullable(); 
+            $table->boolean('is_emergency')->default(false); 
             $table->timestamps();
         });
     }
