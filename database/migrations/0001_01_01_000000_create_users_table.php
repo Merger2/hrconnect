@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::ensureVectorExtensionExists();
+        DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+         DB::statement('CREATE EXTENSION IF NOT EXISTS pgcrypto');
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');

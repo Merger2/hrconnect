@@ -24,6 +24,9 @@ return new class extends Migration
             $table->text('address_detail');
             $table->boolean('is_main')->default(false);
             $table->boolean('is_active')->default(true);
+            $table->decimal('latitude', 10, 8)->nullable()->comment('Titik Y Pusat Kantor');
+            $table->decimal('longitude', 11, 8)->nullable()->comment('Titik X Pusat Kantor');
+            $table->integer('radius')->default(100)->comment('Batas toleransi absen dalam meter');
             $table->timestamps();
         });
     }

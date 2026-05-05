@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('long_in',11,8)->nullable();
             $table->decimal('lat_out',10,8)->nullable();
             $table->decimal('long_out',11,8)->nullable();
+            $table->decimal('face_similarity_score', 5, 2)->nullable()->comment('Akurasi kemiripan wajah dalam persentase (%)');
             $table->string('status', 20)->default('on_time');
             $table->boolean('is_wfa')->default(false);
             $table->string('photo_selfie_in')->nullable();

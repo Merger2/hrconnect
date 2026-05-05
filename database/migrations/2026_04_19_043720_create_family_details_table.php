@@ -18,11 +18,9 @@ public function up(): void
             $table->string('relationship', 50);
             $table->char('gender', 1)->nullable(); 
             $table->text('nik')->nullable(); 
-            $table->string('nik_hash')->nullable();
             $table->date('birth_date')->nullable();
             $table->string('job')->nullable();
             $table->text('phone')->nullable();
-            $table->string('phone_hash')->nullable();
             $table->text('address')->nullable(); 
             $table->boolean('is_emergency')->default(false); 
             $table->timestamps();

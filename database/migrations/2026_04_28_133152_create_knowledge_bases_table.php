@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reimbursements', function (Blueprint $table) {
+        Schema::create('knowledge_bases', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
+            $table->morphs('knowledgeable');
             $table->string('title');
-            $table->decimal('amount',15,2);
-            $table->string('receipt_file')->nullable();
-            $table->string('status',20)->default('pending');
+            $table->text('content');
+            $table->vector('embedding',dimensions: 1536);
+            $table->jsonb('metadata')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
+        DB::statement('CREATE INDEX kb_embedding_hnsw_idx ON knowledge_bases USING hnsw (embedding vector_cosine_ops)');
     }
 
     /**
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reimbursements');
+        Schema::dropIfExists('knowledge_bases');
     }
 };

@@ -31,14 +31,10 @@ return new class extends Migration
             $table->string('employee_number',50)->unique();
             $table->string('full_name');
             $table->text('phone');
-            $table->string('phone_hash')->unique();
             $table->text('bank_account_number');
-            $table->string('bank_account_number_hash')->unique();
             $table->string('bank_name',100);
             $table->text('npwp');
-            $table->string('npwp_hash')->unique();
             $table->text('nik'); // Akan menyimpan string enkripsi yang panjang
-            $table->string('nik_hash')->unique(); // Untuk pencarian & validasi unique
             $table->string('marital_status',20)->default('single');
             $table->string('blood_type',5)->nullable();
             $table->char('gender', 1); 
@@ -47,11 +43,12 @@ return new class extends Migration
             $table->date('join_date');
             $table->date('resign_date')->nullable();
             $table->string('photo')->nullable();
+            $table->vector('face_embedding', dimensions: 1536)->nullable()->comment('Menyimpan vektor embedding wajah untuk keperluan absensi berbasis wajah');
             // pendidikan
             $table->string('education_level', 20);
             $table->string('institution_name');
             $table->string('major')->nullable();
-            $table->year('graduation_year');
+            $table->integer('graduation_year');
             $table->string('salary_type', 20);
             // indexing
             $table->index('full_name');

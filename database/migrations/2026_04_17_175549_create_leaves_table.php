@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('status',20)->default('pending');
             $table->index('status',20);
             $table->index('start_date');
-            $table->index(['employee_id', 'start_date']); // Penting untuk laporan harian seluruh kantor
+            $table->index(['employee_id', 'start_date']); 
             $table->timestamps();
             $table->softDeletes();
         });

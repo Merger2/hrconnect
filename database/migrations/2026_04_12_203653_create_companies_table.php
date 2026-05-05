@@ -22,9 +22,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone');
             $table->string('email');
-            $table->string('website');
+            $table->string('website')->nullable();
             $table->text('npwp');
-            $table->string('npwp_hash');
             $table->string('code')->unique();
             $table->text('logo')->nullable();
             $table->boolean('is_active')->default(true);
