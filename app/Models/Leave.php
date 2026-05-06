@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DayType;
 use App\Enums\LeaveStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,7 @@ class Leave extends Model
     protected function casts(): array
     {
         return [
+            'day_type' => DayType::class,
             'start_date' => 'date',
             'end_date' => 'date',
             'total_days' => 'decimal:2',

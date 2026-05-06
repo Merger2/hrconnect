@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['employee_id', 'rejection_reason', 'created_by', 'amount', 'tenor_months', 'monthly_installment', 'status', 'is_settled'])]
 class Loan extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected function casts(): array
     {
         return [

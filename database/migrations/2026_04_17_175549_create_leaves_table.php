@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('reason');
             $table->string('proof_file')->nullable();
             $table->string('status',20)->default('pending');
-            $table->index('status',20);
+            $table->index('status');
             $table->index('start_date');
             $table->index(['employee_id', 'start_date']); 
             $table->timestamps();

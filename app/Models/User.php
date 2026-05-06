@@ -47,7 +47,7 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public function employee()
+    public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
     }

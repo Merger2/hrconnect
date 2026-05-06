@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Employee;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 use App\Enums\EmployeeStatus;
@@ -23,11 +24,15 @@ class EmployeeFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    protected $model = Employee::class;
+    #[UseModel(Employee::class)]
     public function definition(): array
     {
         return [
             'user_id' => User::factory(),
+            'company_id' => \App\Models\Company::inRandomOrder()->value('id'),
+            'branch_id' => \App\Models\Branch::inRandomOrder()->value('id'),
+            'department_id' => \App\Models\Department::inRandomOrder()->value('id'),
+            'position_id' => \App\Models\Position::inRandomOrder()->value('id'),
             'nik' => $this->faker->unique()->numerify('3276############'),
             'npwp' => $this->faker->unique()->numerify('##.###.###.#-###.###'),
             'employee_number' => 'EMP-' . $this->faker->unique()->numberBetween(1000, 9999),

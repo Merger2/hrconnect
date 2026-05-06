@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('photo_selfie_out')->nullable();
             $table->unique(['employee_id','date']);
             $table->index(['date','status']);
-            $table->index('date');
             $table->timestamps();
             $table->softDeletes();
         });

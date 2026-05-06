@@ -40,9 +40,4 @@ class Company extends Model implements CipherSweetEncrypted
     {
         return $this->hasMany(Employee::class);
     }
-
-    public function departments(): HasMany
-    {
-        return $this->hasMany(Department::class);
-    }
 }

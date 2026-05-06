@@ -43,7 +43,7 @@ return new class extends Migration
             $table->date('join_date');
             $table->date('resign_date')->nullable();
             $table->string('photo')->nullable();
-            $table->vector('face_embedding', dimensions: 1536)->nullable()->comment('Menyimpan vektor embedding wajah untuk keperluan absensi berbasis wajah');
+            $table->vector('face_embedding', dimensions: 128)->nullable()->comment('Menyimpan vektor embedding wajah untuk keperluan absensi berbasis wajah');
             // pendidikan
             $table->string('education_level', 20);
             $table->string('institution_name');

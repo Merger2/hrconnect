@@ -137,4 +137,59 @@ class Employee extends Model implements CipherSweetEncrypted
     {
         return $this->hasMany(FamilyDetail::class);
     }
+
+    public function handovers(): HasMany
+    {
+        return $this->hasMany(AssetHandover::class);
+    }
+
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(Approval::class);
+    }
+
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(Leave::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function payrolls(): HasMany
+    {
+        return $this->hasMany(Payroll::class);
+    }
+
+    public function overtimes(): HasMany
+    {
+        return $this->hasMany(Overtime::class);
+    }
+
+    public function reimbursements(): HasMany
+    {
+        return $this->hasMany(Reimbursement::class);
+    }
+
+    public function performanceReviews(): HasMany
+    {
+        return $this->hasMany(PerformanceReview::class);
+    }
+
+    public function reviewedVersions(): HasMany
+    {
+        return $this->hasMany(PerformanceReview::class, 'reviewer_id');
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
+    }
 }

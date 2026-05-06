@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PayrollItem extends Model
 {
     use HasFactory;
-    protected Function casts(): array
+    protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
