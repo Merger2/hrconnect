@@ -1,7 +1,7 @@
 # Entity Relationship Diagram (ERD) - HRConnect HRIS
 
 ## Deskripsi
-Dokumen ini menyajikan Entity Relationship Diagram (ERD) untuk sistem HRConnect HRIS yang menggambarkan seluruh tabel database (47 tabel: 34 existing + 13 new/modified) beserta relasi, indexes, dan constraints. ERD ini menggunakan Mermaid.js ER diagram syntax dan mencakup semua kolom yang disebutkan dalam PRD termasuk kolom baru (contract_start_date, contract_end_date, deceased_date, termination_reason, employment_type).
+Dokumen ini menyajikan Entity Relationship Diagram (ERD) untuk sistem HRConnect HRIS yang menggambarkan seluruh tabel database (48 tabel: 34 existing + 14 new/modified) beserta relasi, indexes, dan constraints. ERD ini menggunakan Mermaid.js ER diagram syntax dan mencakup semua kolom yang disebutkan dalam PRD termasuk kolom baru (contract_start_date, contract_end_date, deceased_date, termination_reason, employment_type).
 
 ---
 
@@ -238,6 +238,7 @@ erDiagram
     
     %% Payroll Tables
     payrolls ||--o{ payroll_items : "has"
+    payrolls ||--o{ payroll_adjustments : "has"
     payrolls {
         uuid id PK
         uuid employee_id FK
@@ -250,7 +251,11 @@ erDiagram
         decimal loan_deduction
         decimal attendance_penalty
         decimal net_salary
-        string status "draft/published"
+        string status "draft/published/paid"
+        boolean is_locked "default: false"
+        timestamp locked_at
+        uuid locked_by FK
+        timestamp published_at
         text pdf_path
         timestamp created_at
         timestamp updated_at
@@ -261,9 +266,20 @@ erDiagram
     payroll_items {
         uuid id PK
         uuid payroll_id FK
-        string type "allowance/deduction/adjustment"
+        string type "allowance/deduction"
         string name
         decimal amount
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    payroll_adjustments {
+        uuid id PK
+        uuid payroll_id FK "original payroll"
+        integer amount "positif=tambah, negatif=potong"
+        text reason
+        uuid created_by FK
+        date applied_to_period "bulan adjustment diterapkan"
         timestamp created_at
         timestamp updated_at
     }
@@ -573,11 +589,12 @@ erDiagram
 |----|-------|----|----|---------|------------|
 | 17 | approvals | id (uuid) | approver_id | idx_approvable | Polymorphic (Leave/Overtime) |
 
-### Payroll (2 tabel)
+### Payroll (3 tabel)
 | No | Tabel | PK | FK | Indexes | Keterangan |
 |----|-------|----|----|---------|------------|
-| 18 | payrolls | id (uuid) | employee_id | uk_employee_period | Payroll (gross_salary, pph21, bpjs_*, dll) |
-| 19 | payroll_items | id (uuid) | payroll_id | - | Item Payroll (allowance/deduction/adjustment) |
+| 18 | payrolls | id (uuid) | employee_id | uk_employee_period | Payroll (gross_salary, pph21, bpjs_*, is_locked) |
+| 19 | payroll_items | id (uuid) | payroll_id | - | Item Payroll (allowance/deduction) |
+| 20 | payroll_adjustments | id (uuid) | payroll_id, created_by | - | Adjustment (bulan berikutnya, locked permanen) |
 
 ### Configuration (3 tabel - NEW)
 | No | Tabel | PK | FK | Indexes | Keterangan |
@@ -643,9 +660,9 @@ erDiagram
 |----|-------|----|----|---------|------------|
 | 43 | blind_indexes | id (uuid) | - | idx_table_row | CipherSweet Blind Index |
 
-### Total: 43 tabel (bukan 47 seperti disebutkan di PRD, karena beberapa tabel adalah tabel Laravel default yang sudah ada)
+### Total: 44 tabel (bukan 47 seperti disebutkan di PRD, karena beberapa tabel adalah tabel Laravel default yang sudah ada)
 
-**Koreksi**: Berdasarkan PRD 18, ada 34 existing + 6 new tables + 6 alter tables = 40 tabel inti. Tabel Indonesia Region (4) dan Laravel System (6) dan Permission (1) dan Security (1) = 52 tabel total.
+**Koreksi**: Berdasarkan PRD 18, ada 34 existing + 7 new tables + 6 alter tables = 41 tabel inti. Tabel Indonesia Region (4) dan Laravel System (6) dan Permission (1) dan Security (1) = 53 tabel total.
 
 ---
 
@@ -673,6 +690,7 @@ erDiagram
 | leave_types | leaves | leave_type_id | 1:N |
 | leave_types | leave_balances | leave_type_id | 1:N |
 | payrolls | payroll_items | payroll_id | 1:N |
+| payrolls | payroll_adjustments | payroll_id | 1:N |
 | approvals | employees | approver_id | N:1 (approver) |
 
 ---
@@ -731,7 +749,11 @@ Values: `permanent`, `contract`, `probation`
 - `description` (text)
 - `rejection_reason` (text)
 
-### payrolls (ALTER - 7 kolom)
+### payrolls (ALTER - 11 kolom)
+- `is_locked` (boolean, default: false)
+- `locked_at` (timestamp, nullable)
+- `locked_by` (uuid, FK users, nullable)
+- `published_at` (timestamp, nullable)
 - `gross_salary` (decimal)
 - `overtime_pay` (decimal)
 - `pph21` (decimal)
@@ -739,6 +761,16 @@ Values: `permanent`, `contract`, `probation`
 - `bpjs_employment` (decimal)
 - `loan_deduction` (decimal)
 - `attendance_penalty` (decimal)
+
+### payroll_adjustments (NEW)
+- `payroll_id` (uuid, FK payrolls - original payroll)
+- `amount` (integer - positif=tambah, negatif=potong)
+- `reason` (text)
+- `created_by` (uuid, FK users)
+- `applied_to_period` (date - bulan adjustment diterapkan)
+
+### payroll_items (MODIFY)
+- `type` (string: allowance/deduction, HAPUS 'adjustment' — pindah ke payroll_adjustments)
 
 ### shifts (ALTER - 1 kolom)
 - `late_tolerance_minutes` (integer, default: 0)

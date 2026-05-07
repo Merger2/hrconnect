@@ -24,15 +24,15 @@
 | Task | Files | Estimasi |
 |------|-------|----------|
 | Buat 11 Enum baru | `app/Enums/*.php` (11 files) | 2 jam |
-| Buat 15 Migration baru | `database/migrations/*.php` (15 files) | 3 jam |
+| Buat 16 Migration baru | `database/migrations/*.php` (16 files) | 3 jam |
 | Verifikasi 33 migration existing | Cek schema vs ERD | 1 jam |
 | Run migrations + test | `php artisan migrate` | 1 jam |
-| **Total** | **26 files** | **7 jam** |
+| **Total** | **27 files** | **7 jam** |
 
 ### Hari 3-4: Models
 | Task | Files | Estimasi |
 |------|-------|----------|
-| Buat 6 Model baru | `app/Models/*.php` (6 files) | 2 jam |
+| Buat 7 Model baru | `app/Models/*.php` (7 files) | 2 jam |
 | Update 7 Model existing | Modify existing models | 2 jam |
 | Setup semua relationships | BelongsTo, HasMany, etc. | 2 jam |
 | Setup accessors & mutators | Get/set attributes | 1 jam |
@@ -121,24 +121,27 @@
 | Leave Quota | Livewire + view (2 files) | 1 jam |
 | **Total** | **10 files** | **7 jam** |
 
-### Hari 5-6: Routes & Form Requests
+### Hari 5-6: Overtime & Routes
 | Task | Files | Estimasi |
 |------|-------|----------|
+| Overtime Create | Livewire + view (2 files) | 2 jam |
+| Overtime History | Livewire + view (2 files) | 1 jam |
 | Buat routes/employee.php | Route definitions | 1 jam |
 | Update routes/web.php | Include employee routes | 0.5 jam |
-| StoreAttendanceRequest | `app/Http/Requests/StoreAttendanceRequest.php` | 1 jam |
 | StoreLeaveRequest | `app/Http/Requests/StoreLeaveRequest.php` | 1 jam |
+| StoreOvertimeRequest | `app/Http/Requests/StoreOvertimeRequest.php` | 1 jam |
 | Employee Policy | `app/Policies/EmployeePolicy.php` | 1 jam |
 | Attendance Policy | `app/Policies/AttendancePolicy.php` | 1 jam |
-| Leave Policy | `app/Policies/LeavePolicy.php` | 1 jam |
-| Middleware setup | DeviceDetection + Geofence | 1.5 jam |
-| **Total** | **9 files** | **7 jam** |
+| Leave Policy | `app/Policies/LeavePolicy.php` | 0.5 jam |
+| Middleware setup | DeviceDetection + Geofence | 1 jam |
+| **Total** | **12 files** | **10 jam** |
 
 ### Minggu 3 Deliverables
 - ✅ ESS mobile layout working
 - ✅ Clock in/out dengan face + GPS
 - ✅ Attendance history & summary
 - ✅ Leave request, history, quota
+- ✅ Overtime request & history
 - ✅ Employee routes configured
 - ✅ Form requests + policies created
 - ✅ Device detection middleware
@@ -150,11 +153,10 @@
 ### Hari 1-2: Employee Finance
 | Task | Files | Estimasi |
 |------|-------|----------|
-| LoanRequest | Livewire + view (2 files) | 2 jam |
 | ReimbursementRequest | Livewire + view (2 files) | 2 jam |
 | PayrollSlip | Livewire + view (2 files) | 2 jam |
-| Finance Policy | `app/Policies/LoanPolicy.php`, `ReimbursementPolicy.php` | 1 jam |
-| **Total** | **7 files** | **7 jam** |
+| Reimbursement Policy | `app/Policies/ReimbursementPolicy.php` | 1 jam |
+| **Total** | **5 files** | **5 jam** |
 
 ### Hari 3-4: Employee Profile
 | Task | Files | Estimasi |
@@ -173,11 +175,11 @@
 | ApprovalTimeline Component | View component (1 file) | 1 jam |
 | FileUpload Component | Livewire + view (2 files) | 1.5 jam |
 | StatusBadge Component | View component (1 file) | 0.5 jam |
-| Form Requests | StoreLoan, StoreReimbursement, UpdateProfile, StoreDevice (4 files) | 2 jam |
+| Form Requests | StoreReimbursement, UpdateProfile, StoreDevice (3 files) | 2 jam |
 | **Total** | **13 files** | **7 jam** |
 
 ### Minggu 4 Deliverables
-- ✅ Loan & reimbursement request
+- ✅ Reimbursement request
 - ✅ Payroll slip view
 - ✅ Profile editing (secondary data)
 - ✅ Family details CRUD
@@ -578,7 +580,8 @@
 - [ ] Clock in/out working
 - [ ] Attendance history working
 - [ ] Leave request working
-- [ ] Finance features working
+- [ ] Overtime request working
+- [ ] Reimbursement request working
 - [ ] Profile editing working
 - [ ] All ESS routes configured
 
@@ -594,7 +597,6 @@
 ### Week 7-8: Finance & Admin
 - [ ] Finance layout working
 - [ ] Payroll generation working
-- [ ] Loan management working
 - [ ] Reimbursement working
 - [ ] Admin settings working
 - [ ] User management working

@@ -50,7 +50,7 @@ HRConnect adalah sistem HRIS (Human Resource Information System) berskala Enterp
 - **KnowledgeBase AI (RAG)** untuk HRD (nilai jual utama skripsi)
 - PWA Mobile-First untuk Employee Self-Service (ESS)
 
-**Fitur yang DITUNDA ke V2:** Reimbursement, Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications.
+**Fitur yang DITUNDA ke V2:** Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications.
 
 **Tech Stack:**
 - Backend: Laravel 13, PHP 8.5
@@ -319,15 +319,21 @@ Default seed:
 
 ---
 
-## 9. MODULE: REIMBURSEMENT (V2)
+## 9. MODULE: REIMBURSEMENT (V1)
 
-**DITUNDA ke V2.** Tabel `reimbursement_categories` tetap dibuat sebagai persiapan.
-
-### Rencana V2
+### 9.1 Kategori Reimbursement
 - Kategori: Transport, Makan, Akomodasi, Medis, Lainnya
+- Dikelola oleh HRD via `reimbursement_categories`
 - Upload: JPG, PNG, PDF, **max 2 MB**
+
+### 9.2 Approval Workflow
 - Approval: Manager (L1) → Finance (L2)
 - Tidak ada ceiling/max amount
+- Setelah approved → masuk ke payroll bulan berikutnya
+
+### 9.3 Integrasi Payroll
+- Reimbursement approved → masuk ke `gross_salary` sebagai `reimbursement_paid`
+- Rumus payroll: `GROSS = basic_salary + allowance_jabatan + ... + reimbursement_paid`
 
 ---
 
@@ -396,7 +402,7 @@ NET = GROSS - DEDUCTIONS
 
 ### 11.7 Payroll Lock
 - Status `published` → **LOCKED PERMANEN**
-- Koreksi → buat `Adjustment` (payroll_items dengan type `adjustment`) di periode berikutnya
+- Koreksi → buat record baru di `payroll_adjustments` (amount positif/negatif, reason, applied_to_period) untuk bulan berikutnya
 
 ### 11.8 E-Payslip PDF
 - 2 kolom: Pendapatan (kiri) vs Potongan (kanan)

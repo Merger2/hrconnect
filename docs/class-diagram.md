@@ -236,10 +236,21 @@ classDiagram
     class PayrollItem {
         -uuid id PK
         +uuid payroll_id FK
-        +string type "allowance/deduction/adjustment"
+        +string type "allowance/deduction"
         +string name
         +decimal amount
         +payroll() Payroll
+    }
+    
+    class PayrollAdjustment {
+        -uuid id PK
+        +uuid payroll_id FK "original payroll"
+        +integer amount "positif=tambah, negatif=potong"
+        +text reason
+        +uuid created_by FK
+        +date applied_to_period
+        +payroll() Payroll
+        +creator() User
     }
     
     class FamilyDetail {
@@ -427,6 +438,7 @@ classDiagram
     LeaveType "1" --> "0..*" Leave : has
     LeaveType "1" --> "0..*" LeaveBalance : has
     Payroll "1" --> "0..*" PayrollItem : has
+    Payroll "1" --> "0..*" PayrollAdjustment : has
     Approval "0..*" --> "1" Employee : approver
     Employee "0..*" --> "1" Approval : polymorphic
     
@@ -877,13 +889,13 @@ classDiagram
 | Kategori | Jumlah | Daftar |
 |----------|--------|--------|
 | Models (Existing) | 25 | User, Company, Branch, Department, Position, Employee, Shift, Attendance, LeaveType, Leave, Overtime, Payroll, PayrollItem, FamilyDetail, Device, Approval, Holiday, KnowledgeBase, ActivityLog, Asset, AssetHandover, PerformanceReview, Reimbursement, Loan, LoanInstallment |
-| Models (New) | 4 | CompanySetting, ReimbursementCategory, ShiftSchedule, LeaveBalance |
+| Models (New) | 5 | CompanySetting, ReimbursementCategory, ShiftSchedule, LeaveBalance, PayrollAdjustment |
 | Service Classes | 4 | PayrollCalculatorService, AttendanceService, LeaveService, ApprovalService |
 | Jobs | 2 | GenerateEmployeePayrollJob, ProcessKnowledgeBaseEmbedding |
 | Commands | 2 | AttendanceDetectAlphaCommand, LeaveResetQuotaCommand |
 | Notifications | 6 | LeaveRequestSubmitted, LeaveApproved, LeaveRejected, PayrollPublished, ApprovalOverdue, NewDeviceLogin |
 | Enums | 17 | EmploymentType, LeaveDayType, AttendanceStatus, WfaStatus, ApprovalLevel, ApprovalStatus, RequestStatus, PayrollStatus, PayrollItemType, TERCategory, MaritalStatus, Gender, Relationship, AssetStatus, LoanStatus, ReimbursementStatus, KnowledgeBaseStatus |
-| **TOTAL** | **60** | |
+| **TOTAL** | **61** | |
 
 ---
 

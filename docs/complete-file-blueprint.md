@@ -55,7 +55,7 @@ app/Enums/SalaryType.php              ✅
 
 ---
 
-## 1.2 MIGRATIONS (database/migrations/) — 15 file baru
+## 1.2 MIGRATIONS (database/migrations/) — 16 file baru
 
 | No | Path Lengkap | Keterangan |
 |----|-------------|------------|
@@ -74,12 +74,13 @@ app/Enums/SalaryType.php              ✅
 | 13 | `database/migrations/2026_05_08_000013_add_google_oauth_to_users_table.php` | Verifikasi google_id sudah ada |
 | 14 | `database/migrations/2026_05_08_000014_add_password_changed_at_to_users_table.php` | Verifikasi password_changed_at sudah ada |
 | 15 | `database/migrations/2026_05_08_000015_create_knowledge_base_embeddings_table.php` | Chunks + embeddings untuk RAG |
+| 16 | `database/migrations/2026_05_08_000016_create_payroll_adjustments_table.php` | id, payroll_id, amount, reason, created_by, applied_to_period |
 
 ---
 
-## 1.3 MODELS — 6 baru + 7 dimodifikasi
+## 1.3 MODELS — 7 baru + 7 dimodifikasi
 
-### NEW (🆕 6 files)
+### NEW (🆕 7 files)
 | No | Path Lengkap | Keterangan |
 |----|-------------|------------|
 | 1 | `app/Models/CompanySetting.php` | Key-value settings per company |
@@ -88,6 +89,7 @@ app/Enums/SalaryType.php              ✅
 | 4 | `app/Models/EmployeeHandover.php` | Handover items saat resign |
 | 5 | `app/Models/KnowledgeBaseEmbedding.php` | Chunks + embeddings RAG |
 | 6 | `app/Models/RolePermission.php` | Helper RBAC (opsional) |
+| 7 | `app/Models/PayrollAdjustment.php` | Adjustment payroll locked (amount, reason, applied_to_period) |
 
 ### EXISTING MODELS (✅ 25 files - TIDAK PERLU DIBUAT ULANG)
 ```
