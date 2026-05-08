@@ -50,8 +50,8 @@
 
 ### Minggu 1 Deliverables
 - ✅ 11 Enums created
-- ✅ 15 Migrations created & run
-- ✅ 6 Models created
+- ✅ 16 Migrations created & run
+- ✅ 7 Models created
 - ✅ 7 Models updated
 - ✅ 11 Seeders created & run
 - ✅ 2 Config files created
