@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('leaves', function (Blueprint $table) {
@@ -18,21 +15,19 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->string('day_type')->default('full_day');
-            $table->decimal('total_days',4,2);
+            $table->decimal('total_days', 4, 2);
             $table->text('reason');
             $table->string('proof_file')->nullable();
-            $table->string('status',20)->default('pending');
+            $table->text('rejection_reason')->nullable();
+            $table->string('status', 20)->default('pending');
             $table->index('status');
             $table->index('start_date');
-            $table->index(['employee_id', 'start_date']); 
+            $table->index(['employee_id', 'start_date']);
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('leaves');

@@ -2,205 +2,114 @@
 
 namespace App\Services;
 
+use App\Exceptions\AlreadyClockedInException;
 use App\Models\Attendance;
 use App\Models\Employee;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use App\Exceptions\InvalidPinException;
+use App\Exceptions\FaceNotRecognizedException;
 class AttendanceService
 {
+    // Implementasi logika untuk layanan kehadiran (attendance)
     public function __construct(
         protected GeofenceService $geofenceService,
-        protected FaceRecognitionService $faceRecognitionService
-    ) {
-    }
+        protected FaceRecognitionService $faceRecognitionService,
+    ){}
 
     public function clockIn(Employee $employee, array $data): Attendance
     {
-        // Tier 1: Face Recognition
-        if (isset($data['face_embedding']) && $data['face_embedding']) {
-            $similarity = $this->faceRecognitionService->compare(
-                $employee->face_embedding,
-                $data['face_embedding']
-            );
+       //FAIL-FAST: Cek Double Clock-In
+        if ($this->hasClockedInToday($employee)) {
+            throw new AlreadyClockedInException('Anda sudah melakukan absensi masuk hari ini.');
+        }
+        //VALIDASI GEOFENCE
+        $isWfa = $data['is_wfa'] ?? false;
+        if (!$isWfa) {
+            $this->geofenceService->validateLocation($employee->branch, $data);
+        }
+        //DATABASE TRANSACTION
+        return DB::transaction(function () use ($employee, $data, $isWfa) {
+            $verificationMethod = 'manual';
 
-            if ($similarity >= config('hrconnect.face_threshold', 0.85)) {
-                return $this->createAttendance($employee, $data, $similarity);
+            //VERFIKASI BIOMETRIK WAJAH
+            if (!empty($data['face_embedding'])) {
+                try {
+                    $this->faceRecognitionService->verifyFace($employee, $data['face_embedding']);
+                    $verificationMethod = 'face_verified';
+                } catch (FaceNotRecognizedException $e) {
+                    Log::warning("Verifikasi wajah gagal untuk NIK {$employee->nik}: " . $e->getMessage());
+                }
             }
-        }
 
-        // Tier 2: PIN Verification
-        if (isset($data['pin']) && $data['pin']) {
-            $this->verifyPin($employee, $data['pin']);
-            $this->logBypass($employee, 'pin_verified');
-            return $this->createAttendance($employee, $data, null);
-        }
-
-        // Tier 3: Manual Request
-        return $this->createManualRequest($employee, $data);
-    }
-
-    public function clockOut(Employee $employee, array $data): Attendance
-    {
-        $todayAttendance = $this->getTodayAttendance($employee);
-
-        if (!$todayAttendance) {
-            throw new \Exception('Belum melakukan clock in hari ini.');
-        }
-
-        if ($todayAttendance->clock_out) {
-            throw new \Exception('Sudah melakukan clock out hari ini.');
-        }
-
-        // Face recognition for clock out
-        $similarity = null;
-        if (isset($data['face_embedding']) && $data['face_embedding'] && $employee->face_embedding) {
-            $similarity = $this->faceRecognitionService->compare(
-                $employee->face_embedding,
-                $data['face_embedding']
-            );
-        }
-
-        $todayAttendance->update([
-            'clock_out' => now(),
-            'lat_out' => $data['lat'] ?? null,
-            'long_out' => $data['long'] ?? null,
-            'face_similarity_score' => $similarity,
-            'is_mocked_gps' => $data['is_mocked'] ?? false,
-            'gps_accuracy' => $data['accuracy'] ?? null,
-        ]);
-
-        Cache::forget("attendance:today:{$employee->id}");
-
-        return $todayAttendance;
-    }
-
-    public function validateGeofence(float $lat, float $long, ?int $branchId = null): bool
-    {
-        return $this->geofenceService->isWithinRadius($lat, $long, $branchId);
-    }
-
-    public function validateAntiFakeGPS(array $data): bool
-    {
-        if ($data['is_mocked'] ?? false) {
-            return false;
-        }
-
-        if (($data['accuracy'] ?? 999) > 100) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function calculateLateMinutes(Carbon $clockIn, ?Carbon $shiftStart = null): int
-    {
-        $shiftStart = $shiftStart ?? Carbon::parse('08:00');
-        $tolerance = config('hrconnect.late_tolerance', 15);
-
-        if ($clockIn->gt($shiftStart->copy()->addMinutes($tolerance))) {
-            return $clockIn->diffInMinutes($shiftStart);
-        }
-
-        return 0;
-    }
-
-    public function getTodayAttendance(Employee $employee): ?Attendance
-    {
-        return Cache::remember(
-            "attendance:today:{$employee->id}",
-            now()->endOfDay(),
-            fn() => $employee->attendances()
-                ->whereDate('date', today())
-                ->first()
-        );
-    }
-
-    public function getMonthlySummary(Employee $employee, string $period): array
-    {
-        return Cache::remember(
-            "attendance:monthly:{$employee->id}:{$period}",
-            now()->addHour(),
-            function () use ($employee, $period) {
-                $date = Carbon::parse($period . '-01');
-                $attendances = $employee->attendances()
-                    ->whereYear('date', $date->year)
-                    ->whereMonth('date', $date->month)
-                    ->get();
-
-                return [
-                    'present' => $attendances->where('status', 'present')->count(),
-                    'late' => $attendances->where('exception_type', 'late')->count(),
-                    'sick' => $attendances->where('status', 'sick')->count(),
-                    'leave' => $attendances->where('status', 'leave')->count(),
-                    'absent' => $attendances->where('status', 'absent')->count(),
-                    'total' => $attendances->count(),
-                ];
+            // Fallback ke PIN jika verifikasi wajah gagal atau tidak tersedia
+           if ($verificationMethod === 'manual' && !empty($data['pin'])) {
+                $this->verifyPin($employee, $data['pin']);
+                $this->logBypass($employee, 'pin_verified');
+                $verificationMethod = 'pin_verified';
             }
-        );
+
+            // status penentuan
+            $status = ($verificationMethod === 'manual') ? 'pending' : 'present';
+            // delegasi fat model untuk menyimpan data absensi
+            $lateMinutes = $employee->shift->calculateLateMinutes(now());
+
+            // menyimpan data absensi
+            $attendance = Attendance::create([
+                'employee_id'         => $employee->id,
+                'shift_id'            => $employee->shift_id,
+                'date'                => today()->toDateString(),
+                'clock_in'            => now(),
+                'clock_in_latitude'   => $data['latitude'] ?? null,
+                'clock_in_longitude'  => $data['longitude'] ?? null,
+                'is_wfa'              => $isWfa,
+                'wfa_note'            => $data['wfa_note'] ?? null,
+                'late_minutes'        => $lateMinutes,
+                'verification_method' => $verificationMethod,
+                'status'              => $status,
+            ]);
+
+            // cache invalidation 
+            if (Cache::supportsTags()) {
+                Cache::tags(['attendance', "employee:{$employee->id}"])->flush();
+            }
+            Cache::forget("attendance:employee:{$employee->id}:date:" . today()->toDateString());
+            return $attendance;
+        });
     }
 
-    protected function createAttendance(Employee $employee, array $data, ?float $similarity): Attendance
+    /**
+     * Helper: Cek absen hari ini
+     */
+    private function hasClockedInToday(Employee $employee): bool
     {
-        $clockIn = Carbon::parse($data['clock_in'] ?? now());
-        $shift = $employee->shift;
-        $lateMinutes = $this->calculateLateMinutes($clockIn, $shift?->start_time);
-
-        $exceptionType = $lateMinutes > 0 ? 'late' : null;
-
-        $attendance = Attendance::create([
-            'employee_id' => $employee->id,
-            'shift_id' => $shift?->id,
-            'date' => today(),
-            'clock_in' => $clockIn,
-            'lat_in' => $data['lat'] ?? null,
-            'long_in' => $data['long'] ?? null,
-            'face_similarity_score' => $similarity,
-            'status' => 'present',
-            'exception_type' => $exceptionType,
-            'is_mocked_gps' => $data['is_mocked'] ?? false,
-            'gps_accuracy' => $data['accuracy'] ?? null,
-            'device_fingerprint' => $data['device_fingerprint'] ?? null,
-        ]);
-
-        Cache::forget("attendance:today:{$employee->id}");
-
-        return $attendance;
+        return Attendance::where('employee_id', $employee->id)
+            ->where('date', today()->toDateString())
+            ->whereNotNull('clock_in')
+            ->exists();
     }
 
-    protected function createManualRequest(Employee $employee, array $data): Attendance
+    /**
+     * Helper: Verifikasi PIN
+     */
+    private function verifyPin(Employee $employee, string $pin): void
     {
-        // Create attendance with pending status for supervisor approval
-        $attendance = Attendance::create([
-            'employee_id' => $employee->id,
-            'date' => today(),
-            'clock_in' => now(),
-            'status' => 'pending',
-            'exception_type' => 'missed_clock_in',
-            'exception_notes' => 'Manual request - memerlukan persetujuan supervisor',
-        ]);
-
-        return $attendance;
-    }
-
-    protected function verifyPin(Employee $employee, string $pin): bool
-    {
-        // PIN verification logic - could be stored encrypted
-        if (!$employee->pin) {
-            throw new \Exception('PIN belum diatur. Hubungi HRD.');
+        if (!Hash::check($pin, $employee->user->password)) {
+            throw new InvalidPinException('PIN yang Anda masukkan salah.');
         }
-
-        if (!password_verify($pin, $employee->pin)) {
-            throw new \Exception('PIN salah.');
-        }
-
-        return true;
     }
 
-    protected function logBypass(Employee $employee, string $reason): void
+    /**
+     * Helper: Log aktivitas bypass
+     */
+    private function logBypass(Employee $employee, string $method): void
     {
-        activity('attendance')
+        activity()
+            ->causedBy($employee->user)
             ->performedOn($employee)
-            ->log("Face recognition bypassed: {$reason}");
+            ->withProperties(['ip' => request()->ip(), 'method' => $method])
+            ->log('Melakukan bypass absensi menggunakan PIN');
     }
 }

@@ -13,11 +13,11 @@ enum HandoverCategory: string
     public function label(): string
     {
         return match ($this) {
-            self::DOCUMENT => 'Dokumen',
-            self::ASSET => 'Aset',
-            self::DATA => 'Data',
-            self::ACCESS => 'Akses Sistem',
-            self::RESPONSIBILITY => 'Tanggung Jawab',
+            self::DOCUMENT => 'Dokumen & Berkas',
+            self::ASSET => 'Aset Fisik',
+            self::DATA => 'Data & File',
+            self::ACCESS => 'Akses Akun & Server',
+            self::RESPONSIBILITY => 'Tanggung Jawab / Tugas',
         };
     }
 }

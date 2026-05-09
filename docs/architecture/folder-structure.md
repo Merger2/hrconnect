@@ -33,13 +33,14 @@ hrconnect/
 │   │   ├── EmployeeStatus.php                       ✅
 │   │   ├── FamilyRelationship.php                   ✅
 │   │   ├── Gender.php                               ✅
-│   │   ├── LeaveStatus.php                          ✅
+│   │   ├── LeaveStatus.php                          ❌ DIGANTI RequestStatus
 │   │   ├── LoanStatus.php                           ✅
 │   │   ├── MaritalStatus.php                        ✅
-│   │   ├── OvertimeStatus.php                       ✅
+│   │   ├── OvertimeStatus.php                       ❌ DIGANTI RequestStatus
 │   │   ├── PayrollItemType.php                      ✅
 │   │   ├── PayrollStatus.php                        ✅
 │   │   ├── ReimbursementStatus.php                  ✅
+│   │   ├── RequestStatus.php                        ✅ (merge Leave + Overtime)
 │   │   ├── SalaryType.php                           ✅
 │   │   ├── EmploymentType.php                       🆕
 │   │   ├── ResignationReason.php                    🆕
@@ -329,7 +330,7 @@ hrconnect/
 │   │   ├── 2026_05_08_000007_add_clock_exception_to_attendances_table.php 🆕
 │   │   ├── 2026_05_08_000008_add_gps_validation_to_attendances_table.php 🆕
 │   │   ├── 2026_05_08_000009_create_employee_handovers_table.php 🆕
-│   │   ├── 2026_05_08_000010_add_payroll_locked_to_payrolls_table.php 🆕
+│   │   ├── 2026_05_08_000010_add_payroll_locked_to_payrolls_table.php 🚫 DIHAPUS
 │   │   ├── 2026_05_08_000011_create_notifications_table.php 🆕
 │   │   ├── 2026_05_08_000012_add_force_password_change_to_users_table.php 🆕
 │   │   ├── 2026_05_08_000013_add_google_oauth_to_users_table.php 🆕

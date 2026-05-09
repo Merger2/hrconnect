@@ -12,8 +12,8 @@ enum MaritalStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::SINGLE => 'Lajang / Belum Kawin',
-            self::MARRIED => 'Menikah',
+            self::SINGLE => 'Belum Kawin (TK)',
+            self::MARRIED => 'Kawin (K)',
             self::DIVORCED => 'Cerai Hidup',
             self::WIDOWED => 'Cerai Mati',
         };

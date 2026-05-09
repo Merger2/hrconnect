@@ -5,10 +5,14 @@ namespace App\Models;
 use App\Enums\BloodType;
 use App\Enums\EducationLevel;
 use App\Enums\EmployeeStatus;
+use App\Enums\EmploymentType;
 use App\Enums\Gender;
 use App\Enums\MaritalStatus;
 use App\Enums\SalaryType;
+use App\Enums\TerminationType;
+use Illuminate\Database\Eloquent\Builder; 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,18 +28,24 @@ use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
 #[Fillable([
-    'user_id', 'parent_id', 'company_id', 'branch_id', 'department_id', 'position_id',
+    'user_id', 'parent_id', 'company_id', 'branch_id', 'department_id', 'position_id', 'shift_id',
     'province_id', 'city_id', 'district_id', 'village_id', 'postal_code', 'address_detail',
     'employee_number', 'full_name', 'phone', 'bank_account_number', 'bank_name',
     'npwp', 'nik', 'marital_status', 'blood_type', 'gender', 'status',
-    'birth_date', 'join_date', 'resign_date', 'photo',
+    'birth_date', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
+    'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'photo',
     'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
     'created_by', 'updated_by',
 ])]
+#[Guarded(['id'])]
 
 class Employee extends Model implements CipherSweetEncrypted
 {
     use HasFactory, SoftDeletes, UsesCipherSweet;
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('status', EmployeeStatus::ACTIVE->value);
+    }
 
     protected function casts(): array
     {
@@ -43,12 +53,17 @@ class Employee extends Model implements CipherSweetEncrypted
             'birth_date' => 'date',
             'join_date' => 'date',
             'resign_date' => 'date',
+            'deceased_date' => 'date',
+            'contract_start_date' => 'date',
+            'contract_end_date' => 'date',
             'gender' => Gender::class,
             'status' => EmployeeStatus::class,
             'marital_status' => MaritalStatus::class,
             'blood_type' => BloodType::class,
             'education_level' => EducationLevel::class,
             'salary_type' => SalaryType::class,
+            'employment_type' => EmploymentType::class,
+            'termination_type' => TerminationType::class,
         ];
     }
 
@@ -64,8 +79,7 @@ class Employee extends Model implements CipherSweetEncrypted
             ->addOptionalTextField('npwp')
             ->addBlindIndex('npwp', new BlindIndex('npwp_hash'))
 
-            ->addOptionalTextField('bank_account_number')
-            ->addBlindIndex('bank_account_number', new BlindIndex('bank_account_number_hash'));
+            ->addOptionalTextField('bank_account_number');
     }
 
     public function user(): BelongsTo
@@ -91,6 +105,11 @@ class Employee extends Model implements CipherSweetEncrypted
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
+    }
+
+    public function shift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class);
     }
 
     public function manager(): BelongsTo
@@ -145,7 +164,7 @@ class Employee extends Model implements CipherSweetEncrypted
 
     public function approvals(): HasMany
     {
-        return $this->hasMany(Approval::class);
+        return $this->hasMany(Approval::class, 'approver_id');
     }
 
     public function loans(): HasMany
@@ -156,6 +175,11 @@ class Employee extends Model implements CipherSweetEncrypted
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
+    }
+
+    public function leaveBalances(): HasMany
+    {
+        return $this->hasMany(LeaveBalance::class);
     }
 
     public function attendances(): HasMany
@@ -191,5 +215,10 @@ class Employee extends Model implements CipherSweetEncrypted
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);
+    }
+
+    public function shiftSchedules(): HasMany
+    {
+        return $this->hasMany(ShiftSchedule::class);
     }
 }

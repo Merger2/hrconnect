@@ -18,7 +18,7 @@ classDiagram
     
     %% Existing Models (25)
     class User {
-        -uuid id PK
+        -bigint id PK
         +string name
         +string email
         +timestamp email_verified_at
@@ -34,7 +34,7 @@ classDiagram
     }
     
     class Company {
-        -uuid id PK
+        -bigint id PK
         +string name
         +string phone
         +string email
@@ -49,8 +49,8 @@ classDiagram
     }
     
     class Branch {
-        -uuid id PK
-        +uuid company_id FK
+        -bigint id PK
+        +bigint company_id FK
         +string name
         +text address
         +decimal latitude
@@ -64,8 +64,8 @@ classDiagram
     }
     
     class Department {
-        -uuid id PK
-        +uuid branch_id FK
+        -bigint id PK
+        +bigint branch_id FK
         +string name
         +string code
         +text description
@@ -75,8 +75,8 @@ classDiagram
     }
     
     class Position {
-        -uuid id PK
-        +uuid department_id FK
+        -bigint id PK
+        +bigint department_id FK
         +string name
         +string code
         +string grade
@@ -88,10 +88,10 @@ classDiagram
     }
     
     class Employee {
-        -uuid id PK
-        +uuid user_id FK
-        +uuid position_id FK
-        +uuid parent_id FK "manager"
+        -bigint id PK
+        +bigint user_id FK
+        +bigint position_id FK
+        +bigint parent_id FK "manager"
         +string nik "encrypted, blind_index"
         +string name
         +string phone "encrypted, blind_index"
@@ -110,7 +110,7 @@ classDiagram
         +text termination_reason
         +string face_embedding "vector(128)"
         +string npwp "encrypted, blind_index"
-        +uuid shift_id FK
+        +bigint shift_id FK
         +timestamps
         +softDeletes
         +user() User
@@ -129,7 +129,7 @@ classDiagram
     }
     
     class Shift {
-        -uuid id PK
+        -bigint id PK
         +string name
         +time start_time
         +time end_time
@@ -141,9 +141,9 @@ classDiagram
     }
     
     class Attendance {
-        -uuid id PK
-        +uuid employee_id FK
-        +uuid shift_id FK
+        -bigint id PK
+        +bigint employee_id FK
+        +bigint shift_id FK
         +time clock_in
         +time clock_out
         +decimal clock_in_latitude
@@ -157,7 +157,7 @@ classDiagram
         +string status_wfa "pending/approved/rejected"
         +string wfa_note
         +integer late_minutes
-        +uuid overtime_id FK
+        +bigint overtime_id FK
         +softDeletes
         +employee() Employee
         +shift() Shift
@@ -165,7 +165,7 @@ classDiagram
     }
     
     class LeaveType {
-        -uuid id PK
+        -bigint id PK
         +string name
         +integer quota "default: 12"
         +boolean is_paid
@@ -178,9 +178,9 @@ classDiagram
     }
     
     class Leave {
-        -uuid id PK
-        +uuid employee_id FK
-        +uuid leave_type_id FK
+        -bigint id PK
+        +bigint employee_id FK
+        +bigint leave_type_id FK
         +date start_date
         +date end_date
         +string day_type "full_day/morning/afternoon"
@@ -196,9 +196,9 @@ classDiagram
     }
     
     class Overtime {
-        -uuid id PK
-        +uuid employee_id FK
-        +uuid attendance_id FK "nullable"
+        -bigint id PK
+        +bigint employee_id FK
+        +bigint attendance_id FK "nullable"
         +time start_time
         +time end_time
         +text description
@@ -213,9 +213,11 @@ classDiagram
     }
     
     class Payroll {
-        -uuid id PK
-        +uuid employee_id FK
+        -bigint id PK
+        +bigint employee_id FK
         +string period "YYYY-MM"
+        +decimal basic_salary
+        +decimal total_allowance
         +decimal gross_salary
         +decimal overtime_pay
         +decimal pph21
@@ -223,19 +225,20 @@ classDiagram
         +decimal bpjs_employment
         +decimal loan_deduction
         +decimal attendance_penalty
+        +decimal total_deduction
         +decimal net_salary
-        +string status "draft/published"
-        +string pdf_path
+        +string status "draft/published/paid"
         +softDeletes
         +employee() Employee
         +items() HasMany
+        +adjustments() HasMany
         +isLocked()$ bool
         +generatePdf()$ void
     }
     
     class PayrollItem {
-        -uuid id PK
-        +uuid payroll_id FK
+        -bigint id PK
+        +bigint payroll_id FK
         +string type "allowance/deduction"
         +string name
         +decimal amount
@@ -243,19 +246,19 @@ classDiagram
     }
     
     class PayrollAdjustment {
-        -uuid id PK
-        +uuid payroll_id FK "original payroll"
+        -bigint id PK
+        +bigint payroll_id FK "original payroll"
         +integer amount "positif=tambah, negatif=potong"
         +text reason
-        +uuid created_by FK
+        +bigint created_by FK
         +date applied_to_period
         +payroll() Payroll
         +creator() User
     }
     
     class FamilyDetail {
-        -uuid id PK
-        +uuid employee_id FK
+        -bigint id PK
+        +bigint employee_id FK
         +string nik "encrypted, blind_index"
         +string name
         +string relationship
@@ -266,8 +269,8 @@ classDiagram
     }
     
     class Device {
-        -uuid id PK
-        +uuid employee_id FK
+        -bigint id PK
+        +bigint employee_id FK
         +string uuid "device UUID"
         +boolean is_verified "default: false"
         +string device_name
@@ -275,10 +278,10 @@ classDiagram
     }
     
     class Approval {
-        -uuid id PK
+        -bigint id PK
         +string approvable_type "polymorphic"
-        +uuid approvable_id
-        +uuid approver_id FK "employee_id"
+        +bigint approvable_id
+        +bigint approver_id FK "employee_id"
         +integer level "1 or 2"
         +string status "pending/approved/rejected"
         +text notes
@@ -287,7 +290,7 @@ classDiagram
     }
     
     class Holiday {
-        -uuid id PK
+        -bigint id PK
         +date date "unique"
         +string name
         +boolean is_active
@@ -295,7 +298,7 @@ classDiagram
     }
     
     class KnowledgeBase {
-        -uuid id PK
+        -bigint id PK
         +string title
         +string file_path
         +text content "chunked"
@@ -308,20 +311,20 @@ classDiagram
     }
     
     class ActivityLog {
-        -uuid id PK
+        -bigint id PK
         +string log_name
         +string description
         +string subject_type "polymorphic"
-        +uuid subject_id
+        +bigint subject_id
         +string causer_type "polymorphic"
-        +uuid causer_id
+        +bigint causer_id
         +json properties
         +prunable()$ Builder
     }
     
     class Asset {
-        -uuid id PK
-        +uuid company_id FK
+        -bigint id PK
+        +bigint company_id FK
         +string name
         +string code
         +string category
@@ -329,17 +332,17 @@ classDiagram
     }
     
     class AssetHandover {
-        -uuid id PK
-        +uuid asset_id FK
-        +uuid employee_id FK
+        -bigint id PK
+        +bigint asset_id FK
+        +bigint employee_id FK
         +date handover_date
         +date return_date
         +string condition
     }
     
     class PerformanceReview {
-        -uuid id PK
-        +uuid employee_id FK
+        -bigint id PK
+        +bigint employee_id FK
         +integer period_year
         +integer period_month
         +decimal score
@@ -347,38 +350,45 @@ classDiagram
     }
     
     class Reimbursement {
-        -uuid id PK
-        +uuid employee_id FK
-        +uuid category_id FK
+        -bigint id PK
+        +bigint employee_id FK
+        +bigint payroll_id FK "nullable"
+        +string title
+        +date expense_date
         +decimal amount
-        +string description
-        +string attachment_path
-        +string status "pending/approved/rejected"
+        +string receipt_file "nullable"
+        +text rejection_reason "nullable"
+        +string status "pending/approved/rejected/paid"
         +softDeletes
     }
     
     class Loan {
-        -uuid id PK
-        +uuid employee_id FK
+        -bigint id PK
+        +bigint employee_id FK
+        +text rejection_reason "nullable"
+        +bigint created_by FK
         +decimal amount
-        +decimal interest_rate "default: 0%"
-        +integer tenure_months
-        +string status "pending/approved/paid/off"
+        +integer tenor_months
+        +decimal monthly_installment
+        +string status "pending/approved/rejected/active/paid_off/cancelled"
+        +boolean is_settled "default: false"
         +softDeletes
     }
     
     class LoanInstallment {
-        -uuid id PK
-        +uuid loan_id FK
+        -bigint id PK
+        +bigint loan_id FK
+        +bigint payroll_id FK "nullable"
+        +decimal amount_paid
         +integer installment_number
-        +decimal amount
-        +string status "pending/paid"
+        +string status "default: pending"
         +date due_date
+        +timestamp paid_at "nullable"
     }
     
     %% NEW Models (4)
     class CompanySetting {
-        -uuid id PK
+        -bigint id PK
         +string key
         +text value
         +string description
@@ -387,25 +397,25 @@ classDiagram
     }
     
     class ReimbursementCategory {
-        -uuid id PK
+        -bigint id PK
         +string name
         +string description
         +boolean is_active
     }
     
     class ShiftSchedule {
-        -uuid id PK
-        +uuid employee_id FK
-        +uuid shift_id FK
+        -bigint id PK
+        +bigint employee_id FK
+        +bigint shift_id FK
         +date date
         +employee() Employee
         +shift() Shift
     }
     
     class LeaveBalance {
-        -uuid id PK
-        +uuid employee_id FK
-        +uuid leave_type_id FK
+        -bigint id PK
+        +bigint employee_id FK
+        +bigint leave_type_id FK
         +integer year
         +integer quota
         +integer used
@@ -761,6 +771,7 @@ classDiagram
         <<enum>>
         +DRAFT = "draft"
         +PUBLISHED = "published"
+        +PAID = "paid"
     }
     
     class PayrollItemType {
@@ -835,7 +846,7 @@ classDiagram
 ```mermaid
 classDiagram
     class TaxConfig {
-        -uuid id PK
+        -bigint id PK
         +string category "A/B/C"
         +decimal min_income
         +decimal max_income
@@ -843,7 +854,7 @@ classDiagram
     }
     
     class BpjsConfig {
-        -uuid id PK
+        -bigint id PK
         +string name "kesehatan/jht/jp/jkk/jkm"
         +decimal employer_rate
         +decimal employee_rate

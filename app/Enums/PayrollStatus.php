@@ -11,9 +11,9 @@ enum PayrollStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::DRAFT => 'Draft',
-            self::PUBLISHED => 'Diterbitkan',
-            self::PAID => 'Telah Dibayar',
+            self::DRAFT => 'Draft (Bisa Direvisi)',
+            self::PUBLISHED => 'Diterbitkan (Terkunci Permanen)',
+            self::PAID => 'Dibayar',
         };
     }
 }

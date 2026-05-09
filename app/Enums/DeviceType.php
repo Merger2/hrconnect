@@ -11,9 +11,17 @@ enum DeviceType: string
     public function label(): string
     {
         return match ($this) {
-            self::DESKTOP => 'Desktop/Laptop',
-            self::MOBILE => 'Handphone',
-            self::TABLET => 'Tablet',
+            self::DESKTOP => 'Komputer / Laptop',
+            self::MOBILE => 'Smartphone',
+            self::TABLET => 'Tablet / iPad',
+        };
+    }
+
+    public function isAllowedForBiometric(): bool
+    {
+        return match ($this) {
+            self::MOBILE, self::TABLET => true,
+            self::DESKTOP => false,
         };
     }
 }

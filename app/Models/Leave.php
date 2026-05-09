@@ -3,17 +3,17 @@
 namespace App\Models;
 
 use App\Enums\DayType;
-use App\Enums\LeaveStatus;
+use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['employee_id', 'leave_type_id', 'start_date', 'end_date', 'day_type', 'total_days', 'reason', 'proof_file', 'status'])]
 class Leave extends Model
 {
-    use SoftDeletes, HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {
@@ -22,7 +22,7 @@ class Leave extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'total_days' => 'decimal:2',
-            'status' => LeaveStatus::class,
+            'status' => RequestStatus::class,
         ];
     }
 
@@ -35,6 +35,4 @@ class Leave extends Model
     {
         return $this->belongsTo(LeaveType::class);
     }
-
-
 }

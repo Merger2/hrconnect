@@ -43,13 +43,14 @@ app/Enums/EducationLevel.php          ✅
 app/Enums/EmployeeStatus.php          ✅
 app/Enums/FamilyRelationship.php      ✅
 app/Enums/Gender.php                  ✅
-app/Enums/LeaveStatus.php             ✅
+app/Enums/LeaveStatus.php             ❌ DIGANTI RequestStatus
 app/Enums/LoanStatus.php              ✅
 app/Enums/MaritalStatus.php           ✅
-app/Enums/OvertimeStatus.php          ✅
+app/Enums/OvertimeStatus.php          ❌ DIGANTI RequestStatus
 app/Enums/PayrollItemType.php         ✅
 app/Enums/PayrollStatus.php           ✅
 app/Enums/ReimbursementStatus.php     ✅
+app/Enums/RequestStatus.php           ✅ (merge Leave + Overtime)
 app/Enums/SalaryType.php              ✅
 ```
 
@@ -68,7 +69,7 @@ app/Enums/SalaryType.php              ✅
 | 7 | `database/migrations/2026_05_08_000007_add_clock_exception_to_attendances_table.php` | exception_type, exception_notes, approved_late_by |
 | 8 | `database/migrations/2026_05_08_000008_add_gps_validation_to_attendances_table.php` | is_mocked_gps, gps_accuracy, device_fingerprint |
 | 9 | `database/migrations/2026_05_08_000009_create_employee_handovers_table.php` | id, resigning_employee_id, reassign_to, category, item_name, status |
-| 10 | `database/migrations/2026_05_08_000010_add_payroll_locked_to_payrolls_table.php` | is_locked, locked_at, locked_by |
+| 10 | `database/migrations/2026_05_08_000010_add_payroll_locked_to_payrolls_table.php` | ❌ TIDAK DIBUAT — lock via status=published |
 | 11 | `database/migrations/2026_05_08_000011_create_notifications_table.php` | Laravel notifications table |
 | 12 | `database/migrations/2026_05_08_000012_add_force_password_change_to_users_table.php` | force_password_change flag |
 | 13 | `database/migrations/2026_05_08_000013_add_google_oauth_to_users_table.php` | Verifikasi google_id sudah ada |

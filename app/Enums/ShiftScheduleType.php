@@ -11,8 +11,8 @@ enum ShiftScheduleType: string
     public function label(): string
     {
         return match ($this) {
-            self::REGULAR => 'Reguler',
-            self::ROTATING => 'Rotasi',
+            self::REGULAR => 'Reguler (Tetap)',
+            self::ROTATING => 'Rotasi (Bergilir)',
             self::CUSTOM => 'Kustom',
         };
     }

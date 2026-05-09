@@ -17,8 +17,8 @@ enum FamilyRelationship: string
             self::SPOUSE => 'Suami / Istri',
             self::PARENT => 'Orang Tua',
             self::CHILD => 'Anak',
-            self::SIBLING => 'Saudara',
-            self::FRIEND => 'Teman',
+            self::SIBLING => 'Saudara Kandung',
+            self::FRIEND => 'Teman / Relasi',
             self::OTHER => 'Lainnya',
         };
     }

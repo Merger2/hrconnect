@@ -5,17 +5,19 @@ namespace App\Enums;
 enum EmployeeStatus: string
 {
     case ACTIVE = 'active';
-    case PROBATION = 'probation';
-    case RESIGN = 'resign';
+    case INACTIVE = 'inactive';
+    case RESIGNED = 'resigned';
     case TERMINATED = 'terminated';
+    case DECEASED = 'deceased';
 
     public function label(): string
     {
         return match ($this) {
             self::ACTIVE => 'Karyawan Aktif',
-            self::PROBATION => 'Masa Percobaan (Probation)',
-            self::RESIGN => 'Mengundurkan Diri',
+            self::INACTIVE => 'Tidak Aktif / Suspend',
+            self::RESIGNED => 'Mengundurkan Diri',
             self::TERMINATED => 'Diberhentikan (PHK)',
+            self::DECEASED => 'Meninggal Dunia',
         };
     }
 }

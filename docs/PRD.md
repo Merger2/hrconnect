@@ -163,7 +163,8 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
 
 ### E-Payslip Security
 - Download E-Payslip → wajib **re-enter password login** (Password Confirmation)
-- Tidak ada PIN terpisah
+- PIN (6 digit) tersimpan di `employees.pin` — khusus untuk absensi (fallback saat face gagal)
+- **Separation of Concerns:** password (users) → login + payslip, pin (employees) → absensi shortcut
 - Download **unlimited** (tidak ada limit per bulan)
 - PDF di-generate **satu kali** saat status `published` → disimpan di `storage/app/payslips/`
 - Download = file streaming (bukan generate ulang), beban server = 0%
@@ -628,16 +629,139 @@ users, companies, branches, departments, positions, employees, attendances, shif
 | `deceased_date` | date | ✅ | null |
 | `termination_reason` | text | ✅ | null |
 | `employment_type` | string(20) | ❌ | 'permanent' |
+| `pin` | string(60) | ✅ | null |
 
 **employment_type values:** `permanent`, `contract`, `probation`
 
-### New Tables (6)
+### New Tables (7)
 1. `company_settings` — key-value config
 2. `reimbursement_categories` — master kategori (V2)
 3. `shift_schedules` — pivot jadwal shift
 4. `leave_balances` — saldo cuti per tahun
 5. `tax_configs` — PPh21 TER rates
 6. `bpjs_configs` — BPJS rates + ceilings
+7. `payroll_adjustments` — koreksi payroll pasca-lock
+
+**Catatan:** Semua tabel menggunakan `$table->id()` (Auto-Increment BIGINT UNSIGNED), BUKAN UUID. Foreign keys menggunakan `$table->foreignId()` untuk type consistency.
+
+### Strategi ENUM: "Dumb Database, Smart Application"
+
+**Prinsip:** Tidak ada `$table->enum()` atau `CHECK` constraint di database. Kolom "enum-like" tetap `$table->string()` atau `$table->char()`. Validasi dilakukan di **PHP level** menggunakan **PHP Backed Enums + Eloquent Model Casts**.
+
+**Alasan:**
+1. **Aturan pemerintah bisa berubah** — BPJS bisa ditambah kategori baru tanpa migration baru
+2. **Zero downtime** — tidak perlu `ALTER TABLE` di production
+3. **Clean Code** — validasi di Model via `casts()`, error terjadi sebelum query SQL
+
+**Implementasi:**
+```php
+// Migration: tetap string
+$table->char('ter_category', 1);
+
+// Model: casting ke PHP Enum
+protected function casts(): array {
+    return [
+        'ter_category' => TerCategory::class,
+    ];
+}
+
+// PHP Enum: validasi otomatis
+enum TerCategory: string {
+    case A = 'A';
+    case B = 'B';
+    case C = 'C';
+}
+```
+
+**Daftar PHP Enums yang Dibutuhkan:**
+
+| Enum File | Model | Kolom | Values |
+|-----------|-------|-------|--------|
+| `EmployeeStatus` | Employee | `status` | `active`, `inactive`, `resigned`, `deceased`, `terminated` |
+| `EmploymentType` | Employee | `employment_type` | `permanent`, `contract`, `probation`, `intern` |
+| `TerminationType` | Employee | `termination_type` | `resign`, `dismissed`, `deceased`, `contract_end` |
+| `MaritalStatus` | Employee | `marital_status` | `single`, `married`, `divorced`, `widowed` |
+| `BloodType` | Employee | `blood_type` | `A+`, `A-`, `B+`, `B-`, `O+`, `O-`, `AB+`, `AB-` |
+| `SalaryType` | Employee | `salary_type` | `monthly`, `daily`, `hourly` |
+| `AttendanceStatus` | Attendance | `status` | `on_time`, `late`, `early`, `holiday`, `permission`, `absent`, `missed_clock_in`, `missed_clock_out` |
+| `RequestStatus` | Leave, Overtime | `status` | `pending`, `approved_l1`, `approved`, `rejected`, `cancelled` |
+| `DayType` | Leave | `day_type` | `full_day`, `morning`, `afternoon` |
+| `LoanStatus` | Loan | `status` | `pending`, `approved`, `rejected`, `active`, `paid_off`, `cancelled` |
+| `ReimbursementStatus` | Reimbursement | `status` | `pending`, `approved`, `rejected`, `paid` |
+| `PayrollStatus` | Payroll | `status` | `draft`, `published`, `paid` |
+| `PayrollItemType` | PayrollItem | `type` | `allowance`, `deduction` |
+| `ApprovalStatus` | Approval | `status` | `pending`, `approved`, `rejected` |
+| `TerCategory` | TaxConfig | `ter_category` | `A`, `B`, `C` |
+| `BpjsType` | BpjsConfig | `name` | `kesehatan`, `jht`, `jp`, `jkk`, `jkm` |
+
+#### Schema: `company_settings`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `company_id` | bigint (FK→companies) | ✅ | null |
+| `key` | string (unique) | ❌ | — |
+| `value` | json | ✅ | null |
+| `description` | text | ✅ | null |
+
+#### Schema: `reimbursement_categories`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `company_id` | bigint (FK→companies) | ✅ | null |
+| `name` | string | ❌ | — |
+| `code` | string (unique) | ❌ | — |
+| `is_active` | boolean | ❌ | true |
+
+#### Schema: `shift_schedules`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `employee_id` | bigint (FK→employees) | ❌ | — |
+| `shift_id` | bigint (FK→shifts) | ❌ | — |
+| `date` | date | ❌ | — |
+| **Unique:** `(employee_id, date)` |
+
+#### Schema: `leave_balances`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `employee_id` | bigint (FK→employees) | ❌ | — |
+| `leave_type_id` | bigint (FK→leave_types) | ❌ | — |
+| `year` | integer | ❌ | — |
+| `quota` | integer | ❌ | 0 |
+| `used` | integer | ❌ | 0 |
+| `carry_forward` | integer | ❌ | 0 |
+| `carry_forward_deadline` | date | ✅ | null |
+| **Unique:** `(employee_id, leave_type_id, year)` |
+
+#### Schema: `tax_configs`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `ter_category` | char(1) | ❌ | — |
+| `min_income` | decimal(15,2) | ❌ | — |
+| `max_income` | decimal(15,2) | ❌ | — |
+| `rate` | decimal(5,4) | ❌ | — |
+| `effective_rate` | decimal(5,4) | ✅ | null |
+
+#### Schema: `bpjs_configs`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `name` | string | ❌ | — |
+| `employer_rate` | decimal(5,4) | ❌ | — |
+| `employee_rate` | decimal(5,4) | ❌ | — |
+| `ceiling` | decimal(15,2) | ✅ | null |
+
+#### Schema: `payroll_adjustments`
+| Kolom | Tipe | Nullable | Default |
+|-------|------|:---:|:---:|
+| `id` | bigint (PK) | ❌ | auto |
+| `payroll_id` | bigint (FK→payrolls) | ❌ | — |
+| `amount` | integer | ❌ | — |
+| `reason` | text | ❌ | — |
+| `created_by` | bigint (FK→users) | ❌ | — |
+| `applied_to_period` | date | ❌ | — |
 
 ### Alter Tables (6)
 1. `loan_installments` — add: status, due_date
@@ -645,7 +769,8 @@ users, companies, branches, departments, positions, employees, attendances, shif
 3. `overtimes` — add: start_time, end_time, description, rejection_reason
 4. `payrolls` — add: gross_salary, overtime_pay, pph21, bpjs_health, bpjs_employment, loan_deduction, attendance_penalty
 5. `shifts` — add: late_tolerance_minutes
-6. `attendances` — add: late_minutes
+6. `attendances` — add: late_minutes, verification_method
+7. `employees` — add: pin
 
 ---
 
@@ -659,22 +784,28 @@ users, companies, branches, departments, positions, employees, attendances, shif
 5. `create_leave_balances_table`
 6. `create_tax_configs_table`
 7. `create_bpjs_configs_table`
-8. `add_status_and_due_date_to_loan_installments` (V2 prep)
-9. `add_rejection_reason_to_leaves`
-10. `add_details_to_overtimes`
-11. `add_breakdown_to_payrolls`
-12. `add_late_tolerance_to_shifts`
-13. `add_late_minutes_to_attendances`
+8. `create_payroll_adjustments_table`
+9. `add_status_and_due_date_to_loan_installments` (V2 prep)
+10. `add_rejection_reason_to_leaves`
+11. `add_details_to_overtimes`
+12. `add_breakdown_to_payrolls`
+13. `add_late_tolerance_to_shifts`
+14. `add_late_minutes_to_attendances`
+15. `add_verification_method_to_attendances`
+16. `add_pin_to_employees`
 
 ---
 
 ## 20. MODEL PLAN
 
-### New Models (4)
+### New Models (7)
 1. CompanySetting — key-value helper (get/set static methods)
 2. ReimbursementCategory (V2)
 3. ShiftSchedule
 4. LeaveBalance
+5. TaxConfig — cast `ter_category` ke TerCategory enum
+6. BpjsConfig — cast `name` ke BpjsType enum
+7. PayrollAdjustment — relasi `payroll`, `createdBy`
 
 ### Modified Models (14)
 | Model | Perubahan |
@@ -683,7 +814,7 @@ users, companies, branches, departments, positions, employees, attendances, shif
 | Employee | 5 kolom baru, relasi `parent`, `children`, `approvals`, `leaveBalances`, `leaveBalances.currentYear()` |
 | Leave | relasi `approvals()`, method `calculateTotalDays()`, `validateQuota()` |
 | Overtime | kolom baru (start_time, end_time, description), relasi `attendance`, `approvals` |
-| Payroll | kolom breakdown, relasi `items`, method `isLocked()`, `generatePdf()` |
+| Payroll | kolom breakdown, relasi `items`, `adjustments`, method `isLocked()`, `generatePdf()` |
 | Shift | kolom `late_tolerance_minutes`, cast `time` |
 | Holiday | method `isHoliday(date)` |
 | ActivityLog | trait `Prunable` |

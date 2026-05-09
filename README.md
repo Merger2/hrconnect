@@ -252,7 +252,7 @@ php artisan queue:work --queue=default,payroll_high,notifications
 hrconnect/
 ├── app/
 │   ├── Console/Commands/     # Artisan commands (detect-alpha, reset-quota)
-│   ├── Enums/               # 27 enum files (EmploymentType, LeaveStatus, dll)
+│   ├── Enums/               # 30 enum files (EmploymentType, RequestStatus, dll)
 │   ├── Http/
 │   │   ├── Middleware/      # DeviceDetection, GeofenceValidation, ForcePasswordChange
 │   │   └── Requests/        # Form request validation

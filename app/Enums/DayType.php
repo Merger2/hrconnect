@@ -16,4 +16,12 @@ enum DayType: string
             self::AFTERNOON => 'Setengah Hari (Siang)',
         };
     }
+
+    public function getQuotaDeduction(): float
+    {
+        return match ($this) {
+            self::FULL_DAY => 1.0,
+            self::MORNING, self::AFTERNOON => 0.5,
+        };
+    }
 }

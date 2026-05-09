@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\OvertimeStatus;
+use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,13 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Overtime extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected function casts(): array
     {
         return [
             'date' => 'date',
             'total_hours' => 'decimal:2',
             'calculated_pay' => 'decimal:2',
-            'status' => OvertimeStatus::class,
+            'status' => RequestStatus::class,
         ];
     }
 

@@ -14,12 +14,33 @@ enum NotificationType: string
     public function label(): string
     {
         return match ($this) {
-            self::ATTENDANCE => 'Absensi',
-            self::LEAVE => 'Cuti',
-            self::PAYROLL => 'Penggajian',
-            self::SYSTEM => 'Sistem',
-            self::APPROVAL => 'Persetujuan',
+            self::ATTENDANCE => 'Info Presensi',
+            self::LEAVE => 'Info Cuti',
+            self::PAYROLL => 'Slip Gaji',
+            self::SYSTEM => 'Sistem HRIS',
+            self::APPROVAL => 'Butuh Persetujuan',
             self::REMINDER => 'Pengingat',
+        };
+    }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::ATTENDANCE => 'clock',
+            self::LEAVE => 'calendar-days',
+            self::PAYROLL => 'banknotes',
+            self::SYSTEM => 'cog-6-tooth',
+            self::APPROVAL => 'check-badge',
+            self::REMINDER => 'bell-alert',
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::PAYROLL, self::APPROVAL => 'green',
+            self::SYSTEM, self::REMINDER => 'blue',
+            self::ATTENDANCE, self::LEAVE => 'slate',
         };
     }
 }
