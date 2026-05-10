@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['employee_id', 'attendance_id', 'date', 'total_hours', 'calculated_pay', 'status'])]
+#[Fillable(['employee_id', 'attendance_id', 'date', 'start_time', 'end_time', 'description', 'total_hours', 'amount', 'rejection_reason', 'status'])]
 class Overtime extends Model
 {
     use HasFactory, SoftDeletes;
@@ -18,12 +19,18 @@ class Overtime extends Model
     {
         return [
             'date' => 'date',
+            'start_time' => 'time',
+            'end_time' => 'time',
             'total_hours' => 'decimal:2',
-            'calculated_pay' => 'decimal:2',
+            'amount' => 'decimal:2',
             'status' => RequestStatus::class,
         ];
     }
 
+     public function approvals(): MorphMany
+    {
+        return $this->morphMany(Approval::class, 'approvable');
+    }
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -32,5 +39,17 @@ class Overtime extends Model
     public function attendance(): BelongsTo
     {
         return $this->belongsTo(Attendance::class);
+    }
+
+    public function durationHours(): float
+    {
+        if (!$this->start_time || !$this->end_time) {
+            return 0.0;
+        }
+
+        //diffInMinutes / 60 mencegah pembulatan ke bawah yang merugikan uang karyawan
+        $minutes = $this->start_time->diffInMinutes($this->end_time);
+
+        return round($minutes / 60, 2);
     }
 }

@@ -21,8 +21,7 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable();
             $table->string('status', 20)->default('pending');
             $table->index('status');
-            $table->index('start_date');
-            $table->index(['employee_id', 'start_date']);
+            $table->index(['employee_id', 'start_date', 'end_date']);
             $table->timestamps();
             $table->softDeletes();
         });

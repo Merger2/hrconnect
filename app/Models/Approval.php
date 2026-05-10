@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['approver_id', 'level', 'status', 'notes'])]
+#[Fillable(['approvable_type', 'approvable_id', 'approver_id', 'level', 'status', 'notes', 'approved_at'])]
 class Approval extends Model
 {
     use HasFactory;
@@ -24,7 +24,7 @@ class Approval extends Model
         ];
     }
 
-    public function employee(): BelongsTo
+    public function approver(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'approver_id');
     }

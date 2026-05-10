@@ -15,9 +15,9 @@ class LeaveBalance extends Model
     protected function casts(): array
     {
         return [
-            'quota' => 'integer',
-            'used' => 'integer',
-            'carry_forward' => 'integer',
+            'quota' => 'decimal:1',
+            'used' => 'decimal:1',
+            'carry_forward' => 'decimal:1',
             'carry_forward_deadline' => 'date',
         ];
     }
@@ -32,8 +32,18 @@ class LeaveBalance extends Model
         return $this->belongsTo(LeaveType::class);
     }
 
-    public function available(): int
+    public function available(): float
     {
-        return $this->quota + $this->carry_forward - $this->used;
+        $carryForward = 0;
+        if ($this->carry_forward_deadline && now()->lessThanOrEqualTo($this->carry_forward_deadline)) {
+            $carryForward = $this->carry_forward;
+        }
+        return $this->quota + $carryForward - $this->used;
+    }
+
+    public function deduct(float $days): void
+    {
+        $this->used += $days;
+        $this->save();
     }
 }

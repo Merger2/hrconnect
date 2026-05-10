@@ -217,14 +217,16 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
   4. Face Recognition via **face-api.js** (client-side, 128D FaceNet embedding)
   5. Similarity score > threshold (`company_settings.face_similarity_threshold`, default 0.85) → **terima**
   6. Foto selfie + GPS koordinat disimpan
+  7. Setelah clock-in → sistem menampilkan jarak karyawan dari kantor (meter) dan status "Dalam Radius" / "Di Luar Radius"
 
 - **WFA (Work From Anywhere):**
   1. Toggle WFA → validasi GPS **dilewati**
   2. Tetap wajib Face ID
   3. **Wajib isi catatan pekerjaan** minimal 20 karakter
-  4. `is_wfa = true` di database
+  4. `is_wfa = true` di database, GPS koordinat tetap disimpan sebagai catatan
   5. **Approval SETELAH clock-in** (bukan sebelum) — karyawan absen dulu, baru manager review
   6. Jika WFA di-reject → status absensi hari itu bisa diubah menjadi `absent`
+  7. Setelah clock-in → sistem menampilkan label "Anda sedang WFA — GPS tidak divalidasi 📍"
 
 - **Double Clock Prevention:** Max 1x Clock-In + 1x Clock-Out per hari
 - **Grace Period:** `shifts.late_tolerance_minutes` (default 0)
@@ -248,6 +250,13 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
 ### 6.4 Device Management
 - Device UUID di tabel `devices`
 - Device baru → perlu verifikasi HRD (`is_verified = false`)
+
+### 6.5 Chronic Late Warning System (V1)
+- **Command:** `attendance:detect-chronic-late`
+- **Jadwal:** Setiap Jumat pukul 18:00
+- **Logic:** Cari karyawan dengan status `late` ≥ 3 kali dalam 1 bulan terakhir
+- **Action:** Kirim notifikasi In-App + Email ke Manager dan HRD
+- Notifikasi berisi: nama karyawan, jumlah keterlambatan, periode
 
 ---
 
@@ -428,6 +437,14 @@ NET = GROSS - DEDUCTIONS
 | PPh21 TER | ❌ Tidak | Dihitung dari bruto aktual |
 | THR/Bonus | ❌ Tidak | Pro-rated terpisah (bulan kerja / 12) |
 
+### 11.11 THR/Bonus Auto-Calculation (V1)
+- **Service method:** `PayrollCalculatorService::calculateThrProrated(Employee, float $monthlySalary, int $monthsWorked): float`
+- **Rumus THR pro-rated:** `(monthsWorked / 12) × monthlySalary`
+- **Syarat dapat THR:** Minimal 1 bulan kerja
+- **Bonus:** Input manual via `payroll_items` dengan type `allowance`, nama `income_bonus`
+- THR/Bonus ditampilkan sebagai item terpisah di E-Payslip
+- Tampil di payslip: `income_thr` dan `income_bonus` sebagai komponen pendapatan
+
 ---
 
 ## 12. MODULE: APPROVAL WORKFLOW
@@ -565,6 +582,19 @@ date (unique), name, is_active
 - `toDatabase()` untuk in-app
 - Email provider: Mailtrap (dev) → SES/Mailgun (production)
 
+### 15.4 Export to Excel (V1)
+- **Package:** `maatwebsite/laravel-excel`
+- **Format:** `.xlsx` (Excel 2007+)
+- **Data yang bisa di-export:**
+  | Modul | Data | Oleh |
+  |-------|------|------|
+  | Attendance | Rekap absen per periode | HRD |
+  | Leave | Riwayat cuti per karyawan | HRD |
+  | Payroll | Slip gaji (bulanan) | Finance |
+  | Employee | Direktori karyawan | HRD |
+- Implementasi via **Export classes** (`app/Exports/`) yang extend `Maatwebsite\Excel\Concerns\FromCollection`
+- Download langsung via browser — tidak disimpan di server
+
 ---
 
 ## 16. QUEUE & JOB ARCHITECTURE
@@ -602,7 +632,9 @@ date (unique), name, is_active
 - Tampilkan `3271********99`, data asli tetap terenkripsi
 
 ### 17.3 Activity Logs
-- Trait `Prunable` → hapus log > 1 tahun
+- Dihandle oleh **Spatie ActivityLog Package** (`php artisan activitylog:clean`)
+- Command: `activitylog:clean --days=365` dijadwalkan via Scheduler harian
+- Custom model `ActivityLog.php` dihapus — mencegah conflict dengan model bawaan Spatie
 
 ### 17.4 Soft Deletes
 - employees, departments, positions, leaves, overtimes, payrolls, attendances
@@ -817,7 +849,7 @@ enum TerCategory: string {
 | Payroll | kolom breakdown, relasi `items`, `adjustments`, method `isLocked()`, `generatePdf()` |
 | Shift | kolom `late_tolerance_minutes`, cast `time` |
 | Holiday | method `isHoliday(date)` |
-| ActivityLog | trait `Prunable` |
+| ActivityLog | Dihandle oleh **Spatie ActivityLog Package** (model custom dihapus) |
 | Branch | relasi `company`, `departments`, method `validateRadius(lat, lng, radius)` |
 | PayrollItem | relasi `payroll` |
 | LeaveType | relasi `leaveBalances`, method `isPaid()`, `deductsFromQuota()` |
@@ -825,27 +857,33 @@ enum TerCategory: string {
 | Approval | relasi polymorphic `approvable`, relasi `approver` |
 | KnowledgeBase | relasi polymorphic `knowledgeable`, method `processEmbedding()` |
 
-### New Service Classes (4)
-1. **PayrollCalculator** — calculateProratedSalary(), calculatePTKP(), getTERCategory(), calculatePPh21(), calculateBPJS(), calculateOvertimePay(), countWorkingDays()
+### New Service Classes (5)
+1. **PayrollCalculator** — calculateProratedSalary(), calculatePTKP(), getTERCategory(), calculatePPh21(), calculateBPJS(), calculateOvertimePay(), countWorkingDays(), calculateThrProrated()
 2. **AttendanceService** — clockIn(), clockOut(), validateGPS(), validateFace(), handleWFA()
 3. **LeaveService** — calculateWorkDays(), validateLeaveQuota(), applyLeave(), initializeBalance()
 4. **ApprovalService** — createApprovalWorkflow(), approve(), reject(), checkAllApproved(), getDirectApprover()
+5. **ReimbursementService** — createReimbursement(), validateReceipt(), approve(), reject(), linkToPayroll()
+
+### New Export Classes (1)
+1. **Exports/** — AttendanceExport, LeaveExport, PayrollExport, EmployeeExport — extend `Maatwebsite\Excel\Concerns\FromCollection`
 
 ### New Jobs (2)
 1. GenerateEmployeePayrollJob — queue: payroll_high, tries: 3, timeout: 120s
 2. ProcessKnowledgeBaseEmbedding — queue: default, tries: 2, timeout: 300s
 
-### New Commands (2)
+### New Commands (3)
 1. `attendance:detect-alpha` — dailyAt 23:59
-2. `leave:reset-quota` — yearOn 1 Jan 00:00
+2. `attendance:detect-chronic-late` — weeklyOn Friday 18:00
+3. `leave:reset-quota` — yearOn 1 Jan 00:00
 
-### New Notifications (6)
+### New Notifications (7)
 1. LeaveRequestSubmitted
 2. LeaveApproved
 3. LeaveRejected
 4. PayrollPublished
 5. ApprovalOverdue
 6. NewDeviceLogin
+7. ChronicLateWarning
 
 ---
 
@@ -1074,7 +1112,7 @@ getDirectApprover(Employee $employee): Employee
 | Multi-KPI Performance Review | MVP: single score cukup | 1-2 minggu |
 | Employee Mutation Tracking | HRD update manual dulu | 1-2 minggu |
 | Asset Management | Bisa Excel dulu | 1-2 minggu |
-| Chronic Late Warning System | Nice to have | 3-4 hari |
+| Chronic Late Warning System | Nice to have | ~~DITUNDA~~ → **V1** (3-4 hari) |
 | Drag-and-Drop Shift Scheduler | HRD input manual dulu | 1 minggu |
 | PWA Offline (IndexedDB sync) | Kompleks, sync logic | 2 minggu |
 | PWA Push Notifications | DITUNDA | 1 minggu |
@@ -1086,9 +1124,10 @@ getDirectApprover(Employee $employee): Employee
 | Export to Excel | PDF sudah cukup | 3-4 hari |
 | Multi-Language Support | 100% Bahasa Indonesia | 2 minggu |
 | API untuk Mobile App Native | PWA sudah cukup | 2 minggu |
-| Reimbursement | Bisa manual dulu | 1 minggu |
+| ~~Reimbursement~~ | → **V1** | ~~1 minggu~~ |
 | Loan/Kasbon | Bisa manual dulu | 1 minggu |
-| THR/Bonus Auto-Calculation | Input manual via payroll_items | 3-4 hari |
+| ~~THR/Bonus Auto-Calculation~~ | → **V1** | ~~3-4 hari~~ |
+| ~~Export to Excel~~ | → **V1** | ~~3-4 hari~~ |
 
 ### CATATAN V2
 - Fitur V2 sudah tercatat di PRD ini untuk referensi
@@ -1116,8 +1155,9 @@ APP_NAME=HRConnect
 
 ```
 attendance:detect-alpha          → dailyAt 23:59
+attendance:detect-chronic-late   → weeklyOn Friday 18:00
 leave:reset-quota                → yearOn 1 Jan 00:00
-model:prune                      → daily
+activitylog:clean --days=365     → daily
 ```
 
 ## APPENDIX C: Pesangon Table (UU Cipta Kerja)

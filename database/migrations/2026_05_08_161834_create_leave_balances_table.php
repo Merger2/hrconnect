@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->foreignId('leave_type_id')->constrained('leave_types')->restrictOnDelete();
             $table->integer('year');
-            $table->integer('quota')->default(0);
-            $table->integer('used')->default(0);
-            $table->integer('carry_forward')->default(0);
+            $table->decimal('quota', 4, 1)->default(0);
+            $table->decimal('used', 4, 1)->default(0);
+            $table->decimal('carry_forward', 4, 1)->default(0);
             $table->date('carry_forward_deadline')->nullable();
             $table->timestamps();
 

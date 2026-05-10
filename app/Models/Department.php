@@ -24,10 +24,13 @@ class Department extends Model
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
-
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
+    }
+    public function positions(): HasMany
+    {
+        return $this->hasMany(Position::class);
     }
     
 }

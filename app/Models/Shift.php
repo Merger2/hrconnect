@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'start_time', 'end_time', 'is_active'])]
+#[Fillable(['name', 'start_time', 'late_tolerance_minutes', 'end_time', 'is_active'])]
 class Shift extends Model
 {
     use HasFactory;
@@ -18,6 +18,7 @@ class Shift extends Model
         return [
             'start_time' => 'time',
             'end_time' => 'time',
+            'late_tolerance_minutes' => 'integer',
             'is_active' => 'boolean',
         ];
     }
@@ -33,9 +34,19 @@ class Shift extends Model
                     $end->addDay();
                 }
 
-                return $start->diffInHours($end) . ' hours';
+                return $start->diffInHours($end);
             }
         );
+    }
+
+    public function calculateLateMinutes(Carbon $clockIn): int
+    {
+        $shiftStart = Carbon::parse($this->start_time);
+        $maxArrivalTime = $shiftStart->copy()->addMinutes($this->late_tolerance_minutes);
+        if($clockIn->lessThanOrEqualTo($maxArrivalTime)) {
+            return 0;
+        }
+        return (int) $shiftStart->diffInMinutes($clockIn);
     }
 
     public function attendances(): HasMany

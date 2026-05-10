@@ -29,6 +29,8 @@ return new class extends Migration
             $table->string('photo_selfie_out')->nullable();
             $table->string('status', 20)->default('on_time');
             $table->boolean('is_wfa')->default(false);
+            $table->string('verification_method', 50)->nullable()->comment('face_verified|pin_verified|manual');
+            $table->text('wfa_note')->nullable();
             $table->integer('late_minutes')->default(0);
             $table->unique(['employee_id', 'date']);
             $table->index(['date', 'status']);

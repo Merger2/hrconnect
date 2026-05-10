@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
             // Foreign Key ke tabel departements
-            $table->foreignId('department_id')->constrained('departments')->cascadeOnDelete();
+            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
             $table->string('name');
             $table->string('code')->unique();
             $table->integer('grade');

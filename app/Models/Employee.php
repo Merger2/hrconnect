@@ -10,9 +10,9 @@ use App\Enums\Gender;
 use App\Enums\MaritalStatus;
 use App\Enums\SalaryType;
 use App\Enums\TerminationType;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder; 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,10 +34,10 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
     'npwp', 'nik', 'marital_status', 'blood_type', 'gender', 'status',
     'birth_date', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
     'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'photo',
-    'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
+    'face_embedding', 'pin', 'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
     'created_by', 'updated_by',
 ])]
-#[Guarded(['id'])]
+#[Hidden(['face_embedding', 'pin'])]
 
 class Employee extends Model implements CipherSweetEncrypted
 {
@@ -64,6 +64,7 @@ class Employee extends Model implements CipherSweetEncrypted
             'salary_type' => SalaryType::class,
             'employment_type' => EmploymentType::class,
             'termination_type' => TerminationType::class,
+            'pin' => 'hashed',
         ];
     }
 
@@ -86,139 +87,121 @@ class Employee extends Model implements CipherSweetEncrypted
     {
         return $this->belongsTo(User::class);
     }
-
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
-
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
-
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
-
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
     }
-
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
     }
-
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'parent_id');
     }
-
     public function subordinates(): HasMany
     {
         return $this->hasMany(Employee::class, 'parent_id');
     }
-
     public function province(): BelongsTo
     {
         return $this->belongsTo(Province::class, 'province_id');
     }
-
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class, 'city_id');
     }
-
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class, 'district_id');
     }
-
     public function village(): BelongsTo
     {
         return $this->belongsTo(Village::class, 'village_id');
     }
-
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-
     public function families(): HasMany
     {
         return $this->hasMany(FamilyDetail::class);
     }
-
     public function handovers(): HasMany
     {
         return $this->hasMany(AssetHandover::class);
     }
-
     public function approvals(): HasMany
     {
         return $this->hasMany(Approval::class, 'approver_id');
     }
-
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
-
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
     }
-
     public function leaveBalances(): HasMany
     {
         return $this->hasMany(LeaveBalance::class);
     }
-
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
-
     public function payrolls(): HasMany
     {
         return $this->hasMany(Payroll::class);
     }
-
     public function overtimes(): HasMany
     {
         return $this->hasMany(Overtime::class);
     }
-
     public function reimbursements(): HasMany
     {
         return $this->hasMany(Reimbursement::class);
     }
-
     public function performanceReviews(): HasMany
     {
         return $this->hasMany(PerformanceReview::class);
     }
-
     public function reviewedVersions(): HasMany
     {
         return $this->hasMany(PerformanceReview::class, 'reviewer_id');
     }
-
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);
     }
-
     public function shiftSchedules(): HasMany
     {
         return $this->hasMany(ShiftSchedule::class);
+    }
+    public function getDirectApprover(): ?Employee
+    {
+        return $this->manager;
+    }
+    public function currentYearLeaveBalances(): HasMany
+    {
+        return $this->hasMany(LeaveBalance::class)
+            ->where('year', now()->year);
     }
 }

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('total_deduction', 15, 2);
             $table->decimal('net_salary', 15, 2);
             $table->string('status', 20)->default('draft');
-            $table->index('period');
+            $table->unique(['employee_id', 'period']);
             $table->index('status');
             $table->softDeletes();
             $table->timestamps();

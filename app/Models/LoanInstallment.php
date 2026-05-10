@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['loan_id', 'payroll_id', 'amount_paid', 'installment_number', 'paid_at'])]
+#[Fillable(['loan_id', 'payroll_id', 'amount_paid', 'installment_number', 'status', 'due_date', 'paid_at'])]
 class LoanInstallment extends Model
 {
     use HasFactory;
@@ -15,6 +15,7 @@ class LoanInstallment extends Model
     {
         return [
             'amount_paid' => 'decimal:2',
+            'due_date' => 'date',
             'installment_number' => 'integer',
             'paid_at' => 'datetime',
         ];

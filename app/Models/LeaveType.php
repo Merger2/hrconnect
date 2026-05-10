@@ -7,21 +7,34 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'code', 'max_days', 'is_paid', 'is_active'])]
+#[Fillable(['name', 'code', 'quota', 'is_paid', 'is_active', 'deducts_from_quota'])]
 class LeaveType extends Model
 {
     use HasFactory;
     protected function casts(): array
     {
         return [
-            'max_days' => 'integer',
+            'quota' => 'integer',
             'is_paid' => 'boolean',
             'is_active' => 'boolean',
+            'deducts_from_quota' => 'boolean'
         ];
     }
 
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
+    }
+    public function leaveBalances(): HasMany
+    {
+        return $this->hasMany(LeaveBalance::class);
+    }
+    public function isPaid(): bool
+    {
+        return $this->is_paid;
+    }
+    public function deductsFromQuota(): bool
+    {
+        return $this->deducts_from_quota;
     }
 }

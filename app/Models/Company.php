@@ -35,9 +35,13 @@ class Company extends Model implements CipherSweetEncrypted
     {
         return $this->hasMany(Branch::class);
     }
-
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
     }
+     public function settings(): HasMany
+    {
+        return $this->hasMany(CompanySetting::class);
+    }
+
 }
