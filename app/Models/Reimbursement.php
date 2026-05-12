@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use App\Enums\ReimbursementStatus;
+use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['employee_id', 'payroll_id', 'category_id', 'title', 'expense_date', 'amount', 'description', 'receipt_file', 'attachment_path', 'status', 'rejection_reason'])]
 class Reimbursement extends Model
 {
-    use HasFactory, SoftDeletes;
+    use Approvable, HasFactory, SoftDeletes;
+
     protected function casts(): array
     {
         return [
@@ -27,7 +28,7 @@ class Reimbursement extends Model
     {
         return $this->belongsTo(Employee::class);
     }
-    
+
     public function payroll(): BelongsTo
     {
         return $this->belongsTo(Payroll::class);
@@ -38,8 +39,8 @@ class Reimbursement extends Model
         return $this->belongsTo(ReimbursementCategory::class, 'category_id');
     }
 
-    public function approvals(): MorphMany
+    public function isApproved(): bool
     {
-        return $this->morphMany(Approval::class, 'approvable');
+        return $this->status === ReimbursementStatus::APPROVED;
     }
 }

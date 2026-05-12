@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Position extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected function casts(): array
     {
         return [

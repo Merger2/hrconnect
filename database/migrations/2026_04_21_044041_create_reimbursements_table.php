@@ -14,16 +14,17 @@ return new class extends Migration
         Schema::create('reimbursements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
+            $table->index('employee_id');
             $table->foreignId('payroll_id')->nullable()->constrained('payrolls')->nullOnDelete();
             $table->foreignId('category_id')->nullable()->constrained('reimbursement_categories')->nullOnDelete();
             $table->string('title');
             $table->date('expense_date');
-            $table->decimal('amount',15,2);
+            $table->decimal('amount', 15, 2);
             $table->text('description')->nullable();
             $table->string('receipt_file')->nullable();
             $table->string('attachment_path', 255)->nullable();
             $table->text('rejection_reason')->nullable();
-            $table->string('status',20)->default('pending');
+            $table->string('status', 20)->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -31,7 +32,6 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     * 
      */
     public function down(): void
     {

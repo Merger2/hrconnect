@@ -2,114 +2,190 @@
 
 namespace App\Services;
 
+use App\Enums\AttendanceStatus;
 use App\Exceptions\AlreadyClockedInException;
+use App\Exceptions\AntiFakeGPSException;
+use App\Exceptions\BusinessRuleException;
+use App\Exceptions\FaceNotRecognizedException;
+use App\Exceptions\InvalidPinException;
+use App\Exceptions\NotClockedInException;
 use App\Models\Attendance;
 use App\Models\Employee;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Exceptions\InvalidPinException;
-use App\Exceptions\FaceNotRecognizedException;
+use Illuminate\Support\Facades\Log;
+
 class AttendanceService
 {
-    // Implementasi logika untuk layanan kehadiran (attendance)
     public function __construct(
         protected GeofenceService $geofenceService,
         protected FaceRecognitionService $faceRecognitionService,
-    ){}
+    ) {}
 
     public function clockIn(Employee $employee, array $data): Attendance
     {
-       //FAIL-FAST: Cek Double Clock-In
-        if ($this->hasClockedInToday($employee)) {
+        // Tier 0: Anti-Tuyul GPS
+        if (isset($data['is_mocked']) && $data['is_mocked'] == true) {
+            throw new AntiFakeGPSException('Peringatan: Aplikasi Fake GPS / Tuyul terdeteksi!');
+        }
+
+        if ($employee->hasClockedInToday()) {
             throw new AlreadyClockedInException('Anda sudah melakukan absensi masuk hari ini.');
         }
-        //VALIDASI GEOFENCE
+
         $isWfa = $data['is_wfa'] ?? false;
-        if (!$isWfa) {
+
+        if ($isWfa) {
+            if (empty($data['wfa_note']) || mb_strlen(trim($data['wfa_note'])) < 20) {
+                throw new BusinessRuleException('Catatan WFA wajib diisi minimal 20 karakter.');
+            }
+        } else {
+            // WFO: cek dulu apakah karyawan punya branch
+            if (! $employee->branch) {
+                throw new BusinessRuleException('Data lokasi kerja Anda belum diatur. Hubungi HRD.');
+            }
             $this->geofenceService->validateLocation($employee->branch, $data);
         }
-        //DATABASE TRANSACTION
-        return DB::transaction(function () use ($employee, $data, $isWfa) {
-            $verificationMethod = 'manual';
 
-            //VERFIKASI BIOMETRIK WAJAH
-            if (!empty($data['face_embedding'])) {
-                try {
-                    $this->faceRecognitionService->verifyFace($employee, $data['face_embedding']);
-                    $verificationMethod = 'face_verified';
-                } catch (FaceNotRecognizedException $e) {
-                    Log::warning("Verifikasi wajah gagal untuk NIK {$employee->nik}: " . $e->getMessage());
-                }
+        $verificationMethod = 'manual';
+        $faceSimilarityScore = null;
+
+        if (! empty($data['face_embedding'])) {
+            try {
+                $faceResult = $this->faceRecognitionService->verifyFace(
+                    $employee,
+                    $data['face_embedding']
+                );
+                $verificationMethod = 'face_verified';
+                $faceSimilarityScore = $faceResult['similarity_percentage'];
+            } catch (FaceNotRecognizedException $e) {
+                Log::warning('Verifikasi wajah gagal: '.$e->getMessage());
+            }
+        }
+
+        if ($verificationMethod === 'manual' && ! empty($data['pin'])) {
+            $this->verifyPin($employee, $data['pin']);
+            $this->logBypass($employee, 'pin_verified_clock_in');
+            $verificationMethod = 'pin_verified';
+        }
+
+        return DB::transaction(function () use ($employee, $data, $isWfa, $verificationMethod, $faceSimilarityScore) {
+            if ($employee->hasClockedInToday()) {
+                throw new AlreadyClockedInException('Data absen masuk sudah tercatat.');
             }
 
-            // Fallback ke PIN jika verifikasi wajah gagal atau tidak tersedia
-           if ($verificationMethod === 'manual' && !empty($data['pin'])) {
-                $this->verifyPin($employee, $data['pin']);
-                $this->logBypass($employee, 'pin_verified');
-                $verificationMethod = 'pin_verified';
-            }
+            $now = now();
+            $lateMinutes = $employee->shift ? $employee->shift->calculateLateMinutes($now) : 0;
 
-            // status penentuan
-            $status = ($verificationMethod === 'manual') ? 'pending' : 'present';
-            // delegasi fat model untuk menyimpan data absensi
-            $lateMinutes = $employee->shift->calculateLateMinutes(now());
+            $status = $lateMinutes > 0
+                ? AttendanceStatus::LATE
+                : AttendanceStatus::ON_TIME;
 
-            // menyimpan data absensi
             $attendance = Attendance::create([
-                'employee_id'         => $employee->id,
-                'shift_id'            => $employee->shift_id,
-                'date'                => today()->toDateString(),
-                'clock_in'            => now(),
-                'clock_in_latitude'   => $data['latitude'] ?? null,
-                'clock_in_longitude'  => $data['longitude'] ?? null,
-                'is_wfa'              => $isWfa,
-                'wfa_note'            => $data['wfa_note'] ?? null,
-                'late_minutes'        => $lateMinutes,
+                'employee_id' => $employee->id,
+                'shift_id' => $employee->shift_id,
+                'date' => $now->toDateString(),
+                'clock_in' => $now,
+                'lat_in' => $data['latitude'] ?? null,
+                'long_in' => $data['longitude'] ?? null,
+                'clock_in_is_mocked' => $data['is_mocked'] ?? false,
+                'clock_in_accuracy' => $data['accuracy'] ?? null,
+                'is_wfa' => $isWfa,
+                'wfa_note' => $data['wfa_note'] ?? null,
+                'late_minutes' => $lateMinutes,
                 'verification_method' => $verificationMethod,
-                'status'              => $status,
+                'face_similarity_score' => $faceSimilarityScore,
+                'photo_selfie_in' => $data['photo_selfie'] ?? null,
+                'status' => $status,
             ]);
 
-            // cache invalidation 
-            if (Cache::supportsTags()) {
-                Cache::tags(['attendance', "employee:{$employee->id}"])->flush();
-            }
-            Cache::forget("attendance:employee:{$employee->id}:date:" . today()->toDateString());
+            $this->invalidateCache($employee);
+
             return $attendance;
         });
     }
 
-    /**
-     * Helper: Cek absen hari ini
-     */
-    private function hasClockedInToday(Employee $employee): bool
+    public function clockOut(Employee $employee, array $data, string $verificationMethod = 'face'): Attendance
     {
-        return Attendance::where('employee_id', $employee->id)
-            ->where('date', today()->toDateString())
-            ->whereNotNull('clock_in')
-            ->exists();
+        // Tier 0: Anti-Tuyul GPS
+        if (isset($data['is_mocked']) && $data['is_mocked'] == true) {
+            throw new AntiFakeGPSException('Peringatan: Aplikasi Fake GPS terdeteksi saat Clock-Out!');
+        }
+
+        $attendance = $employee->getTodayActiveAttendance();
+
+        if (! $attendance) {
+            throw new NotClockedInException('Tidak ada absensi masuk hari ini atau Anda sudah melakukan clock-out.');
+        }
+
+        if (! $attendance->is_wfa) {
+            // WFO: cek dulu apakah karyawan punya branch
+            if (! $employee->branch) {
+                throw new BusinessRuleException('Data lokasi kerja Anda belum diatur. Hubungi HRD.');
+            }
+            $this->geofenceService->validateLocation($employee->branch, $data);
+        }
+
+        $faceSimilarityScore = null;
+
+        if ($verificationMethod === 'pin') {
+            $this->verifyPin($employee, $data['pin'] ?? '');
+            $this->logBypass($employee, 'pin_verified_clock_out');
+        } else {
+            $faceResult = $this->faceRecognitionService->verifyFace(
+                $employee,
+                $data['face_embedding'] ?? []
+            );
+            $faceSimilarityScore = $faceResult['similarity_percentage'];
+            $verificationMethod = 'face_verified';
+        }
+
+        return DB::transaction(function () use ($employee, $data, $verificationMethod, $faceSimilarityScore) {
+            $lockedAttendance = $employee->getTodayActiveAttendance(lockForUpdate: true);
+
+            if (! $lockedAttendance) {
+                throw new NotClockedInException('Sistem sedang memproses data absensi Anda yang lain.');
+            }
+
+            $lockedAttendance->update([
+                'clock_out' => now(),
+                'lat_out' => $data['latitude'] ?? null,
+                'long_out' => $data['longitude'] ?? null,
+                'clock_out_is_mocked' => $data['is_mocked'] ?? false,
+                'clock_out_accuracy' => $data['accuracy'] ?? null,
+                'photo_selfie_out' => $data['photo_selfie'] ?? null,
+                'verification_method' => $verificationMethod,
+                'face_similarity_score' => $faceSimilarityScore,
+            ]);
+
+            $this->invalidateCache($employee);
+
+            return $lockedAttendance->fresh();
+        });
     }
 
-    /**
-     * Helper: Verifikasi PIN
-     */
     private function verifyPin(Employee $employee, string $pin): void
     {
-        if (!Hash::check($pin, $employee->user->password)) {
+        if (! Hash::check($pin, $employee->pin)) {
             throw new InvalidPinException('PIN yang Anda masukkan salah.');
         }
     }
 
-    /**
-     * Helper: Log aktivitas bypass
-     */
     private function logBypass(Employee $employee, string $method): void
     {
         activity()
             ->causedBy($employee->user)
             ->performedOn($employee)
             ->withProperties(['ip' => request()->ip(), 'method' => $method])
-            ->log('Melakukan bypass absensi menggunakan PIN');
+            ->log('Melakukan bypass absensi menggunakan '.$method);
+    }
+
+    private function invalidateCache(Employee $employee): void
+    {
+        if (Cache::supportsTags()) {
+            Cache::tags(['attendance', "employee:{$employee->id}"])->flush();
+        }
+        Cache::forget("attendance:employee:{$employee->id}:date:".today()->toDateString());
     }
 }

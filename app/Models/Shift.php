@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Shift extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [
@@ -43,10 +44,11 @@ class Shift extends Model
     {
         $shiftStart = Carbon::parse($this->start_time);
         $maxArrivalTime = $shiftStart->copy()->addMinutes($this->late_tolerance_minutes);
-        if($clockIn->lessThanOrEqualTo($maxArrivalTime)) {
+        if ($clockIn->lessThanOrEqualTo($maxArrivalTime)) {
             return 0;
         }
-        return (int) $shiftStart->diffInMinutes($clockIn);
+
+        return (int) $maxArrivalTime->diffInMinutes($clockIn);
     }
 
     public function attendances(): HasMany

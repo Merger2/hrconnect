@@ -2,19 +2,20 @@
 
 > **Dokumen ini berisi jadwal pengerjaan lengkap untuk 12 minggu development HRConnect.**
 > Estimasi: ~9 jam/hari, 6 hari/minggu.
+> **Update terakhir: 2026-05-11** — Progress aktual + redistribusi.
 
 ---
 
 ## 📅 OVERVIEW
 
-| Phase | Minggu | Fokus | Target |
-|-------|--------|-------|--------|
-| **Phase 1** | 1-2 | Foundation | Backend siap (Models, Services, Migrations) |
-| **Phase 2** | 3-4 | ESS Frontend | Employee bisa clock in, ajukan cuti, lihat gaji |
-| **Phase 3** | 5-6 | HRD & Finance | Admin bisa manage semua modul |
-| **Phase 4** | 7-8 | Admin & Polish | Super admin, PWA, UI polish |
-| **Phase 5** | 9-10 | Testing | Semua fitur ditest, bug fixed |
-| **Phase 6** | 11-12 | Deploy | Production ready, dokumentasi final |
+| Phase | Minggu | Fokus | Target | Progress |
+|-------|--------|-------|--------|:---:|
+| **Phase 1** | 1-2 | Foundation | Backend siap (Models, Services, Migrations) | 🟢 85% |
+| **Phase 2** | 3-4 | ESS Frontend | Employee bisa clock in, ajukan cuti, lihat gaji | ⬜ 0% |
+| **Phase 3** | 5-6 | HRD & Finance | Admin bisa manage semua modul | ⬜ 0% |
+| **Phase 4** | 7-8 | Admin & Polish | Super admin, PWA, UI polish | ⬜ 0% |
+| **Phase 5** | 9-10 | Testing | Semua fitur ditest, bug fixed | ⬜ 0% |
+| **Phase 6** | 11-12 | Deploy | Production ready, dokumentasi final | ⬜ 0% |
 
 ---
 
@@ -564,16 +565,20 @@
 ## ✅ WEEKLY CHECKLIST
 
 ### Week 1-2: Foundation
-- [ ] All enums created
-- [ ] All migrations created & run
-- [ ] All models created & updated
-- [ ] All seeders created & run
-- [ ] All services created
-- [ ] All observers created & registered
-- [ ] All commands created
-- [ ] All jobs created
-- [ ] All notifications created
-- [ ] Config files created
+- [x] All enums (30 enum created)
+- [x] All migrations (41 migration, all synced)
+- [x] All models (32 model, 100% PRD §20 compliant)
+- [ ] All seeders (0/11 created)
+- [x] All services (7 service: Attendance, Leave, Payroll, Approval, Reimbursement, Geofence, FaceRecognition)
+- [ ] All observers (0/6 created)
+- [ ] All commands (0/3 created)
+- [x] Jobs: GenerateEmployeePayrollJob (1/2 created)
+- [ ] All notifications (0/7 created)
+- [ ] Config files (0/2 created)
+- [x] 2 Traits (Approvable, ManagesWorkDays)
+- [x] 9 Exceptions (all with render() method)
+- [x] 1 Controller + 1 FormRequest (Attendance API)
+- [x] 15 bug fixes (CRITICAL 2/2, HIGH 7/7)
 
 ### Week 3-4: ESS
 - [ ] ESS layout working
@@ -623,6 +628,62 @@
 - [ ] SSL configured
 - [ ] Production tested
 - [ ] **LAUNCH! 🚀**
+
+---
+
+## 🚧 GAP PRD — STATUS (Update: 2026-05-11)
+
+> Audit dilakukan pada 11 Mei 2026 terhadap semua kode vs PRD.
+> Backend core 85% siap. Berikut gap yang tersisa.
+
+### 🔴 CRITICAL GAP (3 — Formula/Logic Salah)
+
+| # | Task | PRD | File |
+|---|------|-----|------|
+| G1 | Overtime max 4h/hari, 18h/minggu validation | §8.1 | Service baru / Observer |
+| G2 | Attendance penalty: flat per hari (Rp 50.000), **bukan** per menit | §11.6 | `PayrollCalculatorService.php` |
+| G3 | Reimbursement L2 approval ke **Finance**, bukan HR Manager | §9.2 | `ApprovalService.php` |
+
+### 🟡 MEDIUM GAP (6 — Fitur Kurang)
+
+| # | Task | PRD | File |
+|---|------|-----|------|
+| G4 | `tunjangan_makan × hari_hadir` di payroll | §11.2 | `PayrollCalculatorService.php` |
+| G5 | THR dipanggil di `generatePayroll()` | §11.11 | `PayrollCalculatorService.php` |
+| G6 | Payroll cut-off date (default 25) check | §11.1 | `PayrollCalculatorService.php` |
+| G7 | Alpha penalty: 1 hari = gross_monthly / 22 | §11.6 | `PayrollCalculatorService.php` |
+| G8 | `linkOvertimeToAttendance()` Observer | §8.2 | `app/Observers/` baru |
+| G9 | Reimbursement file MIME + size validation | §9.1 | `ReimbursementService.php` |
+
+### 🟢 LOW GAP (8 — Minor / Nice-to-Have)
+
+| # | Task | PRD | File |
+|---|------|-----|------|
+| G10 | `attendance:detect-alpha` command | §6.3 | `app/Console/Commands/` |
+| G11 | `attendance:detect-chronic-late` command | §6.5 | `app/Console/Commands/` |
+| G12 | `leave:reset-quota` command | §7.3 | `app/Console/Commands/` |
+| G13 | WFA rejection → ubah attendance ke `absent` | §26.9 | `ApprovalService.php` |
+| G14 | Set `early` status (clockOut < shift.end_time) | §6.2 | `AttendanceService.php` |
+| G15 | Set `holiday` / `permission` status | §6.2 | `AttendanceService.php` |
+| G16 | Withdraw approval (status `pending`) | §12.2 | `ApprovalService.php` |
+| G17 | `HasFactory` di `KnowledgeBase` + `PerformanceReview` | §20 | `app/Models/` |
+
+---
+
+## ✅ YANG SUDAH SELESAI DI BRANCH INI
+
+| Layer | Detail | File Count |
+|-------|--------|:---:|
+| **Enum** | 30 PHP Backed Enum, semua valid + business logic | 30 |
+| **Migration** | 41 file, 1 batch, 0 pending, semua index + FK + constraint | 41 |
+| **Model** | 32 model, 100% PRD §20 compliant, semua fillable + casts + relasi | 32 |
+| **Service** | 7 service: Attendance, Leave, Payroll, Approval, Reimbursement, Geofence, FaceRecognition | 7 |
+| **Trait** | 2 trait: Approvable (4 model), ManagesWorkDays (2 service) | 2 |
+| **Exception** | 9 exception, semua dengan `render()` method (status code via `getCode()`) | 9 |
+| **Controller** | 1: AttendanceController (Skinny, tanpa try-catch) | 1 |
+| **FormRequest** | 1: ClockInRequest (StopOnFirstFailure + required_unless) | 1 |
+| **Job** | 1: GenerateEmployeePayrollJob (queue: payroll_high, tries: 3) | 1 |
+| **Bug Fix** | 15 bug ditemukan + difix (2 CRITICAL, 7 HIGH, 6 lainnya) | — |
 
 ---
 

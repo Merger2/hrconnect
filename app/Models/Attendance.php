@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
+use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['employee_id', 'shift_id', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'clock_in_is_mocked', 'clock_in_accuracy', 'clock_out_is_mocked', 'clock_out_accuracy', 'device_fingerprint', 'face_similarity_score', 'status', 'is_wfa', 'photo_selfie_in', 'photo_selfie_out', 'late_minutes', 'verification_method', 'wfa_note'])]
 class Attendance extends Model
 {
-    use HasFactory, SoftDeletes;
+    use Approvable, HasFactory, SoftDeletes;
+
     protected function casts(): array
     {
         return [
@@ -31,7 +33,7 @@ class Attendance extends Model
             'clock_out_accuracy' => 'decimal:2',
             'face_similarity_score' => 'decimal:2',
             'is_wfa' => 'boolean',
-            'late_minutes'=> 'integer',
+            'late_minutes' => 'integer',
             'status' => AttendanceStatus::class,
         ];
     }
@@ -40,27 +42,26 @@ class Attendance extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
     }
+
     public function overtime(): HasOne
     {
         return $this->hasOne(Overtime::class);
     }
-    public function approvals(): MorphMany
-    {
-        return $this->morphMany(Approval::class, 'approvable');
-    }
+
     public function needsReview(): bool
     {
+        $latestApproval = $this->approvals()->latest()->first();
         $wfaPending = $this->is_wfa
-            &&(! $this->approvals()->exists()
-                || $this->approvals()->latest()->first()->status->value === 'pending');
+            && (! $latestApproval
+        || $latestApproval->status === ApprovalStatus::PENDING);
 
         return $wfaPending
             || $this->clock_in_is_mocked
             || $this->clock_out_is_mocked;
     }
-
 }

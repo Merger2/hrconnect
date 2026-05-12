@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('loan_installments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_id')->constrained('loans')->restrictOnDelete();
+            $table->index('loan_id');
             $table->foreignId('payroll_id')->nullable()->constrained('payrolls')->nullOnDelete();
+            $table->index('payroll_id');
             $table->decimal('amount_paid', 15, 2);
             $table->integer('installment_number');
             $table->string('status', 20)->default('pending');

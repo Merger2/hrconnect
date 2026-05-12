@@ -16,7 +16,7 @@ return new class extends Migration
             $table->morphs('knowledgeable');
             $table->string('title');
             $table->text('content');
-            $table->vector('embedding',dimensions: 1536);
+            $table->vector('embedding', dimensions: 1536);
             $table->jsonb('metadata')->nullable();
             $table->timestamps();
         });

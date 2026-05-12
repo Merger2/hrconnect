@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Asset extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [

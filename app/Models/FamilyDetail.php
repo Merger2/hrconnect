@@ -4,20 +4,20 @@ namespace App\Models;
 
 use App\Enums\FamilyRelationship;
 use App\Enums\Gender;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use ParagonIE\CipherSweet\BlindIndex;
+use ParagonIE\CipherSweet\EncryptedRow;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
-use ParagonIE\CipherSweet\EncryptedRow;
-use ParagonIE\CipherSweet\BlindIndex;
-
 
 #[Fillable(['employee_id', 'name', 'gender', 'relationship', 'nik', 'birth_date', 'job', 'phone', 'address', 'is_emergency'])]
 class FamilyDetail extends Model implements CipherSweetEncrypted
 {
     use HasFactory, UsesCipherSweet;
+
     protected function casts(): array
     {
         return [
@@ -27,7 +27,6 @@ class FamilyDetail extends Model implements CipherSweetEncrypted
             'relationship' => FamilyRelationship::class,
         ];
     }
-
 
     public static function configureCipherSweet(EncryptedRow $encryptedRow): void
     {
@@ -45,5 +44,4 @@ class FamilyDetail extends Model implements CipherSweetEncrypted
     {
         return $this->belongsTo(Employee::class);
     }
-   
 }

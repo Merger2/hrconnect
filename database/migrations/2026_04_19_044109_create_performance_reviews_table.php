@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->foreignId('reviewer_id')->constrained('employees')->restrictOnDelete();
-            $table->decimal('final_score',5,2);
+            $table->decimal('final_score', 5, 2);
             $table->text('notes')->nullable();
             $table->timestamps();
         });

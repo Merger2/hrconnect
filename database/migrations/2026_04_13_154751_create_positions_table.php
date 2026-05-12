@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('code')->unique();
             $table->integer('grade');
-            $table->decimal('basic_salary',15,2);
-            $table->decimal('allowance_jabatan',15,2)->default(0);
+            $table->decimal('basic_salary', 15, 2);
+            $table->decimal('allowance_jabatan', 15, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

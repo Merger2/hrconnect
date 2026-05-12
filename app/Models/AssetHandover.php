@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AssetHandover extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [
@@ -18,7 +19,7 @@ class AssetHandover extends Model
             'return_date' => 'date',
         ];
     }
-    
+
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);

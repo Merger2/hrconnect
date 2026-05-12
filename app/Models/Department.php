@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Department extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected function casts(): array
     {
         return [
@@ -24,13 +25,14 @@ class Department extends Model
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
+
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
     }
+
     public function positions(): HasMany
     {
         return $this->hasMany(Position::class);
     }
-    
 }

@@ -20,6 +20,7 @@ class KnowledgeBase extends Model
     {
         return $this->morphTo();
     }
+
     public function processEmbedding(): void
     {
         $this->update(['status' => 'processing']);

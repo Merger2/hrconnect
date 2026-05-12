@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 class Holiday extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [
@@ -21,7 +22,7 @@ class Holiday extends Model
     public static function isHoliday(Carbon $date): bool
     {
         return static::where('date', $date->toDateString())
-        ->where('is_active', true)
-        ->exists();
+            ->where('is_active', true)
+            ->exists();
     }
 }

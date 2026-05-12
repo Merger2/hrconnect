@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Loan extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected function casts(): array
     {
         return [
@@ -24,7 +25,7 @@ class Loan extends Model
             'status' => LoanStatus::class,
         ];
     }
-    
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);

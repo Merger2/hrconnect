@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -13,11 +13,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::ensureVectorExtensionExists();
-        if (DB::getDriverName() === 'pgsql') 
-            {
+        if (DB::getDriverName() === 'pgsql') {
             DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');
             DB::statement('CREATE EXTENSION IF NOT EXISTS pgcrypto');
-            }
+        }
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');

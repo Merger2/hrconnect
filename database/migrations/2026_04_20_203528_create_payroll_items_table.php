@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('payroll_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payroll_id')->constrained('payrolls')->restrictOnDelete();
+            $table->index('payroll_id');
             $table->string('name');
-            $table->decimal('amount',15,2);
-            $table->string('type',20);
+            $table->decimal('amount', 15, 2);
+            $table->string('type', 20);
             $table->timestamps();
         });
     }

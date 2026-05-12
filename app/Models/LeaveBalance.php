@@ -35,15 +35,20 @@ class LeaveBalance extends Model
     public function available(): float
     {
         $carryForward = 0;
-        if ($this->carry_forward_deadline && now()->lessThanOrEqualTo($this->carry_forward_deadline)) {
+        if ($this->carry_forward_deadline && today()->lessThanOrEqualTo($this->carry_forward_deadline)) {
             $carryForward = $this->carry_forward;
         }
+
         return $this->quota + $carryForward - $this->used;
+    }
+
+    public function hasEnoughQuota(float $daysNeeded): bool
+    {
+        return $this->available() >= $daysNeeded;
     }
 
     public function deduct(float $days): void
     {
-        $this->used += $days;
-        $this->save();
+        $this->increment('used', $days);
     }
 }

@@ -16,6 +16,7 @@ use Laravolt\Indonesia\Models\Village;
 class Branch extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [
@@ -71,6 +72,7 @@ class Branch extends Model
              cos(deg2rad($this->latitude)) * cos(deg2rad($lat)) *
              sin($dLng / 2) ** 2;
         $distance = $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+
         return $distance <= $radius;
     }
 }

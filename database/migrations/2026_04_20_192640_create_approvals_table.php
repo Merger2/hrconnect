@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamp('approved_at')->nullable();
             $table->morphs('approvable');
             $table->integer('level');
-            $table->string('status',20)->default('pending');
+            $table->string('status', 20)->default('pending');
             $table->index('status');
             $table->text('notes')->nullable();
             $table->timestamps();

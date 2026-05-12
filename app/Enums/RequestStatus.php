@@ -23,7 +23,7 @@ enum RequestStatus: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'warning',
             self::APPROVED_L1 => 'info',
             self::APPROVED => 'success',

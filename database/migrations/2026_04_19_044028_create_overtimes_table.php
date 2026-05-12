@@ -12,12 +12,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->foreignId('attendance_id')->nullable()->constrained('attendances')->nullOnDelete();
+            $table->index('attendance_id');
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
             $table->text('description');
             $table->decimal('total_hours', 5, 2)->nullable();
-            $table->decimal('amount', 15, 2)->nullable(); 
+            $table->decimal('amount', 15, 2)->nullable();
             $table->text('rejection_reason')->nullable();
             $table->string('status', 20)->default('pending');
             $table->index('employee_id');

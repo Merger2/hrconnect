@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PayrollItem extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [

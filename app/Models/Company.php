@@ -11,11 +11,11 @@ use ParagonIE\CipherSweet\EncryptedRow;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
-#[Fillable(['name','phone','email','website','npwp','code','logo','is_active',])]
+#[Fillable(['name', 'phone', 'email', 'website', 'npwp', 'code', 'logo', 'is_active'])]
 
 class Company extends Model implements CipherSweetEncrypted
 {
-    use UsesCipherSweet, HasFactory;
+    use HasFactory, UsesCipherSweet;
 
     protected function casts(): array
     {
@@ -35,13 +35,14 @@ class Company extends Model implements CipherSweetEncrypted
     {
         return $this->hasMany(Branch::class);
     }
+
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
     }
-     public function settings(): HasMany
+
+    public function settings(): HasMany
     {
         return $this->hasMany(CompanySetting::class);
     }
-
 }

@@ -11,13 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LeaveType extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [
             'quota' => 'integer',
             'is_paid' => 'boolean',
             'is_active' => 'boolean',
-            'deducts_from_quota' => 'boolean'
+            'deducts_from_quota' => 'boolean',
         ];
     }
 
@@ -25,14 +26,17 @@ class LeaveType extends Model
     {
         return $this->hasMany(Leave::class);
     }
+
     public function leaveBalances(): HasMany
     {
         return $this->hasMany(LeaveBalance::class);
     }
+
     public function isPaid(): bool
     {
         return $this->is_paid;
     }
+
     public function deductsFromQuota(): bool
     {
         return $this->deducts_from_quota;

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LoanInstallment extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [

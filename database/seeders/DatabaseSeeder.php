@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $this->call([
             EmployeeSeeder::class,
-            
+
             // Nanti kalau lu bikin Seeder lain, tinggal tambahin di bawahnya:
             // LeaveSeeder::class,
             // AttendanceSeeder::class,
