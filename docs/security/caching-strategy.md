@@ -107,13 +107,19 @@ Cache::remember('settings:attendance', now()->addDay(), function () {
 
 ## 3. CACHE TAGS (Redis Only)
 
+> **ERRATA:** `Cache::tags()` **TIDAK SUPPORT** dengan `database` driver. Hanya `redis`, `memcached`, dan `dynamodb` yang mendukung cache tags. Untuk development yang menggunakan `database` driver, gunakan `Cache::forget()` per-key sebagai ganti `Cache::tags()->flush()`.
+
 ```php
-// Group related caches with tags
+// Group related caches with tags (REDIS ONLY)
 Cache::tags(['attendance', 'employee:123'])->put('key', $value, $ttl);
 
-// Invalidate by tag
+// Invalidate by tag (REDIS ONLY)
 Cache::tags(['attendance'])->flush(); // Clear all attendance cache
 Cache::tags(['employee:123'])->flush(); // Clear all cache for employee 123
+
+// For DATABASE driver, use key-based invalidation instead:
+Cache::forget("attendance:today:{$employeeId}");
+Cache::forget("attendance:monthly:{$employeeId}:{$period}");
 ```
 
 **Tag Groups:**
@@ -329,4 +335,4 @@ php artisan cache:table  # If using database driver
 ---
 
 *Dokumen ini harus diikuti untuk performa optimal.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-13 — Added errata note for Cache::tags() with database driver*

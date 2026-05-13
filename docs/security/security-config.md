@@ -70,6 +70,34 @@
 - view-leave, approve-leave
 ```
 
+### 2.1.1 Permission Enum + Seeders
+> **ERRATA (SEC-4):** Permission enum `App\Enums\Permission` dan `RoleAndPermissionSeeder` **BELUM DIBUAT**. Tanpa ini, `$user->can()` selalu return `false`. Buat enum, seeder, dan register ke `AuthServiceProvider`.
+
+```php
+// app/Enums/Permission.php (BELUM ADA — perlu dibuat)
+enum Permission: string
+{
+    case VIEW_EMPLOYEES = 'view-employees';
+    case CREATE_EMPLOYEES = 'create-employees';
+    case EDIT_EMPLOYEES = 'edit-employees';
+    case DELETE_EMPLOYEES = 'delete-employees';
+    case VIEW_PAYROLL = 'view-payroll';
+    case GENERATE_PAYROLL = 'generate-payroll';
+    case PUBLISH_PAYROLL = 'publish-payroll';
+    case VIEW_ATTENDANCE = 'view-attendance';
+    case APPROVE_ATTENDANCE = 'approve-attendance';
+    case VIEW_LEAVE = 'view-leave';
+    case APPROVE_LEAVE = 'approve-leave';
+    // ... +40 permissions lainnya
+}
+```
+
+```php
+// database/seeders/RoleAndPermissionSeeder.php (BELUM ADA — perlu dibuat)
+// 5 roles: super-admin, hr-manager, finance, supervisor, employee
+// + 50+ permissions dari Permission enum
+```
+
 ### 2.2 Policy Guards
 - Every model has corresponding Policy
 - Policy methods: `viewAny`, `view`, `create`, `update`, `delete`
@@ -128,9 +156,15 @@ $employee = (new EncryptedEloquentModel())
 ## 4. API SECURITY
 
 ### 4.1 API Authentication
-- **Method:** Laravel Sanctum tokens
+- **Method:** Laravel Sanctum tokens (SPA + Mobile API)
+- **Package:** `laravel/sanctum` — **BELUM TERINSTALL** (task.md §1.3 / SEC-3)
 - **Scope:** PWA face recognition, GPS sync
 - **Rate Limiting:** 60 requests/minute per user
+- **Token Lifetime:** 24 jam, refresh via `POST /api/v1/auth/refresh`
+- **Model Trait:** `HasApiTokens` pada User model
+- **Guard:** `sanctum` untuk API routes, `web` untuk Livewire
+
+> **ERRATA (SEC-3):** Sanctum belum terinstall. Install: `composer require laravel/sanctum`, publish config, tambah `HasApiTokens` trait ke User model, migrasikan `personal_access_tokens` table. Detail di task.md §1.3.
 
 ### 4.2 Rate Limiting
 ```php
@@ -239,7 +273,7 @@ navigator.geolocation.getCurrentPosition(
 
 ## 7. SESSION SECURITY
 
-### 6.1 Session Configuration
+### 7.1 Session Configuration
 ```php
 // config/session.php
 'driver' => 'database',
@@ -250,7 +284,7 @@ navigator.geolocation.getCurrentPosition(
 'same_site' => 'lax',
 ```
 
-### 6.2 Concurrent Sessions
+### 7.2 Concurrent Sessions
 - **Policy:** Allow multiple sessions (mobile + desktop)
 - **Limit:** Max 5 active sessions per user
 - **Cleanup:** Expired sessions cleaned via `sessions:cleanup` command
@@ -259,7 +293,7 @@ navigator.geolocation.getCurrentPosition(
 
 ## 8. FILE STORAGE SECURITY
 
-### 7.1 Storage Configuration
+### 8.1 Storage Configuration
 ```php
 // config/filesystems.php
 'disks' => [
@@ -276,32 +310,55 @@ navigator.geolocation.getCurrentPosition(
 ],
 ```
 
-### 7.2 File Access Control
+### 8.2 File Access Control
 - Private files: Only accessible via authenticated routes
 - Public files: Avatars, company logo
 - Sensitive files: Payroll PDFs, face photos → `private` disk
 
-### 7.3 File Validation
+### 8.3 File Validation
 - MIME type validation (not just extension)
 - File size limits enforced
 - Scan for malware (opsional, via ClamAV)
 
 ---
 
-## 9. LOGGING & AUDIT
+## 9. EXCEPTION HANDLING & HTTP CODES
 
-### 8.1 Activity Log (Spatie Activity Log)
+### 9.1 Custom Exception Code Mapping
+> **ERRATA (SEC-5):** BusinessRuleException harus return **422** (Unprocessable Entity), bukan 400. File `app/Exceptions/BusinessRuleException.php` saat ini extends `Exception` (return 500). Perlu diubah ke `HttpException` dengan code 422.
+
+| Exception Class | HTTP Code | Use Case |
+|----------------|-----------|----------|
+| `BusinessRuleException` | 422 | Business rule violations (leave quota exceeded, payroll locked, etc.) |
+| `FaceNotRegisteredException` | 400 | Employee has no face embedding registered |
+| `NotClockedInException` | 400 | Clock-out attempted without clock-in |
+| `ValidationException` | 422 | Form request validation failures |
+| `AuthenticationException` | 401 | Unauthenticated / invalid token |
+| `AuthorizationException` | 403 | Insufficient permissions |
+| `ModelNotFoundException` | 404 | Resource not found |
+
+### 9.2 ApprovalLevel Enum Comparison
+> **ERRATA (C1):** Model `Approval` cast `level` ke `ApprovalLevel` enum. Perbandingan `$approval->level === 1` **SELALUS false** (enum vs int strict comparison). Gunakan `$approval->level->value === 1` atau `$approval->level === ApprovalLevel::L1_SUPERVISOR`.
+
+### 9.3 Payroll Immutability & forceDelete
+> **ERRATA (C2):** Payroll menggunakan `SoftDeletes`, tapi `$existingPayroll->delete()` hanya set `deleted_at`. Record tetap ada, menyebabkan **unique constraint violation** saat regenerasi. Gunakan `$existingPayroll->forceDelete()` sebelum create payroll baru periode yang sama.
+
+---
+
+## 10. LOGGING & AUDIT
+
+### 10.1 Activity Log (Spatie Activity Log)
 - Log all CRUD operations on sensitive models
 - Log: user, action, model, old values, new values
 - Retention: 90 days
 - Models to log: Employee, Payroll, Leave, Approval, Attendance
 
-### 8.2 Error Logging
+### 10.2 Error Logging
 - Laravel log channel: `daily`
 - Max files: 14 days
 - Error reporting: Sentry/Bugsnag (opsional)
 
-### 8.3 Security Events
+### 10.3 Security Events
 - Failed login attempts (Fortify throttling)
 - Password change events
 - Role/permission changes
@@ -310,7 +367,7 @@ navigator.geolocation.getCurrentPosition(
 
 ---
 
-## 10. ENVIRONMENT VARIABLES
+## 11. ENVIRONMENT VARIABLES
 
 ```env
 # App
@@ -343,6 +400,10 @@ MAIL_ENCRYPTION=tls
 # Queue
 QUEUE_CONNECTION=database
 
+# Sanctum (API Token Auth)
+SANCTUM_STATEFUL_DOMAINS=hrconnect.company.com
+SESSION_DOMAIN=hrconnect.company.com
+
 # Face Recognition
 FACE_THRESHOLD=0.85
 
@@ -361,7 +422,7 @@ GOOGLE_CLIENT_SECRET=xxx
 
 ---
 
-## 11. SECURITY CHECKLIST
+## 12. SECURITY CHECKLIST
 
 ### Before Deployment
 - [ ] `APP_DEBUG=false`
@@ -381,8 +442,11 @@ GOOGLE_CLIENT_SECRET=xxx
 - [ ] Firewall configured (UFW)
 - [ ] Fail2ban installed
 - [ ] Security headers set (HSTS, CSP, X-Frame-Options)
+- [ ] Sanctum installed and configured (`php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"`)
+- [ ] Permission enum + RoleAndPermissionSeeder migrated
+- [ ] BusinessRuleException returns 422 (not 400/500)
 
 ---
 
 *Dokumen ini harus diikuti untuk memastikan keamanan aplikasi.*
-*Terlast diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-13 — Added errata notes for SEC-3, SEC-4, SEC-5, C1, C2*

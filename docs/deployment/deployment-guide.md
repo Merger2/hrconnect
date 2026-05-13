@@ -216,7 +216,11 @@ php artisan ciphersweet:generate-key
 
 ### 4.3 Database Setup
 ```bash
-# Run migrations
+# Install Sanctum (REQUIRED — not installed by default)
+composer require laravel/sanctum
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+
+# Run migrations (includes personal_access_tokens from Sanctum)
 php artisan migrate --force
 
 # Seed database
@@ -508,4 +512,4 @@ GEOFENCE_DEFAULT_RADIUS=100
 ---
 
 *Dokumen ini harus diikuti saat deployment.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-13 — Added Sanctum install step (C3), errata notes*

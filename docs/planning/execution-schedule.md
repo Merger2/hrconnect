@@ -2,7 +2,21 @@
 
 > **Dokumen ini berisi jadwal pengerjaan lengkap untuk 12 minggu development HRConnect.**
 > Estimasi: ~9 jam/hari, 6 hari/minggu.
-> **Update terakhir: 2026-05-11** — Progress aktual + redistribusi.
+> **Update terakhir: 2026-05-13** — Progress aktual + redistribusi + errata notes.
+
+---
+
+## ⚠️ ERRATA — Critical Issues Found (2026-05-13)
+
+Issues below were identified during comprehensive audit and must be resolved before Phase 1 can start. See `docs/PRD-errata.md` and `docs/planning/task.md` for full details.
+
+| # | Issue | Impact | Fix |
+|---|-------|--------|-----|
+| C1 | `$approval->level === 1` always false (enum vs int) | APPROVED_L1 never reached | Use `$approval->level->value === 1` or `=== ApprovalLevel::L1_SUPERVISOR` |
+| C2 | `$existingPayroll->delete()` only sets `deleted_at` | Unique constraint violation on regenerate | Use `forceDelete()` |
+| C3 | `laravel/sanctum` not installed | API auth = 0% | Install Sanctum + configure |
+| C4 | Permission enum + seeders missing | `$user->can()` always false | Create Permission enum + RoleAndPermissionSeeder |
+| SEC-5 | BusinessRuleException extends Exception (500) | Wrong HTTP code for business errors | Change to HttpException (422) |
 
 ---
 

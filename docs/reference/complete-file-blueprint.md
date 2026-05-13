@@ -1,5 +1,24 @@
 # HRConnect - Complete File Blueprint
 
+## Errata
+
+> **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam blueprint ini yang harus diperbaiki saat implementasi.
+
+1. **C1: ApprovalLevel enum comparison** — When the `Approval` model casts `level` to `ApprovalLevel` enum, comparisons like `$approval->level === 1` will ALWAYS be false. Use `$approval->level->value === 1` or `$approval->level === ApprovalLevel::L1_SUPERVISOR`.
+2. **C2: Payroll forceDelete needed for regeneration** — `$existingPayroll->delete()` only soft-deletes (sets `deleted_at`). Use `forceDelete()` to permanently delete and avoid unique constraint violation when regenerating payroll for the same employee+period.
+3. **C3: Sanctum not installed — add `HasApiTokens` to User model** — `laravel/sanctum` is not installed. The User model must use `HasApiTokens` trait for API authentication (PWA Clock-In, etc.). Add Sanctum to composer.json and the trait to `app/Models/User.php`.
+4. **C4: Permission enum + seeders not created** — `app/Enums/Permission.php` and `database/seeders/RoleAndPermissionSeeder.php` are listed but have not been created. Without these, `$user->can()` always returns false and authorization is broken.
+5. **SEC-5: BusinessRuleException HTTP 422** — `BusinessRuleException` should extend `Symfony\Component\HttpKernel\Exception\HttpException` with status 422, not the base `\Exception` class (which returns 500). All business rule violations must return HTTP 422 Unprocessable Entity.
+6. **PayrollAdjustment.amount: decimal not integer** — The migration for `create_payroll_adjustments_table` must use `$table->decimal('amount', 15, 2)` not `$table->integer('amount')`. The blueprint's class diagram lists `integer amount` which is incorrect for monetary values.
+7. **PayrollAdjustment.created_by: nullable** — The `created_by` FK column must be nullable (`$table->foreignId('created_by')->nullable()`) because system-generated adjustments may not have a user author.
+8. **Employee `$hidden` needs PII fields** — The Employee model's `$hidden` array must include `nik`, `npwp`, `bank_account_number`, and `phone` to prevent PII exposure in API responses.
+9. **KnowledgeBase needs vector cast** — The `KnowledgeBase` model's `$casts` array must include `'embedding' => \Pgvector\Laravel\Vector::class` for the pgvector embedding field to work correctly.
+10. **Asset needs status enum + SoftDeletes** — The `Asset` model must use the `AssetStatus` enum cast instead of a boolean `is_available`, and must include the `SoftDeletes` trait plus `timestamps`.
+11. **FamilyDetail needs encrypted fields** — The `FamilyDetail` model must properly configure CipherSweet encryption for `nik`, `phone`, and `address` fields (marked as "encrypted, blind_index" in the class diagram).
+12. **Attendance needs 4 verification columns (ERR-004)** — The Attendance model migration must add `clock_in_verification_method`, `clock_in_face_similarity_score`, `clock_out_verification_method`, and `clock_out_face_similarity_score` as separate columns instead of relying on a single status/verification field.
+
+---
+
 > **Dokumen ini berisi SEMUA nama file yang akan dibuat/dimodifikasi selama pengembangan HRConnect.**
 > Setiap file memiliki path absolut dari root project `/home/merger/hrconnect`.
 > Gunakan dokumen ini sebagai satu-satunya referensi saat coding agar tidak bingung.
@@ -24,7 +43,7 @@
 | 1 | `app/Enums/EmploymentType.php` | FULLTIME, CONTRACT, INTERN |
 | 2 | `app/Enums/ResignationReason.php` | Personal, BetterOffer, Relocation, Health, Other |
 | 3 | `app/Enums/HandoverCategory.php` | DOCUMENT, ASSET, DATA, ACCESS, RESPONSIBILITY |
-| 4 | `app/Enums/ApprovalLevel.php` | L1_SUPERVISOR, L2_MANAGER, L3_HRD, L4_DIRECTOR |
+| 4 | `app/Enums/ApprovalLevel.php` | L1_SUPERVISOR, L2_MANAGER, L3_HRD, L4_DIRECTOR ⚠️ ERRATA C1: Cast to enum, use ApprovalLevel::L1_SUPERVISOR not integer comparison |
 | 5 | `app/Enums/DeviceType.php` | DESKTOP, MOBILE, TABLET |
 | 6 | `app/Enums/NotificationType.php` | ATTENDANCE, LEAVE, PAYROLL, SYSTEM, APPROVAL, REMINDER |
 | 7 | `app/Enums/ShiftScheduleType.php` | REGULAR, ROTATING, CUSTOM |
@@ -32,6 +51,7 @@
 | 9 | `app/Enums/LeaveQuotaReset.php` | YEARLY, MONTHLY, ONE_TIME |
 | 10 | `app/Enums/KnowledgeBaseCategory.php` | HR_POLICY, IT_GUIDE, GENERAL, FINANCE, OTHER |
 | 11 | `app/Enums/CompanySettingType.php` | GEODATA, BRANDING, ATTENDANCE, LEAVE, PAYROLL, SYSTEM |
+| ⚠️ **ERRATA C4**: `app/Enums/Permission.php` is MISSING from this list and must be created for `$user->can()` authorization to work. |
 
 ### Existing Enums (✅ 16 files - TIDAK PERLU DIBUAT ULANG)
 ```
@@ -66,7 +86,7 @@ app/Enums/SalaryType.php              ✅
 | 4 | `database/migrations/2026_05_08_000004_create_shift_schedules_table.php` | Pivot: employee_id, shift_id, date |
 | 5 | `database/migrations/2026_05_08_000005_create_leave_quotas_table.php` | Quota per employee per leave type per year |
 | 6 | `database/migrations/2026_05_08_000006_add_device_detection_to_devices_table.php` | device_type, device_name, browser, os |
-| 7 | `database/migrations/2026_05_08_000007_add_clock_exception_to_attendances_table.php` | exception_type, exception_notes, approved_late_by |
+| 7 | `database/migrations/2026_05_08_000007_add_clock_exception_to_attendances_table.php` | exception_type, exception_notes, approved_late_by ⚠️ ERRATA ERR-004: Also add clock_in_verification_method, clock_in_face_similarity_score, clock_out_verification_method, clock_out_face_similarity_score |
 | 8 | `database/migrations/2026_05_08_000008_add_gps_validation_to_attendances_table.php` | is_mocked_gps, gps_accuracy, device_fingerprint |
 | 9 | `database/migrations/2026_05_08_000009_create_employee_handovers_table.php` | id, resigning_employee_id, reassign_to, category, item_name, status |
 | 10 | `database/migrations/2026_05_08_000010_add_payroll_locked_to_payrolls_table.php` | ❌ TIDAK DIBUAT — lock via status=published |
@@ -75,7 +95,7 @@ app/Enums/SalaryType.php              ✅
 | 13 | `database/migrations/2026_05_08_000013_add_google_oauth_to_users_table.php` | Verifikasi google_id sudah ada |
 | 14 | `database/migrations/2026_05_08_000014_add_password_changed_at_to_users_table.php` | Verifikasi password_changed_at sudah ada |
 | 15 | `database/migrations/2026_05_08_000015_create_knowledge_base_embeddings_table.php` | Chunks + embeddings untuk RAG |
-| 16 | `database/migrations/2026_05_08_000016_create_payroll_adjustments_table.php` | id, payroll_id, amount, reason, created_by, applied_to_period |
+| 16 | `database/migrations/2026_05_08_000016_create_payroll_adjustments_table.php` | id, payroll_id, amount, reason, created_by, applied_to_period ⚠️ ERRATA: amount must be decimal(15,2) not integer; created_by must be nullable |
 
 ---
 
@@ -89,14 +109,14 @@ app/Enums/SalaryType.php              ✅
 | 3 | `app/Models/LeaveQuota.php` | Quota per employee per leave type |
 | 4 | `app/Models/EmployeeHandover.php` | Handover items saat resign |
 | 5 | `app/Models/KnowledgeBaseEmbedding.php` | Chunks + embeddings RAG |
-| 6 | `app/Models/RolePermission.php` | Helper RBAC (opsional) |
-| 7 | `app/Models/PayrollAdjustment.php` | Adjustment payroll locked (amount, reason, applied_to_period) |
+| 6 | `app/Models/RolePermission.php` | Helper RBAC (opsional) ⚠️ ERRATA C4: Permission enum + RoleAndPermissionSeeder must be created; $user->can() won't work without them |
+| 7 | `app/Models/PayrollAdjustment.php` | Adjustment payroll locked (amount, reason, applied_to_period) ⚠️ ERRATA: amount must be decimal(15,2), created_by must be nullable |
 
 ### EXISTING MODELS (✅ 25 files - TIDAK PERLU DIBUAT ULANG)
 ```
 app/Models/ActivityLog.php         ✅  app/Models/Leave.php               ✅
 app/Models/Approval.php            ✅  app/Models/LeaveType.php           ✅
-app/Models/Asset.php               ✅  app/Models/Loan.php                ✅
+app/Models/Asset.php               ✅ ⚠️ ERRATA: Use AssetStatus enum instead of is_available boolean; add SoftDeletes + timestamps  app/Models/Loan.php                ✅
 app/Models/AssetHandover.php       ✅  app/Models/LoanInstallment.php     ✅
 app/Models/Attendance.php          ✅  app/Models/Overtime.php            ✅
 app/Models/Branch.php              ✅  app/Models/Payroll.php             ✅
@@ -104,21 +124,21 @@ app/Models/Company.php             ✅  app/Models/PayrollItem.php         ✅
 app/Models/Department.php          ✅  app/Models/PerformanceReview.php   ✅
 app/Models/Device.php              ✅  app/Models/Position.php            ✅
 app/Models/Employee.php            ✅  app/Models/Reimbursement.php       ✅
-app/Models/FamilyDetail.php        ✅  app/Models/Shift.php               ✅
+app/Models/FamilyDetail.php        ✅ ⚠️ ERRATA: nik, phone, address need CipherSweet encryption setup in model  app/Models/Shift.php               ✅
 app/Models/Holiday.php             ✅  app/Models/User.php                ✅
-app/Models/KnowledgeBase.php       ✅
+app/Models/KnowledgeBase.php       ✅ ⚠️ ERRATA: Add 'embedding' => \Pgvector\Laravel\Vector::class to $casts
 ```
 
 ### MODIFY (🔧 7 files)
 | No | Path | Perubahan |
 |----|------|-----------|
-| 1 | `app/Models/Employee.php` | employment_type, resignation, probation, face_photo |
-| 2 | `app/Models/Attendance.php` | exception fields, GPS validation |
+| 1 | `app/Models/Employee.php` | employment_type, resignation, probation, face_photo ⚠️ ERRATA: $hidden must include nik, npwp, bank_account_number, phone |
+| 2 | `app/Models/Attendance.php` | exception fields, GPS validation ⚠️ ERRATA ERR-004: Add clock_in_verification_method, clock_in_face_similarity_score, clock_out_verification_method, clock_out_face_similarity_score |
 | 3 | `app/Models/Device.php` | device_type, device_name, browser, os |
-| 4 | `app/Models/Payroll.php` | is_locked, locked_at, locked_by |
-| 5 | `app/Models/User.php` | google_id, password_changed_at verify |
+| 4 | `app/Models/Payroll.php` | is_locked, locked_at, locked_by ⚠️ ERRATA C2: Use forceDelete() when regenerating payroll to avoid unique constraint violation |
+| 5 | `app/Models/User.php` | google_id, password_changed_at verify ⚠️ ERRATA C3: Add HasApiTokens trait from laravel/sanctum (not yet installed) |
 | 6 | `app/Models/Leave.php` | quota deduction, probation validation |
-| 7 | `app/Models/Approval.php` | multi-level support, escalation |
+| 7 | `app/Models/Approval.php` | multi-level support, escalation ⚠️ ERRATA C1: level field casts to ApprovalLevel enum; compare with enum values, not integers |
 
 ---
 
@@ -204,7 +224,7 @@ app/Models/KnowledgeBase.php       ✅
 ### NEW (🆕 11 files)
 | No | Path Lengkap | Keterangan |
 |----|-------------|------------|
-| 1 | `database/seeders/RoleAndPermissionSeeder.php` | Roles: Super Admin, HRD, Finance, Supervisor, Employee |
+| 1 | `database/seeders/RoleAndPermissionSeeder.php` | Roles: Super Admin, HRD, Finance, Supervisor, Employee ⚠️ ERRATA C4: Must be created; authorization will be broken without this + Permission enum |
 | 2 | `database/seeders/CompanySeeder.php` | Default company + branches |
 | 3 | `database/seeders/DepartmentSeeder.php` | Default departments per branch |
 | 4 | `database/seeders/PositionSeeder.php` | Default positions + grade + salary |
@@ -230,7 +250,7 @@ database/seeders/DatabaseSeeder.php                  🔧 (perlu ditambah call k
 | 1 | `app/Http/Middleware/DeviceDetectionMiddleware.php` | Detect mobile vs desktop, redirect ESS |
 | 2 | `app/Http/Middleware/ForcePasswordChangeMiddleware.php` | Redirect ke password change jika true |
 | 3 | `app/Http/Middleware/CheckRoleMiddleware.php` | Cek role: role:super-admin,hrd,finance |
-| 4 | `app/Http/Middleware/CheckPermissionMiddleware.php` | Cek permission: permission:view-payroll |
+| 4 | `app/Http/Middleware/CheckPermissionMiddleware.php` | Cek permission: permission:view-payroll ⚠️ ERRATA C4: Requires Permission enum + RoleAndPermissionSeeder which are not yet created |
 | 5 | `app/Http/Middleware/GeofenceMiddleware.php` | Validate GPS, set device fingerprint |
 
 ---
@@ -278,6 +298,7 @@ database/seeders/DatabaseSeeder.php                  🔧 (perlu ditambah call k
 |----|-------------|------------|
 | 1 | `config/hrconnect.php` | Face threshold, geofence, attendance rules, RAG settings |
 | 2 | `config/ciphersweet.php` | CipherSweet configuration |
+| ⚠️ **ERRATA C3**: `config/sanctum.php` is MISSING — required for API authentication. Install `laravel/sanctum` first. |
 
 ---
 
@@ -285,7 +306,7 @@ database/seeders/DatabaseSeeder.php                  🔧 (perlu ditambah call k
 
 | No | Path Lengkap | Status | Keterangan |
 |----|-------------|--------|------------|
-| 1 | `routes/api.php` | 🆕 | API untuk PWA (face recognition, GPS sync) |
+| 1 | `routes/api.php` | 🆕 | API untuk PWA (face recognition, GPS sync) ⚠️ ERRATA C3: Requires laravel/sanctum for API auth |
 | 2 | `routes/employee.php` | 🆕 | ESS routes |
 | 3 | `routes/hrd.php` | 🆕 | HRD Admin routes |
 | 4 | `routes/finance.php` | 🆕 | Finance Admin routes |
@@ -746,4 +767,4 @@ database/seeders/DatabaseSeeder.php                  🔧 (perlu ditambah call k
 ---
 
 *Dokumen ini adalah SATU-SATUNYA referensi untuk nama file saat coding.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-13*

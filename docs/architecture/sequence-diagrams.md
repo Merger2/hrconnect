@@ -1,5 +1,17 @@
 # Sequence Diagrams - HRConnect HRIS
 
+## Errata
+
+> **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam diagram ini yang harus diperbaiki saat implementasi.
+
+1. **C1: ApprovalLevel enum comparison bug** — Approval model casts `level` to `ApprovalLevel` enum. Comparisons like `$approval->level === 1` are ALWAYS false. Use `$approval->level->value === 1` or `$approval->level === ApprovalLevel::L1_SUPERVISOR`.
+2. **C2: Payroll forceDelete** — `$existingPayroll->delete()` only sets `deleted_at` (SoftDeletes). Use `forceDelete()` to avoid unique constraint violation when regenerating payroll for the same period.
+3. **C3: Sanctum not installed** — API authentication sequences (Clock-In PWA, KnowledgeBase Chat, etc.) require `laravel/sanctum` which is not yet installed. `HasApiTokens` trait is missing from the User model.
+4. **C4: Permission enum missing** — Authorization checks like `$user->can()` will always return false without the `Permission` enum and corresponding seeders (`RoleAndPermissionSeeder`) being created.
+5. **SEC-5: BusinessRuleException HTTP 422** — All business rule exceptions (e.g., insufficient leave quota, invalid GPS, face recognition failed) should return HTTP 422 (Unprocessable Entity), not 400 or 500. `BusinessRuleException` should extend `HttpException` with status 422, not the base `Exception` class.
+6. **ERR-001: Overtime tiered rates** — Overtime calculation uses tiered rates per UU Cipta Kerja: Weekday: first hour 1.5x, subsequent hours 2x. Holiday: first 8 hours 2x, 9th-10th hour 3x, 11th+ hour 4x. Not a flat rate as implied.
+7. **ERR-002: Leave quota deducted AFTER full L2 approval** — Leave quota should be validated on submit (check availability) but only deducted after full L2 approval, not on submission. The current sequence diagram shows this correctly, but implementers must ensure `deduct quota` only runs post-approval.
+
 ## Deskripsi
 Dokumen ini menyajikan diagram Sequence UML untuk sistem HRConnect HRIS yang menggambarkan interaksi antar objek dalam skenario tertentu. Diagram ini menunjukkan message types (sync, async, return, self-call) dan alur komunikasi antara aktor, controller, service classes, models, jobs, dan external APIs sesuai dengan arsitektur yang didefinisikan dalam PRD.
 
@@ -151,6 +163,7 @@ sequenceDiagram
         
         alt parent_id NOT NULL
             AS->>DB: createApproval(leave, approver_id, level=1, status=pending)
+            Note over AS: ⚠️ ERRATA C1: level is cast to ApprovalLevel enum. Use ApprovalLevel::L1_SUPERVISOR, not integer comparison.
             activate DB
             DB-->>AS: return Approval L1
             deactivate DB
@@ -171,7 +184,8 @@ sequenceDiagram
             
             AS->>AS: checkAllApproved(leave) [self-call]
             alt L1 Approved, Continue to L2
-                AS->>DB: createApproval(leave, hr_manager_id, level=2, status=pending)
+AS->>DB: createApproval(leave, hr_manager_id, level=2, status=pending)
+                Note over AS: ⚠️ ERRATA C1: level is cast to ApprovalLevel enum. Use ApprovalLevel::L2_MANAGER, not integer comparison.
                 activate DB
                 DB-->>AS: return Approval L2
                 deactivate DB
@@ -197,6 +211,7 @@ sequenceDiagram
                     DB-->>AS: return updated
                     deactivate DB
                     AS->>LS: applyLeave(leave) [deduct quota]
+                    Note over LS: ⚠️ ERRATA ERR-002: Quota is deducted here AFTER full L2 approval, NOT on submission. Validation happens on submit, deduction happens on approved.
                     activate LS
                     LS->>DB: updateLeaveBalance(used += totalDays)
                     activate DB
@@ -462,3 +477,11 @@ sequenceDiagram
 11. **Payroll Lock**: Status published → LOCKED PERMANEN (PRD 11.7)
 12. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding 1536D, Gemini 2.5 Pro (PRD 13.1)
 13. **Overtime Link**: Saat Clock-Out, Observer link overtime ke attendance (PRD 8.2)
+14. **⚠️ ERRATA ERR-001**: Overtime uses tiered rates per UU Cipta Kerja: Weekday 1.5x/2x, Holiday 2x/3x/4x — NOT a flat rate
+15. **⚠️ ERRATA C3**: API auth sequences require `laravel/sanctum` (not yet installed)
+16. **⚠️ ERRATA C4**: `$user->can()` requires `Permission` enum + seeders (not yet created)
+17. **⚠️ ERRATA SEC-5**: Business rule exceptions must return HTTP 422, not 400/500
+
+---
+
+*Terakhir diupdate: 2026-05-13*

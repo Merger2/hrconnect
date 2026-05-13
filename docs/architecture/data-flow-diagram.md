@@ -1,5 +1,14 @@
 # Data Flow Diagram (DFD) - HRConnect HRIS
 
+## Errata
+
+> **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam diagram ini yang harus diperbaiki saat implementasi.
+
+1. **C3: Sanctum not installed** — The API authentication data flow (OAuth Token, PWA authentication) requires `laravel/sanctum` which is not yet installed. All API-facing data flows are broken until Sanctum is set up and `HasApiTokens` is added to the User model.
+2. **C4: Permission enum missing** — The authorization data flow (who can access what) is broken without the `Permission` enum and corresponding seeders. `$user->can()` checks will always return false.
+3. **ERR-002: Leave balance deducted AFTER full L2 approval** — Process 8.0 "Apply Leave - Deduct Quota" correctly deducts after L2 approval, but implementers must ensure validation-on-submit and deduction-on-approval are two separate steps. The DFD shows P3 (Validate) before submission and P8 (Deduct) after approval.
+4. **ERR-007: Weekend = Holiday rate for overtime calculation** — Overtime performed on weekends uses the same rate as holiday overtime (2x/3x/4x tiered rates), not the weekday rate. Process 5.0 "Calculate Overtime Pay" must differentiate weekday vs weekend/holiday rates.
+
 ## Deskripsi
 Dokumen ini menyajikan Data Flow Diagram (DFD) untuk sistem HRConnect HRIS yang menggambarkan aliran data antara entitas eksternal, proses, dan penyimpanan data. Diagram terdiri dari Level 0 (Context Diagram) yang menunjukkan pandangan menyeluruh sistem, dan Level 1 yang memecah proses inti menjadi sub-proses untuk Attendance, Leave Management, dan Payroll sesuai dengan business rules dalam PRD.
 
@@ -50,6 +59,8 @@ flowchart LR
     HRIS -->|16. System Logs/Reports| SA
     
     %% Data Flows - External APIs
+    %% ⚠️ ERRATA C3: PWA API auth (data flows 1-6) requires laravel/sanctum which is not yet installed
+    %% ⚠️ ERRATA C4: Role-based access control (data flows 7-16) requires Permission enum + seeders which are not yet created
     GO -->|17. OAuth Authentication| HRIS
     HRIS -->|18. OAuth Token| GO
     HRIS -->|19. PDF Embedding Request| OA
@@ -253,6 +264,7 @@ flowchart TD
     P7 -->|7.3 All Approved?| P8
     
     P8 -->|8.1 Deduct Leave Balance| D4
+    %% ⚠️ ERRATA ERR-002: Quota is deducted HERE after full L2 approval (P8), NOT on submission (P3 only validates)
     P8 -->|8.2 Update Leave Status| D3
     P8 -->|8.3 Notify Employee| E
     
@@ -302,6 +314,8 @@ flowchart TD
     P3[3.0 Calculate PPh21 TER<br/>Kategori A/B/C]
     P4[4.0 Calculate BPJS<br/>Kesehatan + JHT + JP]
     P5[5.0 Calculate Overtime Pay<br/>Rate x Hours]
+    Note right of P5: ⚠️ ERRATA ERR-001 & ERR-007: Weekend = Holiday rate.
+    Tiered rates: Weekday 1.5x/2x, Holiday 2x/3x/4x. NOT flat rate.
     P6[6.0 Calculate Attendance Penalty<br/>Late + Alpha]
     P7[7.0 Generate E-Payslip PDF<br/>2 Columns]
     P8[8.0 Process KnowledgeBase Embedding<br/>PDF Upload]
@@ -397,7 +411,7 @@ flowchart TD
 | 2.0 | Calculate Prorated Salary | (Hari Aktual / Efektif) × Gaji Pokok | Employee, Period, Holidays | Prorated salary |
 | 3.0 | Calculate PPh21 TER | PPh21 per bulan kategori A/B/C | Gross income, PTKP, Tax config | PPh21 amount |
 | 4.0 | Calculate BPJS | BPJS Kesehatan, JHT, JP, JKK, JKM | Gross income, BPJS configs | BPJS deductions |
-| 5.0 | Calculate Overtime Pay | (Gaji Pokok + Tunjangan) / 173 × Rate | Overtime hours, Employee | Overtime pay |
+| 5.0 | Calculate Overtime Pay | (Gaji Pokok + Tunjangan) / 173 × Rate | Overtime hours, Employee | Overtime pay ⚠️ ERR-007: Weekend = Holiday rate; tiered per UU Cipta Kerja |
 | 6.0 | Calculate Attendance Penalty | Denda keterlambatan + alpha | Attendance records | Penalty amount |
 | 7.0 | Generate E-Payslip PDF | 2 kolom Pendapatan/Potongan | Payroll data | PDF file |
 | 8.0 | Process KnowledgeBase Embedding | PDF → chunking → OpenAI embedding | PDF file | Vector 1536D in pgvector |
@@ -473,7 +487,7 @@ flowchart TD
 2. **Face Recognition**: face-api.js 128D FaceNet embedding, threshold 0.85 (PRD 2.1)
 3. **WFA Mode**: Catatan ≥20 karakter, approval SETELAH clock-in (PRD 6.1)
 4. **Leave Calculation**: Exclude Sabtu/Minggu/holidays; morning/afternoon = 0.5 hari (PRD 7.2)
-5. **Leave Quota**: Pro-rated tahun pertama, carry forward maksimal 3 hari (PRD 7.3)
+5. **Leave Quota**: Pro-rated tahun pertama, carry forward maksimal 3 hari (PRD 7.3) ⚠️ ERRATA ERR-002: Quota deducted after L2 approval, not on submission
 6. **Approval Workflow**: 2 level (L1 Manager → L2 HR Manager), skip L1 jika parent_id NULL (PRD 12.1)
 7. **Prorated Salary**: (Hari Kerja Aktual / Hari Kerja Efektif) × Gaji Pokok (PRD 11.3)
 8. **PPh21 TER**: Kategori A/B/C berdasarkan PTKP dari marital_status + jumlah anak (PRD 11.4)
@@ -482,3 +496,7 @@ flowchart TD
 11. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding 1536D, Gemini 2.5 Pro (PRD 13.1)
 12. **Payroll Queue**: queue: payroll_high, tries: 3, timeout: 120s (PRD 11.9)
 13. **Cut-off Date**: Default tanggal 25, join setelah cut-off masuk bulan depan (PRD 11.1)
+
+---
+
+*Terakhir diupdate: 2026-05-13*

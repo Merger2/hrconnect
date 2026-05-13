@@ -1,5 +1,22 @@
 # Class Diagram - HRConnect HRIS
 
+## Errata
+
+> **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam diagram ini yang harus diperbaiki saat implementasi.
+
+1. **C1: ApprovalLevel enum comparison bug** — Approval model casts `level` to `ApprovalLevel` enum. Comparisons like `$approval->level === 1` are ALWAYS false. Use `$approval->level->value === 1` or `$approval->level === ApprovalLevel::L1_SUPERVISOR`. See `Approval` class below.
+2. **C2: Payroll forceDelete** — `$existingPayroll->delete()` only sets `deleted_at` (SoftDeletes). Use `forceDelete()` to avoid unique constraint violation when regenerating payroll for the same employee+period.
+3. **C3: Sanctum not installed** — `HasApiTokens` trait is missing from the `User` model. API authentication (`routes/api.php`) requires `laravel/sanctum` which is not yet installed.
+4. **C4: Permission enum + RoleAndPermissionSeeder missing** — The `Permission` enum and `RoleAndPermissionSeeder` referenced in the blueprint have not been created. Authorization checks (`$user->can()`) will always return false.
+5. **SEC-5: BusinessRuleException HTTP 422** — `BusinessRuleException` should extend `HttpException` with status code 422, not the base `Exception` class (which returns 500). All business rule violations must return HTTP 422.
+6. **PayrollAdjustment.amount should be decimal(15,2) not integer** — The `amount` field is listed as `integer` but must be `decimal(15,2)` since payroll adjustments involve fractional monetary values.
+7. **PayrollAdjustment.created_by should be nullable** — The `created_by` FK should be nullable (`?bigint`) because system-generated adjustments may not have a user author.
+8. **Employee model missing PII fields in `$hidden`** — The `$hidden` array on the Employee model must include `nik`, `npwp`, `bank_account_number`, and `phone` to prevent PII exposure in API responses.
+9. **KnowledgeBase model missing vector cast for embedding field** — The `embedding` field requires a cast to `vector` type (via `pgvector` package) in the model's `$casts` array.
+10. **Asset model using `is_available` boolean instead of `AssetStatus` enum** — The `Asset` model should use the `AssetStatus` enum (available/assigned/disposed) instead of a boolean `is_available`. Asset model is also missing `SoftDeletes` and `timestamps`.
+11. **FamilyDetail model missing encrypted fields** — `nik`, `phone`, and `address` fields on `FamilyDetail` are marked as encrypted but the model needs proper `$casts` or CipherSweet encryption setup.
+12. **Attendance model missing verification_method split (ERR-004)** — Per ERR-004, Attendance should have 4 separate columns: `clock_in_verification_method`, `clock_in_face_similarity_score`, `clock_out_verification_method`, `clock_out_face_similarity_score` instead of a single `status` or combined field.
+
 ## Deskripsi
 Dokumen ini menyajikan diagram Class UML untuk sistem HRConnect HRIS yang menggambarkan seluruh Models (25 existing + 4 new), Service classes (4), Jobs (2), Commands (2), Notifications (6), dan Enums (17). Diagram menunjukkan relationships (composition, aggregation, inheritance, dependency), method signatures, dan property types sesuai dengan arsitektur Laravel yang didefinisikan dalam PRD.
 
@@ -31,6 +48,7 @@ classDiagram
         +timestamp updated_at
         +employee() Employee
         +getEmployee() Employee
+        ⚠️ ERRATA C3: Missing HasApiTokens trait (requires laravel/sanctum)
     }
     
     class Company {
@@ -113,6 +131,7 @@ classDiagram
         +bigint shift_id FK
         +timestamps
         +softDeletes
+        ⚠️ ERRATA: $hidden must include nik, npwp, bank_account_number, phone
         +user() User
         +position() Position
         +parent() Employee "manager"
@@ -150,6 +169,10 @@ classDiagram
         +decimal clock_in_longitude
         +decimal clock_out_latitude
         +decimal clock_out_longitude
+        +string clock_in_verification_method ⚠️ ERRATA ERR-004: Split verification into 4 columns
+        +decimal clock_in_face_similarity_score
+        +string clock_out_verification_method
+        +decimal clock_out_face_similarity_score
         +string clock_in_photo
         +string clock_out_photo
         +string status "on_time/late/early/holiday/permission/absent"
@@ -234,6 +257,7 @@ classDiagram
         +adjustments() HasMany
         +isLocked()$ bool
         +generatePdf()$ void
+        ⚠️ ERRATA C2: When regenerating payroll, use forceDelete() to avoid unique constraint violation
     }
     
     class PayrollItem {
@@ -248,9 +272,9 @@ classDiagram
     class PayrollAdjustment {
         -bigint id PK
         +bigint payroll_id FK "original payroll"
-        +integer amount "positif=tambah, negatif=potong"
+        +decimal amount "⚠️ ERRATA: Must be decimal(15,2), NOT integer"
         +text reason
-        +bigint created_by FK
+        +bigint created_by FK "⚠️ ERRATA: Must be nullable"
         +date applied_to_period
         +payroll() Payroll
         +creator() User
@@ -260,6 +284,7 @@ classDiagram
         -bigint id PK
         +bigint employee_id FK
         +string nik "encrypted, blind_index"
+        ⚠️ ERRATA: nik, phone, address must use CipherSweet encryption in model
         +string name
         +string relationship
         +date birth_date
@@ -282,7 +307,7 @@ classDiagram
         +string approvable_type "polymorphic"
         +bigint approvable_id
         +bigint approver_id FK "employee_id"
-        +integer level "1 or 2"
+        +ApprovalLevel level "⚠️ ERRATA C1: Cast to enum! Use ApprovalLevel::L1_SUPERVISOR/L2_MANAGER, NOT integer comparison"
         +string status "pending/approved/rejected"
         +text notes
         +approver() Employee "approver"
@@ -303,6 +328,7 @@ classDiagram
         +string file_path
         +text content "chunked"
         +vector embedding "vector(1536)"
+        ⚠️ ERRATA: $casts must include 'embedding' => \Pgvector\Laravel\Vector::class
         +string source_document
         +integer page_number
         +string status "processing/ready/error"
@@ -328,7 +354,8 @@ classDiagram
         +string name
         +string code
         +string category
-        +string status "available/assigned/disposed"
+        +AssetStatus status "⚠️ ERRATA: Use AssetStatus enum instead of is_available boolean"
+        ⚠️ ERRATA: Missing SoftDeletes and timestamps
     }
     
     class AssetHandover {
@@ -906,6 +933,12 @@ classDiagram
 | Commands | 2 | AttendanceDetectAlphaCommand, LeaveResetQuotaCommand |
 | Notifications | 6 | LeaveRequestSubmitted, LeaveApproved, LeaveRejected, PayrollPublished, ApprovalOverdue, NewDeviceLogin |
 | Enums | 17 | EmploymentType, LeaveDayType, AttendanceStatus, WfaStatus, ApprovalLevel, ApprovalStatus, RequestStatus, PayrollStatus, PayrollItemType, TERCategory, MaritalStatus, Gender, Relationship, AssetStatus, LoanStatus, ReimbursementStatus, KnowledgeBaseStatus |
+
+⚠️ **ERRATA NOTES**:
+- C1: ApprovalLevel enum comparison — use `$approval->level === ApprovalLevel::L1_SUPERVISOR`, not `$approval->level === 1`
+- C3: User model missing `HasApiTokens` trait (laravel/sanctum not installed)
+- C4: Permission enum + RoleAndPermissionSeeder not yet created
+- C5(SEC-5): BusinessRuleException should extend HttpException(422), not base Exception
 | **TOTAL** | **61** | |
 
 ---
@@ -917,7 +950,7 @@ classDiagram
 3. **PPh21 TER**: PayrollCalculatorService dengan kategori A/B/C dari PTKP (PRD 11.4)
 4. **BPJS Rates**: BpjsConfig dengan employer_rate, employee_rate, ceiling (PRD 11.5)
 5. **Leave Quota**: LeaveBalance.quota, used, carry_forward (max 3) (PRD 7.3)
-6. **Approval Workflow**: ApprovalService dengan Level 1 (Manager) & Level 2 (HR Manager) (PRD 12.1)
+6. **Approval Workflow**: ApprovalService dengan Level 1 (Manager) & Level 2 (HR Manager) (PRD 12.1) ⚠️ ERRATA C1: Approval.level casts to ApprovalLevel enum — use enum comparison
 7. **WFA Mode**: Attendance.is_wfa, status_wfa, wfa_note (PRD 6.1)
 8. **Queue Configuration**: Job queue payroll_high (tries:3, timeout:120), default (tries:2, timeout:300) (PRD 11.9, 13.3)
 9. **Employment Type**: Employee.employment_type (permanent/contract/probation) (PRD 18, 26.4)
@@ -925,3 +958,7 @@ classDiagram
 11. **Prorated Salary**: PayrollCalculatorService.calculateProratedSalary() dengan countWorkingDays() (PRD 11.3)
 12. **Shift Late Tolerance**: Shift.late_tolerance_minutes (default: 0) (PRD 6.1)
 13. **Company Settings**: CompanySetting key-value untuk face_similarity_threshold, payroll_cutoff_date, dll (PRD 14.7)
+
+---
+
+*Terakhir diupdate: 2026-05-13*

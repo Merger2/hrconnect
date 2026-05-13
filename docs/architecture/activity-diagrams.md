@@ -1,5 +1,15 @@
 # Activity Diagrams - HRConnect HRIS
 
+## Errata
+
+> **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam diagram ini yang harus diperbaiki saat implementasi.
+
+1. **C1: ApprovalLevel enum comparison bug** — Approval model casts `level` to `ApprovalLevel` enum. Comparisons like `$approval->level === 1` are ALWAYS false. Use `$approval->level->value === 1` or `$approval->level === ApprovalLevel::L1_SUPERVISOR`.
+2. **C2: Payroll forceDelete vs softDelete** — When regenerating payroll for a period, `$existingPayroll->delete()` only sets `deleted_at` (SoftDeletes). Use `forceDelete()` to permanently remove the record and avoid unique constraint violation on `employee_id + period`.
+3. **ERR-001: Overtime has tiered rates** — Overtime uses tiered rates per UU Cipta Kerja, not a flat rate: Weekday: 1st hour 1.5x, subsequent hours 2x. Holiday: 1st 8 hours 2x, 9th-10th hour 3x, 11th+ hour 4x. The activity diagram's `CalculateOvertimePay` should reflect these tiers.
+4. **ERR-002: Leave quota deducted after full L2 approval** — Leave quota is validated on submit (check availability) but only deducted after full L2 approval, not on submission. The activity diagram shows this flow correctly (`UpdateQuota` after L2 Approval), but implementers must ensure the deduction happens post-approval only.
+5. **ERR-004: Attendance verification uses 4 separate columns** — Attendance should store `clock_in_verification_method`, `clock_in_face_similarity_score`, `clock_out_verification_method`, `clock_out_face_similarity_score` instead of a single combined field for verification data.
+
 ## Deskripsi
 Dokumen ini menyajikan diagram Activity UML untuk sistem HRConnect HRIS yang menggambarkan alur kerja (workflow) dari proses-proses bisnis utama. Diagram ini menggunakan swimlanes untuk memisahkan aktivitas berdasarkan aktor dan sistem, serta menunjukkan decision points, fork/join nodes, dan flow directions sesuai dengan business rules dalam PRD.
 
@@ -35,6 +45,10 @@ flowchart TD
     
     CompareFace -->|Tidak Match| RejectFace[Clock-In Ditolak<br/>Face Tidak Cocok]
     CompareFace -->|Match| CheckTime{Cek Waktu Shift}
+    
+    ⚠️ ERRATA ERR-004: Store verification method and similarity score in 4 separate columns:
+    clock_in_verification_method, clock_in_face_similarity_score,
+    clock_out_verification_method, clock_out_face_similarity_score
     
     CheckTime -->|Before/On Time| OnTime[Status: on_time]
     CheckTime -->|Late + Tolerance| Late[Status: late]
@@ -78,6 +92,7 @@ flowchart TD
     ValidateOverlap -->|Tidak Overlap| CheckRetroaktif{Cuti Mundur?<br/>Maksimal H+3}
     
     CheckRetroaktif -->|Valid| SaveLeave[Simpan Leave Request<br/>status = pending]
+    %% ⚠️ ERRATA ERR-002: Quota is VALIDATED here on submit, but DEDUCTED only after full L2 approval (see UpdateQuota below)
     CheckRetroaktif -->|Invalid| RejectRetro[Reject: Melebihi H+3]
     
     SaveLeave --> CreateWF[Buat Approval Workflow<br/>CreateApprovalWorkflow]
@@ -85,6 +100,7 @@ flowchart TD
     
     CheckParent -->|Ya| SkipL1[Skip Level 1]
     CheckParent -->|Tidak| L1Approval[Level 1: Manager Approval]
+    %% ⚠️ ERRATA C1: Approval.level is cast to ApprovalLevel enum. Compare with ApprovalLevel::L1_SUPERVISOR, not integer 1
     
     SkipL1 --> L2Approval[Level 2: HR Manager Approval]
     L1Approval --> L1Decision{Decision L1}
@@ -94,7 +110,8 @@ flowchart TD
     
     L2Approval --> L2Decision{Decision L2}
     L2Decision -->|Approve| UpdateQuota[Kurangi leave_balances.used]
-    L2Decision -->|Reject| RejectLeave
+    %% ⚠️ ERRATA ERR-002: Quota deduction happens HERE after L2 approval, NOT on submission
+    L2Decision -->|Reject| RejectLeave[Status: rejected<br/>Notes: rejection reason]
     
     UpdateQuota --> Approved[Status: approved]
     Approved --> End([End Leave Request])
@@ -171,6 +188,9 @@ flowchart TD
     CalcGross --> ProRated[CalculateProratedSalary<br/>Hari Kerja Aktual/Effective]
     ProRated --> AddAllowance[Tambah Allowance<br/>Jabatan + Makan × Hari Hadir]
     AddAllowance --> CalcOvertime[CalculateOvertimePay<br/>Upah per Jam × Rate]
+    ⚠️ ERRATA ERR-001: Overtime uses tiered rates, NOT flat rate.
+    Weekday: 1st hour 1.5x, subsequent 2x.
+    Weekend/Holiday: 1st 8hrs 2x, 9th-10th 3x, 11th+ 4x.
     CalcOvertime --> AddTHR[Tambah THR/Bonus]
     
     AddTHR --> CalcDeductions[Hitung DEDUCTIONS]
@@ -190,6 +210,7 @@ flowchart TD
     
     JoinTasks --> CheckLock{Semua Berhasil?}
     CheckLock -->|Ya| Publish[Status: published<br/>LOCKED PERMANEN]
+    %% ⚠️ ERRATA C2: When regenerating payroll, use forceDelete() not delete() to avoid unique constraint violation on employee_id + period
     CheckLock -->|Tidak| Error[Error: Rollback Transaction]
     
     Publish --> NotifyEmployees[Notify All Employees<br/>In-App + Email]
@@ -271,3 +292,7 @@ flowchart TD
 11. **Payroll Lock**: Status published → LOCKED PERMANEN, koreksi via adjustment (PRD 11.7)
 12. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding 1536D, Gemini 2.5 Pro LLM (PRD 13.1)
 13. **WFA Approval**: Approval SETELAH clock-in, jika reject status bisa jadi absent (PRD 6.1)
+
+---
+
+*Terakhir diupdate: 2026-05-13*

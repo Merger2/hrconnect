@@ -3,6 +3,14 @@
 > **Dokumen ini berisi strategi pengujian lengkap untuk HRConnect.**
 > Setiap perubahan WAJIB disertai test yang sesuai.
 
+> **ERRATA (2026-05-13):** Beberapa fix kritis yang harus dites:
+> - **C1:** Test ApprovalLevel enum comparison — `$approval->level === 1` MUST fail, `$approval->level->value === 1` MUST pass
+> - **C2:** Test Payroll `forceDelete()` — soft-deleted payroll regenerasi MUST NOT throw unique constraint violation
+> - **C3:** Test Sanctum API auth — `POST /api/v1/auth/login` MUST return token, `Bearer {token}` MUST authenticate
+> - **C4:** Test Permission enum + seeder — `$user->can('view-employees')` MUST return true for assigned roles
+> - **SEC-5:** Test BusinessRuleException — MUST return HTTP 422, not 500
+> - Model `LeaveBalance` (bukan `LeaveQuota`) — semua test harus referensi `LeaveBalance`
+
 ---
 
 ## 1. TESTING PYRAMID
@@ -54,7 +62,7 @@
 | File | What It Tests |
 |------|--------------|
 | `LeaveRequestTest.php` | - Employee can submit leave request<br>- Validation: dates, quota, reason<br>- Proof file upload (optional)<br>- Cannot submit overlapping dates<br>- Request creates approval chain |
-| `LeaveQuotaTest.php` | - Quota initialized correctly on hire<br>- Quota deducted on approved leave<br>- Quota restored on rejected leave<br>- Quota does not go negative<br>- Annual quota reset works |
+| `LeaveBalanceTest.php` | - Balance initialized correctly on hire<br>- Balance deducted on approved leave (after L2, not on submit — ERR-002)<br>- Balance restored on rejected/cancelled leave<br>- Balance does not go negative<br>- Annual balance reset works |
 | `LeaveApprovalTest.php` | - Approver can approve leave<br>- Approver can reject leave with reason<br>- Approval status updates correctly<br>- Notification sent to requester |
 | `ProbationLeaveBlockTest.php` | - Employee on probation cannot take annual leave<br>- Sick leave allowed during probation<br>- Error message clear |
 
@@ -158,7 +166,7 @@
 | `AttendanceServiceTest.php` | - clockIn() creates record<br>- clockOut() updates record<br>- validateGeofence() correct<br>- calculateLateMinutes() correct |
 | `PayrollCalculatorServiceTest.php` | - calculateBasicSalary() correct<br>- calculateBPJS() correct rates<br>- calculatePPh21() correct<br>- calculateNetSalary() correct |
 | `GeofenceServiceTest.php` | - Haversine formula correct<br>- isWithinRadius() correct<br>- Edge cases handled |
-| `LeaveServiceTest.php` | - requestLeave() validates<br>- validateLeaveQuota() correct<br>- deductLeaveQuota() correct<br>- isProbationBlocked() correct |
+| `LeaveServiceTest.php` | - requestLeave() validates<br>- validateLeaveBalance() correct (validates on submit, deducts after L2 approval — ERR-002)<br>- deductLeaveBalance() correct<br>- isProbationBlocked() correct (EmploymentType has 4 values: permanent, contract, probation, intern) |
 | `ApprovalServiceTest.php` | - createApprovalChain() correct<br>- getNextApprover() correct<br>- approve() updates status |
 
 ### 4.3 Model Tests (`tests/Unit/Models/`)
@@ -272,4 +280,4 @@ php artisan test tests/Unit
 ---
 
 *Dokumen ini harus diikuti saat menulis test.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-13 — Added errata notes (C1-C4, SEC-5, LeaveBalance naming, ERR-002)*

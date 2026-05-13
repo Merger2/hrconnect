@@ -283,12 +283,12 @@ Jika ada error:
 TIDAK ADA emergency unpublish. TIDAK ADA rollback.
 ```
 
-**Alasan:** Ini sesuai dengan cara kerja payroll di dunia nyata. Tidak ada perusahaan yang rollback payroll yang sudah publish. Adjustment di bulan berikutnya adalah standar industri.
+> **ERRATA (C2):** Payroll menggunakan `SoftDeletes`. Saat regenerate, `$existingPayroll->delete()` hanya set `deleted_at` — record tetap ada dan menyebabkan **unique constraint violation** (`employee_id + period`). Gunakan `$existingPayroll->forceDelete()` sebelum create payroll baru untuk periode yang sama.
 
 **Kode Implementasi:**
 ```php
 // app/Models/Payroll.php
-public function adjust(int $amount, string $reason, User $createdBy): PayrollAdjustment
+public function adjust(int $amount, string $reason, ?User $createdBy = null): PayrollAdjustment
 {
     if ($this->is_published) {
         // Payroll sudah published → adjustment untuk bulan berikutnya
@@ -296,7 +296,7 @@ public function adjust(int $amount, string $reason, User $createdBy): PayrollAdj
             'payroll_id' => $this->id,
             'amount' => $amount,
             'reason' => $reason,
-            'created_by' => $createdBy->id,
+            'created_by' => $createdBy?->id,  // nullable — system-generated adjustments
             'applied_to_period' => $this->period->copy()->addMonth(),
         ]);
     }
@@ -310,7 +310,7 @@ public function adjust(int $amount, string $reason, User $createdBy): PayrollAdj
         'payroll_id' => $this->id,
         'amount' => $amount,
         'reason' => $reason,
-        'created_by' => $createdBy->id,
+        'created_by' => $createdBy?->id,
         'applied_to_period' => $this->period,
     ]);
 }
@@ -319,16 +319,18 @@ public function adjust(int $amount, string $reason, User $createdBy): PayrollAdj
 // Payroll yang sudah published = LOCKED PERMANEN
 ```
 
+> **ERRATA (§4.1h):** `payroll_adjustments.created_by` harus **nullable**, karena system-generated adjustment tidak punya user. Migration: `$table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete()`. ERD sudah diupdate.
+
 **Kode Migration untuk PayrollAdjustments:**
 ```php
 // database/migrations/..._create_payroll_adjustments_table.php
 Schema::create('payroll_adjustments', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('payroll_id')->constrained()->cascadeOnDelete();
-    $table->integer('amount'); // Positif = tambah, Negatif = potong
+    $table->foreignId('payroll_id')->constrained()->restrictOnDelete();
+    $table->decimal('amount', 15, 2); // Positif = tambah, Negatif = potong (§2.4)
     $table->text('reason');
-    $table->foreignId('created_by')->constrained('users');
-    $table->date('applied_to_period'); // Bulan yang adjustment diterapkan
+    $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete(); // §4.1h
+    $table->date('applied_to_period');
     $table->timestamps();
 });
 ```
@@ -504,6 +506,24 @@ public function handle(Request $request, Closure $next)
 
 ## 11. ERROR LOGGING & MONITORING
 
+### 11.0 Custom Exception HTTP Code Reference
+> **ERRATA (SEC-5):** Semua custom exception harus return HTTP code yang benar. `BusinessRuleException` saat ini extends `Exception` (return 500). Harus diubah ke `HttpException` dengan code 422.
+
+| Exception Class | HTTP Code | When Thrown |
+|----------------|-----------|-------------|
+| `BusinessRuleException` | **422** | Business rule violations: leave quota exceeded, payroll locked, WFA note too short, etc. |
+| `FaceNotRegisteredException` | 400 | Employee has no face embedding |
+| `NotClockedInException` | 400 | Clock-out without clock-in |
+| `ModelNotFoundException` | 404 | Resource not found |
+| `AuthenticationException` | 401 | Invalid/missing token |
+| `AuthorizationException` | 403 | Insufficient permissions |
+| `ValidationException` | 422 | Form request validation |
+
+> **ERRATA (C1):** `Approval` model cast `level` ke `ApprovalLevel` enum. Perbandingan `$approval->level === 1` **SELALUS false** (PHP strict comparison: enum !== int). Gunakan `$approval->level->value === 1` atau `$approval->level === ApprovalLevel::L1_SUPERVISOR`. Bug ini ada di `ApprovalService::processAutoApprovals()` dan menyebabkan `APPROVED_L1` status tidak pernah tercapai.
+
+### 11.1 Sanctum API Auth Failure
+> **ERRATA (SEC-3):** `laravel/sanctum` belum terinstall. Saat ini, panggilan ke `/api/v1/*` akan return 401 (unauthenticated) karena tidak ada token validation. Install Sanctum sebelum API bisa digunakan (task.md §1.3).
+
 ### Log Levels
 ```
 DEBUG:   Face similarity scores, GPS accuracy values
@@ -555,4 +575,4 @@ audit:       Payroll changes, role changes, approvals
 ---
 
 *Dokumen ini harus diikuti untuk handling semua error scenario.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-13 — Added errata notes for C1, C2, SEC-3, SEC-5*

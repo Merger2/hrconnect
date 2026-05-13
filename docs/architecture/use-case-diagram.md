@@ -1,5 +1,13 @@
 # Use Case Diagram - HRConnect HRIS
 
+## Errata
+
+> **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam diagram ini yang harus diperbaiki saat implementasi.
+
+1. **C3: Sanctum not installed** — API use cases (Clock-In PWA, Chat AI Query, etc.) cannot authenticate without `laravel/sanctum`. The `HasApiTokens` trait is missing from the User model. Install Sanctum before implementing API routes.
+2. **C4: Permission-based access control broken** — Use cases UC9 (Manage Roles & Permissions), and all role-gated access depends on the `Permission` enum and `RoleAndPermissionSeeder` which have not been created. `$user->can()` will always return false.
+3. **ERR-003: Reimbursement L2 approver is Finance, not HR Manager** — In the Approval Workflow Module, L2 approval for Reimbursement use cases should be routed to Finance (not HR Manager). HR Manager is L2 for Leave and Overtime, but Finance is L2 for Reimbursement.
+
 ## Deskripsi
 Dokumen ini menyajikan diagram Use Case UML untuk sistem HRConnect HRIS yang menggambarkan interaksi antara aktor (Super Admin, HR Manager, Finance, Manager, Employee) dengan sistem. Diagram ini mencakup seluruh fitur yang diimplementasikan dalam PRD versi 2.0.
 
@@ -423,5 +431,9 @@ graph TD
 3. **PPh21 TER**: Dihitung per bulan berdasarkan kategori A/B/C dari PTKP (PRD 11.4)
 4. **Leave Quota**: Pro-rated tahun pertama, carry forward maksimal 3 hari (PRD 7.3)
 5. **WFA Mode**: GPS dilewati, wajib catatan ≥20 karakter, approval setelah clock-in (PRD 6.1)
-6. **Approval Workflow**: 2 level (Manager L1 → HR Manager L2), skip L1 jika parent_id NULL (PRD 12.1)
-7. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding, Gemini 2.5 Pro LLM (PRD 13.1)
+6. **Approval Workflow**: 2 level (Manager L1 → HR Manager L2), skip L1 jika parent_id NULL (PRD 12.1) ⚠️ ERRATA C1: Approval.level casts to ApprovalLevel enum
+7. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding, Gemini 2.5 Pro LLM (PRD 13.1) ⚠️ ERRATA C3: API auth requires laravel/sanctum (not installed)
+
+---
+
+*Terakhir diupdate: 2026-05-13*

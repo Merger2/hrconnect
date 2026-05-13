@@ -27,12 +27,15 @@ docs/
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
 | **PRD** | `PRD.md` | Product Requirements Document — spesifikasi lengkap fitur |
+| **PRD Errata** | `PRD-errata.md` | CTO amendments — 7 ERR + 4 CAT items, overrides PRD on conflict |
+| **Task Spec** | `planning/task.md` | Executable specification v3.2 — 30 errata, 9-day execution schedule |
 | **README** | `../README.md` | Project overview, installation guide, tech stack |
 
 ### 📐 Architecture (8 files)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
-| ERD | `architecture/erd.md` | Entity Relationship Diagram — 48 tabel database |
+| ERD (DBML) | `architecture/erd.dbml` | Entity Relationship Diagram — 48 tabel database (source of truth) |
+| ~~ERD (MD)~~ | ~~`architecture/erd.md`~~ | ~~Dihapus — digantikan erd.dbml~~ |
 | Class Diagram | `architecture/class-diagram.md` | UML class diagram — models, services, relationships |
 | Sequence Diagrams | `architecture/sequence-diagrams.md` | Flow interaksi antar komponen |
 | Activity Diagrams | `architecture/activity-diagrams.md` | Activity flow per modul |
@@ -89,13 +92,15 @@ docs/
 |--------|---------|--------|
 | 1 | `README.md` | Overview project & cara install |
 | 2 | `PRD.md` | Pahami apa yang dibangun |
-| 3 | `architecture/erd.md` | Pahami struktur database |
-| 4 | `architecture/folder-structure.md` | Pahami struktur project |
-| 5 | `planning/execution-schedule.md` | Pahami timeline pengerjaan |
-| 6 | `planning/sprint-branch-strategy.md` | Pahami cara kerja branch |
-| 7 | `reference/complete-file-blueprint.md` | Referensi file yang dibuat |
-| 8 | `api/api-contracts.md` | Referensi endpoint API |
-| 9 | `planning/notion-kanban.md` | Import task ke Notion |
+| 3 | `PRD-errata.md` | Pahami CTO decisions yang override PRD |
+| 4 | `planning/task.md` | Pahami executable specification & errata |
+| 5 | `architecture/erd.dbml` | Pahami struktur database (source of truth) |
+| 6 | `architecture/folder-structure.md` | Pahami struktur project |
+| 7 | `planning/execution-schedule.md` | Pahami timeline pengerjaan |
+| 8 | `planning/sprint-branch-strategy.md` | Pahami cara kerja branch |
+| 9 | `reference/complete-file-blueprint.md` | Referensi file yang dibuat |
+| 10 | `api/api-contracts.md` | Referensi endpoint API |
+| 11 | `planning/notion-kanban.md` | Import task ke Notion |
 
 ---
 
@@ -103,8 +108,8 @@ docs/
 
 | Kategori | Jumlah File |
 |----------|-------------|
-| Core | 2 |
-| Architecture | 8 |
+| Core | 4 |
+| Architecture | 8 (1 deleted: erd.md → erd.dbml) |
 | Planning | 4 |
 | API | 1 |
 | UI | 1 |
@@ -112,8 +117,17 @@ docs/
 | Testing | 1 |
 | Deployment | 1 |
 | Reference | 1 |
-| **TOTAL** | **22** |
+| **TOTAL** | **23** |
+
+> **ERRATA NOTE (2026-05-13):** Semua dokumen sudah diupdate dengan errata dari task.md v3.2 dan PRD-errata.md. Beberapa fix kritis:
+> - **C1:** ApprovalLevel enum comparison bug — gunakan `$approval->level->value === 1`
+> - **C2:** Payroll forceDelete — gunakan `forceDelete()` bukan `delete()` untuk regenerate
+> - **C3:** Sanctum belum terinstall — perlu install sebelum API auth bisa bekerja
+> - **C4:** Permission enum + seeders belum dibuat — `$user->can()` selalu false
+> - **SEC-5:** BusinessRuleException harus return 422, bukan 500
+> - `erd.md` dihapus — hanya `erd.dbml` yang jadi source of truth
+> - `LeaveBalance` (bukan `LeaveQuota`) adalah model yang benar
 
 ---
 
-> Last Updated: 2026-05-08
+> Last Updated: 2026-05-13
