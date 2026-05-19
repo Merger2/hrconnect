@@ -27,8 +27,8 @@ docs/
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
 | **PRD** | `PRD.md` | Product Requirements Document — spesifikasi lengkap fitur |
-| **PRD Errata** | `PRD-errata.md` | CTO amendments — 7 ERR + 4 CAT items, overrides PRD on conflict |
-| **Task Spec** | `planning/task.md` | Executable specification v3.2 — 30 errata, 9-day execution schedule |
+| **PRD Errata** | `PRD-errata.md` | CTO amendments — 9 ERR + 17 CAT items (v1.2), overrides PRD on conflict |
+| **Task Spec** | `planning/task.md` | Executable specification v3.4 — 49 errata, 9-day execution schedule |
 | **README** | `../README.md` | Project overview, installation guide, tech stack |
 
 ### 📐 Architecture (8 files)
@@ -119,15 +119,23 @@ docs/
 | Reference | 1 |
 | **TOTAL** | **23** |
 
-> **ERRATA NOTE (2026-05-13):** Semua dokumen sudah diupdate dengan errata dari task.md v3.2 dan PRD-errata.md. Beberapa fix kritis:
+> **ERRATA NOTE (2026-05-19):** Semua dokumen sudah diupdate dengan errata dari task.md v3.4 dan PRD-errata.md v1.2. Beberapa fix kritis:
 > - **C1:** ApprovalLevel enum comparison bug — gunakan `$approval->level->value === 1`
 > - **C2:** Payroll forceDelete — gunakan `forceDelete()` bukan `delete()` untuk regenerate
 > - **C3:** Sanctum belum terinstall — perlu install sebelum API auth bisa bekerja
 > - **C4:** Permission enum + seeders belum dibuat — `$user->can()` selalu false
-> - **SEC-5:** BusinessRuleException harus return 422, bukan 500
+> - **SEC-5:** BusinessRuleException → 422, FaceNotRegisteredException → 422, NotClockedInException → 409
+> - **ERR-008:** KnowledgeBase::processEmbedding() crash — kolom `status` belum ada di migration
+> - **ERR-009:** Observer directory kosong — EmployeeObserver + AttendanceObserver belum dibuat
+> - **CAT-005:** Password expiry 90 hari (Security Config §1.5) menang atas PRD §4
+> - **CAT-012:** AttendanceService::invalidateCache() dead code — Cache::tags() tidak didukung database driver
+> - **CAT-013:** `holiday_*` cache tanpa invalidation — stale 30 hari
+> - **CAT-014:** PTKP magic numbers hardcoded — harus dari CompanySetting
+> - **CAT-015:** VerificationMethod enum missing + bug `'pin'` vs `'pin_verified'` — clock-out PIN logic broken
+> - **CAT-016:** 22 hari kerja hardcoded — harus pakai `countWorkingDays()`
+> - **CAT-017:** FaceNotRecognizedException ditelan — security hole, perlu tiered fallback
 > - `erd.md` dihapus — hanya `erd.dbml` yang jadi source of truth
-> - `LeaveBalance` (bukan `LeaveQuota`) adalah model yang benar
 
 ---
 
-> Last Updated: 2026-05-13
+> Last Updated: 2026-05-19

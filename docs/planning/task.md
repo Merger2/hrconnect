@@ -1,8 +1,8 @@
 # HRConnect — Spesifikasi Eksekusi Perbaikan
 
-> **Version:** 3.2 — Comprehensive Audit Update  
-> **Tanggal:** 12 Mei 2026  
-> **Errata v3.2:** 30 koreksi — 14 dari v3.1 + 16 temuan baru audit  
+> **Version:** 3.4 — Deep Cache & Code Audit Update  
+> **Tanggal:** 19 Mei 2026  
+> **Errata v3.4:** 49 koreksi — 43 dari v3.3 + 6 temuan baru cache & code audit (CAT-012 s/d CAT-017)  
 > **Cara Pakai:** Ikuti urutan Fase 0→1→2→3→4. Setiap item punya:  
 > - **Masalah** — apa yang salah  
 > - **File** — path file yang diubah  
@@ -46,6 +46,25 @@
 | 28 | **`LeaveService::carryForward()` mengabaikan `carry_forward` tahun sebelumnya** + menimpa kuota karyawan dengan default tipe cuti** | Ganti `$remaining = $quota - $used` ke `$remaining = $balance->available()` dan `$quota = $prevBalance->quota` bukan `$prevBalance->leaveType->quota` | §3.5 |
 | 29 | **`DomainException` di PayrollCalculatorService return HTTP 500** — seharusnya `BusinessRuleException` (422) | Ganti ke BusinessRuleException | §3.6 |
 | 30 | **`Approval` model: `approvable_type`/`approvable_id` di `#[Fillable]`** — mass-assignment security risk | Hapus dari fillable | §2.10 |
+| 31 | **ERR-008: `KnowledgeBase::processEmbedding()` crash** — kolom `status`, `category`, `source_document`, `page_number` tidak ada di migration | Tambah kolom ke migration + buat KnowledgeBaseStatus + KnowledgeBaseCategory enum | §0.9 |
+| 32 | **ERR-009: Observer directory kosong** — EmployeeObserver (default shift) dan AttendanceObserver (overtime link) tidak ada | Buat EmployeeObserver + AttendanceObserver + daftarkan di AppServiceProvider | §0.10 |
+| 33 | **CAT-005: Password expiry 90 hari (Security Config §1.5) vs PRD §4 "tidak ada expiry"** | Security Config menang — PRD §4 direvisi, `password_changed_at` sudah ada | §1.6 |
+| 34 | **CAT-006: EmploymentType 3 vs 4 values (PRD §18 kontradiksi)** — kolom deskripsi bilang 3, enum table bilang 4 (termasuk `intern`) | Pakai 4 values: permanent, contract, probation, intern — intern exempt BPJS/PPh21 | §2.25 |
+| 35 | **CAT-007: PRD §14.7 `overtime_multiplier` dan `overtime_weekend_multiplier` flat rate masih didefinisikan** | Hapus kedua key, ganti dengan `overtime_tiers_weekday` dan `overtime_tiers_holiday` (JSON tiers per ERR-001) | §2.26 |
+| 36 | **CAT-008: PRD §27 duplicate "Export to Excel"** — line 1124 bilang ditunda ke V2, line 1129 bilang V1 | Keputusan CTO: Export to Excel = V1. Hapus entry line 1124 | §2.27 |
+| 37 | **CAT-009: PRD §6.2 Attendance status 6 vs 8 values** — missing `missed_clock_in` dan `missed_clock_out` | Tambah 2 status ke PRD §6.2 deskripsi | §2.28 |
+| 38 | **CAT-010: PRD §16 missing `attendance:detect-chronic-late` command** — ada di §6.5 dan §27 (V1) tapi tidak di §16 | Tambah ke PRD §16 commands table | §2.29 |
+| 39 | **CAT-011: Asset model missing `SoftDeletes` trait** — migration punya `$table->softDeletes()` tapi model tidak pakai trait | Tambah `use SoftDeletes` + ganti `is_available` boolean ke `status` enum + cast | §2.6, §2.17 |
+| 40 | **SEC-5 update: FaceNotRegisteredException harus 422** — §1.5 sudah benar tapi security-config.md dan error-handling-strategy.md masih 400 | Update kedua security doc | §1.5 |
+| 41 | **SEC-5 update: NotClockedInException harus 409** — §1.5 sudah benar tapi security docs masih 400 | Update kedua security doc | §1.5 |
+| 42 | **`overtimes.description` nullable + `attendance_id` nullable** — sudah di §4.1d, tapi perlu dipastikan FormRequest juga nullable | Verifikasi FormRequest | §4.1d |
+| 43 | **`Employee::processEmbedding()` face_embedding vector cast missing** — mirip §2.11 tapi untuk Employee face_embedding (vector 128) | Tambah vector cast di Employee model | §2.11 |
+| 44 | **Cache dead code di AttendanceService** — `Cache::tags()` tak didukung database driver, `invalidateCache()` forget key yang tak pernah di-populate → CPU terbuang | Hapus method `invalidateCache()` dan semua panggilannya | §2.30 |
+| 45 | **`holiday_*` cache tanpa invalidation** — TTL 30 hari, tak ada `Cache::forget()` di model `Holiday` | Tambah `Holiday::booted()` observer untuk invalidate cache | §2.31 |
+| 46 | **PTKP magic numbers hardcoded** — 54jt/58.5jt/4.5jt di `Employee::calculatePtkp()` | Pindahkan ke `CompanySetting` (ptkp_base_single, ptkp_base_married, ptkp_per_dependent) | §2.32 |
+| 47 | **VerificationMethod enum missing** — string `'manual'`, `'face_verified'`, `'pin_verified'` tersebar 6 baris + bug: line 132 compare ke `'pin'` bukan `'pin_verified'` | Buat `VerificationMethod` enum + ganti semua string literal | §2.33 |
+| 48 | **22 hari kerja hardcoded** — `$dailyRate / 22` di `PayrollCalculatorService`, harus pakai `countWorkingDays()` dari trait `ManagesWorkDays` | Ganti 22 dengan `$company->countWorkingDays($year, $month)` | §2.34 |
+| 49 | **FaceNotRecognizedException ditelan** — catch di `AttendanceService::clockIn()` hanya log, tidak ada fallback eksplisit → security hole | Refactor ke tiered fallback: face → pin → manual dengan flag `verification_fallback` | §2.35 |
 
 ---
 
@@ -912,6 +931,194 @@ if ($payroll) {
 
 ---
 
+### 0.9 DL-4: KnowledgeBase::processEmbedding() Crash — Missing Columns
+
+**Masalah:** `KnowledgeBase::processEmbedding()` (line 26) menjalankan `$this->update(['status' => 'processing'])`, tapi migration `create_knowledge_bases_table` **tidak punya kolom `status`**. Juga tidak punya `category`, `source_document`, `page_number`. Runtime SQL error saat `ProcessKnowledgeBaseEmbedding` job dijalankan.  
+**Severity:** HIGH  
+**Depends On:** —  
+**Estimasi:** 15 menit
+
+> **CATATAN:** §2.1 menambahkan kolom ini via migration terpisah. Karena development stage, edit langsung di migration asli `create_knowledge_bases_table`, lalu `php artisan migrate:fresh`.
+
+**Langkah 1 — Edit migration asli `create_knowledge_bases_table`:**
+
+```php
+// database/migrations/*_create_knowledge_bases_table.php
+// Tambahkan kolom berikut SEBELUM timestamps():
+
+$table->string('status', 20)->default('processing')->after('embedding');
+$table->string('category', 30)->default('general')->after('title');
+$table->string('source_document')->nullable()->after('content');
+$table->integer('page_number')->nullable()->after('source_document');
+
+// PASTIKAN embedding sudah nullable (bukan NOT NULL):
+// Jika masih ->vector(1536), ganti ke:
+$table->vector('embedding', 1536)->nullable()->change();
+// Atau jika membuat baru:
+$table->vector('embedding', 1536)->nullable();
+```
+
+**Langkah 2 — Buat KnowledgeBaseStatus dan KnowledgeBaseCategory enum:**
+
+```php
+// app/Enums/KnowledgeBaseStatus.php
+
+namespace App\Enums;
+
+enum KnowledgeBaseStatus: string
+{
+    case PROCESSING = 'processing';
+    case READY = 'ready';
+    case ERROR = 'error';
+}
+```
+
+```php
+// app/Enums/KnowledgeBaseCategory.php
+
+namespace App\Enums;
+
+enum KnowledgeBaseCategory: string
+{
+    case HR_POLICY = 'hr_policy';
+    case IT_GUIDE = 'it_guide';
+    case GENERAL = 'general';
+    case FINANCE = 'finance';
+    case OTHER = 'other';
+}
+```
+
+**Langkah 3 — Update KnowledgeBase model (lihat §2.1 untuk model lengkap):**
+
+```php
+// app/Models/KnowledgeBase.php — tambah di class:
+use App\Enums\KnowledgeBaseStatus;
+use App\Enums\KnowledgeBaseCategory;
+
+protected $casts = [
+    'embedding' => 'vector', // pgvector cast
+    'status' => KnowledgeBaseStatus::class,
+    'category' => KnowledgeBaseCategory::class,
+];
+```
+
+**Verifikasi:**
+```bash
+php artisan migrate:fresh --seed
+php artisan tinker --execute '
+$kb = App\Models\KnowledgeBase::create(["title" => "Test", "content" => "Test"]);
+echo "Status: " . $kb->status->value; // processing
+echo "Category: " . $kb->category->value; // general
+'
+```
+
+---
+
+### 0.10 DL-5: Observer Directory Kosong — EmployeeObserver + AttendanceObserver
+
+**Masalah:** Direktori `app/Observers/` kosong (0 file). ERR-005 membutuhkan EmployeeObserver untuk assign default shift, PRD §8.2 membutuhkan AttendanceObserver untuk overtime link.  
+**Severity:** HIGH  
+**Depends On:** —  
+**Estimasi:** 20 menit
+
+**Langkah 1 — Buat EmployeeObserver:**
+
+```php
+// app/Observers/EmployeeObserver.php
+
+namespace App\Observers;
+
+use App\Models\Employee;
+use App\Models\Shift;
+
+class EmployeeObserver
+{
+    public function creating(Employee $employee): void
+    {
+        // ERR-005: Assign default "Flexible" shift jika shift_id null
+        if ($employee->shift_id === null) {
+            $flexibleShift = Shift::where('name', 'Flexible')->first();
+            if ($flexibleShift) {
+                $employee->shift_id = $flexibleShift->id;
+            }
+        }
+    }
+}
+```
+
+**Langkah 2 — Buat AttendanceObserver:**
+
+```php
+// app/Observers/AttendanceObserver.php
+
+namespace App\Observers;
+
+use App\Models\Attendance;
+use App\Enums\OvertimeStatus;
+use App\Enums\ApprovalStatus;
+
+class AttendanceObserver
+{
+    public function created(Attendance $attendance): void
+    {
+        // PRD §8.2: Link overtime saat clock-out
+        // Jika karyawan clock-out dan ada overtime request approved
+        // untuk tanggal yang sama, hubungkan attendance_id
+        if ($attendance->clock_out !== null && $attendance->employee_id) {
+            $attendance->employee->overtimes()
+                ->where('date', $attendance->date)
+                ->where('status', ApprovalStatus::APPROVED)
+                ->whereNull('attendance_id')
+                ->each(function ($overtime) use ($attendance) {
+                    $overtime->update(['attendance_id' => $attendance->id]);
+                });
+        }
+    }
+}
+```
+
+**Langkah 3 — Daftarkan di AppServiceProvider:**
+
+```php
+// app/Providers/AppServiceProvider.php — di method boot():
+
+use App\Models\Employee;
+use App\Models\Attendance;
+use App\Observers\EmployeeObserver;
+use App\Observers\AttendanceObserver;
+
+public function boot(): void
+{
+    Employee::observe(EmployeeObserver::class);
+    Attendance::observe(AttendanceObserver::class);
+}
+```
+
+**Langkah 4 — Pastikan Shift "Flexible" di-seed:**
+
+```php
+// database/seeders/ShiftSeeder.php (atau di DatabaseSeeder)
+Shift::firstOrCreate([
+    'name' => 'Flexible',
+], [
+    'start_time' => '08:00:00',
+    'end_time' => '17:00:00',
+    'tolerance_minutes' => 0,
+]);
+```
+
+**Verifikasi:**
+```bash
+php artisan migrate:fresh --seed
+php artisan tinker --execute '
+$emp = App\Models\Employee::create(["name" => "Test", "email" => "test@test.com"]);
+echo "Shift ID: " . ($emp->shift_id ?? "NULL"); // Should show Flexible shift ID, not NULL
+echo "\nObservers: " . (class_exists(App\Observers\EmployeeObserver::class) ? "OK" : "MISSING");
+'
+```
+
+---
+
 > **WAJIB SELESAI SEBELUM UI/API DIBUKA KE USER.**
 
 ---
@@ -1389,6 +1596,67 @@ throw new DomainException("Payroll untuk periode {$period} sudah dikunci permane
 
 // SESUDAH:
 throw new \App\Exceptions\BusinessRuleException("Payroll untuk periode {$period} sudah dikunci permanen.");
+```
+
+---
+
+### 1.6 SEC-6: Password Expiry 90 Hari — PRD §4 Override
+
+**Masalah:** PRD §4 line 155 bilang "**Tidak ada password expiry**", tapi Security Config §1.5 bilang "Expiration: 90 days (reminder at 7 days before)". Kolom `password_changed_at` sudah ada di database (§4.1f), tapi logic password expiry belum diimplementasi.  
+**Severity:** HIGH (compliance ISO 27001)  
+**Depends On:** 1.1 (password_changed_at di $hidden)  
+**Estimasi:** 20 menit
+
+> **CTO Decision (CAT-005):** Security Config §1.5 MENANG atas PRD §4. Alasan: ISO 27001 compliance, `password_changed_at` sudah ada untuk fungsi ini, force change password (PRD §4.2) membutuhkan timestamp.
+
+**Langkah 1 — Buat middleware CheckPasswordExpired:**
+
+```php
+// app/Http/Middleware/CheckPasswordExpired.php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CheckPasswordExpired
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = $request->user();
+
+        if ($user && $user->password_changed_at) {
+            $daysSinceChange = now()->diffInDays($user->password_changed_at);
+
+            if ($daysSinceChange >= 90) {
+                return redirect()->route('password.expired');
+            }
+        }
+
+        return $next($request);
+    }
+}
+```
+
+**Langkah 2 — Register middleware di bootstrap/app.php atau Kernel:**
+
+```php
+// Tambah ke middleware group 'web':
+'password.expired' => \App\Http\Middleware\CheckPasswordExpired::class,
+```
+
+**Langkah 3 — Tambah route untuk password expired page:**
+
+```php
+// routes/web.php atau routes/auth.php
+Route::get('/password/expired', [PasswordController::class, 'showExpiredForm'])->name('password.expired');
+Route::post('/password/expired', [PasswordController::class, 'updateExpired'])->name('password.expired.update');
+```
+
+**Verifikasi:**
+```bash
+php artisan route:list --name=password.expired
 ```
 
 ---
@@ -2260,6 +2528,496 @@ public function linkToPayroll(Reimbursement $reimbursement, int $payrollId): voi
 
 ---
 
+### 2.25 M7: EmploymentType — PRD Kontradiksi 3 vs 4 Values
+
+**Masalah:** PRD §18 line 666 list 3 values (`permanent`, `contract`, `probation`), tapi PRD §18 line 713 dan ERD punya 4 values (+ `intern`). Kode aktual `app/Enums/EmploymentType.php` sudah punya 4 values. `intern` punya business logic berbeda: BPJS dan PPh21 **TIDAK dipotong** untuk intern.  
+**Severity:** MEDIUM  
+**Depends On:** —  
+**Estimasi:** 5 menit
+
+> **CTO Decision (CAT-006):** Pakai 4 values. InternExemptTest.php sudah ada di testing strategy.
+
+**Verifikasi enum sudah benar:**
+
+```php
+// app/Enums/EmploymentType.php — pastikan ada 4 values:
+
+enum EmploymentType: string
+{
+    case PERMANENT = 'permanent';
+    case CONTRACT = 'contract';
+    case PROBATION = 'probation';
+    case INTERN = 'intern';
+}
+```
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$cases = App\Enums\EmploymentType::cases();
+echo "EmploymentType values: " . count($cases); // 4
+foreach ($cases as $case) echo "\n  - " . $case->value;
+'
+```
+
+---
+
+### 2.26 M8: PRD §14.7 Overtime Flat Rate Keys — HARUS Diganti Tiered
+
+**Masalah:** PRD §14.7 masih mendefinisikan `overtime_multiplier` (1.5) dan `overtime_weekend_multiplier` (2.0) sebagai flat rate. ERR-001 menyatakan bahwa key ini HARUS DIHAPUS dan diganti dengan `overtime_tiers_weekday` dan `overtime_tiers_holiday` (JSON indexed tiers).  
+**Severity:** HIGH (berdampak ke payroll calculation - gaji ganda jika config salah)  
+**Depends On:** 3.1 (Overtime Rate Calculation)  
+**Estimasi:** 10 menit
+
+> **CAT-007:** Ini dokumentasi fix, bukan kode fix. Kode fix sudah di §3.1.
+
+**PRD §14.7 `company_settings` table — UPDATE:**
+
+| Key | Type | Description |
+|-----|------|-------------|
+| ~~`overtime_multiplier`~~ | ~~float~~ | ~~DELETED — see ERR-001~~ |
+| ~~`overtime_weekend_multiplier`~~ | ~~float~~ | ~~DELETED — see ERR-001~~ |
+| `overtime_tiers_weekday` | JSON | Tiered weekday overtime rates — see ERR-001 |
+| `overtime_tiers_holiday` | JSON | Tiered holiday/weekend overtime rates — see ERR-001 |
+
+**Default seed data:**
+
+```php
+// database/seeders/CompanySettingSeeder.php
+'overtime_tiers_weekday' => json_encode([
+    ['from' => 1, 'to' => 1, 'multiplier' => 1.5],
+    ['from' => 2, 'to' => null, 'multiplier' => 2.0],
+]),
+'overtime_tiers_holiday' => json_encode([
+    ['from' => 1, 'to' => 8, 'multiplier' => 2.0],
+    ['from' => 9, 'to' => 9, 'multiplier' => 3.0],
+    ['from' => 10, 'to' => null, 'multiplier' => 4.0],
+]),
+```
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$settings = App\Models\CompanySetting::first();
+echo "Has overtime_tiers_weekday: " . ($settings && $settings->overtime_tiers_weekday ? "YES" : "NO");
+echo "\nHas overtime_tiers_holiday: " . ($settings && $settings->overtime_tiers_holiday ? "YES" : "NO");
+'
+```
+
+---
+
+### 2.27 M9: PRD §27 Duplicate "Export to Excel" Entry
+
+**Masalah:** PRD §27 punya dua entry "Export to Excel" yang kontradiktif:
+- Line 1124: "Export to Excel | PDF sudah cukup | 3-4 hari" (status: ditunda ke V2)
+- Line 1129: "~~Export to Excel~~ | → V1 | ~~3-4 hari~~" (dipindahkan ke V1)
+
+**Severity:** LOW (dokumentasi saja)  
+**Depends On:** —  
+**Estimasi:** 2 menit
+
+> **CTO Decision (CAT-008):** Export to Excel = V1. Hapus entry line 1124 yang bilang "PDF sudah cukup".
+
+**Aksi:** Update PRD §27 — hapus entry "Export to Excel | PDF sudah cukup" yang ditunda ke V2. Pertahankan entry yang bilang V1.
+
+---
+
+### 2.28 M10: Attendance Status — 6 vs 8 Values
+
+**Masalah:** PRD §6.2 hanya list 6 status: `on_time`, `late`, `early`, `holiday`, `permission`, `absent`. ERD dan kode aktual punya 8 values: tambah `missed_clock_in` dan `missed_clock_out`.  
+**Severity:** MEDIUM  
+**Depends On:** —  
+**Estimasi:** 5 menit
+
+> **CAT-009:** PRD §6.2 harus ditambahkan:
+> - `missed_clock_in` — Karyawan clock-out tanpa clock-in sebelumnya
+> - `missed_clock_out` — Karyawan clock-in tapi lupa clock-out
+
+**Verifikasi enum sudah benar:**
+
+```php
+// app/Enums/AttendanceStatus.php — pastikan ada 8 values:
+
+enum AttendanceStatus: string
+{
+    case ON_TIME = 'on_time';
+    case LATE = 'late';
+    case EARLY = 'early';          // clock-out lebih awal
+    case HOLIDAY = 'holiday';
+    case PERMISSION = 'permission';
+    case ABSENT = 'absent';
+    case MISSED_CLOCK_IN = 'missed_clock_in';
+    case MISSED_CLOCK_OUT = 'missed_clock_out';
+}
+```
+
+```bash
+php artisan tinker --execute '
+$cases = App\Enums\AttendanceStatus::cases();
+echo "AttendanceStatus values: " . count($cases); // 8
+'
+```
+
+---
+
+### 2.29 M11: Missing `attendance:detect-chronic-late` Command
+
+**Masalah:** PRD §6.5 mendokumentasi command `attendance:detect-chronic-late` (weeklyOn Friday 18:00). PRD §27 menandai ChronicLateWarning sebagai V1. Tapi PRD §16 Commands table hanya list 3 commands (`attendance:detect-alpha`, `leave:reset-quota`, `model:prune`). Command `attendance:detect-chronic-late` tidak ada di kode maupun scheduler.  
+**Severity:** MEDIUM  
+**Depends On:** —  
+**Estimasi:** 15 menit
+
+> **CAT-010:** Tambahkan `attendance:detect-chronic-late` ke PRD §16 dan implementasikan.
+
+**Langkah 1 — Buat command:**
+
+```bash
+php artisan make:command DetectChronicLateCommand
+```
+
+```php
+// app/Console/Commands/DetectChronicLateCommand.php
+
+namespace App\Console\Commands;
+
+use App\Models\Attendance;
+use App\Enums\AttendanceStatus;
+use App\Notifications\ChronicLateWarning;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+
+class DetectChronicLateCommand extends Command
+{
+    protected $signature = 'attendance:detect-chronic-late';
+    protected $description = 'Deteksi karyawan telat ≥ 3x/bulan dan kirim warning';
+
+    public function handle(): int
+    {
+        $monthStart = now()->startOfMonth();
+        $monthEnd = now()->endOfMonth();
+
+        $lateCounts = Attendance::where('status', AttendanceStatus::LATE)
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->selectRaw('employee_id, COUNT(*) as late_count')
+            ->groupBy('employee_id')
+            ->having('late_count', '>=', 3)
+            ->pluck('late_count', 'employee_id');
+
+        foreach ($lateCounts as $employeeId => $count) {
+            $employee = \App\Models\Employee::find($employeeId);
+            if ($employee?->user) {
+                $employee->user->notify(new ChronicLateWarning($employee, $count));
+            }
+        }
+
+        $this->info("Detected {$lateCounts->count()} chronic late employees.");
+        return self::SUCCESS;
+    }
+}
+```
+
+**Langkah 2 — Register di scheduler:**
+
+```php
+// app/Console/Kernel.php atau routes/console.php (Laravel 11+)
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('attendance:detect-chronic-late')
+    ->weeklyOn(5, '18:00')
+    ->timezone('Asia/Jakarta');
+```
+
+**Verifikasi:**
+```bash
+php artisan attendance:detect-chronic-late
+php artisan schedule:list | grep chronic-late
+```
+
+---
+
+### 2.30 M17: AttendanceService::invalidateCache() — Dead Code (Database Driver Tidak Dukung Tags)
+
+**Masalah:** `AttendanceService::invalidateCache()` (lines 184-190) dipanggil setiap clock-in/out. `Cache::supportsTags()` SELALU `false` dengan database driver → `Cache::tags()->flush()` dead code. `Cache::forget(...)` dijalankan tapi cache key tidak pernah di-populate. **CPU terbuang sia-sia** — 2 operasi cache yang tidak berguna per absensi.  
+**Severity:** HIGH  
+**Depends On:** —  
+**Estimasi:** 5 menit
+
+> **CTO Decision (CAT-012):** Hapus dead code. Attendance query sudah di-index (`UNIQUE(employee_id, date)`). Menambah Redis hanya untuk attendance cache adalah over-engineering untuk MVP.
+
+**Langkah 1 — Hapus method `invalidateCache()` dari AttendanceService:**
+
+```php
+// app/Services/AttendanceService.php — HAPUS seluruh method:
+// ❌ private function invalidateCache(Employee $employee): void { ... }
+```
+
+**Langkah 2 — Hapus semua panggilan `$this->invalidateCache($employee)`:**
+
+```php
+// app/Services/AttendanceService.php — line 103 (di dalam clockIn):
+// HAPUS: $this->invalidateCache($employee);
+
+// app/Services/AttendanceService.php — line 162 (di dalam clockOut):
+// HAPUS: $this->invalidateCache($employee);
+```
+
+**Verifikasi:**
+```bash
+grep -n 'invalidateCache' app/Services/AttendanceService.php
+# Harus return 0 results
+```
+
+---
+
+### 2.31 M18: `holiday_*` Cache Tanpa Invalidation — Stale 30 Hari
+
+**Masalah:** `PayrollCalculatorService::calculateOvertimePay()` line 89 cache `holiday_{date}` dengan TTL 30 hari. Tapi model `Holiday` tidak punya observer untuk `Cache::forget()`. Admin tambah/hapus libur nasional → overtime calculation pakai data libur basi sampai 30 hari.  
+> **CATATAN:** `tax_configs` dan `bpjs_configs` sudah difix di §2.9. Tapi `holiday_*` belum.  
+**Severity:** MEDIUM  
+**Depends On:** —  
+**Estimasi:** 5 menit
+
+**Fix:**
+
+```php
+// app/Models/Holiday.php — tambah di class:
+public static function booted(): void
+{
+    static::saved(function (Holiday $holiday) {
+        Cache::forget("holiday_{$holiday->date->toDateString()}");
+    });
+
+    static::deleted(function (Holiday $holiday) {
+        Cache::forget("holiday_{$holiday->date->toDateString()}");
+    });
+}
+```
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+use App\Models\Holiday;
+use Illuminate\Support\Facades\Cache;
+
+$holiday = Holiday::create(["date" => now()->addDays(5), "name" => "Test"]);
+echo Cache::get("holiday_" . $holiday->date->toDateString()) ? "CACHED" : "NOT CACHED";
+$holiday->update(["name" => "Updated"]);
+echo "\nAfter update: " . (Cache::get("holiday_" . $holiday->date->toDateString()) ? "STILL CACHED" : "EVICTED - OK");
+$holiday->delete();
+'
+```
+
+---
+
+### 2.32 M19: PTKP Magic Numbers Hardcoded — Harus dari CompanySetting
+
+**Masalah:** `Employee::calculatePtkp()` hardcode 54jt (single), 58.5jt (married), 4.5jt (per dependent). PTKP berubah tiap tahun oleh Peraturan Menteri Keuangan. Hardcode artinya setiap perubahan butuh deploy kode baru.  
+**Severity:** HIGH  
+**Depends On:** —  
+**Estimasi:** 15 menit
+
+**Fix:**
+
+```php
+// app/Models/Employee.php — ganti method calculatePtkp():
+
+public function calculatePtkp(): float
+{
+    $base = match ($this->marital_status) {
+        MaritalStatus::MARRIED => (float) CompanySetting::get('ptkp_base_married', 58_500_000),
+        default => (float) CompanySetting::get('ptkp_base_single', 54_000_000),
+    };
+
+    $perDependent = (float) CompanySetting::get('ptkp_per_dependent', 4_500_000);
+    $maxDependents = (int) CompanySetting::get('ptkp_max_dependents', 3);
+
+    $dependentsCount = $this->families()
+        ->where('relationship', FamilyRelationship::CHILD)
+        ->count();
+
+    return $base + (min($dependentsCount, $maxDependents) * $perDependent);
+}
+```
+
+> **CATATAN:** §3.4 sudah fix `families` query (filter CHILD only). Pastikan eager-load `families` di pemanggil jika dipanggil dalam loop payroll.
+
+**Seeder default values:**
+```php
+// database/seeders/CompanySettingSeeder.php — tambah:
+['company_id' => 1, 'key' => 'ptkp_base_single', 'value' => '54000000', 'description' => 'PTKP TK/0'],
+['company_id' => 1, 'key' => 'ptkp_base_married', 'value' => '58500000', 'description' => 'PTKP K/0'],
+['company_id' => 1, 'key' => 'ptkp_per_dependent', 'value' => '4500000', 'description' => 'PTKP per tanggungan (max 3)'],
+['company_id' => 1, 'key' => 'ptkp_max_dependents', 'value' => '3', 'description' => 'Max tanggungan PTKP'],
+```
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$emp = App\Models\Employee::first();
+echo "PTKP: " . number_format($emp->calculatePtkp(), 0, ",", ".");
+'
+```
+
+---
+
+### 2.33 M20: VerificationMethod Enum Missing — Magic String + Bug `'pin'` vs `'pin_verified'`
+
+**Masalah:** `AttendanceService` pakai string literal `'manual'`, `'face_verified'`, `'pin_verified'` di 6 baris tanpa enum. **BUG KRITIS di line 132:** compare ke `'pin'` tapi nilai valid adalah `'pin_verified'`. Kondisi ini **selalu false** → clock-out PIN verification logic broken.  
+**Severity:** HIGH  
+**Depends On:** —  
+**Estimasi:** 10 menit
+
+**Langkah 1 — Buat VerificationMethod enum:**
+
+```php
+// app/Enums/VerificationMethod.php
+
+namespace App\Enums;
+
+enum VerificationMethod: string
+{
+    case FACE_VERIFIED = 'face_verified';
+    case PIN_VERIFIED = 'pin_verified';
+    case MANUAL = 'manual';
+}
+```
+
+**Langkah 2 — Ganti semua string literal di AttendanceService:**
+
+```php
+// app/Services/AttendanceService.php — ganti SEMUA kemunculan:
+
+// SEBELUM:
+$verificationMethod = 'manual';                    // line 51
+$verificationMethod = 'face_verified';            // line 60
+if ($verificationMethod === 'manual' ...)         // line 67
+$verificationMethod = 'pin_verified';             // line 70
+if ($verificationMethod === 'pin') {              // line 132 ← BUG!
+$verificationMethod = 'face_verified';            // line 141
+
+// SESUDAH:
+use App\Enums\VerificationMethod;
+
+$verificationMethod = VerificationMethod::MANUAL->value;
+$verificationMethod = VerificationMethod::FACE_VERIFIED->value;
+if ($verificationMethod === VerificationMethod::MANUAL->value ...)
+$verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {  // ← FIXED
+$verificationMethod = VerificationMethod::FACE_VERIFIED->value;
+```
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$cases = App\Enums\VerificationMethod::cases();
+echo "Values: ";
+foreach ($cases as $c) echo $c->value . " ";
+echo "\nTotal: " . count($cases); // 3
+'
+```
+
+---
+
+### 2.34 M21: 22 Hari Kerja Hardcoded — Harus Pakai `countWorkingDays()`
+
+**Masalah:** `PayrollCalculatorService` line 261: `$dailyRate / 22`. Angka 22 adalah asumsi jumlah hari kerja sebulan. Kenyataannya bervariasi (19-23 hari). Trait `ManagesWorkDays::countWorkingDays()` sudah ada.  
+**Severity:** MEDIUM  
+**Depends On:** —  
+**Estimasi:** 5 menit
+
+> **CAT-016:** Ganti hardcoded 22 dengan method `countWorkingDays()` yang menghitung aktual hari kerja (exclude weekend + holiday).
+
+**Fix:**
+
+```php
+// app/Services/PayrollCalculatorService.php — line 261, ganti:
+// SEBELUM:
+$alphaPenalty = $alphaCount * ($dailyRate > 0 ? $dailyRate / 22 : 0);
+
+// SESUDAH:
+$workingDays = $employee->company->countWorkingDays($targetYear, $targetMonth);
+$alphaPenalty = $alphaCount * ($dailyRate > 0 ? $dailyRate / $workingDays : 0);
+```
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$company = App\Models\Company::first();
+echo "Working days May 2026: " . $company->countWorkingDays(2026, 5);
+'
+```
+
+---
+
+### 2.35 M22: FaceNotRecognizedException Swallowed — Security Hole
+
+**Masalah:** `AttendanceService::clockIn()` (lines 62-64): `FaceNotRecognizedException` ditangkap, di-log, lalu **ditelan**. Kode lanjut seolah tidak terjadi apa-apa. Jika user SUDAH punya face embedding tapi recognition gagal (similarity 72%), clock-in tetap sukses dengan method `'manual'` — indistinguishable dari user yang tidak punya embedding. **Security hole.**  
+**Severity:** HIGH  
+**Depends On:** 2.33 (VerificationMethod enum)  
+**Estimasi:** 20 menit
+
+> **CAT-017:** Refactor ke tiered fallback yang eksplisit: face → pin → manual. Setiap fallback harus meninggalkan jejak audit (`verification_fallback` flag).
+
+**Fix — Refactor AttendanceService::clockIn():**
+
+```php
+// app/Services/AttendanceService.php — refactor clockIn() verification flow:
+
+public function clockIn(Employee $employee, array $request): array
+{
+    $response = [
+        'verification_method' => null,
+        'face_similarity_score' => null,
+        'verification_fallback' => null,
+    ];
+
+    // Tier 1: Face Recognition (jika embedding tersedia DAN request punya face data)
+    if ($employee->face_embedding && !empty($request['face_embedding'])) {
+        try {
+            $faceResult = $this->faceRecognitionService->verifyFace(
+                $employee,
+                $request['face_embedding']
+            );
+            $response['verification_method'] = VerificationMethod::FACE_VERIFIED->value;
+            $response['face_similarity_score'] = $faceResult['similarity_percentage'];
+        } catch (FaceNotRecognizedException $e) {
+            Log::warning('Face verification failed, falling back to PIN.', [
+                'employee_id' => $employee->id,
+                'error' => $e->getMessage(),
+            ]);
+            $response['verification_fallback'] = 'face_failed';
+        }
+    }
+
+    // Tier 2: PIN Verification (jika face gagal atau tidak ada embedding)
+    if ($response['verification_method'] === null) {
+        $this->validatePin($employee, $request['pin'] ?? '');
+        $response['verification_method'] = VerificationMethod::PIN_VERIFIED->value;
+    }
+
+    // ... lanjutkan clock-in logic dengan $response ...
+}
+```
+
+> **CATATAN:** `verification_fallback` harus disimpan di kolom baru `attendances.verification_fallback` atau di log. Minimal pastikan `verification_method` tidak `null` saat clock-in berhasil.
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$emp = App\Models\Employee::first();
+try {
+    $service = app(App\Services\AttendanceService::class);
+    $result = $service->clockIn($emp, ["face_embedding" => [], "pin" => "123456"]);
+    echo "Method: " . $result["verification_method"];
+    echo "\nFallback: " . ($result["verification_fallback"] ?? "none");
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+'
+```
+
+---
+
 ## FASE 3 — Service Bug Fixes
 
 ---
@@ -2977,6 +3735,8 @@ HARI 1:
   ☐ 0.1 — RC-5: Queue retry_after (1 menit)
   ☐ 0.7 — C1: ApprovalLevel enum comparison (5 menit)
   ☐ 0.3 — RC-1: Clock-in QueryException catch (15 menit) ← MIGRATION TIDAK PERLU, index sudah ada
+  ☐ 0.9 — DL-4: KnowledgeBase crash fix (15 menit) ← edit migration asli + enum + model
+  ☐ 0.10 — DL-5: Observer directory (20 menit) ← EmployeeObserver + AttendanceObserver + AppServiceProvider
   ☐ 2.3 — B3: isLocked() block PAID (5 menit)
   ☐ 2.4 — B4: PayrollAdjustment amount decimal:2 (5 menit)
   ☐ 2.5 — B5: Company fillable (10 menit)
@@ -3009,6 +3769,7 @@ HARI 2:
   ☐ 0.4 + 0.8 — RC-2: Payroll race condition + forceDelete fix (30 menit) ← replace softDelete with forceDelete
   ☐ 0.6 — DL-2: Leave quota deduct timing (45 menit) ← includes B2, B8, refund() method
   ☐ 1.5 — SEC-5: Exception HTTP codes (10 menit)
+  ☐ 1.6 — SEC-6: Password expiry 90 hari middleware (20 menit)
 
 HARI 3:
   ☐ 1.1 — SEC-1: PII hidden fields (15 menit)
@@ -3023,6 +3784,15 @@ HARI 3:
   ☐ 2.17 — M12: AssetStatus enum integration (included in B6)
   ☐ 2.18 — M13: LoanInstallmentStatus enum (10 menit)
   ☐ 2.20 — M15: WfaStatus enum (5 menit)
+  ☐ 2.25 — M7: EmploymentType 4 values verify (5 menit)
+  ☐ 2.26 — M8: PRD §14.7 overtime config update (10 menit)
+  ☐ 2.27 — M9: PRD §27 duplicate entry — doc fix (2 menit)
+  ☐ 2.28 — M10: AttendanceStatus 8 values verify (5 menit)
+  ☐ 2.29 — M11: chronic-late command (15 menit)
+  ☐ 2.30 — M17: Hapus dead code invalidateCache() (5 menit)
+  ☐ 2.31 — M18: Holiday cache invalidation observer (5 menit)
+  ☐ 2.32 — M19: PTKP → CompanySetting (15 menit)
+  ☐ 2.33 — M20: VerificationMethod enum + fix 'pin' bug (10 menit)
 
 HARI 4-5:
   ☐ 2.2 — B2: isAllApproved() (sudah di 0.6)
@@ -3031,6 +3801,8 @@ HARI 4-5:
   ☐ 2.22 — L6: Shift SoftDeletes (5 menit)
   ☐ 2.23 — L7: CompanySetting double-decode fix (5 menit)
   ☐ 2.24 — H2: ReimbursementService linkToPayroll guards (10 menit)
+  ☐ 2.34 — M21: 22 hari kerja → countWorkingDays() (5 menit)
+  ☐ 2.35 — M22: FaceNotRecognized fix — tiered fallback (20 menit)
   ☐ 3.1 — P1/P2: Overtime rate calculation (30 menit)
   ☐ 3.2 — G1: GeofenceService null coordinates (15 menit)
   ☐ 3.3 — H1: getTERCategory() DIVORCED/WIDOWED (5 menit)
@@ -3129,6 +3901,33 @@ HARI 9+:
 | `bank_account_number` NOT NULL | Seharusnya nullable | DB: `text NOT NULL` | Fix 4.1k |
 | `bank_name` NOT NULL | Seharusnya nullable | DB: `string NOT NULL` | Fix 4.1k |
 | `password_changed_at` | Security Config §1.5, PRD §4.2 | DB: TIDAK ADA (hanya `password_changed` boolean) | Fix 4.1f — migration baru |
+| Password expiry 90 hari | Security Config §1.5 → PRD §4 "tidak ada expiry" | **Kontradiksi** — Security Config menang | Fix 1.6 |
+| `employment_type` 3 vs 4 values | PRD §18 kolom: 3, enum table: 4 | Kode: 4 values (OK) | Fix 2.25 |
+
+### Observer
+
+| Aspek | PRD/ERD | Kode Aktual | Status |
+|-------|---------|-------------|--------|
+| `EmployeeObserver` (default shift) | PRD §6.1, ERR-005 | TIDAK ADA — `app/Observers/` kosong | Fix 0.10 |
+| `AttendanceObserver` (overtime link) | PRD §8.2 | TIDAK ADA | Fix 0.10 |
+
+### Overtime Config
+
+| Aspek | PRD/ERD | Kode Aktual | Status |
+|-------|---------|-------------|--------|
+| `overtime_multiplier` flat rate | PRD §14.7 | Masih didefinisikan | HAPUS — lihat ERR-001, Fix 2.26 |
+| `overtime_tiers_weekday/holiday` | ERR-001 | TIDAK ADA di config/seed | Fix 2.26 + 3.1 |
+
+### PRD Gaps (Documentation)
+
+| Aspek | PRD Section | Issue | Status |
+|-------|-------------|-------|--------|
+| Password expiry | §4 line 155 | Bilang "tidak ada expiry", Security Config §1.5 bilang 90 hari | Fix 1.6 (CAT-005) |
+| EmploymentType | §18 line 666 | Hanya 3 values (missing `intern`) | Fix 2.25 (CAT-006) |
+| Overtime flat keys | §14.7 | `overtime_multiplier`/`overtime_weekend_multiplier` harus dihapus | Fix 2.26 (CAT-007) |
+| Export to Excel duplicate | §27 lines 1124 & 1129 | Kontradiksi: ditunda vs V1 | Fix 2.27 (CAT-008) |
+| Attendance status | §6.2 | Hanya 6 (missing `missed_clock_in/out`) | Fix 2.28 (CAT-009) |
+| `attendance:detect-chronic-late` | §16 | Tidak ada di commands table | Fix 2.29 (CAT-010) |
 
 ### KnowledgeBase
 
@@ -3137,8 +3936,9 @@ HARI 9+:
 | `status` column | ERD: `knowledge_base_status` | TIDAK ADA | Fix 2.1 |
 | `category` column | ERD: `knowledge_base_category` | TIDAK ADA | Fix 2.1 |
 | `source_document`, `page_number` | ERD | TIDAK ADA | Fix 2.1 |
-| `embedding` NOT NULL | Should be nullable (created before embedding) | DB: `vector(1536) NOT NULL` | Fix 4.1i |
+| `embedding` NOT NULL | Should be nullable (created before embedding) | DB: `vector(1536) NOT NULL` | Fix 4.1i + Fix 0.9 |
 | `embedding` model cast | Should be `vector` | **TIDAK ADA** — serialization risk | Fix 2.12 |
+| `status`, `category`, `source_document`, `page_number` columns | ERD | TIDAK ADA di migration | Fix 0.9 |
 | `ProcessKnowledgeBaseEmbedding` job | PRD §16 | TIDAK ADA | Gap INF-3 |
 | RAG chat (Gemini) | PRD §15.6 | TIDAK ADA | Gap |
 
@@ -3182,6 +3982,31 @@ HARI 9+:
 | API Controllers | API Contracts | Orphan AttendanceController, no routes | Gap |
 | API Form Requests | API Contracts | 2 files, no policy-based auth | Gap |
 
+### Cache
+
+| Aspek | PRD/ERD | Kode Aktual | Status |
+|-------|---------|-------------|--------|
+| `AttendanceService::invalidateCache()` | — | Dead code: forget key yg tak pernah di-populate, `tags()` tak didukung db driver | Fix 2.30 |
+| `holiday_*` cache invalidation | — | TTL 30 hari, tak ada `Cache::forget()` di Holiday model | Fix 2.31 |
+| `tax_configs` cache invalidation | — | TTL 1 hari, observer exist di §2.9 | OK |
+| `bpjs_configs` cache invalidation | — | TTL 1 hari, observer exist di §2.9 | OK |
+
+### Payroll Calculation
+
+| Aspek | PRD/ERD | Kode Aktual | Status |
+|-------|---------|-------------|--------|
+| PTKP values hardcoded | — | 54jt/58.5jt/4.5jt di `Employee::calculatePtkp()` | Fix 2.32 |
+| 22 hari kerja hardcoded | — | `$dailyRate / 22`, harusnya `countWorkingDays()` | Fix 2.34 |
+| Overtime multiplier hardcoded | — | 1.5x flat, harusnya tiered JSON config (ERR-001) | Fix 3.1 |
+
+### Attendance
+
+| Aspek | PRD/ERD | Kode Aktual | Status |
+|-------|---------|-------------|--------|
+| `VerificationMethod` enum | — | Magic string `'manual'`/`'face_verified'`/`'pin_verified'` + bug `'pin'` vs `'pin_verified'` | Fix 2.33 |
+| `FaceNotRecognizedException` swallowed | — | Catch-log-dismiss, no fallback audit trail | Fix 2.35 |
+| `invalidateCache()` dead code | — | CPU wasted per clock-in/out | Fix 2.30 |
+
 ---
 
 ## Jadwal PRD 12 Minggu vs Realita Audit
@@ -3205,5 +4030,5 @@ HARI 9+:
 
 ---
 
-*Terakhir diupdate: 12 Mei 2026 — v3.2 (30 errata, comprehensive audit)*  
-*Versi: 3.0 — Final Audit Release*
+*Terakhir diupdate: 19 Mei 2026 — v3.4 (49 errata: cache dead code, holiday cache, PTKP hardcode, VerificationMethod enum, 22 hari kerja, FaceNotRecognized swallowed)*  
+*Versi: 3.4 — Deep Cache & Code Audit Release*

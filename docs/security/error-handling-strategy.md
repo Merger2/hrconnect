@@ -87,10 +87,7 @@ public function clockIn(Employee $employee, array $data): Attendance
             return $this->clockInWithGPS($employee, $data);
         }
 
-        throw new \Exception(
-            'Wajah belum terdaftar. Hubungi HRD untuk registrasi wajah, ' .
-            'atau gunakan verifikasi PIN untuk sementara.'
-        );
+        throw new \App\Exceptions\FaceNotRegisteredException();
     }
 
     // Lanjut face recognition seperti biasa...
@@ -509,11 +506,13 @@ public function handle(Request $request, Closure $next)
 ### 11.0 Custom Exception HTTP Code Reference
 > **ERRATA (SEC-5):** Semua custom exception harus return HTTP code yang benar. `BusinessRuleException` saat ini extends `Exception` (return 500). Harus diubah ke `HttpException` dengan code 422.
 
+> **ERRATA (SEC-5 update):** `FaceNotRegisteredException` sebelumnya 400 → **422** (business rule violation, bukan bad request). `NotClockedInException` sebelumnya 400 → **409** (state conflict, konsisten dengan `AlreadyClockedInException` yang return 409). Lihat juga security-config.md §9.1 dan task.md §1.5.
+
 | Exception Class | HTTP Code | When Thrown |
 |----------------|-----------|-------------|
 | `BusinessRuleException` | **422** | Business rule violations: leave quota exceeded, payroll locked, WFA note too short, etc. |
-| `FaceNotRegisteredException` | 400 | Employee has no face embedding |
-| `NotClockedInException` | 400 | Clock-out without clock-in |
+| `FaceNotRegisteredException` | **422** | Employee has no face embedding (business rule, not bad request) |
+| `NotClockedInException` | **409** | Clock-out without clock-in (state conflict, consistent with `AlreadyClockedInException`) |
 | `ModelNotFoundException` | 404 | Resource not found |
 | `AuthenticationException` | 401 | Invalid/missing token |
 | `AuthorizationException` | 403 | Insufficient permissions |
@@ -560,7 +559,7 @@ audit:       Payroll changes, role changes, approvals
 |----------|----------|-------|-----------|-------------|
 | Kamera gagal | PIN verification | 0 | WARNING | "Verifikasi PIN diperlukan" |
 | Face similarity rendah | PIN setelah 3x gagal | 3x | WARNING | "Wajah tidak terdeteksi" |
-| Face belum terdaftar | PIN sementara | 0 | WARNING | "Hubungi HRD untuk registrasi wajah" |
+| Face belum terdaftar | PIN sementara | 0 | WARNING (422) | "Wajah belum terdaftar, hubungi HRD" |
 | GPS accuracy buruk | Accept + flag | 0 | WARNING | "Sinyal GPS lemah" |
 | GPS mocked | BLOCK | 0 | CRITICAL | "Lokasi tidak valid" |
 | OpenAI API down | Retry + text search | 3x | ERROR | "AI sedang maintenance" |
@@ -575,4 +574,4 @@ audit:       Payroll changes, role changes, approvals
 ---
 
 *Dokumen ini harus diikuti untuk handling semua error scenario.*
-*Terakhir diupdate: 2026-05-13 — Added errata notes for C1, C2, SEC-3, SEC-5*
+*Terakhir diupdate: 2026-05-19 — Updated SEC-5: FaceNotRegistered→422, NotClockedIn→409. Fixed face enrollment exception type.*

@@ -50,6 +50,8 @@
 - **Expiration:** 90 days (reminder at 7 days before)
 - **History:** Cannot reuse last 3 passwords
 
+> **ERRATA (CAT-005):** PRD §4 line 155 mengatakan "**Tidak ada password expiry**". Security Config §1.5 mengatakan "90 days". **CTO Decision: Security Config MENANG.** Alasan: (1) kolom `password_changed_at` sudah ada untuk fungsi ini, (2) ISO 27001 compliance mewajibkan password rotation, (3) Force change password (PRD §4.2) butuh timestamp untuk menghitung umur password. Lihat juga task.md §1.6 untuk middleware implementasi.
+
 ---
 
 ## 2. AUTHORIZATION (RBAC)
@@ -330,12 +332,14 @@ navigator.geolocation.getCurrentPosition(
 | Exception Class | HTTP Code | Use Case |
 |----------------|-----------|----------|
 | `BusinessRuleException` | 422 | Business rule violations (leave quota exceeded, payroll locked, etc.) |
-| `FaceNotRegisteredException` | 400 | Employee has no face embedding registered |
-| `NotClockedInException` | 400 | Clock-out attempted without clock-in |
+| `FaceNotRegisteredException` | 422 | Employee has no face embedding registered (business rule, not bad request) |
+| `NotClockedInException` | 409 | Clock-out attempted without clock-in (state conflict, consistent with `AlreadyClockedInException`) |
 | `ValidationException` | 422 | Form request validation failures |
 | `AuthenticationException` | 401 | Unauthenticated / invalid token |
 | `AuthorizationException` | 403 | Insufficient permissions |
 | `ModelNotFoundException` | 404 | Resource not found |
+
+> **ERRATA (SEC-5 update):** `FaceNotRegisteredException` sebelumnya 400 → **422** (business rule violation, bukan bad request). `NotClockedInException` sebelumnya 400 → **409** (state conflict, konsisten dengan `AlreadyClockedInException` yang return 409). Lihat juga task.md §1.5.
 
 ### 9.2 ApprovalLevel Enum Comparison
 > **ERRATA (C1):** Model `Approval` cast `level` ke `ApprovalLevel` enum. Perbandingan `$approval->level === 1` **SELALUS false** (enum vs int strict comparison). Gunakan `$approval->level->value === 1` atau `$approval->level === ApprovalLevel::L1_SUPERVISOR`.
@@ -449,4 +453,4 @@ GOOGLE_CLIENT_SECRET=xxx
 ---
 
 *Dokumen ini harus diikuti untuk memastikan keamanan aplikasi.*
-*Terakhir diupdate: 2026-05-13 — Added errata notes for SEC-3, SEC-4, SEC-5, C1, C2*
+*Terakhir diupdate: 2026-05-19 — Updated SEC-5: FaceNotRegistered→422, NotClockedIn→409. Added CAT-005: Password expiry 90 hari override PRD §4.*
