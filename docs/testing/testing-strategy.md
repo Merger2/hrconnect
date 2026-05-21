@@ -279,5 +279,108 @@ php artisan test tests/Unit
 
 ---
 
+## 9. DATABASE TESTING STRATEGY
+
+### 9.1 Dual Environment
+
+Aplikasi HRConnect berjalan di **PostgreSQL** (production) dengan ekstensi `pgvector`, `pg_trgm`, dan `pgcrypto`, tapi test suite (phpunit.xml) menggunakan **SQLite in-memory** untuk kecepatan.
+
+| Environment | Database | Tujuan |
+|------------|----------|--------|
+| Production/Development | PostgreSQL + pgvector | Data persist, vector search, full feature |
+| Testing (default) | SQLite `:memory:` | Unit & Feature test cepat (< 2 detik) |
+| Testing (opsional) | PostgreSQL `hrconnect_testing` | Integration test untuk vector similarity search |
+
+**Default:** `php artisan test` menggunakan SQLite. Cukup untuk 95% test case.
+
+### 9.2 Defensive Migration Pattern
+
+Semua migration yang menggunakan fitur PostgreSQL-specific **WAJIB** di-guard dengan `DB::getDriverName()`:
+
+```php
+// ✅ BENAR — guard dengan driver check
+if (DB::getDriverName() === 'pgsql') {
+    Schema::ensureVectorExtensionExists();
+}
+
+// ❌ SALAH — akan crash di SQLite
+Schema::ensureVectorExtensionExists();
+```
+
+```php
+// ✅ BENAR — fallback kolom vector
+if (DB::getDriverName() === 'pgsql') {
+    $table->vector('embedding', dimensions: 1536)->nullable();
+} else {
+    $table->text('embedding')->nullable();
+}
+```
+
+```php
+// ✅ BENAR — guard HNSW index
+if (DB::getDriverName() === 'pgsql') {
+    DB::statement('CREATE INDEX kb_embedding_hnsw_idx ON knowledge_bases USING hnsw (embedding vector_cosine_ops)');
+}
+```
+
+### 9.3 PostgreSQL-Specific Features di HRConnect
+
+| Feature | File Migration | Guard Status |
+|---------|---------------|--------------|
+| `pgvector` extension | create_users_table | ✅ Guarded (CAT-018) |
+| `pg_trgm` extension | create_users_table | ✅ Guarded |
+| `pgcrypto` extension | create_users_table | ✅ Guarded |
+| `vector(128)` column | create_employees_table | ✅ Guarded (CAT-018) |
+| `vector(1536)` column | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
+| HNSW index | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
+| `jsonb` column | create_knowledge_bases_table | ⚠️ Not guarded (SQLite has json) |
+
+### 9.4 UniqueConstraintViolationException — Dilarang Hardcode Error Code
+
+**DILARANG** menangkap `QueryException` dan mengecek hardcoded error code seperti `$e->getCode() === '23505'`. Error code `23505` hanya berlaku di PostgreSQL; SQLite menggunakan code berbeda (`19` / `23000`).
+
+**WAJIB** menggunakan `Illuminate\Database\UniqueConstraintViolationException` yang otomatis menangkap unique constraint violation di semua driver:
+
+```php
+// ❌ SALAH — PostgreSQL-only
+} catch (QueryException $e) {
+    if ($e->getCode() === '23505') { ... }
+}
+
+// ✅ BENAR — Cross-database compatible
+} catch (UniqueConstraintViolationException $e) {
+    throw new AlreadyClockedInException('...');
+} catch (QueryException $e) {
+    throw $e;
+}
+```
+
+### 9.5 Vector/AI Test — Mocking Approach
+
+Fitur AI (face recognition similarity search, knowledge base RAG) **tidak bisa di-test secara real** di environment SQLite karena SQLite tidak mendukung `vector` column type.
+
+Pendekatan testing:
+
+| Test Type | Pendekatan | Environment |
+|-----------|-----------|-------------|
+| Controller/Service logic | Mock `FaceRecognitionService` dan `RagService` | SQLite |
+| Model creation & fillable | `RefreshDatabase` — kolom `embedding` jadi `text` di SQLite | SQLite |
+| Vector similarity search | Skip atau gunakan PostgreSQL testing DB (`hrconnect_testing`) | PostgreSQL |
+| Face embedding format | Unit test serialization/deserialization dengan data dummy | SQLite |
+
+Contoh mock di Pest:
+```php
+it('allows clock in with valid face verification', function () {
+    $faceService = Mockery::mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('verifyFace')
+        ->once()
+        ->andReturn(['similarity_percentage' => 95.5]);
+    
+    // ... test logic
+});
+```
+
+---
+
 *Dokumen ini harus diikuti saat menulis test.*
-*Terakhir diupdate: 2026-05-13 — Added errata notes (C1-C4, SEC-5, LeaveBalance naming, ERR-002)*
+*Terakhir diupdate: 2026-05-20 — Added §9 Database Testing Strategy (CAT-018, CAT-019)*

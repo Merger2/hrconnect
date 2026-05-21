@@ -11,13 +11,13 @@ enum DayType: string
     public function label(): string
     {
         return match ($this) {
-            self::FULL_DAY => 'Satu Hari Penuh',
-            self::MORNING => 'Setengah Hari (Pagi)',
-            self::AFTERNOON => 'Setengah Hari (Siang)',
+            self::FULL_DAY => 'Full Day (1.0 Hari)',
+            self::MORNING => 'Pagi (0.5 Hari)',
+            self::AFTERNOON => 'Siang (0.5 Hari)',
         };
     }
 
-    public function getQuotaDeduction(): float
+    public function weight(): float
     {
         return match ($this) {
             self::FULL_DAY => 1.0,

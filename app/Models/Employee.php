@@ -38,7 +38,7 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
     'face_embedding', 'pin', 'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
     'created_by', 'updated_by',
 ])]
-#[Hidden(['face_embedding', 'pin'])]
+#[Hidden(['face_embedding', 'pin', 'nik', 'phone', 'npwp', 'bank_account_number'])]
 
 class Employee extends Model implements CipherSweetEncrypted
 {
@@ -66,7 +66,9 @@ class Employee extends Model implements CipherSweetEncrypted
             'salary_type' => SalaryType::class,
             'employment_type' => EmploymentType::class,
             'termination_type' => TerminationType::class,
+            'graduation_year' => 'integer',
             'pin' => 'hashed',
+            'face_embedding' => 'vector',
         ];
     }
 

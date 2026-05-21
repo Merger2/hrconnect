@@ -13,19 +13,13 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('province_id')->nullable()->constrained('indonesia_provinces')->restrictOnDelete();
-            $table->foreignId('city_id')->nullable()->constrained('indonesia_cities')->restrictOnDelete();
-            $table->foreignId('district_id')->nullable()->constrained('indonesia_districts')->restrictOnDelete();
-            $table->foreignId('village_id')->nullable()->constrained('indonesia_villages')->restrictOnDelete();
-            $table->string('postal_code', 10)->nullable();
-            $table->text('address_detail');
             $table->string('name');
             $table->string('phone');
             $table->string('email');
             $table->string('website')->nullable();
             $table->text('npwp');
             $table->string('code')->unique();
-            $table->text('logo')->nullable();
+            $table->string('logo', 255)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

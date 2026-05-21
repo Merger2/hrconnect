@@ -1,15 +1,15 @@
-# PRD ERRATA — Amandemen Kitab Suci
+# PRD ERRATA — Historical Changelog
 
-**Versi:** 1.2  
-**Tanggal:** 19 Mei 2026  
-**PRD Referensi:** PRD v2.0 (2026-05-08)  
-**Status:** LOCKED — Dokumen ini mengesampingkan PRD.md jika ada konflik
+**Versi:** 2.0 (READ-ONLY)  
+**Tanggal:** 20 Mei 2026  
+**PRD Referensi:** PRD v3.0 (2026-05-20)  
+**Status:** HISTORICAL CHANGELOG — Semua koreksi sudah di-merge ke PRD.md v3.0. Dokumen ini hanya untuk referensi historis. Untuk versi terbaru, lihat PRD.md v3.0.
 
 ---
 
 ## Cara Pakai
 
-Jika ada konflik antara `PRD.md` dan dokumen ini, **dokumen ini yang benar**. DeepSeek dan semua AI agent harus membaca kedua dokumen sebelum menulis kode.
+Dokumen ini adalah **read-only changelog**. Semua koreksi di bawah sudah di-merge langsung ke PRD.md v3.0 pada section yang relevan. Jika ada konflik antara dokumen ini dan PRD.md v3.0, **PRD.md v3.0 yang benar**.
 
 ---
 
@@ -481,6 +481,45 @@ if ($response['verification_method'] === null) {
 }
 ```
 
+### CAT-018: Defensive Migration — pgvector Guard untuk SQLite Compatibility
+
+**Masalah:** 3 file migration memanggil fitur PostgreSQL-specific tanpa guard:
+1. `create_users_table.php:15` — `Schema::ensureVectorExtensionExists()` tanpa driver check
+2. `create_employees_table.php:52` — `$table->vector('face_embedding', 128)` tanpa fallback
+3. `create_knowledge_bases_table.php:20` — `$table->vector('embedding', 1536)` + `DB::statement('CREATE INDEX ... hnsw ...')` tanpa guard
+
+PHPUnit (phpunit.xml) menggunakan SQLite in-memory, yang tidak mendukung `vector`, `pg_trgm`, `pgcrypto`, atau HNSW index. Hasilnya: **32 test failure**.
+
+**Aksi:** Pasang `if (DB::getDriverName() === 'pgsql')` guard di semua PostgreSQL-specific code:
+- `ensureVectorExtensionExists()` → guard dengan driver check
+- `$table->vector()` → fallback ke `$table->text()` pada SQLite
+- `DB::statement('CREATE INDEX ... USING hnsw ...')` → guard dengan driver check
+- `DB::statement('CREATE EXTENSION IF NOT EXISTS ...')` → sudah di-guard di users migration
+
+✅ **SUDAH DI-MERGE ke PRD v3.0 §19**
+
+### CAT-019: Dilarang Hardcode SQL Error Code 23505
+
+**Masalah:** `AttendanceService.php:107` menangkap `QueryException` dan mengecek `$e->getCode() === '23505'`. Error code `23505` adalah PostgreSQL-specific (Unique Constraint Violation). SQLite menggunakan error code `19` atau `23000`. Akibatnya, catch block ini tidak bekerja pada test environment (SQLite) dan menyebabkan duplicate clock-in tidak tertangkap.
+
+**Aksi:** Ganti `QueryException` + hardcoded error code dengan `UniqueConstraintViolationException` dari Laravel, yang secara otomatis menangkap unique constraint violation di semua driver database:
+
+```php
+// SEBELUM (PostgreSQL-only):
+} catch (QueryException $e) {
+    if ($e->getCode() === '23505') { ... }
+}
+
+// SESUDAH (Cross-database compatible):
+} catch (UniqueConstraintViolationException $e) {
+    throw new AlreadyClockedInException(...);
+} catch (QueryException $e) {
+    throw $e;
+}
+```
+
+✅ **SUDAH DI-MERGE ke PRD v3.0 §21.1**
+
 ---
 
-*Terakhir diupdate: 19 Mei 2026 — v1.2 (CAT-012 s/d CAT-017: cache dead code, holiday cache, PTKP hardcode, VerificationMethod enum, 22 hari kerja, FaceNotRecognized swallowing)*
+*Terakhir diupdate: 20 Mei 2026 — v2.0 (CAT-018: Defensive Migration, CAT-019: Dilarang hardcode error code 23505. Semua koreksi sudah di-merge ke PRD v3.0)*

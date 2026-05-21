@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
+use App\Enums\VerificationMethod;
+use App\Enums\WfaStatus;
 use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['employee_id', 'shift_id', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'clock_in_is_mocked', 'clock_in_accuracy', 'clock_out_is_mocked', 'clock_out_accuracy', 'device_fingerprint', 'face_similarity_score', 'status', 'is_wfa', 'photo_selfie_in', 'photo_selfie_out', 'late_minutes', 'verification_method', 'wfa_note'])]
+#[Fillable(['employee_id', 'shift_id', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'clock_in_is_mocked', 'clock_in_accuracy', 'clock_out_is_mocked', 'clock_out_accuracy', 'device_fingerprint', 'face_similarity_score', 'clock_out_face_similarity_score', 'status', 'is_wfa', 'status_wfa', 'exception_type', 'exception_notes', 'approved_late_by', 'photo_selfie_in', 'photo_selfie_out', 'late_minutes', 'verification_method', 'clock_out_verification_method', 'wfa_note'])]
 class Attendance extends Model
 {
     use Approvable, HasFactory, SoftDeletes;
@@ -32,7 +34,11 @@ class Attendance extends Model
             'clock_out_is_mocked' => 'boolean',
             'clock_out_accuracy' => 'decimal:2',
             'face_similarity_score' => 'decimal:2',
+            'clock_out_face_similarity_score' => 'decimal:2',
             'is_wfa' => 'boolean',
+            'status_wfa' => WfaStatus::class,
+            'verification_method' => VerificationMethod::class,
+            'clock_out_verification_method' => VerificationMethod::class,
             'late_minutes' => 'integer',
             'status' => AttendanceStatus::class,
         ];
@@ -51,6 +57,11 @@ class Attendance extends Model
     public function overtime(): HasOne
     {
         return $this->hasOne(Overtime::class);
+    }
+
+    public function approvedLateBy(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'approved_late_by');
     }
 
     public function needsReview(): bool

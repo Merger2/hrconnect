@@ -39,7 +39,7 @@ class Leave extends Model
         $totalDays = 0.0;
 
         // Operator Ternary: Jika Full Day = 1 hari, jika Half Day = 0.5 hari
-        $dayTypeMultiplier = $this->day_type === DayType::FULL_DAY ? 1.0 : 0.5;
+        $dayTypeMultiplier = $this->day_type->weight();
 
         while ($start->lte($end)) {
             if (! $start->isWeekend() && ! Holiday::isHoliday($start)) {

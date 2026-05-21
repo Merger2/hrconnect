@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['employee_id', 'rejection_reason', 'created_by', 'amount', 'tenor_months', 'monthly_installment', 'status', 'is_settled'])]
+#[Fillable(['employee_id', 'rejection_reason', 'created_by', 'amount', 'interest_rate', 'tenor_months', 'monthly_installment', 'status', 'is_settled'])]
 class Loan extends Model
 {
     use HasFactory, SoftDeletes;
@@ -19,6 +19,7 @@ class Loan extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'interest_rate' => 'decimal:2',
             'monthly_installment' => 'decimal:2',
             'tenor_months' => 'integer',
             'is_settled' => 'boolean',

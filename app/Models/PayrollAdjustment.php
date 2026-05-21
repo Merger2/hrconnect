@@ -15,7 +15,7 @@ class PayrollAdjustment extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'integer',
+            'amount' => 'decimal:2',
             'applied_to_period' => 'date',
         ];
     }

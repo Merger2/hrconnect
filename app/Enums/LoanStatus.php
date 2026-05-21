@@ -34,12 +34,12 @@ enum LoanStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PENDING => 'yellow',
-            self::APPROVED => 'blue',
-            self::ACTIVE => 'green',
-            self::PAID_OFF => 'slate',
-            self::REJECTED => 'red',
-            self::CANCELLED => 'gray',
+            self::PENDING => 'warning',
+            self::APPROVED => 'info',
+            self::ACTIVE => 'success',
+            self::PAID_OFF => 'zinc',
+            self::REJECTED => 'danger',
+            self::CANCELLED => 'zinc',
         };
     }
 }

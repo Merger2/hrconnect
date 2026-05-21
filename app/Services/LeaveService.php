@@ -103,7 +103,7 @@ class LeaveService
      */
     public function calculateWorkDays(Carbon $start, Carbon $end, DayType $dayType): float
     {
-        $multiplier = in_array($dayType, [DayType::MORNING, DayType::AFTERNOON]) ? 0.5 : 1.0;
+        $multiplier = $dayType->weight();
 
         $workDaysCount = $this->countWorkingDays($start, $end);
 

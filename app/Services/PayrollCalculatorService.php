@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\AttendanceStatus;
 use App\Enums\EmploymentType;
 use App\Enums\FamilyRelationship;
-use App\Enums\MaritalStatus;
 use App\Enums\PayrollStatus;
 use App\Enums\ReimbursementStatus;
 use App\Enums\RequestStatus;
@@ -106,25 +105,12 @@ class PayrollCalculatorService
      */
     public function getTERCategory(Employee $employee): TerCategory
     {
-        $maritalStatus = $employee->marital_status;
-
         $dependentsCount = $employee->family_details_count
             ?? $employee->families
                 ->where('relationship', FamilyRelationship::CHILD)
                 ->count();
-        $dependents = min($dependentsCount, 3);
 
-        if ($maritalStatus === MaritalStatus::SINGLE) {
-            return match (true) {
-                $dependents <= 1 => TerCategory::A,
-                default => TerCategory::B,
-            };
-        }
-
-        return match (true) {
-            $dependents <= 1 => TerCategory::B,
-            default => TerCategory::C,
-        };
+        return TerCategory::resolveFromStatus($employee->marital_status, $dependentsCount);
     }
 
     /**

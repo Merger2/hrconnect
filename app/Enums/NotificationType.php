@@ -34,13 +34,4 @@ enum NotificationType: string
             self::REMINDER => 'bell-alert',
         };
     }
-
-    public function color(): string
-    {
-        return match ($this) {
-            self::PAYROLL, self::APPROVAL => 'green',
-            self::SYSTEM, self::REMINDER => 'blue',
-            self::ATTENDANCE, self::LEAVE => 'slate',
-        };
-    }
 }

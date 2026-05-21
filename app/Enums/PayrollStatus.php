@@ -16,4 +16,13 @@ enum PayrollStatus: string
             self::PAID => 'Dibayar',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::DRAFT => 'zinc',
+            self::PUBLISHED => 'info',
+            self::PAID => 'success',
+        };
+    }
 }

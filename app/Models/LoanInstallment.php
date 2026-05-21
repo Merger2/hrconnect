@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LoanInstallmentStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class LoanInstallment extends Model
             'due_date' => 'date',
             'installment_number' => 'integer',
             'paid_at' => 'datetime',
+            'status' => LoanInstallmentStatus::class,
         ];
     }
 

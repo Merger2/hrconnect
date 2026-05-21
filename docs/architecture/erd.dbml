@@ -229,6 +229,18 @@ Enum family_relationship {
   other
 }
 
+Enum loan_installment_status {
+  pending
+  paid
+  overdue
+}
+
+Enum wfa_status {
+  pending
+  approved
+  rejected
+}
+
 // ============================================
 // MASTER DATA
 // ============================================
@@ -265,24 +277,26 @@ Table departments {
   id bigint [pk, increment]
   branch_id bigint
   name varchar(255)
-  code varchar(255)
+  code varchar(255) [unique]
   description text
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
+  deleted_at timestamp [null]
 }
 
 Table positions {
   id bigint [pk, increment]
   department_id bigint
   name varchar(255)
-  code varchar(255)
-  grade varchar(255)
+  code varchar(255) [unique]
+  grade int
   basic_salary decimal(15, 2)
-  allowance_jabatan decimal(15, 2)
+  allowance_jabatan decimal(15, 2) [default: 0]
   is_active boolean [default: true]
   created_at timestamp
   updated_at timestamp
+  deleted_at timestamp [null]
 }
 
 Table shifts {
@@ -329,13 +343,16 @@ Table users {
   email varchar(255) [unique]
   email_verified_at timestamp [null]
   password varchar(255)
-  phone varchar(255) [null]
+  google_id varchar(255) [null]
   password_changed boolean [default: false]
+  password_changed_at timestamp [null]
   two_factor_secret text [null]
   two_factor_recovery_codes text [null]
+  two_factor_confirmed_at timestamp [null]
   remember_token text [null]
   created_at timestamp
   updated_at timestamp
+  deleted_at timestamp [null]
 }
 
 Table employees {
@@ -416,7 +433,10 @@ Table devices {
   id bigint [pk, increment]
   employee_id bigint
   device_uuid varchar(255) [unique, note: "hardware UUID"]
-  device_name varchar(255) [null, note: "enhancement - nama perangkat"]
+  device_type varchar(20) [null, note: "desktop/mobile/tablet"]
+  device_name varchar(255) [null, note: "nama perangkat"]
+  browser varchar(255) [null]
+  os varchar(255) [null]
   is_verified boolean [default: false]
   verified_at timestamp [null]
   last_used_at timestamp [null]
@@ -454,7 +474,11 @@ Table attendances {
   exception_type varchar(30) [null, note: "perlu alter table - late_exception, dll"]
   exception_notes text [null, note: "perlu alter table"]
   approved_late_by bigint [null, note: "perlu alter table - FK employees"]
+  exception_type varchar(30) [null]
+  exception_notes text [null]
+  approved_late_by bigint [null, note: "FK employees"]
   is_wfa boolean [default: false]
+  status_wfa wfa_status [null]
   wfa_note text [null, note: "WFA note minimal 20 karakter"]
   late_minutes int [default: 0]
   created_at timestamp
@@ -474,7 +498,7 @@ Table attendances {
 Table leave_types {
   id bigint [pk, increment]
   name varchar(255)
-  code varchar(255) [unique, note: "enhancement - kode unik (annual, sick, dll)"]
+  code varchar(255) [unique]
   quota int [default: 12]
   is_paid boolean [default: true]
   deducts_from_quota boolean [default: true]
@@ -488,9 +512,9 @@ Table leave_balances {
   employee_id bigint
   leave_type_id bigint
   year int
-  quota int [default: 0]
-  used int [default: 0]
-  carry_forward int [default: 0, note: "max: 3 hari"]
+  quota decimal(4, 1) [default: 0]
+  used decimal(4, 1) [default: 0]
+  carry_forward decimal(4, 1) [default: 0, note: "max: 3 hari"]
   carry_forward_deadline date [null]
   created_at timestamp
   updated_at timestamp
@@ -651,7 +675,7 @@ Table loan_installments {
   payroll_id bigint [null]
   amount_paid decimal(15, 2)
   installment_number int
-  status varchar(20) [default: 'pending']
+  status loan_installment_status [default: pending]
   due_date date
   paid_at timestamp [null]
   created_at timestamp
@@ -696,13 +720,13 @@ Table reimbursements {
 
 Table assets {
   id bigint [pk, increment]
-  company_id bigint [null, note: "perlu alter table - belum ada di migration awal"]
+  company_id bigint [null]
   name varchar(255)
   serial_number varchar(255) [unique]
-  code varchar(255) [null, note: "perlu alter table - belum ada di migration awal"]
-  category varchar(255) [null, note: "perlu alter table - belum ada di migration awal"]
-  is_available boolean [default: true, note: "akan dideprecate setelah status enum migrate"]
-  status asset_status [default: available, note: "perlu alter table - belum ada di migration awal"]
+  code varchar(255) [null]
+  category varchar(255) [null]
+  is_available boolean [default: true]
+  status asset_status [default: available]
   created_at timestamp
   updated_at timestamp
   deleted_at timestamp [null]
@@ -728,14 +752,14 @@ Table performance_reviews {
   id bigint [pk, increment]
   employee_id bigint
   reviewer_id bigint [note: "FK employees - yang menilai"]
-  status varchar(20) [default: draft, note: "draft/in_progress/completed/cancelled - perlu alter table"]
-  review_date date [null, note: "perlu alter table - belum ada di migration awal"]
-  period varchar(20) [null, note: "perlu alter table - e.g. 2026-Q1, 2026-H1"]
+  status varchar(20) [default: draft]
+  review_date date [null]
+  period varchar(20) [null, note: "e.g. 2026-Q1, 2026-H1"]
   final_score decimal(5, 2) [null]
   notes text [null]
   created_at timestamp
   updated_at timestamp
-  deleted_at timestamp [null, note: "perlu alter table - softDeletes"]
+  deleted_at timestamp [null]
 }
 
 // ============================================
@@ -744,16 +768,16 @@ Table performance_reviews {
 
 Table knowledge_bases {
   id bigint [pk, increment]
-  knowledgeable_type varchar(255) [null, note: "polymorphic - App\Models\Company, etc."]
-  knowledgeable_id bigint [null, note: "polymorphic ID"]
+  knowledgeable_type varchar(255) [note: "polymorphic - App\Models\Company, etc."]
+  knowledgeable_id bigint [note: "polymorphic ID"]
   title varchar(255)
   content text [note: "chunked text"]
-  embedding vector(1536) [null, note: "pgvector - nullable karena insert sebelum embedding di-generate"]
+  embedding vector(768) [null, note: "pgvector - nullable karena insert sebelum embedding di-generate"]
   metadata json [null, note: "chunk metadata: source, page, dll"]
-  category knowledge_base_category [null, note: "belum ada di migration - perlu alter table"]
-  status knowledge_base_status [default: processing, note: "belum ada di migration - perlu alter table"]
-  source_document varchar(255) [null, note: "belum ada di migration - perlu alter table"]
-  page_number int [null, note: "belum ada di migration - perlu alter table"]
+  category knowledge_base_category [default: general]
+  status knowledge_base_status [default: processing]
+  source_document varchar(255) [null]
+  page_number int [null]
   created_at timestamp
   updated_at timestamp
 
@@ -933,6 +957,7 @@ Ref: payrolls.id > payroll_items.payroll_id
 Ref: payrolls.id > payroll_adjustments.payroll_id
 Ref: users.id > payroll_adjustments.created_by
 Ref: employees.id > approvals.approver_id
+Ref: employees.id > attendances.approved_late_by
 Ref: employees.id > family_details.employee_id
 Ref: employees.id > devices.employee_id
 Ref: shifts.id > shift_schedules.shift_id

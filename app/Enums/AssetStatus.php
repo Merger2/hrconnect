@@ -20,9 +20,9 @@ enum AssetStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::AVAILABLE => 'green',
-            self::ASSIGNED => 'blue',
-            self::DISPOSED => 'red',
+            self::AVAILABLE => 'success',
+            self::ASSIGNED => 'info',
+            self::DISPOSED => 'danger',
         };
     }
 }

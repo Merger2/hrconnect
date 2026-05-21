@@ -1,70 +1,126 @@
 # HRConnect — Spesifikasi Eksekusi Perbaikan
 
-> **Version:** 3.4 — Deep Cache & Code Audit Update  
-> **Tanggal:** 19 Mei 2026  
-> **Errata v3.4:** 49 koreksi — 43 dari v3.3 + 6 temuan baru cache & code audit (CAT-012 s/d CAT-017)  
-> **Cara Pakai:** Ikuti urutan Fase 0→1→2→3→4. Setiap item punya:  
-> - **Masalah** — apa yang salah  
-> - **File** — path file yang diubah  
-> - **Kode Fix** — kode lengkap pengganti  
-> - **Verifikasi** — command untuk cek fix  
-> - **Depends On** — item yang harus selesai dulu
+> **Version:** 4.3 — Observer Consolidation + Face Tiered Fallback  
+> **Tanggal:** 20 Mei 2026  
+> **Errata v4.0:** 49 koreksi total — 55 ✅ SELESAI, 2 🔀 MERGED, 3 ⚠️ PARTIAL, ❌ NOT DONE  
+> **Cara Pakai:** Item bertanda ✅ SELESAI tidak perlu dikerjakan lagi. Fokus pada item ❌ NOT DONE dan ⚠️ PARTIAL. Item 🔀 MERGED dipindah ke task lain.
 
 ---
 
-## ERRATA (Koreksi dari v2.1)
+## STATUS RINGKASAN
 
-| # | Kesalahan | Koreksi | Lokasi |
-|---|-----------|---------|--------|
-| 1 | Typo `bpjsKesehetanDeduction` | Diperbaiki ke `bpjsKesehatanDeduction` | §0.4 |
-| 2 | ApprovalService guard pakai `RequestStatus` hardcoded — gagal untuk Reimbursement yang pakai `ReimbursementStatus` | Diganti ke instance-based check | §0.6 |
-| 3 | `refundLeaveQuotaIfApplicable()` di-reject padahal quota belum di-deduct | Dihapus — refund hanya diperlukan saat withdraw, bukan reject | §0.6 |
-| 4 | PayrollAdjustment `decimal:2` perlu migration database | Karena development stage, cukup alter kolom langsung atau update migration asli, tanpa migration file baru | §2.4 |
-| 5 | Unique index mungkin sudah ada | Ditambahkan langkah verifikasi sebelum buat migration | §0.3, §0.4 |
-| 6 | **§0.3 & §0.4: Migration unique constraint TIDAK PERLU** — index sudah ada di database (`attendances_employee_id_date_unique` dan `payrolls_employee_id_period_unique`) | Hapus Langkah 1 (migration), pertahankan service fix (QueryException catch + lockForUpdate). Verifikasi command diperbaiki. | §0.3, §0.4 |
-| 7 | **§2.6: Asset model fillable ditambah `company_id, code, category, status` tapi kolom ini TIDAK ADA di tabel `assets`** | Tambahkan migration alter table untuk add missing columns | §2.6 |
-| 8 | **§0.6 Langkah 4: BusinessRuleException sudah ada** tapi extends `Exception` (HTTP 400), bukan `HttpException` (HTTP 422). API Contracts spec: validation errors return 422. | Ubah instruksi dari "buat jika belum ada" ke "ganti seluruh file" | §0.6 |
-| 9 | **§4.1: `loan_installments` migration redundant** — kolom `status` dan `due_date` sudah ada di database | Hapus baris loan_installments dari §4.1 | §4.1 |
-| 10 | **§4.1: 3 migration tanpa kode detail** (devices, attendances exception, attendances wfa) | Tambahkan kode migration lengkap untuk ketiga migration | §4.1 |
-| 11 | **§3.1: Judul bilang "2x/3x" tapi PRD §26.7 bilang jam ke-10+ = 4x** | Update judul menjadi "2x/3x/4x" | §3.1 |
-| 12 | **`password_changed_at` wajib untuk keamanan** — Password expiration (90 hari), force change password (PRD §4.2), dan audit forensik membutuhkan time anchor. Kolom `password_changed` (boolean) hanya bilang "sudah diganti atau belum", BUKAN "kapan terakhir diganti" | Tambah migration + model cast | §4.1 |
-| 13 | **`overtimes.description` NOT NULL dan `overtimes.attendance_id` NOT NULL** — description harus nullable (FormRequest enforce required), attendance_id WAJIB nullable (PRD §8.1: lembur diajukan SEBELUM absen pulang) | Edit migration asli `create_overtimes_table` | §4.1d |
-| 14 | **`employees.address_detail` NOT NULL** — seharusnya nullable (alamat boleh kosong, validasi di FormRequest) | Edit migration asli `create_employees_table` | §4.1e |
-| 15 | **`$approval->level === 1` selalu false** — ApprovalLevel enum vs int strict comparison (`===`), status APPROVED_L1 tidak pernah tercapai | Ganti ke `$approval->level->value === 1` atau `$approval->level === ApprovalLevel::L1_SUPERVISOR`. Bug ini JUGA ada di §0.6 fix yang diusulkan! | §0.7 |
-| 16 | **Payroll `SoftDeletes` memblokir regenerasi** — `$existingPayroll->delete()` hanya set `deleted_at`, record tetap ada, `Payroll::create()` crash karena unique constraint violation | Ganti ke `$existingPayroll->forceDelete()` atau gunakan partial unique index | §0.8 |
-| 17 | **`laravel/sanctum` tidak terinstall** — Tidak ada package, no `HasApiTokens`, no API guard, no `personal_access_tokens` migration | Install Sanctum + konfigurasi lengkap untuk V2 API | §1.3 |
-| 18 | **`Permission` enum + `RoleAndPermissionSeeder` + `SuperAdminSeeder` tidak ada** — `$user->can()` selalu return false, policy authorization 100% mati | Buat Permission enum + 2 seeder | §1.4 |
-| 19 | **`PayrollCalculatorService::getTERCategory()` punya bug DIVORCED/WIDOWED yang sama dengan M4** — tapi di method berbeda, tidak difix di §2.8 | Tambah fix parallel di §3.3 | §3.3 |
-| 20 | **`family_details_count` menghitung SEMUA keluarga (termasuk pasangan)**, bukan hanya anak — TER category salah | Ganti ke `withCount` yang filter `FamilyRelationship::CHILD` | §3.4 |
-| 21 | **`attendances.shift_id` NOT NULL** tapi `employees.shift_id` nullable — karyawan tanpa shift gagal clock-in | Edit migration: `$table->foreignId('shift_id')->nullable()` | §4.1g |
-| 22 | **`payroll_adjustments.created_by` NOT NULL + `nullOnDelete()`** — user deletion crash (constraint violation) | Ganti ke `->nullable()` atau `restrictOnDelete()` | §4.1h |
-| 23 | **`knowledge_bases.embedding` NOT NULL** — mencegah insert sebelum embedding di-generate, `processEmbedding()` menjadi useless | Ganti ke `->nullable()` | §4.1i |
-| 24 | **`companies.address_detail` NOT NULL** — sama seperti employees, seharusnya nullable | Edit migration asli `create_companies_table` | §4.1j |
-| 25 | **`branches.address_detail` NOT NULL** — sama seperti employees | Edit migration asli `create_branches_table` | §4.1j |
-| 26 | **`employees.npwp` NOT NULL** — CipherSweet pakai `addOptionalTextField`, seharusnya nullable | Edit migration asli `create_employees_table` | §4.1k |
-| 27 | **`employees.bank_account_number` + `bank_name` NOT NULL** — seharusnya nullable (karyawan baru/probation mungkin belum punya rekening) | Edit migration asli `create_employees_table` | §4.1k |
-| 28 | **`LeaveService::carryForward()` mengabaikan `carry_forward` tahun sebelumnya** + menimpa kuota karyawan dengan default tipe cuti** | Ganti `$remaining = $quota - $used` ke `$remaining = $balance->available()` dan `$quota = $prevBalance->quota` bukan `$prevBalance->leaveType->quota` | §3.5 |
-| 29 | **`DomainException` di PayrollCalculatorService return HTTP 500** — seharusnya `BusinessRuleException` (422) | Ganti ke BusinessRuleException | §3.6 |
-| 30 | **`Approval` model: `approvable_type`/`approvable_id` di `#[Fillable]`** — mass-assignment security risk | Hapus dari fillable | §2.10 |
-| 31 | **ERR-008: `KnowledgeBase::processEmbedding()` crash** — kolom `status`, `category`, `source_document`, `page_number` tidak ada di migration | Tambah kolom ke migration + buat KnowledgeBaseStatus + KnowledgeBaseCategory enum | §0.9 |
-| 32 | **ERR-009: Observer directory kosong** — EmployeeObserver (default shift) dan AttendanceObserver (overtime link) tidak ada | Buat EmployeeObserver + AttendanceObserver + daftarkan di AppServiceProvider | §0.10 |
-| 33 | **CAT-005: Password expiry 90 hari (Security Config §1.5) vs PRD §4 "tidak ada expiry"** | Security Config menang — PRD §4 direvisi, `password_changed_at` sudah ada | §1.6 |
-| 34 | **CAT-006: EmploymentType 3 vs 4 values (PRD §18 kontradiksi)** — kolom deskripsi bilang 3, enum table bilang 4 (termasuk `intern`) | Pakai 4 values: permanent, contract, probation, intern — intern exempt BPJS/PPh21 | §2.25 |
-| 35 | **CAT-007: PRD §14.7 `overtime_multiplier` dan `overtime_weekend_multiplier` flat rate masih didefinisikan** | Hapus kedua key, ganti dengan `overtime_tiers_weekday` dan `overtime_tiers_holiday` (JSON tiers per ERR-001) | §2.26 |
-| 36 | **CAT-008: PRD §27 duplicate "Export to Excel"** — line 1124 bilang ditunda ke V2, line 1129 bilang V1 | Keputusan CTO: Export to Excel = V1. Hapus entry line 1124 | §2.27 |
-| 37 | **CAT-009: PRD §6.2 Attendance status 6 vs 8 values** — missing `missed_clock_in` dan `missed_clock_out` | Tambah 2 status ke PRD §6.2 deskripsi | §2.28 |
-| 38 | **CAT-010: PRD §16 missing `attendance:detect-chronic-late` command** — ada di §6.5 dan §27 (V1) tapi tidak di §16 | Tambah ke PRD §16 commands table | §2.29 |
-| 39 | **CAT-011: Asset model missing `SoftDeletes` trait** — migration punya `$table->softDeletes()` tapi model tidak pakai trait | Tambah `use SoftDeletes` + ganti `is_available` boolean ke `status` enum + cast | §2.6, §2.17 |
-| 40 | **SEC-5 update: FaceNotRegisteredException harus 422** — §1.5 sudah benar tapi security-config.md dan error-handling-strategy.md masih 400 | Update kedua security doc | §1.5 |
-| 41 | **SEC-5 update: NotClockedInException harus 409** — §1.5 sudah benar tapi security docs masih 400 | Update kedua security doc | §1.5 |
-| 42 | **`overtimes.description` nullable + `attendance_id` nullable** — sudah di §4.1d, tapi perlu dipastikan FormRequest juga nullable | Verifikasi FormRequest | §4.1d |
-| 43 | **`Employee::processEmbedding()` face_embedding vector cast missing** — mirip §2.11 tapi untuk Employee face_embedding (vector 128) | Tambah vector cast di Employee model | §2.11 |
-| 44 | **Cache dead code di AttendanceService** — `Cache::tags()` tak didukung database driver, `invalidateCache()` forget key yang tak pernah di-populate → CPU terbuang | Hapus method `invalidateCache()` dan semua panggilannya | §2.30 |
-| 45 | **`holiday_*` cache tanpa invalidation** — TTL 30 hari, tak ada `Cache::forget()` di model `Holiday` | Tambah `Holiday::booted()` observer untuk invalidate cache | §2.31 |
-| 46 | **PTKP magic numbers hardcoded** — 54jt/58.5jt/4.5jt di `Employee::calculatePtkp()` | Pindahkan ke `CompanySetting` (ptkp_base_single, ptkp_base_married, ptkp_per_dependent) | §2.32 |
-| 47 | **VerificationMethod enum missing** — string `'manual'`, `'face_verified'`, `'pin_verified'` tersebar 6 baris + bug: line 132 compare ke `'pin'` bukan `'pin_verified'` | Buat `VerificationMethod` enum + ganti semua string literal | §2.33 |
-| 48 | **22 hari kerja hardcoded** — `$dailyRate / 22` di `PayrollCalculatorService`, harus pakai `countWorkingDays()` dari trait `ManagesWorkDays` | Ganti 22 dengan `$company->countWorkingDays($year, $month)` | §2.34 |
-| 49 | **FaceNotRecognizedException ditelan** — catch di `AttendanceService::clockIn()` hanya log, tidak ada fallback eksplisit → security hole | Refactor ke tiered fallback: face → pin → manual dengan flag `verification_fallback` | §2.35 |
+| Kategori | Jumlah | Detail |
+|----------|--------|--------|
+| ✅ SELESAI | 55 | Migrasi, model, enum, service, docs — semua sudah diimplementasi |
+| 🔀 MERGED | 2 | §2.9 + §2.31 dikonsolidasi ke §0.10 (5 observer terpadu) |
+| ⚠️ PARTIAL | 3 | Sebagian done, sebagian belum |
+| ❌ NOT DONE | ~63 | Belum dikerjakan |
+
+### ✅ SELESAI (55 item)
+
+Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untuk ringkas.
+
+| # | Item | Bukti |
+|---|------|-------|
+| E1 | `bpjsKesehetanDeduction` typo | PayrollCalculatorService uses `$bpjsKesehatanDeduction` |
+| E4 | PayrollAdjustment decimal:2 | Migration `decimal(15,2)` + model cast `'decimal:2'` |
+| E6 | Unique constraint migration not needed | Attendance migration has unique index |
+| E9 | loan_installments redundant | Already had status + due_date columns |
+| E11 | §3.1 title 2x/3x/4x | PRD v3.0 updated |
+| E12 | password_changed_at | Migration + User model fillable/cast/hidden |
+| E13 | overtimes description nullable | Migration: `$table->text('description')->nullable()` |
+| E14 | employees address_detail nullable | Migration: `$table->text('address_detail')->nullable()` |
+| E21 | attendances shift_id nullable | Migration: `$table->foreignId('shift_id')->nullable()` |
+| E22 | payroll_adjustments created_by nullable | Migration: `$table->foreignId('created_by')->nullable()` |
+| E23 | knowledge_bases embedding nullable | Migration: `$table->vector(...)->nullable()` with pgsql guard |
+| E26 | employees npwp nullable | Migration: `$table->text('npwp')->nullable()` |
+| E27 | employees bank_account_number + bank_name nullable | Both nullable |
+| E31 | KnowledgeBase columns + enums | status, category, source_document, page_number + 3 enums |
+| E34 | EmploymentType 4 values | Enum has PERMANENT, CONTRACT, PROBATION, INTERN |
+| E35 | overtime flat rate keys → tiered | PRD v3.0 updated |
+| E36 | PRD §27 duplicate Excel | PRD v3.0 updated |
+| E37 | AttendanceStatus 8 values | Enum has MISSED_CLOCK_IN, MISSED_CLOCK_OUT |
+| E43 | Employee face_embedding vector cast | `'face_embedding' => 'vector'` in casts |
+| E44 | AttendanceService invalidateCache dead code | Method removed entirely |
+| E47 | VerificationMethod enum | Enum created, AttendanceService uses it |
+| — | §0.2 Clock-out overwrites verification_method | Separate columns + AttendanceService clockOut fix |
+| — | §0.3 Clock-in double-submit 500 | UniqueConstraintViolationException replaces QueryException+23505 |
+| — | §0.9 KnowledgeBase columns | 4 cols + 3 enums |
+| — | §2.4 PayrollAdjustment decimal | Cast + migration |
+| — | §2.11 Employee vector cast | Done |
+| — | §2.12 KnowledgeBase vector cast | Done |
+| — | §2.15 Employee npwp/bank nullable | Done |
+| — | §2.25 EmploymentType 4 values | Done |
+| — | §2.28 AttendanceStatus 8 values | Done |
+| — | §2.30 Cache dead code removed | Done |
+| — | §2.19 M14-NEW: 16 enum classification HAPUS color(), 17 enum status STANDARDIZE ke Flux UI | Done ✅ |
+| — | §2.18 LoanInstallmentStatus model cast | Done ✅ |
+| — | §2.20 WfaStatus migration column + fillable | Done ✅ |
+| — | §4.1d overtimes nullable | Done |
+| — | §4.1e employees address_detail nullable | Done |
+| — | §4.1f password_changed_at | Done |
+| — | §4.1g attendances shift_id nullable | Done |
+| — | §4.1h payroll_adjustments created_by nullable | Done |
+| — | §4.1i knowledge_bases embedding nullable | Done |
+| — | §4.1k employees npwp/bank nullable | Done |
+| — | Companies 3NF (address FK removed) | 5 FK address columns removed from migration + model |
+| — | Branches 3NF (address FK removed) | 5 FK address columns removed, `address` text kept |
+| — | Model fixes (Company Hidden, Branch fillable, Attendance fillable/casts, Asset SoftDeletes, User password_changed_at, Employee PII+vector, FamilyDetail Hidden) | All done |
+| — | Defensive Migration pattern | 3 migrations guarded with `DB::getDriverName() === 'pgsql'` |
+| — | UniqueConstraintViolationException | AttendanceService clockIn |
+| — | CAT-018 + CAT-019 | PRD-errata v2.0 + testing-strategy.md §9 |
+| — | PRD v3.0 + PRD-errata v2.0 + INDEX.md | All docs updated |
+| — | .env.example + config/database.php default pgsql | Done |
+| E24 | companies.address_detail NOT NULL | Kolom dihapus seluruhnya (3NF — address di branches) |
+| E25 | branches.address_detail NOT NULL | Diganti `address` text (FK alamat dihapus per ERD) |
+| — | §2.5 Company missing 6 address columns | Dihapus (3NF clean architecture) |
+| — | §2.14 Company/Branch address_detail nullable | Tidak relevan — kolom address_detail tidak ada, diganti text |
+| — | §4.1j companies/branches address_detail | Sama seperti §2.14 — tidak relevan |
+| E5 | Unique index verification step | Note only — unique index sudah ada di migration |
+| — | §0.7 ApprovalService enum vs int bug | `$approval->level === 1` → `=== ApprovalLevel::L1_SUPERVISOR` |
+| — | §2.3 Payroll isLocked() block PAID | `=== PUBLISHED` → `in_array(..., [PUBLISHED, PAID])` |
+| — | §2.10 Approval mass-assignment | Hapus `approvable_type`, `approvable_id` dari fillable |
+| — | §2.13 Holiday date cast | Tambah `'date' => 'date'` di casts |
+| — | N1 | overtimes start_time/end_time → nullable |
+| — | N3 | companies.logo text → string(255)->nullable() |
+| — | N4 | branches lat/lon decimal(10,8)/(11,8) → decimal(10,7) |
+| — | Audit: attendances exception columns | +exception_type, +exception_notes, +approved_late_by FK |
+| — | Audit: devices detection columns | +device_type, +device_name, +browser, +os |
+| — | Audit: assets columns | +company_id FK, +code, +category, +status AssetStatus |
+| — | Audit: asset_handovers columns | +condition, +category HandoverCategory |
+| — | Audit: performance_reviews columns | +status, +review_date, +period, final_score→nullable, +softDeletes |
+| — | Audit: loans interest_rate | +interest_rate decimal(5,2) default(0) |
+| — | Audit: leave_types quota default | quota → default(12) |
+| — | Audit: Branch model lat/lon cast | decimal:8 → decimal:7 |
+| — | Audit: Employee graduation_year cast | +graduation_year → integer |
+| — | Audit: User company() relationship | +company() BelongsTo |
+| — | Audit: Company users() relationship | +users() HasMany |
+| — | Audit: Shift shiftSchedules() relationship | +shiftSchedules() HasMany |
+| — | Audit: Attendance approvedLateBy() relationship | +approvedLateBy() BelongsTo Employee |
+| — | Audit: Asset company() relationship | +company() BelongsTo |
+| — | Audit: ERD sync | 15+ updates: users, departments, positions, leave_types, attendances, devices, assets, asset_handovers, performance_reviews, knowledge_bases, leave_balances, loan_installments, wfa_status + loan_installment_status enums, FK refs |
+
+### ⚠️ PARTIAL (3 item — sebagian done, sebagian belum)
+
+| # | Item | Yang Sudah | Yang Belum |
+|---|------|-----------|------------|
+| E20 | family_details_count | CHILD filter fallback ✅ | `withCount` accessor still counts all ❌ |
+| E42 | overtimes description nullable | Migration ✅ | FormRequest verification ❌ |
+| — | §0.1 Queue retry_after | Config fixed (180) ✅ | GenerateEmployeePayrollJob $queue ❌ |
+
+### Item yang sudah SELESAI dari sesi v4.2 (dipindah dari PARTIAL):
+
+| # | Item | Bukti |
+|---|------|-------|
+| E7/§2.6 | Asset migration + fillable + cast + relationship | company_id, code, category, status + AssetStatus cast + company() |
+| E39 | Asset SoftDeletes + status columns | Migration columns + fillable + cast semua done |
+| E10 | 3 migrations tanpa kode | KnowledgeBase ✅, exception_fields ✅, wfa_status ✅, device_detection ✅ |
+| — | §2.17 AssetStatus enum | Model cast ✅, migration column ✅ |
+| — | §2.18 LoanInstallmentStatus | Model cast ✅ |
+| — | §2.20 WfaStatus | Migration column ✅, fillable ✅ |
+| — | §2.35 FaceNotRecognized fallback | Face→PIN logic ✅ (verification_fallback defer) |
+| — | §49 tiered fallback | VerificationMethod enum ✅ (verification_fallback defer) |
+| — | §33 CAT-005 Password expiry | password_changed_at ✅ (CheckPasswordExpired middleware defer) |
 
 ---
 
@@ -87,259 +143,32 @@
 
 ---
 
-### 0.1 RC-5: Queue retry_after < timeout
+### ✅ 0.1 RC-5: Queue retry_after < timeout — PARTIAL
 
-**Masalah:** `retry_after=90s` tapi `timeout=120s`. Job payroll yang jalan >90 detik akan diproses 2x.  
-**Severity:** CRITICAL  
-**File:** `config/queue.php`  
-**Depends On:** —  
-**Estimasi:** 1 menit
+> **Status:** ⚠️ PARTIAL — Config fixed (`retry_after=180`), tapi `GenerateEmployeePayrollJob::$queue = 'payroll_high'` belum ditambahkan.
 
-**Fix:**
-
-```php
-// config/queue.php — baris 43
-// SEBELUM:
-'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
-
-// SESUDAH:
-'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 180),
-```
-
-Juga update `GenerateEmployeePayrollJob` agar queue-nya explicit:
+**Sisa yang perlu dikerjakan:**
 
 ```php
 // app/Jobs/GenerateEmployeePayrollJob.php — tambah properti
-// CATATAN: hanya berpengaruh jika queue connection mendukung named queues.
-// Untuk database driver default, job akan masuk ke queue 'default'.
-// Konfigurasi queue terpisah diperlukan jika ingin named queue 'payroll_high'.
 public string $queue = 'payroll_high';
 ```
 
-**Verifikasi:**
-```bash
-php artisan config:show queue.connections.database.retry_after
-# Harus return 180
-```
+---
+
+### ✅ 0.2 DL-3: face_similarity_score & verification_method Ditimpa Saat Clock-Out — SELESAI
+
+> **Status:** ✅ SELESAI — Kolom `clock_out_verification_method` + `clock_out_face_similarity_score` ditambahkan. AttendanceService clockOut() menulis ke kolom terpisah.
 
 ---
 
-### 0.2 DL-3: face_similarity_score & verification_method Ditimpa Saat Clock-Out
+### ✅ 0.3 RC-1: Clock-In Double-Submit → 500 Error — SELESAI
 
-**Masalah:** Clock-out menimpa `verification_method` dan `face_similarity_score` dari clock-in. Data biometrik clock-in hilang.  
-**Severity:** CRITICAL  
-**File:** `app/Services/AttendanceService.php`  
-**Depends On:** —  
-**Estimasi:** 15 menit
-
-**Fix — opsi terbaik: Buat kolom terpisah di migration dulu, lalu update service.**
-
-**Langkah 1 — Buat migration:**
-
-```bash
-php artisan make:migration add_clock_out_verification_to_attendances_table
-```
-
-```php
-// database/migrations/YYYY_MM_DD_HHMMSS_add_clock_out_verification_to_attendances_table.php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::table('attendances', function (Blueprint $table) {
-            $table->string('clock_out_verification_method', 50)->nullable()->after('verification_method');
-            $table->decimal('clock_out_face_similarity_score', 5, 2)->nullable()->after('face_similarity_score');
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::table('attendances', function (Blueprint $table) {
-            $table->dropColumn(['clock_out_verification_method', 'clock_out_face_similarity_score']);
-        });
-    }
-};
-```
-
-**Langkah 2 — Update Model:**
-
-```php
-// app/Models/Attendance.php — tambah ke #[Fillable] attribute
-// Tambahkan: 'clock_out_verification_method', 'clock_out_face_similarity_score'
-
-// Tambahkan ke casts():
-'clock_out_verification_method' => 'string',
-'clock_out_face_similarity_score' => 'decimal:2',
-```
-
-**Langkah 3 — Update AttendanceService clockOut:**
-
-```php
-// app/Services/AttendanceService.php — method clockOut()
-// GANTI baris 151-160 (update.clock_out):
-
-// SEBELUM:
-$lockedAttendance->update([
-    'clock_out' => now(),
-    'lat_out' => $data['latitude'] ?? null,
-    'long_out' => $data['longitude'] ?? null,
-    'clock_out_is_mocked' => $data['is_mocked'] ?? false,
-    'clock_out_accuracy' => $data['accuracy'] ?? null,
-    'photo_selfie_out' => $data['photo_selfie'] ?? null,
-    'verification_method' => $verificationMethod,        // ← OVERWRITE clock-in
-    'face_similarity_score' => $faceSimilarityScore,      // ← OVERWRITE clock-in
-]);
-
-// SESUDAH:
-$lockedAttendance->update([
-    'clock_out' => now(),
-    'lat_out' => $data['latitude'] ?? null,
-    'long_out' => $data['longitude'] ?? null,
-    'clock_out_is_mocked' => $data['is_mocked'] ?? false,
-    'clock_out_accuracy' => $data['accuracy'] ?? null,
-    'photo_selfie_out' => $data['photo_selfie'] ?? null,
-    'clock_out_verification_method' => $verificationMethod,
-    'clock_out_face_similarity_score' => $faceSimilarityScore,
-]);
-```
-
-**Verifikasi:**
-```bash
-php artisan migrate
-# Lalu test clock-in lalu clock-out, cek bahwa clock_in verification_method tetap utuh:
-php artisan tinker --execute '
-$att = App\Models\Attendance::latest()->first();
-echo "In method: " . $att->verification_method . "\n";
-echo "Out method: " . $att->clock_out_verification_method . "\n";
-echo "In face: " . $att->face_similarity_score . "\n";
-echo "Out face: " . $att->clock_out_face_similarity_score . "\n";
-'
-```
+> **Status:** ✅ SELESAI — `UniqueConstraintViolationException` menggantikan `QueryException` + hardcoded `23505`.
 
 ---
 
-### 0.3 RC-1: Clock-In Double-Submit → 500 Error
-
-**Masalah:** Double-tap clock-in bisa membuat 2 record attendance. Unique constraint `(employee_id, date)` **sudah ada di database** (`attendances_employee_id_date_unique`), tapi service tidak catch unique violation.  
-**Severity:** CRITICAL  
-**File:** `AttendanceService.php`  
-**Depends On:** —  
-**Estimasi:** 15 menit
-
-> **CATATAN (v3.0):** Unique index `attendances_employee_id_date_unique` sudah ada di database.
-> Migration TIDAK DIPERLUKAN. Fix hanya di service layer (catch QueryException).
-
-**Update AttendanceService clockIn untuk catch unique violation:**
-
-```php
-// app/Services/AttendanceService.php — method clockIn()
-// GANTI seluruh method clockIn:
-
-public function clockIn(Employee $employee, array $data): Attendance
-{
-    if (isset($data['is_mocked']) && $data['is_mocked'] == true) {
-        throw new AntiFakeGPSException('Peringatan: Aplikasi Fake GPS / Tuyul terdeteksi!');
-    }
-
-    if ($employee->hasClockedInToday()) {
-        throw new AlreadyClockedInException('Anda sudah melakukan absensi masuk hari ini.');
-    }
-
-    $isWfa = $data['is_wfa'] ?? false;
-
-    if ($isWfa) {
-        if (empty($data['wfa_note']) || mb_strlen(trim($data['wfa_note'])) < 20) {
-            throw new BusinessRuleException('Catatan WFA wajib diisi minimal 20 karakter.');
-        }
-    } else {
-        if (! $employee->branch) {
-            throw new BusinessRuleException('Data lokasi kerja Anda belum diatur. Hubungi HRD.');
-        }
-        $this->geofenceService->validateLocation($employee->branch, $data);
-    }
-
-    $verificationMethod = 'manual';
-    $faceSimilarityScore = null;
-
-    if (! empty($data['face_embedding'])) {
-        try {
-            $faceResult = $this->faceRecognitionService->verifyFace(
-                $employee,
-                $data['face_embedding']
-            );
-            $verificationMethod = 'face_verified';
-            $faceSimilarityScore = $faceResult['similarity_percentage'];
-        } catch (FaceNotRecognizedException $e) {
-            Log::warning('Verifikasi wajah gagal: '.$e->getMessage());
-        }
-    }
-
-    if ($verificationMethod === 'manual' && ! empty($data['pin'])) {
-        $this->verifyPin($employee, $data['pin']);
-        $this->logBypass($employee, 'pin_verified_clock_in');
-        $verificationMethod = 'pin_verified';
-    }
-
-    try {
-        return DB::transaction(function () use ($employee, $data, $isWfa, $verificationMethod, $faceSimilarityScore) {
-            if ($employee->hasClockedInToday()) {
-                throw new AlreadyClockedInException('Data absen masuk sudah tercatat.');
-            }
-
-            $now = now();
-            $lateMinutes = $employee->shift ? $employee->shift->calculateLateMinutes($now) : 0;
-
-            $status = $lateMinutes > 0
-                ? AttendanceStatus::LATE
-                : AttendanceStatus::ON_TIME;
-
-            $attendance = Attendance::create([
-                'employee_id' => $employee->id,
-                'shift_id' => $employee->shift_id,
-                'date' => $now->toDateString(),
-                'clock_in' => $now,
-                'lat_in' => $data['latitude'] ?? null,
-                'long_in' => $data['longitude'] ?? null,
-                'clock_in_is_mocked' => $data['is_mocked'] ?? false,
-                'clock_in_accuracy' => $data['accuracy'] ?? null,
-                'is_wfa' => $isWfa,
-                'wfa_note' => $data['wfa_note'] ?? null,
-                'late_minutes' => $lateMinutes,
-                'verification_method' => $verificationMethod,
-                'face_similarity_score' => $faceSimilarityScore,
-                'photo_selfie_in' => $data['photo_selfie'] ?? null,
-                'status' => $status,
-            ]);
-
-            $this->invalidateCache($employee);
-
-            return $attendance;
-        });
-    } catch (\Illuminate\Database\QueryException $e) {
-        if ($e->getCode() === '23505') {
-            throw new AlreadyClockedInException('Anda sudah melakukan absensi masuk hari ini.');
-        }
-        throw $e;
-    }
-}
-```
-
-**Verifikasi:**
-```bash
-php artisan migrate
-# Test double-submit: kirim clock-in 2x cepat, harus return friendly error bukan 500
-```
-
----
-
-### 0.4 RC-2: Payroll Double-Generation Race Condition
-
-**Masalah:** Dua request payroll generate untuk employee+period yang sama bisa masuk bersamaan.  
+### ❌ 0.4 RC-2: Payroll Double-Generation Race Condition
 **Severity:** CRITICAL  
 **File:** `PayrollCalculatorService.php`  
 **Depends On:** —  
@@ -931,7 +760,7 @@ if ($payroll) {
 
 ---
 
-### 0.9 DL-4: KnowledgeBase::processEmbedding() Crash — Missing Columns
+### ✅ 0.9 DL-4: KnowledgeBase Columns — SELESAI KnowledgeBase::processEmbedding() Crash — Missing Columns
 
 **Masalah:** `KnowledgeBase::processEmbedding()` (line 26) menjalankan `$this->update(['status' => 'processing'])`, tapi migration `create_knowledge_bases_table` **tidak punya kolom `status`**. Juga tidak punya `category`, `source_document`, `page_number`. Runtime SQL error saat `ProcessKnowledgeBaseEmbedding` job dijalankan.  
 **Severity:** HIGH  
@@ -951,11 +780,19 @@ $table->string('category', 30)->default('general')->after('title');
 $table->string('source_document')->nullable()->after('content');
 $table->integer('page_number')->nullable()->after('source_document');
 
+// CATATAN: Polymorphic columns harus nullable (global KB tanpa owner)
+// Jika menggunakan migration alter, tambahkan:
+// $table->string('knowledgeable_type', 255)->nullable()->change();
+// $table->unsignedBigInteger('knowledgeable_id')->nullable()->change();
+// Jika edit migration asli, pastikan create sudah nullable.
+
 // PASTIKAN embedding sudah nullable (bukan NOT NULL):
-// Jika masih ->vector(1536), ganti ke:
-$table->vector('embedding', 1536)->nullable()->change();
+// Migration sekarang sudah `->vector('embedding', 768)` — pastikan tetap 768 (Gemini text-embedding-004).
+// Jika ada warisan kode dimensions:1536 (OpenAI text-embedding-ada-002), GANTI menjadi 768:
+$table->vector('embedding', 768)->nullable()->change();
 // Atau jika membuat baru:
-$table->vector('embedding', 1536)->nullable();
+$table->vector('embedding', 768)->nullable();
+// [K2] Dimensi 768 mengikuti Gemini text-embedding-004 sesuai PRD §13.1.
 ```
 
 **Langkah 2 — Buat KnowledgeBaseStatus dan KnowledgeBaseCategory enum:**
@@ -1014,14 +851,22 @@ echo "Category: " . $kb->category->value; // general
 
 ---
 
-### 0.10 DL-5: Observer Directory Kosong — EmployeeObserver + AttendanceObserver
+### 0.10 DL-5: Observer Directory Kosong — 5 Observers (Domain + Cache Invalidation)
 
-**Masalah:** Direktori `app/Observers/` kosong (0 file). ERR-005 membutuhkan EmployeeObserver untuk assign default shift, PRD §8.2 membutuhkan AttendanceObserver untuk overtime link.  
-**Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 20 menit
+**Masalah:** Direktori `app/Observers/` kosong (0 file). Konsekuensi:
+1. **Domain logic broken** — ERR-005 (default shift assignment), PRD §8.2 (overtime ↔ attendance link).
+2. **Cache stale risk** — `tax_configs`, `bpjs_configs`, `holidays:*` punya TTL 1-day–1-month tapi 0 observer untuk invalidasi. Admin update tarif/libur via Eloquent normal → cached value stale sampai TTL expired.
+3. **Cache key boros** — `holiday_{YYYY-MM-DD}` per-tanggal, payroll batch 30 entries/karyawan/bulan. Refactor ke `holidays:{year}` (1 entry/tahun, in-memory check).
 
-**Langkah 1 — Buat EmployeeObserver:**
+**Severity:** HIGH (domain) + HIGH (correctness)
+**Depends On:** —
+**Estimasi:** 45 menit (5 observer + register + refactor cache key)
+
+**Konsolidasi:** §2.9 (Tax/BPJS observer) + §2.31 (Holiday observer + yearly refactor) merged ke sini untuk satu register block di AppServiceProvider.
+
+---
+
+**Langkah 1 — EmployeeObserver (Domain):**
 
 ```php
 // app/Observers/EmployeeObserver.php
@@ -1046,74 +891,191 @@ class EmployeeObserver
 }
 ```
 
-**Langkah 2 — Buat AttendanceObserver:**
+**Langkah 2 — AttendanceObserver (Domain):**
 
 ```php
 // app/Observers/AttendanceObserver.php
 
 namespace App\Observers;
 
+use App\Enums\RequestStatus;
 use App\Models\Attendance;
-use App\Enums\OvertimeStatus;
-use App\Enums\ApprovalStatus;
 
 class AttendanceObserver
 {
     public function created(Attendance $attendance): void
     {
-        // PRD §8.2: Link overtime saat clock-out
-        // Jika karyawan clock-out dan ada overtime request approved
-        // untuk tanggal yang sama, hubungkan attendance_id
+        // PRD §8.2: Link overtime saat clock-out (attendance_id matching)
         if ($attendance->clock_out !== null && $attendance->employee_id) {
             $attendance->employee->overtimes()
                 ->where('date', $attendance->date)
-                ->where('status', ApprovalStatus::APPROVED)
+                ->where('status', RequestStatus::APPROVED)
                 ->whereNull('attendance_id')
-                ->each(function ($overtime) use ($attendance) {
-                    $overtime->update(['attendance_id' => $attendance->id]);
-                });
+                ->each(fn ($ot) => $ot->update(['attendance_id' => $attendance->id]));
         }
     }
 }
 ```
 
-**Langkah 3 — Daftarkan di AppServiceProvider:**
+**Langkah 3 — HolidayObserver (Cache Invalidation + Yearly Key):**
 
 ```php
-// app/Providers/AppServiceProvider.php — di method boot():
+// app/Observers/HolidayObserver.php
 
-use App\Models\Employee;
-use App\Models\Attendance;
-use App\Observers\EmployeeObserver;
-use App\Observers\AttendanceObserver;
+namespace App\Observers;
 
-public function boot(): void
+use App\Models\Holiday;
+use Illuminate\Support\Facades\Cache;
+
+class HolidayObserver
 {
-    Employee::observe(EmployeeObserver::class);
-    Attendance::observe(AttendanceObserver::class);
+    public function saved(Holiday $holiday): void
+    {
+        Cache::forget("holidays:{$holiday->date->year}");
+    }
+
+    public function deleted(Holiday $holiday): void
+    {
+        Cache::forget("holidays:{$holiday->date->year}");
+    }
 }
 ```
 
-**Langkah 4 — Pastikan Shift "Flexible" di-seed:**
+**Langkah 4 — TaxConfigObserver (merge dari §2.9):**
 
 ```php
-// database/seeders/ShiftSeeder.php (atau di DatabaseSeeder)
-Shift::firstOrCreate([
-    'name' => 'Flexible',
-], [
+// app/Observers/TaxConfigObserver.php
+
+namespace App\Observers;
+
+use App\Models\TaxConfig;
+use Illuminate\Support\Facades\Cache;
+
+class TaxConfigObserver
+{
+    public function saved(TaxConfig $config): void
+    {
+        Cache::forget('taxes:configs');
+    }
+
+    public function deleted(TaxConfig $config): void
+    {
+        Cache::forget('taxes:configs');
+    }
+}
+```
+
+**Langkah 5 — BpjsConfigObserver (merge dari §2.9):**
+
+```php
+// app/Observers/BpjsConfigObserver.php
+
+namespace App\Observers;
+
+use App\Models\BpjsConfig;
+use Illuminate\Support\Facades\Cache;
+
+class BpjsConfigObserver
+{
+    public function saved(BpjsConfig $config): void
+    {
+        Cache::forget('bpjs:configs');
+    }
+
+    public function deleted(BpjsConfig $config): void
+    {
+        Cache::forget('bpjs:configs');
+    }
+}
+```
+
+> **CompanySettingObserver di-SKIP** — `CompanySetting::set()` sudah handle invalidation manual. Disiplin pakai facade ini, jangan `update()` direct.
+
+**Langkah 6 — Register di AppServiceProvider::boot():**
+
+```php
+// app/Providers/AppServiceProvider.php
+
+use App\Models\{Attendance, BpjsConfig, Employee, Holiday, TaxConfig};
+use App\Observers\{AttendanceObserver, BpjsConfigObserver, EmployeeObserver, HolidayObserver, TaxConfigObserver};
+
+public function boot(): void
+{
+    $this->configureDefaults();
+
+    Employee::observe(EmployeeObserver::class);
+    Attendance::observe(AttendanceObserver::class);
+    Holiday::observe(HolidayObserver::class);
+    TaxConfig::observe(TaxConfigObserver::class);
+    BpjsConfig::observe(BpjsConfigObserver::class);
+}
+```
+
+**Langkah 7 — Refactor PayrollCalculatorService cache keys:**
+
+```php
+// app/Services/PayrollCalculatorService.php
+
+// SEBELUM (boros, line 88):
+$isHoliday = Cache::remember("holiday_{$date->toDateString()}", now()->addMonth(),
+    fn () => Holiday::isHoliday($date)
+) || $date->isWeekend();
+
+// SESUDAH (yearly, in-memory check):
+$year = $date->year;
+$holidaysOfYear = Cache::remember("holidays:{$year}", now()->addMonth(),
+    fn () => Holiday::where('is_active', true)
+        ->whereYear('date', $year)
+        ->pluck('date')
+        ->map(fn ($d) => $d->toDateString())
+        ->toArray()
+);
+$isHoliday = in_array($date->toDateString(), $holidaysOfYear) || $date->isWeekend();
+
+// Rename keys (line 126, 161):
+$taxConfigs = Cache::remember('taxes:configs', now()->addDay(), fn () => TaxConfig::all());
+$bpjsConfigs = Cache::remember('bpjs:configs', now()->addDay(), fn () => BpjsConfig::all());
+```
+
+**Langkah 8 — Pastikan Shift "Flexible" di-seed:**
+
+```php
+// database/seeders/ShiftSeeder.php
+Shift::firstOrCreate(['name' => 'Flexible'], [
     'start_time' => '08:00:00',
     'end_time' => '17:00:00',
-    'tolerance_minutes' => 0,
+    'late_tolerance_minutes' => 0,
 ]);
 ```
 
 **Verifikasi:**
+
 ```bash
 php artisan migrate:fresh --seed
+
+# Test observer registration
 php artisan tinker --execute '
-$emp = App\Models\Employee::create(["name" => "Test", "email" => "test@test.com"]);
-echo "Shift ID: " . ($emp->shift_id ?? "NULL"); // Should show Flexible shift ID, not NULL
-echo "\nObservers: " . (class_exists(App\Observers\EmployeeObserver::class) ? "OK" : "MISSING");
+$observers = ["EmployeeObserver", "AttendanceObserver", "HolidayObserver", "TaxConfigObserver", "BpjsConfigObserver"];
+foreach ($observers as $o) {
+    echo class_exists("App\\\\Observers\\\\$o") ? "OK $o\n" : "MISSING $o\n";
+}
+'
+
+# Test cache invalidation
+php artisan tinker --execute '
+use Illuminate\Support\Facades\Cache;
+use App\Models\TaxConfig;
+Cache::remember("taxes:configs", now()->addDay(), fn () => TaxConfig::all());
+echo Cache::get("taxes:configs") ? "CACHED\n" : "MISS\n";
+TaxConfig::first()?->touch();
+echo Cache::get("taxes:configs") === null ? "EVICTED OK\n" : "STILL CACHED — BUG\n";
+'
+
+# Test yearly holiday cache (1 entry per year, bukan 30+)
+php artisan tinker --execute '
+use Illuminate\Support\Facades\Cache;
+Cache::remember("holidays:2026", now()->addMonth(), fn () => []);
+echo "Cache key holidays:2026 exists: " . (Cache::has("holidays:2026") ? "yes" : "no");
 '
 ```
 
@@ -1661,6 +1623,81 @@ php artisan route:list --name=password.expired
 
 ---
 
+### 1.7 SEC-7: Module Route Files — Policy Middleware Tidak Bisa Di-enforce Tanpa Route Definitions
+
+**Masalah:** §1.2 membuat Policy classes, tapi tanpa route files per module, policy middleware (`can:view`, `can:update`, dll) tidak bisa di-enforce. `routes/web.php` saat ini kosong — tidak ada route untuk attendance, leave, overtime, payroll, approval, knowledge-base, dsb. Livewire components perlu route definitions untuk policy gates.
+**Severity:** HIGH  
+**Depends On:** 1.2 (Policy creation)  
+**Estimasi:** 2 jam
+
+**Langkah 1 — Buat route files per module:**
+
+```bash
+# Module routes (Livewire + policy gates)
+touch routes/attendance.php
+touch routes/leave.php
+touch routes/overtime.php
+touch routes/payroll.php
+touch routes/approval.php
+touch routes/knowledge-base.php
+touch routes/asset.php
+touch routes/loan.php
+touch routes/reimbursement.php
+```
+
+**Langkah 2 — Contoh route file (attendance.php):**
+
+```php
+// routes/attendance.php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckPasswordExpired;
+
+Route::middleware(['auth', 'verified', CheckPasswordExpired::class])->group(function () {
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        // Livewire routes akan dialisi oleh Livewire volt:auto-route
+        // Tapi tetap perlu route definitions untuk policy gates:
+        Route::get('/', fn () => view('attendance.index'))
+            ->middleware('can:view-attendances')
+            ->name('index');
+        Route::get('/clock-in', fn () => view('attendance.clock-in'))
+            ->middleware('can:clock-in')
+            ->name('clock-in');
+    });
+});
+```
+
+**Langkah 3 — Daftarkan di bootstrap/app.php:**
+
+```php
+// bootstrap/app.php — tambah di withRouting():
+->withRouting(
+    web: __DIR__.'/../routes/web.php',
+    api: __DIR__.'/../routes/api.php',
+    commands: __DIR__.'/../routes/console.php',
+    health: '/up',
+    then: function () {
+        Route::middleware('web')->group(base_path('routes/attendance.php'));
+        Route::middleware('web')->group(base_path('routes/leave.php'));
+        Route::middleware('web')->group(base_path('routes/overtime.php'));
+        Route::middleware('web')->group(base_path('routes/payroll.php'));
+        Route::middleware('web')->group(base_path('routes/approval.php'));
+        Route::middleware('web')->group(base_path('routes/knowledge-base.php'));
+        Route::middleware('web')->group(base_path('routes/asset.php'));
+        Route::middleware('web')->group(base_path('routes/loan.php'));
+        Route::middleware('web')->group(base_path('routes/reimbursement.php'));
+    },
+)
+```
+
+**Verifikasi:**
+```bash
+php artisan route:list --name=attendance
+# Harus menampilkan route dengan middleware can:view-attendances
+```
+
+---
+
 ## FASE 2 — Missing Infrastructure
 
 > **Infrastruktur yang diperlukan sebelum fitur bisa berjalan.**
@@ -1847,7 +1884,7 @@ echo $p->isLocked() ? "OK: PAID is locked" : "FAIL: PAID is not locked";
 
 ---
 
-### 2.4 B4: PayrollAdjustment.amount Cast integer → decimal:2
+### ✅ 2.4 B4: PayrollAdjustment decimal — SELESAI PayrollAdjustment.amount Cast integer → decimal:2
 
 **Masalah:** Uang disimpan sebagai integer, precision loss.  
 **Severity:** HIGH  
@@ -1892,7 +1929,7 @@ echo $adj->amount;  // Harus tampil 500000.50, bukan 500000
 
 ---
 
-### 2.5 B5: Company Model Missing 6 Address Columns
+### 🔀 2.5 B5: Company Address Columns — SKIPPED (3NF redesign) Company Model Missing 6 Address Columns
 
 **Masalah:** `province_id`, `city_id`, `district_id`, `village_id`, `postal_code`, `address_detail` tidak di `$fillable`.  
 **Severity:** HIGH  
@@ -1943,86 +1980,15 @@ use App\Models\Village;
 
 ---
 
-### 2.6 B6: Asset Model — Tambah SoftDeletes, Fillable, Casts, dan Migration
+### ✅ 2.6 B6: Asset — SoftDeletes + Migration — SELESAI
 
 **Masalah:** Migration punya `deleted_at` tapi model tidak pakai trait. Kolom `company_id`, `code`, `category`, `status` ada di ERD tapi tidak di model.  
 **Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 15 menit
+**Status:** ✅ SELESAI — Kolom langsung ditambahkan ke migration asli (bukan alter table karena development), model fillable/cast/relationship diupdate, AssetStatus cast ditambahkan.
 
-**Langkah 1 — Buat migration untuk add missing columns ke assets table:**
-
-```bash
-php artisan make:migration add_missing_columns_to_assets_table
-```
-
-```php
-// database/migrations/YYYY_MM_DD_HHMMSS_add_missing_columns_to_assets_table.php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::table('assets', function (Blueprint $table) {
-            $table->foreignId('company_id')->nullable()->after('id')->constrained()->nullOnDelete();
-            $table->string('code')->nullable()->after('name');
-            $table->string('category')->nullable()->after('code');
-            $table->string('status', 20)->default('available')->after('serial_number');
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::table('assets', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('company_id');
-            $table->dropColumn(['code', 'category', 'status']);
-        });
-    }
-};
-```
-
-**Langkah 2 — Update Model:**
-
-```php
-// app/Models/Asset.php — ganti seluruh file:
-
-namespace App\Models;
-
-use App\Enums\AssetStatus;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-#[Fillable(['company_id', 'name', 'code', 'category', 'status', 'serial_number'])]
-class Asset extends Model
-{
-    use HasFactory, SoftDeletes;
-
-    protected function casts(): array
-    {
-        return [
-            'is_available' => 'boolean',
-            'status' => AssetStatus::class,
-        ];
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function handovers(): HasMany
-    {
-        return $this->hasMany(AssetHandover::class);
-    }
-}
-```
+**Masalah:** Migration punya `deleted_at` tapi model tidak pakai trait. Kolom `company_id`, `code`, `category`, `status` ada di ERD tapi tidak di model.  
+**Severity:** HIGH  
+**Status:** ✅ SELESAI — Kolom langsung ditambahkan ke migration asli, model fillable/cast/relationship diupdate, AssetStatus cast ditambahkan.
 
 ---
 
@@ -2049,12 +2015,22 @@ public function deduct(float $days): void
 
 ---
 
-### 2.8 M4: TerCategory resolveFromStatus Crash pada DIVORCED/WIDOWED
+### ✅ 2.8 M4: TerCategory resolveFromStatus Crash pada DIVORCED/WIDOWED — SELESAI
 
-**Masalah:** String 'divorced'/'widowed' tidak ditangani, jatuh ke match default (yang untuk married).  
-**Severity:** MEDIUM  
+**Masalah:** String 'divorced'/'widowed' tidak ditangani, jatuh ke match default (yang untuk married). Juga: `PayrollCalculatorService::getTERCategory()` menduplikasi logika yang sama.
+**Severity:** HIGH  
 **Depends On:** —  
-**Estimasi:** 5 menit
+**Estimasi:** 5 menit  
+**Status:** ✅ SELESAI
+
+**Fix 1 — TerCategory::resolveFromStatus():**
+- Signature: `string $maritalStatus` → `MaritalStatus $status` (type-safe)
+- Signature: `int $childrenCount` → `int $dependents` (lebih jelas)
+- Logic: `if ($maritalStatus === 'single')` → `if (in_array($status, [MaritalStatus::SINGLE, MaritalStatus::DIVORCED, MaritalStatus::WIDOWED]))`
+
+**Fix 2 — PayrollCalculatorService::getTERCategory():**
+- Duplikasi logika dihapus, diganti dengan delegasi ke `TerCategory::resolveFromStatus($employee->marital_status, $dependentsCount)`
+- Import `MaritalStatus` dihapus (tidak lagi digunakan langsung)
 
 ```php
 // app/Enums/TerCategory.php — ganti method resolveFromStatus():
@@ -2081,58 +2057,13 @@ public static function resolveFromStatus(string $maritalStatus, int $childrenCou
 
 ---
 
-### 2.9 M2: Tax/BPJS Cache 24 Jam Tanpa Invalidation
+### 🔀 2.9 M2: Tax/BPJS Cache Invalidation — MERGED ke §0.10
 
-**Masalah:** Admin ubah tarif → cache masih pakai tarif lama selama 24 jam.  
-**Severity:** MEDIUM  
-**Depends On:** —  
-**Estimasi:** 15 menit
+**Masalah:** Admin ubah tarif → cache pakai tarif lama selama 24 jam.
+**Severity:** MEDIUM
+**Status:** 🔀 MERGED ke §0.10 (DL-5) — TaxConfigObserver + BpjsConfigObserver dikonsolidasi dengan domain observer (Employee/Attendance) + Holiday observer untuk satu register block di AppServiceProvider.
 
-```php
-// app/Models/TaxConfig.php — tambah boot method:
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
-
-class TaxConfig extends Model
-{
-    protected static function booted(): void
-    {
-        static::saved(function () {
-            Cache::forget('tax_configs');
-        });
-
-        static::deleted(function () {
-            Cache::forget('tax_configs');
-        });
-    }
-}
-```
-
-```php
-// app/Models/BpjsConfig.php — sama:
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
-
-class BpjsConfig extends Model
-{
-    protected static function booted(): void
-    {
-        static::saved(function () {
-            Cache::forget('bpjs_configs');
-        });
-
-        static::deleted(function () {
-            Cache::forget('bpjs_configs');
-        });
-    }
-}
-```
+> Lihat §0.10 Langkah 4-5 untuk implementasi `TaxConfigObserver` + `BpjsConfigObserver`. Cache key direname: `tax_configs` → `taxes:configs`, `bpjs_configs` → `bpjs:configs` (konvensi colon).
 
 ---
 
@@ -2157,7 +2088,7 @@ class BpjsConfig extends Model
 
 ---
 
-### 2.11 H9: Employee Model — Missing `vector` Cast untuk `face_embedding`
+### ✅ 2.11 H9: Employee vector cast — SELESAI Employee Model — Missing `vector` Cast untuk `face_embedding`
 
 **Masalah:** Migration mendefinisikan `face_embedding` sebagai `vector(128)` (pgvector), tapi model tidak punya cast. Tanpa cast, read/write kolom ini menyebabkan serialization error atau string mentah.  
 **Severity:** HIGH  
@@ -2174,9 +2105,9 @@ class BpjsConfig extends Model
 
 ---
 
-### 2.12 H10: KnowledgeBase Model — Missing `vector` Cast untuk `embedding`
+### ✅ 2.12 H10: KnowledgeBase vector cast — SELESAI KnowledgeBase Model — Missing `vector` Cast untuk `embedding`
 
-**Masalah:** Sama seperti H9, migration mendefinisikan `embedding` sebagai `vector(1536)`, tapi model tidak punya cast.  
+**Masalah:** Sama seperti H9, migration mendefinisikan `embedding` sebagai `vector(768)` (Gemini text-embedding-004), tapi model tidak punya cast.  
 **Severity:** HIGH  
 **Depends On:** —  
 **Estimasi:** 5 menit
@@ -2204,7 +2135,7 @@ class BpjsConfig extends Model
 
 ---
 
-### 2.14 M2 & M3: Company dan Branch `address_detail` NOT NULL — Harus Nullable
+### 🔀 2.14 Company/Branch address_detail — SKIPPED (3NF) Company dan Branch `address_detail` NOT NULL — Harus Nullable
 
 **Masalah:** Sama seperti employees (§4.1e), `companies.address_detail` dan `branches.address_detail` NOT NULL. Ini mencegah pembuatan company/branch tanpa alamat lengkap.  
 **Severity:** MEDIUM  
@@ -2223,7 +2154,7 @@ class BpjsConfig extends Model
 
 ---
 
-### 2.15 M4: Employee `npwp`, `bank_account_number`, `bank_name` NOT NULL — Harus Nullable
+### ✅ 2.15 Employee npwp/bank nullable — SELESAI Employee `npwp`, `bank_account_number`, `bank_name` NOT NULL — Harus Nullable
 
 **Masalah:** `npwp`, `bank_account_number`, dan `bank_name` NOT NULL di migration, tapi CipherSweet menganggap field ini opsional (`addOptionalTextField`). Karyawan baru/probation sering belum punya NPWP atau rekening bank.  
 **Severity:** MEDIUM  
@@ -2298,23 +2229,21 @@ return new class extends Migration
 
 ---
 
-### 2.17 M12: AssetStatus Enum Orphaned — `is_available` Boolean Harusnya `status` + Enum
+### ✅ 2.17 M12: AssetStatus enum — SELESAI
 
 **Masalah:** `AssetStatus` enum (AVAILABLE, ASSIGNED, DISPOSED) didefinisikan tapi tidak dipakai oleh model. Model pakai `is_available` boolean. Enum tidak bisa men-track status "disposed".  
 **Severity:** MEDIUM  
-**Depends On:** 2.6 (Asset model update)  
-**Estimasi:** Sudah diperbaiki di §2.6 — migration menambah `status` column, model sudah pakai `AssetStatus` cast
+**Status:** ✅ SELESAI — Migration menambah `status` column, model sudah pakai `AssetStatus` cast, `company()` relationship ditambahkan.
 
-> **CATATAN:** Setelah §2.6 diimplementasi, `is_available` boolean menjadi redundant dengan `status` enum. Pertimbangkan untuk deprecate `is_available` dan gunakan `$asset->status === AssetStatus::AVAILABLE` sebagai pengganti.
+> **CATATAN:** `is_available` boolean menjadi redundant dengan `status` enum. Pertimbangkan untuk deprecate `is_available` dan gunakan `$asset->status === AssetStatus::AVAILABLE` sebagai pengganti.
 
 ---
 
-### 2.18 M13: LoanInstallment `status` Tanpa Enum Cast — Plain String, Tidak Type-Safe
+### ✅ 2.18 M13: LoanInstallmentStatus — SELESAI
 
 **Masalah:** Setiap model status lain (Attendance, Leave, Payroll, Reimbursement, Approval, Overtime) menggunakan backed enum cast. `LoanInstallment.status` masih plain string.  
 **Severity:** LOW  
-**Depends On:** —  
-**Estimasi:** 10 menit
+**Status:** ✅ SELESAI — Enum `LoanInstallmentStatus` sudah ada (pending/paid/overdue), model cast `'status' => LoanInstallmentStatus::class` ditambahkan.
 
 ```php
 // Buat enum baru:
@@ -2335,6 +2264,70 @@ enum LoanInstallmentStatus: string
 
 ---
 
+### 2.19 M14-NEW: 16 Enum Classification — HAPUS color() (Visual Noise), 17 Enum Status — STANDARDIZE ke Flux UI Semantic Names
+
+**Masalah:** AGENTS.md menyatakan "Each enum has `label()` + `color()` methods", tapi memberi warna ke semua enum menciptakan Visual Noise di dashboard — seperti pasar malam. Enum dibagi 2 kategori:
+
+1. **Status/Indicator (WAJIB color())** — menunjukkan state/urgensi, user perlu RAG scan cepat
+2. **Classification/Data (HARAM color())** — murni klasifikasi administratif, warna menambah noise tanpa value
+
+**Prinsip:** Ketika user melihat **merah** di dashboard, harus artinya "bahaya/gagal" — bukan "golongan darah O" atau "tipe BPJS tertentu".
+
+**Severity:** MEDIUM  
+**Depends On:** —  
+**Estimasi:** 30 menit  
+**Status:** ✅ SELESAI
+
+**Enum dengan color() (16 — Status/Indicator):**
+
+| Enum | Warna (Flux UI Semantic) |
+|------|--------------------------|
+| ApprovalStatus | pending=warning, approved=success, rejected=danger |
+| EmployeeStatus | active=success, inactive=zinc, resigned=warning, terminated=danger, deceased=zinc |
+| PayrollStatus | draft=zinc, published=info, paid=success |
+| PayrollItemType | allowance=success, deduction=danger |
+| TerCategory | A=info, B=warning, C=danger |
+| EmploymentType | permanent=success, contract=info, probation=warning, intern=zinc |
+| TerminationType | resign=warning, dismissed=danger, deceased=zinc, contract_end=info |
+| MaritalStatus | single=zinc, married=success, divorced=warning, widowed=info |
+| AttendanceStatus | on_time/holiday/permission=success, late/early=warning, absent/missed_clock_in/missed_clock_out=danger |
+| RequestStatus | pending=warning, approved_l1=info, approved=success, rejected/cancelled=danger |
+| ReimbursementStatus | pending=warning, approved=info, paid=success, rejected=danger |
+| LoanStatus | pending=warning, approved=info, active=success, paid_off=zinc, rejected=danger, cancelled=zinc |
+| LoanInstallmentStatus | pending=warning, paid=success, overdue=danger |
+| WfaStatus | pending=warning, approved=success, rejected=danger |
+| AssetStatus | available=success, assigned=info, disposed=danger |
+| KnowledgeBaseStatus | processing=warning, ready=success, error=danger |
+
+**Enum TANPA color() (17 — Classification/Data — HAPUS):**
+
+ApprovalLevel, BloodType, BpjsType, CompanySettingType, DayType (← refactored: color() dihapus, getQuotaDeduction() → weight()), DeviceType, EducationLevel, FamilyRelationship, Gender, HandoverCategory, KnowledgeBaseCategory, LeaveQuotaReset, NotificationType, ResignationReason, SalaryType, ShiftScheduleType, VerificationMethod
+
+> **Catatan Flux UI Semantic Names:** `success` (hijau), `warning` (kuning/amber), `danger` (merah), `info` (biru), `zinc` (abu-abu/netral). Palet 5 warna — tanpa `violet`. `DayType` awalnya dikategorikan sebagai WAJIB, tetapi setelah review arsitektur UI, dipindahkan ke HAPUS karena merupakan klasifikasi (kuantitas), bukan status indicator (kualitas). Method `color()` dihapus, method `getQuotaDeduction()` di-rename ke `weight()` yang lebih idiomatik.
+
+**Verifikasi:**
+```bash
+grep -rl "public function color()" app/Enums/ | wc -l
+# Harus: 17
+
+# Pastikan tidak ada warna mentah (green, red, amber, blue, primary, slate, neutral):
+grep -rh "=>" app/Enums/ | grep -E "'(green|red|amber|blue|primary|slate|neutral)'"
+# Harus: 0 results
+```
+
+> Flux UI semantic color names: zinc, slate, red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose.
+
+**Verifikasi:**
+```bash
+php artisan tinker --execute '
+$enum = App\Enums\AttendanceStatus::LATE;
+echo $enum->label() . " = " . $enum->color();
+// Harus: Terlambat = amber
+'
+```
+
+---
+
 ### 2.19 M14: `bpjs_configs.name` Missing Unique Constraint
 
 **Masalah:** Tanpa unique constraint, duplikat konfigurasi BPJS bisa dibuat, menyebabkan kalkulasi payroll salah (double-counting).  
@@ -2350,12 +2343,11 @@ enum LoanInstallmentStatus: string
 
 ---
 
-### 2.20 M15: Missing `WfaStatus` Enum untuk `status_wfa` Column
+### ✅ 2.20 M15: WfaStatus — SELESAI
 
 **Masalah:** §4.1 Migration 6 menambah `status_wfa varchar(20) nullable` tapi tidak ada enum. Nilai status akan disimpan sebagai untyped string.  
 **Severity:** MEDIUM  
-**Depends On:** 4.1 (Migration 6)  
-**Estimasi:** 5 menit
+**Status:** ✅ SELESAI — Enum `WfaStatus` sudah ada (pending/approved/rejected), migration column ditambahkan, fillable + cast di Attendance model sudah ada. ERD diupdate.
 
 ```php
 // app/Enums/WfaStatus.php
@@ -2528,7 +2520,7 @@ public function linkToPayroll(Reimbursement $reimbursement, int $payrollId): voi
 
 ---
 
-### 2.25 M7: EmploymentType — PRD Kontradiksi 3 vs 4 Values
+### ✅ 2.25 EmploymentType 4 values — SELESAI EmploymentType — PRD Kontradiksi 3 vs 4 Values
 
 **Masalah:** PRD §18 line 666 list 3 values (`permanent`, `contract`, `probation`), tapi PRD §18 line 713 dan ERD punya 4 values (+ `intern`). Kode aktual `app/Enums/EmploymentType.php` sudah punya 4 values. `intern` punya business logic berbeda: BPJS dan PPh21 **TIDAK dipotong** untuk intern.  
 **Severity:** MEDIUM  
@@ -2622,7 +2614,7 @@ echo "\nHas overtime_tiers_holiday: " . ($settings && $settings->overtime_tiers_
 
 ---
 
-### 2.28 M10: Attendance Status — 6 vs 8 Values
+### ✅ 2.28 AttendanceStatus 8 values — SELESAI Attendance Status — 6 vs 8 Values
 
 **Masalah:** PRD §6.2 hanya list 6 status: `on_time`, `late`, `early`, `holiday`, `permission`, `absent`. ERD dan kode aktual punya 8 values: tambah `missed_clock_in` dan `missed_clock_out`.  
 **Severity:** MEDIUM  
@@ -2735,7 +2727,7 @@ php artisan schedule:list | grep chronic-late
 
 ---
 
-### 2.30 M17: AttendanceService::invalidateCache() — Dead Code (Database Driver Tidak Dukung Tags)
+### ✅ 2.30 M17: Cache dead code — SELESAI AttendanceService::invalidateCache() — Dead Code (Database Driver Tidak Dukung Tags)
 
 **Masalah:** `AttendanceService::invalidateCache()` (lines 184-190) dipanggil setiap clock-in/out. `Cache::supportsTags()` SELALU `false` dengan database driver → `Cache::tags()->flush()` dead code. `Cache::forget(...)` dijalankan tapi cache key tidak pernah di-populate. **CPU terbuang sia-sia** — 2 operasi cache yang tidak berguna per absensi.  
 **Severity:** HIGH  
@@ -2769,43 +2761,16 @@ grep -n 'invalidateCache' app/Services/AttendanceService.php
 
 ---
 
-### 2.31 M18: `holiday_*` Cache Tanpa Invalidation — Stale 30 Hari
+### 🔀 2.31 M18: Holiday Cache Invalidation + Yearly Refactor — MERGED ke §0.10
 
-**Masalah:** `PayrollCalculatorService::calculateOvertimePay()` line 89 cache `holiday_{date}` dengan TTL 30 hari. Tapi model `Holiday` tidak punya observer untuk `Cache::forget()`. Admin tambah/hapus libur nasional → overtime calculation pakai data libur basi sampai 30 hari.  
-> **CATATAN:** `tax_configs` dan `bpjs_configs` sudah difix di §2.9. Tapi `holiday_*` belum.  
-**Severity:** MEDIUM  
-**Depends On:** —  
-**Estimasi:** 5 menit
+**Masalah:**
+1. `PayrollCalculatorService::calculateOvertimePay()` line 88 pakai cache key `holiday_{YYYY-MM-DD}` (per-tanggal). Payroll batch loop 30 hari → 30+ cache entries per karyawan per bulan. Boros memori.
+2. Model `Holiday` tidak punya observer untuk `Cache::forget()`. Admin tambah/hapus libur → calculation pakai data basi sampai TTL 30 hari expired.
 
-**Fix:**
+**Severity:** HIGH (waste + correctness)
+**Status:** 🔀 MERGED ke §0.10 (DL-5) — `HolidayObserver` dengan refactor cache key dari `holiday_{date}` → `holidays:{year}` (1 entry per tahun, in-memory check).
 
-```php
-// app/Models/Holiday.php — tambah di class:
-public static function booted(): void
-{
-    static::saved(function (Holiday $holiday) {
-        Cache::forget("holiday_{$holiday->date->toDateString()}");
-    });
-
-    static::deleted(function (Holiday $holiday) {
-        Cache::forget("holiday_{$holiday->date->toDateString()}");
-    });
-}
-```
-
-**Verifikasi:**
-```bash
-php artisan tinker --execute '
-use App\Models\Holiday;
-use Illuminate\Support\Facades\Cache;
-
-$holiday = Holiday::create(["date" => now()->addDays(5), "name" => "Test"]);
-echo Cache::get("holiday_" . $holiday->date->toDateString()) ? "CACHED" : "NOT CACHED";
-$holiday->update(["name" => "Updated"]);
-echo "\nAfter update: " . (Cache::get("holiday_" . $holiday->date->toDateString()) ? "STILL CACHED" : "EVICTED - OK");
-$holiday->delete();
-'
-```
+> Lihat §0.10 Langkah 3 (`HolidayObserver`) + Langkah 7 (refactor `PayrollCalculatorService` cache key).
 
 ---
 
@@ -2860,7 +2825,7 @@ echo "PTKP: " . number_format($emp->calculatePtkp(), 0, ",", ".");
 
 ---
 
-### 2.33 M20: VerificationMethod Enum Missing — Magic String + Bug `'pin'` vs `'pin_verified'`
+### ✅ 2.33 M20: VerificationMethod enum — SELESAI VerificationMethod Enum Missing — Magic String + Bug `'pin'` vs `'pin_verified'`
 
 **Masalah:** `AttendanceService` pakai string literal `'manual'`, `'face_verified'`, `'pin_verified'` di 6 baris tanpa enum. **BUG KRITIS di line 132:** compare ke `'pin'` tapi nilai valid adalah `'pin_verified'`. Kondisi ini **selalu false** → clock-out PIN verification logic broken.  
 **Severity:** HIGH  
@@ -2949,71 +2914,202 @@ echo "Working days May 2026: " . $company->countWorkingDays(2026, 5);
 
 ---
 
-### 2.35 M22: FaceNotRecognizedException Swallowed — Security Hole
+### ⚠️ 2.35 M22: Face Verification Tiered Fallback (PARTIAL)
 
-**Masalah:** `AttendanceService::clockIn()` (lines 62-64): `FaceNotRecognizedException` ditangkap, di-log, lalu **ditelan**. Kode lanjut seolah tidak terjadi apa-apa. Jika user SUDAH punya face embedding tapi recognition gagal (similarity 72%), clock-in tetap sukses dengan method `'manual'` — indistinguishable dari user yang tidak punya embedding. **Security hole.**  
-**Severity:** HIGH  
-**Depends On:** 2.33 (VerificationMethod enum)  
-**Estimasi:** 20 menit
+**Masalah (3 lapisan):**
 
-> **CAT-017:** Refactor ke tiered fallback yang eksplisit: face → pin → manual. Setiap fallback harus meninggalkan jejak audit (`verification_fallback` flag).
+1. **B12-Tier0 (BARU)** — `AttendanceService::clockIn()` line 55: `if ($employee->face_embedding && ! empty($data['face_embedding']))` SILENTLY skip face verification untuk karyawan tanpa embedding. Tidak ada audit log `face_not_enrolled`, tidak distinguishable dari karyawan yang seharusnya pakai face. error-handling-strategy.md §1 Skenario 4 mewajibkan catch `FaceNotRegisteredException` + log `bypass_reason: face_not_enrolled`.
+2. **B12-clockOut (BARU)** — `AttendanceService::clockOut()` line 141 panggil `verifyFace()` **tanpa guard**. Karyawan tanpa embedding → `FaceNotRecognizedService` throw `FaceNotRegisteredException` → tidak di-catch → 422 ke user. UNCAUGHT EXCEPTION.
+3. **CAT-017 (existing)** — `FaceNotRecognizedException` (similarity rendah) di-`Log::warning()` lalu ditelan. Clock-in lanjut sebagai `'manual'`. Indistinguishable dari karyawan tanpa embedding. **Security hole**.
+
+**Severity:** HIGH (security + correctness)
+**Depends On:** 2.33 (VerificationMethod enum), 4.1 (kolom `verification_fallback`)
+**Estimasi:** 30 menit (3 tier eksplisit untuk clock-in & clock-out)
+
+---
+
+**Tabel Tiered Fallback (sumber: PRD §7 + error-handling-strategy.md §1):**
+
+| Tier | Kondisi | Method Output | `verification_fallback` Flag | Audit / Throws |
+|------|---------|---------------|------------------------------|-----------------|
+| **0** | `face_embedding === NULL` (face belum enrolled) + PIN valid | `PIN_VERIFIED` | `face_not_enrolled` | `logBypass(face_not_enrolled)`. Skenario 4 PRD: izinkan PIN sementara, tampilkan info "Hubungi HRD untuk registrasi wajah". |
+| **0.fail** | `face_embedding === NULL` + PIN missing/invalid | — | — | Throw `FaceNotRegisteredException` (HTTP 422) — wajib enrol atau berikan PIN. |
+| **1** | `face_embedding` ada + similarity ≥ 85% (`distance ≤ 0.15`) | `FACE_VERIFIED` | `null` | Normal happy-path. `face_similarity_score` disimpan. |
+| **1.retry** | `face_embedding` ada + similarity < 85%, attempt < 3 | (still trying) | `null` | Tampilkan warning client-side, retry max 2x (total 3 attempt). |
+| **1.fail** | `face_embedding` ada + 3x gagal recognition + PIN valid | `PIN_VERIFIED` | `face_failed` | `logBypass(face_failed)` + `face_similarity_score` last attempt disimpan untuk audit. |
+| **2** | Semua tier 0/1 gagal + PIN missing/invalid | — | — | Throw `InvalidPinException` (HTTP 422) → user dialihkan ke "Manual Request" (supervisor approval). |
+
+**Catatan kunci:**
+- `verification_fallback` adalah **kolom baru** di `attendances` (atau ditulis ke `activity_log` minimal). Tanpa kolom ini, audit forensik tidak bisa distinguish "face success" vs "face_not_enrolled bypass".
+- Setiap fallback **WAJIB** meninggalkan jejak via `logBypass($employee, $reason)`.
+- `verification_method` final saat insert `attendances` row TIDAK BOLEH `null`. Validate di akhir.
+- Clock-out juga ikut tabel ini — pakai kolom `clock_out_verification_method` + `clock_out_face_similarity_score` + (kolom baru) `clock_out_verification_fallback`.
+
+---
 
 **Fix — Refactor AttendanceService::clockIn():**
 
 ```php
-// app/Services/AttendanceService.php — refactor clockIn() verification flow:
+// app/Services/AttendanceService.php
 
-public function clockIn(Employee $employee, array $request): array
+use App\Exceptions\FaceNotRecognizedException;
+use App\Exceptions\FaceNotRegisteredException;
+use App\Exceptions\InvalidPinException;
+
+public function clockIn(Employee $employee, array $data): Attendance
 {
-    $response = [
-        'verification_method' => null,
-        'face_similarity_score' => null,
-        'verification_fallback' => null,
-    ];
+    // ... existing anti-tuyul + WFA + geofence checks ...
 
-    // Tier 1: Face Recognition (jika embedding tersedia DAN request punya face data)
-    if ($employee->face_embedding && !empty($request['face_embedding'])) {
+    $verificationMethod = null;
+    $faceSimilarityScore = null;
+    $verificationFallback = null;
+
+    // ─── Tier 0: Face NOT REGISTERED ─────────────────────────────
+    if (! $employee->face_embedding) {
+        if (empty($data['pin'])) {
+            throw new FaceNotRegisteredException(
+                'Wajah belum terdaftar. PIN wajib untuk fallback. Hubungi HRD untuk registrasi.'
+            );
+        }
+        $this->verifyPin($employee, $data['pin']);
+        $this->logBypass($employee, 'face_not_enrolled');
+        $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+        $verificationFallback = 'face_not_enrolled';
+    }
+    // ─── Tier 1: Face REGISTERED — attempt recognition ───────────
+    elseif (! empty($data['face_embedding'])) {
         try {
             $faceResult = $this->faceRecognitionService->verifyFace(
                 $employee,
-                $request['face_embedding']
+                $data['face_embedding']
             );
-            $response['verification_method'] = VerificationMethod::FACE_VERIFIED->value;
-            $response['face_similarity_score'] = $faceResult['similarity_percentage'];
+            $verificationMethod = VerificationMethod::FACE_VERIFIED->value;
+            $faceSimilarityScore = $faceResult['similarity_percentage'];
         } catch (FaceNotRecognizedException $e) {
+            // Tier 1.fail → fallback ke PIN
             Log::warning('Face verification failed, falling back to PIN.', [
                 'employee_id' => $employee->id,
-                'error' => $e->getMessage(),
+                'similarity' => $e->getMessage(),
             ]);
-            $response['verification_fallback'] = 'face_failed';
+            if (empty($data['pin'])) {
+                throw new InvalidPinException(
+                    'Wajah tidak dikenali dan PIN tidak diberikan. Hubungi HRD.'
+                );
+            }
+            $this->verifyPin($employee, $data['pin']);
+            $this->logBypass($employee, 'face_failed');
+            $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+            $verificationFallback = 'face_failed';
         }
     }
-
-    // Tier 2: PIN Verification (jika face gagal atau tidak ada embedding)
-    if ($response['verification_method'] === null) {
-        $this->validatePin($employee, $request['pin'] ?? '');
-        $response['verification_method'] = VerificationMethod::PIN_VERIFIED->value;
+    // ─── Tier 1.alt: Face registered tapi tidak ada face_embedding di request ───
+    else {
+        if (empty($data['pin'])) {
+            throw new InvalidPinException('Face data atau PIN wajib disertakan.');
+        }
+        $this->verifyPin($employee, $data['pin']);
+        $this->logBypass($employee, 'face_skipped');
+        $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+        $verificationFallback = 'face_skipped';
     }
 
-    // ... lanjutkan clock-in logic dengan $response ...
+    // Guard final: verification_method TIDAK BOLEH null
+    if ($verificationMethod === null) {
+        throw new BusinessRuleException('Verifikasi gagal — method tidak ter-set.');
+    }
+
+    // ... lanjutkan create Attendance dengan $verificationMethod, $faceSimilarityScore, $verificationFallback ...
 }
 ```
 
-> **CATATAN:** `verification_fallback` harus disimpan di kolom baru `attendances.verification_fallback` atau di log. Minimal pastikan `verification_method` tidak `null` saat clock-in berhasil.
+**Fix — Refactor AttendanceService::clockOut() (sama 3 tier):**
+
+```php
+public function clockOut(Employee $employee, array $data, ?string $requestedMethod = null): Attendance
+{
+    // ... existing anti-tuyul + WFA + geofence ...
+
+    $verificationMethod = null;
+    $faceSimilarityScore = null;
+    $verificationFallback = null;
+
+    // Tier 0: face_embedding NULL → PIN required
+    if (! $employee->face_embedding) {
+        if (empty($data['pin'])) {
+            throw new FaceNotRegisteredException(
+                'Wajah belum terdaftar. PIN wajib untuk clock-out.'
+            );
+        }
+        $this->verifyPin($employee, $data['pin']);
+        $this->logBypass($employee, 'face_not_enrolled_clock_out');
+        $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+        $verificationFallback = 'face_not_enrolled';
+    }
+    // Tier 1: Face attempt
+    elseif (! empty($data['face_embedding'])) {
+        try {
+            $faceResult = $this->faceRecognitionService->verifyFace(
+                $employee,
+                $data['face_embedding']
+            );
+            $verificationMethod = VerificationMethod::FACE_VERIFIED->value;
+            $faceSimilarityScore = $faceResult['similarity_percentage'];
+        } catch (FaceNotRecognizedException $e) {
+            if (empty($data['pin'])) {
+                throw new InvalidPinException('Wajah tidak dikenali, PIN wajib.');
+            }
+            $this->verifyPin($employee, $data['pin']);
+            $this->logBypass($employee, 'face_failed_clock_out');
+            $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+            $verificationFallback = 'face_failed';
+        }
+    } else {
+        // face_embedding ada di model tapi tidak dikirim di request
+        if (empty($data['pin'])) {
+            throw new InvalidPinException('Face data atau PIN wajib untuk clock-out.');
+        }
+        $this->verifyPin($employee, $data['pin']);
+        $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
+        $verificationFallback = 'face_skipped';
+    }
+
+    // Update attendance dengan SEPARATE columns (ERR-004)
+    $lockedAttendance->update([
+        'clock_out' => now(),
+        'clock_out_verification_method' => $verificationMethod,
+        'clock_out_face_similarity_score' => $faceSimilarityScore,
+        'clock_out_verification_fallback' => $verificationFallback, // kolom baru, perlu migration §4.1
+        // ... field lain ...
+    ]);
+}
+```
+
+> **Migration dependency:** §4.1 perlu tambah kolom `verification_fallback varchar(30) nullable` dan `clock_out_verification_fallback varchar(30) nullable` di tabel `attendances`.
+
+---
 
 **Verifikasi:**
+
 ```bash
+# Skenario 1: Karyawan tanpa face embedding + PIN valid
 php artisan tinker --execute '
-$emp = App\Models\Employee::first();
-try {
-    $service = app(App\Services\AttendanceService::class);
-    $result = $service->clockIn($emp, ["face_embedding" => [], "pin" => "123456"]);
-    echo "Method: " . $result["verification_method"];
-    echo "\nFallback: " . ($result["verification_fallback"] ?? "none");
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
-}
+$emp = App\Models\Employee::whereNull("face_embedding")->first();
+$service = app(App\Services\AttendanceService::class);
+$attendance = $service->clockIn($emp, [
+    "face_embedding" => null,
+    "pin" => "123456",
+    "is_wfa" => false,
+    "latitude" => -6.2,
+    "longitude" => 106.8,
+]);
+echo "Method: " . $attendance->verification_method->value . "\n";
+echo "Fallback: " . ($attendance->verification_fallback ?? "none") . "\n";
+// Expected: PIN_VERIFIED + face_not_enrolled
 '
+
+# Skenario 2: Karyawan tanpa face + PIN missing → throw FaceNotRegisteredException
+# Skenario 3: Karyawan dengan face + similarity rendah + PIN valid → PIN_VERIFIED + face_failed
+# Skenario 4: Clock-out tanpa face embedding (existing bug 422 uncaught) → handled gracefully
 ```
 
 ---
@@ -3123,42 +3219,13 @@ public function calculateHaversine(float $lat1, float $lng1, float $lat2, float 
 
 ---
 
-### 3.3 H1: PayrollCalculatorService `getTERCategory()` — Bug DIVORCED/WIDOWED (Parallel ke M4)
+### ✅ 3.3 H1: PayrollCalculatorService `getTERCategory()` — Bug DIVORCED/WIDOWED — SELESAI
 
-**Masalah:** §2.8 memperbaiki `TerCategory::resolveFromStatus()`, tapi `PayrollCalculatorService::getTERCategory()` (baris 107-128) punya logic sendiri yang juga salah: hanya `$maritalStatus === MaritalStatus::SINGLE` yang di-handle, DIVORCED dan WIDOWED jatuh ke branch MARRIED → TER category salah → PPh21 salah.  
+**Masalah:** §2.8 memperbaiki `TerCategory::resolveFromStatus()`, tapi `PayrollCalculatorService::getTERCategory()` punya logic sendiri yang juga salah.  
 **Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 5 menit
+**Status:** ✅ SELESAI
 
-```php
-// app/Services/PayrollCalculatorService.php — ganti method getTERCategory():
-
-public function getTERCategory(Employee $employee): TerCategory
-{
-    $maritalStatus = $employee->marital_status;
-
-    $dependentsCount = $employee->families
-        ->where('relationship', FamilyRelationship::CHILD)
-        ->count();
-    $dependents = min($dependentsCount, 3);
-
-    // DIVORCED dan WIDOWED diperlakukan sama seperti SINGLE (TK/)
-    if (in_array($maritalStatus->value ?? $maritalStatus, ['single', 'divorced', 'widowed'])) {
-        return match (true) {
-            $dependents <= 1 => TerCategory::A,
-            default => TerCategory::B,
-        };
-    }
-
-    // MARRIED (K/)
-    return match (true) {
-        $dependents <= 1 => TerCategory::B,
-        default => TerCategory::C,
-    };
-}
-```
-
-> **CATATAN:** Juga perbaiki N+1 query dengan eager-load: ganti `$employee->families` ke eager-load relasi di pemanggil method. Atau gunakan `withCount` yang filter CHILD saja (lihat §3.4).
+**Fix:** Duplikasi logika dihapus. `getTERCategory()` sekarang mendelegasi ke `TerCategory::resolveFromStatus()`. Import `MaritalStatus` dihapus dari PayrollCalculatorService (tidak lagi digunakan langsung).
 
 ---
 
@@ -3547,7 +3614,7 @@ return new class extends Migration
 
 ---
 
-### 4.1d Edit Migration Asli: overtimes (description nullable, attendance_id nullable)
+✅ 4.1d Edit Migration Asli: overtimes (description nullable, attendance_id nullable)
 
 > **Mengapa?** PRD §8.1: lembur diajukan SEBELUM absen pulang → `attendance_id` harus nullable.
 > `description` juga harus nullable — validasi required di level FormRequest, bukan database.
@@ -3567,7 +3634,7 @@ $table->text('description')->nullable();
 
 ---
 
-### 4.1e Edit Migration Asli: employees (address_detail nullable)
+✅ 4.1e Edit Migration Asli: employees (address_detail nullable)
 
 > **Mengapa?** Alamat seharusnya boleh kosong. Validasi required di level FormRequest, bukan database.
 
@@ -3581,7 +3648,7 @@ $table->text('address_detail')->nullable();
 
 ---
 
-### 4.1f Ringkasan: Semua Edit Migration Asli
+✅ 4.1f Ringkasan: Semua Edit Migration Asli
 
 Setelah semua edit selesai, jalankan:
 
@@ -3593,6 +3660,8 @@ php artisan migrate:fresh
 |---|---------------|-----------|
 | 1 | `2026_05_08_161915_create_payroll_adjustments_table.php` | `$table->integer('amount')` → `$table->decimal('amount', 15, 2)` |
 | 2 | `2026_04_19_044028_create_overtimes_table.php` | `$table->foreignId('attendance_id')` → `$table->foreignId('attendance_id')->nullable()->constrained('attendances')->nullOnDelete()` |
+| 3 | `2026_04_19_044028_create_overtimes_table.php` | `$table->time('start_time')` → `$table->time('start_time')->nullable()` |
+| 3b | `2026_04_19_044028_create_overtimes_table.php` | `$table->time('end_time')` → `$table->time('end_time')->nullable()` |
 | 3 | `2026_04_19_044028_create_overtimes_table.php` | `$table->text('description')` → `$table->text('description')->nullable()` |
 | 4 | `2026_04_16_192201_create_employees_table.php` | `$table->text('address_detail')` → `$table->text('address_detail')->nullable()` |
 | 5 | `2026_04_12_203653_create_companies_table.php` | `$table->text('address_detail')` → `$table->text('address_detail')->nullable()` |
@@ -3602,12 +3671,14 @@ php artisan migrate:fresh
 | 9 | `2026_04_16_192201_create_employees_table.php` | `$table->string('bank_name', 100)` → `$table->string('bank_name', 100)->nullable()` |
 | 10 | `2026_04_17_175332_create_attendances_table.php` | `$table->foreignId('shift_id')` → `$table->foreignId('shift_id')->nullable()->constrained('shifts')->nullOnDelete()` |
 | 11 | `2026_05_08_161915_create_payroll_adjustments_table.php` | `$table->foreignId('created_by')` → `$table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete()` |
-| 12 | `2026_04_28_133152_create_knowledge_bases_table.php` | `$table->vector('embedding', dimensions: 1536)` → `$table->vector('embedding', dimensions: 1536)->nullable()` |
+| 12 | `2026_04_28_133152_create_knowledge_bases_table.php` | `$table->vector('embedding', dimensions: 768)` → `$table->vector('embedding', dimensions: 768)->nullable()` `[K2 — fix dimension: PRD §13.1 specifies 768 (Gemini text-embedding-004)]` |
 | 13 | `2026_05_08_161905_create_bpjs_configs_table.php` | `$table->string('name')` → `$table->string('name')->unique()` |
+| 14 | `2026_04_12_203653_create_companies_table.php` | `$table->text('logo')` → `$table->string('logo', 255)->nullable()` |
+| 15 | `2026_04_13_152045_create_branches_table.php` | `$table->decimal('latitude', 10, 8)` → `$table->decimal('latitude', 10, 7)`; `$table->decimal('longitude', 11, 8)` → `$table->decimal('longitude', 11, 7)` |
 
 ---
 
-### 4.1g Edit Migration Asli: attendances (shift_id nullable)
+✅ 4.1g Edit Migration Asli: attendances (shift_id nullable)
 
 > **Mengapa?** `employees.shift_id` nullable, tapi `attendances.shift_id` NOT NULL. Karyawan tanpa shift assignment gagal clock-in dengan NOT NULL violation.
 
@@ -3623,7 +3694,7 @@ Jangan lupa update model cast/relationship jika diperlukan.
 
 ---
 
-### 4.1h Edit Migration Asli: payroll_adjustments (created_by nullable)
+✅ 4.1h Edit Migration Asli: payroll_adjustments (created_by nullable)
 
 > **Mengapa?** `created_by` NOT NULL tapi foreign key pakai `nullOnDelete()`. Saat User dihapus, database menolak set NOT NULL column ke NULL = constraint violation crash.
 
@@ -3637,21 +3708,22 @@ $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete(
 
 ---
 
-### 4.1i Edit Migration Asli: knowledge_bases (embedding nullable)
+✅ 4.1i Edit Migration Asli: knowledge_bases (embedding nullable)
 
 > **Mengapa?** Model punya `processEmbedding()` yang set `status = 'processing'` — artinya record dibuat SEBELUM embedding di-generate. Kolom NOT NULL mencegah insert tanpa embedding.
 
 ```php
 // database/migrations/2026_04_28_133152_create_knowledge_bases_table.php
 // GANTI baris:
-$table->vector('embedding', dimensions: 1536);
+$table->vector('embedding', dimensions: 768);
 // MENJADI:
-$table->vector('embedding', dimensions: 1536)->nullable();
+$table->vector('embedding', dimensions: 768)->nullable();
+// [K2] PRD §13.1: Gemini text-embedding-004 = 768 dim (bukan 1536 dari OpenAI).
 ```
 
 ---
 
-### 4.1j Edit Migration Asli: companies & branches (address_detail nullable)
+✅ 4.1j Edit Migration Asli: companies & branches (address_detail nullable)
 
 > **Mengapa?** Sama seperti employees (§4.1e). Perusahaan dan cabang harus bisa dibuat tanpa alamat lengkap.
 
@@ -3667,7 +3739,7 @@ $table->vector('embedding', dimensions: 1536)->nullable();
 
 ---
 
-### 4.1k Edit Migration Asli: employees (npwp, bank_account_number, bank_name nullable)
+✅ 4.1k Edit Migration Asli: employees (npwp, bank_account_number, bank_name nullable)
 
 > **Mengapa?** CipherSweet menggunakan `addOptionalTextField` untuk `npwp` dan `bank_account_number`. Karyawan baru/probation sering belum punya NPWP atau rekening bank.
 
@@ -3740,14 +3812,17 @@ HARI 1:
   ☐ 2.3 — B3: isLocked() block PAID (5 menit)
   ☐ 2.4 — B4: PayrollAdjustment amount decimal:2 (5 menit)
   ☐ 2.5 — B5: Company fillable (10 menit)
-  ☐ 2.8 — M4: TerCategory DIVORCED/WIDOWED (5 menit)
+  ☐ 2.8 — M4: TerCategory DIVORCED/WIDOWED ✅ SELESAI
   ☐ 2.9 — M2: Tax/BPJS cache invalidation (15 menit)
   ☐ 2.10 — SEC-6: Approval fillable mass-assignment (5 menit)
   ☐ 2.13 — M1: Holiday date cast (2 menit)
   ☐ 2.14 — M2/M3: Company & Branch address_detail nullable (5 menit)
   ☐ 2.15 — M4: Employee npwp/bank nullable (5 menit)
   ☐ 2.19 — M14: bpjs_configs.name unique (2 menit)
+  ☐ N3 — companies.logo text→varchar(255) (2 menit) ← edit migration asli
+  ☐ N4 — branches lat/lon precision (2 menit) ← edit migration asli
   ☐ 4.1d — Fix overtimes NOT NULL → nullable (5 menit) ← edit migration asli
+  ☐ N1 — Fix overtimes start_time/end_time NOT NULL → nullable (2 menit) ← edit migration asli
   ☐ 4.1e — Fix employees.address_detail NOT NULL → nullable (5 menit) ← edit migration asli
   ☐ 4.1f — Add password_changed_at to users (5 menit) ← migration baru + model cast
   ☐ 4.1g — Fix attendances.shift_id nullable (2 menit) ← edit migration asli
@@ -3770,6 +3845,8 @@ HARI 2:
   ☐ 0.6 — DL-2: Leave quota deduct timing (45 menit) ← includes B2, B8, refund() method
   ☐ 1.5 — SEC-5: Exception HTTP codes (10 menit)
   ☐ 1.6 — SEC-6: Password expiry 90 hari middleware (20 menit)
+  ☐ 1.7 — SEC-7: Module route files + policy middleware (2 jam)
+  ☐ N2 — M14-NEW: 16 enum missing color() method (30 menit)
 
 HARI 3:
   ☐ 1.1 — SEC-1: PII hidden fields (15 menit)
@@ -3777,13 +3854,13 @@ HARI 3:
   ☐ 1.3 — SEC-3: Sanctum install + config (30 menit)
   ☐ 1.4 — SEC-4: Permission enum + seeders (1 jam)
   ☐ 2.1 — B1: KnowledgeBase status/category migration + vector cast (15 menit)
-  ☐ 2.6 — B6: Asset SoftDeletes + missing columns migration (15 menit)
-  ☐ 2.11 — H9: Employee vector cast (5 menit)
-  ☐ 2.12 — H10: KnowledgeBase vector cast (5 menit)
+  ☐ 2.6 — B6: Asset SoftDeletes + missing columns migration (15 menit) ← SELESAI v4.2
+  ☐ 2.11 — H9: Employee vector cast (5 menit) ← SELESAI v4.0
+  ☐ 2.12 — H10: KnowledgeBase vector cast (5 menit) ← SELESAI v4.0
   ☐ 2.16 — M5: FK indexes migration (5 menit)
-  ☐ 2.17 — M12: AssetStatus enum integration (included in B6)
-  ☐ 2.18 — M13: LoanInstallmentStatus enum (10 menit)
-  ☐ 2.20 — M15: WfaStatus enum (5 menit)
+  ☐ 2.17 — M12: AssetStatus enum integration (included in B6) ← SELESAI v4.2
+  ☐ 2.18 — M13: LoanInstallmentStatus enum (10 menit) ← SELESAI v4.2
+  ☐ 2.20 — M15: WfaStatus enum (5 menit) ← SELESAI v4.2
   ☐ 2.25 — M7: EmploymentType 4 values verify (5 menit)
   ☐ 2.26 — M8: PRD §14.7 overtime config update (10 menit)
   ☐ 2.27 — M9: PRD §27 duplicate entry — doc fix (2 menit)
@@ -3805,7 +3882,6 @@ HARI 4-5:
   ☐ 2.35 — M22: FaceNotRecognized fix — tiered fallback (20 menit)
   ☐ 3.1 — P1/P2: Overtime rate calculation (30 menit)
   ☐ 3.2 — G1: GeofenceService null coordinates (15 menit)
-  ☐ 3.3 — H1: getTERCategory() DIVORCED/WIDOWED (5 menit)
   ☐ 3.4 — H2: family_details_count counts all (5 menit)
   ☐ 3.5 — H6/H7: carryForward bugs (10 menit)
   ☐ 3.6 — H8: DomainException → BusinessRuleException (2 menit)
@@ -3832,7 +3908,7 @@ HARI 9+:
 |-------|---------|-------------|--------|
 | Unique `(employee_id, date)` | ERD: unique index | **SUDAH ADA** di DB (`attendances_employee_id_date_unique`) | Fix 0.3 — service-level catch |
 | `verification_method` in/out terpisah | PRD §7.3 | Di-overwrite | Fix 0.2 |
-| WFA `status_wfa` column | PRD §26.9 | TIDAK ADA | Gap G1 + §2.20 |
+| WFA `status_wfa` column | PRD §26.9 | ✅ ADA | SELESAI v4.2 |
 | WFA reject → absent flow | PRD §26.9 | TIDAK ADA | Gap G1 |
 | Anti-fake GPS | PRD §17.1 | Ada, tapi client-side trust | SEC-5 |
 | `late_tolerance_minutes` | ERD | Ada | OK |
@@ -3863,7 +3939,7 @@ HARI 9+:
 | Holiday overtime rate | PRD §26.7 | Salah (2x/3x, harusnya 2x/3x/4x) | Fix 3.1 |
 | Weekday overtime rate | PRD §8.3 | Flat 1.5x (harusnya jam pertama 1.5x, sisanya 2x) | Fix 3.1 |
 | `family_details_count` counts ALL families | Should count CHILD only | Over-counting dependents → wrong TER category | Fix 3.4 |
-| `getTERCategory()` DIVORCED/WIDOWED bug | Second instance in PayrollCalculatorService | Same bug as M4, different method | Fix 3.3 |
+| `getTERCategory()` DIVORCED/WIDOWED bug | Second instance in PayrollCalculatorService | ✅ Fixed — delegated to TerCategory::resolveFromStatus() |
 | DomainException 500 error | Should be 422 | `throw new DomainException(...)` returns 500 | Fix 3.6 |
 | No guard for employee without position | Should throw error | Silent 0 salary | Fix 3.10 |
 | Loan deduction | PRD §12.3 | Hardcoded 0 | Gap P4 |
@@ -3875,6 +3951,8 @@ HARI 9+:
 |-------|---------|-----------|--------|
 | `description` NOT NULL | ERD: `text` (implisit nullable) | `text NOT NULL` | Fix 4.1d — edit migration asli |
 | `attendance_id` NOT NULL | ERD: nullable, PRD §8.1: submit sebelum absen | `bigint NOT NULL` | Fix 4.1d — edit migration asli |
+| `start_time` NOT NULL | ERD: `time [null]` | `time NOT NULL` | **Fix N1** — edit migration asli |
+| `end_time` NOT NULL | ERD: `time [null]` (lembur diajukan sebelum selesai) | `time NOT NULL` | **Fix N1** — edit migration asli |
 
 ### Approval
 
@@ -3936,7 +4014,8 @@ HARI 9+:
 | `status` column | ERD: `knowledge_base_status` | TIDAK ADA | Fix 2.1 |
 | `category` column | ERD: `knowledge_base_category` | TIDAK ADA | Fix 2.1 |
 | `source_document`, `page_number` | ERD | TIDAK ADA | Fix 2.1 |
-| `embedding` NOT NULL | Should be nullable (created before embedding) | DB: `vector(1536) NOT NULL` | Fix 4.1i + Fix 0.9 |
+| `knowledgeable_type`/`knowledgeable_id` NOT NULL | ERD: `[null]` nullable | NOT NULL (global KB tanpa owner gagal insert) | **Fix N5** — tambah note di §2.1 |
+| `embedding` NOT NULL | Should be nullable (created before embedding) | DB: `vector(768) NOT NULL` `[K2]` | Fix 4.1i + Fix 0.9 |
 | `embedding` model cast | Should be `vector` | **TIDAK ADA** — serialization risk | Fix 2.12 |
 | `status`, `category`, `source_document`, `page_number` columns | ERD | TIDAK ADA di migration | Fix 0.9 |
 | `ProcessKnowledgeBaseEmbedding` job | PRD §16 | TIDAK ADA | Gap INF-3 |
@@ -3947,14 +4026,16 @@ HARI 9+:
 | Aspek | PRD/ERD | Kode Aktual | Status |
 |-------|---------|-------------|--------|
 | `address_detail` NOT NULL | Should be nullable | DB: `text NOT NULL` | Fix 4.1j |
-| Missing address fillable fields | 6 kolom address tidak di fillable | Bypass mass-assignment | Fix 2.5 |
+| Missing address fillable fields | 6 kolom address tidak di fillable | Bypass mass-assignment | Fix 2.5 (SKIPPED — 3NF redesign) |
+| `logo` type | ERD: `varchar(255)` | Migration: `text` | **Fix N3** — edit migration asli |
+| `latitude`/`longitude` precision | ERD: `decimal(10,7)` | Migration: `decimal(10,8)` | **Fix N4** — edit migration asli |
 
 ### Asset
 
 | Aspek | PRD/ERD | Kode Aktual | Status |
 |-------|---------|-------------|--------|
-| Missing columns (company_id, code, category, status) | ERD | TIDAK ADA di DB | Fix 2.6 |
-| AssetStatus enum unused | Model pakai boolean `is_available` | Enum orphaned | Fix 2.17 |
+| Missing columns (company_id, code, category, status) | ERD | ✅ ADA di DB | SELESAI v4.2 |
+| AssetStatus enum unused | Model pakai boolean `is_available` | ✅ Enum dipakai | SELESAI v4.2 |
 | Missing SoftDeletes | ERD | Model tidak pakai trait | Fix 2.6 |
 
 ### PayrollAdjustment
@@ -3971,12 +4052,13 @@ HARI 9+:
 |-------|---------|-------------|--------|
 | `name` unique constraint | Should prevent duplicate configs | No unique constraint | Fix 2.19 |
 
-### Token/Auth/API
+### Token/Auth/API/Routes
 
 | Aspek | PRD/ERD | Kode Aktual | Status |
 |-------|---------|-------------|--------|
 | Sanctum package | API Contracts §1 | TIDAK ADA — not even installed | Fix 1.3 |
 | `routes/api.php` | API Contracts | TIDAK ADA | Fix 1.3 |
+| `routes/web.php` + module routes | PRD + Livewire | TIDAK ADA — hanya settings.php dan console.php | **Fix 1.7** |
 | `AuthServiceProvider` | Policy registration | TIDAK ADA | Fix 1.4 |
 | Permission enum + seeders | Policy authorization | TIDAK ADA — `$user->can()` always false | Fix 1.4 |
 | API Controllers | API Contracts | Orphan AttendanceController, no routes | Gap |
@@ -4030,5 +4112,5 @@ HARI 9+:
 
 ---
 
-*Terakhir diupdate: 19 Mei 2026 — v3.4 (49 errata: cache dead code, holiday cache, PTKP hardcode, VerificationMethod enum, 22 hari kerja, FaceNotRecognized swallowed)*  
-*Versi: 3.4 — Deep Cache & Code Audit Release*
+*Terakhir diupdate: 20 Mei 2026 — v4.3 (Observer Consolidation: §0.10 5 observers, §2.9+§2.31 merged, §2.35 tiered fallback rewrite)*  
+*Versi: 4.3 — Observer Consolidation + Face Tiered Fallback Release*

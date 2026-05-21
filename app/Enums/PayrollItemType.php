@@ -15,6 +15,14 @@ enum PayrollItemType: string
         };
     }
 
+    public function color(): string
+    {
+        return match ($this) {
+            self::ALLOWANCE => 'success',
+            self::DEDUCTION => 'danger',
+        };
+    }
+
     public function getMultiplier(): int
     {
         return match ($this) {

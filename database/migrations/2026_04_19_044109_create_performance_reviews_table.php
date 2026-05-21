@@ -15,9 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->foreignId('reviewer_id')->constrained('employees')->restrictOnDelete();
-            $table->decimal('final_score', 5, 2);
+            $table->string('status', 20)->default('draft');
+            $table->date('review_date')->nullable();
+            $table->string('period', 20)->nullable();
+            $table->decimal('final_score', 5, 2)->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

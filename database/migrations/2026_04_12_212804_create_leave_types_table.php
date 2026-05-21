@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('code')->unique();
-            $table->integer('quota');
+            $table->integer('quota')->default(12);
             $table->boolean('is_paid')->default(true);
             $table->boolean('deducts_from_quota')->default(true);
             $table->boolean('is_active')->default(true);

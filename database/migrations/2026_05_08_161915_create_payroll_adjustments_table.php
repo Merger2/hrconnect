@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('payroll_adjustments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payroll_id')->constrained('payrolls')->restrictOnDelete();
-            $table->integer('amount');
+            $table->decimal('amount', 15, 2);
             $table->text('reason');
-            $table->foreignId('created_by')->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->date('applied_to_period');
             $table->timestamps();
         });

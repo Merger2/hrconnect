@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
             $table->string('device_uuid')->unique();
+            $table->string('device_type', 20)->nullable();
+            $table->string('device_name')->nullable();
+            $table->string('browser')->nullable();
+            $table->string('os')->nullable();
             $table->boolean('is_verified')->default(false);
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('last_used_at')->nullable();

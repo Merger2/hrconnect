@@ -2,28 +2,18 @@
 
 namespace App\Enums;
 
-enum ReimbursementStatus: string
+enum WfaStatus: string
 {
     case PENDING = 'pending';
     case APPROVED = 'approved';
     case REJECTED = 'rejected';
-    case PAID = 'paid';
 
     public function label(): string
     {
         return match ($this) {
-            self::PENDING => 'Sedang Diproses',
+            self::PENDING => 'Menunggu Persetujuan',
             self::APPROVED => 'Disetujui',
             self::REJECTED => 'Ditolak',
-            self::PAID => 'Sudah Dibayarkan',
-        };
-    }
-
-    public function isSettled(): bool
-    {
-        return match ($this) {
-            self::PAID, self::REJECTED => true,
-            default => false,
         };
     }
 
@@ -31,8 +21,7 @@ enum ReimbursementStatus: string
     {
         return match ($this) {
             self::PENDING => 'warning',
-            self::APPROVED => 'info',
-            self::PAID => 'success',
+            self::APPROVED => 'success',
             self::REJECTED => 'danger',
         };
     }

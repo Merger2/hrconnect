@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->date('handover_date');
             $table->date('return_date')->nullable();
+            $table->string('condition');
+            $table->string('category', 30);
             $table->timestamps();
         });
     }

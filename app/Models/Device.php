@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['employee_id', 'device_uuid', 'is_verified', 'last_used_at', 'verified_at'])]
+#[Fillable(['employee_id', 'device_uuid', 'device_type', 'device_name', 'browser', 'os', 'is_verified', 'last_used_at', 'verified_at'])]
 class Device extends Model
 {
     use HasFactory;

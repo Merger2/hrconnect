@@ -18,4 +18,14 @@ enum TerminationType: string
             self::CONTRACT_END => 'Akhir Kontrak',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::RESIGN => 'warning',
+            self::DISMISSED => 'danger',
+            self::DECEASED => 'zinc',
+            self::CONTRACT_END => 'info',
+        };
+    }
 }

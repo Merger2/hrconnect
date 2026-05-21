@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +13,7 @@ use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
 #[Fillable(['name', 'phone', 'email', 'website', 'npwp', 'code', 'logo', 'is_active'])]
+#[Hidden(['npwp'])]
 
 class Company extends Model implements CipherSweetEncrypted
 {
@@ -29,6 +31,11 @@ class Company extends Model implements CipherSweetEncrypted
         $encryptedRow
             ->addOptionalTextField('npwp')
             ->addBlindIndex('npwp', new BlindIndex('npwp_hash'));
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 
     public function branches(): HasMany

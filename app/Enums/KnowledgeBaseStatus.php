@@ -11,7 +11,7 @@ enum KnowledgeBaseStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PROCESSING => 'Sedang Diproses AI',
+            self::PROCESSING => 'Sedang Diproses',
             self::READY => 'Siap Digunakan',
             self::ERROR => 'Gagal Diproses',
         };
@@ -20,9 +20,9 @@ enum KnowledgeBaseStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PROCESSING => 'yellow',
-            self::READY => 'green',
-            self::ERROR => 'red',
+            self::PROCESSING => 'warning',
+            self::READY => 'success',
+            self::ERROR => 'danger',
         };
     }
 }

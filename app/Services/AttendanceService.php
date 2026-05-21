@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AttendanceStatus;
+use App\Enums\VerificationMethod;
 use App\Exceptions\AlreadyClockedInException;
 use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
@@ -11,7 +12,8 @@ use App\Exceptions\InvalidPinException;
 use App\Exceptions\NotClockedInException;
 use App\Models\Attendance;
 use App\Models\Employee;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\QueryException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -38,75 +40,78 @@ class AttendanceService
 
         if ($isWfa) {
             if (empty($data['wfa_note']) || mb_strlen(trim($data['wfa_note'])) < 20) {
-                throw new BusinessRuleException('Catatan WFA wajib diisi minimal 20 karakter.');
+                throw new BusinessRuleException('Catatan WFA wajib diisi minimal 20 karakter');
             }
         } else {
-            // WFO: cek dulu apakah karyawan punya branch
             if (! $employee->branch) {
                 throw new BusinessRuleException('Data lokasi kerja Anda belum diatur. Hubungi HRD.');
             }
             $this->geofenceService->validateLocation($employee->branch, $data);
         }
 
-        $verificationMethod = 'manual';
+        $verificationMethod = VerificationMethod::MANUAL->value;
         $faceSimilarityScore = null;
 
-        if (! empty($data['face_embedding'])) {
+        if ($employee->face_embedding && ! empty($data['face_embedding'])) {
             try {
                 $faceResult = $this->faceRecognitionService->verifyFace(
                     $employee,
                     $data['face_embedding']
                 );
-                $verificationMethod = 'face_verified';
+                $verificationMethod = VerificationMethod::FACE_VERIFIED->value;
                 $faceSimilarityScore = $faceResult['similarity_percentage'];
             } catch (FaceNotRecognizedException $e) {
                 Log::warning('Verifikasi wajah gagal: '.$e->getMessage());
             }
         }
 
-        if ($verificationMethod === 'manual' && ! empty($data['pin'])) {
+        if ($verificationMethod === VerificationMethod::MANUAL->value && ! empty($data['pin'])) {
             $this->verifyPin($employee, $data['pin']);
             $this->logBypass($employee, 'pin_verified_clock_in');
-            $verificationMethod = 'pin_verified';
+            $verificationMethod = VerificationMethod::PIN_VERIFIED->value;
         }
 
-        return DB::transaction(function () use ($employee, $data, $isWfa, $verificationMethod, $faceSimilarityScore) {
-            if ($employee->hasClockedInToday()) {
-                throw new AlreadyClockedInException('Data absen masuk sudah tercatat.');
-            }
+        try {
+            return DB::transaction(function () use ($employee, $data, $isWfa, $verificationMethod, $faceSimilarityScore) {
+                if ($employee->hasClockedInToday()) {
+                    throw new AlreadyClockedInException('Data absen masuk sudah tercatat.');
+                }
 
-            $now = now();
-            $lateMinutes = $employee->shift ? $employee->shift->calculateLateMinutes($now) : 0;
+                $now = now();
+                $lateMinutes = $employee->shift ? $employee->shift->calculateLateMinutes($now) : 0;
 
-            $status = $lateMinutes > 0
-                ? AttendanceStatus::LATE
-                : AttendanceStatus::ON_TIME;
+                $status = $lateMinutes > 0
+                    ? AttendanceStatus::LATE
+                    : AttendanceStatus::ON_TIME;
 
-            $attendance = Attendance::create([
-                'employee_id' => $employee->id,
-                'shift_id' => $employee->shift_id,
-                'date' => $now->toDateString(),
-                'clock_in' => $now,
-                'lat_in' => $data['latitude'] ?? null,
-                'long_in' => $data['longitude'] ?? null,
-                'clock_in_is_mocked' => $data['is_mocked'] ?? false,
-                'clock_in_accuracy' => $data['accuracy'] ?? null,
-                'is_wfa' => $isWfa,
-                'wfa_note' => $data['wfa_note'] ?? null,
-                'late_minutes' => $lateMinutes,
-                'verification_method' => $verificationMethod,
-                'face_similarity_score' => $faceSimilarityScore,
-                'photo_selfie_in' => $data['photo_selfie'] ?? null,
-                'status' => $status,
-            ]);
+                $attendance = Attendance::create([
+                    'employee_id' => $employee->id,
+                    'shift_id' => $employee->shift_id,
+                    'date' => $now->toDateString(),
+                    'clock_in' => $now,
+                    'lat_in' => $data['latitude'] ?? null,
+                    'long_in' => $data['longitude'] ?? null,
+                    'clock_in_is_mocked' => $data['is_mocked'] ?? false,
+                    'clock_in_accuracy' => $data['accuracy'] ?? null,
+                    'is_wfa' => $isWfa,
+                    'wfa_note' => $data['wfa_note'] ?? null,
+                    'late_minutes' => $lateMinutes,
+                    'verification_method' => $verificationMethod,
+                    'face_similarity_score' => $faceSimilarityScore,
+                    'photo_selfie_in' => $data['photo_selfie'] ?? null,
+                    'status' => $status,
+                ]);
 
-            $this->invalidateCache($employee);
-
-            return $attendance;
-        });
+                return $attendance;
+            });
+        } catch (UniqueConstraintViolationException $e) {
+            throw new AlreadyClockedInException('Anda sudah melakukan absensi hari ini');
+        } catch (QueryException $e) {
+            throw $e;
+        }
     }
 
-    public function clockOut(Employee $employee, array $data, string $verificationMethod = 'face'): Attendance
+    public function clockOut(Employee $employee, array $data, string $verificationMethod = 'face_verified'): Attendance
     {
         // Tier 0: Anti-Tuyul GPS
         if (isset($data['is_mocked']) && $data['is_mocked'] == true) {
@@ -129,7 +134,7 @@ class AttendanceService
 
         $faceSimilarityScore = null;
 
-        if ($verificationMethod === 'pin') {
+        if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
             $this->verifyPin($employee, $data['pin'] ?? '');
             $this->logBypass($employee, 'pin_verified_clock_out');
         } else {
@@ -138,7 +143,7 @@ class AttendanceService
                 $data['face_embedding'] ?? []
             );
             $faceSimilarityScore = $faceResult['similarity_percentage'];
-            $verificationMethod = 'face_verified';
+            $verificationMethod = VerificationMethod::FACE_VERIFIED->value;
         }
 
         return DB::transaction(function () use ($employee, $data, $verificationMethod, $faceSimilarityScore) {
@@ -154,12 +159,10 @@ class AttendanceService
                 'long_out' => $data['longitude'] ?? null,
                 'clock_out_is_mocked' => $data['is_mocked'] ?? false,
                 'clock_out_accuracy' => $data['accuracy'] ?? null,
+                'clock_out_verification_method' => $verificationMethod,
+                'clock_out_face_similarity_score' => $faceSimilarityScore,
                 'photo_selfie_out' => $data['photo_selfie'] ?? null,
-                'verification_method' => $verificationMethod,
-                'face_similarity_score' => $faceSimilarityScore,
             ]);
-
-            $this->invalidateCache($employee);
 
             return $lockedAttendance->fresh();
         });
@@ -179,13 +182,5 @@ class AttendanceService
             ->performedOn($employee)
             ->withProperties(['ip' => request()->ip(), 'method' => $method])
             ->log('Melakukan bypass absensi menggunakan '.$method);
-    }
-
-    private function invalidateCache(Employee $employee): void
-    {
-        if (Cache::supportsTags()) {
-            Cache::tags(['attendance', "employee:{$employee->id}"])->flush();
-        }
-        Cache::forget("attendance:employee:{$employee->id}:date:".today()->toDateString());
     }
 }

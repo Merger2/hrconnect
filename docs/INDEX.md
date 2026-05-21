@@ -26,8 +26,8 @@ docs/
 ### Core
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
-| **PRD** | `PRD.md` | Product Requirements Document — spesifikasi lengkap fitur |
-| **PRD Errata** | `PRD-errata.md` | CTO amendments — 9 ERR + 17 CAT items (v1.2), overrides PRD on conflict |
+| **PRD** | `PRD.md` | Product Requirements Document v3.1 — 35 koreksi konsolidasi (K1-K5 + M1-M8 + S1-S18 + N1-N12 + Glossary) di atas v3.0 |
+| **PRD Errata** | `PRD-errata.md` | READ-ONLY changelog — 9 ERR + 19 CAT items (v2.0), semua sudah di-merge ke PRD v3.0 |
 | **Task Spec** | `planning/task.md` | Executable specification v3.4 — 49 errata, 9-day execution schedule |
 | **README** | `../README.md` | Project overview, installation guide, tech stack |
 
@@ -72,7 +72,7 @@ docs/
 ### 🧪 Testing (1 file)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
-| Testing Strategy | `testing/testing-strategy.md` | Feature tests, unit tests, browser tests |
+| Testing Strategy | `testing/testing-strategy.md` | Feature tests, unit tests, browser tests, §9 Database Testing Strategy |
 
 ### 🚀 Deployment (1 file)
 | Dokumen | Path | Deskripsi |
@@ -91,8 +91,8 @@ docs/
 | Urutan | Dokumen | Alasan |
 |--------|---------|--------|
 | 1 | `README.md` | Overview project & cara install |
-| 2 | `PRD.md` | Pahami apa yang dibangun |
-| 3 | `PRD-errata.md` | Pahami CTO decisions yang override PRD |
+| 2 | `PRD.md` | Pahami apa yang dibangun (v3.0 — semua koreksi sudah inline) |
+| 3 | `PRD-errata.md` | (Optional) Referensi historis — semua koreksi sudah di-merge ke PRD v3.0 |
 | 4 | `planning/task.md` | Pahami executable specification & errata |
 | 5 | `architecture/erd.dbml` | Pahami struktur database (source of truth) |
 | 6 | `architecture/folder-structure.md` | Pahami struktur project |
@@ -119,7 +119,22 @@ docs/
 | Reference | 1 |
 | **TOTAL** | **23** |
 
-> **ERRATA NOTE (2026-05-19):** Semua dokumen sudah diupdate dengan errata dari task.md v3.4 dan PRD-errata.md v1.2. Beberapa fix kritis:
+> **PRD v3.1 NOTE (2026-05-21):** 35 koreksi konsolidasi di atas v3.0:
+> - **5 Kontradiksi Kritis (K1-K5):** LLM Gemini Pro→Flash, embedding dim 768, face distance threshold semantic, ERD source-of-truth, 33 enum lengkap
+> - **8 Gap Modul (M1-M8):** Permission Matrix expand, WFA flow, Reimbursement state machine, 4 method PayrollCalculator baru (Pesangon/LeaveCashOut/UangKompensasi/Penghargaan), Salary type variants (monthly/daily/hourly), Special employment types (probation/intern/contract), PHK 3 variant, Unpaid leave impact
+> - **18 Spec Area Baru (S1-S18):** §29 Validation Rules, §30 Locale & Format, §31 Data Retention & PDP Compliance (UU 27/2022), File Upload Specs, Audit Log Coverage, PWA expand, Accessibility WCAG 2.1 AA, Tax & Compliance Reports, Concurrency Control, KB pg_trgm fallback, 2FA Recovery, PPh 21 Annual Reconciliation, Branch-level overrides, Holiday management, Shift scheduling UX
+> - **12 Cleanup Minor (N1-N12):** Reimbursement V2→V1, CipherSweet status sync, ERD as source-of-truth reference, env var seeder, Component Standards, payroll:generate command, OAuth payslip re-auth, PTKP keys, password-protected Excel export, Migration list expand, STRICT RULES klarifikasi, V2 list refactor
+> - **§28 Glossary baru** (44 istilah)
+
+> **ERRATA NOTE (2026-05-20):** PRD-errata.md sekarang READ-ONLY changelog — semua koreksi sudah di-merge ke PRD.md v3.0. Perubahan besar:
+> - **PRD v3.0**: 28 koreksi (9 ERR + 19 CAT) di-merge inline dengan tag referensi
+> - **PRD-errata v2.0**: Status berubah dari LOCKED → HISTORICAL CHANGELOG
+> - **CAT-018**: Defensive Migration pattern — `DB::getDriverName() === 'pgsql'` guard di 3 migration
+> - **CAT-019**: Dilarang hardcode SQL Error Code 23505 — WAJIB `UniqueConstraintViolationException`
+> - **Testing §9**: Database Testing Strategy — SQLite vs PostgreSQL, defensive migration, mocking approach
+> - **Code fixes**: 3 migration guards, AttendanceService clockOut columns fix, .env.example + config default → pgsql
+
+> **PREVIOUS NOTE (2026-05-19):** Beberapa fix kritis yang sudah di-merge ke PRD v3.0:
 > - **C1:** ApprovalLevel enum comparison bug — gunakan `$approval->level->value === 1`
 > - **C2:** Payroll forceDelete — gunakan `forceDelete()` bukan `delete()` untuk regenerate
 > - **C3:** Sanctum belum terinstall — perlu install sebelum API auth bisa bekerja
@@ -138,4 +153,4 @@ docs/
 
 ---
 
-> Last Updated: 2026-05-19
+> Last Updated: 2026-05-21

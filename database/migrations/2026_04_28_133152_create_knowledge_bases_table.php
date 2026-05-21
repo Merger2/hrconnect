@@ -2,13 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('knowledge_bases', function (Blueprint $table) {
@@ -16,16 +14,32 @@ return new class extends Migration
             $table->morphs('knowledgeable');
             $table->string('title');
             $table->text('content');
-            $table->vector('embedding', dimensions: 1536);
-            $table->jsonb('metadata')->nullable();
+            $table->string('category', 30)->default('general');
+
+            if (DB::getDriverName() === 'pgsql') {
+                $table->vector('embedding', dimensions: 768)->nullable();
+            } else {
+                $table->text('embedding')->nullable();
+            }
+
+            $table->string('status', 20)->default('processing');
+            $table->string('source_document')->nullable();
+            $table->integer('page_number')->nullable();
+
+            if (DB::getDriverName() === 'pgsql') {
+                $table->jsonb('metadata')->nullable();
+            } else {
+                $table->json('metadata')->nullable();
+            }
+
             $table->timestamps();
         });
-        DB::statement('CREATE INDEX kb_embedding_hnsw_idx ON knowledge_bases USING hnsw (embedding vector_cosine_ops)');
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE INDEX kb_embedding_hnsw_idx ON knowledge_bases USING hnsw (embedding vector_cosine_ops)');
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('knowledge_bases');

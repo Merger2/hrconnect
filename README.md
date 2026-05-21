@@ -49,7 +49,7 @@ Proyek ini dikembangkan sebagai **skripsi** dan **proof-of-concept** bahwa solo 
 ### 🧠 AI & Machine Learning
 
 - **AI Face Recognition Clock-In** — Presensi WFO/WFA menggunakan pencocokan wajah langsung di browser (face-api.js, FaceNet 128D). Tanpa membebani server.
-- **AI-Powered Knowledge Base (RAG)** — Chat dengan dokumen SOP perusahaan (PDF). Ditenagai oleh Gemini 2.5 Pro + Vector Database (pgvector 1536D). Fallback ke full-text search (pg_trgm) jika AI down.
+- **AI-Powered Knowledge Base (RAG)** — Chat dengan dokumen SOP perusahaan (PDF). Ditenagai oleh Gemini 2.5 Flash + Vector Database (pgvector 768D). Fallback ke full-text search (pg_trgm) jika AI down.
 
 ### 📍 Location & Security
 
@@ -109,8 +109,8 @@ Proyek ini dikembangkan sebagai **skripsi** dan **proof-of-concept** bahwa solo 
 | Technology | Purpose |
 |------------|---------|
 | **face-api.js** (FaceNet) | Client-side face detection & 128D embedding |
-| **OpenAI** (text-embedding-3-small) | PDF chunk embedding → vector(1536) |
-| **Google Gemini 2.5 Pro** | RAG Knowledge Base Q&A |
+| **Google Gemini** (text-embedding-004) | PDF chunk embedding → vector(768) |
+| **Google Gemini 2.5 Flash** | RAG Knowledge Base Q&A |
 
 ---
 
@@ -180,8 +180,9 @@ DB_PASSWORD=your_password
 
 # AI Configuration (opsional — ada mock mode untuk demo)
 RAG_MOCK_MODE=true
-OPENAI_API_KEY=sk-...
-GEMINI_API_KEY=AIza...
+GOOGLE_AI_API_KEY=AIza...
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_EMBEDDING_MODEL=text-embedding-004
 ```
 
 ### 4. Database Setup
@@ -361,7 +362,7 @@ php artisan test --filter=Payroll
 │                    PostgreSQL 15+                           │
 │  ┌────────────┐  ┌────────────┐  ┌───────────────────────┐  │
 │  │  pgvector  │  │  pg_trgm   │  │       pgcrypto        │  │
-│  │ (128D+1536D│  │ (RAG Fallback│ (CipherSweet Encryption)│ │
+│  │ (128D+768D │  │ (RAG Fallback│ (CipherSweet Encryption)│ │
 │  │  vectors)  │  │   search)  │  │                       │  │
 │  └────────────┘  └────────────┘  └───────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘

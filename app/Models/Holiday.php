@@ -15,6 +15,7 @@ class Holiday extends Model
     protected function casts(): array
     {
         return [
+            'date' => 'date',
             'is_active' => 'boolean',
         ];
     }

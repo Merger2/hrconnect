@@ -18,4 +18,14 @@ enum MaritalStatus: string
             self::WIDOWED => 'Cerai Mati',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::SINGLE => 'zinc',
+            self::MARRIED => 'success',
+            self::DIVORCED => 'warning',
+            self::WIDOWED => 'info',
+        };
+    }
 }

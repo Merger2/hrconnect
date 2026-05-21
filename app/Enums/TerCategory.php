@@ -17,11 +17,20 @@ enum TerCategory: string
         };
     }
 
-    public static function resolveFromStatus(string $maritalStatus, int $childrenCount): self
+    public function color(): string
     {
-        $dependents = min($childrenCount, 3);
+        return match ($this) {
+            self::A => 'info',
+            self::B => 'warning',
+            self::C => 'danger',
+        };
+    }
 
-        if ($maritalStatus === 'single') {
+    public static function resolveFromStatus(MaritalStatus $status, int $dependents): self
+    {
+        $dependents = min($dependents, 3);
+
+        if (in_array($status, [MaritalStatus::SINGLE, MaritalStatus::DIVORCED, MaritalStatus::WIDOWED])) {
             return match ($dependents) {
                 0, 1 => self::A,
                 2, 3 => self::B,

@@ -14,9 +14,9 @@ return new class extends Migration
             $table->foreignId('attendance_id')->nullable()->constrained('attendances')->nullOnDelete();
             $table->index('attendance_id');
             $table->date('date');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->text('description');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->text('description')->nullable();
             $table->decimal('total_hours', 5, 2)->nullable();
             $table->decimal('amount', 15, 2)->nullable();
             $table->text('rejection_reason')->nullable();

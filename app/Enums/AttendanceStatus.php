@@ -30,9 +30,9 @@ enum AttendanceStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::ON_TIME, self::HOLIDAY, self::PERMISSION => 'green',
-            self::LATE, self::EARLY => 'yellow',
-            self::ABSENT, self::MISSED_CLOCK_IN, self::MISSED_CLOCK_OUT => 'red',
+            self::ON_TIME, self::HOLIDAY, self::PERMISSION => 'success',
+            self::LATE, self::EARLY => 'warning',
+            self::ABSENT, self::MISSED_CLOCK_IN, self::MISSED_CLOCK_OUT => 'danger',
         };
     }
 

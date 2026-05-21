@@ -60,7 +60,7 @@ class Payroll extends Model
 
     public function isLocked(): bool
     {
-        return $this->status === PayrollStatus::PUBLISHED;
+        return in_array($this->status, [PayrollStatus::PUBLISHED, PayrollStatus::PAID]);
     }
 
     public function generatePdf(): string

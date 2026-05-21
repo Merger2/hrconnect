@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ApprovalLevel;
 use App\Enums\ApprovalStatus;
 use App\Enums\RequestStatus;
 use App\Models\Approval;
@@ -69,7 +70,7 @@ class ApprovalService
 
             if ($approvable->isAllApproved()) {
                 $approvable->update(['status' => RequestStatus::APPROVED]);
-            } elseif ($approval->level === 1) {
+            } elseif ($approval->level === ApprovalLevel::L1_SUPERVISOR) {
                 $approvable->update(['status' => RequestStatus::APPROVED_L1]);
             }
         });

@@ -63,4 +63,14 @@ enum EmploymentType: string
             default => true,
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::PERMANENT => 'success',
+            self::CONTRACT => 'info',
+            self::PROBATION => 'warning',
+            self::INTERN => 'zinc',
+        };
+    }
 }

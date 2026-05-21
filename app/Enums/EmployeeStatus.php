@@ -20,4 +20,15 @@ enum EmployeeStatus: string
             self::DECEASED => 'Meninggal Dunia',
         };
     }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::ACTIVE => 'success',
+            self::INACTIVE => 'zinc',
+            self::RESIGNED => 'warning',
+            self::TERMINATED => 'danger',
+            self::DECEASED => 'zinc',
+        };
+    }
 }

@@ -17,7 +17,6 @@ class EmployeeSeeder extends Seeder
         $companyId = DB::table('companies')->insertGetId([
             'name' => 'PT Tech Nusantara',
             'code' => 'TECH',
-            'address_detail' => 'Depok',
             'phone' => '021-12345678',
             'email' => 'Perushaan@gmail.com',
             'npwp' => '123456789012345',
@@ -29,7 +28,7 @@ class EmployeeSeeder extends Seeder
         $branchId = DB::table('branches')->insertGetId([
             'company_id' => $companyId,
             'name' => 'HQ Depok',
-            'address_detail' => 'Margonda',
+            'address' => 'Margonda',
             'is_main' => true,
             'is_active' => true,
             'created_at' => now(),
