@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\BusinessRuleException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,6 +50,15 @@ class LeaveBalance extends Model
 
     public function deduct(float $days): void
     {
+        if ($this->available() < $days) {
+            throw new BusinessRuleException("Saldo cuti tidak mencukupi. Sisa: {$this->available()} hari, diminta: {$days} hari.");
+        }
         $this->increment('used', $days);
+    }
+
+    public function refund(float $days): void
+    {
+        $newUsed = max(0, (float) $this->used - $days);
+        $this->update(['used' => $newUsed]);
     }
 }

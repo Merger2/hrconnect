@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bpjs_configs', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->decimal('employer_rate', 5, 4);
             $table->decimal('employee_rate', 5, 4);
             $table->decimal('ceiling', 15, 2)->nullable();

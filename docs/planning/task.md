@@ -1,8 +1,8 @@
 # HRConnect — Spesifikasi Eksekusi Perbaikan
 
-> **Version:** 4.3 — Observer Consolidation + Face Tiered Fallback  
-> **Tanggal:** 20 Mei 2026  
-> **Errata v4.0:** 49 koreksi total — 55 ✅ SELESAI, 2 🔀 MERGED, 3 ⚠️ PARTIAL, ❌ NOT DONE  
+> **Version:** 4.4 — Hari 1 Critical Fixes Complete (B1+B2+D1+B3+B4 verified via tinker)  
+> **Tanggal:** 22 Mei 2026  
+> **Errata v4.0:** 49 koreksi total — 59 ✅ SELESAI, 2 🔀 MERGED, 3 ⚠️ PARTIAL, ❌ NOT DONE  
 > **Cara Pakai:** Item bertanda ✅ SELESAI tidak perlu dikerjakan lagi. Fokus pada item ❌ NOT DONE dan ⚠️ PARTIAL. Item 🔀 MERGED dipindah ke task lain.
 
 ---
@@ -11,12 +11,12 @@
 
 | Kategori | Jumlah | Detail |
 |----------|--------|--------|
-| ✅ SELESAI | 55 | Migrasi, model, enum, service, docs — semua sudah diimplementasi |
+| ✅ SELESAI | 59 | Migrasi, model, enum, service, docs — semua sudah diimplementasi |
 | 🔀 MERGED | 2 | §2.9 + §2.31 dikonsolidasi ke §0.10 (5 observer terpadu) |
 | ⚠️ PARTIAL | 3 | Sebagian done, sebagian belum |
-| ❌ NOT DONE | ~63 | Belum dikerjakan |
+| ❌ NOT DONE | ~59 | Belum dikerjakan |
 
-### ✅ SELESAI (55 item)
+### ✅ SELESAI (59 item)
 
 Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untuk ringkas.
 
@@ -45,11 +45,15 @@ Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untu
 | E47 | VerificationMethod enum | Enum created, AttendanceService uses it |
 | — | §0.2 Clock-out overwrites verification_method | Separate columns + AttendanceService clockOut fix |
 | — | §0.3 Clock-in double-submit 500 | UniqueConstraintViolationException replaces QueryException+23505 |
+| — | **§0.4 RC-2 Payroll race condition** | **HARI 1**: lockForUpdate + forceDelete + outer transaction (verified tinker) |
+| — | **§0.6 DL-2 Leave quota deduct timing** | **HARI 1**: dipindah ke ApprovalService::approve() saat isAllApproved (verified tinker) |
 | — | §0.9 KnowledgeBase columns | 4 cols + 3 enums |
 | — | §2.4 PayrollAdjustment decimal | Cast + migration |
+| — | **§2.7 B8 LeaveBalance.deduct() negatif** | **HARI 1**: guard `available() < days` throw + increment + refund method (verified tinker) |
 | — | §2.11 Employee vector cast | Done |
 | — | §2.12 KnowledgeBase vector cast | Done |
 | — | §2.15 Employee npwp/bank nullable | Done |
+| — | **§2.19 M14 bpjs_configs.name unique** | **HARI 1**: Migration `unique()` (verified tinker — duplicate throw UniqueConstraintViolationException) |
 | — | §2.25 EmploymentType 4 values | Done |
 | — | §2.28 AttendanceStatus 8 values | Done |
 | — | §2.30 Cache dead code removed | Done |
@@ -168,152 +172,15 @@ public string $queue = 'payroll_high';
 
 ---
 
-### ❌ 0.4 RC-2: Payroll Double-Generation Race Condition
-**Severity:** CRITICAL  
-**File:** `PayrollCalculatorService.php`  
-**Depends On:** —  
-**Estimasi:** 30 menit
+### ✅ 0.4 RC-2: Payroll Double-Generation Race Condition — SELESAI
 
-> **CATATAN (v3.0):** Unique index `payrolls_employee_id_period_unique` **sudah ada di database**.
-> Migration TIDAK DIPERLUKAN. Fix hanya di service layer (lockForUpdate + QueryException catch).
+> **Status:** ✅ SELESAI — `PayrollCalculatorService::generatePayroll()` sudah pakai `lockForUpdate()` + `forceDelete()` di dalam SATU `DB::transaction`. Verified via tinker: regenerate menghasilkan id baru, count=1, withTrashed=1 (force-deleted, bukan soft).
 
-**Update PayrollCalculatorService::generatePayroll dengan lockForUpdate + QueryException catch:**
-
-```php
-// app/Services/PayrollCalculatorService.php — ganti method generatePayroll():
-
-public function generatePayroll(Employee $employee, string $period): Payroll
-{
-    $parsedPeriod = Carbon::createFromFormat('Y-m', $period);
-    $targetYear = $parsedPeriod->year;
-    $targetMonth = $parsedPeriod->month;
-
-    try {
-        return DB::transaction(function () use ($employee, $period, $targetYear, $targetMonth) {
-            $existingPayroll = Payroll::where('employee_id', $employee->id)
-                ->where('period', $period)
-                ->lockForUpdate()
-                ->first();
-
-            if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
-                throw new DomainException("Payroll untuk periode {$period} sudah dikunci permanen.");
-            }
-
-            // Hitung semua nilai sebelum create
-            $grossSalary = $this->calculateProratedSalary($employee, $period);
-
-            $overtimes = Overtime::where('employee_id', $employee->id)
-                ->where('status', RequestStatus::APPROVED)
-                ->whereBetween('date', [
-                    Carbon::create($targetYear, $targetMonth, 1)->startOfMonth()->toDateString(),
-                    Carbon::create($targetYear, $targetMonth, 1)->endOfMonth()->toDateString(),
-                ])
-                ->get();
-
-            $totalOvertimePay = $overtimes
-                ->map(fn(Overtime $ot) => $this->calculateOvertimePay($ot))
-                ->sum();
-
-            $taxableIncome = $grossSalary + $totalOvertimePay;
-
-            $startOfMonth = Carbon::create($targetYear, $targetMonth, 1)->startOfMonth();
-            $endOfMonth = Carbon::create($targetYear, $targetMonth, 1)->endOfMonth();
-
-            $reimbursements = Reimbursement::where('employee_id', $employee->id)
-                ->where('status', ReimbursementStatus::APPROVED)
-                ->whereBetween('expense_date', [$startOfMonth, $endOfMonth])
-                ->get();
-
-            $totalReimbursement = $reimbursements->sum('amount');
-            $totalGross = $taxableIncome + $totalReimbursement;
-
-            $penaltyPerDay = (int) CompanySetting::get('attendance_penalty_per_day', 50000);
-
-            $lateCount = Attendance::where('employee_id', $employee->id)
-                ->whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
-                ->where('late_minutes', '>', 0)
-                ->count();
-            $latePenalty = $lateCount * $penaltyPerDay;
-
-            $alphaCount = Attendance::where('employee_id', $employee->id)
-                ->whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
-                ->where('status', AttendanceStatus::ABSENT)
-                ->count();
-            $dailyRate = $employee->position?->basic_salary ?? 0;
-            $alphaPenalty = $alphaCount * ($dailyRate > 0 ? $dailyRate / 22 : 0);
-
-            $attendancePenalty = $latePenalty + $alphaPenalty;
-
-            $bpjsComponents = $this->calculateBPJS($employee, $taxableIncome);
-            $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
-            $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
-
-            $terCategory = $this->getTERCategory($employee);
-            $pph21Deduction = $this->calculatePPh21($employee, max(0, $taxableIncome - $attendancePenalty), $terCategory);
-
-            $totalDeduction = $attendancePenalty + $bpjsKesehatanDeduction + $bpjsEmploymentDeduction + $pph21Deduction;
-            $basicSalary = $employee->position?->basic_salary ?? 0;
-            $totalAllowance = $employee->position?->allowance_jabatan ?? 0;
-            $netSalary = $totalGross - $totalDeduction;
-
-            if ($existingPayroll) {
-                // Reset reimbursements yang terkait payroll lama
-                Reimbursement::where('payroll_id', $existingPayroll->id)->update([
-                    'payroll_id' => null,
-                    'status' => ReimbursementStatus::APPROVED,
-                ]);
-                $existingPayroll->delete();
-            }
-
-            $payroll = Payroll::create([
-                'employee_id' => $employee->id,
-                'period' => $period,
-                'basic_salary' => $basicSalary,
-                'total_allowance' => $totalAllowance,
-                'gross_salary' => $totalGross,
-                'overtime_pay' => $totalOvertimePay,
-                'pph21' => $pph21Deduction,
-                'bpjs_health' => $bpjsKesehatanDeduction,
-                'bpjs_employment' => $bpjsEmploymentDeduction,
-                'loan_deduction' => 0,
-                'attendance_penalty' => $attendancePenalty,
-                'total_deduction' => $totalDeduction,
-                'net_salary' => $netSalary,
-                'status' => PayrollStatus::DRAFT,
-            ]);
-
-            if ($reimbursements->isNotEmpty()) {
-                Reimbursement::whereIn('id', $reimbursements->pluck('id'))->update([
-                    'payroll_id' => $payroll->id,
-                    'status' => ReimbursementStatus::PAID,
-                ]);
-            }
-
-            return $payroll;
-        });
-    } catch (\Illuminate\Database\QueryException $e) {
-        if ($e->getCode() === '23505') {
-            throw new DomainException("Payroll untuk periode {$period} sudah ada. Gunakan regenerate.");
-        }
-        throw $e;
-    }
-}
-```
-
-**Perubahan penting dalam method ini:**
-
-1. **`lockForUpdate()`** — cegah race condition
-2. **`whereBetween('date', [...])`** — ganti `whereYear/whereMonth` yang bypass B-tree index
-3. **`whereBetween('expense_date', [...])`** — filter reimbursement per periode (fix P1)
-4. **Reset reimbursements sebelum delete** — fix DL-1
-5. **Catch `QueryException 23505`** — friendly error untuk unique violation (fix RC-2)
-6. **`max(0, ...)`** — cegah negative taxable income untuk PPh21
-
-**Verifikasi:**
-```bash
-php artisan migrate
-# Test: generate payroll untuk employee Y, lalu generate lagi → harus return friendly error
-```
+**Bukti:**
+- `PayrollCalculatorService.php:200` — outer `DB::transaction`
+- `PayrollCalculatorService.php:203` — `lockForUpdate()` saat cek existing payroll
+- `PayrollCalculatorService.php:263` — `$existingPayroll->forceDelete()` (bukan `delete()`)
+- Migration `payrolls` sudah punya unique index `(employee_id, period)`
 
 ---
 
@@ -334,347 +201,15 @@ php artisan tinker --execute '
 
 ---
 
-### 0.6 DL-2: Leave Quota Di-deduct Saat SUBMIT, Bukan Saat APPROVED
+### ✅ 0.6 DL-2: Leave Quota Di-deduct Saat SUBMIT, Bukan Saat APPROVED — SELESAI
 
-**Masalah:** `LeaveService::applyLeave()` langsung deduct quota saat submit. Jika di-reject, kuota tidak dikembalikan.  
-**Severity:** CRITICAL  
-**File:** `app/Services/LeaveService.php`, `app/Services/ApprovalService.php`  
-**Depends On:** 0.3 (B2 fix — isAllApproved)  
-**Estimasi:** 45 menit
+> **Status:** ✅ SELESAI — Quota validate-on-submit, deduct-on-final-approval. Verified via tinker: submit (used=0) → approve full (used=3) → submit baru (used=3) → reject (used=3 tetap).
 
-**Langkah 1 — Hapus deduct dari LeaveService::applyLeave():**
-
-```php
-// app/Services/LeaveService.php — method applyLeave()
-// GANTI seluruh method:
-
-public function applyLeave(Employee $employee, array $data): Leave
-{
-    $leaveType = LeaveType::findOrFail($data['leave_type_id']);
-    $startDate = Carbon::parse($data['start_date']);
-    $endDate = Carbon::parse($data['end_date']);
-    $dayType = DayType::from($data['day_type'] ?? 'full_day');
-
-    if ($startDate->isBefore(now()->startOfDay()->subDays(3))) {
-        throw new BusinessRuleException('Pengajuan cuti maksimal mundur H+3 dari hari ini.');
-    }
-
-    if ($employee->employment_type === EmploymentType::PROBATION
-        && $leaveType->deductsFromQuota()) {
-        throw new BusinessRuleException('Karyawan masa percobaan tidak dapat mengajukan cuti tahunan.');
-    }
-
-    $sickLeaveCode = CompanySetting::get('leave_sick_code', 'sick');
-    if ($leaveType->code === $sickLeaveCode && empty($data['proof_file'])) {
-        throw new BusinessRuleException('Cuti Sakit wajib menyertakan bukti (Surat Dokter).');
-    }
-
-    $totalDays = $this->calculateWorkDays($startDate, $endDate, $dayType);
-
-    if ($totalDays <= 0) {
-        throw new BusinessRuleException('Durasi cuti 0 hari. Tanggal hanya weekend atau libur.');
-    }
-
-    if (Leave::hasOverlap($employee->id, $startDate, $endDate)) {
-        throw new BusinessRuleException('Tanggal bertabrakan dengan pengajuan cuti lain.');
-    }
-
-    // VALIDASI quota di sini, tapi JANGAN deduct dulu
-    if ($leaveType->deductsFromQuota()) {
-        $balance = LeaveBalance::where('employee_id', $employee->id)
-            ->where('leave_type_id', $leaveType->id)
-            ->where('year', now()->year)
-            ->first();
-
-        if (! $balance) {
-            throw new BusinessRuleException('Saldo cuti Anda belum diinisialisasi.');
-        }
-
-        if (! $balance->hasEnoughQuota($totalDays)) {
-            $remaining = $balance->available();
-            throw new BusinessRuleException(
-                "Kuota cuti tidak mencukupi. (Sisa: {$remaining} hari, Diminta: {$totalDays} hari)"
-            );
-        }
-    }
-
-    // BUAT LEAVE TANPA DEDUCT — deduct akan dilakukan di ApprovalService::approve()
-    // setelah SEMUA approval selesai
-    return DB::transaction(function () use ($employee, $leaveType, $data, $totalDays) {
-        $leave = Leave::create([
-            'employee_id' => $employee->id,
-            'leave_type_id' => $leaveType->id,
-            'start_date' => $data['start_date'],
-            'end_date' => $data['end_date'],
-            'day_type' => $data['day_type'],
-            'total_days' => $totalDays,
-            'reason' => $data['reason'],
-            'proof_file' => $data['proof_file'] ?? null,
-            'status' => RequestStatus::PENDING,
-        ]);
-
-        $this->approvalService->createApprovalWorkflow($leave);
-
-        return $leave;
-    });
-}
-```
-
-**Langkah 2 — Tambah deduct di ApprovalService::approve() dan refund di reject():**
-
-```php
-// app/Services/ApprovalService.php — ganti seluruh file:
-
-namespace App\Services;
-
-use App\Enums\ApprovalStatus;
-use App\Enums\RequestStatus;
-use App\Models\Approval;
-use App\Models\Employee;
-use App\Models\Leave;
-use App\Models\LeaveBalance;
-use App\Models\LeaveType;
-use App\Models\Reimbursement;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use LogicException;
-
-class ApprovalService
-{
-    public function createApprovalWorkflow(Model $approvable): void
-    {
-        DB::transaction(function () use ($approvable) {
-            $employee = $approvable->employee;
-            $directApprover = $employee->getDirectApprover();
-            $l2Approver = $this->resolveL2Approver($approvable);
-
-            $approversCount = 0;
-
-            if ($directApprover) {
-                $approvable->approvals()->create([
-                    'approver_id' => $directApprover->id,
-                    'level' => 1,
-                    'status' => ApprovalStatus::PENDING,
-                ]);
-                $approversCount++;
-            }
-
-            if ($l2Approver) {
-                // Jangan buat L2 = L1 (deduplikasi)
-                if (! $directApprover || $l2Approver->id !== $directApprover->id) {
-                    $approvable->approvals()->create([
-                        'approver_id' => $l2Approver->id,
-                        'level' => 2,
-                        'status' => ApprovalStatus::PENDING,
-                    ]);
-                    $approversCount++;
-                }
-            }
-
-            // Fallback: jika tidak ada approver sama sekali, langsung ke Super Admin
-            if ($approversCount === 0) {
-                $superAdmin = User::role('super-admin')->first()?->employee;
-                if ($superAdmin) {
-                    $approvable->approvals()->create([
-                        'approver_id' => $superAdmin->id,
-                        'level' => 1,
-                        'status' => ApprovalStatus::PENDING,
-                    ]);
-                    $approversCount++;
-                }
-            }
-
-            if ($approversCount === 0) {
-                throw new LogicException('Tidak ada Approver (Atasan/HR) yang tersedia.');
-            }
-        });
-    }
-
-    public function approve(Approval $approval, string $notes = ''): void
-    {
-        DB::transaction(function () use ($approval, $notes) {
-            $approvable = $approval->approvable()->lockForUpdate()->first();
-
-            // Guard: jangan approve yang sudah diproses
-            if ($approval->status !== ApprovalStatus::PENDING) {
-                throw new LogicException('Persetujuan ini sudah diproses.');
-            }
-
-            // Guard: jangan approve jika parent model sudah resolved
-            // Gunakan instance-based check karena Leave/Overtime pakai RequestStatus
-            // tapi Reimbursement pakai ReimbursementStatus
-            $pendingStatuses = match (true) {
-                $approvable instanceof \App\Models\Leave, $approvable instanceof \App\Models\Overtime
-                    => [RequestStatus::PENDING->value, RequestStatus::APPROVED_L1->value],
-                $approvable instanceof \App\Models\Reimbursement
-                    => [\App\Enums\ReimbursementStatus::PENDING->value],
-                $approvable instanceof \App\Models\Attendance
-                    => [ApprovalStatus::PENDING->value],
-                default => [],
-            };
-
-            if (! in_array($approvable->status instanceof \BackedEnum ? $approvable->status->value : $approvable->status, $pendingStatuses, true)) {
-                throw new LogicException('Pengajuan ini sudah diproses.');
-            }
-
-            $approval->update([
-                'status' => ApprovalStatus::APPROVED,
-                'approved_at' => now(),
-                'notes' => $notes ?: null,
-            ]);
-
-            if ($approvable->isAllApproved()) {
-                // Instance-based check: Reimbursement pakai ReimbursementStatus,
-                // Leave/Overtime pakai RequestStatus. Attendance tidak masuk sini.
-                $finalStatus = $approvable instanceof \App\Models\Reimbursement
-                    ? \App\Enums\ReimbursementStatus::APPROVED
-                    : RequestStatus::APPROVED;
-                $approvable->update(['status' => $finalStatus]);
-                // DEDUCT QUOTA SETELAH SEMUA APPROVAL SELESAI
-                $this->deductLeaveQuotaIfApplicable($approvable);
-            } elseif ($approval->level === 1) {
-                // Reimbursement tidak punya status APPROVED_L1 — tetap PENDING
-                // sampai finance (L2) approve. Hanya Leave/Overtime yang pakai L1.
-                if (! ($approvable instanceof \App\Models\Reimbursement)) {
-                    $approvable->update(['status' => RequestStatus::APPROVED_L1]);
-                }
-            }
-        });
-    }
-
-    public function reject(Approval $approval, string $reason): void
-    {
-        DB::transaction(function () use ($approval, $reason) {
-            $approvable = $approval->approvable()->lockForUpdate()->first();
-
-            if ($approval->status !== ApprovalStatus::PENDING) {
-                throw new LogicException('Persetujuan ini sudah diproses.');
-            }
-
-            $approval->update([
-                'status' => ApprovalStatus::REJECTED,
-                'notes' => $reason,
-            ]);
-
-            // Cancel semua PENDING approvals lainnya
-            $approvable->approvals()
-                ->where('id', '!=', $approval->id)
-                ->where('status', ApprovalStatus::PENDING)
-                ->update(['status' => ApprovalStatus::REJECTED, 'notes' => 'Otomatis dibatalkan karena pengajuan ditolak.']);
-
-            // Instance-based check: Reimbursement pakai ReimbursementStatus,
-            // Leave/Overtime/Attendance pakai RequestStatus.
-            $rejectedStatus = $approvable instanceof \App\Models\Reimbursement
-                ? \App\Enums\ReimbursementStatus::REJECTED
-                : RequestStatus::REJECTED;
-            $approvable->update([
-                'status' => $rejectedStatus,
-                'rejection_reason' => $reason,
-            ]);
-
-            // CATATAN: TIDAK perlu refund quota di sini karena quota bara di-deduct
-            // di approve() setelah SEMUA approval selesai. Jika reject terjadi sebelum
-            // semua approval, quota belum pernah di-deduct.
-            // Refund hanya diperlukan saat "withdraw" (cancel cuti yang sudah approved),
-            // yang akan diimplementasi di fitur terpisah.
-        });
-    }
-
-    protected function resolveL2Approver(Model $approvable): ?Employee
-    {
-        if ($approvable instanceof Reimbursement) {
-            return User::role('finance')->first()?->employee;
-        }
-
-        return User::role('hr-manager')->first()?->employee;
-    }
-
-    protected function deductLeaveQuotaIfApplicable(Model $approvable): void
-    {
-        if ($approvable instanceof Leave) {
-            $leaveType = $approvable->leaveType;
-
-            if ($leaveType && $leaveType->deductsFromQuota()) {
-                $balance = LeaveBalance::where('employee_id', $approvable->employee_id)
-                    ->where('leave_type_id', $leaveType->id)
-                    ->where('year', $approvable->start_date->year)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($balance) {
-                    $balance->deduct($approvable->total_days);
-                }
-            }
-        }
-    }
-
-    // CATATAN: refundLeaveQuotaIfApplicable() dihapus dari reject() karena
-    // quota hanya di-deduct di approve() setelah semua approval selesai.
-    // Method ini akan dibutuhkan lagi saat fitur "withdraw leave" diimplementasi.
-}
-```
-
-**Langkah 3 — Tambah `refund()` method di LeaveBalance:**
-
-```php
-// app/Models/LeaveBalance.php — tambah method setelah deduct():
-
-public function refund(float $days): void
-{
-    if ($this->used < $days) {
-        $this->used = 0;
-    } else {
-        $this->decrement('used', $days);
-    }
-}
-```
-
-**Juga update `deduct()` untuk cek minimum:**
-
-```php
-// app/Models/LeaveBalance.php — ganti method deduct():
-
-public function deduct(float $days): void
-{
-    if ($this->available() < $days) {
-        throw new \App\Exceptions\BusinessRuleException('Kuota cuti tidak mencukupi.');
-    }
-    $this->increment('used', $days);
-}
-```
-
-**Langkah 4 — Ganti seluruh BusinessRuleException (sudah ada tapi salah HTTP code):**
-
-> **CATATAN (v3.0):** File `app/Exceptions/BusinessRuleException.php` sudah ada, tapi
-> menggunakan `extends Exception` dengan HTTP code **400**. API Contracts spec mengharuskan
-> validation/business rule errors return **422**. Ganti seluruh file:
-
-```php
-// app/Exceptions/BusinessRuleException.php — GANTI SELURUH FILE:
-
-namespace App\Exceptions;
-
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
-class BusinessRuleException extends HttpException
-{
-    public function __construct(string $message = '', int $statusCode = 422)
-    {
-        parent::__construct($statusCode, $message);
-    }
-}
-```
-
-**Verifikasi:**
-```bash
-# Test skenario:
-# 1. Apply leave → quota TIDAK berkurang
-# 2. Approve L1 → quota TIDAK berkurang
-# 3. Approve L2 → quota BERKURANG
-# 4. Reject leave → quota DIKEMBALIKAN
-php artisan test --compact --filter=LeaveTest
-```
+**Bukti:**
+- `LeaveService.php:62-79` — validasi quota saja (no deduct) saat applyLeave
+- `ApprovalService.php:72-85` — deduct kuota saat `isAllApproved()` di method `approve()`
+- `LeaveBalance.php:51-57` — `deduct()` dengan guard + `increment('used', $days)`
+- `LeaveBalance.php:59-63` — method `refund()` untuk withdraw scenario (V2)
 
 ---
 
@@ -1992,26 +1527,13 @@ use App\Models\Village;
 
 ---
 
-### 2.7 B8: LeaveBalance.deduct() Bisa Negatif
+### ✅ 2.7 B8: LeaveBalance.deduct() Bisa Negatif — SELESAI
 
-**Masalah:** Tidak ada pengecekan minimum sebelum deduct.  
-**Severity:** HIGH  
-**Depends On:** 0.6 (sudah diperbaiki di sana)  
-**Estimasi:** 5 menit (sudah termasuk di 0.6 Langkah 3)
+> **Status:** ✅ SELESAI — Guard `available() < $days` throw `BusinessRuleException` + `increment('used', $days)` setelah guard. Plus method `refund()` baru. Verified via tinker: deduct(3): 12→9, deduct(999): throw, refund(2): 9→11, refund(999): used=0 (no negative).
 
-**Jika dikerjakan terpisah:**
-
-```php
-// app/Models/LeaveBalance.php — ganti deduct():
-
-public function deduct(float $days): void
-{
-    if ($this->available() < $days) {
-        throw new \App\Exceptions\BusinessRuleException('Kuota cuti tidak mencukupi.');
-    }
-    $this->increment('used', $days);
-}
-```
+**Bukti:**
+- `LeaveBalance.php:51-57` — guard + increment
+- `LeaveBalance.php:59-63` — refund method dengan `max(0, ...)` cegah negative
 
 ---
 
@@ -2328,18 +1850,11 @@ echo $enum->label() . " = " . $enum->color();
 
 ---
 
-### 2.19 M14: `bpjs_configs.name` Missing Unique Constraint
+### ✅ 2.19 M14: `bpjs_configs.name` Missing Unique Constraint — SELESAI
 
-**Masalah:** Tanpa unique constraint, duplikat konfigurasi BPJS bisa dibuat, menyebabkan kalkulasi payroll salah (double-counting).  
-**Severity:** LOW  
-**Depends On:** —  
-**Estimasi:** 2 menit
+> **Status:** ✅ SELESAI — Migration sudah `$table->string('name')->unique()`. Verified via tinker: insert duplicate `'kesehatan'` throw `UniqueConstraintViolationException`.
 
-```php
-// database/migrations/2026_05_08_161905_create_bpjs_configs_table.php
-// GANTI: $table->string('name');
-// MENJADI: $table->string('name')->unique();
-```
+**Bukti:** `database/migrations/2026_05_08_161905_create_bpjs_configs_table.php:16`
 
 ---
 

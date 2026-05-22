@@ -7,7 +7,10 @@ use App\Enums\ApprovalStatus;
 use App\Enums\RequestStatus;
 use App\Models\Approval;
 use App\Models\Employee;
+use App\Models\Leave;
+use App\Models\LeaveBalance;
 use App\Models\Reimbursement;
+use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -61,15 +64,25 @@ class ApprovalService
     {
         DB::transaction(function () use ($approval, $notes) {
             $approvable = $approval->approvable()->lockForUpdate()->first();
-
             $approval->update([
                 'status' => ApprovalStatus::APPROVED,
                 'approved_at' => now(),
                 'notes' => $notes ?: null,
             ]);
-
             if ($approvable->isAllApproved()) {
                 $approvable->update(['status' => RequestStatus::APPROVED]);
+                // Fix B3: deduct kuota saat full approval (bukan saat submit)
+                if (
+                    $approvable instanceof Leave
+                    && $approvable->leaveType?->deductsFromQuota()
+                ) {
+                    $balance = LeaveBalance::where('employee_id', $approvable->employee_id)
+                        ->where('leave_type_id', $approvable->leave_type_id)
+                        ->where('year', Carbon::parse($approvable->start_date)->year)
+                        ->lockForUpdate()
+                        ->first();
+                    $balance?->deduct((float) $approvable->total_days);
+                }
             } elseif ($approval->level === ApprovalLevel::L1_SUPERVISOR) {
                 $approvable->update(['status' => RequestStatus::APPROVED_L1]);
             }

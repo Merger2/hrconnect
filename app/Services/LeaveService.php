@@ -76,8 +76,6 @@ class LeaveService
                         "Kuota cuti tidak mencukupi. (Sisa: {$remaining} hari, Diminta: {$totalDays} hari)"
                     );
                 }
-
-                $balance->deduct($totalDays);
             }
 
             $leave = Leave::create([

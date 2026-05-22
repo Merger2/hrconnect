@@ -187,93 +187,81 @@ class PayrollCalculatorService
 
     /**
      * Orkestrator penggajian akhir bulan.
+     * - lockForUpdate() pada cek existing payroll (cegah race condition double-generation).
+     * - forceDelete() pada existing payroll (cegah unique constraint violation karena soft delete).
+     * - Semua kalkulasi & write berada di dalam SATU transaction.
      */
     public function generatePayroll(Employee $employee, string $period): Payroll
     {
-        // Fix: Parse period untuk whereYear/whereMonth (PostgreSQL safe)
         $parsedPeriod = Carbon::createFromFormat('Y-m', $period);
         $targetYear = $parsedPeriod->year;
         $targetMonth = $parsedPeriod->month;
 
-        // Cek existing — JANGAN delete di sini!
-        $existingPayroll = Payroll::where('employee_id', $employee->id)
-            ->where('period', $period)
-            ->first();
-
-        if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
-            throw new DomainException("Payroll untuk periode {$period} sudah dikunci permanen.");
-        }
-
-        // Pendapatan kena pajak
-        $grossSalary = $this->calculateProratedSalary($employee, $period);
-
-        // Fix: whereYear/whereMonth ganti LIKE (PostgreSQL safe)
-        $overtimes = Overtime::where('employee_id', $employee->id)
-            ->where('status', RequestStatus::APPROVED)
-            ->whereYear('date', $targetYear)
-            ->whereMonth('date', $targetMonth)
-            ->get();
-
-        // Fix: map()->sum() — tidak bikin stdClass
-        $totalOvertimePay = $overtimes
-            ->map(fn (Overtime $ot) => $this->calculateOvertimePay($ot))
-            ->sum();
-
-        $taxableIncome = $grossSalary + $totalOvertimePay;
-
-        // Pendapatan bebas pajak — Reimbursement
-        $reimbursements = Reimbursement::where('employee_id', $employee->id)
-            ->where('status', ReimbursementStatus::APPROVED)
-            ->get();
-        $totalReimbursement = $reimbursements->sum('amount');
-        $totalGross = $taxableIncome + $totalReimbursement;
-
-        // Fix: Flat per hari (PRD §11.6), bukan per menit
-        $penaltyPerDay = (int) CompanySetting::get('attendance_penalty_per_day', 50000);
-
-        $lateCount = Attendance::where('employee_id', $employee->id)
-            ->whereYear('date', $targetYear)
-            ->whereMonth('date', $targetMonth)
-            ->where('late_minutes', '>', 0)
-            ->count();
-        $latePenalty = $lateCount * $penaltyPerDay;
-
-        $alphaCount = Attendance::where('employee_id', $employee->id)
-            ->whereYear('date', $targetYear)
-            ->whereMonth('date', $targetMonth)
-            ->where('status', AttendanceStatus::ABSENT)
-            ->count();
-        $dailyRate = $employee->position?->basic_salary ?? 0;
-        $alphaPenalty = $alphaCount * ($dailyRate > 0 ? $dailyRate / 22 : 0);
-
-        $attendancePenalty = $latePenalty + $alphaPenalty;
-
-        // BPJS & PPh21 dari taxable income (Reimbursement tidak dipajaki)
-        $bpjsComponents = $this->calculateBPJS($employee, $taxableIncome);
-        $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
-        $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
-
-        $terCategory = $this->getTERCategory($employee);
-        $pph21Deduction = $this->calculatePPh21($employee, ($taxableIncome - $attendancePenalty), $terCategory);
-
-        // Fix: Hitung kolom NOT NULL sebelum transaksi
-        $totalDeduction = $attendancePenalty + $bpjsKesehatanDeduction + $bpjsEmploymentDeduction + $pph21Deduction;
-        $basicSalary = $employee->position?->basic_salary ?? 0;
-        $totalAllowance = $employee->position?->allowance_jabatan ?? 0;
-        $netSalary = $totalGross - $totalDeduction;
-
-        // Fix: delete existingPayroll DI DALAM transaksi (cegah data loss)
-        return DB::transaction(function () use (
-            $existingPayroll, $employee, $period, $basicSalary, $totalAllowance,
-            $totalGross, $totalOvertimePay, $reimbursements,
-            $bpjsKesehatanDeduction, $bpjsEmploymentDeduction,
-            $pph21Deduction, $attendancePenalty, $totalDeduction, $netSalary
-        ) {
-            // Fix: Delete DI DALAM transaksi
-            if ($existingPayroll) {
-                $existingPayroll->delete();
+        return DB::transaction(function () use ($employee, $period, $targetYear, $targetMonth) {
+            $existingPayroll = Payroll::where('employee_id', $employee->id)
+                ->where('period', $period)
+                ->lockForUpdate()
+                ->first();
+            if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
+                throw new DomainException("Payroll untuk periode {$period} sudah dikunci permanen.");
             }
+            // pendapatan kena pajak
+            $grossSalary = $this->calculateProratedSalary($employee, $period);
 
+            $overtimes = Overtime::where('employee_id', $employee->id)
+                ->where('status', RequestStatus::APPROVED)
+                ->whereYear('date', $targetYear)
+                ->whereMonth('date', $targetMonth)
+                ->get();
+
+            $totalOvertimePay = $overtimes
+                ->map(fn (Overtime $ot) => $this->calculateOvertimePay($ot))
+                ->sum();
+
+            $taxableIncome = $grossSalary + $totalOvertimePay;
+
+            // pendapatan bebas pajak - Reimbursment
+            $reimbursements = Reimbursement::where('employee_id', $employee->id)
+                ->where('status', ReimbursementStatus::APPROVED)
+                ->get();
+            $totalReimbursment = $reimbursements->sum('amount');
+            $totalGross = $taxableIncome + $totalReimbursment;
+
+            // flat per hari
+            $penaltyPerDay = (int) CompanySetting::get('attendance_penalty_per_day', 50000);
+
+            $lateCount = Attendance::where('employee_id', $employee->id)
+                ->whereYear('date', $targetYear)
+                ->whereMonth('date', $targetMonth)
+                ->where('late_minutes', '>', 0)
+                ->count();
+            $latePenalty = $lateCount * $penaltyPerDay;
+
+            $alphaCount = Attendance::where('employee_id', $employee->id)
+                ->whereYear('date', $targetYear)
+                ->whereMonth('date', $targetMonth)
+                ->where('status', AttendanceStatus::ABSENT)
+                ->count();
+            $dailyRate = $employee->position?->basic_salary ?? 0;
+            $alphaPenalty = $alphaCount * ($dailyRate > 0 ? $dailyRate / 22 : 0);
+
+            $attendancePenalty = $latePenalty + $alphaPenalty;
+
+            // BPJS & PPh21 dari taxable income (Reimbursement tidak dipajaki)
+            $bpjsComponents = $this->calculateBPJS($employee, $taxableIncome);
+            $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
+            $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
+            $terCategory = $this->getTERCategory($employee);
+            $pph21Deduction = $this->calculatePPh21($employee, ($taxableIncome - $attendancePenalty), $terCategory);
+            $totalDeduction = $attendancePenalty + $bpjsKesehatanDeduction + $bpjsEmploymentDeduction + $pph21Deduction;
+            $basicSalary = $employee->position?->basic_salary ?? 0;
+            $totalAllowance = $employee->position?->allowance_jabatan ?? 0;
+            $netSalary = $totalGross - $totalDeduction;
+
+            // forceDelete supaya unique (employee_id, period) tidak violation karena soft delete
+            if ($existingPayroll) {
+                $existingPayroll->forceDelete();
+            }
             $payroll = Payroll::create([
                 'employee_id' => $employee->id,
                 'period' => $period,
@@ -291,7 +279,6 @@ class PayrollCalculatorService
                 'status' => PayrollStatus::DRAFT,
             ]);
 
-            // Bulk update reimbursement — 1 query, bukan N query
             if ($reimbursements->isNotEmpty()) {
                 Reimbursement::whereIn('id', $reimbursements->pluck('id'))
                     ->update([
