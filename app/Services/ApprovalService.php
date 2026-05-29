@@ -112,7 +112,6 @@ class ApprovalService
     /**
      * Resolve approver Level 2 berdasarkan tipe pengajuan.
      * Reimbursement → Finance. Cuti/Lembur → HR Manager.
-     * PRD §9.2 + §12.1.
      */
     protected function resolveL2Approver(Model $approvable): ?Employee
     {

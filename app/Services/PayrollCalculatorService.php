@@ -21,7 +21,6 @@ use App\Models\TaxConfig;
 use App\Traits\ManagesWorkDays;
 use Carbon\Carbon;
 use DomainException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PayrollCalculatorService
@@ -36,7 +35,6 @@ class PayrollCalculatorService
 
     /**
      * Menghitung Gaji Tetap (Basic + Allowance) secara Pro-Rate.
-     * PRD 11.3 & 11.10.
      */
     public function calculateProratedSalary(Employee $employee, string $period): float
     {
@@ -68,7 +66,7 @@ class PayrollCalculatorService
 
     /**
      * Menghitung upah lembur berdasarkan UU Cipta Kerja.
-     * PRD 8.3 & 8.4. Cache Holiday lookup untuk cegah N+1.
+     * PRD 8.3 & 8.4. SSOT cache holiday di Holiday::cachedYear() (B11 — 1 entry per tahun).
      */
     public function calculateOvertimePay(Overtime $overtime): float
     {
@@ -85,9 +83,8 @@ class PayrollCalculatorService
 
         $date = Carbon::parse($overtime->date);
 
-        $isHoliday = Cache::remember("holiday_{$date->toDateString()}", now()->addMonth(), function () use ($date) {
-            return Holiday::isHoliday($date);
-        }) || $date->isWeekend();
+        // B11: yearly cache (1 entry per year) + in-memory in_array() check
+        $isHoliday = Holiday::isHoliday($date) || $date->isWeekend();
 
         if ($isHoliday) {
             $firstEightHours = min($hours, 8);
@@ -115,7 +112,7 @@ class PayrollCalculatorService
 
     /**
      * Menghitung PPh21 TER per bulan.
-     * Cache TaxConfig untuk cegah N+1.
+     * SSOT cache di TaxConfig::cachedAll() — service ini fokus orkestrasi kalkulasi.
      */
     public function calculatePPh21(Employee $employee, float $grossIncome, TerCategory $category): float
     {
@@ -123,26 +120,25 @@ class PayrollCalculatorService
             return 0.0;
         }
 
-        $taxConfigs = Cache::remember('tax_configs', now()->addDay(), fn () => TaxConfig::all());
+        $categoryValue = $category instanceof \BackedEnum ? $category->value : $category;
 
-        $taxRate = $taxConfigs
-            ->where('ter_category', $category)
-            ->where('min_income', '<=', $grossIncome)
-            ->where('max_income', '>=', $grossIncome)
-            ->first();
+        $taxRate = collect(TaxConfig::cachedAll())->first(fn (array $t) => $t['ter_category'] === $categoryValue
+            && $t['min_income'] <= $grossIncome
+            && $t['max_income'] >= $grossIncome
+        );
 
         if (! $taxRate) {
             return 0.0;
         }
 
-        $rateToUse = $taxRate->effective_rate ?? $taxRate->rate;
+        $rateToUse = $taxRate['effective_rate'] ?? $taxRate['rate'];
 
         return round($grossIncome * $rateToUse, 2);
     }
 
     /**
      * Menghitung 5 komponen BPJS.
-     * Cache mencegah N+1 saat bulk generate payroll.
+     * SSOT cache di BpjsConfig::cachedAll() — service ini fokus orkestrasi kalkulasi.
      */
     public function calculateBPJS(Employee $employee, float $grossIncome): array
     {
@@ -158,14 +154,14 @@ class PayrollCalculatorService
             return $result;
         }
 
-        $bpjsConfigs = Cache::remember('bpjs_configs', now()->addDay(), fn () => BpjsConfig::all());
+        foreach (BpjsConfig::cachedAll() as $config) {
+            $baseIncome = $config['ceiling'] !== null
+                ? min($grossIncome, $config['ceiling'])
+                : $grossIncome;
 
-        foreach ($bpjsConfigs as $config) {
-            $baseIncome = $config->ceiling ? min($grossIncome, $config->ceiling) : $grossIncome;
-
-            $result["bpjs_{$config->name->value}"] = [
-                'employer' => round($baseIncome * $config->employer_rate, 2),
-                'employee' => round($baseIncome * $config->employee_rate, 2),
+            $result["bpjs_{$config['name']}"] = [
+                'employer' => round($baseIncome * $config['employer_rate'], 2),
+                'employee' => round($baseIncome * $config['employee_rate'], 2),
             ];
         }
 
@@ -174,7 +170,7 @@ class PayrollCalculatorService
 
     /**
      * Menghitung THR Pro-Rated (V1).
-     * PRD §11.11.
+     * 
      */
     public function calculateThrProrated(Employee $employee, float $monthlySalary, int $monthsWorked): float
     {

@@ -1,8 +1,8 @@
 # HRConnect — Spesifikasi Eksekusi Perbaikan
 
-> **Version:** 4.4 — Hari 1 Critical Fixes Complete (B1+B2+D1+B3+B4 verified via tinker)  
+> **Version:** 4.5 — Hari 1 Critical Fixes + Cache Clean Code Refactor (Eloquent Collection → plain array)  
 > **Tanggal:** 22 Mei 2026  
-> **Errata v4.0:** 49 koreksi total — 59 ✅ SELESAI, 2 🔀 MERGED, 3 ⚠️ PARTIAL, ❌ NOT DONE  
+> **Errata v4.0:** 49 koreksi total — 60 ✅ SELESAI, 2 🔀 MERGED, 3 ⚠️ PARTIAL, ❌ NOT DONE  
 > **Cara Pakai:** Item bertanda ✅ SELESAI tidak perlu dikerjakan lagi. Fokus pada item ❌ NOT DONE dan ⚠️ PARTIAL. Item 🔀 MERGED dipindah ke task lain.
 
 ---
@@ -11,12 +11,12 @@
 
 | Kategori | Jumlah | Detail |
 |----------|--------|--------|
-| ✅ SELESAI | 59 | Migrasi, model, enum, service, docs — semua sudah diimplementasi |
+| ✅ SELESAI | 60 | Migrasi, model, enum, service, docs — semua sudah diimplementasi |
 | 🔀 MERGED | 2 | §2.9 + §2.31 dikonsolidasi ke §0.10 (5 observer terpadu) |
 | ⚠️ PARTIAL | 3 | Sebagian done, sebagian belum |
-| ❌ NOT DONE | ~59 | Belum dikerjakan |
+| ❌ NOT DONE | ~58 | Belum dikerjakan |
 
-### ✅ SELESAI (59 item)
+### ✅ SELESAI (60 item)
 
 Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untuk ringkas.
 
@@ -54,6 +54,7 @@ Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untu
 | — | §2.12 KnowledgeBase vector cast | Done |
 | — | §2.15 Employee npwp/bank nullable | Done |
 | — | **§2.19 M14 bpjs_configs.name unique** | **HARI 1**: Migration `unique()` (verified tinker — duplicate throw UniqueConstraintViolationException) |
+| — | **Cache Clean Code: Eloquent Collection → plain array** | **HARI 1 BONUS**: `PayrollCalculatorService::calculatePPh21()` (line 124-132) + `calculateBPJS()` (line 164-171) cache plain array via `->toArray()` + unwrap enum + float cast. Cegah "incomplete object" cross-session crash. Doc `caching-strategy.md` §1.1 update aturan keras |
 | — | §2.25 EmploymentType 4 values | Done |
 | — | §2.28 AttendanceStatus 8 values | Done |
 | — | §2.30 Cache dead code removed | Done |

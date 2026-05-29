@@ -9,13 +9,60 @@
 
 ```php
 // config/cache.php
-'default' => env('CACHE_DRIVER', 'redis'), // Preferred: Redis
-// Fallback: 'database' jika Redis tidak tersedia
+'default' => env('CACHE_STORE', 'database'), // Default: database (KISS)
 ```
 
-**Rekomendasi:**
-- Development: `database` (simple, no extra setup)
-- Production: `redis` (faster, supports tags)
+**Strategi (KISS — Keep It Simple, Stupid):**
+- **Development & Testing:** `database` — simpel, tanpa setup tambahan. Manfaatkan PostgreSQL yang sudah ada.
+- **Production:** tetap `database` selama PostgreSQL belum sentuh limit. Laravel 13 + PostgreSQL 15+ sanggup handle cache + queue + (future) broadcasting tanpa Redis.
+- **Production scaling:** switch ke `redis` HANYA jika butuh `Cache::tags()` atau performa real-time tinggi (>10K req/min sustained).
+
+### 1.1 Rule Keras: Jangan Cache Eloquent Object Utuh
+
+**DILARANG KERAS** menyimpan Eloquent Model atau Eloquent Collection ke dalam cache:
+
+```php
+// ❌ SALAH — Eloquent object "gendut" (bawa relasi + state internal Laravel)
+$bpjs = Cache::remember('bpjs_configs', now()->addDay(), fn () => BpjsConfig::all());
+
+// ❌ SALAH — Single model
+$user = Cache::remember("user:{$id}", now()->addDay(), fn () => User::find($id));
+```
+
+**Alasan:**
+1. **Memory cepat habis** — Eloquent object bawa connection, relations, attribute casting, state internal.
+2. **Crash saat unserialize** — kalau struktur class berubah (cast, fillable, relasi), cache lama bisa rusak (`incomplete object` error).
+3. **Tidak portable** — sulit di-share antar process (queue worker, scheduled command).
+
+**Solusi: cache plain array primitif.**
+
+```php
+// ✅ BENAR — unwrap ke array primitif
+$bpjsConfigs = Cache::remember('bpjs_configs', now()->addDay(), function () {
+    return BpjsConfig::all()->map(fn (BpjsConfig $c) => [
+        'name' => $c->name->value,           // unwrap enum cast
+        'employer_rate' => (float) $c->employer_rate,  // unwrap decimal cast
+        'employee_rate' => (float) $c->employee_rate,
+        'ceiling' => $c->ceiling !== null ? (float) $c->ceiling : null,
+    ])->toArray();
+});
+
+// Akses pakai bracket notation
+foreach ($bpjsConfigs as $config) {
+    $rate = $config['employer_rate'];
+}
+
+// Re-hydrate ke Collection di runtime jika butuh method Collection (aman, baru dibuat)
+$found = collect($bpjsConfigs)->firstWhere('name', 'kesehatan');
+```
+
+### 1.2 Reverb Database Driver (Laravel 13 Native)
+
+Laravel 13 punya **database driver untuk Reverb** (WebSocket broadcasting). Tidak perlu Redis untuk real-time:
+- `BROADCAST_CONNECTION=reverb` saat fitur real-time dipakai (V2: live attendance counter, push notif).
+- MVP: cukup `BROADCAST_CONNECTION=log` (events ditulis ke log, tidak di-broadcast).
+
+Ini menjaga prinsip KISS: 1 PostgreSQL untuk DB + queue + cache + broadcasting.
 
 ---
 
