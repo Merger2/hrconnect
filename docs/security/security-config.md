@@ -3,6 +3,17 @@
 > **Dokumen ini berisi konfigurasi keamanan lengkap untuk HRConnect.**
 > Semua pengaturan keamanan harus diterapkan sesuai spesifikasi ini.
 
+> **STATUS IMPLEMENTASI (2026-05-31):**
+> Dokumen ini menjelaskan **target keamanan**. Beberapa komponen belum diimplementasikan:
+> - ❌ **SEC-3:** `laravel/sanctum` BELUM TERINSTALL → API auth tidak berfungsi
+> - ❌ **SEC-4:** `Permission` enum + `RoleAndPermissionSeeder` BELUM DIBUAT → `$user->can()` selalu `false`
+> - ❌ `app/Policies/` KOSONG → IDOR vulnerability di semua modul
+> - ❌ `app/Http/Middleware/CheckPasswordExpired.php` BELUM DIBUAT (kolom `password_changed_at` ada)
+> - ✅ CipherSweet aktif untuk Employee/FamilyDetail/Company PII fields
+> - ✅ Fortify 2FA TOTP aktif
+>
+> Setiap section di bawah menandai status spesifik dengan tag ❌/✅. Jadwal implementasi: lihat `planning/task.md` Phase 1.
+
 ---
 
 ## 1. AUTHENTICATION
@@ -414,10 +425,10 @@ FACE_THRESHOLD=0.85
 # Geofence
 GEOFENCE_DEFAULT_RADIUS=100
 
-# AI/RAG
-OPENAI_API_KEY=sk-xxx
+# AI/RAG (Gemini for both embedding and LLM)
 GEMINI_API_KEY=xxx
-GEMINI_MODEL=gemini-2.5-pro
+GEMINI_EMBEDDING_MODEL=text-embedding-004
+GEMINI_MODEL=gemini-2.5-flash
 
 # Google OAuth
 GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
@@ -453,4 +464,4 @@ GOOGLE_CLIENT_SECRET=xxx
 ---
 
 *Dokumen ini harus diikuti untuk memastikan keamanan aplikasi.*
-*Terakhir diupdate: 2026-05-19 — Updated SEC-5: FaceNotRegistered→422, NotClockedIn→409. Added CAT-005: Password expiry 90 hari override PRD §4.*
+*Terakhir diupdate: 2026-05-31 — G15: Status block ditambahkan di top. G1: env Gemini text-embedding-004 + gemini-2.5-flash.*

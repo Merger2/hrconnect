@@ -185,22 +185,24 @@ Cache::forget("attendance:monthly:{$employeeId}:{$period}");
 ## 4. CACHE INVALIDATION PATTERNS
 
 ### 4.1 Model Observer Pattern
+
+> **PENTING:** Contoh berikut adalah pattern yang aktual dipakai HRConnect (database driver). **Jangan gunakan `Cache::tags()`** di Observer — akan throw `BadMethodCallException`. Hapus per-key dengan `Cache::forget()`.
+
 ```php
 // app/Observers/AttendanceObserver.php
 class AttendanceObserver
 {
     public function created(Attendance $attendance): void
     {
-        // Invalidate related caches
+        // Invalidate per-key (database driver — NO tags)
         Cache::forget("attendance:today:{$attendance->employee_id}");
         Cache::forget("attendance:monthly:{$attendance->employee_id}:{$attendance->date->format('Y-m')}");
-        Cache::tags(['attendance'])->flush();
     }
 
     public function updated(Attendance $attendance): void
     {
         Cache::forget("attendance:today:{$attendance->employee_id}");
-        Cache::tags(['attendance'])->flush();
+        Cache::forget("attendance:monthly:{$attendance->employee_id}:{$attendance->date->format('Y-m')}");
     }
 }
 ```
@@ -345,25 +347,29 @@ php artisan cache:table  # If using database driver
 
 ## 9. CACHE CONFIGURATION
 
+> **HRConnect MVP pakai `database` driver.** Konfigurasi `redis` di bawah hanya untuk **referensi masa depan** kalau scaling membutuhkan `Cache::tags()` atau >10K req/min sustained.
+
 ```php
 // config/cache.php
 'stores' => [
-    'redis' => [
-        'driver' => 'redis',
-        'connection' => 'cache',
-        'lock_connection' => 'default',
-    ],
+    // ✅ DEFAULT — dipakai HRConnect
     'database' => [
         'driver' => 'database',
         'table' => 'cache',
         'connection' => null,
         'lock_connection' => null,
     ],
+    // 🔮 FUTURE REFERENCE — hanya jika upgrade ke Redis
+    'redis' => [
+        'driver' => 'redis',
+        'connection' => 'cache',
+        'lock_connection' => 'default',
+    ],
 ],
 ```
 
 ```php
-// config/database.php
+// config/database.php — 🔮 FUTURE REFERENCE (hanya jika migrasi ke Redis)
 'redis' => [
     'client' => env('REDIS_CLIENT', 'phpredis'),
     'default' => [
@@ -382,4 +388,4 @@ php artisan cache:table  # If using database driver
 ---
 
 *Dokumen ini harus diikuti untuk performa optimal.*
-*Terakhir diupdate: 2026-05-13 — Added errata note for Cache::tags() with database driver*
+*Terakhir diupdate: 2026-05-31*

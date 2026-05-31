@@ -83,21 +83,21 @@ C4Deployment
             table "47 Tables (34 existing + 13 new/modified)"
             table "companies, branches, employees, attendances"
             table "leaves, overtimes, payrolls, approvals"
-            table "knowledge_bases (embedding vector1536)"
+            table "knowledge_bases (embedding vector768)"
             table "company_settings, tax_configs, bpjs_configs"
             table "leave_balances, shift_schedules"
         }
     }
     
     node "External APIs" as ExternalAPIs {
-        node "OpenAI API" as OpenAI {
-            artifact "text-embedding-3-small" as OpenAIEmbedding {
-                component "1536-dimension embeddings"
+        node "Gemini Embedding API" as GeminiEmbed {
+            artifact "text-embedding-004" as GeminiEmbedding {
+                component "768-dimension embeddings"
                 component "PDF chunking ~60 tokens"
             }
         }
         
-        node "Gemini 2.5 Pro API" as Gemini {
+        node "Gemini 2.5 Flash API" as Gemini {
             artifact "Gemini LLM" as GeminiLLM {
                 component "RAG Response Generation"
                 component "Context + Query Processing"
@@ -132,8 +132,8 @@ C4Deployment
     PHPRuntime -->|8. Cron Execution| Cron
     Cron -->|9. Scheduled Commands| PHPRuntime
     
-    PHPRuntime -->|10. HTTPS API Call<br/>text-embedding-3-small| OpenAI
-    OpenAI -->|11. 1536D Embedding| PHPRuntime
+    PHPRuntime -->|10. HTTPS API Call<br/>text-embedding-004| GeminiEmbed
+    GeminiEmbed -->|11. 768D Embedding| PHPRuntime
     
     PHPRuntime -->|12. HTTPS API Call<br/>RAG Query + Context| Gemini
     Gemini -->|13. AI Response + Sources| PHPRuntime
@@ -149,8 +149,8 @@ C4Deployment
     note right of PWA: PWA Mobile-First<br/>Bottom Navigation<br/>Offline: DITUNDA (V2)
     note right of VPS: VPS Server<br/>PHP 8.5 + Laravel 13<br/>Queue: database
     note right of DB: Neon PostgreSQL<br/>pgvector + pg_trgm + pgcrypto<br/>CipherSweet Encryption
-    note right of OpenAI: OpenAI text-embedding-3-small<br/>1536 dimensions<br/>PDF chunking ~60 tokens
-    note right of Gemini: Gemini 2.5 Pro API<br/>RAG Response Generation<br/>Don't self-host (avoid OOM)
+    note right of GeminiEmbed: Gemini text-embedding-004<br/>768 dimensions<br/>PDF chunking ~60 tokens
+    note right of Gemini: Gemini 2.5 Flash API<br/>RAG Response Generation<br/>Don't self-host (avoid OOM)
 ```
 
 ---
@@ -217,8 +217,8 @@ flowchart TB
     end
     
     subgraph "External APIs"
-        OA[OpenAI API<br/>text-embedding-3-small<br/>1536D embedding]
-        GM[Gemini 2.5 Pro API<br/>RAG Response<br/>Context + Query]
+        OA[Gemini Embedding API<br/>text-embedding-004<br/>768D embedding]
+        GM[Gemini 2.5 Flash API<br/>RAG Response<br/>Context + Query]
         GO[Google OAuth<br/>SSO Workspace]
         EM[Mailtrap/SES<br/>Email Service]
     end
@@ -255,7 +255,7 @@ flowchart TB
     ApprovalSvc -->|Eloquent ORM| PG
     
     EmbeddingJob -->|HTTPS API| OA
-    OA -->|1536D Embedding| EmbeddingJob
+    OA -->|768D Embedding| EmbeddingJob
     
     LeaveSvc -->|HTTPS API<br/>RAG Query| GM
     GM -->|AI Response + Sources| LeaveSvc
@@ -298,8 +298,8 @@ flowchart LR
     end
     
     subgraph "External Services"
-        OA[OpenAI API<br/>Embedding]
-        GM[Gemini API<br/>LLM]
+        OA[Gemini Embedding API<br/>text-embedding-004]
+        GM[Gemini 2.5 Flash API<br/>LLM]
         GO[Google OAuth<br/>SSO]
         EM[Email Service<br/>SMTP]
     end
@@ -331,8 +331,8 @@ flowchart LR
     CR -->|Execute Commands| WEB1
     
     %% Application to External Services
-    WEB1 -->|HTTPS<br/>text-embedding-3-small| OA
-    WEB2 -->|HTTPS<br/>text-embedding-3-small| OA
+    WEB1 -->|HTTPS<br/>text-embedding-004| OA
+    WEB2 -->|HTTPS<br/>text-embedding-004| OA
     WEB1 -->|HTTPS<br/>RAG Query| GM
     WEB2 -->|HTTPS<br/>RAG Query| GM
     WEB1 -->|OAuth 2.0| GO
@@ -342,8 +342,8 @@ flowchart LR
     
     note top of E: PWA Mobile-First<br/>face-api.js 128D<br/>Geolocation API
     note right of DB: Neon PostgreSQL<br/>47 Tables<br/>pgvector extension
-    note bottom of OA: OpenAI API<br/>1536D Embedding<br/>PDF max 10MB
-    note bottom of GM: Gemini 2.5 Pro<br/>RAG Response<br/>Don't self-host
+    note bottom of OA: Gemini text-embedding-004<br/>768D Embedding<br/>PDF max 10MB
+    note bottom of GM: Gemini 2.5 Flash<br/>RAG Response<br/>Don't self-host
     
     style E fill:#e1f5ff
     style M fill:#e1f5ff
@@ -381,14 +381,14 @@ flowchart LR
 | Connection | PDO/PostgreSQL via `.env` |
 | Encryption | CipherSweet untuk NIK, phone, NPWP |
 | Tables | 47 tables (34 existing + 13 new/modified) |
-| Vector Support | 1536 dimensions (OpenAI) + 128 dimensions (face-api.js) |
+| Vector Support | 768 dimensions (Gemini text-embedding-004) + 128 dimensions (face-api.js) |
 
 ### 4.3 External APIs & Services
 
 | API/Service | Fungsi | Spesifikasi | PRD Reference |
 |-------------|--------|-------------|----------------|
-| OpenAI API | PDF Embedding | text-embedding-3-small, 1536D | PRD 13.1 |
-| Gemini 2.5 Pro | RAG LLM | Context + Query processing | PRD 13.1 |
+| Gemini Embedding API | PDF Embedding | text-embedding-004, 768D | PRD 13.1 |
+| Gemini 2.5 Flash | RAG LLM | Context + Query processing | PRD 13.1 |
 | Google OAuth | SSO Workspace | OAuth 2.0, token verification | PRD 4.1 |
 | Mailtrap/SES/Mailgun | Email | SMTP, In-App + Email notifications | PRD 15.3 |
 
@@ -443,10 +443,7 @@ DB_DATABASE=hrconnect
 DB_USERNAME=hrconnect_user
 DB_PASSWORD=secret
 
-CACHE_STORE=redis
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-
+CACHE_STORE=database
 QUEUE_CONNECTION=database
 
 MAIL_MAILER=smtp
@@ -455,7 +452,6 @@ MAIL_PORT=2525
 MAIL_USERNAME=mailtrap_user
 MAIL_PASSWORD=mailtrap_pass
 
-OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxx
 GEMINI_API_KEY=AIzaSyxxxxxxxxxxxxxxxx
 GOOGLE_CLIENT_ID=521tech.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=google_secret
@@ -504,7 +500,7 @@ CIPHERSWEET_SECRET_KEY=secret_key_32_bytes
 2. **Haversine Formula**: Server-side GPS validation di AttendanceService (PRD 2.2)
 3. **PPh21 TER**: Kategori A/B/C dihitung per bulan (PRD 11.4)
 4. **BPJS**: Rates di bpjs_configs dengan ceiling configurable (PRD 11.5)
-5. **KnowledgeBase AI**: OpenAI embedding 1536D + Gemini 2.5 Pro LLM (PRD 13.1)
+5. **KnowledgeBase AI**: Gemini text-embedding-004 768D + Gemini 2.5 Flash LLM (PRD 13.1)
 6. **Payroll Queue**: queue: payroll_high, tries: 3, timeout: 120s (PRD 11.9)
 7. **Approval Workflow**: 2 level (Manager L1 → HR Manager L2) (PRD 12.1)
 8. **Cron Jobs**: attendance:detect-alpha (23:59), leave:reset-quota (Jan 1) (PRD 16)

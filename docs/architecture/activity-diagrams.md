@@ -233,7 +233,7 @@ flowchart TD
     subgraph Background Job
         DispatchJob --> ExtractText[Extract Text from PDF]
         ExtractText --> Chunking[Chunking ~60 Token<br/>Overlap 10 Token]
-        Chunking --> GenEmbedding[Generate Embedding<br/>OpenAI text-embedding-3-small<br/>1536 dimensi]
+        Chunking --> GenEmbedding[Generate Embedding<br/>Gemini text-embedding-004<br/>768 dimensi]
         GenEmbedding --> SaveVector[Simpan ke DB<br/>knowledge_bases.embedding<br/>pgvector]
     end
     
@@ -241,7 +241,7 @@ flowchart TD
         UserAsk([User Tanya]) --> InputQuery[Input Pertanyaan]
         InputQuery --> VectorQuery[Query Vector Similarity<br/>Cosine Similarity]
         VectorQuery --> GetTopK[Ambil Top-K Chunks<br/>Relevant Documents]
-        GetTopK --> SendToGemini[Send to Gemini 2.5 Pro API<br/>Context + Question]
+        GetTopK --> SendToGemini[Send to Gemini 2.5 Flash API<br/>Context + Question]
         SendToGemini --> GetResponse[Receive AI Response<br/>+ Source References]
         GetResponse --> Display[Display to User<br/>Answer + Source Docs]
     end
@@ -290,9 +290,9 @@ flowchart TD
 9. **PPh21 TER**: Kategori A/B/C berdasarkan PTKP dari marital_status + jumlah anak (PRD 11.4)
 10. **BPJS**: Kesehatan 4%/1%, JHT 3.7%/2%, JP 2%/1%, ceiling di bpjs_configs (PRD 11.5)
 11. **Payroll Lock**: Status published → LOCKED PERMANEN, koreksi via adjustment (PRD 11.7)
-12. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding 1536D, Gemini 2.5 Pro LLM (PRD 13.1)
+12. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, Gemini text-embedding-004 768D, Gemini 2.5 Flash LLM (PRD 13.1)
 13. **WFA Approval**: Approval SETELAH clock-in, jika reject status bisa jadi absent (PRD 6.1)
 
 ---
 
-*Terakhir diupdate: 2026-05-13*
+*Terakhir diupdate: 2026-05-31*

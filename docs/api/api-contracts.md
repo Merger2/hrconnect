@@ -375,6 +375,6 @@ X-Platform: ios|android|web
 
 ---
 
-*Last Updated: 2026-05-13*
+*Last Updated: 2026-05-31*
 *Version: 1.1.0 — Errata applied (C1, C2, SEC-3, SEC-5, LeaveBalance naming, EmploymentType 4 values)*
 *Status: Draft - Ready for Implementation*

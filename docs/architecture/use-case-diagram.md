@@ -338,7 +338,7 @@ graph TD
         UC1[Upload PDF Document]
         UC2[Extract Text from PDF]
         UC3[Chunk Document]
-        UC4[Generate Embedding - OpenAI]
+        UC4[Generate Embedding - Gemini]
         UC5[Store to pgvector]
         UC6[Chat with AI]
         UC7[Query Vector Similarity]
@@ -432,8 +432,8 @@ graph TD
 4. **Leave Quota**: Pro-rated tahun pertama, carry forward maksimal 3 hari (PRD 7.3)
 5. **WFA Mode**: GPS dilewati, wajib catatan ≥20 karakter, approval setelah clock-in (PRD 6.1)
 6. **Approval Workflow**: 2 level (Manager L1 → HR Manager L2), skip L1 jika parent_id NULL (PRD 12.1) ⚠️ ERRATA C1: Approval.level casts to ApprovalLevel enum
-7. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding, Gemini 2.5 Pro LLM (PRD 13.1) ⚠️ ERRATA C3: API auth requires laravel/sanctum (not installed)
+7. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, Gemini text-embedding-004 768D, Gemini 2.5 Flash LLM (PRD 13.1) ⚠️ ERRATA C3: API auth requires laravel/sanctum (not installed)
 
 ---
 
-*Terakhir diupdate: 2026-05-13*
+*Terakhir diupdate: 2026-05-31 — G1: Migrasi OpenAI→Gemini (text-embedding-004)*

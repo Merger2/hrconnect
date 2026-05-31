@@ -27,8 +27,14 @@
 └──────────────┘                │  │  Worker   │  │
                                 │  └─────┬─────┘  │
 ┌──────────────┐                │        │        │
-│ OpenAI API   │ ◄────────────► │  ┌─────▼─────┐  │
-└──────────────┘                │  │ PostgreSQL│  │
+│ Gemini API   │ ◄────────────► │  ┌─────▼─────┐  │
+│ (Embedding + │                │  │  Queue    │  │
+│  2.5 Flash)  │                │  │  Worker   │  │
+└──────────────┘                │  │ (database)│  │
+                                │  └─────┬─────┘  │
+                                │        │        │
+                                │  ┌─────▼─────┐  │
+                                │  │ PostgreSQL│  │
                                 │  │  (Neon)   │  │
                                 │  └───────────┘  │
                                 └─────────────────┘
@@ -61,8 +67,8 @@
 | Service | Purpose | Cost |
 |---------|---------|------|
 | Google Cloud Console | OAuth authentication | Free |
-| OpenAI API | Text embeddings (1536D) | ~$5/bulan |
-| Gemini API | LLM chat (RAG) | Free tier available |
+| Gemini Embedding API | Text embeddings (text-embedding-004, 768D) | Free tier available |
+| Gemini 2.5 Flash API | LLM chat (RAG) | Free tier available |
 | Mail Service | Email notifications | ~$10/bulan (Mailgun) |
 
 ---
@@ -77,16 +83,11 @@ ssh root@your-server-ip
 # Update system
 apt update && apt upgrade -y
 
-# Install dependencies
+# Install dependencies (NO Redis — cache & queue use database driver)
 apt install -y php8.5 php8.5-fpm php8.5-cli php8.5-pgsql php8.5-mbstring \
-    php8.5-xml php8.5-curl php8.5-zip php8.5-gd php8.5-sodium php8.5-redis \
+    php8.5-xml php8.5-curl php8.5-zip php8.5-gd php8.5-sodium \
     php8.5-bcmath php8.5-intl php8.5-fileinfo \
     nginx supervisor git curl unzip composer nodejs npm
-
-# Install Redis
-apt install -y redis-server
-systemctl enable redis-server
-systemctl start redis-server
 
 # Enable PHP-FPM
 systemctl enable php8.5-fpm
@@ -482,11 +483,8 @@ DB_SSLMODE=require
 
 CIPHERSWEET_KEY=base64:...
 
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-REDIS_DB=0
-REDIS_CACHE_DB=1
-
+# Cache & Queue: database driver (KISS, no Redis)
+CACHE_STORE=database
 QUEUE_CONNECTION=database
 
 MAIL_MAILER=smtp
@@ -498,9 +496,10 @@ MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS="hrconnect@company.com"
 MAIL_FROM_NAME="${APP_NAME}"
 
-OPENAI_API_KEY=sk-xxx
+# AI/RAG (Gemini for both embedding and LLM)
 GEMINI_API_KEY=xxx
-GEMINI_MODEL=gemini-2.5-pro
+GEMINI_EMBEDDING_MODEL=text-embedding-004
+GEMINI_MODEL=gemini-2.5-flash
 
 GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=xxx
@@ -512,4 +511,4 @@ GEOFENCE_DEFAULT_RADIUS=100
 ---
 
 *Dokumen ini harus diikuti saat deployment.*
-*Terakhir diupdate: 2026-05-13 — Added Sanctum install step (C3), errata notes*
+*Terakhir diupdate: 2026-05-31 — G2: Hapus Redis (cache & queue pakai database driver), G1: OpenAI→Gemini*

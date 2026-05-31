@@ -1,5 +1,12 @@
 # Sprint & Branch Strategy — HRConnect
 
+> **CATATAN ESTIMASI FILE (2026-05-31):** Estimasi total ~408 file di dokumen ini berbeda dengan dokumen lain karena scope-nya berbeda:
+> - `sprint-branch-strategy.md`: ~408 file (granular per-sprint, termasuk sub-modul Livewire)
+> - `execution-schedule.md`: ~353 file (12-week schedule, granularitas mingguan)
+> - `reference/complete-file-blueprint.md`: ~341 file baru + ~12 modifikasi (audit terhadap struktur ideal)
+>
+> **Sumber kebenaran**: `planning/task.md` v4.5 (per-item status ✅/⚠️/❌). Estimasi total file di doc lain adalah perkiraan working — gunakan task.md untuk track progress aktual.
+
 ## Branching Strategy
 
 ```

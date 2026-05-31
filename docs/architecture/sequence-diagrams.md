@@ -358,8 +358,8 @@ sequenceDiagram
     participant C as KnowledgeBaseController
     participant KBS as KnowledgeBaseService
     participant DB as PostgreSQL (pgvector)
-    participant OA as OpenAI API
-    participant GM as Gemini 2.5 Pro API
+    participant GE as Gemini Embedding API
+    participant GM as Gemini 2.5 Flash API
     
     U->>C: POST /knowledgebase/chat (question)
     activate C
@@ -367,11 +367,11 @@ sequenceDiagram
     C->>KBS: processQuery(question)
     activate KBS
     
-    KBS->>OA: createEmbedding(text-embedding-3-small, question)
-    activate OA
-    Note over OA: Generate 1536-dimension embedding
-    OA-->>KBS: return queryEmbedding[1536]
-    deactivate OA
+    KBS->>GE: createEmbedding(text-embedding-004, question)
+    activate GE
+    Note over GE: Generate 768-dimension embedding
+    GE-->>KBS: return queryEmbedding[768]
+    deactivate GE
     
     KBS->>DB: vectorSimilaritySearch(queryEmbedding, topK=5)
     activate DB
@@ -379,7 +379,7 @@ sequenceDiagram
     DB-->>KBS: return topChunks[text, source, page]
     deactivate DB
     
-    KBS->>GM: generateResponse(model=gemini-2.5-pro, context=topChunks, question)
+    KBS->>GM: generateResponse(model=gemini-2.5-flash, context=topChunks, question)
     activate GM
     Note over GM: Send context + question<br/>Receive AI-generated answer
     GM-->>KBS: return answer + sources[]
@@ -406,7 +406,7 @@ sequenceDiagram
     participant J as ProcessKnowledgeBaseEmbedding
     participant FS as File Storage
     participant PDF as PDF Parser
-    participant OA as OpenAI API
+    participant GE as Gemini Embedding API
     
     HR->>C: POST /knowledgebase/upload (pdf_file, title)
     activate C
@@ -437,11 +437,11 @@ sequenceDiagram
     Note over J: Split into chunks
     
     loop For Each Chunk
-        J->>OA: createEmbedding(text-embedding-3-small, chunk)
-        activate OA
-        Note over OA: Generate 1536-dimension embedding
-        OA-->>J: return chunkEmbedding[1536]
-        deactivate OA
+        J->>GE: createEmbedding(text-embedding-004, chunk)
+        activate GE
+        Note over GE: Generate 768-dimension embedding
+        GE-->>J: return chunkEmbedding[768]
+        deactivate GE
         
         J->>DB: insertKnowledgeBaseChunk(knowledge_base_id, chunk, embedding, page)
         activate DB
@@ -475,7 +475,7 @@ sequenceDiagram
 9. **PPh21 TER**: Dihitung per bulan, kategori A/B/C dari PTKP (PRD 11.4)
 10. **BPJS**: Kesehatan 4%/1%, JHT 3.7%/2%, JP 2%/1%, ceiling di bpjs_configs (PRD 11.5)
 11. **Payroll Lock**: Status published → LOCKED PERMANEN (PRD 11.7)
-12. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding 1536D, Gemini 2.5 Pro (PRD 13.1)
+12. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, Gemini text-embedding-004 768D, Gemini 2.5 Flash (PRD 13.1)
 13. **Overtime Link**: Saat Clock-Out, Observer link overtime ke attendance (PRD 8.2)
 14. **⚠️ ERRATA ERR-001**: Overtime uses tiered rates per UU Cipta Kerja: Weekday 1.5x/2x, Holiday 2x/3x/4x — NOT a flat rate
 15. **⚠️ ERRATA C3**: API auth sequences require `laravel/sanctum` (not yet installed)
@@ -484,4 +484,4 @@ sequenceDiagram
 
 ---
 
-*Terakhir diupdate: 2026-05-13*
+*Terakhir diupdate: 2026-05-31*

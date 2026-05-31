@@ -2,14 +2,14 @@
 
 **Versi:** 2.0 (READ-ONLY)  
 **Tanggal:** 20 Mei 2026  
-**PRD Referensi:** PRD v3.0 (2026-05-20)  
-**Status:** HISTORICAL CHANGELOG — Semua koreksi sudah di-merge ke PRD.md v3.0. Dokumen ini hanya untuk referensi historis. Untuk versi terbaru, lihat PRD.md v3.0.
+**PRD Referensi:** PRD v3.1 (2026-05-21)  
+**Status:** HISTORICAL CHANGELOG — Semua koreksi (9 ERR + 19 CAT) sudah di-merge ke PRD.md v3.0 dan diperluas pada PRD.md v3.1 dengan 35 koreksi konsolidasi tambahan (K1-K5 + M1-M8 + S1-S18 + N1-N12 + Glossary). Dokumen ini hanya untuk referensi historis. Untuk versi terbaru, lihat PRD.md v3.1.
 
 ---
 
 ## Cara Pakai
 
-Dokumen ini adalah **read-only changelog**. Semua koreksi di bawah sudah di-merge langsung ke PRD.md v3.0 pada section yang relevan. Jika ada konflik antara dokumen ini dan PRD.md v3.0, **PRD.md v3.0 yang benar**.
+Dokumen ini adalah **read-only changelog**. Semua koreksi di bawah sudah di-merge langsung ke PRD.md v3.0 (dan diperluas di v3.1) pada section yang relevan. Jika ada konflik antara dokumen ini dan PRD.md v3.1, **PRD.md v3.1 yang benar**.
 
 ---
 

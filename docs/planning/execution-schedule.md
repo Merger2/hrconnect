@@ -2,7 +2,9 @@
 
 > **Dokumen ini berisi jadwal pengerjaan lengkap untuk 12 minggu development HRConnect.**
 > Estimasi: ~9 jam/hari, 6 hari/minggu.
-> **Update terakhir: 2026-05-13** — Progress aktual + redistribusi + errata notes.
+> **Update terakhir: 2026-05-31** — Progress aktual + redistribusi + errata notes.
+
+> **CATATAN ESTIMASI FILE:** Total ~353 file di dokumen ini adalah granularitas mingguan, berbeda dengan `sprint-branch-strategy.md` (~408 file granular per-sprint) dan `reference/complete-file-blueprint.md` (~341 baru + ~12 modifikasi). **Sumber kebenaran progress per-item**: `planning/task.md` v4.5.
 
 ---
 
@@ -703,4 +705,4 @@ Issues below were identified during comprehensive audit and must be resolved bef
 
 *Dokumen ini adalah panduan utama untuk eksekusi project.*
 *Ikuti jadwal ini agar tidak bingung dan tetap on track.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-31*

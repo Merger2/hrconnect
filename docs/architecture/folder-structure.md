@@ -693,29 +693,29 @@ hrconnect/
 
 ## KEY FOLDERS SUMMARY
 
-| Folder | Purpose | Files |
-|--------|---------|-------|
-| `app/Enums/` | PHP 8.1 Enums | 27 files |
-| `app/Models/` | Eloquent Models | 31 files |
-| `app/Services/` | Business Logic | 8 files |
-| `app/Observers/` | Model Event Handlers | 6 files |
-| `app/Jobs/` | Queue Jobs | 9 files |
-| `app/Notifications/` | Mail/Database Notifications | 12 files |
-| `app/Livewire/` | Livewire Components | 69 files |
-| `app/Http/Requests/` | Form Validation | 15 files |
-| `app/Http/Middleware/` | HTTP Middleware | 5 files |
-| `app/Policies/` | Authorization Policies | 8 files |
-| `app/Console/Commands/` | Artisan Commands | 7 files |
-| `database/migrations/` | Database Schema | 48 files |
-| `database/seeders/` | Database Seeders | 12 files |
-| `resources/views/` | Blade Templates | 110+ files |
-| `resources/js/` | JavaScript Files | 8 files |
-| `lang/id/` | Bahasa Indonesia Translations | 13 files |
-| `tests/Feature/` | Feature Tests | 49 files |
-| `tests/Unit/` | Unit Tests | 14 files |
-| `docs/` | Project Documentation | 15 files |
+| Folder | Purpose | Target Files | Realisasi (2026-05-31) |
+|--------|---------|--------------|------------------------|
+| `app/Enums/` | PHP 8.1 Enums | 33 files | ✅ 33 files |
+| `app/Models/` | Eloquent Models | 31 files | ✅ 31 files |
+| `app/Services/` | Business Logic | 7 files | ✅ 7 files (Approval, Attendance, FaceRecognition, Geofence, Leave, PayrollCalculator, Reimbursement) |
+| `app/Observers/` | Model Event Handlers | 5 files | ✅ 5 files (Attendance, BpjsConfig, Employee, Holiday, TaxConfig) |
+| `app/Jobs/` | Queue Jobs | 9 files | ⚠️ 1 file (GenerateEmployeePayrollJob) — 8 pending |
+| `app/Notifications/` | Mail/Database Notifications | 12 files | ❌ 0 files (folder belum ada — Phase 2) |
+| `app/Livewire/` | Livewire Components | 69 files | ❌ 0 files (Phase 2-4) |
+| `app/Http/Requests/` | Form Validation | 15 files | ❌ 0 files (Phase 2) |
+| `app/Http/Middleware/` | HTTP Middleware | 5 files | ❌ 0 files (Phase 2) |
+| `app/Policies/` | Authorization Policies | 8 files | ❌ 0 files (Phase 1.2) |
+| `app/Console/Commands/` | Artisan Commands | 7 files | ❌ 0 files (Phase 1) |
+| `database/migrations/` | Database Schema | 48 files | ⚠️ 42 files — 6 pending (sanctum, password_changed_at, FK indexes, performance_reviews, BPJS unique, exception fields) |
+| `database/seeders/` | Database Seeders | 12 files | ⚠️ partial |
+| `resources/views/` | Blade Templates | 110+ files | ❌ 0 files (Phase 2-4) |
+| `resources/js/` | JavaScript Files | 8 files | ⚠️ partial |
+| `lang/id/` | Bahasa Indonesia Translations | 13 files | ⚠️ partial |
+| `tests/Feature/` | Feature Tests | 49 files | ⚠️ partial |
+| `tests/Unit/` | Unit Tests | 14 files | ⚠️ partial |
+| `docs/` | Project Documentation | 25+ files | ✅ 27 files |
 
 ---
 
 *Dokumen ini adalah referensi lengkap struktur folder.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-31*

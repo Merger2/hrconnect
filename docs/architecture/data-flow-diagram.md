@@ -25,8 +25,8 @@ flowchart LR
     F[Finance]
     SA[Super Admin]
     GO[Google OAuth]
-    OA[OpenAI API]
-    GM[Gemini API]
+    OA[Gemini Embedding API]
+    GM[Gemini 2.5 Flash API]
     NE[Neon PostgreSQL]
     
     %% System
@@ -64,7 +64,7 @@ flowchart LR
     GO -->|17. OAuth Authentication| HRIS
     HRIS -->|18. OAuth Token| GO
     HRIS -->|19. PDF Embedding Request| OA
-    OA -->|20. 1536D Embedding| HRIS
+    OA -->|20. 768D Embedding| HRIS
     HRIS -->|21. RAG Query + Context| GM
     GM -->|22. AI Generated Response| HRIS
     
@@ -95,10 +95,10 @@ flowchart LR
 | 16 | System Logs | HRIS | Super Admin | Activity logs, audit trails |
 | 17 | OAuth Auth | Google OAuth | HRIS | Google Workspace SSO authentication |
 | 18 | OAuth Token | HRIS | Google OAuth | Token verifikasi |
-| 19 | Embedding Request | HRIS | OpenAI API | Text chunks untuk embedding (text-embedding-3-small) |
-| 20 | 1536D Embedding | OpenAI API | HRIS | Vector embedding hasil proses |
-| 21 | RAG Query | HRIS | Gemini API | Query + context chunks untuk AI response |
-| 22 | AI Response | Gemini API | HRIS | Generated answer + sources |
+| 19 | Embedding Request | HRIS | Gemini Embedding API | Text chunks untuk embedding (text-embedding-004) |
+| 20 | 768D Embedding | Gemini Embedding API | HRIS | Vector embedding hasil proses |
+| 21 | RAG Query | HRIS | Gemini 2.5 Flash API | Query + context chunks untuk AI response |
+| 22 | AI Response | Gemini 2.5 Flash API | HRIS | Generated answer + sources |
 | 23 | Read/Write Data | HRIS | Neon PostgreSQL | Operasi CRUD database |
 | 24 | Retrieved Data | Neon PostgreSQL | HRIS | Data hasil query |
 
@@ -305,8 +305,8 @@ flowchart TD
     %% External Entities
     F[Finance]
     E[Employee]
-    OA[OpenAI API]
-    GM[Gemini API]
+    OA[Gemini Embedding API]
+    GM[Gemini 2.5 Flash API]
     
     %% Processes
     P1[1.0 Generate Payroll<br/>Main Process]
@@ -332,7 +332,7 @@ flowchart TD
     D8[(D8: Leave Balances<br/>used days)]
     D9[(D9: Loans<br/>active loan)]
     D10[(D10: Company Settings<br/>payroll_cutoff_date)]
-    D11[(D11: KnowledgeBases<br/>embedding vector1536)]
+    D11[(D11: KnowledgeBases<br/>embedding vector768)]
     D12[(D12: Holidays<br/>date)]
     
     %% Data Flows - Generate Payroll
@@ -390,12 +390,12 @@ flowchart TD
     P8 -->|8.2 Extract Text| P8
     P8 -->|8.3 Chunking ~60 tokens| P8
     P8 -->|8.4 Request Embedding| OA
-    OA -->|8.5 1536D Embedding| P8
+    OA -->|8.5 768D Embedding| P8
     P8 -->|8.6 Save to Vector DB| D11
     
     E -->|9.1 Chat Query| P9
     P9 -->|9.2 Get Query Embedding| OA
-    OA -->|9.3 Query Vector 1536D| P9
+    OA -->|9.3 Query Vector 768D| P9
     P9 -->|9.4 Vector Similarity Search| D11
     D11 -->|9.5 Top-K Chunks| P9
     P9 -->|9.6 Send Context + Query| GM
@@ -414,7 +414,7 @@ flowchart TD
 | 5.0 | Calculate Overtime Pay | (Gaji Pokok + Tunjangan) / 173 × Rate | Overtime hours, Employee | Overtime pay ⚠️ ERR-007: Weekend = Holiday rate; tiered per UU Cipta Kerja |
 | 6.0 | Calculate Attendance Penalty | Denda keterlambatan + alpha | Attendance records | Penalty amount |
 | 7.0 | Generate E-Payslip PDF | 2 kolom Pendapatan/Potongan | Payroll data | PDF file |
-| 8.0 | Process KnowledgeBase Embedding | PDF → chunking → OpenAI embedding | PDF file | Vector 1536D in pgvector |
+| 8.0 | Process KnowledgeBase Embedding | PDF → chunking → Gemini embedding | PDF file | Vector 768D in pgvector |
 | 9.0 | RAG Chat Query | Vector search → Gemini API → Response | User query | AI answer + sources |
 
 ---
@@ -430,8 +430,8 @@ flowchart TD
 | 4 | Finance | Payroll Processing | Generate Payroll, View Reports |
 | 5 | Super Admin | Full System Access | Config, Audit Logs |
 | 6 | Google OAuth | Authentication | SSO Google Workspace |
-| 7 | OpenAI API | Embedding Service | text-embedding-3-small (1536D) |
-| 8 | Gemini API | LLM Service | Gemini 2.5 Pro untuk RAG |
+| 7 | Gemini Embedding API | Embedding Service | text-embedding-004 (768D) |
+| 8 | Gemini 2.5 Flash API | LLM Service | Gemini 2.5 Flash untuk RAG |
 | 9 | Neon PostgreSQL | Database | Data storage (pgvector) |
 
 ### Penyimpanan Data (Data Stores)
@@ -447,7 +447,7 @@ flowchart TD
 | D8 | Tax Configs | A/B/C, min_income, rate | PPh21 Calculation |
 | D9 | BPJS Configs | kesehatan/jht/jp, rates | BPJS Calculation |
 | D10 | Company Settings | face_similarity_threshold, cutoff_date | System Config |
-| D11 | KnowledgeBases | embedding vector(1536) | AI RAG |
+| D11 | KnowledgeBases | embedding vector(768) | AI RAG |
 | D12 | Holidays | date, name | Attendance, Leave, Payroll |
 
 ### Proses Inti (Processes)
@@ -493,10 +493,10 @@ flowchart TD
 8. **PPh21 TER**: Kategori A/B/C berdasarkan PTKP dari marital_status + jumlah anak (PRD 11.4)
 9. **BPJS**: Kesehatan 4%/1%, JHT 3.7%/2%, JP 2%/1%, ceiling di bpjs_configs (PRD 11.5)
 10. **Payroll Lock**: Status published → LOCKED PERMANEN (PRD 11.7)
-11. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, OpenAI embedding 1536D, Gemini 2.5 Pro (PRD 13.1)
+11. **KnowledgeBase AI**: PDF max 10MB, chunking 60 token, Gemini text-embedding-004 768D, Gemini 2.5 Flash (PRD 13.1)
 12. **Payroll Queue**: queue: payroll_high, tries: 3, timeout: 120s (PRD 11.9)
 13. **Cut-off Date**: Default tanggal 25, join setelah cut-off masuk bulan depan (PRD 11.1)
 
 ---
 
-*Terakhir diupdate: 2026-05-13*
+*Terakhir diupdate: 2026-05-31 — G1: Migrasi OpenAI→Gemini (text-embedding-004 768D, Gemini 2.5 Flash)*

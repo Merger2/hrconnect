@@ -65,6 +65,8 @@ public function clockIn(Employee $employee, array $data): Attendance
 ### Skenario 4: Karyawan Belum Register Wajah (Face Enrollment)
 **Trigger:** Karyawan baru belum melakukan registrasi wajah, tapi coba clock in
 
+> **⚠️ STATUS IMPLEMENTASI (B12 — 2026-05-31):** Tier-fallback Face → PIN di bawah ini **belum diimplementasikan** di `AttendanceService::clockIn()`. Saat ini `FaceNotRegisteredException` dilempar tanpa fallback ke PIN — tracking di `AGENTS.md` Known Critical Bugs B12 dan `planning/task.md` §0.2 / §2.34. Fix-nya: catch exception di awal flow, cek `$data['pin']`, dan jalankan `clockInWithGPS()` jika PIN valid.
+
 **Handling:**
 ```
 1. BLOCK clock in via face recognition
@@ -137,8 +139,8 @@ public function clockIn(Employee $employee, array $data): Attendance
 
 ## 3. RAG / KNOWLEDGE BASE API FAILURE
 
-### Skenario 1: OpenAI API Down (PDF Embedding)
-**Trigger:** OpenAI API timeout / rate limited / down saat generate embeddings
+### Skenario 1: Gemini Embedding API Down (PDF Embedding)
+**Trigger:** Gemini Embedding API (text-embedding-004) timeout / rate limited / down saat generate embeddings
 
 **Handling:**
 ```
@@ -536,7 +538,7 @@ CRITICAL: Security events (mocked GPS, multiple failed logins)
 ```
 daily:       Default application log
 security:    Security events (GPS spoofing, failed auth)
-api:         External API calls (OpenAI, Gemini)
+api:         External API calls (Gemini)
 queue:       Queue job processing
 audit:       Payroll changes, role changes, approvals
 ```
@@ -562,7 +564,7 @@ audit:       Payroll changes, role changes, approvals
 | Face belum terdaftar | PIN sementara | 0 | WARNING (422) | "Wajah belum terdaftar, hubungi HRD" |
 | GPS accuracy buruk | Accept + flag | 0 | WARNING | "Sinyal GPS lemah" |
 | GPS mocked | BLOCK | 0 | CRITICAL | "Lokasi tidak valid" |
-| OpenAI API down | Retry + text search | 3x | ERROR | "AI sedang maintenance" |
+| Gemini Embedding API down | Retry + text search | 3x | ERROR | "AI sedang maintenance" |
 | Gemini API timeout | Text search fallback | 0 | ERROR | "AI sedang sibuk" |
 | Queue job gagal | DB notification | 3x | ERROR | Admin notified |
 | Payroll bug | Adjustment bulan berikut | 0 | CRITICAL | "Ada penyesuaian gaji" |
@@ -574,4 +576,4 @@ audit:       Payroll changes, role changes, approvals
 ---
 
 *Dokumen ini harus diikuti untuk handling semua error scenario.*
-*Terakhir diupdate: 2026-05-19 — Updated SEC-5: FaceNotRegistered→422, NotClockedIn→409. Fixed face enrollment exception type.*
+*Terakhir diupdate: 2026-05-31 — G1: Skenario 1 OpenAI→Gemini Embedding API. G17: Status implementasi B12 di Skenario 4.*

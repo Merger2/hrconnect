@@ -310,7 +310,7 @@ Schema::ensureVectorExtensionExists();
 ```php
 // ✅ BENAR — fallback kolom vector
 if (DB::getDriverName() === 'pgsql') {
-    $table->vector('embedding', dimensions: 1536)->nullable();
+    $table->vector('embedding', dimensions: 768)->nullable();
 } else {
     $table->text('embedding')->nullable();
 }
@@ -331,7 +331,7 @@ if (DB::getDriverName() === 'pgsql') {
 | `pg_trgm` extension | create_users_table | ✅ Guarded |
 | `pgcrypto` extension | create_users_table | ✅ Guarded |
 | `vector(128)` column | create_employees_table | ✅ Guarded (CAT-018) |
-| `vector(1536)` column | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
+| `vector(768)` column | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
 | HNSW index | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
 | `jsonb` column | create_knowledge_bases_table | ⚠️ Not guarded (SQLite has json) |
 
@@ -383,4 +383,4 @@ it('allows clock in with valid face verification', function () {
 ---
 
 *Dokumen ini harus diikuti saat menulis test.*
-*Terakhir diupdate: 2026-05-20 — Added §9 Database Testing Strategy (CAT-018, CAT-019)*
+*Terakhir diupdate: 2026-05-31 — G1: Migrasi vector(1536)→vector(768) (Gemini text-embedding-004)*

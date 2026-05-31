@@ -22,7 +22,7 @@ Dokumen ini menyajikan diagram Class UML untuk sistem HRConnect HRIS yang mengga
 
 ---
 
-## 1. Class Diagram - Models (29 Total: 25 Existing + 4 New)
+## 1. Class Diagram - Models (31 Total)
 
 ```mermaid
 classDiagram
@@ -327,7 +327,7 @@ classDiagram
         +string title
         +string file_path
         +text content "chunked"
-        +vector embedding "vector(1536)"
+        +vector embedding "vector(768)"
         ⚠️ ERRATA: $casts must include 'embedding' => \Pgvector\Laravel\Vector::class
         +string source_document
         +integer page_number
@@ -618,7 +618,7 @@ classDiagram
     GenerateEmployeePayrollJob ..> Payroll : uses
     
     ProcessKnowledgeBaseEmbedding ..> KnowledgeBase : uses
-    ProcessKnowledgeBaseEmbedding ..> OpenAI : external API
+    ProcessKnowledgeBaseEmbedding ..> Gemini : external API
 ```
 
 ---
@@ -954,11 +954,11 @@ classDiagram
 7. **WFA Mode**: Attendance.is_wfa, status_wfa, wfa_note (PRD 6.1)
 8. **Queue Configuration**: Job queue payroll_high (tries:3, timeout:120), default (tries:2, timeout:300) (PRD 11.9, 13.3)
 9. **Employment Type**: Employee.employment_type (permanent/contract/probation) (PRD 18, 26.4)
-10. **KnowledgeBase AI**: ProcessKnowledgeBaseEmbedding dengan OpenAI embedding 1536D (PRD 13.1)
+10. **KnowledgeBase AI**: ProcessKnowledgeBaseEmbedding dengan Gemini text-embedding-004 768D (PRD 13.1)
 11. **Prorated Salary**: PayrollCalculatorService.calculateProratedSalary() dengan countWorkingDays() (PRD 11.3)
 12. **Shift Late Tolerance**: Shift.late_tolerance_minutes (default: 0) (PRD 6.1)
 13. **Company Settings**: CompanySetting key-value untuk face_similarity_threshold, payroll_cutoff_date, dll (PRD 14.7)
 
 ---
 
-*Terakhir diupdate: 2026-05-13*
+*Terakhir diupdate: 2026-05-31*

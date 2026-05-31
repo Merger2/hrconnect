@@ -8,7 +8,7 @@
 ## 1. MOCK MODE SETUP
 
 ### Tujuan
-Menghindari ketergantungan pada koneksi internet saat presentasi. Semua API external (OpenAI, Gemini) akan di-mock.
+Menghindari ketergantungan pada koneksi internet saat presentasi. Semua API external (Gemini Embedding, Gemini 2.5 Flash) akan di-mock.
 
 ### Konfigurasi
 ```env
@@ -175,8 +175,8 @@ time psql -h ep-xxx.neon.tech -U hrconnect -d hrconnect -c "SELECT 1"
 1. Buka halaman Knowledge Base chat
 2. Tanya: "Berapa hari cuti tahunan?"
 3. Tunjukkan response AI dengan source citation ✅
-4. Jelaskan: PDF → chunks → embeddings → Gemini 2.5 Pro
-5. Tunjukkan database: knowledge_base_embeddings (vector 1536)
+4. Jelaskan: PDF → chunks → embeddings (text-embedding-004) → Gemini 2.5 Flash
+5. Tunjukkan database: knowledge_bases.embedding (vector 768)
 ```
 
 ### Segment 8: HRD Dashboard (2 menit)
@@ -396,7 +396,7 @@ Q: "Bagaimana keamanan face embedding?"
 A: "Embedding disimpan sebagai vector 128D di database, bukan foto mentah. Tidak bisa di-reverse engineering jadi foto. Akses hanya via authenticated API."
 
 Q: "Berapa biaya operasional per bulan?"
-A: "VPS ~Rp 150rb, Neon DB free tier, OpenAI API ~Rp 75rb, Total ~Rp 240rb/bulan untuk 150 karyawan."
+A: "VPS ~Rp 150rb, Neon DB free tier, Gemini API free tier (cukup untuk 150 karyawan), Total ~Rp 150rb/bulan untuk 150 karyawan."
 
 Q: "Apakah bisa scaling ke 1000+ karyawan?"
 A: "Ya. Arsitektur menggunakan queue untuk heavy processing (payroll, embeddings). Database Neon serverless auto-scale. Tinggal upgrade VPS."
@@ -414,4 +414,4 @@ A: "Sistem mendeteksi GPS mocked dari browser API. Jika terdeteksi, clock in dit
 ---
 
 *Dokumen ini harus diikuti saat persiapan demo/presentasi skripsi.*
-*Terakhir diupdate: 2026-05-08*
+*Terakhir diupdate: 2026-05-31*

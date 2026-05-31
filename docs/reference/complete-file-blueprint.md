@@ -1,5 +1,7 @@
 # HRConnect - Complete File Blueprint
 
+> **CATATAN ESTIMASI FILE (2026-05-31):** Total ~341 file baru + ~12 modifikasi di dokumen ini adalah audit terhadap struktur ideal, berbeda dengan `planning/sprint-branch-strategy.md` (~408 granular per-sprint) dan `planning/execution-schedule.md` (~353 mingguan). **Sumber kebenaran progress per-item**: `planning/task.md` v4.5.
+
 ## Errata
 
 > **Peringatan:** Catatan berikut mengidentifikasi masalah (bugs, ketidakakuratan, item yang hilang) dalam blueprint ini yang harus diperbaiki saat implementasi.
@@ -767,4 +769,4 @@ database/seeders/DatabaseSeeder.php                  🔧 (perlu ditambah call k
 ---
 
 *Dokumen ini adalah SATU-SATUNYA referensi untuk nama file saat coding.*
-*Terakhir diupdate: 2026-05-13*
+*Terakhir diupdate: 2026-05-31*

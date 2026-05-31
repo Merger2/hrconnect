@@ -5,7 +5,7 @@ Enterprise HRIS (thesis project). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreS
 ## Project Documentation
 
 All plans live in `docs/`. Read `docs/INDEX.md` for the full index. Source-of-truth files:
-- `docs/PRD.md` — PRD v3.0 (errata merged inline)
+- `docs/PRD.md` — PRD v3.1 (35 koreksi konsolidasi: K1-K5 + M1-M8 + S1-S18 + N1-N12 + Glossary)
 - `docs/PRD-errata.md` — HISTORICAL ONLY
 - `docs/planning/task.md` — Executable spec v4.2 (per-item status: ✅/⚠️/❌)
 - `docs/architecture/erd.dbml` — DB schema source of truth

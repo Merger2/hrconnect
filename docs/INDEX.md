@@ -27,15 +27,16 @@ docs/
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
 | **PRD** | `PRD.md` | Product Requirements Document v3.1 — 35 koreksi konsolidasi (K1-K5 + M1-M8 + S1-S18 + N1-N12 + Glossary) di atas v3.0 |
-| **PRD Errata** | `PRD-errata.md` | READ-ONLY changelog — 9 ERR + 19 CAT items (v2.0), semua sudah di-merge ke PRD v3.0 |
-| **Task Spec** | `planning/task.md` | Executable specification v3.4 — 49 errata, 9-day execution schedule |
+| **PRD Errata** | `PRD-errata.md` | READ-ONLY changelog — 9 ERR + 19 CAT items (v2.0), semua sudah di-merge ke PRD v3.0 dan diperluas di v3.1 |
+| **Task Spec** | `planning/task.md` | Executable specification v4.5 — per-item status (✅/⚠️/❌), 60 SELESAI items |
 | **README** | `../README.md` | Project overview, installation guide, tech stack |
 
-### 📐 Architecture (8 files)
+### 📐 Architecture (10 files)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
+| SRS | `architecture/srs.md` | Software Requirements Specification — fungsional + non-fungsional + REQ-ID per modul |
+| SDD | `architecture/sdd.md` | Software Design Description — arsitektur, komponen, deployment, integrasi |
 | ERD (DBML) | `architecture/erd.dbml` | Entity Relationship Diagram — 48 tabel database (source of truth) |
-| ~~ERD (MD)~~ | ~~`architecture/erd.md`~~ | ~~Dihapus — digantikan erd.dbml~~ |
 | Class Diagram | `architecture/class-diagram.md` | UML class diagram — models, services, relationships |
 | Sequence Diagrams | `architecture/sequence-diagrams.md` | Flow interaksi antar komponen |
 | Activity Diagrams | `architecture/activity-diagrams.md` | Activity flow per modul |
@@ -44,12 +45,13 @@ docs/
 | Use Case Diagram | `architecture/use-case-diagram.md` | Use case per role |
 | Folder Structure | `architecture/folder-structure.md` | Struktur direktori project |
 
-### 📋 Planning (4 files)
+### 📋 Planning (5 files)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
+| Task Spec | `planning/task.md` | Executable specification v4.5 — per-item status, 60 SELESAI items |
+| Phase 1 Plan | `planning/phase-1-plan.md` | Detail rencana Phase 1 (Foundation) |
 | Execution Schedule | `planning/execution-schedule.md` | Jadwal 12 minggu development |
 | Sprint & Branch Strategy | `planning/sprint-branch-strategy.md` | 35 sprint + branch naming |
-| Notion Kanban | `planning/notion-kanban.md` | 263 card siap import ke Notion |
 | Demo Preparation | `planning/demo-preparation.md` | Panduan presentasi skripsi |
 
 ### 🔌 API (1 file)
@@ -79,10 +81,11 @@ docs/
 |---------|------|-----------|
 | Deployment Guide | `deployment/deployment-guide.md` | VPS setup, SSL, CI/CD |
 
-### 📖 Reference (1 file)
+### 📖 Reference (2 files)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
 | Complete File Blueprint | `reference/complete-file-blueprint.md` | Semua file path yang akan dibuat |
+| Audit Trail Migrations & Models | `reference/audit-trail-migrations-models.md` | Audit trail migrasi & model vs PRD |
 
 ---
 
@@ -91,16 +94,17 @@ docs/
 | Urutan | Dokumen | Alasan |
 |--------|---------|--------|
 | 1 | `README.md` | Overview project & cara install |
-| 2 | `PRD.md` | Pahami apa yang dibangun (v3.0 — semua koreksi sudah inline) |
-| 3 | `PRD-errata.md` | (Optional) Referensi historis — semua koreksi sudah di-merge ke PRD v3.0 |
-| 4 | `planning/task.md` | Pahami executable specification & errata |
-| 5 | `architecture/erd.dbml` | Pahami struktur database (source of truth) |
-| 6 | `architecture/folder-structure.md` | Pahami struktur project |
-| 7 | `planning/execution-schedule.md` | Pahami timeline pengerjaan |
-| 8 | `planning/sprint-branch-strategy.md` | Pahami cara kerja branch |
-| 9 | `reference/complete-file-blueprint.md` | Referensi file yang dibuat |
-| 10 | `api/api-contracts.md` | Referensi endpoint API |
-| 11 | `planning/notion-kanban.md` | Import task ke Notion |
+| 2 | `PRD.md` | Pahami apa yang dibangun (v3.1 — semua koreksi sudah inline) |
+| 3 | `architecture/srs.md` | Pahami requirement formal (FR + NFR + REQ-ID) |
+| 4 | `architecture/sdd.md` | Pahami desain arsitektur |
+| 5 | `PRD-errata.md` | (Optional) Referensi historis — semua koreksi sudah di-merge ke PRD v3.1 |
+| 6 | `planning/task.md` | Pahami executable specification & status per-item (v4.5) |
+| 7 | `architecture/erd.dbml` | Pahami struktur database (source of truth) |
+| 8 | `architecture/folder-structure.md` | Pahami struktur project + status per folder |
+| 9 | `planning/execution-schedule.md` | Pahami timeline pengerjaan |
+| 10 | `planning/sprint-branch-strategy.md` | Pahami cara kerja branch |
+| 11 | `reference/complete-file-blueprint.md` | Referensi file yang dibuat |
+| 12 | `api/api-contracts.md` | Referensi endpoint API |
 
 ---
 
@@ -109,15 +113,15 @@ docs/
 | Kategori | Jumlah File |
 |----------|-------------|
 | Core | 4 |
-| Architecture | 8 (1 deleted: erd.md → erd.dbml) |
-| Planning | 4 |
+| Architecture | 10 (termasuk SRS + SDD; erd.md dihapus → erd.dbml) |
+| Planning | 5 |
 | API | 1 |
 | UI | 1 |
 | Security | 3 |
 | Testing | 1 |
 | Deployment | 1 |
-| Reference | 1 |
-| **TOTAL** | **23** |
+| Reference | 2 |
+| **TOTAL** | **27** |
 
 > **PRD v3.1 NOTE (2026-05-21):** 35 koreksi konsolidasi di atas v3.0:
 > - **5 Kontradiksi Kritis (K1-K5):** LLM Gemini Pro→Flash, embedding dim 768, face distance threshold semantic, ERD source-of-truth, 33 enum lengkap
@@ -153,4 +157,4 @@ docs/
 
 ---
 
-> Last Updated: 2026-05-21
+> Last Updated: 2026-05-31
