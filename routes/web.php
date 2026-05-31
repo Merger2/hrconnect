@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// Semua route ber-auth dilindungi password expiry check (CAT-005, default 90 hari).
+// Route 'security.edit' dan 'logout' otomatis di-skip oleh middleware.
+Route::middleware(['auth', 'verified', 'password.expired'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 });
 
