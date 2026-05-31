@@ -38,16 +38,22 @@ test('GET /api/v1/user dengan Bearer token valid return 200 + user info', functi
 
     $response->assertOk()
         ->assertJson([
-            'id' => $user->id,
-            'name' => 'Sanctum Tester',
-            'email' => 'tester@example.com',
+            'status' => 'success',
+            'data' => [
+                'id' => $user->id,
+                'name' => 'Sanctum Tester',
+                'email' => 'tester@example.com',
+            ],
         ])
         ->assertJsonStructure([
-            'id',
-            'name',
-            'email',
-            'roles',
-            'permissions',
+            'status',
+            'data' => [
+                'id',
+                'name',
+                'email',
+                'roles',
+                'permissions',
+            ],
         ]);
 });
 
@@ -71,10 +77,12 @@ test('User token return roles dan permissions di response', function () {
     ])->getJson('/api/v1/user');
 
     $response->assertJson([
-        'roles' => ['manager'],
+        'data' => [
+            'roles' => ['manager'],
+        ],
     ]);
 
-    $permissions = $response->json('permissions');
+    $permissions = $response->json('data.permissions');
     expect($permissions)->toContain('approve_leaves_l1');
     expect($permissions)->toContain('approve_wfa');
     expect($permissions)->not->toContain('process_payroll');

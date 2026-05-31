@@ -1,35 +1,157 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\ApprovalController;
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\FaceController;
+use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\LeaveController;
+use App\Http\Controllers\Api\OvertimeController;
+use App\Http\Controllers\Api\PayrollController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ReimbursementController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes (v1)
 |--------------------------------------------------------------------------
 |
-| Routes API HRConnect dengan prefix /api/v1 (lihat bootstrap/app.php).
-| Authentication: Sanctum Bearer token untuk PWA mobile, cookie stateful
-| untuk SPA same-origin.
+| Prefix: /api/v1 (defined di bootstrap/app.php apiPrefix).
+| Auth: Sanctum Bearer token (PWA mobile) atau cookie stateful (SPA same-origin).
+| Token expiration: null (never expire — PWA reuse sampai logout/revoke).
 |
-| Token tidak expire (config sanctum.expiration = null) — PWA reuse
-| sampai user logout manual atau admin revoke.
+| Lihat docs/api/api-contracts.md v2.0 untuk spesifikasi penuh 47 endpoint.
 |
-| Module routes (attendance, leave, overtime, dll) akan ditambah di
-| Sprint 30 sesuai sprint-branch-strategy.md. File ini sengaja minimal
-| sebagai bootstrap.
+| HTTP code policy:
+| - 200 success, 201 created, 204 deleted
+| - 401 token invalid/missing
+| - 403 policy reject (IDOR fix)
+| - 409 state conflict (already clocked in, payroll locked, dll)
+| - 422 validation / business rule violation
+| - 429 rate limited
 */
 
-// Endpoint paling dasar: /api/v1/user — return current user identity.
-// Dipakai PWA untuk verifikasi session/token validity setelah login.
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    $user = $request->user();
+// ─── PUBLIC (no auth) ─────────────────────────────────────────────────
 
-    return response()->json([
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'roles' => $user->getRoleNames(),
-        'permissions' => $user->getAllPermissions()->pluck('name'),
-    ]);
+Route::get('/health', HealthController::class)->name('api.health');
+
+Route::prefix('auth')->name('api.auth.')->group(function () {
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1') // 5 attempts per 1 menit
+        ->name('login');
+
+    Route::post('/2fa/challenge', [AuthController::class, 'twoFactorChallenge'])
+        ->middleware('throttle:5,1')
+        ->name('2fa.challenge');
+
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:5,1')
+        ->name('forgot-password');
+});
+
+// ─── AUTHENTICATED (Sanctum) ──────────────────────────────────────────
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    // ── Auth (logout) ────────────────────────────────────────────────
+    Route::prefix('auth')->name('api.auth.')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/logout-all', [AuthController::class, 'logoutAll'])->name('logout-all');
+    });
+
+    // ── User & Profile ───────────────────────────────────────────────
+    Route::get('/user', [AuthController::class, 'me'])->name('api.user');
+
+    Route::prefix('profile')->name('api.profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'show'])->name('show');
+        Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::post('/change-password', [ProfileController::class, 'changePassword'])
+            ->name('change-password');
+    });
+
+    // ── Face Recognition ─────────────────────────────────────────────
+    Route::prefix('face')->name('api.face.')->group(function () {
+        Route::post('/register', [FaceController::class, 'register'])
+            ->middleware('throttle:10,1')
+            ->name('register');
+        Route::post('/verify', [FaceController::class, 'verify'])
+            ->middleware('throttle:10,1')
+            ->name('verify');
+    });
+
+    // ── Attendance ───────────────────────────────────────────────────
+    Route::prefix('attendance')->name('api.attendance.')->group(function () {
+        Route::post('/clock-in', [AttendanceController::class, 'clockIn'])
+            ->middleware('throttle:5,5') // 5 per 5 menit
+            ->name('clock-in');
+        Route::post('/clock-out', [AttendanceController::class, 'clockOut'])
+            ->middleware('throttle:5,5')
+            ->name('clock-out');
+        Route::get('/today', [AttendanceController::class, 'today'])->name('today');
+        Route::get('/', [AttendanceController::class, 'index'])->name('index');
+        Route::post('/{attendance}/approve-wfa', [AttendanceController::class, 'approveWfa'])
+            ->name('approve-wfa');
+    });
+
+    // ── Leave ────────────────────────────────────────────────────────
+    Route::prefix('leave')->name('api.leave.')->group(function () {
+        Route::post('/', [LeaveController::class, 'store'])->name('store');
+        Route::get('/', [LeaveController::class, 'index'])->name('index');
+        Route::get('/quota', [LeaveController::class, 'quota'])->name('quota');
+        Route::get('/{leave}', [LeaveController::class, 'show'])->name('show');
+        Route::delete('/{leave}', [LeaveController::class, 'destroy'])->name('destroy');
+    });
+
+    // ── Overtime ─────────────────────────────────────────────────────
+    Route::prefix('overtime')->name('api.overtime.')->group(function () {
+        Route::post('/', [OvertimeController::class, 'store'])->name('store');
+        Route::get('/', [OvertimeController::class, 'index'])->name('index');
+        Route::get('/{overtime}', [OvertimeController::class, 'show'])->name('show');
+        Route::delete('/{overtime}', [OvertimeController::class, 'destroy'])->name('destroy');
+    });
+
+    // ── Reimbursement ────────────────────────────────────────────────
+    Route::prefix('reimbursement')->name('api.reimbursement.')->group(function () {
+        Route::post('/', [ReimbursementController::class, 'store'])->name('store');
+        Route::get('/', [ReimbursementController::class, 'index'])->name('index');
+        Route::get('/{reimbursement}', [ReimbursementController::class, 'show'])->name('show');
+        Route::delete('/{reimbursement}', [ReimbursementController::class, 'destroy'])
+            ->name('destroy');
+    });
+
+    // ── Approval Workflow ────────────────────────────────────────────
+    Route::prefix('approvals')->name('api.approvals.')->group(function () {
+        Route::get('/pending', [ApprovalController::class, 'pending'])->name('pending');
+        Route::post('/{approval}/approve', [ApprovalController::class, 'approve'])
+            ->name('approve');
+        Route::post('/{approval}/reject', [ApprovalController::class, 'reject'])
+            ->name('reject');
+    });
+
+    // ── Payroll ──────────────────────────────────────────────────────
+    Route::prefix('payroll')->name('api.payroll.')->group(function () {
+        Route::get('/', [PayrollController::class, 'index'])->name('index');
+        Route::post('/generate', [PayrollController::class, 'generate'])
+            ->middleware('permission:process_payroll')
+            ->name('generate');
+        Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
+        Route::get('/{payroll}/payslip', [PayrollController::class, 'payslip'])->name('payslip');
+    });
+
+    // ── Employee Directory (HR Manager + Super Admin) ────────────────
+    Route::prefix('employees')->name('api.employees.')
+        ->middleware('permission:view_employees')
+        ->group(function () {
+            Route::get('/', [EmployeeController::class, 'index'])->name('index');
+            Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
+            Route::post('/', [EmployeeController::class, 'store'])
+                ->middleware('permission:manage_employees')
+                ->name('store');
+            Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
+            Route::delete('/{employee}', [EmployeeController::class, 'destroy'])
+                ->middleware('permission:manage_employees')
+                ->name('destroy');
+        });
 });
