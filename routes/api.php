@@ -137,6 +137,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/generate', [PayrollController::class, 'generate'])
             ->middleware('permission:process_payroll')
             ->name('generate');
+        Route::post('/export/monthly', [PayrollController::class, 'exportMonthly'])
+            ->middleware('permission:process_payroll')
+            ->name('export.monthly');
+        Route::post('/export/1721-a1', [PayrollController::class, 'export1721A1'])
+            ->middleware('permission:process_payroll')
+            ->name('export.1721-a1');
+        Route::post('/export/bpjs', [PayrollController::class, 'exportBpjs'])
+            ->middleware('permission:process_payroll')
+            ->name('export.bpjs');
         Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
         Route::get('/{payroll}/payslip', [PayrollController::class, 'payslip'])->name('payslip');
     });

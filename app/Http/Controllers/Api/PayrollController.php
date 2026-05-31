@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\EmployeeStatus;
 use App\Enums\PayrollStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Employee;
 use App\Models\Payroll;
+use App\Services\PayrollExportService;
+use App\Services\PayslipPdfService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * PayrollController — list/show payroll + download payslip + generate batch.
@@ -100,30 +104,87 @@ class PayrollController extends Controller
         ]);
     }
 
-    public function payslip(Request $request, Payroll $payroll): JsonResponse
+    public function payslip(Request $request, Payroll $payroll): BinaryFileResponse
     {
         $this->authorize('downloadPayslip', $payroll);
 
-        // Status check explicit (defense-in-depth)
+        // Defense-in-depth: status check explicit
         if (! in_array($payroll->status, [PayrollStatus::PUBLISHED, PayrollStatus::PAID], true)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Payslip hanya tersedia untuk payroll yang sudah dipublikasi.',
-            ], 422);
+            throw new BusinessRuleException(
+                'Payslip hanya tersedia untuk payroll yang sudah dipublikasi.'
+            );
         }
 
-        // PDF generation belum diimplementasi (Sprint 27).
-        // Placeholder: return data + URL stub.
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Endpoint payslip PDF belum diimplementasi (Sprint 27).',
-            'data' => [
-                'payroll_id' => $payroll->id,
-                'period' => $payroll->period,
-                'pdf_url' => null,
-                'note' => 'PDF generator akan ditambahkan via DomPDF / Snappy di Sprint 27.',
-            ],
-        ], 501);
+        $pdfPath = app(PayslipPdfService::class)->generateAndStore($payroll);
+
+        $filename = sprintf(
+            'payslip-%s-%s.pdf',
+            $payroll->period,
+            $payroll->employee?->employee_number ?? 'unknown'
+        );
+
+        return response()->download($pdfPath, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    /**
+     * POST /payroll/export/monthly — Excel rekap payroll per periode.
+     * Permission: process_payroll (Finance + Super Admin).
+     */
+    public function exportMonthly(Request $request): BinaryFileResponse
+    {
+        $this->authorize('create', Payroll::class);
+
+        $data = $request->validate([
+            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
+            'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
+        ]);
+
+        $path = app(PayrollExportService::class)->exportMonthly(
+            $data['period'],
+            $data['branch_id'] ?? null,
+        );
+
+        return response()->download($path, basename($path), [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * POST /payroll/export/1721-a1 — Bukti potong PPh 21 bulanan (DJP).
+     */
+    public function export1721A1(Request $request): BinaryFileResponse
+    {
+        $this->authorize('create', Payroll::class);
+
+        $data = $request->validate([
+            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
+        ]);
+
+        $path = app(PayrollExportService::class)->export1721A1($data['period']);
+
+        return response()->download($path, basename($path), [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    /**
+     * POST /payroll/export/bpjs — Laporan iuran BPJS Kesehatan + Ketenagakerjaan.
+     */
+    public function exportBpjs(Request $request): BinaryFileResponse
+    {
+        $this->authorize('create', Payroll::class);
+
+        $data = $request->validate([
+            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
+        ]);
+
+        $path = app(PayrollExportService::class)->exportBpjsReport($data['period']);
+
+        return response()->download($path, basename($path), [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     public function generate(Request $request): JsonResponse
