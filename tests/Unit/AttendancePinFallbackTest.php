@@ -37,12 +37,14 @@ function callResolveVerification(AttendanceService $service, Employee $employee,
 /**
  * Bypass Eloquent attribute cast (pgvector) yang tidak available di SQLite.
  * Set langsung ke $attributes via reflection.
+ *
+ * Catatan PHP 8.5: ReflectionProperty::setAccessible() deprecated karena
+ * reflection sekarang accessible by default. Tidak perlu dipanggil lagi.
  */
 function setRawAttribute(Employee $employee, string $key, mixed $value): void
 {
     $ref = new ReflectionClass($employee);
     $prop = $ref->getProperty('attributes');
-    $prop->setAccessible(true);
     $attrs = $prop->getValue($employee);
     $attrs[$key] = $value;
     $prop->setValue($employee, $attrs);

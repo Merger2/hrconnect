@@ -34,16 +34,18 @@ When PRD/docs conflict with code, **trust ERD + migrations + task.md status tabl
 - `.npmrc` sets `ignore-scripts=true` — npm runs no postinstall scripts
 - `.env.example` and `config/database.php` default to `pgsql` — do **not** revert to `sqlite`
 
-## Empty / Missing Folders (status as of v4.2)
+## Folder Status (as of 2026-05-31)
 
-These exist as folders but contain **no implementations** — agents often assume they're populated:
-- `app/Observers/` — **EMPTY**. No HolidayObserver, TaxConfigObserver, BpjsConfigObserver, EmployeeObserver, AttendanceObserver yet (cache invalidation + default shift assignment broken because of this).
-- `app/Policies/` — **EMPTY**. Zero authorization → IDOR vulnerability across all modules. `$user->can(...)` always false.
-- `app/Http/Middleware/` — **EMPTY**. No `CheckPasswordExpired`, no `GoogleOAuthRefresh`.
-- `app/Console/Commands/` — **EMPTY**. No `attendance:detect-chronic-late`, no `cache:warm`.
-- `app/Notifications/` — **DOES NOT EXIST**. Folder must be created before adding notification classes.
-- `routes/api.php` — **DOES NOT EXIST**. Sanctum not installed.
-- `routes/web.php` — exists but has no module routes (only Fortify auth + settings + console).
+Update progress per folder. Sebelumnya banyak yang kosong — sebagian sudah populated:
+
+- `app/Observers/` — ✅ **5 observers** (Hari 2): TaxConfig, BpjsConfig, Holiday, Employee, Attendance. Registered di `AppServiceProvider::boot()`.
+- `app/Policies/` — ✅ **8 policies** (Sesi 3): Employee, Attendance, Leave, Overtime, Reimbursement, Payroll, KnowledgeBase, Asset. Auto-discovery Laravel 11+. IDOR fix.
+- `app/Http/Middleware/` — ✅ **CheckPasswordExpired** (Sesi 5, alias `password.expired`). `GoogleOAuthRefresh` belum dibuat (V2).
+- `app/Console/Commands/` — ✅ **5 commands** (Sesi 6): `attendance:detect-alpha`, `attendance:detect-chronic-late`, `leave:reset-quota`, `payroll:generate`, `cache:warm`. Schedule registered di `routes/console.php`.
+- `app/Notifications/` — ❌ **DOES NOT EXIST**. Folder must be created before adding notification classes.
+- `routes/api.php` — ✅ Bootstrap dengan `/api/v1/user` endpoint (Sesi 2). Sanctum installed, `HasApiTokens` di User. Module routes (attendance, leave, dll) belum (Sprint 30).
+- `routes/web.php` — exists. Dashboard pakai middleware `password.expired`. Module routes (HRD/Finance/Admin) belum.
+- `app/Enums/Permission.php` — ✅ **44 cases** (Sesi 1). Pair dengan `RoleAndPermissionSeeder` (5 roles) + `SuperAdminSeeder` (env-driven).
 
 ## Architecture
 
@@ -106,6 +108,13 @@ These exist as folders but contain **no implementations** — agents often assum
 - **Cache invalidation pattern** when modifying any cached model: call `Cache::forget("key")` in the same transaction or use observer. `CompanySetting::set()` does this manually but bypasses if you call `update()` directly.
 - **Cache key naming** — mixed conventions exist (`holiday_{date}` vs `settings:{key}` vs `tax_configs`). Strategy doc prescribes colon separator: `module:identifier:key`.
 
+## PHP 8.5 Deprecations
+
+- **`ReflectionProperty::setAccessible()`** is **DEPRECATED in PHP 8.5**. Reflection is accessible by default — never call `$prop->setAccessible(true)`. Just `getProperty()` then `setValue()` / `getValue()` directly.
+- **`ReflectionMethod::setAccessible()`** same — deprecated, omit the call.
+- **`ReflectionClass::newInstanceWithoutConstructor()`** still works but consider direct instantiation when possible.
+- When fixing legacy code, search `setAccessible` and remove the call — keep the rest of the reflection chain intact.
+
 ## Database Gotchas
 
 - **Defensive Migration**: any `vector`, `pg_trgm`, `pgcrypto`, HNSW index code MUST be guarded with `if (DB::getDriverName() === 'pgsql')` for SQLite test compat (CAT-018). 3 migrations already guarded: users, employees, knowledge_bases.
@@ -120,8 +129,8 @@ These exist as folders but contain **no implementations** — agents often assum
 
 - Custom view bindings in `App\Providers\FortifyServiceProvider`.
 - Features: registration, password reset, email verification, 2FA TOTP + confirm password.
-- User uses `HasRoles` (Spatie), `SoftDeletes`, `TwoFactorAuthenticatable`.
-- `password_changed_at` column exists; `CheckPasswordExpired` middleware **does not** (CAT-005 partial).
+- User uses `HasRoles` (Spatie), `SoftDeletes`, `TwoFactorAuthenticatable`, `HasApiTokens` (Sanctum).
+- `password_changed_at` column exists; `CheckPasswordExpired` middleware **DONE** (CAT-005 closed) — alias `password.expired`, default 90 hari, configurable via CompanySetting `password_expiry_days`.
 - Custom actions: `App\Actions\Fortify\CreateNewUser`, `App\Actions\Fortify\ResetUserPassword`.
 
 ## Testing

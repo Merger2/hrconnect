@@ -11,10 +11,10 @@ use App\Services\GeofenceService;
 /**
  * Bug fixes Phase 3 (Sesi 7) — focused unit tests.
  *
- * B3.2 — GeofenceService null/invalid coordinates guard
- * B3.6 — DomainException → BusinessRuleException (HTTP 422)
- * B3.10 — Employee tanpa position throw eksplisit
- * B3.12 — FaceRecognition vector dimension validation
+ * GeofenceService null/invalid coordinates guard
+ * DomainException → BusinessRuleException (HTTP 422)
+ * Employee tanpa position throw eksplisit
+ * FaceRecognition vector dimension validation
  */
 
 // ─── B3.2 GeofenceService null guard ──────────────────────────────────
@@ -134,10 +134,10 @@ test('B3.12: FaceRecognitionService throw kalau vector bukan 128D', function () 
     $svc = new FaceRecognitionService();
 
     $emp = new Employee();
-    // setRawAttribute via reflection (bypass pgvector cast)
+    // setRawAttribute via reflection (bypass pgvector cast).
+    // PHP 8.5: setAccessible() deprecated — reflection accessible by default.
     $ref = new ReflectionClass($emp);
     $prop = $ref->getProperty('attributes');
-    $prop->setAccessible(true);
     $prop->setValue($emp, ['face_embedding' => '[0.1, 0.2]']);
 
     // 64-dim vector → invalid
@@ -159,7 +159,6 @@ test('B3.12: FaceRecognitionService throw kalau vector ada non-numeric', functio
     $emp = new Employee();
     $ref = new ReflectionClass($emp);
     $prop = $ref->getProperty('attributes');
-    $prop->setAccessible(true);
     $prop->setValue($emp, ['face_embedding' => '[0.1, 0.2]']);
 
     // 128-dim tapi ada string → invalid
