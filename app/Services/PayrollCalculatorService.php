@@ -9,6 +9,7 @@ use App\Enums\PayrollStatus;
 use App\Enums\ReimbursementStatus;
 use App\Enums\RequestStatus;
 use App\Enums\TerCategory;
+use App\Exceptions\BusinessRuleException;
 use App\Models\Attendance;
 use App\Models\BpjsConfig;
 use App\Models\CompanySetting;
@@ -20,7 +21,6 @@ use App\Models\Reimbursement;
 use App\Models\TaxConfig;
 use App\Traits\ManagesWorkDays;
 use Carbon\Carbon;
-use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class PayrollCalculatorService
@@ -220,6 +220,15 @@ class PayrollCalculatorService
      */
     public function generatePayroll(Employee $employee, string $period): Payroll
     {
+        // B3.10 fix: explicit guard kalau employee belum punya position.
+        // Sebelum: silent fallback ke 0 via ?->basic_salary ?? 0 → payroll Rp 0
+        // tanpa peringatan apapun. Sekarang: throw eksplisit supaya HRD aware.
+        if (! $employee->position) {
+            throw new BusinessRuleException(
+                "Karyawan {$employee->employee_number} belum memiliki jabatan (position). Hubungi HRD untuk konfigurasi sebelum generate payroll."
+            );
+        }
+
         $parsedPeriod = Carbon::createFromFormat('Y-m', $period);
         $targetYear = $parsedPeriod->year;
         $targetMonth = $parsedPeriod->month;
@@ -230,7 +239,9 @@ class PayrollCalculatorService
                 ->lockForUpdate()
                 ->first();
             if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
-                throw new DomainException("Payroll untuk periode {$period} sudah dikunci permanen.");
+                // B3.6 fix: BusinessRuleException → HTTP 422 (business rule violation),
+                // bukan DomainException → HTTP 500 (generic server error).
+                throw new BusinessRuleException("Payroll untuk periode {$period} sudah dikunci permanen.");
             }
             // pendapatan kena pajak
             $grossSalary = $this->calculateProratedSalary($employee, $period);

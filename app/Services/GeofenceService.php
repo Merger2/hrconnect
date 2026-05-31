@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\AntiFakeGPSException;
+use App\Exceptions\BusinessRuleException;
 use App\Exceptions\GeofenceViolationException;
 use App\Models\Branch;
 
@@ -20,6 +21,13 @@ class GeofenceService
         if (isset($gpsData['accuracy']) && $gpsData['accuracy'] > 100) {
             throw new AntiFakeGPSException('Peringatan: Akurasi GPS terlalu rendah ('.$gpsData['accuracy'].' meter). Pastikan Anda berada di area terbuka untuk hasil terbaik.');
         }
+
+        // B3.2 fix: validasi koordinat sebelum hitung Haversine.
+        // Tanpa guard ini, deg2rad(null) silently jadi 0 → false-positive
+        // "user di branch coordinates" yang membatalkan validasi GPS.
+        $this->assertValidCoordinates($gpsData);
+        $this->assertValidBranchCoordinates($branch);
+
         $distance = $this->calculateHaversine(
             $branch->latitude,
             $branch->longitude,
@@ -37,6 +45,46 @@ class GeofenceService
             'valid' => true,
             'distance' => $distance,
         ];
+    }
+
+    /**
+     * B3.2 fix: validasi koordinat dari client (PWA).
+     * Cegah null/string/range invalid lolos ke deg2rad() yang silent error.
+     */
+    private function assertValidCoordinates(array $gpsData): void
+    {
+        if (! isset($gpsData['latitude'], $gpsData['longitude'])) {
+            throw new BusinessRuleException('Koordinat GPS tidak dikirim. Pastikan izin lokasi diaktifkan.');
+        }
+
+        if (! is_numeric($gpsData['latitude']) || ! is_numeric($gpsData['longitude'])) {
+            throw new BusinessRuleException('Format koordinat GPS tidak valid (harus angka).');
+        }
+
+        $lat = (float) $gpsData['latitude'];
+        $lng = (float) $gpsData['longitude'];
+
+        if (abs($lat) > 90 || abs($lng) > 180) {
+            throw new BusinessRuleException("Koordinat GPS di luar range valid (lat: {$lat}, lng: {$lng}).");
+        }
+
+        if ($lat === 0.0 && $lng === 0.0) {
+            // (0, 0) adalah Null Island di samudera Atlantik — hampir pasti GPS error
+            throw new BusinessRuleException('Koordinat GPS (0, 0) terdeteksi. Pastikan GPS sudah lock signal.');
+        }
+    }
+
+    /**
+     * B3.2 fix: validasi koordinat branch dari database.
+     * Cegah branch tanpa koordinat lolos validasi (data integrity check).
+     */
+    private function assertValidBranchCoordinates(Branch $branch): void
+    {
+        if ($branch->latitude === null || $branch->longitude === null) {
+            throw new BusinessRuleException(
+                "Cabang '{$branch->name}' belum punya koordinat GPS. Hubungi HRD untuk konfigurasi geofence."
+            );
+        }
     }
 
     private function calculateHaversine($lat1, $lon1, $lat2, $lon2): float

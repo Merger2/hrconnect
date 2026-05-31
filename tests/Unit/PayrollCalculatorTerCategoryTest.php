@@ -5,7 +5,7 @@ use App\Enums\MaritalStatus;
 use App\Enums\TerCategory;
 
 /**
- * B5 fix verification — getTERCategory() count CHILD only, bukan semua relasi.
+ * fix verification — getTERCategory() count CHILD only, bukan semua relasi.
  *
  * TerCategory mapping (resolveFromStatus):
  * - SINGLE/DIVORCED/WIDOWED + (0|1 dependent) = A (TK/0, TK/1)

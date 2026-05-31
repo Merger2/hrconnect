@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 /**
- * B7 fix verification — calculateOvertimePay() pakai tiered rate.
+ * fix verification — calculateOvertimePay() pakai tiered rate.
  *
  * Tarif sesuai UU Cipta Kerja PP 35/2021 Pasal 31:
  * - Weekday (Senin-Jumat, bukan holiday):
