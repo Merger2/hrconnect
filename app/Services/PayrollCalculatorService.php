@@ -201,7 +201,6 @@ class PayrollCalculatorService
 
     /**
      * Menghitung THR Pro-Rated (V1).
-     * 
      */
     public function calculateThrProrated(Employee $employee, float $monthlySalary, int $monthsWorked): float
     {
@@ -246,11 +245,16 @@ class PayrollCalculatorService
             // pendapatan kena pajak
             $grossSalary = $this->calculateProratedSalary($employee, $period);
 
+            // 3.9 fix: cegah N+1 query Overtime → Employee → Position.
+            // Query overtimes lalu set relation ke $employee yang SUDAH dimuat
+            // di parameter generatePayroll(). Tanpa ini, calculateOvertimePay()
+            // akan trigger 2N extra queries (employee + position per overtime).
             $overtimes = Overtime::where('employee_id', $employee->id)
                 ->where('status', RequestStatus::APPROVED)
                 ->whereYear('date', $targetYear)
                 ->whereMonth('date', $targetMonth)
-                ->get();
+                ->get()
+                ->each(fn (Overtime $ot) => $ot->setRelation('employee', $employee));
 
             $totalOvertimePay = $overtimes
                 ->map(fn (Overtime $ot) => $this->calculateOvertimePay($ot))
@@ -268,17 +272,25 @@ class PayrollCalculatorService
             // flat per hari
             $penaltyPerDay = (int) CompanySetting::get('attendance_penalty_per_day', 50000);
 
+            // 3.11 fix: lateCount filter WFA + exception. Karyawan WFA tidak
+            // kena denda telat (tidak ada toleransi GPS), dan late yang sudah
+            // di-approve exception (force majeure) juga tidak boleh kena denda.
             $lateCount = Attendance::where('employee_id', $employee->id)
                 ->whereYear('date', $targetYear)
                 ->whereMonth('date', $targetMonth)
                 ->where('late_minutes', '>', 0)
+                ->where('is_wfa', false)
+                ->whereNull('exception_type')
                 ->count();
             $latePenalty = $lateCount * $penaltyPerDay;
 
+            // 3.11 fix: alphaCount filter exception. Alpha yang punya exception
+            // approved (sakit mendadak diakui, izin force majeure) tidak kena denda.
             $alphaCount = Attendance::where('employee_id', $employee->id)
                 ->whereYear('date', $targetYear)
                 ->whereMonth('date', $targetMonth)
                 ->where('status', AttendanceStatus::ABSENT)
+                ->whereNull('exception_type')
                 ->count();
             $dailyRate = $employee->position?->basic_salary ?? 0;
             // B6 fix: hari kerja efektif dihitung dinamis per bulan (exclude weekend + holiday),

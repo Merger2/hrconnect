@@ -89,16 +89,19 @@ Update progress per folder. Sebelumnya banyak yang kosong — sebagian sudah pop
 
 ## Known Critical Bugs (must check before touching these files)
 
-| Bug | File:line | Fix |
-|-----|-----------|-----|
-| **B1** Payroll regenerate uses `delete()` | `PayrollCalculatorService.php:274` | Use `forceDelete()` — soft delete violates unique `(employee_id, period)` (CAT-002). |
-| **B2** Payroll race condition | `PayrollCalculatorService.php:199` | Add `->lockForUpdate()` when checking existing payroll. |
-| **B3** Leave quota deducted at submit, not approval | `LeaveService::applyLeave():80` | Move `$balance->deduct()` to `ApprovalService::approve()` after `isAllApproved()`. Add `LeaveBalance::refund()`. PRD §9.1. |
-| **B4** `LeaveBalance::deduct()` allows negative | `LeaveBalance.php:50` | Add `if ($this->available() < $days) throw BusinessRuleException`. |
-| **B5** `family_details_count` counts ALL relations | `Employee.php` + `PayrollCalculatorService::getTERCategory()` | Filter `relationship = CHILD` in `withCount`. Currently safe via fallback at line 109-111 but fragile. |
-| **B6** Hardcoded `/22` working days | `PayrollCalculatorService.php:247` | Use `countWorkingDays($startOfMonth, $endOfMonth)`. |
-| **B7** Overtime weekday flat 1.5x | `PayrollCalculatorService.php:99` | PRD §8.3: hour-1 = 1.5x, rest = 2x. |
-| **B12** `FaceNotRegisteredException` not caught | `AttendanceService.php:55-66` | Catch + fallback to PIN per error-handling-strategy.md §1 Skenario 4. |
+> **STATUS (2026-05-31):** B1, B2, B3, B4, B5, B6, B7, B12 — semua **SELESAI** di Sesi 4-8.
+> Tidak ada bug critical yang masih open. Daftar di bawah disimpan sebagai catatan historis untuk regression check.
+
+| Bug | File:line | Status |
+|-----|-----------|--------|
+| **B1** Payroll regenerate uses `delete()` | `PayrollCalculatorService.php` | ✅ FIXED — pakai `forceDelete()` |
+| **B2** Payroll race condition | `PayrollCalculatorService.php` | ✅ FIXED — `lockForUpdate()` di awal transaction |
+| **B3** Leave quota deducted at submit, not approval | `LeaveService::applyLeave()` + `ApprovalService::approve()` | ✅ FIXED — deduct dipindah ke `isAllApproved()` callback |
+| **B4** `LeaveBalance::deduct()` allows negative | `LeaveBalance.php` | ✅ FIXED — guard `if ($this->available() < $days) throw BusinessRuleException` |
+| **B5** `family_details_count` counts ALL relations | `Employee.php` + `PayrollCalculatorService::getTERCategory()` | ✅ FIXED — scoped relation `Employee::children()` (Sesi 4) |
+| **B6** Hardcoded `/22` working days | `PayrollCalculatorService.php` | ✅ FIXED — `countWorkingDays($startOfMonth, $endOfMonth)` (Sesi 4) |
+| **B7** Overtime weekday flat 1.5x | `PayrollCalculatorService.php` | ✅ FIXED — tiered: hour-1=1.5x, sisa=2x (UU Cipta Kerja) (Sesi 4) |
+| **B12** `FaceNotRegisteredException` not caught | `AttendanceService.php` | ✅ FIXED — `resolveVerification()` tiered Face → PIN (Sesi 4) |
 
 ## Caching Gotchas
 

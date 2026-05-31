@@ -21,7 +21,7 @@ use App\Services\GeofenceService;
 
 function makeBranch(?float $lat = -6.2, ?float $lng = 106.8, int $radius = 100): Branch
 {
-    $branch = new Branch();
+    $branch = new Branch;
     $branch->id = 1;
     $branch->name = 'Test HQ';
     $branch->latitude = $lat;
@@ -32,7 +32,7 @@ function makeBranch(?float $lat = -6.2, ?float $lng = 106.8, int $radius = 100):
 }
 
 test('B3.2: GeofenceService throw kalau koordinat tidak dikirim', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch();
 
     expect(fn () => $svc->validateLocation($branch, []))
@@ -40,7 +40,7 @@ test('B3.2: GeofenceService throw kalau koordinat tidak dikirim', function () {
 });
 
 test('B3.2: GeofenceService throw kalau koordinat null', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch();
 
     expect(fn () => $svc->validateLocation($branch, [
@@ -51,7 +51,7 @@ test('B3.2: GeofenceService throw kalau koordinat null', function () {
 });
 
 test('B3.2: GeofenceService throw kalau koordinat string non-numeric', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch();
 
     expect(fn () => $svc->validateLocation($branch, [
@@ -62,7 +62,7 @@ test('B3.2: GeofenceService throw kalau koordinat string non-numeric', function 
 });
 
 test('B3.2: GeofenceService throw kalau lat di luar range (-90..90)', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch();
 
     expect(fn () => $svc->validateLocation($branch, [
@@ -73,7 +73,7 @@ test('B3.2: GeofenceService throw kalau lat di luar range (-90..90)', function (
 });
 
 test('B3.2: GeofenceService throw kalau Null Island (0, 0)', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch();
 
     expect(fn () => $svc->validateLocation($branch, [
@@ -84,7 +84,7 @@ test('B3.2: GeofenceService throw kalau Null Island (0, 0)', function () {
 });
 
 test('B3.2: GeofenceService throw kalau branch tanpa koordinat', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch(lat: null, lng: null);
 
     expect(fn () => $svc->validateLocation($branch, [
@@ -95,7 +95,7 @@ test('B3.2: GeofenceService throw kalau branch tanpa koordinat', function () {
 });
 
 test('B3.2: GeofenceService validate koordinat valid dalam radius', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch(lat: -6.2, lng: 106.8, radius: 1000);
 
     $result = $svc->validateLocation($branch, [
@@ -108,7 +108,7 @@ test('B3.2: GeofenceService validate koordinat valid dalam radius', function () 
 });
 
 test('B3.2: GeofenceService throw GeofenceViolation kalau di luar radius', function () {
-    $svc = new GeofenceService();
+    $svc = new GeofenceService;
     $branch = makeBranch(lat: -6.2, lng: 106.8, radius: 50);
 
     // ~5km away
@@ -119,11 +119,11 @@ test('B3.2: GeofenceService throw GeofenceViolation kalau di luar radius', funct
         ->toThrow(GeofenceViolationException::class);
 });
 
-// ─── FaceRecognition vector dimension validation ────────────────
+// FaceRecognition vector dimension validation
 
 test('B3.12: FaceRecognitionService throw kalau employee tanpa face_embedding', function () {
-    $svc = new FaceRecognitionService();
-    $emp = new Employee();
+    $svc = new FaceRecognitionService;
+    $emp = new Employee;
     // face_embedding null
 
     expect(fn () => $svc->verifyFace($emp, array_fill(0, 128, 0.1)))
@@ -131,9 +131,9 @@ test('B3.12: FaceRecognitionService throw kalau employee tanpa face_embedding', 
 });
 
 test('B3.12: FaceRecognitionService throw kalau vector bukan 128D', function () {
-    $svc = new FaceRecognitionService();
+    $svc = new FaceRecognitionService;
 
-    $emp = new Employee();
+    $emp = new Employee;
     // setRawAttribute via reflection (bypass pgvector cast).
     // PHP 8.5: setAccessible() deprecated — reflection accessible by default.
     $ref = new ReflectionClass($emp);
@@ -154,9 +154,9 @@ test('B3.12: FaceRecognitionService throw kalau vector bukan 128D', function () 
 });
 
 test('B3.12: FaceRecognitionService throw kalau vector ada non-numeric', function () {
-    $svc = new FaceRecognitionService();
+    $svc = new FaceRecognitionService;
 
-    $emp = new Employee();
+    $emp = new Employee;
     $ref = new ReflectionClass($emp);
     $prop = $ref->getProperty('attributes');
     $prop->setValue($emp, ['face_embedding' => '[0.1, 0.2]']);

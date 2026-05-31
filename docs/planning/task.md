@@ -2634,12 +2634,17 @@ echo "Fallback: " . ($attendance->verification_fallback ?? "none") . "\n";
 
 ---
 
-### 3.1 P1 & P2: Overtime Rate Calculation
+### ✅ 3.1 P1 & P2: Overtime Rate Calculation — SELESAI
 
 **Masalah:** Weekday overtime flat 1.5x (seharusnya jam pertama 1.5x, selanjutnya 2x). Holiday overtime: salah 2x/3x (PRD §26.7: jam 1-8=2x, jam ke-9=3x, jam ke-10+=4x).  
 **Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 30 menit
+**Status:** ✅ SELESAI (Sesi 4 / commit 63bf69c — B7 fix)
+
+**Bukti:** `PayrollCalculatorService::calculateOvertimePay()` sekarang tiered:
+- Weekday: jam-1=1.5x, jam-2 dst=2x
+- Holiday/Weekend: 1-8=2x, 9-10=3x, 11+=4x
+
+Verified via `tests/Unit/OvertimeRateTest.php` (7 tests passing).
 
 ```php
 // app/Services/PayrollCalculatorService.php — ganti method calculateOvertimePay():
@@ -2696,12 +2701,20 @@ public function calculateOvertimePay(Overtime $overtime): float
 
 ---
 
-### 3.2 G1: GeofenceService Null Coordinates
+### ✅ 3.2 G1: GeofenceService Null Coordinates — SELESAI
 
 **Masalah:** `deg2rad(null)` = 0.0 → jika branch lat/lng null, perhitungan jarak salah.  
 **Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 15 menit
+**Status:** ✅ SELESAI (Sesi 7 / commit c0678bd)
+
+**Bukti:** `GeofenceService::validateLocation()` sekarang punya `assertValidCoordinates()` + `assertValidBranchCoordinates()` yang throw `BusinessRuleException` untuk:
+- Koordinat null/missing
+- Koordinat string non-numeric
+- lat di luar -90..90 / lng di luar -180..180
+- Null Island (0, 0)
+- Branch tanpa koordinat
+
+Verified via `tests/Unit/Phase3BugFixesTest.php` (8 tests passing).
 
 ```php
 // app/Services/GeofenceService.php — tambah null check di awal calculateHaversine():
@@ -2745,12 +2758,15 @@ public function calculateHaversine(float $lat1, float $lng1, float $lat2, float 
 
 ---
 
-### 3.4 H2: `family_details_count` Menghitung Semua Keluarga — TER Category Salah
+### ✅ 3.4 H2: `family_details_count` Menghitung Semua Keluarga — TER Category Salah — SELESAI
 
-**Masalah:** `$employee->family_details_count` (dari `withCount('families')`) menghitung **semua** family members termasuk pasangan, bukan hanya `FamilyRelationship::CHILD`. Ini menyebabkan over-counting dependents → TER category terlalu rendah → PPh21 kurang dipotong.  
+**Masalah:** `$employee->family_details_count` (dari `withCount('families')`) menghitung **semua** family members termasuk pasangan, bukan hanya `FamilyRelationship::CHILD`. Ini menyebabkan over-count dependents → kategori TER salah.  
 **Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 5 menit
+**Status:** ✅ SELESAI (Sesi 4 / commit 63bf69c — B5 fix)
+
+**Bukti:** Tambah scoped relation `Employee::children()` yang filter `relationship = CHILD`. `PayrollCalculatorService::getTERCategory()` sekarang pakai `$employee->children_count` (bukan `family_details_count`).
+
+Verified via `tests/Unit/PayrollCalculatorTerCategoryTest.php` (5 tests passing).
 
 ```php
 // Ganti eager-load pemanggil PayrollCalculatorService::generatePayroll()
@@ -2770,13 +2786,16 @@ $employee->load([
 
 ---
 
-### 3.5 H6 & H7: LeaveService `carryForward()` — 2 Bug
+### ✅ 3.5 H6 & H7: LeaveService `carryForward()` — 2 Bug — SELESAI
 
-**Masalah 1:** `carryForward()` mengabaikan `carry_forward` tahun sebelumnya dalam perhitungan remaining. `$remaining = $prevBalance->quota - $prevBalance->used` seharusnya `$prevBalance->available()` (yang termasuk carry_forward yang belum expired).  
+**Masalah 1:** `carryForward()` mengabaikan `carry_forward` tahun sebelumnya dalam perhitungan remaining. `$remaining = $prevBalance->quota - $prevBalance->used` seharusnya `$prevBalance->available()`.  
 **Masalah 2:** `carryForward()` menimpa kuota karyawan yang sudah di-customize admin dengan default tipe cuti (`$prevBalance->leaveType->quota`).  
 **Severity:** HIGH  
-**Depends On:** —  
-**Estimasi:** 10 menit
+**Status:** ✅ SELESAI (Sesi 4 / commit 63bf69c — B3.5 fix)
+
+**Bukti:**
+- Bug 1: `$remaining = $prevBalance->available()` (include unexpired carry_forward)
+- Bug 2: `'quota' => $prevBalance->quota` (pertahankan kuota employee-specific)
 
 ```php
 // app/Services/LeaveService.php — ganti method carryForward():
@@ -2820,7 +2839,11 @@ public function carryForward(Employee $employee, int $fromYear, int $toYear): vo
 
 ---
 
-### 3.6 H8: `DomainException` di PayrollCalculatorService Return HTTP 500
+### ✅ 3.6 H8: `DomainException` di PayrollCalculatorService Return HTTP 500 — SELESAI
+
+**Status:** ✅ SELESAI (Sesi 7 / commit c0678bd)
+
+**Bukti:** `PayrollCalculatorService::generatePayroll()` sekarang throw `BusinessRuleException` (HTTP 422) saat regenerate locked payroll, bukan `DomainException` (HTTP 500). Import `DomainException` dihapus.
 
 **Masalah:** Line 218 melempar `DomainException` yang di-render Laravel sebagai 500 Internal Server Error. Ini bukan server error — ini business rule violation yang seharusnya return 422.  
 **Severity:** MEDIUM  
@@ -2841,7 +2864,13 @@ throw new \App\Exceptions\BusinessRuleException("Payroll untuk periode {$period}
 
 ---
 
-### 3.7 M10: LeaveService `applyLeave()` — No `end_date >= start_date` Validation
+### ✅ 3.7 M10: LeaveService `applyLeave()` — `end_date >= start_date` Validation — SELESAI
+
+**Status:** ✅ SELESAI (Sesi 4 / commit 63bf69c — B3.7 fix)
+
+**Bukti:** `LeaveService::applyLeave()` sekarang throw `BusinessRuleException` di awal method kalau `end_date < start_date`. Validasi pindah ke depan, sebelum query `LeaveType::findOrFail()` (cepat reject tanpa hit DB).
+
+Verified via `tests/Unit/LeaveDateRangeValidationTest.php` (2 tests passing).
 
 **Masalah:** Tidak ada validasi bahwa `end_date >= start_date`. Jika user submit range terbalik, `calculateWorkDays` return 0, dan user mendapat pesan error yang menyesatkan ("Durasi cuti 0 hari. Tanggal hanya weekend atau libur.").  
 **Severity:** MEDIUM  
@@ -2864,12 +2893,23 @@ if ($endDate->lt($startDate)) {
 
 ---
 
-### 3.9 H3: PayrollCalculatorService — N+1 Query pada Overtime → Employee → Position
+### ✅ 3.9 H3: PayrollCalculatorService — N+1 Query pada Overtime → Employee → Position — SELESAI
 
-**Masalah:** `calculateOvertimePay()` dipanggil per-overtime via `map()`, dan setiap overtime trigger `$overtime->employee` + `$employee->position` = 2N extra queries. Employee dan position sudah tersedia di `generatePayroll()` scope.  
+**Masalah:** `calculateOvertimePay()` dipanggil per-overtime via `map()`, dan setiap overtime trigger `$overtime->employee` + `$employee->position` = 2N extra queries. Employee dan position sudah ada di scope `generatePayroll()`.  
 **Severity:** MEDIUM  
-**Depends On:** —  
-**Estimasi:** 10 menit
+**Status:** ✅ SELESAI (Sesi 8 — current commit)
+
+**Bukti:** `PayrollCalculatorService::generatePayroll()` sekarang setRelation `employee` di setiap overtime ke `$employee` yang sudah dimuat di scope:
+```php
+$overtimes = Overtime::where('employee_id', $employee->id)
+    ->where('status', RequestStatus::APPROVED)
+    ->whereYear('date', $targetYear)
+    ->whereMonth('date', $targetMonth)
+    ->get()
+    ->each(fn (Overtime $ot) => $ot->setRelation('employee', $employee));
+```
+
+Cegah 2N extra queries (employee + position) per overtime.
 
 ```php
 // app/Services/PayrollCalculatorService.php — di dalam method generatePayroll(), update eager-load:
@@ -2887,12 +2927,16 @@ $overtimes = Overtime::with('employee.position')
 
 ---
 
-### 3.10 M16: PayrollCalculatorService — No Guard untuk Employee tanpa Position
+### ✅ 3.10 M16: PayrollCalculatorService — No Guard untuk Employee tanpa Position — SELESAI
 
 **Masalah:** Null-safe operator `$employee->position?->basic_salary ?? 0` silently defaults to 0, menghasilkan payroll dengan gaji 0 untuk karyawan tanpa position assignment.  
 **Severity:** MEDIUM  
-**Depends On:** —  
-**Estimasi:** 5 menit
+**Status:** ✅ SELESAI (Sesi 7 / commit c0678bd)
+
+**Bukti:** `PayrollCalculatorService::generatePayroll()` sekarang throw `BusinessRuleException` di awal method kalau `! $employee->position`:
+```
+"Karyawan {$employee->employee_number} belum memiliki jabatan (position). Hubungi HRD untuk konfigurasi sebelum generate payroll."
+```
 
 ```php
 // app/Services/PayrollCalculatorService.php — tambah di awal method generatePayroll(), setelah parsing period:
@@ -2906,12 +2950,17 @@ if (! $employee->position) {
 
 ---
 
-### 3.11 L8: Attendance Penalty Count — Tidak Filter WFA atau Exception
+### ✅ 3.11 L8: Attendance Penalty Count — Tidak Filter WFA atau Exception — SELESAI
 
 **Masalah:** Count query `where('late_minutes', '>', 0)` menghitung semua late attendance, termasuk WFA dan yang sudah di-approved exception. Seharusnya mengecualikan WFA dan yang punya approved exception.  
 **Severity:** LOW  
-**Depends On:** 4.1 (Migration 2: add_exception_fields_to_attendances)  
-**Estimasi:** 5 menit
+**Status:** ✅ SELESAI (Sesi 8 — current commit)
+
+**Bukti:** Kedua query (`lateCount` + `alphaCount`) di `PayrollCalculatorService::generatePayroll()` sekarang filter:
+- `where('is_wfa', false)` (untuk lateCount — WFA tidak ada toleransi GPS, tidak kena denda telat)
+- `whereNull('exception_type')` (untuk lateCount + alphaCount — exception approved tidak kena denda)
+
+Kolom `is_wfa` (default false) dan `exception_type` (nullable) sudah ada di migration `create_attendances_table`.
 
 ```php
 // app/Services/PayrollCalculatorService.php — update late penalty query:
@@ -2936,12 +2985,15 @@ $lateCount = Attendance::where('employee_id', $employee->id)
 
 ---
 
-### 3.12 H4: FaceRecognitionService — No Vector Dimension Validation
+### ✅ 3.12 H4: FaceRecognitionService — No Vector Dimension Validation — SELESAI
 
-**Masalah:** Method `verifyFace()` memvalidasi bahwa setiap value numeric, tapi tidak memvalidasi bahwa incoming vector punya tepat 128 dimensions. Vector dengan dimensi berbeda menyebabkan PostgreSQL error saat operator `<=>` dijalankan.  
+**Masalah:** Method `verifyFace()` memvalidasi bahwa setiap value numeric, tapi tidak memvalidasi bahwa incoming vector punya tepat 128 dimensions. Vector dengan dimensi berbeda menyebabkan PostgreSQL pgvector error.  
 **Severity:** MEDIUM  
-**Depends On:** —  
-**Estimasi:** 5 menit
+**Status:** ✅ SELESAI (Sesi 7 / commit c0678bd)
+
+**Bukti:** Tambah konstanta `EMBEDDING_DIMENSIONS = 128` + validasi `count($incomingVector) !== 128` di `FaceRecognitionService::verifyFace()`. Throw `BusinessRuleException` dengan pesan jelas: `"harus 128D (FaceNet), diterima NN"`.
+
+Verified via `tests/Unit/Phase3BugFixesTest.php` (3 tests passing untuk 64D, 256D, 0D, non-numeric).
 
 ```php
 // app/Services/FaceRecognitionService.php — tambah di awal method verifyFace(), setelah line validasi:
@@ -3396,19 +3448,19 @@ HARI 4-5:
   ☐ 2.24 — H2: ReimbursementService linkToPayroll guards (10 menit)
   ☐ 2.34 — M21: 22 hari kerja → countWorkingDays() (5 menit)
   ☐ 2.35 — M22: FaceNotRecognized fix — tiered fallback (20 menit)
-  ☐ 3.1 — P1/P2: Overtime rate calculation (30 menit)
-  ☐ 3.2 — G1: GeofenceService null coordinates (15 menit)
-  ☐ 3.4 — H2: family_details_count counts all (5 menit)
-  ☐ 3.5 — H6/H7: carryForward bugs (10 menit)
-  ☐ 3.6 — H8: DomainException → BusinessRuleException (2 menit)
-  ☐ 3.7 — M10: LeaveService end_date >= start_date (2 menit)
-  ☐ 3.9 — H3: N+1 overtime query (10 menit)
-  ☐ 3.10 — M16: No guard employee without position (5 menit)
-  ☐ 3.12 — H4: FaceRecognition dimension validation (5 menit)
+  ✅ 3.1 — P1/P2: Overtime rate calculation (30 menit) — SELESAI Sesi 4
+  ✅ 3.2 — G1: GeofenceService null coordinates (15 menit) — SELESAI Sesi 7
+  ✅ 3.4 — H2: family_details_count counts all (5 menit) — SELESAI Sesi 4
+  ✅ 3.5 — H6/H7: carryForward bugs (10 menit) — SELESAI Sesi 4
+  ✅ 3.6 — H8: DomainException → BusinessRuleException (2 menit) — SELESAI Sesi 7
+  ✅ 3.7 — M10: LeaveService end_date >= start_date (2 menit) — SELESAI Sesi 4
+  ✅ 3.9 — H3: N+1 overtime query (10 menit) — SELESAI Sesi 8
+  ✅ 3.10 — M16: No guard employee without position (5 menit) — SELESAI Sesi 7
+  ✅ 3.12 — H4: FaceRecognition dimension validation (5 menit) — SELESAI Sesi 7
 
 HARI 6-8:
   ☐ Fase 2 — Missing Infrastructure (seeders, commands, notifications)
-  ☐ 3.11 — L8: Attendance penalty count filter (depends on Migration 2)
+  ✅ 3.11 — L8: Attendance penalty count filter — SELESAI Sesi 8 (column is_wfa + exception_type sudah ada di migration awal)
 
 HARI 9+:
   ☐ Fase 4 — PRD Gap Implementation (WFA flow, etc.)
