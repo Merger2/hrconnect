@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
             $table->foreignId('shift_id')->nullable()->constrained('shifts')->nullOnDelete();
             $table->date('date');
-            $table->timestamp('clock_in');
+            $table->timestamp('clock_in')->nullable()->comment('Null jika status=absent dari DetectAlphaAttendanceCommand');
             $table->timestamp('clock_out')->nullable();
             $table->decimal('lat_in', 10, 8)->nullable();
             $table->decimal('long_in', 11, 8)->nullable();

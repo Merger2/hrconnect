@@ -2,7 +2,45 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+/*
+|--------------------------------------------------------------------------
+| Scheduled Tasks
+|--------------------------------------------------------------------------
+|
+| Cron schedule untuk command HRConnect. Pastikan crontab di server jalan:
+|   * * * * * cd /path-to-app && php artisan schedule:run >> /dev/null 2>&1
+|
+| Verifikasi: php artisan schedule:list
+*/
+
+// Alpha detection: setiap hari jam 23:59
+// Skip otomatis kalau weekend / holiday (built-in di command).
+Schedule::command('attendance:detect-alpha')
+    ->dailyAt('23:59')
+    ->withoutOverlapping()
+    ->onSuccess(fn () => logger()->info('attendance:detect-alpha selesai'))
+    ->onFailure(fn () => logger()->error('attendance:detect-alpha gagal'));
+
+// Chronic late warning: setiap Jumat jam 18:00
+Schedule::command('attendance:detect-chronic-late')
+    ->weeklyOn(\Illuminate\Console\Scheduling\Schedule::FRIDAY, '18:00')
+    ->withoutOverlapping();
+
+// Reset leave quota: 1 Januari 00:00 setiap tahun
+Schedule::command('leave:reset-quota')
+    ->yearlyOn(1, 1, '00:00')
+    ->withoutOverlapping()
+    ->onFailure(fn () => logger()->error('leave:reset-quota gagal'));
+
+// Cache warm: setiap hari jam 05:00 (sebelum jam kerja)
+Schedule::command('cache:warm')
+    ->dailyAt('05:00')
+    ->withoutOverlapping();
+
+// payroll:generate TIDAK auto-scheduled — manual trigger via Finance UI / artisan.
