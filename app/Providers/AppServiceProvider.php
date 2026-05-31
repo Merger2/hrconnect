@@ -2,6 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Attendance;
+use App\Models\BpjsConfig;
+use App\Models\Employee;
+use App\Models\Holiday;
+use App\Models\TaxConfig;
+use App\Observers\AttendanceObserver;
+use App\Observers\BpjsConfigObserver;
+use App\Observers\EmployeeObserver;
+use App\Observers\HolidayObserver;
+use App\Observers\TaxConfigObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerObservers();
     }
 
     /**
@@ -46,5 +57,22 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Register Eloquent Model Observers.
+     *
+     * Observer untuk:
+     * - TaxConfig, BpjsConfig, Holiday — cache invalidation (Sesi 5-7)
+     * - Employee — auto-assign default shift (Sesi 8)
+     * - Attendance — cache invalidation (Sesi 9, prep for V2 dashboard)
+     */
+    protected function registerObservers(): void
+    {
+        TaxConfig::observe(TaxConfigObserver::class);
+        BpjsConfig::observe(BpjsConfigObserver::class);
+        Holiday::observe(HolidayObserver::class);
+        Employee::observe(EmployeeObserver::class);
+        Attendance::observe(AttendanceObserver::class);
     }
 }
