@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\FaceController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\PayrollController;
@@ -154,4 +155,17 @@ Route::middleware('auth:sanctum')->group(function () {
                 ->middleware('permission:manage_employees')
                 ->name('destroy');
         });
+
+    // ── KnowledgeBase RAG (Sesi 11) ─────────────────────────────────
+    Route::prefix('knowledgebase')->name('api.knowledgebase.')->group(function () {
+        Route::post('/chat', [KnowledgeBaseController::class, 'chat'])
+            ->middleware('throttle:20,1')
+            ->name('chat');
+        Route::post('/', [KnowledgeBaseController::class, 'upload'])
+            ->middleware('permission:manage_knowledgebase')
+            ->name('upload');
+        Route::delete('/{knowledgeBase}', [KnowledgeBaseController::class, 'destroy'])
+            ->middleware('permission:manage_knowledgebase')
+            ->name('destroy');
+    });
 });

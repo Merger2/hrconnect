@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['title', 'content', 'metadata', 'embedding', 'status', 'category', 'source_document', 'page_number'])]
+#[Fillable(['knowledgeable_type', 'knowledgeable_id', 'title', 'content', 'metadata', 'embedding', 'status', 'category', 'source_document', 'page_number'])]
 class KnowledgeBase extends Model
 {
     protected function casts(): array
