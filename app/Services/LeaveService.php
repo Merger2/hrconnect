@@ -28,9 +28,16 @@ class LeaveService
      */
     public function applyLeave(Employee $employee, array $data): Leave
     {
-        $leaveType = LeaveType::findOrFail($data['leave_type_id']);
+        // B3.7 fix: validasi range tanggal sebelum query apapun.
+        // Cegah Leave::hasOverlap() / countWorkingDays() bertingkah aneh dengan range terbalik.
         $startDate = Carbon::parse($data['start_date']);
         $endDate = Carbon::parse($data['end_date']);
+
+        if ($endDate->lt($startDate)) {
+            throw new BusinessRuleException('Tanggal akhir cuti tidak boleh lebih awal dari tanggal mulai.');
+        }
+
+        $leaveType = LeaveType::findOrFail($data['leave_type_id']);
         $dayType = DayType::from($data['day_type'] ?? 'full_day');
 
         if ($startDate->isBefore(now()->startOfDay()->subDays(3))) {
@@ -157,6 +164,12 @@ class LeaveService
 
     /**
      * Carry-forward sisa cuti. Maks 3 hari, batas hangus dinamis dari CompanySetting.
+     *
+     * B3.5 fix (2 bug):
+     * 1. Pakai $prevBalance->available() — bukan $quota - $used — supaya
+     *    carry_forward tahun sebelumnya yang belum kepakai ikut dihitung.
+     * 2. Pertahankan $prevBalance->quota (bisa di-customize admin per karyawan),
+     *    jangan timpa dengan $prevBalance->leaveType->quota (default tipe cuti).
      */
     public function carryForward(Employee $employee, int $fromYear, int $toYear): void
     {
@@ -169,7 +182,8 @@ class LeaveService
         $deadlineDate = Carbon::parse($toYear.'-'.$deadlineSetting)->toDateString();
 
         foreach ($previousBalances as $prevBalance) {
-            $remaining = $prevBalance->quota - $prevBalance->used;
+            // Bug 1 fix: pakai available() yang sudah include unexpired carry_forward
+            $remaining = $prevBalance->available();
 
             if ($remaining <= 0) {
                 continue;
@@ -184,7 +198,8 @@ class LeaveService
                     'year' => $toYear,
                 ],
                 [
-                    'quota' => $prevBalance->leaveType->quota,
+                    // Bug 2 fix: pertahankan kuota employee-specific, bukan default tipe cuti
+                    'quota' => $prevBalance->quota,
                     'carry_forward' => $carryForward,
                     'carry_forward_deadline' => $deadlineDate,
                 ]

@@ -162,6 +162,20 @@ class Employee extends Model implements CipherSweetEncrypted
         return $this->hasMany(FamilyDetail::class);
     }
 
+    /**
+     * B5 fix: scoped relation untuk anak (CHILD) saja.
+     * Pakai ini di withCount untuk hindari counting parent/spouse/sibling.
+     *
+     * Usage:
+     *   Employee::withCount('children')->get();
+     *   $employee->children_count; // jumlah anak (untuk PTKP/TER)
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(FamilyDetail::class)
+            ->where('relationship', FamilyRelationship::CHILD);
+    }
+
     public function handovers(): HasMany
     {
         return $this->hasMany(AssetHandover::class);

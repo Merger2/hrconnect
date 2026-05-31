@@ -19,8 +19,8 @@ class Overtime extends Model
     {
         return [
             'date' => 'date',
-            'start_time' => 'time',
-            'end_time' => 'time',
+            'start_time' => 'datetime',
+            'end_time' => 'datetime',
             'total_hours' => 'decimal:2',
             'amount' => 'decimal:2',
             'status' => RequestStatus::class,

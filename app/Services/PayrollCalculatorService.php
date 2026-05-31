@@ -65,8 +65,20 @@ class PayrollCalculatorService
     }
 
     /**
-     * Menghitung upah lembur berdasarkan UU Cipta Kerja.
-     * PRD 8.3 & 8.4. SSOT cache holiday di Holiday::cachedYear() (B11 — 1 entry per tahun).
+     * Menghitung upah lembur berdasarkan UU Cipta Kerja PP 35/2021 Pasal 31.
+     * PRD §8.3. SSOT cache holiday di Holiday::cachedYear() (B11 — 1 entry per tahun).
+     *
+     * Tarif tiered:
+     * - Weekday (Senin-Jumat, bukan holiday):
+     *     • Jam ke-1     : 1.5x hourlyRate
+     *     • Jam ke-2 dst : 2.0x hourlyRate
+     * - Hari libur / weekend (multiplier identik per ERR-007):
+     *     • Jam 1-8   : 2.0x hourlyRate (8 jam pertama)
+     *     • Jam 9-10  : 3.0x hourlyRate (jam ke-9 dan 10)
+     *     • Jam 11+   : 4.0x hourlyRate (jam ke-11 dst)
+     *
+     * Catatan: implementasi simplifikasi mengacu pola 5 hari kerja/minggu.
+     * Konversi 6 hari kerja ditangani saat config dinaikkan (TODO config-driven).
      */
     public function calculateOvertimePay(Overtime $overtime): float
     {
@@ -87,22 +99,41 @@ class PayrollCalculatorService
         $isHoliday = Holiday::isHoliday($date) || $date->isWeekend();
 
         if ($isHoliday) {
-            $firstEightHours = min($hours, 8);
-            $extraHours = max($hours - 8, 0);
+            // Holiday/Weekend tiered: 1-8 = 2x, 9-10 = 3x, 11+ = 4x
+            $tier1Hours = min($hours, 8);
+            $tier2Hours = max(0, min($hours - 8, 2));
+            $tier3Hours = max(0, $hours - 10);
 
-            return round(($firstEightHours * $hourlyRate * 2.0) + ($extraHours * $hourlyRate * 3.0), 2);
+            return round(
+                ($tier1Hours * $hourlyRate * 2.0) +
+                ($tier2Hours * $hourlyRate * 3.0) +
+                ($tier3Hours * $hourlyRate * 4.0),
+                2
+            );
         }
 
-        return round($hours * $hourlyRate * 1.5, 2);
+        // B7 fix: Weekday tiered — jam-1 = 1.5x, jam-2 dst = 2x (UU Cipta Kerja).
+        $firstHour = min($hours, 1);
+        $extraHours = max(0, $hours - 1);
+
+        return round(
+            ($firstHour * $hourlyRate * 1.5) +
+            ($extraHours * $hourlyRate * 2.0),
+            2
+        );
     }
 
     /**
      * Menentukan Kategori TER (A/B/C).
-     * Fix N+1: pakai Collection (tanpa kurung) agar tidak query ulang per karyawan.
+     *
+     * B5 fix: gunakan `children_count` (scoped to relationship=CHILD) bukan
+     * `family_details_count` yang menghitung SEMUA relasi (orang tua, pasangan, saudara).
+     * Pakai `Employee::withCount('children')` di caller untuk avoid N+1.
+     * Fallback: count via families relation dengan filter CHILD.
      */
     public function getTERCategory(Employee $employee): TerCategory
     {
-        $dependentsCount = $employee->family_details_count
+        $dependentsCount = $employee->children_count
             ?? $employee->families
                 ->where('relationship', FamilyRelationship::CHILD)
                 ->count();
@@ -193,7 +224,7 @@ class PayrollCalculatorService
         $targetYear = $parsedPeriod->year;
         $targetMonth = $parsedPeriod->month;
 
-        return DB::transaction(function () use ($employee, $period, $targetYear, $targetMonth) {
+        return DB::transaction(function () use ($employee, $period, $targetYear, $targetMonth, $parsedPeriod) {
             $existingPayroll = Payroll::where('employee_id', $employee->id)
                 ->where('period', $period)
                 ->lockForUpdate()
@@ -239,7 +270,16 @@ class PayrollCalculatorService
                 ->where('status', AttendanceStatus::ABSENT)
                 ->count();
             $dailyRate = $employee->position?->basic_salary ?? 0;
-            $alphaPenalty = $alphaCount * ($dailyRate > 0 ? $dailyRate / 22 : 0);
+            // B6 fix: hari kerja efektif dihitung dinamis per bulan (exclude weekend + holiday),
+            // bukan hardcoded 22. Cegah perhitungan denda alpha tidak akurat di bulan dengan
+            // jumlah hari kerja berbeda (Februari 20 hari, Lebaran 16 hari, dll).
+            $workingDaysInMonth = $this->countWorkingDays(
+                $parsedPeriod->copy()->startOfMonth(),
+                $parsedPeriod->copy()->endOfMonth()
+            );
+            $alphaPenalty = $alphaCount * ($dailyRate > 0 && $workingDaysInMonth > 0
+                ? $dailyRate / $workingDaysInMonth
+                : 0);
 
             $attendancePenalty = $latePenalty + $alphaPenalty;
 
