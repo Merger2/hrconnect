@@ -16,21 +16,24 @@ class GenerateEmployeePayrollJob implements ShouldQueue
 
     /**
      * Jumlah maksimal percobaan jika job gagal.
-     * PRD §16: tries: 3.
      */
     public int $tries = 3;
 
     /**
      * Batas waktu eksekusi job dalam detik.
-     * PRD §16: timeout: 120s.
      */
     public int $timeout = 120;
 
     /**
      * Delay antar retry (dalam detik).
-     * PRD §16: backoff [10, 30, 60].
      */
     public array $backoff = [10, 30, 60];
+
+    /**
+     * Queue name untuk job ini (high priority payroll queue).
+     * Payroll generation uses dedicated high-priority queue.
+     */
+    public string $queue = 'payroll_high';
 
     /**
      * @param  Employee  $employee  Karyawan yang akan digenerate gajinya

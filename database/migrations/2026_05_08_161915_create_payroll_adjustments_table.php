@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('payroll_adjustments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payroll_id')->constrained('payrolls')->restrictOnDelete();
+            $table->foreignId('payroll_id')->index()->constrained('payrolls')->restrictOnDelete();
             $table->decimal('amount', 15, 2);
             $table->text('reason');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->index()->constrained('users')->nullOnDelete();
             $table->date('applied_to_period');
             $table->timestamps();
         });

@@ -1,6 +1,6 @@
 {
-    "$schema": "https://opencode.ai/config.json",
-    "mcp": {
+  "$schema": "https://opencode.ai/config.json",
+   "mcp": {
         "laravel-boost": {
             "type": "local",
             "enabled": true,
@@ -35,6 +35,21 @@
             ]
           }
         },
+        "claude-haiku-4-5-20251001": {
+          "name": "Claude Haiku 4 5 20251001",
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
         "claude-haiku-4.5": {
           "name": "Claude Haiku 4.5",
           "limit": {
@@ -45,6 +60,21 @@
             "input": [
               "text",
               "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "claude-opus-4-6": {
+          "name": "Claude Opus 4 6",
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text"
             ],
             "output": [
               "text"
@@ -101,6 +131,36 @@
         },
         "deepseek-3.2": {
           "name": "Deepseek 3.2",
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "deepseek-v4-flash": {
+          "name": "Deepseek V4 Flash",
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "deepseek-v4-pro": {
+          "name": "Deepseek V4 Pro",
           "limit": {
             "context": 200000,
             "output": 64000
@@ -254,6 +314,21 @@
             ]
           }
         },
+        "glm-5.1": {
+          "name": "Glm 5.1",
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
         "google/gemini-2.5-flash": {
           "name": "Google Gemini 2.5 Flash",
           "limit": {
@@ -320,5 +395,4 @@
       }
     }
   }
-
 }

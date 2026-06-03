@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('performance_reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
-            $table->foreignId('reviewer_id')->constrained('employees')->restrictOnDelete();
+            $table->foreignId('employee_id')->index()->constrained('employees')->restrictOnDelete();
+            $table->foreignId('reviewer_id')->index()->constrained('employees')->restrictOnDelete();
             $table->string('status', 20)->default('draft');
             $table->date('review_date')->nullable();
             $table->string('period', 20)->nullable();

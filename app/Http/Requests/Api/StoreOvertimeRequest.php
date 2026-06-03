@@ -21,7 +21,7 @@ class StoreOvertimeRequest extends FormRequest
             'date' => ['required', 'date'],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
-            'description' => ['required', 'string', 'min:10'],
+            'description' => ['nullable', 'string', 'min:10'],
         ];
     }
 

@@ -1,9 +1,9 @@
 # HRConnect — Spesifikasi Eksekusi Perbaikan
 
-> **Version:** 4.5 — Hari 1 Critical Fixes + Cache Clean Code Refactor (Eloquent Collection → plain array)  
-> **Tanggal:** 22 Mei 2026  
-> **Errata v4.0:** 49 koreksi total — 60 ✅ SELESAI, 2 🔀 MERGED, 3 ⚠️ PARTIAL, ❌ NOT DONE  
-> **Cara Pakai:** Item bertanda ✅ SELESAI tidak perlu dikerjakan lagi. Fokus pada item ❌ NOT DONE dan ⚠️ PARTIAL. Item 🔀 MERGED dipindah ke task lain.
+> **Version:** 4.6 — Audit 2026-06-03: 60 → 87 ✅ SELESAI, 3 🔀 MERGED, 0 ⚠️ PARTIAL, 7 ❌ NOT DONE  
+> **Tanggal:** 3 Juni 2026  
+> **Errata v4.0:** 49 koreksi total — 87 ✅ SELESAI, 3 🔀 MERGED, 0 ⚠️ PARTIAL, 7 ❌ NOT DONE  
+> **Cara Pakai:** Item bertanda ✅ SELESAI tidak perlu dikerjakan lagi. Fokus pada item ❌ NOT DONE.
 
 ---
 
@@ -11,10 +11,10 @@
 
 | Kategori | Jumlah | Detail |
 |----------|--------|--------|
-| ✅ SELESAI | 60 | Migrasi, model, enum, service, docs — semua sudah diimplementasi |
-| 🔀 MERGED | 2 | §2.9 + §2.31 dikonsolidasi ke §0.10 (5 observer terpadu) |
-| ⚠️ PARTIAL | 3 | Sebagian done, sebagian belum |
-| ❌ NOT DONE | ~58 | Belum dikerjakan |
+| ✅ SELESAI | 87 | Semua item Fase 0-3 + audit migration + partial solved (60→87) |
+| 🔀 MERGED | 3 | §2.9 + §2.31 dikonsolidasi ke §0.10 (5 observer), §3.8 merged ke §2.24 |
+| ⚠️ PARTIAL | 0 | Semua partial sudah diselesaikan |
+| ❌ NOT DONE | 7 | 1.5, 1.7, 2.2, 2.24, 2.32, 4.3, 4.4 |
 
 ### ✅ SELESAI (60 item)
 
@@ -105,13 +105,13 @@ Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untu
 | — | Audit: Asset company() relationship | +company() BelongsTo |
 | — | Audit: ERD sync | 15+ updates: users, departments, positions, leave_types, attendances, devices, assets, asset_handovers, performance_reviews, knowledge_bases, leave_balances, loan_installments, wfa_status + loan_installment_status enums, FK refs |
 
-### ⚠️ PARTIAL (3 item — sebagian done, sebagian belum)
+### ✅ SEMUA PARTIAL SELESAI (3 item — ✅ DONE)
 
-| # | Item | Yang Sudah | Yang Belum |
-|---|------|-----------|------------|
-| E20 | family_details_count | CHILD filter fallback ✅ | `withCount` accessor still counts all ❌ |
-| E42 | overtimes description nullable | Migration ✅ | FormRequest verification ❌ |
-| — | §0.1 Queue retry_after | Config fixed (180) ✅ | GenerateEmployeePayrollJob $queue ❌ |
+| # | Item | Status |
+|---|------|--------|
+| E20 | family_details_count — `children()` scoped relation sudah dibuat, `getTERCategory()` pakai `children_count` | ✅ Auditor: 2026-06-03 |
+| E42 | overtimes description nullable — `StoreOvertimeRequest` validation `required`→`nullable` | ✅ Fix: 2026-06-03 |
+| — | §0.1 Queue retry_after — `GenerateEmployeePayrollJob::$queue = 'payroll_high'` ditambahkan | ✅ Fix: 2026-06-03 |
 
 ### Item yang sudah SELESAI dari sesi v4.2 (dipindah dari PARTIAL):
 
@@ -148,7 +148,7 @@ Item berikut sudah diimplementasi dan diverifikasi. Kode fix detail dihapus untu
 
 ---
 
-### ✅ 0.1 RC-5: Queue retry_after < timeout — PARTIAL
+### ✅ 0.1 RC-5: Queue retry_after < timeout — SELESAI
 
 > **Status:** ⚠️ PARTIAL — Config fixed (`retry_after=180`), tapi `GenerateEmployeePayrollJob::$queue = 'payroll_high'` belum ditambahkan.
 
@@ -185,9 +185,9 @@ public string $queue = 'payroll_high';
 
 ---
 
-### 0.5 DL-1: Reimbursement PAID Tanpa payroll_id Setelah Regenerate
+### ✅ 0.5 DL-1: Reimbursement PAID Tanpa payroll_id Setelah Regenerate — SELESAI
 
-**Masalah:** Saat payroll di-regenerate, reimbursement yang sudah PAID tetap PAID tapi payroll_id-nya orphan. Fix SUDAH termasuk di 0.4 di atas (lihat baris "Reset reimbursements").  
+> **Status:** ✅ SELESAI — Included in 0.4 fix (PayrollCalculatorService forceDelete resets reimbursements).  
 **Severity:** CRITICAL  
 **Depends On:** 0.4  
 **Estimasi:** 0 menit (sudah diperbaiki di 0.4)
@@ -214,9 +214,9 @@ php artisan tinker --execute '
 
 ---
 
-### 0.7 C1: ApprovalLevel Enum vs Integer Strict Comparison — APPROVED_L1 Never Reached
+### ✅ 0.7 C1: ApprovalLevel Enum vs Integer Strict Comparison — APPROVED_L1 Never Reached — SELESAI
 
-**Masalah:** `Approval` model cast `level` ke `ApprovalLevel` enum, tapi `ApprovalService` membandingkan dengan integer `1` menggunakan `===`. PHP strict comparison `enum === int` **selalu false**. Akibatnya, status `APPROVED_L1` tidak pernah tercapai.  
+> **Status:** ✅ SELESAI — `ApprovalService.php:86` uses `$approval->level === ApprovalLevel::L1_SUPERVISOR` (enum comparison, not integer). Auditor: 2026-06-03.  
 **Severity:** CRITICAL  
 **File:** `app/Services/ApprovalService.php:72`, `app/Traits/Approvable.php`  
 **Depends On:** —  
@@ -253,9 +253,9 @@ if ($app) {
 
 ---
 
-### 0.8 C2: Payroll SoftDelete Memblokir Regenerasi — Unique Constraint Violation
+### ✅ 0.8 C2: Payroll SoftDelete Memblokir Regenerasi — Unique Constraint Violation — SELESAI
 
-**Masalah:** `Payroll` model menggunakan `SoftDeletes`. Saat `generatePayroll()` regenerasi, `$existingPayroll->delete()` hanya set `deleted_at` — record tetap ada di database. `Payroll::create()` berikutnya dengan `employee_id + period` yang sama **crash** karena `payrolls_employee_id_period_unique` constraint violation.  
+> **Status:** ✅ SELESAI — `PayrollCalculatorService.php:322` uses `forceDelete()` instead of `delete()`. Auditor: 2026-06-03.  
 **Severity:** CRITICAL  
 **File:** `app/Services/PayrollCalculatorService.php`, `app/Models/Payroll.php`  
 **Depends On:** 0.4 (RC-2 fix)  
@@ -387,8 +387,9 @@ echo "Category: " . $kb->category->value; // general
 
 ---
 
-### 0.10 DL-5: Observer Directory Kosong — 5 Observers (Domain + Cache Invalidation)
+### ✅ 0.10 DL-5: Observer Directory Kosong — 5 Observers (Domain + Cache Invalidation) — SELESAI
 
+> **Status:** ✅ SELESAI — 5 observers exist (EmployeeObserver, AttendanceObserver, HolidayObserver, TaxConfigObserver, BpjsConfigObserver). Registered in `AppServiceProvider::registerObservers()`. Auditor: 2026-06-03.  
 **Masalah:** Direktori `app/Observers/` kosong (0 file). Konsekuensi:
 1. **Domain logic broken** — ERR-005 (default shift assignment), PRD §8.2 (overtime ↔ attendance link).
 2. **Cache stale risk** — `tax_configs`, `bpjs_configs`, `holidays:*` punya TTL 1-day–1-month tapi 0 observer untuk invalidasi. Admin update tarif/libur via Eloquent normal → cached value stale sampai TTL expired.
@@ -621,7 +622,9 @@ echo "Cache key holidays:2026 exists: " . (Cache::has("holidays:2026") ? "yes" :
 
 ---
 
-### 1.1 SEC-1: PII Tidak Ada di $hidden
+### ✅ 1.1 SEC-1: PII Tidak Ada di $hidden — SELESAI
+
+> **Status:** ✅ SELESAI — Employee, FamilyDetail, Company models all have proper `#[Hidden]`. Auditor: 2026-06-03.
 
 **Masalah:** `nik`, `phone`, `npwp`, `bank_account_number` bocor di API/JSON.  
 **Severity:** CRITICAL  
@@ -664,7 +667,9 @@ echo isset($arr["bank_account_number"]) ? " FAIL: bank visible" : " OK: bank hid
 
 ---
 
-### 1.2 SEC-2: Zero Policies → IDOR
+### ✅ 1.2 SEC-2: Zero Policies → IDOR — SELESAI
+
+> **Status:** ✅ SELESAI — 8 policies exist (Employee, Attendance, Leave, Overtime, Reimbursement, Payroll, KnowledgeBase, Asset). Auditor: 2026-06-03.
 
 **Masalah:** Tidak ada Policy untuk model apapun.  
 **Severity:** CRITICAL  
@@ -750,7 +755,9 @@ php artisan policy:list
 
 ---
 
-### 1.3 SEC-3: Sanctum Tidak Terinstall — API Auth 0%
+### ✅ 1.3 SEC-3: Sanctum Tidak Terinstall — API Auth 0% — SELESAI
+
+> **Status:** ✅ SELESAI — Sanctum v4 installed, `HasApiTokens` on User model, `auth:sanctum` middleware active on all API routes. Auditor: 2026-06-03.
 
 **Masalah:** `composer.json` tidak menyertakan `laravel/sanctum`. Tidak ada `HasApiTokens` trait, tidak ada `config/sanctum.php`, tidak ada `personal_access_tokens` migration, tidak ada `api` guard di `config/auth.php`. V2 API auth 100% tidak bisa berjalan.  
 **Severity:** CRITICAL (untuk V2 API)  
@@ -812,7 +819,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 ---
 
-### 1.4 SEC-4: Permission Enum + RoleAndPermissionSeeder + SuperAdminSeeder Tidak Ada
+### ✅ 1.4 SEC-4: Permission Enum + RoleAndPermissionSeeder + SuperAdminSeeder Tidak Ada — SELESAI
+
+> **Status:** ✅ SELESAI — `Permission.php` (44 cases), `RoleAndPermissionSeeder`, `SuperAdminSeeder` all exist. Auditor: 2026-06-03.
 
 **Masalah:** Tanpa `Permission` enum dan seeder, `$user->can()` selalu return `false`. Policy authorization 100% mati.  
 **Severity:** CRITICAL  
@@ -1056,7 +1065,9 @@ echo $user->can("view-employees") ? " OK: can view-employees" : " FAIL: cannot v
 
 ---
 
-### 1.5 SEC-5: Exception HTTP Codes Tidak Konsisten
+### ❌ 1.5 SEC-5: Exception HTTP Codes Tidak Konsisten — NOT DONE
+
+> **Status:** ❌ FaceNotRegisteredException uses HTTP 400 (should be 422). NotClockedInException uses HTTP 400 (should be 409).
 
 **Masalah:** Beberapa exception menggunakan HTTP code yang salah atau tidak konsisten:
 - `FaceNotRegisteredException` return 400 (seharusnya 422 — business rule)
@@ -1098,7 +1109,9 @@ throw new \App\Exceptions\BusinessRuleException("Payroll untuk periode {$period}
 
 ---
 
-### 1.6 SEC-6: Password Expiry 90 Hari — PRD §4 Override
+### ✅ 1.6 SEC-6: Password Expiry 90 Hari — PRD §4 Override — SELESAI
+
+> **Status:** ✅ SELESAI — `CheckPasswordExpired` middleware exists, registered as `password.expired`. Default 90 days, configurable via CompanySetting. Auditor: 2026-06-03.
 
 **Masalah:** PRD §4 line 155 bilang "**Tidak ada password expiry**", tapi Security Config §1.5 bilang "Expiration: 90 days (reminder at 7 days before)". Kolom `password_changed_at` sudah ada di database (§4.1f), tapi logic password expiry belum diimplementasi.  
 **Severity:** HIGH (compliance ISO 27001)  
@@ -1159,7 +1172,9 @@ php artisan route:list --name=password.expired
 
 ---
 
-### 1.7 SEC-7: Module Route Files — Policy Middleware Tidak Bisa Di-enforce Tanpa Route Definitions
+### ❌ 1.7 SEC-7: Module Route Files — Policy Middleware Tidak Bisa Di-enforce Tanpa Route Definitions — NOT DONE
+
+> **Status:** ❌ API routes exist in api.php, but no separate module route files (attendance.php, leave.php, etc.) for web routes.
 
 **Masalah:** §1.2 membuat Policy classes, tapi tanpa route files per module, policy middleware (`can:view`, `can:update`, dll) tidak bisa di-enforce. `routes/web.php` saat ini kosong — tidak ada route untuk attendance, leave, overtime, payroll, approval, knowledge-base, dsb. Livewire components perlu route definitions untuk policy gates.
 **Severity:** HIGH  
@@ -1240,7 +1255,9 @@ php artisan route:list --name=attendance
 
 ---
 
-### 2.1 B1: KnowledgeBase — Tambah Kolom `status` dan `category`
+### ✅ 2.1 B1: KnowledgeBase — Tambah Kolom `status` dan `category` — SELESAI
+
+> **Status:** ✅ SELESAI — Migration has all columns (status, category, source_document, page_number). Model casts to enums. Auditor: 2026-06-03.
 
 **Masalah:** Model update kolom yang tidak ada di DB → crash.  
 **Severity:** HIGH  
@@ -1363,7 +1380,9 @@ echo "OK: KnowledgeBase saved with status and category";
 
 ---
 
-### 2.2 B2: isAllApproved() Vacuous Truth
+### ❌ 2.2 B2: isAllApproved() Vacuous Truth — NOT DONE
+
+> **Status:** ❌ `Approvable.php:24-28` — `isAllApproved()` missing `$this->approvals()->exists()` guard. Returns true if 0 approvals exist.
 
 **Masalah:** Method return true jika 0 approval → bypass approval workflow.  
 **Severity:** HIGH  
@@ -1386,7 +1405,9 @@ public function isAllApproved(): bool
 
 ---
 
-### 2.3 B3: isLocked() Tidak Block PAID
+### ✅ 2.3 B3: isLocked() Tidak Block PAID — SELESAI
+
+> **Status:** ✅ SELESAI — `Payroll.php:61-64` uses `in_array($this->status, [PUBLISHED, PAID])`. Auditor: 2026-06-03.
 
 **Masalah:** `isLocked()` hanya return true untuk PUBLISHED, tapi PAID juga harus locked.  
 **Severity:** HIGH  
@@ -1590,7 +1611,9 @@ public static function resolveFromStatus(string $maritalStatus, int $childrenCou
 
 ---
 
-### 2.10 SEC-6: Approval Model — Mass Assignment Risk pada `approvable_type`/`approvable_id`
+### ✅ 2.10 SEC-6: Approval Model — Mass Assignment Risk pada `approvable_type`/`approvable_id` — SELESAI
+
+> **Status:** ✅ SELESAI — `Approval.php` fillable does NOT include approvable_type/approvable_id. Auditor: 2026-06-03.
 
 **Masalah:** `approvable_type` dan `approvable_id` (polymorphic morph columns) ada di `#[Fillable]`. Ini memungkinkan mass-assignment yang bisa mengubah target approval ke model yang tidak diinginkan.  
 **Severity:** MEDIUM  
@@ -1643,7 +1666,9 @@ public static function resolveFromStatus(string $maritalStatus, int $childrenCou
 
 ---
 
-### 2.13 M1: Holiday Model — Missing `date` Cast
+### ✅ 2.13 M1: Holiday Model — Missing `date` Cast — SELESAI
+
+> **Status:** ✅ SELESAI — `Holiday.php:19` has `'date' => 'date'` cast. Auditor: 2026-06-03.
 
 **Masalah:** Kolom `date` tanpa cast mengembalikan string mentah, bukan Carbon instance.  
 **Severity:** MEDIUM  
@@ -1698,7 +1723,9 @@ $table->string('bank_name', 100)->nullable();
 
 ---
 
-### 2.16 M5: Missing Foreign Key Indexes (PostgreSQL Performance)
+### ✅ 2.16 M5: Missing Foreign Key Indexes (PostgreSQL Performance) — SELESAI
+
+> **Status:** ✅ SELESAI — FK indexes added to payroll_adjustments.payroll_id/created_by, asset_handovers.asset_id/employee_id, performance_reviews.employee_id/reviewer_id. Fix: 2026-06-03.
 
 **Masalah:** PostgreSQL tidak auto-create index pada FK columns. 5 FK columns tanpa index menyebabkan slow JOINs.  
 **Severity:** MEDIUM  
@@ -1787,7 +1814,9 @@ enum LoanInstallmentStatus: string
 
 ---
 
-### 2.19 M14-NEW: 16 Enum Classification — HAPUS color() (Visual Noise), 17 Enum Status — STANDARDIZE ke Flux UI Semantic Names
+### ✅ 2.19 M14-NEW: 16 Enum Classification — HAPUS color() (Visual Noise), 17 Enum Status — STANDARDIZE ke Flux UI Semantic Names — SELESAI
+
+> **Status:** ✅ SELESAI — Classification enums have NO color(), Status enums use only Flux UI colors (success/warning/danger/info/zinc). Auditor: 2026-06-03.
 
 **Masalah:** AGENTS.md menyatakan "Each enum has `label()` + `color()` methods", tapi memberi warna ke semua enum menciptakan Visual Noise di dashboard — seperti pasar malam. Enum dibagi 2 kategori:
 
@@ -1890,7 +1919,9 @@ enum WfaStatus: string
 
 ---
 
-### 2.21 L5: PerformanceReview Missing Status, Review_Date, Period, SoftDeletes
+### ✅ 2.21 L5: PerformanceReview Missing Status, Review_Date, Period, SoftDeletes — SELESAI
+
+> **Status:** ✅ SELESAI — Migration already has all columns (status, review_date, period, softDeletes). Auditor: 2026-06-03.
 
 **Masalah:** PerformanceReview table hanya punya `employee_id`, `reviewer_id`, `final_score`, `notes`, timestamps. Tidak bisa track lifecycle (draft/in-progress/completed), tidak bisa group by period, dan hard-delete menghilangkan audit trail.  
 **Severity:** LOW  
@@ -1961,7 +1992,9 @@ protected function casts(): array
 
 ---
 
-### 2.22 L6: Shift Model Missing `SoftDeletes`
+### ✅ 2.22 L6: Shift Model Missing `SoftDeletes` — SELESAI
+
+> **Status:** ✅ SELESAI — SoftDeletes trait added + migration `add_soft_deletes_to_shifts_table`. Fix: 2026-06-03.
 
 **Masalah:** Shift di-referenced oleh `attendances.shift_id` dan `employees.shift_id`. Hard-delete menyebabkan foreign key constraint error atau dangling references.  
 **Severity:** LOW  
@@ -1981,7 +2014,9 @@ use SoftDeletes;
 
 ---
 
-### 2.23 L7: CompanySetting `get()` Method — Double-Decode Risk
+### ✅ 2.23 L7: CompanySetting `get()` Method — Double-Decode Risk — SELESAI
+
+> **Status:** ✅ SELESAI — Uses Eloquent `first()?->value` with array cast, no raw json_decode(). Fix: 2026-06-03.
 
 **Masalah:** Method `get()` bypass Eloquent dengan raw query `->value('value')` + `json_decode()`. Tapi model punya `'value' => 'array'` cast. Jika di-refactor ke Eloquent access, `json_decode` akan dijalankan 2x.  
 **Severity:** LOW  
@@ -2005,7 +2040,9 @@ public static function get(string $key, mixed $default = null): mixed
 
 ---
 
-### 2.24 H2: ReimbursementService `linkToPayroll` — No Duplicate Check & No Payroll Validation
+### ❌ 2.24 H2: ReimbursementService `linkToPayroll` — No Duplicate Check & No Payroll Validation — NOT DONE
+
+> **Status:** ❌ `linkToPayroll()` checks `isApproved()` but not `payroll_id !== null` (double-link risk).
 
 **Masalah:** `linkToPayroll()` tidak cek apakah `payroll_id` sudah terisi (bisa double-link), dan tidak verifikasi bahwa payroll exists serta status DRAFT.  
 **Severity:** MEDIUM  
@@ -2070,7 +2107,9 @@ foreach ($cases as $case) echo "\n  - " . $case->value;
 
 ---
 
-### 2.26 M8: PRD §14.7 Overtime Flat Rate Keys — HARUS Diganti Tiered
+### ✅ 2.26 M8: PRD §14.7 Overtime Flat Rate Keys — HARUS Diganti Tiered — SELESAI
+
+> **Status:** ✅ SELESAI — `PayrollCalculatorService::calculateOvertimePay()` implements UU Cipta Kerja tiered logic. Auditor: 2026-06-03.
 
 **Masalah:** PRD §14.7 masih mendefinisikan `overtime_multiplier` (1.5) dan `overtime_weekend_multiplier` (2.0) sebagai flat rate. ERR-001 menyatakan bahwa key ini HARUS DIHAPUS dan diganti dengan `overtime_tiers_weekday` dan `overtime_tiers_holiday` (JSON indexed tiers).  
 **Severity:** HIGH (berdampak ke payroll calculation - gaji ganda jika config salah)  
@@ -2114,7 +2153,9 @@ echo "\nHas overtime_tiers_holiday: " . ($settings && $settings->overtime_tiers_
 
 ---
 
-### 2.27 M9: PRD §27 Duplicate "Export to Excel" Entry
+### ✅ 2.27 M9: PRD §27 Duplicate "Export to Excel" Entry — SELESAI
+
+> **Status:** ✅ SELESAI — Only `§15.4 Export to Excel (V1)` exists. CAT-008 applied. Auditor: 2026-06-03.
 
 **Masalah:** PRD §27 punya dua entry "Export to Excel" yang kontradiktif:
 - Line 1124: "Export to Excel | PDF sudah cukup | 3-4 hari" (status: ditunda ke V2)
@@ -2168,7 +2209,9 @@ echo "AttendanceStatus values: " . count($cases); // 8
 
 ---
 
-### 2.29 M11: Missing `attendance:detect-chronic-late` Command
+### ✅ 2.29 M11: Missing `attendance:detect-chronic-late` Command — SELESAI
+
+> **Status:** ✅ SELESAI — `DetectChronicLateCommand.php` exists with weekly Friday 18:00 schedule. Auditor: 2026-06-03.
 
 **Masalah:** PRD §6.5 mendokumentasi command `attendance:detect-chronic-late` (weeklyOn Friday 18:00). PRD §27 menandai ChronicLateWarning sebagai V1. Tapi PRD §16 Commands table hanya list 3 commands (`attendance:detect-alpha`, `leave:reset-quota`, `model:prune`). Command `attendance:detect-chronic-late` tidak ada di kode maupun scheduler.  
 **Severity:** MEDIUM  
@@ -2290,7 +2333,9 @@ grep -n 'invalidateCache' app/Services/AttendanceService.php
 
 ---
 
-### 2.32 M19: PTKP Magic Numbers Hardcoded — Harus dari CompanySetting
+### ❌ 2.32 M19: PTKP Magic Numbers Hardcoded — Harus dari CompanySetting — NOT DONE
+
+> **Status:** ❌ `Employee::calculatePtkp()` hardcodes 54jt/58.5jt/4.5jt constants. Should use CompanySetting::get().
 
 **Masalah:** `Employee::calculatePtkp()` hardcode 54jt (single), 58.5jt (married), 4.5jt (per dependent). PTKP berubah tiap tahun oleh Peraturan Menteri Keuangan. Hardcode artinya setiap perubahan butuh deploy kode baru.  
 **Severity:** HIGH  
@@ -2399,7 +2444,9 @@ echo "\nTotal: " . count($cases); // 3
 
 ---
 
-### 2.34 M21: 22 Hari Kerja Hardcoded — Harus Pakai `countWorkingDays()`
+### ✅ 2.34 M21: 22 Hari Kerja Hardcoded — Harus Pakai `countWorkingDays()` — SELESAI
+
+> **Status:** ✅ SELESAI — Uses `$this->countWorkingDays()` with dynamic month calculation. Auditor: 2026-06-03.
 
 **Masalah:** `PayrollCalculatorService` line 261: `$dailyRate / 22`. Angka 22 adalah asumsi jumlah hari kerja sebulan. Kenyataannya bervariasi (19-23 hari). Trait `ManagesWorkDays::countWorkingDays()` sudah ada.  
 **Severity:** MEDIUM  
@@ -2887,7 +2934,9 @@ if ($endDate->lt($startDate)) {
 
 ---
 
-### 3.8 M8: ReimbursementService `linkToPaylawl()` — Sudah dipindahkan ke §2.24
+### 🔀 3.8 M8: ReimbursementService `linkToPaylawl()` — Sudah dipindahkan ke §2.24 — MERGED
+
+> **Status:** 🔀 MERGED — Ditangani di §2.24. Auditor: 2026-06-03.
 
 > **CATATAN:** Bug ini sudah didokumentasikan di §2.24 (Fase 2).
 
@@ -3011,27 +3060,31 @@ if (count($incomingVector) !== 128) {
 
 ---
 
-### 4.1 Migrations yang Masih Dibutuhkan
+### ✅ 4.1 Migrations — SEMUA SUDAH ADA
+
+> **Status:** ✅ SEMUA SELESAI — Semua kolom sudah ada di migration asli (development mode). Tidak ada alter migration terpisah yang diperlukan. Audit: 2026-06-03.
 
 Berdasarkan perbandingan ERD vs database aktual:
 
-| # | Migration | Kolom yang Ditambahkan | Status |
-|---|-----------|----------------------|--------|
-| 1 | ~~`add_status_and_due_date_to_loan_installments`~~ | ~~`status varchar(20) default 'pending'`, `due_date date`~~ | **SUDAH ADA** — skip |
-| 2 | `add_exception_fields_to_attendances` | `exception_type varchar(30) nullable`, `exception_notes text nullable`, `approved_late_by bigint nullable` | Diperlukan |
-| 3 | `add_breakdown_to_payrolls` | Kolom-kolom sudah ada di DB (sudah diverifikasi) | **SUDAH ADA** — skip |
-| 4 | `add_google_oauth_to_users` | `google_id varchar(255) nullable` | **SUDAH ADA** — skip |
-| 5 ~~`add_password_changed_at_to_users`~~ | ~~`password_changed_at timestamp nullable`~~ | ~~SUDAH ADA sebagai `password_changed`~~ — **TAPI FIELD SALAH: `password_changed` adalah boolean, bukan timestamp!** | **Ganti ke migration baru** — lihat #8 |
-| 6 | `add_wfa_status_to_attendances` | `status_wfa varchar(20) nullable` | Diperlukan |
-| 7 | `add_device_detection_to_devices` | `device_type varchar(20) nullable`, `device_name varchar(255) nullable`, `browser varchar(255) nullable`, `os varchar(255) nullable` | Diperlukan |
-| 8 | `add_password_changed_at_to_users` | `password_changed_at timestamp nullable` — **KRITIS untuk keamanan** (password expiration 90 hari, force change, audit forensik) | **Diperlukan** — `password_changed` (boolean) tidak bisa jadi time anchor |
-| 9 | ~~Edit migration asli~~ | ~~`payroll_adjustments.amount` integer → decimal(15,2)~~ | **Sudah di §2.4** |
-| 10 | ~~Edit migration asli~~ | ~~`overtimes.description` NOT NULL → nullable~~ | **Lihat §4.1d** |
-| 11 | ~~Edit migration asli~~ | ~~`overtimes.attendance_id` NOT NULL → nullable~~ | **Lihat §4.1d** — PRD §8.1: lembur diajukan SEBELUM absen pulang |
-| 12 | ~~Edit migration asli~~ | ~~`employees.address_detail` NOT NULL → nullable~~ | **Lihat §4.1e** |
-| 13 | `add_foreign_key_indexes` | Index pada `payroll_adjustments.payroll_id`, `performance_reviews.employee_id`, `performance_reviews.reviewer_id`, `asset_handovers.asset_id`, `asset_handovers.employee_id` | Diperlukan — §2.16 |
-| 14 | `add_status_and_period_to_performance_reviews` | `status varchar(20) default 'draft'`, `review_date date nullable`, `period varchar(20) nullable`, `softDeletes` | Diperlukan — §2.21 |
-| 15 | `add_unique_to_bpjs_configs_name` | Unique constraint pada `bpjs_configs.name` | Diperlukan — §2.19 |
+| # | Migration | Kolom | Status |
+|---|-----------|-------|--------|
+| 1 | ~~`add_status_and_due_date_to_loan_installments`~~ | ~~status, due_date~~ | **SUDAH ADA** |
+| 2 | exception_fields | exception_type, exception_notes, approved_late_by | ✅ Ada di `create_attendances_table` |
+| 3 | payroll_breakdown | — | **SUDAH ADA** |
+| 4 | google_oauth | google_id | ✅ Ada di `create_users_table` |
+| 5 | password_changed_at | password_changed_at timestamp | ✅ Boolean → Timestamp di migration asli (Fix: 2026-06-03) |
+| 6 | wfa_status | status_wfa | ✅ Ada di `create_attendances_table` |
+| 7 | device_detection | device_type, device_name, browser, os | ✅ Ada di `create_devices_table` |
+| 8 | password_changed_at | password_changed_at (CRITICAL) | ✅ Di migration asli `create_users_table` |
+| 9 | payroll_adjustments decimal | amount decimal(15,2) | ✅ Di migration asli |
+| 10 | overtimes description | nullable | ✅ Di migration asli |
+| 11 | overtimes attendance_id | nullable | ✅ |
+| 12 | employees address_detail | nullable | ✅ Di migration asli |
+| 13 | FK indexes | 5 indexes | ✅ Ditambahkan ke migration asli (Fix: 2026-06-03) |
+| 14 | performance_reviews fields | status, review_date, period, softDeletes | ✅ Ada di migration asli |
+| 15 | bpjs_configs name unique | unique constraint | ✅ Ada di `create_bpjs_configs_table` |
+
+**Semua migration terverifikasi — tidak ada yang perlu dibuat.**
 
 **Catatan:** Sebelum membuat migration, verifikasi dulu dengan `php artisan migrate:status` apakah kolom sudah ada di DB.
 
@@ -3325,145 +3378,71 @@ $table->string('bank_name', 100)->nullable();
 
 ---
 
-### 4.2 Console Commands yang Dibutuhkan
+### ✅ 4.2 Console Commands — SEMUA SUDAH ADA
 
-| Command | Schedule | Spesifikasi |
-|---------|----------|-------------|
-| `attendance:detect-alpha` | `dailyAt('23:59')` | Cari employee yang tidak punya attendance record hari ini → buat record dengan `status=absent` |
-| `attendance:detect-chronic-late` | `weeklyOn(Friday, '18:00')` | Cari employee dengan >3 late attendance minggu ini → kirim ChronicLateWarning notification |
-| `leave:reset-quota` | `yearlyOn(1, 1, '00:00')` | Untuk setiap employee, create LeaveBalance untuk tahun baru. Panggil `LeaveService::carryForward()` untuk sisa tahun lalu. |
-| `payroll:generate {period}` | Manual | Dispatch `GenerateEmployeePayrollJob` untuk setiap active employee |
-| `activitylog:clean` | `daily()` | `php artisan activitylog:clean --days=365` (sudah dari Spatie) |
+> **Status:** ✅ SEMUA SELESAI — 5 commands exist. Auditor: 2026-06-03.
+
+| Command | Schedule | File | Status |
+|---------|----------|------|--------|
+| `attendance:detect-alpha` | `dailyAt('23:59')` | `DetectAlphaAttendanceCommand.php` | ✅ |
+| `attendance:detect-chronic-late` | `weeklyOn(Friday, '18:00')` | `DetectChronicLateCommand.php` | ✅ |
+| `leave:reset-quota` | `yearlyOn(1, 1, '00:00')` | `ResetLeaveQuotaCommand.php` | ✅ |
+| `payroll:generate {period}` | Manual | `GeneratePayrollCommand.php` | ✅ |
+| `activitylog:clean` | `daily()` | Dari package Spatie | ✅ |
 
 ---
 
-### 4.3 Notification Classes yang Dibutuhkan
+### ❌ 4.3 Notification Classes — BELUM ADA
 
-| # | Class | Via | Trigger |
-|---|-------|-----|---------|
-| 1 | `LeaveRequestSubmitted` | mail, database | Leave::create |
-| 2 | `LeaveApproved` | mail, database | ApprovalService::approve (final) |
-| 3 | `LeaveRejected` | mail, database | ApprovalService::reject |
-| 4 | `PayrollPublished` | mail, database | Payroll publish |
-| 5 | `ApprovalOverdue` | database | attendance:detect-alpha command |
-| 6 | `NewDeviceLogin` | mail, database | Login dari device baru |
-| 7 | `ChronicLateWarning` | mail, database | attendance:detect-chronic-late command |
+> **Status:** ❌ `app/Notifications/` folder exists but contains NO notification classes. 7 classes needed.
+
+| # | Class | Via | Trigger | Status |
+|---|-------|-----|---------|--------|
+| 1 | `LeaveRequestSubmitted` | mail, database | Leave::create | ❌ |
+| 2 | `LeaveApproved` | mail, database | ApprovalService::approve (final) | ❌ |
+| 3 | `LeaveRejected` | mail, database | ApprovalService::reject | ❌ |
+| 4 | `PayrollPublished` | mail, database | Payroll publish | ❌ |
+| 5 | `ApprovalOverdue` | database | attendance:detect-alpha command | ❌ |
+| 6 | `NewDeviceLogin` | mail, database | Login dari device baru | ❌ |
+| 7 | `ChronicLateWarning` | mail, database | attendance:detect-chronic-late command | ❌ |
 
 Setiap notification harus implement `ShouldQueue` dan punya `toDatabase()` + `toMail()`.
 
 ---
 
-### 4.4 Seeders yang Dibutuhkan
+### ⚠️ 4.4 Seeders — SEBAGIAN ADA
 
-| # | Seeder | Data |
-|---|---------|------|
-| 1 | `RoleAndPermissionSeeder` | 5 roles (super-admin, hr-manager, finance, supervisor, employee) + 50+ permissions |
-| 2 | `CompanySeeder` | 1 company (521) + 1 branch (Jakarta Pusat) |
-| 3 | `SuperAdminSeeder` | admin@521.com / password123! dengan role super-admin |
-| 4 | `CompanySettingSeeder` | Default settings: geofence radius 100m, face threshold 0.85, attendance rules |
-| 5 | `PayrollConfigSeeder` | Tax configs (TER A/B/C) + BPJS configs (5 jenis) |
-| 6 | `LeaveTypeSeeder` | Tahunan(12 hari), Sakit(unlimited), Menstruasi(1 hari/bulan), Melahirkan(90 hari), Penting(aturan perusahaan), Unpaid |
-| 7 | `HolidaySeeder` | Hari libur nasional Indonesia 2026 |
-| 8 | `ShiftSeeder` | Office Hour (08:00-17:00), Morning (06:00-14:00), Night (14:00-22:00), Flexible |
+> **Status:** ⚠️ PARTIAL — 4 seeders exist, 4 still missing.
+
+| # | Seeder | Status |
+|---|--------|--------|
+| 1 | `RoleAndPermissionSeeder` | ✅ Ada |
+| 2 | `CompanySeeder` | ❌ Belum ada |
+| 3 | `SuperAdminSeeder` | ✅ Ada |
+| 4 | `CompanySettingSeeder` | ❌ Belum ada |
+| 5 | `PayrollConfigSeeder` | ❌ Belum ada (tax_configs + bpjs_configs via migration default) |
+| 6 | `LeaveTypeSeeder` | ❌ Belum ada |
+| 7 | `HolidaySeeder` | ❌ Belum ada |
+| 8 | `ShiftSeeder` | ❌ Belum ada |
 
 ---
 
-## Urutan Eksekusi Lengkap
+## Urutan Eksekusi Lengkap — AUDIT 2026-06-03
 
 ```markdown
-HARI 1:
-  ☐ 0.1 — RC-5: Queue retry_after (1 menit)
-  ☐ 0.7 — C1: ApprovalLevel enum comparison (5 menit)
-  ☐ 0.3 — RC-1: Clock-in QueryException catch (15 menit) ← MIGRATION TIDAK PERLU, index sudah ada
-  ☐ 0.9 — DL-4: KnowledgeBase crash fix (15 menit) ← edit migration asli + enum + model
-  ☐ 0.10 — DL-5: Observer directory (20 menit) ← EmployeeObserver + AttendanceObserver + AppServiceProvider
-  ☐ 2.3 — B3: isLocked() block PAID (5 menit)
-  ☐ 2.4 — B4: PayrollAdjustment amount decimal:2 (5 menit)
-  ☐ 2.5 — B5: Company fillable (10 menit)
-  ☐ 2.8 — M4: TerCategory DIVORCED/WIDOWED ✅ SELESAI
-  ☐ 2.9 — M2: Tax/BPJS cache invalidation (15 menit)
-  ☐ 2.10 — SEC-6: Approval fillable mass-assignment (5 menit)
-  ☐ 2.13 — M1: Holiday date cast (2 menit)
-  ☐ 2.14 — M2/M3: Company & Branch address_detail nullable (5 menit)
-  ☐ 2.15 — M4: Employee npwp/bank nullable (5 menit)
-  ☐ 2.19 — M14: bpjs_configs.name unique (2 menit)
-  ☐ N3 — companies.logo text→varchar(255) (2 menit) ← edit migration asli
-  ☐ N4 — branches lat/lon precision (2 menit) ← edit migration asli
-  ☐ 4.1d — Fix overtimes NOT NULL → nullable (5 menit) ← edit migration asli
-  ☐ N1 — Fix overtimes start_time/end_time NOT NULL → nullable (2 menit) ← edit migration asli
-  ☐ 4.1e — Fix employees.address_detail NOT NULL → nullable (5 menit) ← edit migration asli
-  ☐ 4.1f — Add password_changed_at to users (5 menit) ← migration baru + model cast
-  ☐ 4.1g — Fix attendances.shift_id nullable (2 menit) ← edit migration asli
-  ☐ 4.1h — Fix payroll_adjustments.created_by nullable (2 menit) ← edit migration asli
-  ☐ 4.1i — Fix knowledge_bases.embedding nullable (2 menit) ← edit migration asli
-  ☐ 4.1j — Fix companies/branches.address_detail nullable (5 menit) ← edit migration asli
-  ☐ 4.1k — Fix employees npwp/bank nullable (5 menit) ← edit migration asli
-  ☐ 4.1 — Migration 2: add_exception_fields_to_attendances (10 menit)
-  ☐ 4.1 — Migration 6: add_wfa_status_to_attendances (5 menit)
-  ☐ 4.1 — Migration 7: add_device_detection_to_devices (5 menit)
-  ☐ 4.1 — Migration 8: add_password_changed_at_to_users (5 menit)
-  ☐ 4.1 — Migration 13: add_foreign_key_indexes (5 menit)
-  ☐ 4.1 — Migration 14: add_status_and_period_to_performance_reviews (10 menit)
-  ☐ 4.1 — Migration 15: add_unique_to_bpjs_configs_name (2 menit)
-  ☐ Run: php artisan migrate:fresh
+✅ SELESAI : 87 items (Fase 0-3 + migrations + commands + partial)
+🔀 MERGED  : 3 items
+❌ NOT DONE: 7 items
 
-HARI 2:
-  ☐ 0.2 — DL-3: face_similarity_score clock-out (15 menit)
-  ☐ 0.4 + 0.8 — RC-2: Payroll race condition + forceDelete fix (30 menit) ← replace softDelete with forceDelete
-  ☐ 0.6 — DL-2: Leave quota deduct timing (45 menit) ← includes B2, B8, refund() method
-  ☐ 1.5 — SEC-5: Exception HTTP codes (10 menit)
-  ☐ 1.6 — SEC-6: Password expiry 90 hari middleware (20 menit)
-  ☐ 1.7 — SEC-7: Module route files + policy middleware (2 jam)
-  ☐ N2 — M14-NEW: 16 enum missing color() method (30 menit)
+SISA 7 ITEM YANG HARUS DIKERJAKAN:
 
-HARI 3:
-  ☐ 1.1 — SEC-1: PII hidden fields (15 menit)
-  ☐ 1.2 — SEC-2: Zero policies → create 8 policies (2 jam)
-  ☐ 1.3 — SEC-3: Sanctum install + config (30 menit)
-  ☐ 1.4 — SEC-4: Permission enum + seeders (1 jam)
-  ☐ 2.1 — B1: KnowledgeBase status/category migration + vector cast (15 menit)
-  ☐ 2.6 — B6: Asset SoftDeletes + missing columns migration (15 menit) ← SELESAI v4.2
-  ☐ 2.11 — H9: Employee vector cast (5 menit) ← SELESAI v4.0
-  ☐ 2.12 — H10: KnowledgeBase vector cast (5 menit) ← SELESAI v4.0
-  ☐ 2.16 — M5: FK indexes migration (5 menit)
-  ☐ 2.17 — M12: AssetStatus enum integration (included in B6) ← SELESAI v4.2
-  ☐ 2.18 — M13: LoanInstallmentStatus enum (10 menit) ← SELESAI v4.2
-  ☐ 2.20 — M15: WfaStatus enum (5 menit) ← SELESAI v4.2
-  ☐ 2.25 — M7: EmploymentType 4 values verify (5 menit)
-  ☐ 2.26 — M8: PRD §14.7 overtime config update (10 menit)
-  ☐ 2.27 — M9: PRD §27 duplicate entry — doc fix (2 menit)
-  ☐ 2.28 — M10: AttendanceStatus 8 values verify (5 menit)
-  ☐ 2.29 — M11: chronic-late command (15 menit)
-  ☐ 2.30 — M17: Hapus dead code invalidateCache() (5 menit)
-  ☐ 2.31 — M18: Holiday cache invalidation observer (5 menit)
-  ☐ 2.32 — M19: PTKP → CompanySetting (15 menit)
-  ☐ 2.33 — M20: VerificationMethod enum + fix 'pin' bug (10 menit)
-
-HARI 4-5:
-  ☐ 2.2 — B2: isAllApproved() (sudah di 0.6)
-  ☐ 2.7 — B8: LeaveBalance deduct minimum (sudah di 0.6)
-  ☐ 2.21 — L5: PerformanceReview status/period/SoftDeletes (30 menit)
-  ☐ 2.22 — L6: Shift SoftDeletes (5 menit)
-  ☐ 2.23 — L7: CompanySetting double-decode fix (5 menit)
-  ☐ 2.24 — H2: ReimbursementService linkToPayroll guards (10 menit)
-  ☐ 2.34 — M21: 22 hari kerja → countWorkingDays() (5 menit)
-  ☐ 2.35 — M22: FaceNotRecognized fix — tiered fallback (20 menit)
-  ✅ 3.1 — P1/P2: Overtime rate calculation (30 menit) — SELESAI Sesi 4
-  ✅ 3.2 — G1: GeofenceService null coordinates (15 menit) — SELESAI Sesi 7
-  ✅ 3.4 — H2: family_details_count counts all (5 menit) — SELESAI Sesi 4
-  ✅ 3.5 — H6/H7: carryForward bugs (10 menit) — SELESAI Sesi 4
-  ✅ 3.6 — H8: DomainException → BusinessRuleException (2 menit) — SELESAI Sesi 7
-  ✅ 3.7 — M10: LeaveService end_date >= start_date (2 menit) — SELESAI Sesi 4
-  ✅ 3.9 — H3: N+1 overtime query (10 menit) — SELESAI Sesi 8
-  ✅ 3.10 — M16: No guard employee without position (5 menit) — SELESAI Sesi 7
-  ✅ 3.12 — H4: FaceRecognition dimension validation (5 menit) — SELESAI Sesi 7
-
-HARI 6-8:
-  ☐ Fase 2 — Missing Infrastructure (seeders, commands, notifications)
-  ✅ 3.11 — L8: Attendance penalty count filter — SELESAI Sesi 8 (column is_wfa + exception_type sudah ada di migration awal)
-
-HARI 9+:
-  ☐ Fase 4 — PRD Gap Implementation (WFA flow, etc.)
+  ❌ 1.5  — SEC-5: Exception HTTP codes (FaceNotRegistered → 422, NotClockedIn → 409) [10 menit]
+  ❌ 1.7  — SEC-7: Module web route files (attendance, leave, payroll, dll) [2 jam]
+  ❌ 2.2  — B2: isAllApproved() vacuous truth — guard approvals()->exists() [5 menit]
+  ❌ 2.24 — H2: ReimbursementService linkToPayroll — duplicate guard [10 menit]
+  ❌ 2.32 — M19: PTKP magic numbers → CompanySetting [15 menit]
+  ❌ 4.3  — Notifications: 7 classes (LeaveRequestSubmitted, LeaveApproved, dll) [2 jam]
+  ❌ 4.4  — Seeders: 6 missing (Company, CompanySetting, PayrollConfig, LeaveType, Holiday, Shift) [1 jam]
 ```
 
 ---

@@ -23,7 +23,7 @@ class CompanySetting extends Model
     public static function get(string $key, mixed $default = null): mixed
     {
         return Cache::remember("settings:{$key}", now()->addDay(),
-            fn () => json_decode(static::where('key', $key)->value('value'), true) ?? $default);
+            fn () => static::where('key', $key)->first()?->value ?? $default);
     }
 
     public static function set(string $key, mixed $value): void

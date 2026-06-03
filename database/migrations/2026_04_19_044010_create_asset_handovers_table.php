@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('asset_handovers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('asset_id')->constrained('assets')->restrictOnDelete();
-            $table->foreignId('employee_id')->constrained('employees')->restrictOnDelete();
+            $table->foreignId('asset_id')->index()->constrained('assets')->restrictOnDelete();
+            $table->foreignId('employee_id')->index()->constrained('employees')->restrictOnDelete();
             $table->date('handover_date');
             $table->date('return_date')->nullable();
             $table->string('condition');
