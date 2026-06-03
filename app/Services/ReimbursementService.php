@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ReimbursementStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Employee;
+use App\Models\Payroll;
 use App\Models\Reimbursement;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -80,6 +81,15 @@ class ReimbursementService
     {
         if (! $reimbursement->isApproved()) {
             throw new BusinessRuleException('Hanya reimbursement yang sudah disetujui penuh yang dapat dimasukkan ke payroll.');
+        }
+
+        if ($reimbursement->payroll_id !== null) {
+            throw new BusinessRuleException('Reimbursement sudah terhubung ke payroll lain.');
+        }
+
+        $payroll = Payroll::findOrFail($payrollId);
+        if ($payroll->isLocked()) {
+            throw new BusinessRuleException('Payroll sudah dikunci dan tidak dapat diubah.');
         }
 
         $reimbursement->update([

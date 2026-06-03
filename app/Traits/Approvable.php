@@ -23,9 +23,10 @@ trait Approvable
      */
     public function isAllApproved(): bool
     {
-        return $this->approvals()
-            ->where('status', '!=', ApprovalStatus::APPROVED)
-            ->doesntExist();
+        return $this->approvals()->exists()
+            && $this->approvals()
+                ->where('status', '!=', ApprovalStatus::APPROVED)
+                ->doesntExist();
     }
 
     /**

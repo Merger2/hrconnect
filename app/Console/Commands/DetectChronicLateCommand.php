@@ -6,6 +6,7 @@ use App\Enums\EmployeeStatus;
 use App\Models\Attendance;
 use App\Models\CompanySetting;
 use App\Models\Employee;
+use App\Notifications\ChronicLateWarning;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -65,8 +66,9 @@ class DetectChronicLateCommand extends Command
                         $this->warn("⚠ {$employee->employee_number} — {$employee->full_name}: {$lateCount}x telat");
                         $detected++;
 
-                        // TODO: dispatch ChronicLateWarningNotification ke Manager + HR
-                        // (akan di-wire saat folder app/Notifications/ dibuat di sesi terpisah).
+                        if ($employee->user) {
+                            $employee->user->notify(new ChronicLateWarning($employee, $lateCount));
+                        }
                     }
                 }
             });

@@ -9,7 +9,7 @@ class NotClockedInException extends Exception
 {
     public function __construct(string $message = 'Tidak ada absensi masuk hari ini.')
     {
-        parent::__construct($message, Response::HTTP_BAD_REQUEST);
+        parent::__construct($message, Response::HTTP_CONFLICT);
     }
 
     public function render(): Response
@@ -17,6 +17,6 @@ class NotClockedInException extends Exception
         return response()->json([
             'status' => 'error',
             'message' => $this->getMessage(),
-        ], Response::HTTP_BAD_REQUEST);
+        ], Response::HTTP_CONFLICT);
     }
 }

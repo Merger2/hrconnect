@@ -276,16 +276,16 @@ class Employee extends Model implements CipherSweetEncrypted
     public function calculatePtkp(): float
     {
         $base = match ($this->marital_status) {
-            MaritalStatus::SINGLE, MaritalStatus::DIVORCED, MaritalStatus::WIDOWED => 54_000_000,
-            MaritalStatus::MARRIED => 58_500_000,
-            default => 54_000_000,
+            MaritalStatus::MARRIED => (float) CompanySetting::get('ptkp_base_married', 58_500_000),
+            default => (float) CompanySetting::get('ptkp_base_single', 54_000_000),
         };
 
-        $dependentsCount = $this->families
-            ->where('relationship', FamilyRelationship::CHILD)
-            ->count();
+        $perDependent = (float) CompanySetting::get('ptkp_per_dependent', 4_500_000);
+        $maxDependents = (int) CompanySetting::get('ptkp_max_dependents', 3);
 
-        return $base + (min($dependentsCount, 3) * 4_500_000);
+        $dependentsCount = $this->children()->count();
+
+        return $base + (min($dependentsCount, $maxDependents) * $perDependent);
     }
 
     public function currentYearLeaveBalances(): HasMany

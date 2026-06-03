@@ -7,9 +7,9 @@ use Illuminate\Http\JsonResponse;
 
 class FaceNotRegisteredException extends Exception
 {
-    public function __construct(string $message = 'Data biometrik wajah Anda belum terdaftar. Silakan hubungi HRD.')
+    public function __construct(string $message = 'Data biometrik wajah Anda belum terdaftar. Silakan hubungi HRD.', int $statusCode = 422)
     {
-        parent::__construct($message, 400);
+        parent::__construct($message, $statusCode);
     }
 
     public function render(): JsonResponse
@@ -17,6 +17,6 @@ class FaceNotRegisteredException extends Exception
         return response()->json([
             'status' => 'error',
             'message' => $this->getMessage(),
-        ], $this->getCode() ?: 400);
+        ], $this->getCode() ?: 422);
     }
 }

@@ -13,16 +13,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // RBAC harus jalan duluan supaya role 'super-admin' ada
-        // sebelum SuperAdminSeeder coba assignRole('super-admin').
         $this->call([
             RoleAndPermissionSeeder::class,
             SuperAdminSeeder::class,
+            CompanySeeder::class,
+            CompanySettingSeeder::class,
+            ShiftSeeder::class,
+            LeaveTypeSeeder::class,
+            HolidaySeeder::class,
+            PayrollConfigSeeder::class,
             EmployeeSeeder::class,
-
-            // Nanti kalau lu bikin Seeder lain, tinggal tambahin di bawahnya:
-            // LeaveSeeder::class,
-            // AttendanceSeeder::class,
         ]);
 
         // Test user — hanya kalau APP_ENV bukan production

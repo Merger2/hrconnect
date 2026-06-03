@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Middleware\CheckPasswordExpired;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,6 +16,18 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         apiPrefix: 'api/v1',
+        then: function () {
+            $modules = [
+                'attendance', 'leave', 'overtime', 'payroll', 'approval',
+                'knowledge-base', 'asset', 'loan', 'reimbursement',
+            ];
+            foreach ($modules as $module) {
+                $path = base_path("routes/{$module}.php");
+                if (file_exists($path)) {
+                    Route::middleware('web')->group($path);
+                }
+            }
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Sanctum SPA stateful (cookie-based) untuk same-origin requests.
@@ -20,10 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Aliases shortcut untuk middleware Spatie & Sanctum (digunakan di routes).
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'password.expired' => \App\Http\Middleware\CheckPasswordExpired::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'password.expired' => CheckPasswordExpired::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
