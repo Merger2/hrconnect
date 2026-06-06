@@ -17,7 +17,7 @@ class FaceController extends Controller
         protected FaceRecognitionService $faceService,
     ) {}
 
-    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D FaceNet vector) for biometric verification.')]
+    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D FaceNet vector) for biometric verification. Flow: Clock In (Step 1/4) — Register Face → Clock In → Today → Clock Out.')]
     #[BodyParameter(name: 'embedding', description: '128-dimension face embedding array from face-api.js', required: true, type: 'array')]
     public function register(RegisterFaceRequest $request): JsonResponse
     {
@@ -46,7 +46,7 @@ class FaceController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance.')]
+    #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance. Flow: Clock In (utility).')]
     #[BodyParameter(name: 'embedding', description: '128-dimension face embedding array to verify', required: true, type: 'array')]
     public function verify(RegisterFaceRequest $request): JsonResponse
     {

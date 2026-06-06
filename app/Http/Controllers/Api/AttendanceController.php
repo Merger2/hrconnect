@@ -25,7 +25,7 @@ class AttendanceController extends Controller
         protected AttendanceService $attendanceService,
     ) {}
 
-    #[Endpoint(title: 'Clock In', description: 'Record attendance clock-in with GPS and face verification.')]
+    #[Endpoint(title: 'Clock In', description: 'Record attendance clock-in with GPS and face verification. Flow: Clock In (Step 2/4) — Register Face → Clock In → Today → Clock Out.')]
     public function clockIn(ClockInRequest $request): JsonResponse
     {
         $employee = $request->user()->employee;
@@ -63,7 +63,7 @@ class AttendanceController extends Controller
         ], 201);
     }
 
-    #[Endpoint(title: 'Clock Out', description: 'Record attendance clock-out with optional GPS and face verification.')]
+    #[Endpoint(title: 'Clock Out', description: 'Record attendance clock-out with optional GPS and face verification. Flow: Clock In (Step 4/4) — Register Face → Clock In → Today → Clock Out.')]
     #[BodyParameter(name: 'latitude', description: 'GPS latitude', required: false, type: 'number')]
     #[BodyParameter(name: 'longitude', description: 'GPS longitude', required: false, type: 'number')]
     #[BodyParameter(name: 'accuracy', description: 'GPS accuracy in meters', required: false, type: 'number')]
@@ -108,7 +108,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Today', description: 'Get today\'s attendance status (clocked in/out).')]
+    #[Endpoint(title: 'Today', description: 'Get today\'s attendance status (clocked in/out). Flow: Clock In (Step 3/4) — Register Face → Clock In → Today → Clock Out.')]
     public function today(Request $request): JsonResponse
     {
         $employee = $request->user()->employee;
@@ -142,7 +142,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'List Attendances', description: 'Paginated attendance list with period/status filters.')]
+    #[Endpoint(title: 'List Attendances', description: 'Paginated attendance list with period/status filters. Flow: Attendance Management.')]
     #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
@@ -202,7 +202,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Approve WFA', description: 'Approve or reject WFA request for a specific attendance.')]
+    #[Endpoint(title: 'Approve WFA', description: 'Approve or reject WFA request for a specific attendance. Flow: WFA Approval.')]
     #[BodyParameter(name: 'decision', description: 'Approve or reject', required: true, type: 'string')]
     #[BodyParameter(name: 'notes', description: 'Approval notes', required: false, type: 'string')]
     public function approveWfa(Request $request, Attendance $attendance): JsonResponse

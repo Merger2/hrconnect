@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @mixin IdeHelperPayroll
  */
-#[Fillable(['employee_id', 'period', 'basic_salary', 'total_allowance', 'gross_salary', 'overtime_pay', 'pph21', 'bpjs_health', 'bpjs_employment', 'loan_deduction', 'attendance_penalty', 'total_deduction', 'net_salary', 'status'])]
+#[Fillable(['employee_id', 'period', 'basic_salary', 'total_allowance', 'gross_salary', 'overtime_pay', 'pph21', 'bpjs_health', 'bpjs_employment', 'loan_deduction', 'attendance_penalty', 'total_deduction', 'net_salary', 'status', 'pdf_path'])]
 class Payroll extends Model
 {
     use HasFactory, SoftDeletes;
@@ -64,10 +64,5 @@ class Payroll extends Model
     public function isLocked(): bool
     {
         return in_array($this->status, [PayrollStatus::PUBLISHED, PayrollStatus::PAID]);
-    }
-
-    public function generatePdf(): string
-    {
-        return "payslips/{$this->period}/{$this->employee_id}.pdf";
     }
 }

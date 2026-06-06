@@ -7,14 +7,8 @@ parameters:
 			path: app/Console/Commands/AttendanceSendReminders.php
 
 		-
-			message: '#^Unknown parameter \$ip in call to App\\Notifications\\NewDeviceLogin constructor\.$#'
-			identifier: argument.unknown
-			count: 1
-			path: app/Console/Commands/AttendanceSendReminders.php
-
-		-
-			message: '#^Unknown parameter \$time in call to App\\Notifications\\NewDeviceLogin constructor\.$#'
-			identifier: argument.unknown
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Employee\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
 			count: 1
 			path: app/Console/Commands/AttendanceSendReminders.php
 
@@ -29,6 +23,12 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Console/Commands/DetectChronicLateCommand.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: int\<min, \-1\>$#'
+			identifier: match.unhandled
+			count: 2
+			path: app/Enums/TerCategory.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
@@ -49,6 +49,30 @@ parameters:
 			path: app/Http/Controllers/Api/ApprovalController.php
 
 		-
+			message: '#^Instanceof between int and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Api/ApprovalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\ApprovalController\:\:isFinalApproval\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Http/Controllers/Api/ApprovalController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\ApprovalStatus\:\:PENDING will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/Http/Controllers/Api/ApprovalController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 2
+			path: app/Http/Controllers/Api/ApprovalController.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 3
@@ -61,7 +85,7 @@ parameters:
 			path: app/Http/Controllers/Api/AttendanceController.php
 
 		-
-			message: '#^Call to an undefined method Carbon\\Carbon\:\:floatDiffInHours\(\)\.$#'
+			message: '#^Call to an undefined method Carbon\\CarbonImmutable\:\:floatDiffInHours\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Controllers/Api/AttendanceController.php
@@ -82,6 +106,42 @@ parameters:
 			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
 			identifier: method.nonObject
 			count: 7
+			path: app/Http/Controllers/Api/AttendanceController.php
+
+		-
+			message: '#^Instanceof between string\|null and Carbon\\CarbonImmutable will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/Api/AttendanceController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,App\\Models\\Attendance\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Api/AttendanceController.php
+
+		-
+			message: '#^Parameter \#1 \$employee of method App\\Services\\AttendanceService\:\:clockIn\(\) expects App\\Models\\Employee, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/AttendanceController.php
+
+		-
+			message: '#^Parameter \#1 \$employee of method App\\Services\\AttendanceService\:\:clockOut\(\) expects App\\Models\\Employee, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/AttendanceController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/Api/AttendanceController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
 			path: app/Http/Controllers/Api/AttendanceController.php
 
 		-
@@ -109,6 +169,18 @@ parameters:
 			path: app/Http/Controllers/Api/EmployeeController.php
 
 		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/Api/EmployeeController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 8
+			path: app/Http/Controllers/Api/EmployeeController.php
+
+		-
 			message: '#^Cannot access property \$value on string\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -121,14 +193,32 @@ parameters:
 			path: app/Http/Controllers/Api/EmployeeTerminationController.php
 
 		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/EmployeeTerminationController.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Api/FaceController.php
 
 		-
+			message: '#^Parameter \#1 \$employee of method App\\Services\\FaceRecognitionService\:\:verifyFace\(\) expects App\\Models\\Employee, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/FaceController.php
+
+		-
 			message: '#^Cannot access property \$value on string\.$#'
 			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/Api/KnowledgeBaseController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Http/Controllers/Api/KnowledgeBaseController.php
 
@@ -193,13 +283,49 @@ parameters:
 			path: app/Http/Controllers/Api/LeaveController.php
 
 		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Api/LeaveController.php
+
+		-
+			message: '#^Instanceof between string and Carbon\\Carbon will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/Api/LeaveController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\LeaveBalance\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Api/LeaveController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Api/LeaveController.php
+
+		-
+			message: '#^Parameter \#1 \$employee of method App\\Services\\LeaveService\:\:applyLeave\(\) expects App\\Models\\Employee, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/LeaveController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/LeaveController.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 4
 			path: app/Http/Controllers/Api/OvertimeController.php
 
 		-
-			message: '#^Call to an undefined method Carbon\\Carbon\:\:floatDiffInHours\(\)\.$#'
+			message: '#^Call to an undefined method Carbon\\CarbonImmutable\:\:floatDiffInHours\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Controllers/Api/OvertimeController.php
@@ -217,14 +343,50 @@ parameters:
 			path: app/Http/Controllers/Api/OvertimeController.php
 
 		-
+			message: '#^Instanceof between string and Carbon\\Carbon will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Api/OvertimeController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/OvertimeController.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Api/PayrollController.php
 
 		-
+			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\PayrollStatus\:\:PUBLISHED, App\\Enums\\PayrollStatus\:\:PAID\} and true will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Http/Controllers/Api/PayrollController.php
+
+		-
 			message: '#^Cannot access property \$value on string\.$#'
 			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/Api/PayrollController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,App\\Models\\Payroll\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Api/PayrollController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Http/Controllers/Api/PayrollController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Http/Controllers/Api/PayrollController.php
 
@@ -243,6 +405,18 @@ parameters:
 		-
 			message: '#^Cannot access property \$value on string\.$#'
 			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/Api/ReimbursementController.php
+
+		-
+			message: '#^Instanceof between string and Carbon\\Carbon will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Api/ReimbursementController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/Api/ReimbursementController.php
 
@@ -289,10 +463,22 @@ parameters:
 			path: app/Models/Attendance.php
 
 		-
+			message: '#^Method App\\Models\\Attendance\:\:getPendingApprovalFor\(\) should return App\\Models\\Approval\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Attendance.php
+
+		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperAttendance\.$#'
 			identifier: class.notFound
 			count: 1
 			path: app/Models/Attendance.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Models/BpjsConfig.php
 
 		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperBpjsConfig\.$#'
@@ -319,6 +505,12 @@ parameters:
 			path: app/Models/CompanySetting.php
 
 		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/CompanySetting.php
+
+		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperDepartment\.$#'
 			identifier: class.notFound
 			count: 1
@@ -329,6 +521,30 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: app/Models/Device.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\MaritalStatus\:\:MARRIED is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Models/Employee.php
+
+		-
+			message: '#^Method App\\Models\\Employee\:\:getDirectApprover\(\) should return App\\Models\\Employee\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Employee.php
+
+		-
+			message: '#^Method App\\Models\\Employee\:\:getHrApprover\(\) should return App\\Models\\Employee\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Employee.php
+
+		-
+			message: '#^Method App\\Models\\Employee\:\:getTodayActiveAttendance\(\) should return App\\Models\\Attendance\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Employee.php
 
 		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperEmployee\.$#'
@@ -379,6 +595,12 @@ parameters:
 			path: app/Models/Leave.php
 
 		-
+			message: '#^Method App\\Models\\Leave\:\:getPendingApprovalFor\(\) should return App\\Models\\Approval\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Leave.php
+
+		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperLeave\.$#'
 			identifier: class.notFound
 			count: 1
@@ -415,10 +637,22 @@ parameters:
 			path: app/Models/Overtime.php
 
 		-
+			message: '#^Method App\\Models\\Overtime\:\:getPendingApprovalFor\(\) should return App\\Models\\Approval\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Overtime.php
+
+		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperOvertime\.$#'
 			identifier: class.notFound
 			count: 1
 			path: app/Models/Overtime.php
+
+		-
+			message: '#^Call to function in_array\(\) with string and array\{App\\Enums\\PayrollStatus\:\:PUBLISHED, App\\Enums\\PayrollStatus\:\:PAID\} will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Models/Payroll.php
 
 		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperPayroll\.$#'
@@ -451,8 +685,20 @@ parameters:
 			path: app/Models/Position.php
 
 		-
+			message: '#^Method App\\Models\\Reimbursement\:\:getPendingApprovalFor\(\) should return App\\Models\\Approval\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Reimbursement.php
+
+		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperReimbursement\.$#'
 			identifier: class.notFound
+			count: 1
+			path: app/Models/Reimbursement.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\ReimbursementStatus\:\:APPROVED will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/Reimbursement.php
 
@@ -475,6 +721,12 @@ parameters:
 			path: app/Models/ShiftSchedule.php
 
 		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Models/TaxConfig.php
+
+		-
 			message: '#^PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelperTaxConfig\.$#'
 			identifier: class.notFound
 			count: 1
@@ -487,12 +739,6 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/LeaveApproved.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -515,12 +761,6 @@ parameters:
 			identifier: method.nonObject
 			count: 4
 			path: app/Notifications/LeaveRejected.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/LeaveRequestSubmitted.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
@@ -553,6 +793,24 @@ parameters:
 			path: app/Observers/LeaveObserver.php
 
 		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Observers/LeaveObserver.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Observers/PayrollObserver.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PayrollStatus\:\:PUBLISHED will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Observers/PayrollObserver.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 2
@@ -583,6 +841,18 @@ parameters:
 			path: app/Policies/LeavePolicy.php
 
 		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 2
+			path: app/Policies/LeavePolicy.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\RequestStatus\:\:PENDING will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Policies/LeavePolicy.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 5
@@ -595,9 +865,39 @@ parameters:
 			path: app/Policies/OvertimePolicy.php
 
 		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 2
+			path: app/Policies/OvertimePolicy.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\RequestStatus\:\:PENDING will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Policies/OvertimePolicy.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 2
+			path: app/Policies/PayrollPolicy.php
+
+		-
+			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\PayrollStatus\:\:PUBLISHED, App\\Enums\\PayrollStatus\:\:PAID\} and true will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Policies/PayrollPolicy.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 3
+			path: app/Policies/PayrollPolicy.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PayrollStatus\:\:DRAFT will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 3
 			path: app/Policies/PayrollPolicy.php
 
 		-
@@ -609,6 +909,18 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$parent_id\.$#'
 			identifier: property.notFound
+			count: 2
+			path: app/Policies/ReimbursementPolicy.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 2
+			path: app/Policies/ReimbursementPolicy.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\ReimbursementStatus\:\:PENDING will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 2
 			path: app/Policies/ReimbursementPolicy.php
 
@@ -637,14 +949,62 @@ parameters:
 			path: app/Services/ApprovalService.php
 
 		-
+			message: '#^Method App\\Services\\ApprovalService\:\:resolveL2Approver\(\) should return App\\Models\\Employee\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Services/ApprovalService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between int and App\\Enums\\ApprovalLevel\:\:L1_SUPERVISOR will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/ApprovalService.php
+
+		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:calculateLateMinutes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/Services/AttendanceService.php
 
 		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: app/Services/AttendanceService.php
+
+		-
+			message: '#^Parameter \#1 \$branch of method App\\Services\\GeofenceService\:\:validateLocation\(\) expects App\\Models\\Branch, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/AttendanceService.php
+
+		-
+			message: '#^Method App\\Services\\EmployeeTerminationService\:\:logTermination\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Services/EmployeeTerminationService.php
+
+		-
+			message: '#^Method App\\Services\\EmployeeTerminationService\:\:terminate\(\) should return App\\Models\\Employee but returns null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/EmployeeTerminationService.php
+
+		-
 			message: '#^Result of static method Illuminate\\Database\\Connection\:\:transaction\(\) \(void\) is used\.$#'
 			identifier: staticMethod.void
+			count: 1
+			path: app/Services/EmployeeTerminationService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\EmployeeStatus\:\:ACTIVE will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Services/EmployeeTerminationService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: app/Services/EmployeeTerminationService.php
 
@@ -667,6 +1027,18 @@ parameters:
 			path: app/Services/FaceRecognitionService.php
 
 		-
+			message: '#^Offset ''content'' on array\{content\: string, source\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Services/GeminiClient.php
+
+		-
+			message: '#^Offset ''source'' on array\{content\: string, source\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Services/GeminiClient.php
+
+		-
 			message: '#^Cannot access property \$month on string\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -675,6 +1047,18 @@ parameters:
 		-
 			message: '#^Cannot access property \$year on string\.$#'
 			identifier: property.nonObject
+			count: 1
+			path: app/Services/LeaveService.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Services/LeaveService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\EmploymentType\:\:PROBATION will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Services/LeaveService.php
 
@@ -700,6 +1084,66 @@ parameters:
 			message: '#^Cannot call method diffInMonths\(\) on string\.$#'
 			identifier: method.nonObject
 			count: 2
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Instanceof between App\\Enums\\TerCategory and BackedEnum will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Parameter \#1 \$status of static method App\\Enums\\TerCategory\:\:resolveFromStatus\(\) expects App\\Enums\\MaritalStatus, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\EmploymentType\:\:CONTRACT will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\EmploymentType\:\:INTERN will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PayrollStatus\:\:PUBLISHED will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>allowance_jabatan" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Services/PayrollCalculatorService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>basic_salary" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 5
 			path: app/Services/PayrollCalculatorService.php
 
 		-
@@ -739,7 +1183,37 @@ parameters:
 			path: app/Services/PayrollExportService.php
 
 		-
+			message: '#^Using nullsafe property access "\?\-\>employee_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Services/PayrollExportService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>full_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Services/PayrollExportService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Services/PayrollExportService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>npwp" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/PayrollExportService.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee_number\.$#'
 			identifier: property.notFound
+			count: 1
+			path: app/Services/PayslipPdfService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>employee_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Services/PayslipPdfService.php

@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Hash;
 #[Group('Employees')]
 class EmployeeController extends Controller
 {
-    #[Endpoint(title: 'List Employees', description: 'Paginated employee directory with search and filter.')]
+    #[Endpoint(title: 'List Employees', description: 'Paginated employee directory with search and filter. Flow: Employee Management (directory).')]
     #[QueryParameter(name: 'branch_id', description: 'Filter by branch', type: 'integer')]
     #[QueryParameter(name: 'department_id', description: 'Filter by department', type: 'integer')]
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
@@ -80,7 +80,7 @@ class EmployeeController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Get Employee', description: 'Get employee detail with user account, branch, department, position.')]
+    #[Endpoint(title: 'Get Employee', description: 'Get employee detail with user account, branch, department, position. Flow: Employee Management (detail).')]
     public function show(Request $request, Employee $employee): JsonResponse
     {
         $this->authorize('view', $employee);
@@ -100,7 +100,7 @@ class EmployeeController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Create Employee', description: 'Create a new employee with user account and employment details.')]
+    #[Endpoint(title: 'Create Employee', description: 'Create a new employee with user account and employment details. Flow: Employee Management (create).')]
     #[BodyParameter(name: 'name', description: 'User display name', required: true, type: 'string')]
     #[BodyParameter(name: 'email', description: 'User email (must be unique)', required: true, type: 'string')]
     #[BodyParameter(name: 'password', description: 'Account password (min 8 chars)', required: true, type: 'string')]
@@ -142,7 +142,7 @@ class EmployeeController extends Controller
         ], 201);
     }
 
-    #[Endpoint(title: 'Update Employee', description: 'Update employee personal and employment data.')]
+    #[Endpoint(title: 'Update Employee', description: 'Update employee personal and employment data. Flow: Employee Management (update).')]
     #[BodyParameter(name: 'full_name', description: 'Employee full name', required: false, type: 'string')]
     #[BodyParameter(name: 'phone', description: 'Phone number (+62 format)', required: false, type: 'string')]
     #[BodyParameter(name: 'company_id', description: 'Company ID', required: false, type: 'integer')]
@@ -166,7 +166,7 @@ class EmployeeController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Delete Employee', description: 'Soft-delete an employee record.')]
+    #[Endpoint(title: 'Delete Employee', description: 'Soft-delete an employee record. Flow: Employee Management (delete).')]
     public function destroy(Request $request, Employee $employee): JsonResponse
     {
         $this->authorize('delete', $employee);

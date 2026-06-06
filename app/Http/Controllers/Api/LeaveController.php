@@ -8,6 +8,7 @@ use App\Http\Requests\Api\StoreLeaveRequest;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Services\LeaveService;
+use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -22,7 +23,7 @@ class LeaveController extends Controller
         protected LeaveService $leaveService,
     ) {}
 
-    #[Endpoint(title: 'Create Leave', description: 'Submit a new leave request with type, dates, and reason.')]
+    #[Endpoint(title: 'Create Leave', description: 'Submit a new leave request with type, dates, and reason. Flow: Leave (Step 1/3) → Approval.')]
     #[BodyParameter(name: 'leave_type_id', description: 'Leave type ID from leave_types table', required: true, type: 'integer')]
     #[BodyParameter(name: 'start_date', description: 'Leave start date (Y-m-d)', required: true, type: 'string', format: 'date')]
     #[BodyParameter(name: 'end_date', description: 'Leave end date (Y-m-d)', required: true, type: 'string', format: 'date')]
@@ -56,7 +57,7 @@ class LeaveController extends Controller
         ], 201);
     }
 
-    #[Endpoint(title: 'List Leaves', description: 'Paginated leave list with status/year filters. Manager sees own + team.')]
+    #[Endpoint(title: 'List Leaves', description: 'Paginated leave list with status/year filters. Manager sees own + team. Flow: Leave (history).')]
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
     #[QueryParameter(name: 'year', description: 'Filter by year', type: 'integer')]
     #[QueryParameter(name: 'employee_id', description: 'Filter by employee (HR only)', type: 'integer')]
@@ -118,7 +119,7 @@ class LeaveController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Get Leave', description: 'Get leave detail with type and approvals.')]
+    #[Endpoint(title: 'Get Leave', description: 'Get leave detail with type and approvals. Flow: Leave (detail).')]
     public function show(Request $request, Leave $leave): JsonResponse
     {
         $this->authorize('view', $leave);
@@ -129,7 +130,7 @@ class LeaveController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Cancel Leave', description: 'Cancel a pending leave request (sets status to cancelled).')]
+    #[Endpoint(title: 'Cancel Leave', description: 'Cancel a pending leave request (sets status to cancelled). Flow: Leave (cancel).')]
     public function destroy(Request $request, Leave $leave): JsonResponse
     {
         $this->authorize('delete', $leave);
@@ -143,7 +144,7 @@ class LeaveController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Leave Quota', description: 'Get current year leave balances (quota, used, available).')]
+    #[Endpoint(title: 'Leave Quota', description: 'Get current year leave balances (quota, used, available). Flow: Leave (Step 0/3) — check quota before submitting.')]
     #[QueryParameter(name: 'year', description: 'Year (defaults to current)', type: 'integer')]
     public function quota(Request $request): JsonResponse
     {

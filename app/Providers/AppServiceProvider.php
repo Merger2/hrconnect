@@ -7,12 +7,14 @@ use App\Models\BpjsConfig;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
+use App\Models\Payroll;
 use App\Models\TaxConfig;
 use App\Observers\AttendanceObserver;
 use App\Observers\BpjsConfigObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
+use App\Observers\PayrollObserver;
 use App\Observers\TaxConfigObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -77,5 +79,6 @@ class AppServiceProvider extends ServiceProvider
         Employee::observe(EmployeeObserver::class);
         Attendance::observe(AttendanceObserver::class);
         Leave::observe(LeaveObserver::class);
+        Payroll::observe(PayrollObserver::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Attendance;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 /**

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Holiday;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 /**

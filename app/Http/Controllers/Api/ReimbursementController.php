@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreReimbursementRequest;
 use App\Models\Reimbursement;
 use App\Services\ApprovalService;
+use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -21,7 +22,7 @@ class ReimbursementController extends Controller
         protected ApprovalService $approvalService,
     ) {}
 
-    #[Endpoint(title: 'Create Reimbursement', description: 'Submit reimbursement request with receipt and expense details.')]
+    #[Endpoint(title: 'Create Reimbursement', description: 'Submit reimbursement request with receipt and expense details. Flow: Reimbursement (Step 1/2) → Approval.')]
     #[BodyParameter(name: 'category_id', description: 'Reimbursement category ID', required: true, type: 'integer')]
     #[BodyParameter(name: 'title', description: 'Reimbursement title', required: false, type: 'string')]
     #[BodyParameter(name: 'amount', description: 'Amount in IDR', required: true, type: 'integer')]
@@ -63,7 +64,7 @@ class ReimbursementController extends Controller
         ], 201);
     }
 
-    #[Endpoint(title: 'List Reimbursements', description: 'Paginated reimbursement list with status/period filters.')]
+    #[Endpoint(title: 'List Reimbursements', description: 'Paginated reimbursement list with status/period filters. Flow: Reimbursement (history).')]
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
     #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
@@ -119,7 +120,7 @@ class ReimbursementController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Get Reimbursement', description: 'Get reimbursement detail with approvals.')]
+    #[Endpoint(title: 'Get Reimbursement', description: 'Get reimbursement detail with approvals. Flow: Reimbursement (detail).')]
     public function show(Request $request, Reimbursement $reimbursement): JsonResponse
     {
         $this->authorize('view', $reimbursement);
@@ -132,7 +133,7 @@ class ReimbursementController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Cancel Reimbursement', description: 'Delete pending reimbursement (soft delete).')]
+    #[Endpoint(title: 'Cancel Reimbursement', description: 'Delete pending reimbursement (soft delete). Flow: Reimbursement (cancel).')]
     public function destroy(Request $request, Reimbursement $reimbursement): JsonResponse
     {
         $this->authorize('delete', $reimbursement);

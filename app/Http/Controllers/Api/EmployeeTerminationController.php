@@ -21,7 +21,7 @@ class EmployeeTerminationController extends Controller
         protected EmployeeTerminationService $terminationService,
     ) {}
 
-    #[Endpoint(title: 'Terminate Employee', description: 'Terminate an active employee with reason and effective date. Clears face_embedding, soft-deletes user (except deceased).')]
+    #[Endpoint(title: 'Terminate Employee', description: 'Terminate an active employee with reason and effective date. Clears face_embedding, soft-deletes user (except deceased). Flow: Termination (Step 1/2) — Terminate PKWTT → Process Contract Ends.')]
     #[BodyParameter(name: 'type', description: 'Termination type: resign, dismissed, deceased, contract_end', required: true, type: 'string')]
     #[BodyParameter(name: 'reason', description: 'Termination reason', required: false, type: 'string')]
     #[BodyParameter(name: 'date', description: 'Effective termination date (Y-m-d, defaults to today)', required: false, type: 'string', format: 'date')]
@@ -53,7 +53,7 @@ class EmployeeTerminationController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Process Contract Ends', description: 'Batch-terminate all contractors whose contract_end_date <= reference date.')]
+    #[Endpoint(title: 'Process Contract Ends', description: 'Batch-terminate all contractors whose contract_end_date <= reference date. Flow: Termination (Step 2/2) — Terminate PKWTT → Process Contract Ends.')]
     #[BodyParameter(name: 'date', description: 'Reference date (Y-m-d, defaults to today)', required: false, type: 'string', format: 'date')]
     public function processContractEnd(Request $request): JsonResponse
     {

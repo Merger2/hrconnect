@@ -79,7 +79,42 @@ Update progress per folder. Sebelumnya banyak yang kosong — sebagian sudah pop
 - Employee `#[Hidden(['face_embedding','pin','nik','phone','npwp','bank_account_number'])]`
 - FamilyDetail `#[Hidden(['nik','phone','address'])]`
 - Company `#[Hidden(['npwp'])]`
-- **NEVER query CipherSweet-encrypted columns directly.** Use blind index `*_hash`, e.g. `Employee::where('nik_hash', $nik)`. Encrypted columns: `nik`, `phone`, `npwp`, `bank_account_number` (Employee); `nik`, `phone`, `address` (FamilyDetail); `npwp` (Company).
+- Encrypted columns: `nik`, `phone`, `npwp`, `bank_account_number` (Employee); `nik`, `phone`, `address` (FamilyDetail); `npwp` (Company).
+
+## CipherSweet (PII Encryption)
+
+- **Package**: `spatie/laravel-ciphersweet` v1.7.4 — AEAD field-level encryption with searchable blind indexes
+- **Env vars**:
+  - `CIPHERSWEET_KEY` — 64-char hex key (required, already in `.env` and `.env.production`)
+  - `CIPHERSWEET_BACKEND=nacl` (default)
+  - `CIPHERSWEET_PROVIDER=string` (default)
+- **Commands**:
+  - `php artisan ciphersweet:generate-key` — generate a new encryption key
+  - `php artisan ciphersweet:encrypt App\\Models\\Employee <key>` — encrypt existing rows (run after seed!)
+  - `php artisan ciphersweet:encrypt App\\Models\\FamilyDetail <key>`
+  - `php artisan ciphersweet:encrypt App\\Models\\Company <key>`
+- **Models**: 3 models implement `CipherSweetEncrypted` + trait `UsesCipherSweet`:
+  - `Employee` — encrypts `nik`, `phone`, `npwp`, `bank_account_number`; blind indexes `nik_hash`, `phone_hash`, `npwp_hash`
+  - `FamilyDetail` — encrypts `nik`, `phone`, `address`; blind indexes `nik_hash`, `phone_hash`
+  - `Company` — encrypts `npwp`; blind index `npwp_hash`
+- **Blind index storage**: Blind indexes are stored in the **`blind_indexes` table** (polymorphic `morphs` + `name` + `value`), NOT as columns in the main table. Migration `2026_04_21_014315_create_blind_indexes_table.php` is published.
+- **Query rule**: Use `whereBlind()` scope (auto-computes hash). **NEVER query encrypted columns directly.**
+  ```php
+  // ✅ CORRECT — uses the blind_indexes table
+  Employee::whereBlind('nik', 'nik_hash', $nikValue)->first();
+  Employee::whereBlind('phone', 'phone_hash', $phoneValue)->first();
+
+  // ❌ WRONG — 'nik_hash' column does NOT exist in employees table
+  Employee::where('nik_hash', $nik)->first();
+  ```
+- **Unique validation**: Use `Rule::encryptedUnique()` for encrypted fields:
+  ```php
+  use Illuminate\Validation\Rule;
+  Rule::encryptedUnique(Employee::class, 'nik_hash');
+  ```
+- **Key rotation**: Generate new key → run `ciphersweet:encrypt` for each model → update `CIPHERSWEET_KEY` in `.env`.
+- **False positives**: Blind indexes may produce collisions. Always verify decrypted value matches after lookup.
+- **Config**: Published at `config/ciphersweet.php`.
 
 ## 3 Core Thesis Features (MUST NOT defer)
 

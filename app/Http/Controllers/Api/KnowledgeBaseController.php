@@ -12,6 +12,7 @@ use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 #[Group('Knowledge Base')]
 class KnowledgeBaseController extends Controller
@@ -20,7 +21,7 @@ class KnowledgeBaseController extends Controller
         protected KnowledgeBaseService $kbService,
     ) {}
 
-    #[Endpoint(title: 'Chat', description: 'Ask a question against the knowledge base (RAG with Gemini + pgvector + pg_trgm fallback).')]
+    #[Endpoint(title: 'Chat', description: 'Ask a question against the knowledge base (RAG with Gemini + pgvector + pg_trgm fallback). Flow: Knowledge Base (usage).')]
     #[BodyParameter(name: 'question', description: 'Question text (min 5, max 500 chars)', required: true, type: 'string')]
     public function chat(ChatRequest $request): JsonResponse
     {
@@ -34,7 +35,7 @@ class KnowledgeBaseController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Upload Document', description: 'Upload PDF document to knowledge base (max 10MB). Embedding processing is async.')]
+    #[Endpoint(title: 'Upload Document', description: 'Upload PDF document to knowledge base (max 10MB). Embedding processing is async. Flow: Knowledge Base (Step 1/2) — Upload → Chat.')]
     #[BodyParameter(name: 'title', description: 'Document title', required: true, type: 'string')]
     #[BodyParameter(name: 'category', description: 'Document category', required: false, type: 'string')]
     #[BodyParameter(name: 'file', description: 'PDF file (max 10MB)', required: true, type: 'string', format: 'binary')]
@@ -63,7 +64,7 @@ class KnowledgeBaseController extends Controller
         ], 201);
     }
 
-    #[Endpoint(title: 'Delete Document', description: 'Delete knowledge base document and all associated chunks.')]
+    #[Endpoint(title: 'Delete Document', description: 'Delete knowledge base document and all associated chunks. Flow: Knowledge Base (admin).')]
     public function destroy(Request $request, KnowledgeBase $knowledgeBase): JsonResponse
     {
         $this->authorize('delete', $knowledgeBase);

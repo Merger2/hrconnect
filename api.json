@@ -57,7 +57,7 @@
         "/v1/approvals/pending": {
             "get": {
                 "operationId": "approvals.pending",
-                "description": "List pending approvals for the current user as approver.",
+                "description": "List pending approvals for the current user as approver. Flow: Approval (Step 2/2) \u2014 manager reviews pending requests from Leave, Overtime, Reimbursement.",
                 "summary": "Pending Approvals",
                 "tags": [
                     "Approvals"
@@ -66,25 +66,40 @@
                     {
                         "name": "type",
                         "in": "query",
-                        "description": "Filter by type (leave, overtime, reimbursement, wfa)",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "leave",
+                                "overtime",
+                                "reimbursement",
+                                "wfa"
+                            ]
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -217,11 +232,14 @@
                             }
                         }
                     },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -229,7 +247,7 @@
         "/v1/approvals/{approval}/approve": {
             "post": {
                 "operationId": "approvals.approve",
-                "description": "Approve a pending approval request.",
+                "description": "Approve a pending approval request. Flow: Approval (approve action).",
                 "summary": "Approve",
                 "tags": [
                     "Approvals"
@@ -249,13 +267,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "notes": {
-                                        "type": "string",
-                                        "description": "Approval notes (optional)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ApproveRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "notes": {
+                                                "type": "string",
+                                                "description": "Approval notes (optional)"
+                                            }
+                                        }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -330,37 +355,16 @@
                         }
                     },
                     "403": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "const": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Anda bukan approver untuk request ini."
-                                        }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -368,7 +372,7 @@
         "/v1/approvals/{approval}/reject": {
             "post": {
                 "operationId": "approvals.reject",
-                "description": "Reject a pending approval request with reason.",
+                "description": "Reject a pending approval request with reason. Flow: Approval (reject action).",
                 "summary": "Reject",
                 "tags": [
                     "Approvals"
@@ -385,19 +389,25 @@
                     }
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "rejection_reason": {
-                                        "type": "string",
-                                        "description": "Reason for rejection (min 10 chars)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/RejectRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "rejection_reason": {
+                                                "type": "string",
+                                                "description": "Reason for rejection (min 10 chars)"
+                                            }
+                                        },
+                                        "required": [
+                                            "rejection_reason"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "rejection_reason"
                                 ]
                             }
                         }
@@ -469,37 +479,16 @@
                         }
                     },
                     "403": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "const": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Anda bukan approver untuk request ini."
-                                        }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -507,7 +496,7 @@
         "/v1/attendance/clock-in": {
             "post": {
                 "operationId": "attendance.clock-in",
-                "description": "Record attendance clock-in with GPS and face verification.",
+                "description": "Record attendance clock-in with GPS and face verification. Flow: Clock In (Step 2/4) \u2014 Register Face \u2192 Clock In \u2192 Today \u2192 Clock Out.",
                 "summary": "Clock In",
                 "tags": [
                     "Attendance"
@@ -636,7 +625,7 @@
         "/v1/attendance/clock-out": {
             "post": {
                 "operationId": "attendance.clock-out",
-                "description": "Record attendance clock-out with optional GPS and face verification.",
+                "description": "Record attendance clock-out with optional GPS and face verification. Flow: Clock In (Step 4/4) \u2014 Register Face \u2192 Clock In \u2192 Today \u2192 Clock Out.",
                 "summary": "Clock Out",
                 "tags": [
                     "Attendance"
@@ -645,46 +634,49 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "latitude": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ClockOutRequest"
+                                    },
+                                    {
                                         "type": "object",
-                                        "description": "GPS latitude"
-                                    },
-                                    "longitude": {
-                                        "type": "object",
-                                        "description": "GPS longitude"
-                                    },
-                                    "accuracy": {
-                                        "type": "object",
-                                        "description": "GPS accuracy in meters"
-                                    },
-                                    "is_mocked": {
-                                        "type": "boolean",
-                                        "description": "GPS mock detection flag"
-                                    },
-                                    "pin": {
-                                        "type": "string",
-                                        "description": "6-digit PIN as fallback verification"
-                                    },
-                                    "verification_method": {
-                                        "type": "string",
-                                        "description": "Verification method override"
-                                    },
-                                    "photo_selfie": {
-                                        "type": "string",
-                                        "description": "Base64 selfie photo"
-                                    },
-                                    "embedding": {
-                                        "type": "array",
-                                        "description": "Face embedding 128D array for verification",
-                                        "items": {
-                                            "type": "number",
-                                            "minimum": -1.5,
-                                            "maximum": 1.5
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "object",
+                                                "description": "GPS latitude"
+                                            },
+                                            "longitude": {
+                                                "type": "object",
+                                                "description": "GPS longitude"
+                                            },
+                                            "accuracy": {
+                                                "type": "object",
+                                                "description": "GPS accuracy in meters"
+                                            },
+                                            "is_mocked": {
+                                                "type": "boolean",
+                                                "description": "GPS mock detection flag"
+                                            },
+                                            "embedding": {
+                                                "type": "array",
+                                                "description": "Face embedding 128D array for verification",
+                                                "items": {}
+                                            },
+                                            "pin": {
+                                                "type": "string",
+                                                "description": "6-digit PIN as fallback verification"
+                                            },
+                                            "verification_method": {
+                                                "type": "string",
+                                                "description": "Verification method override"
+                                            },
+                                            "photo_selfie": {
+                                                "type": "string",
+                                                "description": "Base64 selfie photo"
+                                            }
                                         }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -762,11 +754,11 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -774,7 +766,7 @@
         "/v1/attendance/today": {
             "get": {
                 "operationId": "attendance.today",
-                "description": "Get today's attendance status (clocked in/out).",
+                "description": "Get today's attendance status (clocked in/out). Flow: Clock In (Step 3/4) \u2014 Register Face \u2192 Clock In \u2192 Today \u2192 Clock Out.",
                 "summary": "Today",
                 "tags": [
                     "Attendance"
@@ -887,7 +879,7 @@
         "/v1/attendance": {
             "get": {
                 "operationId": "attendance.index",
-                "description": "Paginated attendance list with period/status filters.",
+                "description": "Paginated attendance list with period/status filters. Flow: Attendance Management.",
                 "summary": "List Attendances",
                 "tags": [
                     "Attendance"
@@ -1024,7 +1016,7 @@
         "/v1/attendance/{attendance}/approve-wfa": {
             "post": {
                 "operationId": "attendance.approve-wfa",
-                "description": "Approve or reject WFA request for a specific attendance.",
+                "description": "Approve or reject WFA request for a specific attendance. Flow: WFA Approval.",
                 "summary": "Approve WFA",
                 "tags": [
                     "Attendance"
@@ -1168,35 +1160,41 @@
         "/v1/auth/login": {
             "post": {
                 "operationId": "auth.login",
-                "description": "Authenticate user with email/password. Returns Bearer token or 2FA challenge.",
+                "description": "Authenticate user with email/password. Returns Bearer token or 2FA challenge. Flow: Auth \u2014 Login \u2192 (2FA jika perlu) \u2192 Get Profile.",
                 "summary": "Login",
                 "tags": [
                     "Auth"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "description": "User email address"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/LoginRequest"
                                     },
-                                    "password": {
-                                        "type": "string",
-                                        "description": "User password (min 8 chars)"
-                                    },
-                                    "device_name": {
-                                        "type": "string",
-                                        "description": "Device identifier for the token"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "description": "User email address"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "description": "User password (min 8 chars)"
+                                            },
+                                            "device_name": {
+                                                "type": "string",
+                                                "description": "Device identifier for the token"
+                                            }
+                                        },
+                                        "required": [
+                                            "email",
+                                            "password",
+                                            "device_name"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "email",
-                                    "password",
-                                    "device_name"
                                 ]
                             }
                         }
@@ -1328,30 +1326,36 @@
         "/v1/auth/2fa/challenge": {
             "post": {
                 "operationId": "auth.2fa.challenge",
-                "description": "Complete two-factor authentication with TOTP or recovery code.",
+                "description": "Complete two-factor authentication with TOTP or recovery code. Flow: Auth (2FA step) \u2014 setelah Login jika 2FA aktif.",
                 "summary": "2FA Challenge",
                 "tags": [
                     "Auth"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "challenge_id": {
-                                        "type": "string",
-                                        "description": "Challenge ID from login response"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/TwoFactorChallengeRequest"
                                     },
-                                    "code": {
-                                        "type": "string",
-                                        "description": "6-digit TOTP code or 8-char recovery code"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "challenge_id": {
+                                                "type": "string",
+                                                "description": "Challenge ID from login response"
+                                            },
+                                            "code": {
+                                                "type": "string",
+                                                "description": "6-digit TOTP code or 8-char recovery code"
+                                            }
+                                        },
+                                        "required": [
+                                            "challenge_id",
+                                            "code"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "challenge_id",
-                                    "code"
                                 ]
                             }
                         }
@@ -1446,25 +1450,31 @@
         "/v1/auth/forgot-password": {
             "post": {
                 "operationId": "auth.forgot-password",
-                "description": "Send password reset link to email. Always returns 200 (security: hide valid emails).",
+                "description": "Send password reset link to email. Always returns 200 (security: hide valid emails). Flow: Auth (password reset).",
                 "summary": "Forgot Password",
                 "tags": [
                     "Auth"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "description": "Registered email address"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ForgotPasswordRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "description": "Registered email address"
+                                            }
+                                        },
+                                        "required": [
+                                            "email"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "email"
                                 ]
                             }
                         }
@@ -1505,7 +1515,7 @@
         "/v1/auth/logout": {
             "post": {
                 "operationId": "auth.logout",
-                "description": "Revoke current Bearer token.",
+                "description": "Revoke current Bearer token. Flow: Auth (logout device).",
                 "summary": "Logout",
                 "tags": [
                     "Auth"
@@ -1544,7 +1554,7 @@
         "/v1/auth/logout-all": {
             "post": {
                 "operationId": "auth.logout-all",
-                "description": "Revoke all tokens for the authenticated user.",
+                "description": "Revoke all tokens for the authenticated user. Flow: Auth (logout all devices).",
                 "summary": "Logout All",
                 "tags": [
                     "Auth"
@@ -1596,7 +1606,7 @@
         "/v1/user": {
             "get": {
                 "operationId": "user",
-                "description": "Get authenticated user info with roles and permissions.",
+                "description": "Get authenticated user info with roles and permissions. Flow: Auth (after login).",
                 "summary": "Current User",
                 "tags": [
                     "Auth"
@@ -1672,7 +1682,7 @@
         "/v1/employees": {
             "get": {
                 "operationId": "employees.index",
-                "description": "Paginated employee directory with search and filter.",
+                "description": "Paginated employee directory with search and filter. Flow: Employee Management (directory).",
                 "summary": "List Employees",
                 "tags": [
                     "Employees"
@@ -1827,147 +1837,103 @@
             },
             "post": {
                 "operationId": "employees.store",
-                "description": "Create a new employee with user account and employment details.",
+                "description": "Create a new employee with user account and employment details. Flow: Employee Management (create).",
                 "summary": "Create Employee",
                 "tags": [
                     "Employees"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "phone": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "pattern": "^(\\+62|0)\\d{9,12}$"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/StoreEmployeeRequest"
                                     },
-                                    "nik": {
-                                        "type": [
-                                            "string",
-                                            "null"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "description": "User display name"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "description": "User email (must be unique)"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "description": "Account password (min 8 chars)"
+                                            },
+                                            "employee_number": {
+                                                "type": "string",
+                                                "description": "Unique employee number"
+                                            },
+                                            "full_name": {
+                                                "type": "string",
+                                                "description": "Employee full legal name"
+                                            },
+                                            "company_id": {
+                                                "type": "integer",
+                                                "description": "Company ID"
+                                            },
+                                            "branch_id": {
+                                                "type": "integer",
+                                                "description": "Branch ID"
+                                            },
+                                            "department_id": {
+                                                "type": "integer",
+                                                "description": "Department ID"
+                                            },
+                                            "position_id": {
+                                                "type": "integer",
+                                                "description": "Position ID"
+                                            },
+                                            "gender": {
+                                                "type": "string",
+                                                "description": "Gender (L/P)"
+                                            },
+                                            "marital_status": {
+                                                "type": "string",
+                                                "description": "Marital status"
+                                            },
+                                            "employment_type": {
+                                                "type": "string",
+                                                "description": "Type of employment"
+                                            },
+                                            "birth_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Date of birth (Y-m-d)"
+                                            },
+                                            "join_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Join date (Y-m-d)"
+                                            },
+                                            "salary_type": {
+                                                "type": "string",
+                                                "description": "Salary type (monthly/daily/hourly)"
+                                            }
+                                        },
+                                        "required": [
+                                            "name",
+                                            "email",
+                                            "password",
+                                            "employee_number",
+                                            "full_name",
+                                            "company_id",
+                                            "branch_id",
+                                            "department_id",
+                                            "position_id",
+                                            "gender",
+                                            "marital_status",
+                                            "employment_type",
+                                            "birth_date",
+                                            "join_date",
+                                            "salary_type"
                                         ]
-                                    },
-                                    "parent_id": {
-                                        "type": [
-                                            "integer",
-                                            "null"
-                                        ]
-                                    },
-                                    "blood_type": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "enum": [
-                                            "A+",
-                                            "A-",
-                                            "B+",
-                                            "B-",
-                                            "AB+",
-                                            "AB-",
-                                            "O+",
-                                            "O-"
-                                        ]
-                                    },
-                                    "education_level": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "enum": [
-                                            "sd",
-                                            "smp",
-                                            "sma",
-                                            "d3",
-                                            "s1",
-                                            "s2",
-                                            "s3"
-                                        ]
-                                    },
-                                    "name": {
-                                        "type": "string",
-                                        "description": "User display name"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "description": "User email (must be unique)"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "description": "Account password (min 8 chars)"
-                                    },
-                                    "employee_number": {
-                                        "type": "string",
-                                        "description": "Unique employee number"
-                                    },
-                                    "full_name": {
-                                        "type": "string",
-                                        "description": "Employee full legal name"
-                                    },
-                                    "company_id": {
-                                        "type": "integer",
-                                        "description": "Company ID"
-                                    },
-                                    "branch_id": {
-                                        "type": "integer",
-                                        "description": "Branch ID"
-                                    },
-                                    "department_id": {
-                                        "type": "integer",
-                                        "description": "Department ID"
-                                    },
-                                    "position_id": {
-                                        "type": "integer",
-                                        "description": "Position ID"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "description": "Gender (L/P)"
-                                    },
-                                    "marital_status": {
-                                        "type": "string",
-                                        "description": "Marital status"
-                                    },
-                                    "employment_type": {
-                                        "type": "string",
-                                        "description": "Type of employment"
-                                    },
-                                    "birth_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "description": "Date of birth (Y-m-d)"
-                                    },
-                                    "join_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "description": "Join date (Y-m-d)"
-                                    },
-                                    "salary_type": {
-                                        "type": "string",
-                                        "description": "Salary type (monthly/daily/hourly)"
                                     }
-                                },
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password",
-                                    "employee_number",
-                                    "full_name",
-                                    "company_id",
-                                    "branch_id",
-                                    "department_id",
-                                    "position_id",
-                                    "gender",
-                                    "marital_status",
-                                    "employment_type",
-                                    "birth_date",
-                                    "join_date",
-                                    "salary_type"
                                 ]
                             }
                         }
@@ -2130,14 +2096,14 @@
                             }
                         }
                     },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -2145,7 +2111,7 @@
         "/v1/employees/{employee}": {
             "get": {
                 "operationId": "employees.show",
-                "description": "Get employee detail with user account, branch, department, position.",
+                "description": "Get employee detail with user account, branch, department, position. Flow: Employee Management (detail).",
                 "summary": "Get Employee",
                 "tags": [
                     "Employees"
@@ -2326,7 +2292,7 @@
             },
             "put": {
                 "operationId": "employees.update",
-                "description": "Update employee personal and employment data.",
+                "description": "Update employee personal and employment data. Flow: Employee Management (update).",
                 "summary": "Update Employee",
                 "tags": [
                     "Employees"
@@ -2346,68 +2312,48 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "parent_id": {
-                                        "type": [
-                                            "integer",
-                                            "null"
-                                        ]
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/UpdateEmployeeRequest"
                                     },
-                                    "address_detail": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "maxLength": 500
-                                    },
-                                    "bank_name": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "maxLength": 100
-                                    },
-                                    "bank_account_number": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "pattern": "^\\d{8,18}$"
-                                    },
-                                    "full_name": {
-                                        "type": "string",
-                                        "description": "Employee full name"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "description": "Phone number (+62 format)"
-                                    },
-                                    "company_id": {
-                                        "type": "integer",
-                                        "description": "Company ID"
-                                    },
-                                    "branch_id": {
-                                        "type": "integer",
-                                        "description": "Branch ID"
-                                    },
-                                    "department_id": {
-                                        "type": "integer",
-                                        "description": "Department ID"
-                                    },
-                                    "position_id": {
-                                        "type": "integer",
-                                        "description": "Position ID"
-                                    },
-                                    "employment_type": {
-                                        "type": "string",
-                                        "description": "Type of employment"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "description": "Employment status"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "full_name": {
+                                                "type": "string",
+                                                "description": "Employee full name"
+                                            },
+                                            "phone": {
+                                                "type": "string",
+                                                "description": "Phone number (+62 format)"
+                                            },
+                                            "company_id": {
+                                                "type": "integer",
+                                                "description": "Company ID"
+                                            },
+                                            "branch_id": {
+                                                "type": "integer",
+                                                "description": "Branch ID"
+                                            },
+                                            "department_id": {
+                                                "type": "integer",
+                                                "description": "Department ID"
+                                            },
+                                            "position_id": {
+                                                "type": "integer",
+                                                "description": "Position ID"
+                                            },
+                                            "employment_type": {
+                                                "type": "string",
+                                                "description": "Type of employment"
+                                            },
+                                            "status": {
+                                                "type": "string",
+                                                "description": "Employment status"
+                                            }
+                                        }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -2569,23 +2515,23 @@
                             }
                         }
                     },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
             "delete": {
                 "operationId": "employees.destroy",
-                "description": "Soft-delete an employee record.",
+                "description": "Soft-delete an employee record. Flow: Employee Management (delete).",
                 "summary": "Delete Employee",
                 "tags": [
                     "Employees"
@@ -2638,33 +2584,261 @@
                 }
             }
         },
-        "/v1/face/register": {
+        "/v1/employees/{employee}/terminate": {
             "post": {
-                "operationId": "face.register",
-                "description": "Enroll face embedding (128D FaceNet vector) for biometric verification.",
-                "summary": "Register Face",
+                "operationId": "employees.terminate",
+                "description": "Terminate an active employee with reason and effective date. Clears face_embedding, soft-deletes user (except deceased). Flow: Termination (Step 1/2) \u2014 Terminate PKWTT \u2192 Process Contract Ends.",
+                "summary": "Terminate Employee",
                 "tags": [
-                    "Face Recognition"
+                    "Employees"
+                ],
+                "parameters": [
+                    {
+                        "name": "employee",
+                        "in": "path",
+                        "required": true,
+                        "description": "The employee ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
                 ],
                 "requestBody": {
-                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/TerminateEmployeeRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string",
+                                                "description": "Termination type: resign, dismissed, deceased, contract_end"
+                                            },
+                                            "reason": {
+                                                "type": "string",
+                                                "description": "Termination reason"
+                                            },
+                                            "date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Effective termination date (Y-m-d, defaults to today)"
+                                            }
+                                        },
+                                        "required": [
+                                            "type"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Karyawan berhasil di-terminasi"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "full_name": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "termination_type": {
+                                                    "anyOf": [
+                                                        {
+                                                            "$ref": "#/components/schemas/TerminationType"
+                                                        },
+                                                        {
+                                                            "type": "null"
+                                                        }
+                                                    ]
+                                                },
+                                                "termination_reason": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "resign_date": {
+                                                    "type": "string"
+                                                },
+                                                "deceased_date": {
+                                                    "type": "string"
+                                                },
+                                                "face_cleared": {
+                                                    "type": "string"
+                                                },
+                                                "financial_summary": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "minItems": 0,
+                                                            "maxItems": 0,
+                                                            "additionalItems": false
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "full_name",
+                                                "status",
+                                                "termination_type",
+                                                "termination_reason",
+                                                "resign_date",
+                                                "deceased_date",
+                                                "face_cleared",
+                                                "financial_summary"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "/v1/employees/terminate/contract-end": {
+            "post": {
+                "operationId": "employees.terminate.contract-end",
+                "description": "Batch-terminate all contractors whose contract_end_date <= reference date. Flow: Termination (Step 2/2) \u2014 Terminate PKWTT \u2192 Process Contract Ends.",
+                "summary": "Process Contract Ends",
+                "tags": [
+                    "Employees"
+                ],
+                "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "embedding": {
-                                        "type": "array",
-                                        "description": "128-dimension face embedding array from face-api.js",
-                                        "items": {
-                                            "type": "number",
-                                            "minimum": -1.5,
-                                            "maximum": 1.5
-                                        }
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "description": "Reference date (Y-m-d, defaults to today)"
                                     }
-                                },
-                                "required": [
-                                    "embedding"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "processed_count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "required": [
+                                                "processed_count"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/face/register": {
+            "post": {
+                "operationId": "face.register",
+                "description": "Enroll face embedding (128D FaceNet vector) for biometric verification. Flow: Clock In (Step 1/4) \u2014 Register Face \u2192 Clock In \u2192 Today \u2192 Clock Out.",
+                "summary": "Register Face",
+                "tags": [
+                    "Face Recognition"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/RegisterFaceRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "embedding": {
+                                                "type": "array",
+                                                "description": "128-dimension face embedding array from face-api.js",
+                                                "items": {}
+                                            }
+                                        },
+                                        "required": [
+                                            "embedding"
+                                        ]
+                                    }
                                 ]
                             }
                         }
@@ -2735,11 +2909,14 @@
                             }
                         }
                     },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -2747,30 +2924,32 @@
         "/v1/face/verify": {
             "post": {
                 "operationId": "face.verify",
-                "description": "Test face verification against enrolled embedding without recording attendance.",
+                "description": "Test face verification against enrolled embedding without recording attendance. Flow: Clock In (utility).",
                 "summary": "Verify Face",
                 "tags": [
                     "Face Recognition"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "embedding": {
-                                        "type": "array",
-                                        "description": "128-dimension face embedding array to verify",
-                                        "items": {
-                                            "type": "number",
-                                            "minimum": -1.5,
-                                            "maximum": 1.5
-                                        }
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/RegisterFaceRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "embedding": {
+                                                "type": "array",
+                                                "description": "128-dimension face embedding array to verify",
+                                                "items": {}
+                                            }
+                                        },
+                                        "required": [
+                                            "embedding"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "embedding"
                                 ]
                             }
                         }
@@ -2841,11 +3020,14 @@
                             }
                         }
                     },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -2876,25 +3058,31 @@
         "/v1/knowledgebase/chat": {
             "post": {
                 "operationId": "knowledgebase.chat",
-                "description": "Ask a question against the knowledge base (RAG with Gemini + pgvector + pg_trgm fallback).",
+                "description": "Ask a question against the knowledge base (RAG with Gemini + pgvector + pg_trgm fallback). Flow: Knowledge Base (usage).",
                 "summary": "Chat",
                 "tags": [
                     "Knowledge Base"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "question": {
-                                        "type": "string",
-                                        "description": "Question text (min 5, max 500 chars)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ChatRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "question": {
+                                                "type": "string",
+                                                "description": "Question text (min 5, max 500 chars)"
+                                            }
+                                        },
+                                        "required": [
+                                            "question"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "question"
                                 ]
                             }
                         }
@@ -3072,11 +3260,11 @@
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -3084,35 +3272,41 @@
         "/v1/knowledgebase": {
             "post": {
                 "operationId": "knowledgebase.upload",
-                "description": "Upload PDF document to knowledge base (max 10MB). Embedding processing is async.",
+                "description": "Upload PDF document to knowledge base (max 10MB). Embedding processing is async. Flow: Knowledge Base (Step 1/2) \u2014 Upload \u2192 Chat.",
                 "summary": "Upload Document",
                 "tags": [
                     "Knowledge Base"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "description": "Document title"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/UploadDocumentRequest"
                                     },
-                                    "category": {
-                                        "type": "string",
-                                        "description": "Document category"
-                                    },
-                                    "file": {
-                                        "type": "string",
-                                        "format": "binary",
-                                        "description": "PDF file (max 10MB)"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "title": {
+                                                "type": "string",
+                                                "description": "Document title"
+                                            },
+                                            "category": {
+                                                "type": "string",
+                                                "description": "Document category"
+                                            },
+                                            "file": {
+                                                "type": "string",
+                                                "format": "binary",
+                                                "description": "PDF file (max 10MB)"
+                                            }
+                                        },
+                                        "required": [
+                                            "title",
+                                            "file"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "title",
-                                    "file"
                                 ]
                             }
                         }
@@ -3177,11 +3371,11 @@
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -3189,7 +3383,7 @@
         "/v1/knowledgebase/{knowledgeBase}": {
             "delete": {
                 "operationId": "knowledgebase.destroy",
-                "description": "Delete knowledge base document and all associated chunks.",
+                "description": "Delete knowledge base document and all associated chunks. Flow: Knowledge Base (admin).",
                 "summary": "Delete Document",
                 "tags": [
                     "Knowledge Base"
@@ -3257,52 +3451,58 @@
         "/v1/leave": {
             "post": {
                 "operationId": "leave.store",
-                "description": "Submit a new leave request with type, dates, and reason.",
+                "description": "Submit a new leave request with type, dates, and reason. Flow: Leave (Step 1/3) \u2192 Approval.",
                 "summary": "Create Leave",
                 "tags": [
                     "Leave"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "leave_type_id": {
-                                        "type": "integer",
-                                        "description": "Leave type ID from leave_types table"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/StoreLeaveRequest"
                                     },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "description": "Leave start date (Y-m-d)"
-                                    },
-                                    "end_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "description": "Leave end date (Y-m-d)"
-                                    },
-                                    "day_type": {
-                                        "type": "string",
-                                        "description": "full_day, morning, or afternoon"
-                                    },
-                                    "reason": {
-                                        "type": "string",
-                                        "description": "Leave reason (min 10 chars)"
-                                    },
-                                    "proof_file": {
-                                        "type": "string",
-                                        "format": "binary",
-                                        "description": "Supporting document (jpg/jpeg/png/pdf, max 5MB)"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "leave_type_id": {
+                                                "type": "integer",
+                                                "description": "Leave type ID from leave_types table"
+                                            },
+                                            "start_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Leave start date (Y-m-d)"
+                                            },
+                                            "end_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Leave end date (Y-m-d)"
+                                            },
+                                            "day_type": {
+                                                "type": "string",
+                                                "description": "full_day, morning, or afternoon"
+                                            },
+                                            "reason": {
+                                                "type": "string",
+                                                "description": "Leave reason (min 10 chars)"
+                                            },
+                                            "proof_file": {
+                                                "type": "string",
+                                                "format": "binary",
+                                                "description": "Supporting document (jpg/jpeg/png/pdf, max 5MB)"
+                                            }
+                                        },
+                                        "required": [
+                                            "leave_type_id",
+                                            "start_date",
+                                            "end_date",
+                                            "day_type",
+                                            "reason"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "leave_type_id",
-                                    "start_date",
-                                    "end_date",
-                                    "day_type",
-                                    "reason"
                                 ]
                             }
                         }
@@ -3493,17 +3693,20 @@
                             }
                         }
                     },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
             "get": {
                 "operationId": "leave.index",
-                "description": "Paginated leave list with status/year filters. Manager sees own + team.",
+                "description": "Paginated leave list with status/year filters. Manager sees own + team. Flow: Leave (history).",
                 "summary": "List Leaves",
                 "tags": [
                     "Leave"
@@ -3748,7 +3951,7 @@
         "/v1/leave/quota": {
             "get": {
                 "operationId": "leave.quota",
-                "description": "Get current year leave balances (quota, used, available).",
+                "description": "Get current year leave balances (quota, used, available). Flow: Leave (Step 0/3) \u2014 check quota before submitting.",
                 "summary": "Leave Quota",
                 "tags": [
                     "Leave"
@@ -3878,7 +4081,7 @@
         "/v1/leave/{leave}": {
             "get": {
                 "operationId": "leave.show",
-                "description": "Get leave detail with type and approvals.",
+                "description": "Get leave detail with type and approvals. Flow: Leave (detail).",
                 "summary": "Get Leave",
                 "tags": [
                     "Leave"
@@ -4063,7 +4266,7 @@
             },
             "delete": {
                 "operationId": "leave.destroy",
-                "description": "Cancel a pending leave request (sets status to cancelled).",
+                "description": "Cancel a pending leave request (sets status to cancelled). Flow: Leave (cancel).",
                 "summary": "Cancel Leave",
                 "tags": [
                     "Leave"
@@ -4119,43 +4322,49 @@
         "/v1/overtime": {
             "post": {
                 "operationId": "overtime.store",
-                "description": "Submit overtime request with date, time range, and description (max 4h/day).",
+                "description": "Submit overtime request with date, time range, and description (max 4h/day, 18h/week). Flow: Overtime (Step 1/2) \u2192 Approval.",
                 "summary": "Create Overtime",
                 "tags": [
                     "Overtime"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "description": "Overtime date (Y-m-d, today or future)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/StoreOvertimeRequest"
                                     },
-                                    "start_time": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "description": "Start time (H:i)"
-                                    },
-                                    "end_time": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "description": "End time (H:i, must be after start_time)"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "description": "Overtime reason (min 10 chars)"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Overtime date (Y-m-d, today or future)"
+                                            },
+                                            "start_time": {
+                                                "type": "string",
+                                                "format": "time",
+                                                "description": "Start time (H:i)"
+                                            },
+                                            "end_time": {
+                                                "type": "string",
+                                                "format": "time",
+                                                "description": "End time (H:i, must be after start_time)"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "description": "Overtime reason (min 10 chars)"
+                                            }
+                                        },
+                                        "required": [
+                                            "date",
+                                            "start_time",
+                                            "end_time",
+                                            "description"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "date",
-                                    "start_time",
-                                    "end_time",
-                                    "description"
                                 ]
                             }
                         }
@@ -4240,9 +4449,6 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "404": {
                         "description": "",
                         "content": {
@@ -4269,12 +4475,18 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
             "get": {
                 "operationId": "overtime.index",
-                "description": "Paginated overtime list with status/period filters.",
+                "description": "Paginated overtime list with status/period filters. Flow: Overtime (history).",
                 "summary": "List Overtimes",
                 "tags": [
                     "Overtime"
@@ -4429,7 +4641,7 @@
         "/v1/overtime/{overtime}": {
             "get": {
                 "operationId": "overtime.show",
-                "description": "Get overtime detail with approvals.",
+                "description": "Get overtime detail with approvals. Flow: Overtime (detail).",
                 "summary": "Get Overtime",
                 "tags": [
                     "Overtime"
@@ -4532,7 +4744,7 @@
             },
             "delete": {
                 "operationId": "overtime.destroy",
-                "description": "Cancel pending overtime request.",
+                "description": "Cancel pending overtime request. Flow: Overtime (cancel).",
                 "summary": "Cancel Overtime",
                 "tags": [
                     "Overtime"
@@ -4588,7 +4800,7 @@
         "/v1/payroll": {
             "get": {
                 "operationId": "payroll.index",
-                "description": "Paginated payroll list with year filter.",
+                "description": "Paginated payroll list with year filter. Flow: Payroll (Step 2/4) \u2014 Generate \u2192 List \u2192 Download \u2192 Export.",
                 "summary": "List Payrolls",
                 "tags": [
                     "Payroll"
@@ -4597,33 +4809,46 @@
                     {
                         "name": "year",
                         "in": "query",
-                        "description": "Filter by year (YYYY)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 2000,
+                            "maximum": 2100
                         }
                     },
                     {
                         "name": "employee_id",
                         "in": "query",
-                        "description": "Filter by employee (Finance only)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -4714,14 +4939,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -4729,32 +4954,36 @@
         "/v1/payroll/generate": {
             "post": {
                 "operationId": "payroll.generate",
-                "description": "Queue payroll generation jobs for active employees.",
+                "description": "Queue payroll generation jobs for active employees. Flow: Payroll (Step 1/4) \u2014 Generate \u2192 List \u2192 Download \u2192 Export.",
                 "summary": "Generate Payroll",
                 "tags": [
                     "Payroll"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "period": {
-                                        "type": "string",
-                                        "description": "Payroll period (YYYY-MM)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/GeneratePayrollRequest"
                                     },
-                                    "employee_ids": {
-                                        "type": "array",
-                                        "description": "Specific employees to process (null = all active)",
-                                        "items": {
-                                            "type": "integer"
-                                        }
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "period": {
+                                                "type": "string",
+                                                "description": "Payroll period (YYYY-MM)"
+                                            },
+                                            "employee_ids": {
+                                                "type": "array",
+                                                "description": "Specific employees to process (null = all active)",
+                                                "items": {}
+                                            }
+                                        },
+                                        "required": [
+                                            "period"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "period"
                                 ]
                             }
                         }
@@ -4810,6 +5039,9 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -4817,29 +5049,35 @@
         "/v1/payroll/export/monthly": {
             "post": {
                 "operationId": "payroll.export.monthly",
-                "description": "Export monthly payroll recap as Excel.",
+                "description": "Export monthly payroll recap as Excel. Flow: Payroll (Step 4/4) \u2014 Generate \u2192 List \u2192 Download \u2192 Export.",
                 "summary": "Export Monthly",
                 "tags": [
                     "Payroll"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "period": {
-                                        "type": "string",
-                                        "description": "Payroll period (YYYY-MM)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ExportMonthlyRequest"
                                     },
-                                    "branch_id": {
-                                        "type": "integer",
-                                        "description": "Filter by branch"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "period": {
+                                                "type": "string",
+                                                "description": "Payroll period (YYYY-MM)"
+                                            },
+                                            "branch_id": {
+                                                "type": "integer",
+                                                "description": "Filter by branch"
+                                            }
+                                        },
+                                        "required": [
+                                            "period"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "period"
                                 ]
                             }
                         }
@@ -4869,11 +5107,11 @@
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -4881,25 +5119,31 @@
         "/v1/payroll/export/1721-a1": {
             "post": {
                 "operationId": "payroll.export.1721-a1",
-                "description": "Export PPh 21 tax certificate as Excel (DJP format).",
+                "description": "Export PPh 21 tax certificate as Excel (DJP format). Flow: Payroll (tax export).",
                 "summary": "Export 1721-A1",
                 "tags": [
                     "Payroll"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "period": {
-                                        "type": "string",
-                                        "description": "Tax period (YYYY-MM)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ExportPeriodRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "period": {
+                                                "type": "string",
+                                                "description": "Tax period (YYYY-MM)"
+                                            }
+                                        },
+                                        "required": [
+                                            "period"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "period"
                                 ]
                             }
                         }
@@ -4929,11 +5173,11 @@
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -4941,25 +5185,31 @@
         "/v1/payroll/export/bpjs": {
             "post": {
                 "operationId": "payroll.export.bpjs",
-                "description": "Export BPJS health and employment insurance report as Excel.",
+                "description": "Export BPJS health and employment insurance report as Excel. Flow: Payroll (BPJS export).",
                 "summary": "Export BPJS",
                 "tags": [
                     "Payroll"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "period": {
-                                        "type": "string",
-                                        "description": "BPJS period (YYYY-MM)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ExportPeriodRequest"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "period": {
+                                                "type": "string",
+                                                "description": "BPJS period (YYYY-MM)"
+                                            }
+                                        },
+                                        "required": [
+                                            "period"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "period"
                                 ]
                             }
                         }
@@ -4989,11 +5239,11 @@
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -5001,7 +5251,7 @@
         "/v1/payroll/{payroll}": {
             "get": {
                 "operationId": "payroll.show",
-                "description": "Get payroll detail with all salary components.",
+                "description": "Get payroll detail with all salary components. Flow: Payroll (detail).",
                 "summary": "Get Payroll",
                 "tags": [
                     "Payroll"
@@ -5124,7 +5374,7 @@
         "/v1/payroll/{payroll}/payslip": {
             "get": {
                 "operationId": "payroll.payslip",
-                "description": "Download payslip PDF for published/paid payroll.",
+                "description": "Download payslip PDF for published/paid payroll. Flow: Payroll (Step 3/4) \u2014 Generate \u2192 List \u2192 Download \u2192 Export.",
                 "summary": "Download Payslip",
                 "tags": [
                     "Payroll"
@@ -5196,7 +5446,7 @@
         "/v1/profile": {
             "get": {
                 "operationId": "profile.show",
-                "description": "Get authenticated employee profile with masked PII fields.",
+                "description": "Get authenticated employee profile with masked PII fields. Flow: Profile (read).",
                 "summary": "Get Profile",
                 "tags": [
                     "Profile"
@@ -5429,7 +5679,7 @@
             },
             "put": {
                 "operationId": "profile.update",
-                "description": "Update self-service personal data (phone, address, bank).",
+                "description": "Update self-service personal data (phone, address, bank). Flow: Profile (update).",
                 "summary": "Update Profile",
                 "tags": [
                     "Profile"
@@ -5438,25 +5688,32 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "phone": {
-                                        "type": "string",
-                                        "description": "Phone number (+62 format)"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/UpdateProfileRequest"
                                     },
-                                    "address_detail": {
-                                        "type": "string",
-                                        "description": "Address detail"
-                                    },
-                                    "bank_name": {
-                                        "type": "string",
-                                        "description": "Bank name"
-                                    },
-                                    "bank_account_number": {
-                                        "type": "string",
-                                        "description": "Bank account number (8-18 digits)"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "phone": {
+                                                "type": "string",
+                                                "description": "Phone number (+62 format)"
+                                            },
+                                            "address_detail": {
+                                                "type": "string",
+                                                "description": "Address detail"
+                                            },
+                                            "bank_name": {
+                                                "type": "string",
+                                                "description": "Bank name"
+                                            },
+                                            "bank_account_number": {
+                                                "type": "string",
+                                                "description": "Bank account number (8-18 digits)"
+                                            }
+                                        }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -5687,11 +5944,14 @@
                             }
                         }
                     },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -5699,35 +5959,41 @@
         "/v1/profile/change-password": {
             "post": {
                 "operationId": "profile.change-password",
-                "description": "Change authenticated user password. Token stays valid.",
+                "description": "Change authenticated user password. Token stays valid. Flow: Profile (security).",
                 "summary": "Change Password",
                 "tags": [
                     "Profile"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "current_password": {
-                                        "type": "string",
-                                        "description": "Current password for verification"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ChangePasswordRequest"
                                     },
-                                    "password": {
-                                        "type": "string",
-                                        "description": "New password (min 8 chars, mixed case, numbers)"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "description": "Confirm new password"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "current_password": {
+                                                "type": "string",
+                                                "description": "Current password for verification"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "description": "New password (min 8 chars, mixed case, numbers)"
+                                            },
+                                            "password_confirmation": {
+                                                "type": "string",
+                                                "description": "Confirm new password"
+                                            }
+                                        },
+                                        "required": [
+                                            "current_password",
+                                            "password",
+                                            "password_confirmation"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "current_password",
-                                    "password",
-                                    "password_confirmation"
                                 ]
                             }
                         }
@@ -5758,11 +6024,11 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -5770,51 +6036,57 @@
         "/v1/reimbursement": {
             "post": {
                 "operationId": "reimbursement.store",
-                "description": "Submit reimbursement request with receipt and expense details.",
+                "description": "Submit reimbursement request with receipt and expense details. Flow: Reimbursement (Step 1/2) \u2192 Approval.",
                 "summary": "Create Reimbursement",
                 "tags": [
                     "Reimbursement"
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "category_id": {
-                                        "type": "integer",
-                                        "description": "Reimbursement category ID"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/StoreReimbursementRequest"
                                     },
-                                    "title": {
-                                        "type": "string",
-                                        "description": "Reimbursement title"
-                                    },
-                                    "amount": {
-                                        "type": "integer",
-                                        "description": "Amount in IDR"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "description": "Expense description (min 10 chars)"
-                                    },
-                                    "expense_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "description": "Expense date (Y-m-d, today or past)"
-                                    },
-                                    "receipt": {
-                                        "type": "string",
-                                        "format": "binary",
-                                        "description": "Receipt file (jpg/jpeg/png/pdf, max 5MB)"
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "category_id": {
+                                                "type": "integer",
+                                                "description": "Reimbursement category ID"
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "description": "Reimbursement title"
+                                            },
+                                            "amount": {
+                                                "type": "integer",
+                                                "description": "Amount in IDR"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "description": "Expense description (min 10 chars)"
+                                            },
+                                            "expense_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Expense date (Y-m-d, today or past)"
+                                            },
+                                            "receipt": {
+                                                "type": "string",
+                                                "format": "binary",
+                                                "description": "Receipt file (jpg/jpeg/png/pdf, max 5MB)"
+                                            }
+                                        },
+                                        "required": [
+                                            "category_id",
+                                            "amount",
+                                            "description",
+                                            "expense_date",
+                                            "receipt"
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "category_id",
-                                    "amount",
-                                    "description",
-                                    "expense_date",
-                                    "receipt"
                                 ]
                             }
                         }
@@ -5952,17 +6224,20 @@
                             }
                         }
                     },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
             "get": {
                 "operationId": "reimbursement.index",
-                "description": "Paginated reimbursement list with status/period filters.",
+                "description": "Paginated reimbursement list with status/period filters. Flow: Reimbursement (history).",
                 "summary": "List Reimbursements",
                 "tags": [
                     "Reimbursement"
@@ -6146,7 +6421,7 @@
         "/v1/reimbursement/{reimbursement}": {
             "get": {
                 "operationId": "reimbursement.show",
-                "description": "Get reimbursement detail with approvals.",
+                "description": "Get reimbursement detail with approvals. Flow: Reimbursement (detail).",
                 "summary": "Get Reimbursement",
                 "tags": [
                     "Reimbursement"
@@ -6278,7 +6553,7 @@
             },
             "delete": {
                 "operationId": "reimbursement.destroy",
-                "description": "Delete pending reimbursement (soft delete).",
+                "description": "Delete pending reimbursement (soft delete). Flow: Reimbursement (cancel).",
                 "summary": "Cancel Reimbursement",
                 "tags": [
                     "Reimbursement"
@@ -6350,6 +6625,53 @@
                 ],
                 "title": "ApprovalLevel"
             },
+            "ApproveRequest": {
+                "type": "object",
+                "properties": {
+                    "notes": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 500
+                    }
+                },
+                "title": "ApproveRequest"
+            },
+            "ChangePasswordRequest": {
+                "type": "object",
+                "properties": {
+                    "current_password": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "password_confirmation": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "current_password",
+                    "password",
+                    "password_confirmation"
+                ],
+                "title": "ChangePasswordRequest"
+            },
+            "ChatRequest": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "minLength": 5,
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "question"
+                ],
+                "title": "ChatRequest"
+            },
             "ClockInRequest": {
                 "type": "object",
                 "description": "Clock-in request with GPS location, face verification, and WFA support.\n\n- WFO (is_wfa=false): latitude, longitude required; GPS validated against branch geofence.\n- WFA (is_wfa=true): note required (min 20 chars); GPS skipped.\n- Verification: face_embedding (128D), pin (6-digit), or manual fallback.\n- Anti-fake GPS: is_mocked flag + accuracy meter.",
@@ -6375,7 +6697,7 @@
                             "null"
                         ]
                     },
-                    "face_embedding": {
+                    "embedding": {
                         "type": [
                             "array",
                             "null"
@@ -6403,6 +6725,73 @@
                 },
                 "title": "ClockInRequest"
             },
+            "ClockOutRequest": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "minimum": -90,
+                        "maximum": 90
+                    },
+                    "longitude": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "minimum": -180,
+                        "maximum": 180
+                    },
+                    "accuracy": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "minimum": 0
+                    },
+                    "is_mocked": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    },
+                    "embedding": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "pin": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "verification_method": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "face_verified",
+                            "pin_verified",
+                            "manual"
+                        ]
+                    },
+                    "photo_selfie": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "title": "ClockOutRequest"
+            },
             "DayType": {
                 "type": "string",
                 "enum": [
@@ -6411,6 +6800,590 @@
                     "afternoon"
                 ],
                 "title": "DayType"
+            },
+            "ExportMonthlyRequest": {
+                "type": "object",
+                "properties": {
+                    "period": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}$"
+                    },
+                    "branch_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "period"
+                ],
+                "title": "ExportMonthlyRequest"
+            },
+            "ExportPeriodRequest": {
+                "type": "object",
+                "properties": {
+                    "period": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}$"
+                    }
+                },
+                "required": [
+                    "period"
+                ],
+                "title": "ExportPeriodRequest"
+            },
+            "ForgotPasswordRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email"
+                ],
+                "title": "ForgotPasswordRequest"
+            },
+            "GeneratePayrollRequest": {
+                "type": "object",
+                "properties": {
+                    "period": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}$"
+                    },
+                    "employee_ids": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "period"
+                ],
+                "title": "GeneratePayrollRequest"
+            },
+            "LoginRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 8
+                    },
+                    "device_name": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "email",
+                    "password",
+                    "device_name"
+                ],
+                "title": "LoginRequest"
+            },
+            "RegisterFaceRequest": {
+                "type": "object",
+                "properties": {
+                    "embedding": {
+                        "type": "array",
+                        "items": {
+                            "type": "number",
+                            "minimum": -1.5,
+                            "maximum": 1.5
+                        },
+                        "minItems": 128,
+                        "maxItems": 128
+                    }
+                },
+                "required": [
+                    "embedding"
+                ],
+                "title": "RegisterFaceRequest"
+            },
+            "RejectRequest": {
+                "type": "object",
+                "properties": {
+                    "rejection_reason": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "rejection_reason"
+                ],
+                "title": "RejectRequest"
+            },
+            "StoreEmployeeRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 8
+                    },
+                    "employee_number": {
+                        "type": "string"
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^(\\+62|0)\\d{9,12}$"
+                    },
+                    "nik": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "company_id": {
+                        "type": "integer"
+                    },
+                    "branch_id": {
+                        "type": "integer"
+                    },
+                    "department_id": {
+                        "type": "integer"
+                    },
+                    "position_id": {
+                        "type": "integer"
+                    },
+                    "parent_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "gender": {
+                        "type": "string",
+                        "enum": [
+                            "L",
+                            "P"
+                        ]
+                    },
+                    "marital_status": {
+                        "type": "string",
+                        "enum": [
+                            "single",
+                            "married",
+                            "divorced",
+                            "widowed"
+                        ]
+                    },
+                    "employment_type": {
+                        "type": "string",
+                        "enum": [
+                            "permanent",
+                            "contract",
+                            "probation",
+                            "intern"
+                        ]
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "join_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "salary_type": {
+                        "type": "string",
+                        "enum": [
+                            "monthly",
+                            "daily",
+                            "hourly"
+                        ]
+                    },
+                    "blood_type": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "A+",
+                            "A-",
+                            "B+",
+                            "B-",
+                            "AB+",
+                            "AB-",
+                            "O+",
+                            "O-"
+                        ]
+                    },
+                    "education_level": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "sd",
+                            "smp",
+                            "sma",
+                            "d3",
+                            "s1",
+                            "s2",
+                            "s3"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "employee_number",
+                    "full_name",
+                    "company_id",
+                    "branch_id",
+                    "department_id",
+                    "position_id",
+                    "gender",
+                    "marital_status",
+                    "employment_type",
+                    "birth_date",
+                    "join_date",
+                    "salary_type"
+                ],
+                "title": "StoreEmployeeRequest"
+            },
+            "StoreLeaveRequest": {
+                "type": "object",
+                "properties": {
+                    "leave_type_id": {
+                        "type": "integer"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "day_type": {
+                        "type": "string",
+                        "enum": [
+                            "full_day",
+                            "morning",
+                            "afternoon"
+                        ]
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 1000
+                    },
+                    "proof_file": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "binary",
+                        "contentMediaType": "application/octet-stream",
+                        "maxLength": 5120
+                    }
+                },
+                "required": [
+                    "leave_type_id",
+                    "start_date",
+                    "end_date",
+                    "day_type",
+                    "reason"
+                ],
+                "title": "StoreLeaveRequest"
+            },
+            "StoreOvertimeRequest": {
+                "type": "object",
+                "description": "Overtime request with daily (4h max) and weekly (18h max) validation per UU Cipta Kerja.\n\n- start_time and end_time must be in H:i format.\n- Daily max 4 hours overtime (UU Cipta Kerja).\n- Weekly max 18 hours across all approved overtime.\n- Status defaults to PENDING; approval workflow is created after store.",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "start_time": {
+                        "type": "string"
+                    },
+                    "end_time": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 10
+                    }
+                },
+                "required": [
+                    "date",
+                    "start_time",
+                    "end_time"
+                ],
+                "title": "StoreOvertimeRequest"
+            },
+            "StoreReimbursementRequest": {
+                "type": "object",
+                "properties": {
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 200
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 1000
+                    },
+                    "expense_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "receipt": {
+                        "type": "string",
+                        "format": "binary",
+                        "contentMediaType": "application/octet-stream",
+                        "maxLength": 5120
+                    }
+                },
+                "required": [
+                    "category_id",
+                    "amount",
+                    "description",
+                    "expense_date",
+                    "receipt"
+                ],
+                "title": "StoreReimbursementRequest"
+            },
+            "TerminateEmployeeRequest": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "resign",
+                            "dismissed",
+                            "deceased",
+                            "contract_end"
+                        ]
+                    },
+                    "reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 500
+                    },
+                    "date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "TerminateEmployeeRequest"
+            },
+            "TerminationType": {
+                "type": "string",
+                "enum": [
+                    "resign",
+                    "dismissed",
+                    "deceased",
+                    "contract_end"
+                ],
+                "title": "TerminationType"
+            },
+            "TwoFactorChallengeRequest": {
+                "type": "object",
+                "properties": {
+                    "challenge_id": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string",
+                        "pattern": "^(\\d{6}|[a-zA-Z0-9]{8})$"
+                    }
+                },
+                "required": [
+                    "challenge_id",
+                    "code"
+                ],
+                "title": "TwoFactorChallengeRequest"
+            },
+            "UpdateEmployeeRequest": {
+                "type": "object",
+                "properties": {
+                    "full_name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^(\\+62|0)\\d{9,12}$"
+                    },
+                    "company_id": {
+                        "type": "integer"
+                    },
+                    "branch_id": {
+                        "type": "integer"
+                    },
+                    "department_id": {
+                        "type": "integer"
+                    },
+                    "position_id": {
+                        "type": "integer"
+                    },
+                    "parent_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "employment_type": {
+                        "type": "string",
+                        "enum": [
+                            "permanent",
+                            "contract",
+                            "probation",
+                            "intern"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "resigned"
+                        ]
+                    },
+                    "address_detail": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 500
+                    },
+                    "bank_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 100
+                    },
+                    "bank_account_number": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^\\d{8,18}$"
+                    }
+                },
+                "title": "UpdateEmployeeRequest"
+            },
+            "UpdateProfileRequest": {
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^(\\+62|0)\\d{9,12}$"
+                    },
+                    "address_detail": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 500
+                    },
+                    "bank_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 100
+                    },
+                    "bank_account_number": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^\\d{8,18}$"
+                    }
+                },
+                "title": "UpdateProfileRequest"
+            },
+            "UploadDocumentRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "category": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "hr_policy",
+                            "it_guide",
+                            "general",
+                            "finance",
+                            "other"
+                        ]
+                    },
+                    "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "contentMediaType": "application/octet-stream",
+                        "maxLength": 10240
+                    }
+                },
+                "required": [
+                    "title",
+                    "file"
+                ],
+                "title": "UploadDocumentRequest"
             },
             "VerificationMethod": {
                 "type": "string",

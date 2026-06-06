@@ -7,41 +7,23 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Payroll;
 use App\Models\PayrollItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
-use Spatie\LaravelPdf\Facades\Pdf;
 
-/**
- * PayslipPdfService — generate PDF slip gaji untuk Payroll.
- *
- * Pakai Spatie Laravel PDF (Browsershot/Puppeteer) untuk render Blade
- * template ke PDF dengan kualitas tinggi (Tailwind/CSS modern support).
- *
- * Template: resources/views/payroll/payslip.blade.php (2 kolom Pendapatan/Potongan
- * dengan Take Home Pay di bawah, sesuai PRD §11.8).
- *
- * Storage: file di-save ke storage/app/private/payslips/{period}/{employee_number}.pdf
- * supaya tidak public (perlu Sanctum auth + Policy::downloadPayslip via streaming).
- */
 class PayslipPdfService
 {
-    /**
-     * Generate PDF binary content untuk single Payroll.
-     */
     public function generate(Payroll $payroll): string
     {
         $payroll->loadMissing(['employee.position', 'employee.department', 'employee.branch']);
 
         $data = $this->buildTemplateData($payroll);
 
-        return Pdf::view('payroll.payslip', $data)
-            ->format('A4')
-            ->margins(20, 20, 20, 20)
-            ->base64();
+        return Pdf::loadView('payroll.payslip', $data)
+            ->setPaper('A4')
+            ->setOptions(['defaultFont' => 'sans-serif', 'isRemoteEnabled' => false])
+            ->output();
     }
 
-    /**
-     * Generate + save ke storage/app/private/payslips/, return absolute path.
-     */
     public function generateAndStore(Payroll $payroll): string
     {
         $payroll->loadMissing(['employee.position', 'employee.department', 'employee.branch']);
@@ -55,12 +37,23 @@ class PayslipPdfService
 
         @mkdir(dirname($absolutePath), 0755, recursive: true);
 
-        Pdf::view('payroll.payslip', $data)
-            ->format('A4')
-            ->margins(20, 20, 20, 20)
+        Pdf::loadView('payroll.payslip', $data)
+            ->setPaper('A4')
+            ->setOptions(['defaultFont' => 'sans-serif', 'isRemoteEnabled' => false])
             ->save($absolutePath);
 
+        $payroll->updateQuietly(['pdf_path' => $relativePath]);
+
         return $absolutePath;
+    }
+
+    public function getPayslipPath(Payroll $payroll): ?string
+    {
+        if ($payroll->pdf_path && file_exists(storage_path('app/private/'.$payroll->pdf_path))) {
+            return storage_path('app/private/'.$payroll->pdf_path);
+        }
+
+        return null;
     }
 
     /**
@@ -70,7 +63,6 @@ class PayslipPdfService
     {
         $period = CarbonImmutable::createFromFormat('Y-m', $payroll->period);
 
-        // Get extra income items (non-standard, dari payroll_items kalau ada)
         $extraIncome = PayrollItem::query()
             ->where('payroll_id', $payroll->id)
             ->where('type', 'income')

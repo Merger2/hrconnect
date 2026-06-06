@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreOvertimeRequest;
 use App\Models\Overtime;
 use App\Services\ApprovalService;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -22,7 +23,7 @@ class OvertimeController extends Controller
         protected ApprovalService $approvalService,
     ) {}
 
-    #[Endpoint(title: 'Create Overtime', description: 'Submit overtime request with date, time range, and description (max 4h/day, 18h/week).')]
+    #[Endpoint(title: 'Create Overtime', description: 'Submit overtime request with date, time range, and description (max 4h/day, 18h/week). Flow: Overtime (Step 1/2) → Approval.')]
     #[BodyParameter(name: 'date', description: 'Overtime date (Y-m-d, today or future)', required: true, type: 'string', format: 'date')]
     #[BodyParameter(name: 'start_time', description: 'Start time (H:i)', required: true, type: 'string', format: 'time')]
     #[BodyParameter(name: 'end_time', description: 'End time (H:i, must be after start_time)', required: true, type: 'string', format: 'time')]
@@ -63,7 +64,7 @@ class OvertimeController extends Controller
         ], 201);
     }
 
-    #[Endpoint(title: 'List Overtimes', description: 'Paginated overtime list with status/period filters.')]
+    #[Endpoint(title: 'List Overtimes', description: 'Paginated overtime list with status/period filters. Flow: Overtime (history).')]
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
     #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
@@ -118,7 +119,7 @@ class OvertimeController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Get Overtime', description: 'Get overtime detail with approvals.')]
+    #[Endpoint(title: 'Get Overtime', description: 'Get overtime detail with approvals. Flow: Overtime (detail).')]
     public function show(Request $request, Overtime $overtime): JsonResponse
     {
         $this->authorize('view', $overtime);
@@ -129,7 +130,7 @@ class OvertimeController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Cancel Overtime', description: 'Cancel pending overtime request.')]
+    #[Endpoint(title: 'Cancel Overtime', description: 'Cancel pending overtime request. Flow: Overtime (cancel).')]
     public function destroy(Request $request, Overtime $overtime): JsonResponse
     {
         $this->authorize('delete', $overtime);

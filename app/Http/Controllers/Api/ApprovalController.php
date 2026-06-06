@@ -25,7 +25,7 @@ class ApprovalController extends Controller
         protected ApprovalService $approvalService,
     ) {}
 
-    #[Endpoint(title: 'Pending Approvals', description: 'List pending approvals for the current user as approver.')]
+    #[Endpoint(title: 'Pending Approvals', description: 'List pending approvals for the current user as approver. Flow: Approval (Step 2/2) — manager reviews pending requests from Leave, Overtime, Reimbursement.')]
     #[QueryParameter(name: 'type', description: 'Filter by type (leave, overtime, reimbursement, wfa)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
@@ -86,7 +86,7 @@ class ApprovalController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Approve', description: 'Approve a pending approval request.')]
+    #[Endpoint(title: 'Approve', description: 'Approve a pending approval request. Flow: Approval (approve action).')]
     #[BodyParameter(name: 'notes', description: 'Approval notes (optional)', required: false, type: 'string')]
     public function approve(ApproveRequest $request, Approval $approval): JsonResponse
     {
@@ -122,7 +122,7 @@ class ApprovalController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Reject', description: 'Reject a pending approval request with reason.')]
+    #[Endpoint(title: 'Reject', description: 'Reject a pending approval request with reason. Flow: Approval (reject action).')]
     #[BodyParameter(name: 'rejection_reason', description: 'Reason for rejection (min 10 chars)', required: true, type: 'string')]
     public function reject(RejectRequest $request, Approval $approval): JsonResponse
     {

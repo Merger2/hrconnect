@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Group('Payroll')]
 class PayrollController extends Controller
 {
-    #[Endpoint(title: 'List Payrolls', description: 'Paginated payroll list with year filter.')]
+    #[Endpoint(title: 'List Payrolls', description: 'Paginated payroll list with year filter. Flow: Payroll (Step 2/4) — Generate → List → Download → Export.')]
     #[QueryParameter(name: 'year', description: 'Filter by year (YYYY)', type: 'integer')]
     #[QueryParameter(name: 'employee_id', description: 'Filter by employee (Finance only)', type: 'integer')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
@@ -76,7 +76,7 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Get Payroll', description: 'Get payroll detail with all salary components.')]
+    #[Endpoint(title: 'Get Payroll', description: 'Get payroll detail with all salary components. Flow: Payroll (detail).')]
     public function show(Request $request, Payroll $payroll): JsonResponse
     {
         $this->authorize('view', $payroll);
@@ -104,19 +104,25 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Download Payslip', description: 'Download payslip PDF for published/paid payroll.')]
+    #[Endpoint(title: 'Download Payslip', description: 'Download payslip PDF for published/paid payroll. Flow: Payroll (Step 3/4) — Generate → List → Download → Export.')]
     public function payslip(Request $request, Payroll $payroll): BinaryFileResponse
     {
         $this->authorize('downloadPayslip', $payroll);
 
-        // Defense-in-depth: status check explicit
         if (! in_array($payroll->status, [PayrollStatus::PUBLISHED, PayrollStatus::PAID], true)) {
             throw new BusinessRuleException(
                 'Payslip hanya tersedia untuk payroll yang sudah dipublikasi.'
             );
         }
 
-        $pdfPath = app(PayslipPdfService::class)->generateAndStore($payroll);
+        $service = app(PayslipPdfService::class);
+        $cachedPath = $service->getPayslipPath($payroll);
+
+        if ($cachedPath) {
+            $pdfPath = $cachedPath;
+        } else {
+            $pdfPath = $service->generateAndStore($payroll);
+        }
 
         $filename = sprintf(
             'payslip-%s-%s.pdf',
@@ -129,7 +135,7 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Export Monthly', description: 'Export monthly payroll recap as Excel.')]
+    #[Endpoint(title: 'Export Monthly', description: 'Export monthly payroll recap as Excel. Flow: Payroll (Step 4/4) — Generate → List → Download → Export.')]
     #[BodyParameter(name: 'period', description: 'Payroll period (YYYY-MM)', required: true, type: 'string')]
     #[BodyParameter(name: 'branch_id', description: 'Filter by branch', required: false, type: 'integer')]
     public function exportMonthly(ExportMonthlyRequest $request): BinaryFileResponse
@@ -146,7 +152,7 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Export 1721-A1', description: 'Export PPh 21 tax certificate as Excel (DJP format).')]
+    #[Endpoint(title: 'Export 1721-A1', description: 'Export PPh 21 tax certificate as Excel (DJP format). Flow: Payroll (tax export).')]
     #[BodyParameter(name: 'period', description: 'Tax period (YYYY-MM)', required: true, type: 'string')]
     public function export1721A1(ExportPeriodRequest $request): BinaryFileResponse
     {
@@ -159,7 +165,7 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Export BPJS', description: 'Export BPJS health and employment insurance report as Excel.')]
+    #[Endpoint(title: 'Export BPJS', description: 'Export BPJS health and employment insurance report as Excel. Flow: Payroll (BPJS export).')]
     #[BodyParameter(name: 'period', description: 'BPJS period (YYYY-MM)', required: true, type: 'string')]
     public function exportBpjs(ExportPeriodRequest $request): BinaryFileResponse
     {
@@ -172,7 +178,7 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Generate Payroll', description: 'Queue payroll generation jobs for active employees.')]
+    #[Endpoint(title: 'Generate Payroll', description: 'Queue payroll generation jobs for active employees. Flow: Payroll (Step 1/4) — Generate → List → Download → Export.')]
     #[BodyParameter(name: 'period', description: 'Payroll period (YYYY-MM)', required: true, type: 'string')]
     #[BodyParameter(name: 'employee_ids', description: 'Specific employees to process (null = all active)', required: false, type: 'array')]
     public function generate(GeneratePayrollRequest $request): JsonResponse

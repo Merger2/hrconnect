@@ -6,131 +6,152 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica', 'Arial', sans-serif; }
         body { font-size: 11px; color: #1f2937; padding: 32px 40px; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 2px solid #1f2937; margin-bottom: 24px; }
-        .company { font-size: 14px; font-weight: bold; }
-        .company-meta { font-size: 9px; color: #6b7280; margin-top: 4px; }
-        .doc-title { text-align: right; }
-        .doc-title h1 { font-size: 18px; font-weight: bold; color: #1f2937; }
-        .doc-title .period { font-size: 11px; color: #6b7280; margin-top: 4px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; padding: 12px 16px; background-color: #f9fafb; border-radius: 4px; }
-        .info-grid dl { display: grid; grid-template-columns: 100px 1fr; gap: 4px 12px; font-size: 10px; }
-        .info-grid dt { color: #6b7280; }
-        .info-grid dd { font-weight: bold; }
-        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        .col { border: 1px solid #e5e7eb; border-radius: 4px; }
+        h1 { font-size: 18px; font-weight: bold; color: #1f2937; }
+        table { width: 100%; border-collapse: collapse; }
+        td { vertical-align: top; padding: 2px 4px; }
+
+        .header-table { width: 100%; margin-bottom: 16px; border-bottom: 2px solid #1f2937; padding-bottom: 16px; }
+        .header-left { font-size: 14px; font-weight: bold; }
+        .header-left .meta { font-size: 9px; color: #6b7280; font-weight: normal; margin-top: 4px; }
+        .header-right { text-align: right; }
+        .header-right .period { font-size: 11px; color: #6b7280; margin-top: 4px; font-weight: normal; }
+
+        .info-table { width: 100%; margin-bottom: 24px; background-color: #f9fafb; }
+        .info-table td { padding: 4px 12px; font-size: 10px; width: 50%; }
+        .info-table .label { color: #6b7280; width: 100px; }
+        .info-table .value { font-weight: bold; }
+
+        .col-table { width: 100%; margin-bottom: 24px; }
+        .col-table td { width: 50%; padding: 0 8px; vertical-align: top; }
+        .col-inner { border: 1px solid #e5e7eb; }
         .col-head { padding: 8px 12px; background-color: #f3f4f6; font-weight: bold; font-size: 11px; border-bottom: 1px solid #e5e7eb; }
         .col-head.income { color: #047857; }
         .col-head.deduction { color: #b91c1c; }
-        .col-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 10px; border-bottom: 1px solid #f3f4f6; }
-        .col-row:last-child { border-bottom: none; }
-        .col-row .label { color: #4b5563; }
-        .col-row .value { font-weight: bold; }
-        .col-total { display: flex; justify-content: space-between; padding: 8px 12px; background-color: #f9fafb; font-weight: bold; border-top: 1px solid #d1d5db; }
-        .col-total.income .value { color: #047857; }
-        .col-total.deduction .value { color: #b91c1c; }
-        .net-salary { padding: 16px 20px; background-color: #1f2937; color: white; border-radius: 4px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-        .net-salary .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
-        .net-salary .value { font-size: 20px; font-weight: bold; }
+        .col-row { padding: 6px 12px; font-size: 10px; border-bottom: 1px solid #f3f4f6; }
+        .col-row .pull-left { float: left; color: #4b5563; }
+        .col-row .pull-right { float: right; font-weight: bold; }
+        .col-row:after { content: ''; display: table; clear: both; }
+        .col-total { padding: 8px 12px; background-color: #f9fafb; font-weight: bold; border-top: 1px solid #d1d5db; }
+        .col-total .pull-left { float: left; }
+        .col-total .pull-right { float: right; }
+        .col-total:after { content: ''; display: table; clear: both; }
+        .col-total.income .pull-right { color: #047857; }
+        .col-total.deduction .pull-right { color: #b91c1c; }
+
+        .net-table { width: 100%; margin-bottom: 24px; }
+        .net-table td { padding: 16px 20px; background-color: #1f2937; color: white; }
+        .net-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+        .net-value { font-size: 20px; font-weight: bold; text-align: right; }
+
         .footer { padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #9ca3af; text-align: center; }
         .footer .auto { font-style: italic; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div>
-            <div class="company">{{ $company['name'] ?? 'PT 521 Teknologi Indonesia' }}</div>
-            <div class="company-meta">
-                {{ $company['address'] ?? 'Jakarta, Indonesia' }}<br>
-                NPWP: {{ $company['npwp'] ?? '-' }}
-            </div>
-        </div>
-        <div class="doc-title">
-            <h1>SLIP GAJI</h1>
-            <div class="period">Periode {{ $period_label }}</div>
-        </div>
-    </div>
-
-    <div class="info-grid">
-        <dl>
-            <dt>NIK</dt><dd>{{ $payroll->employee->employee_number }}</dd>
-            <dt>Nama</dt><dd>{{ $payroll->employee->full_name }}</dd>
-            <dt>Posisi</dt><dd>{{ $payroll->employee->position?->name ?? '-' }}</dd>
-            <dt>Departemen</dt><dd>{{ $payroll->employee->department?->name ?? '-' }}</dd>
-        </dl>
-        <dl>
-            <dt>Cabang</dt><dd>{{ $payroll->employee->branch?->name ?? '-' }}</dd>
-            <dt>Tipe Kerja</dt><dd>{{ $payroll->employee->employment_type?->value ?? '-' }}</dd>
-            <dt>Tgl Masuk</dt><dd>{{ optional($payroll->employee->join_date)->format('d M Y') ?? '-' }}</dd>
-            <dt>Status Slip</dt><dd>{{ strtoupper($payroll->status?->value ?? '-') }}</dd>
-        </dl>
-    </div>
-
-    <div class="columns">
-        <div class="col">
-            <div class="col-head income">PENDAPATAN</div>
-            <div class="col-row">
-                <span class="label">Gaji Pokok</span>
-                <span class="value">Rp {{ number_format($payroll->basic_salary, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-row">
-                <span class="label">Tunjangan</span>
-                <span class="value">Rp {{ number_format($payroll->total_allowance, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-row">
-                <span class="label">Lembur</span>
-                <span class="value">Rp {{ number_format($payroll->overtime_pay, 0, ',', '.') }}</span>
-            </div>
-            @foreach($extra_income as $item)
-                <div class="col-row">
-                    <span class="label">{{ $item['name'] }}</span>
-                    <span class="value">Rp {{ number_format($item['amount'], 0, ',', '.') }}</span>
+    <table class="header-table">
+        <tr>
+            <td class="header-left" style="width: 60%;">
+                {{ $company['name'] ?? 'PT 521 Teknologi Indonesia' }}
+                <div class="meta">
+                    {{ $company['address'] ?? 'Jakarta, Indonesia' }}<br>
+                    NPWP: {{ $company['npwp'] ?? '-' }}
                 </div>
-            @endforeach
-            <div class="col-total income">
-                <span>TOTAL PENDAPATAN</span>
-                <span class="value">Rp {{ number_format($payroll->gross_salary, 0, ',', '.') }}</span>
-            </div>
-        </div>
+            </td>
+            <td class="header-right" style="width: 40%;">
+                <h1>SLIP GAJI</h1>
+                <div class="period">Periode {{ $period_label }}</div>
+            </td>
+        </tr>
+    </table>
 
-        <div class="col">
-            <div class="col-head deduction">POTONGAN</div>
-            <div class="col-row">
-                <span class="label">PPh 21</span>
-                <span class="value">Rp {{ number_format($payroll->pph21, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-row">
-                <span class="label">BPJS Kesehatan</span>
-                <span class="value">Rp {{ number_format($payroll->bpjs_health, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-row">
-                <span class="label">BPJS Ketenagakerjaan</span>
-                <span class="value">Rp {{ number_format($payroll->bpjs_employment, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-row">
-                <span class="label">Pinjaman</span>
-                <span class="value">Rp {{ number_format($payroll->loan_deduction, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-row">
-                <span class="label">Denda Kehadiran</span>
-                <span class="value">Rp {{ number_format($payroll->attendance_penalty, 0, ',', '.') }}</span>
-            </div>
-            <div class="col-total deduction">
-                <span>TOTAL POTONGAN</span>
-                <span class="value">Rp {{ number_format($payroll->total_deduction, 0, ',', '.') }}</span>
-            </div>
-        </div>
-    </div>
+    <table class="info-table">
+        <tr>
+            <td style="width: 50%;">
+                <table><tr><td class="label">NIK</td><td class="value">{{ $payroll->employee->employee_number }}</td></tr></table>
+                <table><tr><td class="label">Nama</td><td class="value">{{ $payroll->employee->full_name }}</td></tr></table>
+                <table><tr><td class="label">Posisi</td><td class="value">{{ $payroll->employee->position?->name ?? '-' }}</td></tr></table>
+                <table><tr><td class="label">Departemen</td><td class="value">{{ $payroll->employee->department?->name ?? '-' }}</td></tr></table>
+            </td>
+            <td style="width: 50%;">
+                <table><tr><td class="label">Cabang</td><td class="value">{{ $payroll->employee->branch?->name ?? '-' }}</td></tr></table>
+                <table><tr><td class="label">Tipe Kerja</td><td class="value">{{ $payroll->employee->employment_type?->value ?? '-' }}</td></tr></table>
+                <table><tr><td class="label">Tgl Masuk</td><td class="value">{{ optional($payroll->employee->join_date)->format('d M Y') ?? '-' }}</td></tr></table>
+                <table><tr><td class="label">Status Slip</td><td class="value">{{ strtoupper($payroll->status?->value ?? '-') }}</td></tr></table>
+            </td>
+        </tr>
+    </table>
 
-    <div class="net-salary">
-        <span class="label">Take Home Pay</span>
-        <span class="value">Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</span>
-    </div>
+    <table class="col-table">
+        <tr>
+            <td>
+                <div class="col-inner">
+                    <div class="col-head income">PENDAPATAN</div>
+                    <div class="col-row">
+                        <span class="pull-left">Gaji Pokok</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->basic_salary, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-row">
+                        <span class="pull-left">Tunjangan</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->total_allowance, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-row">
+                        <span class="pull-left">Lembur</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->overtime_pay, 0, ',', '.') }}</span>
+                    </div>
+                    @foreach($extra_income as $item)
+                        <div class="col-row">
+                            <span class="pull-left">{{ $item['name'] }}</span>
+                            <span class="pull-right">Rp {{ number_format($item['amount'], 0, ',', '.') }}</span>
+                        </div>
+                    @endforeach
+                    <div class="col-total income">
+                        <span class="pull-left">TOTAL PENDAPATAN</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->gross_salary, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="col-inner">
+                    <div class="col-head deduction">POTONGAN</div>
+                    <div class="col-row">
+                        <span class="pull-left">PPh 21</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->pph21, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-row">
+                        <span class="pull-left">BPJS Kesehatan</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->bpjs_health, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-row">
+                        <span class="pull-left">BPJS Ketenagakerjaan</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->bpjs_employment, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-row">
+                        <span class="pull-left">Pinjaman</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->loan_deduction, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-row">
+                        <span class="pull-left">Denda Kehadiran</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->attendance_penalty, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="col-total deduction">
+                        <span class="pull-left">TOTAL POTONGAN</span>
+                        <span class="pull-right">Rp {{ number_format($payroll->total_deduction, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="net-table">
+        <tr>
+            <td style="width: 50%;"><span class="net-label">Take Home Pay</span></td>
+            <td style="width: 50%;"><span class="net-value">Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</span></td>
+        </tr>
+    </table>
 
     <div class="footer">
         <div>Slip gaji ini di-generate otomatis oleh sistem HRConnect.</div>
-        <div class="auto">
-            Dicetak: {{ $generated_at }} — Untuk pertanyaan, hubungi tim HR/Finance.
-        </div>
+        <div class="auto">Dicetak: {{ $generated_at }} — Untuk pertanyaan, hubungi tim HR/Finance.</div>
     </div>
 </body>
 </html>

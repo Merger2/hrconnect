@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\EducationLevel;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreEmployeeRequest extends FormRequest
 {
@@ -20,8 +22,8 @@ class StoreEmployeeRequest extends FormRequest
             'password' => ['required', 'string', 'min:8'],
             'employee_number' => ['required', 'string', 'unique:employees,employee_number'],
             'full_name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'regex:/^(\+62|0)\d{9,12}$/'],
-            'nik' => ['nullable', 'string'],
+            'phone' => ['required', 'string', 'max:20'],
+            'nik' => ['required', 'string', 'max:16', Rule::encryptedUnique(Employee::class, 'nik_hash')],
             'company_id' => ['required', 'integer', 'exists:companies,id'],
             'branch_id' => ['required', 'integer', 'exists:branches,id'],
             'department_id' => ['required', 'integer', 'exists:departments,id'],
@@ -34,7 +36,9 @@ class StoreEmployeeRequest extends FormRequest
             'join_date' => ['required', 'date'],
             'salary_type' => ['required', 'in:monthly,daily,hourly'],
             'blood_type' => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
-            'education_level' => ['nullable', 'in:sd,smp,sma,d3,s1,s2,s3'],
+            'education_level' => ['required', Rule::enum(EducationLevel::class)],
+            'institution_name' => ['required', 'string', 'max:255'],
+            'graduation_year' => ['required', 'integer', 'min:1950', 'max:'.date('Y')],
         ];
     }
 }

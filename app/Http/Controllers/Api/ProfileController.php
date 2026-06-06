@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 #[Group('Profile')]
 class ProfileController extends Controller
 {
-    #[Endpoint(title: 'Get Profile', description: 'Get authenticated employee profile with masked PII fields.')]
+    #[Endpoint(title: 'Get Profile', description: 'Get authenticated employee profile with masked PII fields. Flow: Profile (read).')]
     public function show(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -41,7 +41,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Update Profile', description: 'Update self-service personal data (phone, address, bank).')]
+    #[Endpoint(title: 'Update Profile', description: 'Update self-service personal data (phone, address, bank). Flow: Profile (update).')]
     #[BodyParameter(name: 'phone', description: 'Phone number (+62 format)', required: false, type: 'string')]
     #[BodyParameter(name: 'address_detail', description: 'Address detail', required: false, type: 'string')]
     #[BodyParameter(name: 'bank_name', description: 'Bank name', required: false, type: 'string')]
@@ -74,7 +74,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Change Password', description: 'Change authenticated user password. Token stays valid.')]
+    #[Endpoint(title: 'Change Password', description: 'Change authenticated user password. Token stays valid. Flow: Profile (security).')]
     #[BodyParameter(name: 'current_password', description: 'Current password for verification', required: true, type: 'string')]
     #[BodyParameter(name: 'password', description: 'New password (min 8 chars, mixed case, numbers)', required: true, type: 'string')]
     #[BodyParameter(name: 'password_confirmation', description: 'Confirm new password', required: true, type: 'string')]

@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 #[Group('Auth')]
 class AuthController extends Controller
 {
-    #[Endpoint(title: 'Login', description: 'Authenticate user with email/password. Returns Bearer token or 2FA challenge.')]
+    #[Endpoint(title: 'Login', description: 'Authenticate user with email/password. Returns Bearer token or 2FA challenge. Flow: Auth — Login → (2FA jika perlu) → Get Profile.')]
     #[BodyParameter(name: 'email', description: 'User email address', required: true, type: 'string')]
     #[BodyParameter(name: 'password', description: 'User password (min 8 chars)', required: true, type: 'string')]
     #[BodyParameter(name: 'device_name', description: 'Device identifier for the token', required: true, type: 'string')]
@@ -65,7 +65,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Endpoint(title: '2FA Challenge', description: 'Complete two-factor authentication with TOTP or recovery code.')]
+    #[Endpoint(title: '2FA Challenge', description: 'Complete two-factor authentication with TOTP or recovery code. Flow: Auth (2FA step) — setelah Login jika 2FA aktif.')]
     #[BodyParameter(name: 'challenge_id', description: 'Challenge ID from login response', required: true, type: 'string')]
     #[BodyParameter(name: 'code', description: '6-digit TOTP code or 8-char recovery code', required: true, type: 'string')]
     public function twoFactorChallenge(TwoFactorChallengeRequest $request): JsonResponse
@@ -109,7 +109,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Logout', description: 'Revoke current Bearer token.')]
+    #[Endpoint(title: 'Logout', description: 'Revoke current Bearer token. Flow: Auth (logout device).')]
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -120,7 +120,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Logout All', description: 'Revoke all tokens for the authenticated user.')]
+    #[Endpoint(title: 'Logout All', description: 'Revoke all tokens for the authenticated user. Flow: Auth (logout all devices).')]
     public function logoutAll(Request $request): JsonResponse
     {
         $count = $request->user()->tokens()->count();
@@ -133,7 +133,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Forgot Password', description: 'Send password reset link to email. Always returns 200 (security: hide valid emails).')]
+    #[Endpoint(title: 'Forgot Password', description: 'Send password reset link to email. Always returns 200 (security: hide valid emails). Flow: Auth (password reset).')]
     #[BodyParameter(name: 'email', description: 'Registered email address', required: true, type: 'string')]
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
@@ -145,7 +145,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Current User', description: 'Get authenticated user info with roles and permissions.')]
+    #[Endpoint(title: 'Current User', description: 'Get authenticated user info with roles and permissions. Flow: Auth (after login).')]
     public function me(Request $request): JsonResponse
     {
         return response()->json([
