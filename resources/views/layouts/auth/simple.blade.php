@@ -23,6 +23,27 @@
             </flux:toast.group>
         @endpersist
 
+        <div id="pwa-install-banner" class="hidden fixed bottom-0 inset-x-0 p-4 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 shadow-lg z-50">
+            <div class="flex items-center justify-between max-w-sm mx-auto">
+                <div class="flex items-center gap-3">
+                    <img src="/icon-192.svg" alt="HRConnect" class="size-10 rounded-lg" />
+                    <div>
+                        <p class="text-sm font-medium text-zinc-900 dark:text-white">Install HRConnect</p>
+                        <p class="text-xs text-zinc-500">Akses cepat dari layar utama</p>
+                    </div>
+                </div>
+                <button onclick="installPwa()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Install</button>
+            </div>
+        </div>
+
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+                });
+            }
+        </script>
+
         @fluxScripts
     </body>
 </html>

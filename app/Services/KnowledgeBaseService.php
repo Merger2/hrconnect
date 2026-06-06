@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\KnowledgeBaseCategory;
@@ -144,12 +146,7 @@ class KnowledgeBaseService
 
         $filename = uniqid('kb_').'.pdf';
         $path = $pdf->storeAs('knowledgebase', $filename, 'local');
-        $absolutePath = storage_path('app/private/'.$path);
-
-        // Fallback path resolution untuk Laravel < 12 atau driver berbeda
-        if (! is_readable($absolutePath)) {
-            $absolutePath = storage_path('app/'.$path);
-        }
+        $absolutePath = storage_path('app/'.$path);
 
         $rawText = $this->embedding->extractTextFromPdf($absolutePath);
         $chunks = $this->embedding->chunkText($rawText);

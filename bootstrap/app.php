@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\CheckPasswordExpired;
+use App\Http\Middleware\DeviceDetection;
+use App\Http\Middleware\GeofenceValidation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -34,12 +36,20 @@ return Application::configure(basePath: dirname(__DIR__))
         // PWA mobile akan pakai Bearer token (auth:sanctum guard) — tidak butuh stateful.
         $middleware->statefulApi();
 
+        // Trust all proxies (cloud/LB agnostic). Sempitkan ke IP spesifik jika tahu.
+        $middleware->trustProxies(at: '*');
+
+        // Proteksi Host header poisoning.
+        $middleware->trustHosts(at: fn () => [config('app.url')]);
+
         // Aliases shortcut untuk middleware Spatie & Sanctum (digunakan di routes).
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'password.expired' => CheckPasswordExpired::class,
+            'device.detection' => DeviceDetection::class,
+            'geofence' => GeofenceValidation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperDepartment
+ */
 #[Fillable(['branch_id', 'name', 'code', 'description', 'is_active'])]
 class Department extends Model
 {

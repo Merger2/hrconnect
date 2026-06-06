@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperLoanInstallment
+ */
 #[Fillable(['loan_id', 'payroll_id', 'amount_paid', 'installment_number', 'status', 'due_date', 'paid_at'])]
 class LoanInstallment extends Model
 {

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\EmployeeTerminationController;
 use App\Http\Controllers\Api\FaceController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\KnowledgeBaseController;
@@ -163,6 +164,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{employee}', [EmployeeController::class, 'destroy'])
                 ->middleware('permission:manage_employees')
                 ->name('destroy');
+            Route::post('/{employee}/terminate', [EmployeeTerminationController::class, 'terminate'])
+                ->middleware('permission:manage_employees')
+                ->name('terminate');
+            Route::post('/terminate/contract-end', [EmployeeTerminationController::class, 'processContractEnd'])
+                ->middleware('permission:manage_employees')
+                ->name('terminate.contract-end');
         });
 
     // ── KnowledgeBase RAG (Sesi 11) ─────────────────────────────────

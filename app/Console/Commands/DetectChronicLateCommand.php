@@ -7,7 +7,7 @@ use App\Models\Attendance;
 use App\Models\CompanySetting;
 use App\Models\Employee;
 use App\Notifications\ChronicLateWarning;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 /**
@@ -35,7 +35,7 @@ class DetectChronicLateCommand extends Command
     public function handle(): int
     {
         $targetMonth = $this->option('month')
-            ? Carbon::createFromFormat('Y-m', $this->option('month'))
+            ? CarbonImmutable::createFromFormat('Y-m', $this->option('month'))
             : now();
 
         $threshold = (int) CompanySetting::get('chronic_late_threshold', 3);

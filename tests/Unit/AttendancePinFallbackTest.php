@@ -61,7 +61,7 @@ test('Face match → return FACE_VERIFIED dengan similarity score', function () 
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     setRawAttribute($employee, 'face_embedding', '[0.1,0.2,0.3]');
 
     $result = callResolveVerification($service, $employee, [
@@ -82,7 +82,7 @@ test('Face tidak match + PIN valid → fallback ke PIN_VERIFIED', function () {
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     $employee->id = 99;
     setRawAttribute($employee, 'face_embedding', '[0.1,0.2,0.3]');
     $employee->pin = Hash::make('123456');
@@ -106,7 +106,7 @@ test('Face belum register (no embedding) + PIN valid → langsung PIN_VERIFIED',
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     $employee->id = 99;
     // face_embedding biarkan null (default)
     $employee->pin = Hash::make('654321');
@@ -130,7 +130,7 @@ test('Face race (FaceNotRegisteredException saat verify) + PIN → fallback PIN'
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     $employee->id = 99;
     setRawAttribute($employee, 'face_embedding', '[0.1,0.2,0.3]');
     $employee->pin = Hash::make('111222');
@@ -153,7 +153,7 @@ test('Face belum register + tanpa PIN → throw BusinessRuleException', function
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     // face_embedding null
 
     expect(fn () => callResolveVerification($service, $employee, []))
@@ -171,7 +171,7 @@ test('Face tidak match + PIN salah → throw InvalidPinException', function () {
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     $employee->id = 99;
     setRawAttribute($employee, 'face_embedding', '[0.1,0.2,0.3]');
     $employee->pin = Hash::make('correct-pin');
@@ -195,7 +195,7 @@ test('Face match tapi PIN ada → tetap pakai face (Face takes priority)', funct
         $faceService,
     );
 
-    $employee = new Employee();
+    $employee = new Employee;
     setRawAttribute($employee, 'face_embedding', '[0.1,0.2,0.3]');
 
     $result = callResolveVerification($service, $employee, [

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin IdeHelperReimbursementCategory
+ */
 #[Fillable(['company_id', 'name', 'code', 'is_active'])]
 class ReimbursementCategory extends Model
 {

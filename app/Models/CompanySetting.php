@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @mixin IdeHelperCompanySetting
+ */
 #[Fillable(['company_id', 'key', 'value', 'description'])]
 class CompanySetting extends Model
 {

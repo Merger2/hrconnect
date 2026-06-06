@@ -4,20 +4,28 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\EmployeeStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreEmployeeRequest;
+use App\Http\Requests\Api\UpdateEmployeeRequest;
 use App\Models\Employee;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * EmployeeController — direktori karyawan untuk HR Manager + Super Admin.
- *
- * Authorization via EmployeePolicy + middleware `permission:view_employees`
- * pada route group. forceDelete super-admin only.
- */
+#[Group('Employees')]
 class EmployeeController extends Controller
 {
+    #[Endpoint(title: 'List Employees', description: 'Paginated employee directory with search and filter.')]
+    #[QueryParameter(name: 'branch_id', description: 'Filter by branch', type: 'integer')]
+    #[QueryParameter(name: 'department_id', description: 'Filter by department', type: 'integer')]
+    #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
+    #[QueryParameter(name: 'search', description: 'Search by name or employee number (min 2 chars)', type: 'string')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
     public function index(Request $request): JsonResponse
     {
         $request->validate([
@@ -72,6 +80,7 @@ class EmployeeController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Get Employee', description: 'Get employee detail with user account, branch, department, position.')]
     public function show(Request $request, Employee $employee): JsonResponse
     {
         $this->authorize('view', $employee);
@@ -91,32 +100,25 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    #[Endpoint(title: 'Create Employee', description: 'Create a new employee with user account and employment details.')]
+    #[BodyParameter(name: 'name', description: 'User display name', required: true, type: 'string')]
+    #[BodyParameter(name: 'email', description: 'User email (must be unique)', required: true, type: 'string')]
+    #[BodyParameter(name: 'password', description: 'Account password (min 8 chars)', required: true, type: 'string')]
+    #[BodyParameter(name: 'employee_number', description: 'Unique employee number', required: true, type: 'string')]
+    #[BodyParameter(name: 'full_name', description: 'Employee full legal name', required: true, type: 'string')]
+    #[BodyParameter(name: 'company_id', description: 'Company ID', required: true, type: 'integer')]
+    #[BodyParameter(name: 'branch_id', description: 'Branch ID', required: true, type: 'integer')]
+    #[BodyParameter(name: 'department_id', description: 'Department ID', required: true, type: 'integer')]
+    #[BodyParameter(name: 'position_id', description: 'Position ID', required: true, type: 'integer')]
+    #[BodyParameter(name: 'gender', description: 'Gender (L/P)', required: true, type: 'string')]
+    #[BodyParameter(name: 'marital_status', description: 'Marital status', required: true, type: 'string')]
+    #[BodyParameter(name: 'employment_type', description: 'Type of employment', required: true, type: 'string')]
+    #[BodyParameter(name: 'birth_date', description: 'Date of birth (Y-m-d)', required: true, type: 'string', format: 'date')]
+    #[BodyParameter(name: 'join_date', description: 'Join date (Y-m-d)', required: true, type: 'string', format: 'date')]
+    #[BodyParameter(name: 'salary_type', description: 'Salary type (monthly/daily/hourly)', required: true, type: 'string')]
+    public function store(StoreEmployeeRequest $request): JsonResponse
     {
-        $this->authorize('create', Employee::class);
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'employee_number' => ['required', 'string', 'unique:employees,employee_number'],
-            'full_name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'regex:/^(\+62|0)\d{9,12}$/'],
-            'nik' => ['nullable', 'string'],
-            'company_id' => ['required', 'integer', 'exists:companies,id'],
-            'branch_id' => ['required', 'integer', 'exists:branches,id'],
-            'department_id' => ['required', 'integer', 'exists:departments,id'],
-            'position_id' => ['required', 'integer', 'exists:positions,id'],
-            'parent_id' => ['nullable', 'integer', 'exists:employees,id'],
-            'gender' => ['required', 'in:L,P'],
-            'marital_status' => ['required', 'in:single,married,divorced,widowed'],
-            'employment_type' => ['required', 'in:permanent,contract,probation,intern'],
-            'birth_date' => ['required', 'date'],
-            'join_date' => ['required', 'date'],
-            'salary_type' => ['required', 'in:monthly,daily,hourly'],
-            'blood_type' => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
-            'education_level' => ['nullable', 'in:sd,smp,sma,d3,s1,s2,s3'],
-        ]);
+        $data = $request->validated();
 
         $user = User::create([
             'name' => $data['name'],
@@ -140,24 +142,18 @@ class EmployeeController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Employee $employee): JsonResponse
+    #[Endpoint(title: 'Update Employee', description: 'Update employee personal and employment data.')]
+    #[BodyParameter(name: 'full_name', description: 'Employee full name', required: false, type: 'string')]
+    #[BodyParameter(name: 'phone', description: 'Phone number (+62 format)', required: false, type: 'string')]
+    #[BodyParameter(name: 'company_id', description: 'Company ID', required: false, type: 'integer')]
+    #[BodyParameter(name: 'branch_id', description: 'Branch ID', required: false, type: 'integer')]
+    #[BodyParameter(name: 'department_id', description: 'Department ID', required: false, type: 'integer')]
+    #[BodyParameter(name: 'position_id', description: 'Position ID', required: false, type: 'integer')]
+    #[BodyParameter(name: 'employment_type', description: 'Type of employment', required: false, type: 'string')]
+    #[BodyParameter(name: 'status', description: 'Employment status', required: false, type: 'string')]
+    public function update(UpdateEmployeeRequest $request, Employee $employee): JsonResponse
     {
-        $this->authorize('update', $employee);
-
-        $data = $request->validate([
-            'full_name' => ['sometimes', 'string', 'max:255'],
-            'phone' => ['sometimes', 'nullable', 'regex:/^(\+62|0)\d{9,12}$/'],
-            'company_id' => ['sometimes', 'integer', 'exists:companies,id'],
-            'branch_id' => ['sometimes', 'integer', 'exists:branches,id'],
-            'department_id' => ['sometimes', 'integer', 'exists:departments,id'],
-            'position_id' => ['sometimes', 'integer', 'exists:positions,id'],
-            'parent_id' => ['sometimes', 'nullable', 'integer', 'exists:employees,id'],
-            'employment_type' => ['sometimes', 'in:permanent,contract,probation,intern'],
-            'status' => ['sometimes', 'in:active,inactive,resigned'],
-            'address_detail' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'bank_name' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'bank_account_number' => ['sometimes', 'nullable', 'regex:/^\d{8,18}$/'],
-        ]);
+        $data = $request->validated();
 
         $employee->update($data);
 
@@ -170,6 +166,7 @@ class EmployeeController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Delete Employee', description: 'Soft-delete an employee record.')]
     public function destroy(Request $request, Employee $employee): JsonResponse
     {
         $this->authorize('delete', $employee);

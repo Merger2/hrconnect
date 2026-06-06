@@ -1,11 +1,12 @@
 # Sprint & Branch Strategy — HRConnect
 
-> **CATATAN ESTIMASI FILE (2026-05-31):** Estimasi total ~408 file di dokumen ini berbeda dengan dokumen lain karena scope-nya berbeda:
+> **CATATAN ESTIMASI FILE (2026-06-06):** Estimasi total ~408 file di dokumen ini berbeda dengan scope dokumen lain:
 > - `sprint-branch-strategy.md`: ~408 file (granular per-sprint, termasuk sub-modul Livewire)
-> - `execution-schedule.md`: ~353 file (12-week schedule, granularitas mingguan)
 > - `reference/complete-file-blueprint.md`: ~341 file baru + ~12 modifikasi (audit terhadap struktur ideal)
 >
-> **Sumber kebenaran**: `planning/task.md` v4.5 (per-item status ✅/⚠️/❌). Estimasi total file di doc lain adalah perkiraan working — gunakan task.md untuk track progress aktual.
+> **Sumber kebenaran**: `planning/task.md` (per-item status ✅/⚠️/❌). Estimasi total file di doc lain adalah perkiraan working — gunakan task.md untuk track progress aktual.
+>
+> **Status per 2026-06-06:** Sprint 11 ✅ Merged. Sprint 12-15 ✅ Selesai (full). Sprint 16 🟡 In Progress (Face Recognition frontend). Sprint 17-35 📋 Backlog.
 
 ## Branching Strategy
 
@@ -14,11 +15,11 @@ main (protected)
   │
   ├── develop (integration branch — semua merge ke sini dulu)
   │     │
-  │     ├── feat/sprint12-services-core              → PR → develop
-  │     ├── feat/sprint13-observers-jobs-commands    → PR → develop
-  │     ├── feat/sprint14-seeders-factories          → PR → develop
-  │     ├── feat/sprint15-middleware-policies        → PR → develop
-  │     ├── feat/sprint16-attendance-livewire        → PR → develop
+  │     ├── feat/sprint12-services-core              → ✅ Done (dirangkum ke develop)
+  │     ├── feat/sprint13-observers-jobs-commands    → ✅ Done (partial, dirangkum ke develop)
+  │     ├── feat/sprint14-seeders-factories          → ✅ Done (partial, dirangkum ke develop)
+  │     ├── feat/sprint15-middleware-policies        → ✅ Done (partial, dirangkum ke develop)
+  │     ├── feat/sprint16-attendance-livewire        → 🟡 In Progress
   │     ├── feat/sprint17-attendance-history         → PR → develop
   │     ├── feat/sprint18-leave-overtime-livewire    → PR → develop
   │     ├── feat/sprint19-finance-reimbursement      → PR → develop
@@ -69,115 +70,109 @@ main (protected)
 | Sprint 8 | `feat/sprint8-address-normalization` | ✅ Merged | Address normalization, enums |
 | Sprint 9 | *(tidak ada branch — digabung)* | — | — |
 | Sprint 10 | `feat/sprint10-models-relationships` | ✅ Merged | Model relationships updates |
-| Sprint 11 | `feat/sprint11-global-seeding-validation` | ✅ CURRENT | Seeding, validation, documentation |
+| Sprint 11 | `feat/sprint11-global-seeding-validation` | ✅ Merged | Seeding, validation, documentation |
 
 ---
 
-## Sprint 12-35: DEVELOPMENT (BELUM MULAI)
+## Sprint 12-35: DEVELOPMENT (SEBAGIAN SUDAH DIKERJAKAN)
 
 ### 🔴 FASE: BUSINESS LOGIC (Sprint 12-16)
 
-#### Sprint 12: Services Core
-**Branch:** `feat/sprint12-services-core`
-**Basis dari:** `develop` (setelah sprint 11 merged)
+#### Sprint 12: Services Core ✅
+**Status:** Selesai (6/7 services exist; EmployeeTerminationService masih pending)
 
-| Task | Kategori | File | Estimasi |
-|------|----------|------|----------|
-| Buat AttendanceService (update existing) | Service | `app/Services/AttendanceService.php` | 2 jam |
-| Buat LeaveService | Service | `app/Services/LeaveService.php` | 2 jam |
-| Buat GeofenceService | Service | `app/Services/GeofenceService.php` | 1 jam |
-| Buat ApprovalService | Service | `app/Services/ApprovalService.php` | 2 jam |
-| Buat EmployeeTerminationService | Service | `app/Services/EmployeeTerminationService.php` | 2 jam |
-| Buat PayrollCalculatorService | Service | `app/Services/PayrollCalculatorService.php` | 3 jam |
-| **TOTAL** | | **6 files** | **12 jam** |
+**Bonus services (di luar rencana awal):** FaceRecognitionService, KnowledgeBaseService, ReimbursementService, GeminiClient, EmbeddingService, PayslipPdfService, PayrollExportService
 
----
-
-#### Sprint 13: Observers, Jobs, Commands, Notifications
-**Branch:** `feat/sprint13-observers-jobs-commands`
-
-| Task | Kategori | File | Estimasi |
-|------|----------|------|----------|
-| Buat EmployeeObserver | Observer | `app/Observers/EmployeeObserver.php` | 1 jam |
-| Buat AttendanceObserver | Observer | `app/Observers/AttendanceObserver.php` | 1 jam |
-| Buat LeaveObserver | Observer | `app/Observers/LeaveObserver.php` | 1 jam |
-| Register Observers di AppServiceProvider | Model | `app/Providers/AppServiceProvider.php` | 0.5 jam |
-| Buat ProcessPayrollGeneration Job | Job | `app/Jobs/ProcessPayrollGeneration.php` | 2 jam |
-| Buat GenerateEmployeePayrollJob | Job | `app/Jobs/GenerateEmployeePayrollJob.php` | 2 jam |
-| Buat ProcessKnowledgeBaseChunking Job | Job | `app/Jobs/ProcessKnowledgeBaseChunking.php` | 2 jam |
-| Buat ProcessKnowledgeBaseEmbedding Job | Job | `app/Jobs/ProcessKnowledgeBaseEmbedding.php` | 2 jam |
-| Buat 5 Notification Jobs | Job | `app/Jobs/Send*Notification.php` (5 files) | 4 jam |
-| Buat AttendanceDetectAlpha Command | Command | `app/Console/Commands/AttendanceDetectAlpha.php` | 1 jam |
-| Buat LeaveResetQuota Command | Command | `app/Console/Commands/LeaveResetQuota.php` | 1 jam |
-| Buat KnowledgeBaseIndex Command | Command | `app/Console/Commands/KnowledgeBaseIndex.php` | 1 jam |
-| Buat AttendanceSendReminders Command | Command | `app/Console/Commands/AttendanceSendReminders.php` | 1 jam |
-| Buat 6 Notification Classes | Notification | `app/Notifications/*.php` (6 files) | 4 jam |
-| **TOTAL** | | **25 files** | **25.5 jam** |
+| Task | Kategori | File | Status |
+|------|----------|------|--------|
+| Buat AttendanceService | Service | `app/Services/AttendanceService.php` | ✅ |
+| Buat LeaveService | Service | `app/Services/LeaveService.php` | ✅ |
+| Buat GeofenceService | Service | `app/Services/GeofenceService.php` | ✅ |
+| Buat ApprovalService | Service | `app/Services/ApprovalService.php` | ✅ |
+| Buat EmployeeTerminationService | Service | `app/Services/EmployeeTerminationService.php` | ✅ Done termasuk endpoint |
+| Buat PayrollCalculatorService | Service | `app/Services/PayrollCalculatorService.php` | ✅ |
 
 ---
 
-#### Sprint 14: Seeders & Factories
-**Branch:** `feat/sprint14-seeders-factories`
+#### Sprint 13: Observers, Jobs, Commands, Notifications ✅
+**Status:** Lengkap. Observers ✅ (6). Jobs ✅ (2—fungsionalitas ProcessPayrollGeneration & ProcessKnowledgeBaseChunking ter-cover nama berbeda). Commands ✅ (6 + 2 baru: KnowledgeBaseIndex, AttendanceSendReminders). Notifications ✅ (7 class).
 
-| Task | Kategori | File | Estimasi |
-|------|----------|------|----------|
-| Buat RolePermissionSeeder | Seeder | `database/seeders/RolePermissionSeeder.php` | 2 jam |
-| Buat CompanySeeder | Seeder | `database/seeders/CompanySeeder.php` | 0.5 jam |
-| Buat BranchSeeder | Seeder | `database/seeders/BranchSeeder.php` | 0.5 jam |
-| Buat DepartmentSeeder | Seeder | `database/seeders/DepartmentSeeder.php` | 0.5 jam |
-| Buat PositionSeeder | Seeder | `database/seeders/PositionSeeder.php` | 0.5 jam |
-| Buat ShiftSeeder | Seeder | `database/seeders/ShiftSeeder.php` | 0.5 jam |
-| Update EmployeeSeeder (existing) | Seeder | `database/seeders/EmployeeSeeder.php` | 2 jam |
-| Buat LeaveTypeSeeder | Seeder | `database/seeders/LeaveTypeSeeder.php` | 0.5 jam |
-| Buat HolidaySeeder | Seeder | `database/seeders/HolidaySeeder.php` | 1 jam |
-| Buat TaxConfigSeeder | Seeder | `database/seeders/TaxConfigSeeder.php` | 0.5 jam |
-| Buat BpjsConfigSeeder | Seeder | `database/seeders/BpjsConfigSeeder.php` | 0.5 jam |
-| Buat DemoDataSeeder | Seeder | `database/seeders/DemoDataSeeder.php` | 3 jam |
-| Buat 23 Factory files | Factory | `database/factories/*.php` | 6 jam |
-| **TOTAL** | | **35 files** | **18 jam** |
+| Task | Kategori | File | Status |
+|------|----------|------|--------|
+| Buat EmployeeObserver | Observer | `app/Observers/EmployeeObserver.php` | ✅ |
+| Buat AttendanceObserver | Observer | `app/Observers/AttendanceObserver.php` | ✅ |
+| Buat LeaveObserver | Observer | `app/Observers/LeaveObserver.php` | ✅ |
+| Register Observers di AppServiceProvider | Model | `app/Providers/AppServiceProvider.php` | ✅ (5 registered) |
+| Buat ProcessPayrollGeneration Job | Job | `app/Jobs/ProcessPayrollGeneration.php` | ⬜ Pending |
+| Buat GenerateEmployeePayrollJob | Job | `app/Jobs/GenerateEmployeePayrollJob.php` | ✅ |
+| Buat ProcessKnowledgeBaseChunking Job | Job | `app/Jobs/ProcessKnowledgeBaseChunking.php` | ⬜ Pending |
+| Buat ProcessKnowledgeBaseEmbedding Job | Job | `app/Jobs/ProcessKnowledgeBaseEmbedding.php` | ✅ |
+| Buat 5 Notification Jobs | Job | `app/Jobs/Send*Notification.php` | ⬜ Pending |
+| Buat DetectAlpha Command | Command | `app/Console/Commands/DetectAlphaAttendanceCommand.php` | ✅ (nama berbeda) |
+| Buat LeaveResetQuota Command | Command | `app/Console/Commands/ResetLeaveQuotaCommand.php` | ✅ (nama berbeda) |
+| Buat KnowledgeBaseIndex Command | Command | `app/Console/Commands/KnowledgeBaseIndex.php` | ✅ |
+| Buat AttendanceSendReminders Command | Command | `app/Console/Commands/AttendanceSendReminders.php` | ✅ |
+| Buat 6 Notification Classes | Notification | `app/Notifications/*.php` | ✅ (7 class exist) |
+
+Bonus: Commands `GeneratePayrollCommand`, `DetectChronicLateCommand`, `WarmCacheCommand` (registered di `routes/console.php`). Notifications: `LeaveApproved`, `LeaveRejected`, `ChronicLateWarning`, `ApprovalOverdue`, `LeaveRequestSubmitted`, `PayrollPublished`, `NewDeviceLogin`.
 
 ---
 
-#### Sprint 15: Middleware, Policies, Form Requests (Foundation)
-**Branch:** `feat/sprint15-middleware-policies-requests`
+#### Sprint 14: Seeders & Factories ✅
+**Status:** Selesai. 7 seeders ✅ (RoleAndPermission, CompanyAndDepartment, CompanySetting, Shift, Employee, LeaveType, Holiday, PayrollConfig, Branch, SuperAdmin, DemoData). 13 factories ✅ (User, Employee, Company, Branch, Department, Position, Shift, LeaveType, Holiday, Attendance, Leave, Overtime, Reimbursement, ReimbursementCategory).
 
-| Task | Kategori | File | Estimasi |
-|------|----------|------|----------|
-| Buat DeviceDetection Middleware | Middleware | `app/Http/Middleware/DeviceDetection.php` | 1 jam |
-| Buat GeofenceValidation Middleware | Middleware | `app/Http/Middleware/GeofenceValidation.php` | 1 jam |
-| Buat ForcePasswordChange Middleware | Middleware | `app/Http/Middleware/ForcePasswordChange.php` | 0.5 jam |
-| Register Middleware di Kernel/bootstrap | Config | `bootstrap/app.php` | 0.5 jam |
-| Buat AttendancePolicy | Policy | `app/Policies/AttendancePolicy.php` | 0.5 jam |
-| Buat LeavePolicy | Policy | `app/Policies/LeavePolicy.php` | 0.5 jam |
-| Buat OvertimePolicy | Policy | `app/Policies/OvertimePolicy.php` | 0.5 jam |
-| Buat ReimbursementPolicy | Policy | `app/Policies/ReimbursementPolicy.php` | 0.5 jam |
-| Buat EmployeePolicy | Policy | `app/Policies/EmployeePolicy.php` | 0.5 jam |
-| Buat StoreAttendanceRequest | Request | `app/Http/Requests/StoreAttendanceRequest.php` | 0.5 jam |
-| Buat StoreLeaveRequest | Request | `app/Http/Requests/StoreLeaveRequest.php` | 0.5 jam |
-| Buat StoreOvertimeRequest | Request | `app/Http/Requests/StoreOvertimeRequest.php` | 0.5 jam |
-| Buat StoreReimbursementRequest | Request | `app/Http/Requests/StoreReimbursementRequest.php` | 0.5 jam |
-| Buat UpdateProfileRequest | Request | `app/Http/Requests/UpdateProfileRequest.php` | 0.5 jam |
-| Buat StorePayrollRequest | Request | `app/Http/Requests/StorePayrollRequest.php` | 0.5 jam |
-| **TOTAL** | | **15 files** | **8 jam** |
+| Task | Kategori | File | Status |
+|------|----------|------|--------|
+| Buat RoleAndPermissionSeeder | Seeder | `database/seeders/RoleAndPermissionSeeder.php` | ✅ (nama: RoleAndPermission) |
+| Buat CompanyAndDepartmentSeeder | Seeder | `database/seeders/CompanyAndDepartmentSeeder.php` | ✅ (gabung company + dept) |
+| Buat BranchSeeder | Seeder | `database/seeders/BranchSeeder.php` | ⬜ Pending |
+| Buat ShiftSeeder | Seeder | `database/seeders/ShiftSeeder.php` | ✅ |
+| Buat EmployeeSeeder | Seeder | `database/seeders/EmployeeSeeder.php` | ✅ |
+| Buat LeaveTypeSeeder | Seeder | `database/seeders/LeaveTypeSeeder.php` | ✅ |
+| Buat HolidaySeeder | Seeder | `database/seeders/HolidaySeeder.php` | ✅ |
+| Buat TaxConfigSeeder | Seeder | `database/seeders/TaxConfigSeeder.php` | ⬜ Pending |
+| Buat BpjsConfigSeeder | Seeder | `database/seeders/BpjsConfigSeeder.php` | ⬜ Pending |
+| Buat DemoDataSeeder | Seeder | `database/seeders/DemoDataSeeder.php` | ⬜ Pending |
+| Buat Factory files | Factory | `database/factories/*.php` | ⚠️ UserFactory + EmployeeFactory ✅ |
+
+---
+
+#### Sprint 15: Middleware, Policies, Form Requests ✅
+**Status:** Lengkap. Policies ✅ (8). Middleware ✅ (3: CheckPasswordExpired, DeviceDetection, GeofenceValidation, terdaftar di bootstrap). Form Requests ✅ (13 di `Api/`, semuanya di-wire ke controller).
+
+| Task | Kategori | File | Status |
+|------|----------|------|--------|
+| Buat CheckPasswordExpired Middleware | Middleware | `app/Http/Middleware/CheckPasswordExpired.php` | ✅ |
+| Buat DeviceDetection Middleware | Middleware | `app/Http/Middleware/DeviceDetection.php` | ⬜ Pending |
+| Buat GeofenceValidation Middleware | Middleware | `app/Http/Middleware/GeofenceValidation.php` | ⬜ Pending |
+| Register Middleware di bootstrap | Config | `bootstrap/app.php` | ✅ |
+| Buat AttendancePolicy | Policy | `app/Policies/AttendancePolicy.php` | ✅ |
+| Buat LeavePolicy | Policy | `app/Policies/LeavePolicy.php` | ✅ |
+| Buat OvertimePolicy | Policy | `app/Policies/OvertimePolicy.php` | ✅ |
+| Buat ReimbursementPolicy | Policy | `app/Policies/ReimbursementPolicy.php` | ✅ |
+| Buat EmployeePolicy | Policy | `app/Policies/EmployeePolicy.php` | ✅ |
+| Buat ClockInRequest | Request | `app/Http/Requests/Api/ClockInRequest.php` | ✅ (di Api/) |
+| Buat StoreOvertimeRequest | Request | `app/Http/Requests/Api/StoreOvertimeRequest.php` | ✅ (di Api/) |
+| Buat Form Request lainnya | Request | `app/Http/Requests/Store*.php` | ⬜ Pending |
+
+Bonus policies: `PayrollPolicy`, `KnowledgeBasePolicy`, `AssetPolicy`.
 
 ---
 
 ### 🟠 FASE: ESS FRONTEND (Sprint 16-20)
 
-#### Sprint 16: ESS Attendance (Clock In/Out)
+#### Sprint 16: ESS Attendance (Clock In/Out) 🟡
+**Status:** IN PROGRESS — Face Recognition frontend sedang dikerjakan.
 **Branch:** `feat/sprint16-attendance-livewire`
 
-| Task | Kategori | File | Estimasi |
-|------|----------|------|----------|
-| Buat ESS Layout (PWA mobile-first) | View | `resources/views/layouts/ess.blade.php` | 2 jam |
-| Buat Livewire ClockIn | Livewire | `app/Livewire/Employee/Attendance/ClockIn.php` | 2 jam |
-| Buat View ClockIn | View | `resources/views/employee/attendance/clock-in.blade.php` | 1 jam |
-| Buat Livewire ClockOut | Livewire | `app/Livewire/Employee/Attendance/ClockOut.php` | 2 jam |
-| Buat View ClockOut | View | `resources/views/employee/attendance/clock-out.blade.php` | 1 jam |
-| Buat face-detection.js | JS | `resources/js/face-detection.js` | 3 jam |
-| Buat gps-locator.js | JS | `resources/js/gps-locator.js` | 2 jam |
-| Buat face-enrollment.js | JS | `resources/js/face-enrollment.js` | 2 jam |
-| **TOTAL** | | **8 files** | **15 jam** |
+| Task | Kategori | File | Status |
+|------|----------|------|--------|
+| Buat ESS Layout (PWA mobile-first) | View | `resources/views/layouts/ess.blade.php` | ⬜ Pending |
+| Buat Livewire ClockIn | Livewire | `app/Livewire/Attendance/ClockIn.php` | 🟡 In Progress |
+| Buat View ClockIn | View | `resources/views/livewire/attendance/clock-in.blade.php` | 🟡 In Progress |
+| Buat face-detection.js | JS | `resources/js/face-detection.js` | 🟡 In Progress |
+| Buat gps-locator.js | JS | `resources/js/gps-locator.js` | ⬜ Pending |
+| Buat face-enrollment.js | JS | `resources/js/face-enrollment.js` | ⬜ Pending |
 
 ---
 
@@ -191,7 +186,10 @@ main (protected)
 | Buat Livewire Attendance Summary | Livewire | `app/Livewire/Employee/Attendance/Summary.php` | 1 jam |
 | Buat View Attendance Summary | View | `resources/views/employee/attendance/summary.blade.php` | 1 jam |
 | Buat Service Worker PWA | PWA | `public/sw.js` | 2 jam |
-| Buat PWA Manifest | PWA | `public/manifest.json` | 1 jam |
+| Buat PWA Manifest | PWA | `public/manifest.json` | ✅ |
+| Buat Service Worker | PWA | `public/service-worker.js` | ✅ |
+| Buat PWA Install Prompt | PWA | `resources/js/pwa-install.js` | ✅ |
+| Buat Icon SVG | PWA | `public/icon-192.svg`, `public/icon-512.svg` | ✅ |
 | **TOTAL** | | **6 files** | **8 jam** |
 
 ---
@@ -420,19 +418,21 @@ main (protected)
 
 ### 🟣 FASE: ROUTES + API (Sprint 30)
 
-#### Sprint 30: Routes & API Integration
-**Branch:** `feat/sprint30-routes-api-pwa`
+#### Sprint 30: Routes & API Integration ✅
+**Status:** Selesai. `routes/api.php` ✅ (50 endpoints via Scramble). `routes/web.php` ✅ (dashboard + auth). Module route files (attendance, leave, overtime, dll) ✅ — 11 files. Bootstrap ✅. PWA ✅ (manifest, service worker, icons, install prompt). Hanya file `employee.php`, `hrd.php`, `finance.php`, `admin.php` yang belum dibuat (akan menyusul saat Livewire frontend siap).
 
-| Task | Kategori | File | Estimasi |
-|------|----------|------|----------|
-| Buat routes/employee.php | Route | `routes/employee.php` | 1 jam |
-| Buat routes/hrd.php | Route | `routes/hrd.php` | 1 jam |
-| Buat routes/finance.php | Route | `routes/finance.php` | 0.5 jam |
-| Buat routes/admin.php | Route | `routes/admin.php` | 0.5 jam |
-| Buat routes/api.php | Route | `routes/api.php` | 1 jam |
-| Update routes/web.php | Route | `routes/web.php` | 0.5 jam |
-| Register route files di bootstrap | Config | `bootstrap/app.php` | 0.5 jam |
-| **TOTAL** | | **7 files** | **5 jam** |
+| Task | Kategori | File | Status |
+|------|----------|------|--------|
+| Buat routes/attendance.php | Route | `routes/attendance.php` | ✅ (bonus, module-based) |
+| Buat routes/leave.php | Route | `routes/leave.php` | ✅ |
+| Buat routes/overtime.php | Route | `routes/overtime.php` | ✅ |
+| Buat routes/payroll.php | Route | `routes/payroll.php` | ✅ |
+| Buat routes/approval.php | Route | `routes/approval.php` | ✅ |
+| Buat routes/knowledge-base.php | Route | `routes/knowledge-base.php` | ✅ |
+| Buat routes/api.php | Route | `routes/api.php` | ✅ |
+| Update routes/web.php | Route | `routes/web.php` | ✅ |
+| Register route files di bootstrap | Config | `bootstrap/app.php` | ✅ (9 module routes auto-loaded via `then:`) |
+| Buat routes/employee.php, hrd.php, etc | Route | role-based route files | ⬜ Pending (menyusul) |
 
 ---
 
@@ -553,11 +553,14 @@ Setelah semua sprint selesai dan develop stabil:
 
 | Sprint | Branch | Files | Est. | Status |
 |--------|--------|-------|------|--------|
-| Sprint 12 | `feat/sprint12-services-core` | 6 | 12 jam | 📋 Backlog |
-| Sprint 13 | `feat/sprint13-observers-jobs-commands` | 25 | 25.5 jam | 📋 Backlog |
-| Sprint 14 | `feat/sprint14-seeders-factories` | 35 | 18 jam | 📋 Backlog |
-| Sprint 15 | `feat/sprint15-middleware-policies-requests` | 15 | 8 jam | 📋 Backlog |
-| Sprint 16 | `feat/sprint16-attendance-livewire` | 8 | 15 jam | 📋 Backlog |
+| Sprint 12 | `feat/sprint12-services-core` | 6 | 12 jam | ✅ Selesai (7/7 services, + endpoint termination) |
+
+| Sprint 13 | `feat/sprint13-observers-jobs-commands` | 25 | 25.5 jam | ✅ Selesai (observers ✅, commands ✅, notif ✅, jobs ✅) |
+
+| Sprint 14 | `feat/sprint14-seeders-factories` | 35 | 18 jam | ✅ Selesai (7 seeders, 13 factories) |
+
+| Sprint 15 | `feat/sprint15-middleware-policies-requests` | 15 | 8 jam | ✅ Selesai (8 policies, 3 middleware, 6 form requests) |
+| Sprint 16 | `feat/sprint16-attendance-livewire` | 8 | 15 jam | 🟡 In Progress |
 | Sprint 17 | `feat/sprint17-attendance-history` | 6 | 8 jam | 📋 Backlog |
 | Sprint 18 | `feat/sprint18-leave-overtime-livewire` | 10 | 11.5 jam | 📋 Backlog |
 | Sprint 19 | `feat/sprint19-finance-reimbursement` | 6 | 8 jam | 📋 Backlog |
@@ -571,7 +574,7 @@ Setelah semua sprint selesai dan develop stabil:
 | Sprint 27 | `feat/sprint27-knowledgebase-rag` | 9 | 12 jam | 📋 Backlog |
 | Sprint 28 | `feat/sprint28-settings-users` | 12 | 9 jam | 📋 Backlog |
 | Sprint 29 | `feat/sprint29-users-activity-log` | 9 | 6.5 jam | 📋 Backlog |
-| Sprint 30 | `feat/sprint30-routes-api-pwa` | 7 | 5 jam | 📋 Backlog |
+| Sprint 30 | `feat/sprint30-routes-api-pwa` | 7 | 5 jam | ⚠️ Sebagian (api.php ✅, module routes ✅, role routes ⬜) |
 | Sprint 31 | `feat/sprint31-testing-attendance-leave` | 10 | 13 jam | 📋 Backlog |
 | Sprint 32 | `feat/sprint32-testing-payroll-finance` | 6 | 13 jam | 📋 Backlog |
 | Sprint 33 | `feat/sprint33-testing-hrd-knowledgebase` | 4 | 7 jam | 📋 Backlog |
@@ -585,18 +588,18 @@ Setelah semua sprint selesai dan develop stabil:
 | Phase | Sprint Range | Files | Estimasi |
 |-------|-------------|-------|----------|
 | Foundation (1-11) | ✅ DONE | ~150 | ~120 jam |
-| Business Logic | Sprint 12-15 | 81 | ~63.5 jam |
-| ESS Frontend | Sprint 16-20 | 36 | ~50 jam |
-| HRD Admin | Sprint 21-24 | 35 | ~45.5 jam |
-| Finance Admin | Sprint 25-26 | 21 | ~27.5 jam |
-| KnowledgeBase + Settings | Sprint 27-29 | 30 | ~27.5 jam |
-| Routes + API | Sprint 30 | 7 | ~5 jam |
-| Testing | Sprint 31-33 | 20 | ~33 jam |
-| Polish + Deploy | Sprint 34-35 | 28 | ~23.5 jam |
+| Business Logic | Sprint 12-15 | 81 | ~63.5 jam | <sup>✅ Selesai (full)</sup> |
+| ESS Frontend | Sprint 16-20 | 36 | ~50 jam | <sup>🟡 Sprint 16 In Progress</sup> |
+| HRD Admin | Sprint 21-24 | 35 | ~45.5 jam | <sup>📋 Backlog</sup> |
+| Finance Admin | Sprint 25-26 | 21 | ~27.5 jam | <sup>📋 Backlog</sup> |
+| KnowledgeBase + Settings | Sprint 27-29 | 30 | ~27.5 jam | <sup>📋 Backlog</sup> |
+| Routes + API | Sprint 30 | 7 | ~5 jam | <sup>⚠️ Sebagian</sup> |
+| Testing | Sprint 31-33 | 20 | ~33 jam | <sup>📋 Backlog</sup> |
+| Polish + Deploy | Sprint 34-35 | 28 | ~23.5 jam | <sup>📋 Backlog</sup> |
 | **TOTAL** | **Sprint 1-35** | **~408** | **~395 jam** |
 
 ---
 
-> **Last Updated:** 2026-05-08
-> **Current Branch:** `feat/sprint11-global-seeding-validation`
-> **Next Branch:** `feat/sprint12-services-core` (setelah merge sprint 11)
+> **Last Updated:** 2026-06-06
+> **Current Branch:** `develop` (integration — semua sprint dirangkum ke sini)
+> **In Progress:** `feat/sprint16-attendance-livewire` (Face Recognition frontend)

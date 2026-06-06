@@ -1,0 +1,28 @@
+{
+    "name": "HRConnect",
+    "short_name": "HRConnect",
+    "description": "Enterprise HRIS — Attendance, Leave, Payroll, Knowledge Base",
+    "start_url": "/login",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#2563eb",
+    "scope": "/",
+    "lang": "id-ID",
+    "icons": [
+        {
+            "src": "/icon-192.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["business", "productivity", "hr"],
+    "prefer_related_applications": false
+}

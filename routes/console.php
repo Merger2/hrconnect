@@ -29,7 +29,7 @@ Schedule::command('attendance:detect-alpha')
 
 // Chronic late warning: setiap Jumat jam 18:00
 Schedule::command('attendance:detect-chronic-late')
-    ->weeklyOn(\Illuminate\Console\Scheduling\Schedule::FRIDAY, '18:00')
+    ->weeklyOn(Illuminate\Console\Scheduling\Schedule::FRIDAY, '18:00')
     ->withoutOverlapping();
 
 // Reset leave quota: 1 Januari 00:00 setiap tahun
@@ -43,4 +43,19 @@ Schedule::command('cache:warm')
     ->dailyAt('05:00')
     ->withoutOverlapping();
 
+// WFA auto-approve: setiap hari jam 02:00 (cek WFA pending > 3 hari kerja)
+Schedule::command('attendance:auto-approve-wfa')
+    ->dailyAt('02:00')
+    ->withoutOverlapping()
+    ->onSuccess(fn () => logger()->info('attendance:auto-approve-wfa selesai'))
+    ->onFailure(fn () => logger()->error('attendance:auto-approve-wfa gagal'));
+
 // payroll:generate TIDAK auto-scheduled — manual trigger via Finance UI / artisan.
+
+// Attendance reminder: setiap jam kerja jam 09:00
+Schedule::command('attendance:send-reminders')
+    ->weekdays()
+    ->dailyAt('09:00')
+    ->withoutOverlapping()
+    ->onSuccess(fn () => logger()->info('attendance:send-reminders selesai'))
+    ->onFailure(fn () => logger()->error('attendance:send-reminders gagal'));

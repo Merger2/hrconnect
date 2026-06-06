@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperAssetHandover
+ */
 #[Fillable(['asset_id', 'employee_id', 'handover_date', 'return_date', 'condition', 'category'])]
 class AssetHandover extends Model
 {

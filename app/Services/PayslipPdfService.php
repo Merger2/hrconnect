@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Company;
 use App\Models\Payroll;
 use App\Models\PayrollItem;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 /**
@@ -66,7 +68,7 @@ class PayslipPdfService
      */
     protected function buildTemplateData(Payroll $payroll): array
     {
-        $period = Carbon::createFromFormat('Y-m', $payroll->period);
+        $period = CarbonImmutable::createFromFormat('Y-m', $payroll->period);
 
         // Get extra income items (non-standard, dari payroll_items kalau ada)
         $extraIncome = PayrollItem::query()

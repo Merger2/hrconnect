@@ -1205,25 +1205,24 @@ enum TerCategory: string {
 
 ## 21. SERVICE CLASSES PLAN
 
-**Catatan:** Direktori `EmployeeObserver` dan `AttendanceObserver` kosong/hilang — perlu dibuat saat implementasi `[ERR-009]`
+**Catatan:** Observers sudah dibuat: EmployeeObserver, AttendanceObserver, LeaveObserver, TaxConfigObserver, BpjsConfigObserver, HolidayObserver — semua terdaftar di `AppServiceProvider::boot()`.
 
 ### 21.1 PayrollCalculatorService
 
 ```php
 // Method utama
 calculateProratedSalary(Employee $employee, string $periodYearMonth): float
-calculatePTKP(Employee $employee): float
-getTERCategory(Employee $employee): string (A|B|C)
-calculatePPh21(float $grossIncome, string $category): float
+getTERCategory(Employee $employee): TerCategory (A|B|C)
+calculatePPh21(Employee $employee, float $grossIncome, TerCategory $category): float
 calculateBPJS(Employee $employee, float $grossIncome): array
-calculateOvertimePay(Overtime $overtime, Employee $employee): float
+calculateOvertimePay(Overtime $overtime): float
 countWorkingDays(Carbon $start, Carbon $end): int
 calculateThrProrated(Employee $employee, float $monthlySalary, int $monthsWorked): float
 
-// Termination-related methods `[M4]`
-calculatePesangon(Employee $employee, TerminationType $type, ?string $phkVariant = null): float
+// Termination-related methods `[M4]` ✅ Implemented 2026-06-06
+calculatePesangon(Employee $employee): float
 // Per Appendix C tabel pesangon (UU Cipta Kerja).
-// Multiplier 2x untuk PHK sepihak (phk_variant='dismissed_severe').
+// phk_variant multiplier: dismissed=1.0, dismissed_severe=2.0, mutual=0.5.
 
 calculateLeaveCashOut(Employee $employee): float
 // Sisa kuota cuti tahunan × (gross_monthly / countWorkingDays(month)).
@@ -1245,32 +1244,34 @@ calculateUangPenghargaanMasaKerja(Employee $employee): float
 - Division by zero protection: `if ($totalWorkingDays === 0) return 0.0`
 - `Carbon::copy()` untuk mencegah pass-by-reference bug
 - **Hardcoded SQL error code 23505 DILARANG** — gunakan `UniqueConstraintViolationException` untuk menangani constraint violation secara database-agnostic `[CAT-019]`
+- `calculatePTKP()` dihapus dari implementasi — PTKP hanya digunakan untuk menentukan kategori TER via `TerCategory::resolveFromStatus()`. Nilai nominal PTKP tidak dipakai di metode TER (Tarif Efektif Rata-rata).
 
 ### 21.2 AttendanceService
 
 ```php
 // Method utama
-clockIn(Employee $employee, float $lat, float $lng, string $faceEmbedding, bool $isWfa = false, ?string $wfaNote = null): Attendance
-clockOut(Employee $employee, float $lat, float $lng, string $faceEmbedding): Attendance
-validateGPS(float $lat, float $lng, Branch $branch): bool (Haversine)
-validateFace(string $liveEmbedding, string $storedEmbedding): float (similarity score)
-handleWFA(Attendance $attendance): void
-linkOvertimeToAttendance(Attendance $attendance): void (Observer pattern)
+clockIn(Employee $employee, array $data): Attendance
+clockOut(Employee $employee, array $data): Attendance
 ```
 
-**Catatan:** `AttendanceService::invalidateCache()` adalah dead code dan telah dihapus `[CAT-012]`
-**Catatan:** `FaceNotRecognizedException` tidak boleh di-swap (swallowed) — harus implementasikan tiered fallback: face → PIN → manual approval `[CAT-017]`
+**Catatan:** Fungsi yang dulu ada di AttendanceService kini terdistribusi:
+- `validateGPS()` → `GeofenceService::validateLocation()` (Haversine)
+- `validateFace()` → `FaceRecognitionService::verifyFace()` (cosine distance via pgvector)
+- `handleWFA()` → inline di `AttendanceService::clockIn()` — notifikasi + auto-approve cron
+- `linkOvertimeToAttendance()` → `AttendanceObserver::saved()` (observer pattern)
+- `FaceNotRecognizedException` tidak boleh di-swap (swallowed) — tiered fallback: face → PIN → manual approval `[CAT-017]`
 
 ### 21.3 LeaveService
 
 ```php
 // Method utama
-calculateWorkDays(Carbon $start, Carbon $end, string $dayType): float
-validateLeaveQuota(Employee $employee, LeaveType $type, float $days): bool
-applyLeave(Leave $leave): Leave
+applyLeave(Employee $employee, array $data): Leave
+calculateWorkDays(Carbon $start, Carbon $end, DayType $dayType): float
 initializeBalance(Employee $employee, int $year): void
 carryForward(Employee $employee, int $fromYear, int $toYear): void
 ```
+
+**Catatan:** `validateLeaveQuota()` tidak sebagai method terpisah — validasi kuota dilakukan inline di `applyLeave()`. Quota hanya divalidasi saat submit, baru di-deduct setelah full L2 approval (via `ApprovalService::approve()` callback ke `LeaveService::applyLeave()`).
 
 ### 21.4 ApprovalService
 
@@ -1279,9 +1280,9 @@ carryForward(Employee $employee, int $fromYear, int $toYear): void
 createApprovalWorkflow(Model $approvable): void
 approve(Approval $approval, string $notes = ''): void
 reject(Approval $approval, string $reason): void
-checkAllApproved(Model $approvable): bool
-getDirectApprover(Employee $employee): Employee
 ```
+
+**Catatan:** `checkAllApproved()` tidak sebagai method terpisah — logika inline di `approve()`. `getDirectApprover()` ada di model `Employee` (method `Employee::getDirectApprover()`).
 
 ---
 

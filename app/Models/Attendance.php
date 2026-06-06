@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperAttendance
+ */
 #[Fillable(['employee_id', 'shift_id', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'clock_in_is_mocked', 'clock_in_accuracy', 'clock_out_is_mocked', 'clock_out_accuracy', 'device_fingerprint', 'face_similarity_score', 'clock_out_face_similarity_score', 'status', 'is_wfa', 'status_wfa', 'exception_type', 'exception_notes', 'approved_late_by', 'photo_selfie_in', 'photo_selfie_out', 'late_minutes', 'verification_method', 'clock_out_verification_method', 'wfa_note'])]
 class Attendance extends Model
 {

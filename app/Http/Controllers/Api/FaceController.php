@@ -3,32 +3,25 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\RegisterFaceRequest;
 use App\Services\FaceRecognitionService;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
-/**
- * FaceController — face enrollment + verification untuk PWA.
- *
- * Endpoint:
- * - POST /face/register : enroll embedding 128D ke employee
- * - POST /face/verify   : test verifikasi tanpa create attendance
- *
- * Embedding harus 128D (FaceNet via face-api.js client-side). Dimension
- * validation di FaceRecognitionService (B3.12 fix).
- */
+#[Group('Face Recognition')]
 class FaceController extends Controller
 {
     public function __construct(
         protected FaceRecognitionService $faceService,
     ) {}
 
-    public function register(Request $request): JsonResponse
+    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D FaceNet vector) for biometric verification.')]
+    #[BodyParameter(name: 'embedding', description: '128-dimension face embedding array from face-api.js', required: true, type: 'array')]
+    public function register(RegisterFaceRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'embedding' => ['required', 'array', 'size:128'],
-            'embedding.*' => ['numeric', 'between:-1.5,1.5'],
-        ]);
+        $data = $request->validated();
 
         $employee = $request->user()->employee;
 
@@ -53,12 +46,11 @@ class FaceController extends Controller
         ]);
     }
 
-    public function verify(Request $request): JsonResponse
+    #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance.')]
+    #[BodyParameter(name: 'embedding', description: '128-dimension face embedding array to verify', required: true, type: 'array')]
+    public function verify(RegisterFaceRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'embedding' => ['required', 'array', 'size:128'],
-            'embedding.*' => ['numeric', 'between:-1.5,1.5'],
-        ]);
+        $data = $request->validated();
 
         $employee = $request->user()->employee;
 

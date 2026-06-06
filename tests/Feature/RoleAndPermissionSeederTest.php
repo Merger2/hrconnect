@@ -2,6 +2,7 @@
 
 use App\Enums\Permission as PermissionEnum;
 use App\Models\User;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -9,7 +10,7 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
+    $this->seed(RoleAndPermissionSeeder::class);
 });
 
 test('44 permissions di-seed sesuai SRS', function () {
@@ -101,7 +102,7 @@ test('seeder idempotent — jalan dua kali tidak duplicate', function () {
     $countBefore = Permission::count();
     $rolesBefore = Role::count();
 
-    $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
+    $this->seed(RoleAndPermissionSeeder::class);
 
     expect(Permission::count())->toBe($countBefore);
     expect(Role::count())->toBe($rolesBefore);

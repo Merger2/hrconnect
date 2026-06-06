@@ -4,34 +4,34 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreLeaveRequest;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Services\LeaveService;
-use Carbon\Carbon;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * LeaveController — request/list/cancel cuti + view kuota.
- *
- * Authorization via LeavePolicy.
- */
+#[Group('Leave')]
 class LeaveController extends Controller
 {
     public function __construct(
         protected LeaveService $leaveService,
     ) {}
 
-    public function store(Request $request): JsonResponse
+    #[Endpoint(title: 'Create Leave', description: 'Submit a new leave request with type, dates, and reason.')]
+    #[BodyParameter(name: 'leave_type_id', description: 'Leave type ID from leave_types table', required: true, type: 'integer')]
+    #[BodyParameter(name: 'start_date', description: 'Leave start date (Y-m-d)', required: true, type: 'string', format: 'date')]
+    #[BodyParameter(name: 'end_date', description: 'Leave end date (Y-m-d)', required: true, type: 'string', format: 'date')]
+    #[BodyParameter(name: 'day_type', description: 'full_day, morning, or afternoon', required: true, type: 'string')]
+    #[BodyParameter(name: 'reason', description: 'Leave reason (min 10 chars)', required: true, type: 'string')]
+    #[BodyParameter(name: 'proof_file', description: 'Supporting document (jpg/jpeg/png/pdf, max 5MB)', required: false, type: 'string', format: 'binary')]
+    public function store(StoreLeaveRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'leave_type_id' => ['required', 'integer', 'exists:leave_types,id'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date'],
-            'day_type' => ['required', 'in:full_day,morning,afternoon'],
-            'reason' => ['required', 'string', 'min:10', 'max:1000'],
-            'proof_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-        ]);
+        $data = $request->validated();
 
         $employee = $request->user()->employee;
 
@@ -56,6 +56,12 @@ class LeaveController extends Controller
         ], 201);
     }
 
+    #[Endpoint(title: 'List Leaves', description: 'Paginated leave list with status/year filters. Manager sees own + team.')]
+    #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
+    #[QueryParameter(name: 'year', description: 'Filter by year', type: 'integer')]
+    #[QueryParameter(name: 'employee_id', description: 'Filter by employee (HR only)', type: 'integer')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
     public function index(Request $request): JsonResponse
     {
         $request->validate([
@@ -112,6 +118,7 @@ class LeaveController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Get Leave', description: 'Get leave detail with type and approvals.')]
     public function show(Request $request, Leave $leave): JsonResponse
     {
         $this->authorize('view', $leave);
@@ -122,6 +129,7 @@ class LeaveController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Cancel Leave', description: 'Cancel a pending leave request (sets status to cancelled).')]
     public function destroy(Request $request, Leave $leave): JsonResponse
     {
         $this->authorize('delete', $leave);
@@ -135,6 +143,8 @@ class LeaveController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Leave Quota', description: 'Get current year leave balances (quota, used, available).')]
+    #[QueryParameter(name: 'year', description: 'Year (defaults to current)', type: 'integer')]
     public function quota(Request $request): JsonResponse
     {
         $year = (int) $request->input('year', now()->year);

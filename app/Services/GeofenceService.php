@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Exceptions\AntiFakeGPSException;
@@ -29,10 +31,10 @@ class GeofenceService
         $this->assertValidBranchCoordinates($branch);
 
         $distance = $this->calculateHaversine(
-            $branch->latitude,
-            $branch->longitude,
-            $gpsData['latitude'],
-            $gpsData['longitude']
+            (float) $branch->latitude,
+            (float) $branch->longitude,
+            (float) $gpsData['latitude'],
+            (float) $gpsData['longitude']
         );
 
         $isWithinRadius = $distance <= $branch->radius;
@@ -87,7 +89,7 @@ class GeofenceService
         }
     }
 
-    private function calculateHaversine($lat1, $lon1, $lat2, $lon2): float
+    private function calculateHaversine(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
         $lat1 = deg2rad($lat1);
         $lon1 = deg2rad($lon1);

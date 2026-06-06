@@ -4,33 +4,33 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\ReimbursementStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreReimbursementRequest;
 use App\Models\Reimbursement;
 use App\Services\ApprovalService;
-use Carbon\Carbon;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * ReimbursementController — request/list/cancel reimbursement.
- *
- * L2 approval = Finance (bukan HR Manager). Lihat ReimbursementPolicy.
- */
+#[Group('Reimbursement')]
 class ReimbursementController extends Controller
 {
     public function __construct(
         protected ApprovalService $approvalService,
     ) {}
 
-    public function store(Request $request): JsonResponse
+    #[Endpoint(title: 'Create Reimbursement', description: 'Submit reimbursement request with receipt and expense details.')]
+    #[BodyParameter(name: 'category_id', description: 'Reimbursement category ID', required: true, type: 'integer')]
+    #[BodyParameter(name: 'title', description: 'Reimbursement title', required: false, type: 'string')]
+    #[BodyParameter(name: 'amount', description: 'Amount in IDR', required: true, type: 'integer')]
+    #[BodyParameter(name: 'description', description: 'Expense description (min 10 chars)', required: true, type: 'string')]
+    #[BodyParameter(name: 'expense_date', description: 'Expense date (Y-m-d, today or past)', required: true, type: 'string', format: 'date')]
+    #[BodyParameter(name: 'receipt', description: 'Receipt file (jpg/jpeg/png/pdf, max 5MB)', required: true, type: 'string', format: 'binary')]
+    public function store(StoreReimbursementRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'category_id' => ['required', 'integer', 'exists:reimbursement_categories,id'],
-            'title' => ['nullable', 'string', 'max:200'],
-            'amount' => ['required', 'integer', 'min:1'],
-            'description' => ['required', 'string', 'min:10', 'max:1000'],
-            'expense_date' => ['required', 'date', 'before_or_equal:today'],
-            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-        ]);
+        $data = $request->validated();
 
         $employee = $request->user()->employee;
 
@@ -63,6 +63,11 @@ class ReimbursementController extends Controller
         ], 201);
     }
 
+    #[Endpoint(title: 'List Reimbursements', description: 'Paginated reimbursement list with status/period filters.')]
+    #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
+    #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
     public function index(Request $request): JsonResponse
     {
         $request->validate([
@@ -114,6 +119,7 @@ class ReimbursementController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Get Reimbursement', description: 'Get reimbursement detail with approvals.')]
     public function show(Request $request, Reimbursement $reimbursement): JsonResponse
     {
         $this->authorize('view', $reimbursement);
@@ -126,6 +132,7 @@ class ReimbursementController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Cancel Reimbursement', description: 'Delete pending reimbursement (soft delete).')]
     public function destroy(Request $request, Reimbursement $reimbursement): JsonResponse
     {
         $this->authorize('delete', $reimbursement);

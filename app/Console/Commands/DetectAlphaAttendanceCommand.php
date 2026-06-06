@@ -10,7 +10,7 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 /**
@@ -40,7 +40,7 @@ class DetectAlphaAttendanceCommand extends Command
     public function handle(): int
     {
         $targetDate = $this->option('date')
-            ? Carbon::parse($this->option('date'))->startOfDay()
+            ? CarbonImmutable::parse($this->option('date'))->startOfDay()
             : now()->startOfDay();
 
         $this->info("Detect Alpha untuk tanggal: {$targetDate->toDateString()}");

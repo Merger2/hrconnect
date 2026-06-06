@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @mixin IdeHelperKnowledgeBase
+ */
 #[Fillable(['knowledgeable_type', 'knowledgeable_id', 'title', 'content', 'metadata', 'embedding', 'status', 'category', 'source_document', 'page_number'])]
 class KnowledgeBase extends Model
 {
@@ -24,10 +27,5 @@ class KnowledgeBase extends Model
     public function knowledgeable(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    public function processEmbedding(): void
-    {
-        $this->update(['status' => 'processing']);
     }
 }

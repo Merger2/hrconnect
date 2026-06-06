@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperLoan
+ */
 #[Fillable(['employee_id', 'rejection_reason', 'created_by', 'amount', 'interest_rate', 'tenor_months', 'monthly_installment', 'status', 'is_settled'])]
 class Loan extends Model
 {

@@ -30,7 +30,7 @@ class LeaveRequestSubmitted extends Notification implements ShouldQueue
             ->line('Karyawan '.$employee->full_name.' telah mengajukan cuti.')
             ->line('Jenis cuti: '.$this->leave->leaveType->name)
             ->line('Periode: '.$this->leave->start_date->format('d M Y').' — '.$this->leave->end_date->format('d M Y'))
-            ->line('Durasi: '.$this->leave->duration.' hari')
+            ->line('Durasi: '.$this->leave->total_days.' hari')
             ->action('Lihat Detail', url('/leaves/'.$this->leave->id))
             ->line('Mohon melakukan persetujuan jika Anda adalah approver yang ditunjuk.');
     }

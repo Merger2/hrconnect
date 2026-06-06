@@ -4,7 +4,6 @@ use App\Models\Employee;
 use App\Models\Overtime;
 use App\Models\Position;
 use App\Services\PayrollCalculatorService;
-use App\Services\ApprovalService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -32,17 +31,17 @@ uses(RefreshDatabase::class);
  */
 function makeOvertime(Carbon $date, float $hours, int $basicSalary = 1730000, int $allowance = 0): Overtime
 {
-    $position = new Position();
+    $position = new Position;
     $position->basic_salary = $basicSalary;
     $position->allowance_jabatan = $allowance;
 
-    $employee = new Employee();
+    $employee = new Employee;
     $employee->setRelation('position', $position);
 
     $start = $date->copy()->setTime(17, 0);
     $end = $start->copy()->addMinutes((int) round($hours * 60));
 
-    $overtime = new Overtime();
+    $overtime = new Overtime;
     $overtime->date = $date;
     $overtime->start_time = $start;
     $overtime->end_time = $end;

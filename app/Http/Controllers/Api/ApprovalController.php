@@ -4,35 +4,33 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\ApprovalStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ApproveRequest;
+use App\Http\Requests\Api\PendingApprovalsRequest;
+use App\Http\Requests\Api\RejectRequest;
 use App\Models\Approval;
 use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
 use App\Services\ApprovalService;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
-/**
- * ApprovalController — pending list + approve/reject untuk Manager/HR/Finance.
- *
- * Authorization: cek di service-level karena polymorphic (approvable_type
- * bisa Leave/Overtime/Reimbursement). Policy approveLevel1/approveLevel2
- * di module masing-masing.
- */
+#[Group('Approvals')]
 class ApprovalController extends Controller
 {
     public function __construct(
         protected ApprovalService $approvalService,
     ) {}
 
-    public function pending(Request $request): JsonResponse
+    #[Endpoint(title: 'Pending Approvals', description: 'List pending approvals for the current user as approver.')]
+    #[QueryParameter(name: 'type', description: 'Filter by type (leave, overtime, reimbursement, wfa)', type: 'string')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
+    public function pending(PendingApprovalsRequest $request): JsonResponse
     {
-        $request->validate([
-            'type' => ['nullable', 'in:leave,overtime,reimbursement,wfa'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $user = $request->user();
         $employee = $user->employee;
 
@@ -88,12 +86,10 @@ class ApprovalController extends Controller
         ]);
     }
 
-    public function approve(Request $request, Approval $approval): JsonResponse
+    #[Endpoint(title: 'Approve', description: 'Approve a pending approval request.')]
+    #[BodyParameter(name: 'notes', description: 'Approval notes (optional)', required: false, type: 'string')]
+    public function approve(ApproveRequest $request, Approval $approval): JsonResponse
     {
-        $data = $request->validate([
-            'notes' => ['nullable', 'string', 'max:500'],
-        ]);
-
         $user = $request->user();
         $employee = $user->employee;
 
@@ -111,7 +107,7 @@ class ApprovalController extends Controller
             ], 409);
         }
 
-        $this->approvalService->approve($approval, $data['notes'] ?? '');
+        $this->approvalService->approve($approval, $request->validated('notes') ?? '');
 
         $approval->refresh();
 
@@ -126,12 +122,10 @@ class ApprovalController extends Controller
         ]);
     }
 
-    public function reject(Request $request, Approval $approval): JsonResponse
+    #[Endpoint(title: 'Reject', description: 'Reject a pending approval request with reason.')]
+    #[BodyParameter(name: 'rejection_reason', description: 'Reason for rejection (min 10 chars)', required: true, type: 'string')]
+    public function reject(RejectRequest $request, Approval $approval): JsonResponse
     {
-        $data = $request->validate([
-            'rejection_reason' => ['required', 'string', 'min:10', 'max:500'],
-        ]);
-
         $user = $request->user();
         $employee = $user->employee;
 
@@ -149,7 +143,7 @@ class ApprovalController extends Controller
             ], 409);
         }
 
-        $this->approvalService->reject($approval, $data['rejection_reason']);
+        $this->approvalService->reject($approval, $request->validated('rejection_reason'));
 
         $approval->refresh();
 

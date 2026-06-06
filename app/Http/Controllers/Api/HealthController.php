@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
-/**
- * HealthController — system health check.
- *
- * Public endpoint untuk monitoring + cron warm-up (cegah Neon cold start).
- * Return 200 kalau semua service hijau, 503 kalau ada yang down.
- */
+#[Group('Health')]
 class HealthController extends Controller
 {
+    #[Endpoint(title: 'Health Check', description: 'System health check endpoint for monitoring. Returns 200 if all services up, 503 if degraded.')]
     public function __invoke(): JsonResponse
     {
         $services = [

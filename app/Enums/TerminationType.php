@@ -28,4 +28,24 @@ enum TerminationType: string
             self::CONTRACT_END => 'info',
         };
     }
+
+    public function requiresPesangon(): bool
+    {
+        return $this === self::RESIGN || $this === self::DISMISSED;
+    }
+
+    public function requiresPenghargaan(): bool
+    {
+        return $this === self::RESIGN || $this === self::DISMISSED;
+    }
+
+    public function requiresLeaveCashOut(): bool
+    {
+        return true;
+    }
+
+    public function requiresUangKompensasi(): bool
+    {
+        return $this === self::CONTRACT_END;
+    }
 }

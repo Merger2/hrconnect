@@ -47,6 +47,7 @@ return new class extends Migration
             $table->date('deceased_date')->nullable();
             $table->string('termination_type', 20)->nullable();
             $table->text('termination_reason')->nullable();
+            $table->string('phk_variant', 20)->nullable();
             $table->string('pin', 60)->nullable()->comment('bcrypt hash, 6 digit PIN absensi');
             // --- BIOMETRIK & PENDIDIKAN ---
             $table->string('photo')->nullable();

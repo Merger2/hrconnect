@@ -4,6 +4,14 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Clock-in request with GPS location, face verification, and WFA support.
+ *
+ * - WFO (is_wfa=false): latitude, longitude required; GPS validated against branch geofence.
+ * - WFA (is_wfa=true): note required (min 20 chars); GPS skipped.
+ * - Verification: face_embedding (128D), pin (6-digit), or manual fallback.
+ * - Anti-fake GPS: is_mocked flag + accuracy meter.
+ */
 class ClockInRequest extends FormRequest
 {
     public function authorize(): bool
@@ -19,7 +27,7 @@ class ClockInRequest extends FormRequest
             'longitude' => ['required_if:is_wfa,false', 'numeric'],
             'accuracy' => ['nullable', 'numeric'],
             'is_mocked' => ['nullable', 'boolean'],
-            'face_embedding' => ['nullable', 'array'],
+            'embedding' => ['nullable', 'array'],
             'pin' => ['nullable', 'string', 'digits:6'],
             'wfa_note' => ['required_if:is_wfa,true', 'string', 'min:20'],
             'photo_selfie' => ['nullable', 'string'],

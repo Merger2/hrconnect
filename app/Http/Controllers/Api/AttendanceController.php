@@ -7,26 +7,25 @@ use App\Enums\WfaStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ClockInRequest;
+use App\Http\Requests\Api\ClockOutRequest;
 use App\Models\Attendance;
 use App\Services\AttendanceService;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * AttendanceController — clock-in/out, today, history, WFA approve.
- *
- * Authorization via AttendancePolicy (auto-discovery Laravel 11+).
- */
+#[Group('Attendance')]
 class AttendanceController extends Controller
 {
     public function __construct(
         protected AttendanceService $attendanceService,
     ) {}
 
-    /**
-     * POST /attendance/clock-in
-     */
+    #[Endpoint(title: 'Clock In', description: 'Record attendance clock-in with GPS and face verification.')]
     public function clockIn(ClockInRequest $request): JsonResponse
     {
         $employee = $request->user()->employee;
@@ -64,22 +63,18 @@ class AttendanceController extends Controller
         ], 201);
     }
 
-    /**
-     * POST /attendance/clock-out
-     */
-    public function clockOut(Request $request): JsonResponse
+    #[Endpoint(title: 'Clock Out', description: 'Record attendance clock-out with optional GPS and face verification.')]
+    #[BodyParameter(name: 'latitude', description: 'GPS latitude', required: false, type: 'number')]
+    #[BodyParameter(name: 'longitude', description: 'GPS longitude', required: false, type: 'number')]
+    #[BodyParameter(name: 'accuracy', description: 'GPS accuracy in meters', required: false, type: 'number')]
+    #[BodyParameter(name: 'is_mocked', description: 'GPS mock detection flag', required: false, type: 'boolean')]
+    #[BodyParameter(name: 'embedding', description: 'Face embedding 128D array for verification', required: false, type: 'array')]
+    #[BodyParameter(name: 'pin', description: '6-digit PIN as fallback verification', required: false, type: 'string')]
+    #[BodyParameter(name: 'verification_method', description: 'Verification method override', required: false, type: 'string')]
+    #[BodyParameter(name: 'photo_selfie', description: 'Base64 selfie photo', required: false, type: 'string')]
+    public function clockOut(ClockOutRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'accuracy' => ['nullable', 'numeric', 'min:0'],
-            'is_mocked' => ['nullable', 'boolean'],
-            'embedding' => ['nullable', 'array', 'size:128'],
-            'embedding.*' => ['numeric', 'between:-1.5,1.5'],
-            'pin' => ['nullable', 'regex:/^\d{6}$/'],
-            'verification_method' => ['nullable', 'in:face_verified,pin_verified,manual'],
-            'photo_selfie' => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
         $employee = $request->user()->employee;
 
@@ -92,14 +87,13 @@ class AttendanceController extends Controller
 
         if (isset($data['embedding'])) {
             $data['face_embedding'] = $data['embedding'];
+            unset($data['embedding']);
         }
 
-        $verificationMethod = $data['verification_method'] ?? 'face_verified';
+        $attendance = $this->attendanceService->clockOut($employee, $data);
 
-        $attendance = $this->attendanceService->clockOut($employee, $data, $verificationMethod);
-
-        $clockIn = $attendance->clock_in instanceof Carbon ? $attendance->clock_in : Carbon::parse($attendance->clock_in);
-        $clockOut = $attendance->clock_out instanceof Carbon ? $attendance->clock_out : Carbon::parse($attendance->clock_out);
+        $clockIn = $attendance->clock_in instanceof CarbonImmutable ? $attendance->clock_in : CarbonImmutable::parse($attendance->clock_in);
+        $clockOut = $attendance->clock_out instanceof CarbonImmutable ? $attendance->clock_out : CarbonImmutable::parse($attendance->clock_out);
         $duration = $clockOut->floatDiffInHours($clockIn);
 
         return response()->json([
@@ -114,9 +108,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * GET /attendance/today
-     */
+    #[Endpoint(title: 'Today', description: 'Get today\'s attendance status (clocked in/out).')]
     public function today(Request $request): JsonResponse
     {
         $employee = $request->user()->employee;
@@ -150,9 +142,11 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * GET /attendance?period=YYYY-MM
-     */
+    #[Endpoint(title: 'List Attendances', description: 'Paginated attendance list with period/status filters.')]
+    #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
+    #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
     public function index(Request $request): JsonResponse
     {
         $request->validate([
@@ -208,9 +202,9 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * POST /attendance/{attendance}/approve-wfa
-     */
+    #[Endpoint(title: 'Approve WFA', description: 'Approve or reject WFA request for a specific attendance.')]
+    #[BodyParameter(name: 'decision', description: 'Approve or reject', required: true, type: 'string')]
+    #[BodyParameter(name: 'notes', description: 'Approval notes', required: false, type: 'string')]
     public function approveWfa(Request $request, Attendance $attendance): JsonResponse
     {
         $data = $request->validate([

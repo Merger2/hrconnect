@@ -4,15 +4,23 @@ namespace App\Http\Requests\Api;
 
 use App\Enums\RequestStatus;
 use App\Models\Overtime;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
+/**
+ * Overtime request with daily (4h max) and weekly (18h max) validation per UU Cipta Kerja.
+ *
+ * - start_time and end_time must be in H:i format.
+ * - Daily max 4 hours overtime (UU Cipta Kerja).
+ * - Weekly max 18 hours across all approved overtime.
+ * - Status defaults to PENDING; approval workflow is created after store.
+ */
 class StoreOvertimeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->employee !== null;
+        return auth()->check();
     }
 
     public function rules(): array
@@ -33,8 +41,8 @@ class StoreOvertimeRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                $start = Carbon::parse($this->input('start_time'));
-                $end = Carbon::parse($this->input('end_time'));
+                $start = CarbonImmutable::parse($this->input('start_time'));
+                $end = CarbonImmutable::parse($this->input('end_time'));
                 $hoursToday = $start->diffInMinutes($end) / 60;
 
                 if ($hoursToday > 4) {
@@ -46,13 +54,19 @@ class StoreOvertimeRequest extends FormRequest
                     return;
                 }
 
-                $date = Carbon::parse($this->input('date'));
+                $date = CarbonImmutable::parse($this->input('date'));
                 $weekStart = $date->copy()->startOfWeek();
                 $weekEnd = $date->copy()->endOfWeek();
 
+                $employee = auth()->user()->employee;
+
+                if (! $employee) {
+                    return;
+                }
+
                 $weeklyHours = Overtime::where(
                     'employee_id',
-                    auth()->user()->employee->id
+                    $employee->id
                 )
                     ->whereBetween('date', [$weekStart, $weekEnd])
                     ->where('status', '!=', RequestStatus::REJECTED->value)

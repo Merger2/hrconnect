@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperPosition
+ */
 #[Fillable(['department_id', 'name', 'code', 'grade', 'basic_salary', 'allowance_jabatan', 'is_active'])]
 class Position extends Model
 {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Enums\KnowledgeBaseStatus;
@@ -20,9 +22,9 @@ use Throwable;
  *
  * Config (per PRD §16):
  * - Queue: default
- * - Tries: 2
+ * - Tries: 3
  * - Timeout: 300s
- * - Backoff: [30, 60]
+ * - Backoff: [30, 60, 120]
  *
  * Saat job gagal final → KB record di-set status=ERROR (bisa di-reindex manual).
  */
@@ -30,12 +32,12 @@ class ProcessKnowledgeBaseEmbedding implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 2;
+    public int $tries = 3;
 
     public int $timeout = 300;
 
     /** @var array<int, int> */
-    public array $backoff = [30, 60];
+    public array $backoff = [30, 60, 120];
 
     public function __construct(
         public KnowledgeBase $knowledgeBase,

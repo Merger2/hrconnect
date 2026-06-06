@@ -28,13 +28,16 @@ use ParagonIE\CipherSweet\EncryptedRow;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
+/**
+ * @mixin IdeHelperEmployee
+ */
 #[Fillable([
     'user_id', 'parent_id', 'company_id', 'branch_id', 'department_id', 'position_id', 'shift_id',
     'province_id', 'city_id', 'district_id', 'village_id', 'postal_code', 'address_detail',
     'employee_number', 'full_name', 'phone', 'bank_account_number', 'bank_name',
     'npwp', 'nik', 'marital_status', 'blood_type', 'gender', 'status',
     'birth_date', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
-    'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'photo',
+    'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'phk_variant', 'photo',
     'face_embedding', 'pin', 'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
     'created_by', 'updated_by',
 ])]

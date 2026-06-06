@@ -3,23 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ChangePasswordRequest;
+use App\Http\Requests\Api\UpdateProfileRequest;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
-/**
- * ProfileController — self-service profile untuk Employee.
- *
- * Field employment (position, branch, dept, salary) HANYA HR Manager yang boleh
- * edit via EmployeeController. Endpoint ini fokus self-update personal data.
- *
- * PII fields (phone, nik, npwp, bank_account_number) di-display ter-mask
- * sesuai SEC-1 (kecuali user request export profile).
- */
+#[Group('Profile')]
 class ProfileController extends Controller
 {
+    #[Endpoint(title: 'Get Profile', description: 'Get authenticated employee profile with masked PII fields.')]
     public function show(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -44,7 +41,12 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request): JsonResponse
+    #[Endpoint(title: 'Update Profile', description: 'Update self-service personal data (phone, address, bank).')]
+    #[BodyParameter(name: 'phone', description: 'Phone number (+62 format)', required: false, type: 'string')]
+    #[BodyParameter(name: 'address_detail', description: 'Address detail', required: false, type: 'string')]
+    #[BodyParameter(name: 'bank_name', description: 'Bank name', required: false, type: 'string')]
+    #[BodyParameter(name: 'bank_account_number', description: 'Bank account number (8-18 digits)', required: false, type: 'string')]
+    public function update(UpdateProfileRequest $request): JsonResponse
     {
         $employee = $request->user()->employee;
 
@@ -55,12 +57,7 @@ class ProfileController extends Controller
             ], 404);
         }
 
-        $data = $request->validate([
-            'phone' => ['nullable', 'regex:/^(\+62|0)\d{9,12}$/'],
-            'address_detail' => ['nullable', 'string', 'max:500'],
-            'bank_name' => ['nullable', 'string', 'max:100'],
-            'bank_account_number' => ['nullable', 'regex:/^\d{8,18}$/'],
-        ]);
+        $data = $request->validated();
 
         $employee->update($data);
 
@@ -77,12 +74,13 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function changePassword(Request $request): JsonResponse
+    #[Endpoint(title: 'Change Password', description: 'Change authenticated user password. Token stays valid.')]
+    #[BodyParameter(name: 'current_password', description: 'Current password for verification', required: true, type: 'string')]
+    #[BodyParameter(name: 'password', description: 'New password (min 8 chars, mixed case, numbers)', required: true, type: 'string')]
+    #[BodyParameter(name: 'password_confirmation', description: 'Confirm new password', required: true, type: 'string')]
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'current_password' => ['required', 'string'],
-            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
-        ]);
+        $data = $request->validated();
 
         if (! Hash::check($data['current_password'], $request->user()->password)) {
             throw ValidationException::withMessages([
@@ -155,7 +153,7 @@ class ProfileController extends Controller
             return $phone;
         }
 
-        return substr($phone, 0, 4).str_repeat('*', $len - 8).substr($phone, -4);
+        return substr($phone, 0, 4).str_repeat('*', max(0, $len - 8)).substr($phone, -4);
     }
 
     private function maskBankAccount(?string $account): ?string

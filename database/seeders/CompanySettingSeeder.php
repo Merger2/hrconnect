@@ -22,6 +22,10 @@ class CompanySettingSeeder extends Seeder
             ['key' => 'chronic_late_threshold', 'value' => '3', 'description' => 'Batas keterlambatan kronis per bulan'],
             // Leave carry forward
             ['key' => 'leave_carry_forward_deadline', 'value' => '03-31', 'description' => 'Batas waktu penggunaan cuti carry forward'],
+            // Face recognition threshold (PRD §2.1)
+            ['key' => 'face_distance_threshold', 'value' => '0.15', 'description' => 'Ambang jarak cosinus face recognition (default 0.15 ≈ 85% similaritas)'],
+            // WFA auto-approve
+            ['key' => 'wfa_auto_approve_days', 'value' => '3', 'description' => 'Hari kerja sebelum WFA di-auto-approve'],
             // PTKP values (sesuai PP terbaru, configurable)
             ['key' => 'ptkp_base_single', 'value' => '54000000', 'description' => 'PTKP TK/0 (single/tanpa tanggungan)'],
             ['key' => 'ptkp_base_married', 'value' => '58500000', 'description' => 'PTKP K/0 (married/tanpa tanggungan)'],

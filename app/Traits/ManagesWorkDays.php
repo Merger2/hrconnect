@@ -3,7 +3,8 @@
 namespace App\Traits;
 
 use App\Models\Holiday;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 
 trait ManagesWorkDays
 {
@@ -12,7 +13,7 @@ trait ManagesWorkDays
      *
      * Optimasi: holiday di-fetch SEKALI sebagai flat array, bukan query per hari.
      */
-    public function countWorkingDays(Carbon $start, Carbon $end): int
+    public function countWorkingDays(CarbonInterface $start, CarbonInterface $end): int
     {
         $start = $start->copy();
         $end = $end->copy();
@@ -20,7 +21,7 @@ trait ManagesWorkDays
         $holidays = Holiday::where('is_active', true)
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->pluck('date')
-            ->map(fn ($date) => Carbon::parse($date)->toDateString())
+            ->map(fn ($date) => CarbonImmutable::parse($date)->toDateString())
             ->toArray();
 
         $workingDays = 0;
@@ -29,7 +30,7 @@ trait ManagesWorkDays
             if (! $start->isWeekend() && ! in_array($start->toDateString(), $holidays)) {
                 $workingDays++;
             }
-            $start->addDay();
+            $start = $start->addDay();
         }
 
         return $workingDays;

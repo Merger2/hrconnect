@@ -14,6 +14,9 @@ use ParagonIE\CipherSweet\EncryptedRow;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
+/**
+ * @mixin IdeHelperFamilyDetail
+ */
 #[Fillable(['employee_id', 'name', 'gender', 'relationship', 'nik', 'birth_date', 'job', 'phone', 'address', 'is_emergency'])]
 #[Hidden(['nik', 'phone', 'address'])]
 class FamilyDetail extends Model implements CipherSweetEncrypted

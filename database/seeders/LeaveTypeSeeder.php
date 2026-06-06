@@ -27,6 +27,14 @@ class LeaveTypeSeeder extends Seeder
                 'deducts_from_quota' => true,
             ],
             [
+                'name' => 'Cuti Menstruasi',
+                'code' => 'MENSTRUAL',
+                'quota' => 2,
+                'is_paid' => true,
+                'is_active' => true,
+                'deducts_from_quota' => false,
+            ],
+            [
                 'name' => 'Cuti Besar',
                 'code' => 'COMPASSIONATE',
                 'quota' => 3,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\DayType;
@@ -12,7 +14,8 @@ use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Traits\ManagesWorkDays;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
 class LeaveService
@@ -30,8 +33,8 @@ class LeaveService
     {
         // B3.7 fix: validasi range tanggal sebelum query apapun.
         // Cegah Leave::hasOverlap() / countWorkingDays() bertingkah aneh dengan range terbalik.
-        $startDate = Carbon::parse($data['start_date']);
-        $endDate = Carbon::parse($data['end_date']);
+        $startDate = CarbonImmutable::parse($data['start_date']);
+        $endDate = CarbonImmutable::parse($data['end_date']);
 
         if ($endDate->lt($startDate)) {
             throw new BusinessRuleException('Tanggal akhir cuti tidak boleh lebih awal dari tanggal mulai.');
@@ -106,7 +109,7 @@ class LeaveService
     /**
      * Hitung hari kerja: exclude weekend + holiday. Half-day = ×0.5.
      */
-    public function calculateWorkDays(Carbon $start, Carbon $end, DayType $dayType): float
+    public function calculateWorkDays(CarbonInterface $start, CarbonInterface $end, DayType $dayType): float
     {
         $multiplier = $dayType->weight();
 
@@ -128,7 +131,7 @@ class LeaveService
             ->toArray();
 
         $deadlineSetting = CompanySetting::get('leave_carry_forward_deadline', '03-31');
-        $deadlineDate = Carbon::parse(($year + 1).'-'.$deadlineSetting)->toDateString();
+        $deadlineDate = CarbonImmutable::parse(($year + 1).'-'.$deadlineSetting)->toDateString();
 
         $balancesToInsert = [];
 
@@ -179,7 +182,7 @@ class LeaveService
             ->get();
 
         $deadlineSetting = CompanySetting::get('leave_carry_forward_deadline', '03-31');
-        $deadlineDate = Carbon::parse($toYear.'-'.$deadlineSetting)->toDateString();
+        $deadlineDate = CarbonImmutable::parse($toYear.'-'.$deadlineSetting)->toDateString();
 
         foreach ($previousBalances as $prevBalance) {
             // Bug 1 fix: pakai available() yang sudah include unexpired carry_forward

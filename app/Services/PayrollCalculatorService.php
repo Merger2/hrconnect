@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\AttendanceStatus;
@@ -15,19 +17,18 @@ use App\Models\BpjsConfig;
 use App\Models\CompanySetting;
 use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\LeaveBalance;
 use App\Models\Overtime;
 use App\Models\Payroll;
 use App\Models\Reimbursement;
 use App\Models\TaxConfig;
 use App\Traits\ManagesWorkDays;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 class PayrollCalculatorService
 {
     use ManagesWorkDays;
-
-    const MONTHLY_WORKING_HOURS = 173;
 
     public function __construct(
         protected ApprovalService $approvalService,
@@ -38,7 +39,7 @@ class PayrollCalculatorService
      */
     public function calculateProratedSalary(Employee $employee, string $period): float
     {
-        $date = Carbon::createFromFormat('Y-m', $period);
+        $date = CarbonImmutable::createFromFormat('Y-m', $period);
         $startOfMonth = $date->copy()->startOfMonth();
         $endOfMonth = $date->copy()->endOfMonth();
         $actualStart = $startOfMonth;
@@ -91,9 +92,10 @@ class PayrollCalculatorService
         $employee = $overtime->employee;
         $basicSalary = $employee->position?->basic_salary ?? 0;
         $fixedAllowance = $employee->position?->allowance_jabatan ?? 0;
-        $hourlyRate = ($basicSalary + $fixedAllowance) / self::MONTHLY_WORKING_HOURS;
+        $monthlyHours = (int) config('hrconnect.monthly_working_hours', 173);
+        $hourlyRate = ($basicSalary + $fixedAllowance) / $monthlyHours;
 
-        $date = Carbon::parse($overtime->date);
+        $date = CarbonImmutable::parse($overtime->date);
 
         // B11: yearly cache (1 entry per year) + in-memory in_array() check
         $isHoliday = Holiday::isHoliday($date) || $date->isWeekend();
@@ -212,6 +214,147 @@ class PayrollCalculatorService
     }
 
     /**
+     * Menghitung pesangon berdasarkan UU Cipta Kerja (PRD Appendix C + §26.3).
+     *
+     * Tabel pesangon:
+     *   < 1 thn = 0, 1 thn = 1, 2 thn = 2, 3 thn = 3, 4 thn = 4,
+     *   5 thn = 5, ≥ 6 thn = 6 bulan gaji.
+     *
+     * Multiplier variant (phk_variant):
+     *   dismissed       = 1.0×
+     *   dismissed_severe = 2.0×
+     *   mutual          = 0.5×
+     *   resign          = 1.0× (default)
+     */
+    public function calculatePesangon(Employee $employee): float
+    {
+        $years = (int) ($employee->join_date?->diffInMonths(now()) / 12);
+
+        $monthMultiplier = match (true) {
+            $years < 1 => 0,
+            $years === 1 => 1,
+            $years === 2 => 2,
+            $years === 3 => 3,
+            $years === 4 => 4,
+            $years === 5 => 5,
+            default => 6,
+        };
+
+        if ($monthMultiplier === 0) {
+            return 0.0;
+        }
+
+        $monthlySalary = $this->getMonthlySalary($employee);
+        $variantMultiplier = $this->getPhkVariantMultiplier($employee->phk_variant);
+
+        return round($monthMultiplier * $monthlySalary * $variantMultiplier, 2);
+    }
+
+    /**
+     * Menghitung uang pengganti cuti yang tidak diambil saat resign/PHK.
+     *
+     * Rumus: sisa kuota cuti tahunan × (gross_monthly / countWorkingDays(month))
+     */
+    public function calculateLeaveCashOut(Employee $employee): float
+    {
+        $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
+            ->where('year', now()->year)
+            ->first();
+
+        $remaining = $leaveBalance
+            ? max(0, $leaveBalance->quota - $leaveBalance->used)
+            : 0;
+
+        if ($remaining <= 0) {
+            return 0.0;
+        }
+
+        $monthlySalary = $this->getMonthlySalary($employee);
+        $workingDays = $this->countWorkingDays(
+            now()->startOfMonth(),
+            now()->endOfMonth()
+        );
+
+        $dailyRate = $workingDays > 0 ? $monthlySalary / $workingDays : 0;
+
+        return round($remaining * $dailyRate, 2);
+    }
+
+    /**
+     * Menghitung uang kompensasi untuk PKWT yang kontraknya habis.
+     *
+     * Rumus: (masa_kerja_bulan / 12) × monthly_salary
+     * Hanya berlaku untuk employment_type = CONTACT.
+     */
+    public function calculateUangKompensasi(Employee $employee): float
+    {
+        if ($employee->employment_type !== EmploymentType::CONTRACT) {
+            return 0.0;
+        }
+
+        $endDate = $employee->resign_date ?? $employee->contract_end_date ?? now();
+        $bulanKerja = $employee->join_date
+            ? $employee->join_date->diffInMonths($endDate)
+            : 0;
+
+        if ($bulanKerja < 1) {
+            return 0.0;
+        }
+
+        $monthlySalary = $this->getMonthlySalary($employee);
+
+        return round(($bulanKerja / 12) * $monthlySalary, 2);
+    }
+
+    /**
+     * Menghitung uang penghargaan masa kerja (UU Cipta Kerja Pasal 156).
+     *
+     * Tabel masa kerja → multiplier:
+     *   < 3 thn = 0, 3-6 = 2, 6-9 = 3, 9-12 = 4, 12-15 = 5,
+     *   15-18 = 6, 18-21 = 7, 21-24 = 8, ≥ 24 = 10 bulan gaji.
+     */
+    public function calculateUangPenghargaanMasaKerja(Employee $employee): float
+    {
+        $years = (int) ($employee->join_date?->diffInMonths(now()) / 12);
+
+        $monthMultiplier = match (true) {
+            $years < 3 => 0,
+            $years < 6 => 2,
+            $years < 9 => 3,
+            $years < 12 => 4,
+            $years < 15 => 5,
+            $years < 18 => 6,
+            $years < 21 => 7,
+            $years < 24 => 8,
+            default => 10,
+        };
+
+        if ($monthMultiplier === 0) {
+            return 0.0;
+        }
+
+        $monthlySalary = $this->getMonthlySalary($employee);
+        $variantMultiplier = $this->getPhkVariantMultiplier($employee->phk_variant);
+
+        return round($monthMultiplier * $monthlySalary * $variantMultiplier, 2);
+    }
+
+    private function getMonthlySalary(Employee $employee): float
+    {
+        return ($employee->position?->basic_salary ?? 0)
+            + ($employee->position?->allowance_jabatan ?? 0);
+    }
+
+    private function getPhkVariantMultiplier(?string $phkVariant): float
+    {
+        return match ($phkVariant) {
+            'dismissed_severe' => 2.0,
+            'mutual' => 0.5,
+            default => 1.0,
+        };
+    }
+
+    /**
      * Orkestrator penggajian akhir bulan.
      * - lockForUpdate() pada cek existing payroll (cegah race condition double-generation).
      * - forceDelete() pada existing payroll (cegah unique constraint violation karena soft delete).
@@ -228,7 +371,7 @@ class PayrollCalculatorService
             );
         }
 
-        $parsedPeriod = Carbon::createFromFormat('Y-m', $period);
+        $parsedPeriod = CarbonImmutable::createFromFormat('Y-m', $period);
         $targetYear = $parsedPeriod->year;
         $targetMonth = $parsedPeriod->month;
 

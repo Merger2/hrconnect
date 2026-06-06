@@ -3,15 +3,20 @@
 use App\Enums\AttendanceStatus;
 use App\Enums\EmployeeStatus;
 use App\Enums\RequestStatus;
+use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
+use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use Carbon\Carbon;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -22,9 +27,8 @@ uses(RefreshDatabase::class);
  * (Company/Branch/Department/Position) sesuai pattern EmployeeSeeder.
  * Hindari Employee factory chain yang berat.
  */
-
 beforeEach(function () {
-    $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
+    $this->seed(RoleAndPermissionSeeder::class);
 
     // Master data minimal untuk Employee FK
     $companyId = DB::table('companies')->insertGetId([
@@ -258,24 +262,24 @@ test('leave:reset-quota initialize balance untuk karyawan aktif', function () {
     ]);
 
     expect($exitCode)->toBe(0);
-    expect(\App\Models\LeaveBalance::where('employee_id', $emp->id)->where('year', 2026)->exists())->toBeTrue();
+    expect(LeaveBalance::where('employee_id', $emp->id)->where('year', 2026)->exists())->toBeTrue();
 });
 
 // ─── payroll:generate ─────────────────────────────────────────────────
 
 test('payroll:generate dispatch job per karyawan aktif', function () {
-    \Illuminate\Support\Facades\Queue::fake();
+    Queue::fake();
 
     makeActiveEmployee($this->masterData, 'PayrollEmp1');
     makeActiveEmployee($this->masterData, 'PayrollEmp2');
 
     Artisan::call('payroll:generate', ['--period' => '2026-05']);
 
-    \Illuminate\Support\Facades\Queue::assertPushed(\App\Jobs\GenerateEmployeePayrollJob::class, 2);
+    Queue::assertPushed(GenerateEmployeePayrollJob::class, 2);
 });
 
 test('payroll:generate single employee mode', function () {
-    \Illuminate\Support\Facades\Queue::fake();
+    Queue::fake();
 
     $emp1 = makeActiveEmployee($this->masterData, 'PayrollEmp1');
     makeActiveEmployee($this->masterData, 'PayrollEmp2');
@@ -285,7 +289,7 @@ test('payroll:generate single employee mode', function () {
         '--employee' => $emp1->id,
     ]);
 
-    \Illuminate\Support\Facades\Queue::assertPushed(\App\Jobs\GenerateEmployeePayrollJob::class, 1);
+    Queue::assertPushed(GenerateEmployeePayrollJob::class, 1);
 });
 
 test('payroll:generate gagal kalau format periode salah', function () {
@@ -302,13 +306,13 @@ test('cache:warm jalan tanpa error', function () {
     expect($exitCode)->toBe(0);
 
     // Cache populated
-    expect(\Illuminate\Support\Facades\Cache::has('tax_configs'))->toBeTrue();
-    expect(\Illuminate\Support\Facades\Cache::has('bpjs_configs'))->toBeTrue();
+    expect(Cache::has('tax_configs'))->toBeTrue();
+    expect(Cache::has('bpjs_configs'))->toBeTrue();
 });
 
 test('cache:warm dengan opsi year', function () {
     $exitCode = Artisan::call('cache:warm', ['--year' => 2026]);
 
     expect($exitCode)->toBe(0);
-    expect(\Illuminate\Support\Facades\Cache::has('holidays:2026'))->toBeTrue();
+    expect(Cache::has('holidays:2026'))->toBeTrue();
 });

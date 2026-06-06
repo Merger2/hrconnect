@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\ApprovalLevel;
@@ -10,8 +12,8 @@ use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Models\Reimbursement;
-use Carbon\Carbon;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -78,7 +80,7 @@ class ApprovalService
                 ) {
                     $balance = LeaveBalance::where('employee_id', $approvable->employee_id)
                         ->where('leave_type_id', $approvable->leave_type_id)
-                        ->where('year', Carbon::parse($approvable->start_date)->year)
+                        ->where('year', CarbonImmutable::parse($approvable->start_date)->year)
                         ->lockForUpdate()
                         ->first();
                     $balance?->deduct((float) $approvable->total_days);

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @mixin IdeHelperBpjsConfig
+ */
 #[Fillable(['name', 'employer_rate', 'employee_rate', 'ceiling'])]
 class BpjsConfig extends Model
 {

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperPayroll
+ */
 #[Fillable(['employee_id', 'period', 'basic_salary', 'total_allowance', 'gross_salary', 'overtime_pay', 'pph21', 'bpjs_health', 'bpjs_employment', 'loan_deduction', 'attendance_penalty', 'total_deduction', 'net_salary', 'status'])]
 class Payroll extends Model
 {

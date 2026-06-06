@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,20 +16,24 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleAndPermissionSeeder::class,
             SuperAdminSeeder::class,
-            CompanySeeder::class,
+            CompanyAndDepartmentSeeder::class,
             CompanySettingSeeder::class,
             ShiftSeeder::class,
             LeaveTypeSeeder::class,
             HolidaySeeder::class,
             PayrollConfigSeeder::class,
+            BranchSeeder::class,
             EmployeeSeeder::class,
         ]);
 
-        // Test user — hanya kalau APP_ENV bukan production
         if (! app()->isProduction()) {
-            User::factory()->create([
+            $this->call(DemoDataSeeder::class);
+
+            User::where('email', 'test@example.com')->firstOrCreate([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
             ]);
         }
     }

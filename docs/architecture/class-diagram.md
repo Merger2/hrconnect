@@ -18,7 +18,7 @@
 12. **Attendance model missing verification_method split (ERR-004)** — Per ERR-004, Attendance should have 4 separate columns: `clock_in_verification_method`, `clock_in_face_similarity_score`, `clock_out_verification_method`, `clock_out_face_similarity_score` instead of a single `status` or combined field.
 
 ## Deskripsi
-Dokumen ini menyajikan diagram Class UML untuk sistem HRConnect HRIS yang menggambarkan seluruh Models (25 existing + 4 new), Service classes (4), Jobs (2), Commands (2), Notifications (6), dan Enums (17). Diagram menunjukkan relationships (composition, aggregation, inheritance, dependency), method signatures, dan property types sesuai dengan arsitektur Laravel yang didefinisikan dalam PRD.
+Dokumen ini menyajikan diagram Class UML untuk sistem HRConnect HRIS yang menggambarkan seluruh Models (25 existing + 6 new), Service classes (13), Jobs (2), Commands (8), Notifications (7), dan Enums (34). Diagram menunjukkan relationships (composition, aggregation, inheritance, dependency), method signatures, dan property types sesuai dengan arsitektur Laravel yang didefinisikan dalam PRD.
 
 ---
 
@@ -513,37 +513,35 @@ classDiagram
 
 ---
 
-## 2. Class Diagram - Service Classes (4)
+## 2. Class Diagram - Service Classes (13)
 
 ```mermaid
 classDiagram
     class PayrollCalculatorService {
         <<service>>
         +calculateProratedSalary(Employee employee, string periodYearMonth)$ float
-        +calculatePTKP(Employee employee)$ float
-        +getTERCategory(Employee employee)$ string "A/B/C"
-        +calculatePPh21(float grossIncome, string category)$ float
+        +getTERCategory(Employee employee)$ TerCategory
+        +calculatePPh21(Employee employee, float grossIncome, TerCategory category)$ float
         +calculateBPJS(Employee employee, float grossIncome)$ array
-        +calculateOvertimePay(Overtime overtime, Employee employee)$ float
+        +calculateOvertimePay(Overtime overtime)$ float
         +countWorkingDays(Carbon start, Carbon end)$ int
         +calculateThrProrated(Employee employee, float monthlySalary, int monthsWorked)$ float
+        +calculatePesangon(Employee employee)$ float
+        +calculateLeaveCashOut(Employee employee)$ float
+        +calculateUangKompensasi(Employee employee)$ float
+        +calculateUangPenghargaanMasaKerja(Employee employee)$ float
     }
     
     class AttendanceService {
         <<service>>
-        +clockIn(Employee employee, float lat, float lng, string faceEmbedding, bool isWfa, ?string wfaNote)$ Attendance
-        +clockOut(Employee employee, float lat, float lng, string faceEmbedding)$ Attendance
-        +validateGPS(float lat, float lng, Branch branch)$ bool "Haversine"
-        +validateFace(string liveEmbedding, string storedEmbedding)$ float "similarity score"
-        +handleWFA(Attendance attendance)$ void
-        +linkOvertimeToAttendance(Attendance attendance)$ void "Observer"
+        +clockIn(Employee employee, array data)$ Attendance
+        +clockOut(Employee employee, array data)$ Attendance
     }
     
     class LeaveService {
         <<service>>
-        +calculateWorkDays(Carbon start, Carbon end, string dayType)$ float
-        +validateLeaveQuota(Employee employee, LeaveType type, float days)$ bool
-        +applyLeave(Leave leave)$ Leave
+        +calculateWorkDays(Carbon start, Carbon end, DayType dayType)$ float
+        +applyLeave(Employee employee, array data)$ Leave
         +initializeBalance(Employee employee, int year)$ void
         +carryForward(Employee employee, int fromYear, int toYear)$ void
     }
@@ -553,8 +551,68 @@ classDiagram
         +createApprovalWorkflow(Model approvable)$ void
         +approve(Approval approval, string notes)$ void
         +reject(Approval approval, string reason)$ void
-        +checkAllApproved(Model approvable)$ bool
-        +getDirectApprover(Employee employee)$ Employee
+    }
+    
+    class GeofenceService {
+        <<service>>
+        +validateLocation(Employee employee, float lat, float lng)$ void
+        +haversineDistance(float lat1, float lng1, float lat2, float lng2)$ float
+        +isWithinRadius(float lat, float lng, Branch branch)$ bool
+    }
+    
+    class FaceRecognitionService {
+        <<service>>
+        +registerFace(Employee employee, string embedding)$ void
+        +verifyFace(string liveEmbedding, string storedEmbedding)$ float "cosine distance"
+        +isFaceRegistered(Employee employee)$ bool
+        +MAX_DISTANCE = 0.15
+    }
+    
+    class KnowledgeBaseService {
+        <<service>>
+        +search(string query)$ array
+        +askQuestion(string query, KnowledgeBaseCategory category)$ array
+        +embedText(string text)$ array
+        +trgmFallback(string query)$ array
+    }
+    
+    class ReimbursementService {
+        <<service>>
+        +submitRequest(Employee employee, array data)$ Reimbursement
+        +approveRequest(Reimbursement reimbursement, string notes)$ void
+        +rejectRequest(Reimbursement reimbursement, string reason)$ void
+        +processPayment(Reimbursement reimbursement)$ void
+    }
+    
+    class EmployeeTerminationService {
+        <<service>>
+        +terminate(Employee employee, TerminationType type, Carbon effectiveDate, array options)$ Employee
+    }
+    
+    class EmbeddingService {
+        <<service>>
+        +generateEmbedding(string text)$ array
+        +generateEmbeddingBatch(array texts)$ array
+    }
+    
+    class GeminiClient {
+        <<service>>
+        +embed(string text)$ array
+        +ask(string prompt)$ string
+        +isAvailable()$ bool
+    }
+    
+    class PayrollExportService {
+        <<service>>
+        +exportToCsv(Payroll payroll, array options)$ string "filepath"
+        +exportToExcel(Payroll payroll, array options)$ string "filepath"
+    }
+    
+    class PayslipPdfService {
+        <<service>>
+        +generatePayslip(Employee employee, Payroll payroll)$ string "filepath"
+        +streamPayslip(Employee employee, Payroll payroll)$ StreamedResponse
+        +batchGenerate(array employeeIds, Payroll payroll)$ array "filepaths"
     }
     
     %% Dependencies
@@ -562,11 +620,12 @@ classDiagram
     PayrollCalculatorService ..> TaxConfig : uses
     PayrollCalculatorService ..> BpjsConfig : uses
     PayrollCalculatorService ..> Holiday : uses
+    PayrollCalculatorService ..> TerminationType : uses
+    PayrollCalculatorService ..> LeaveBalance : uses
     
     AttendanceService ..> Employee : uses
     AttendanceService ..> Branch : uses
     AttendanceService ..> Shift : uses
-    AttendanceService ..> Overtime : uses
     AttendanceService ..> CompanySetting : uses
     
     LeaveService ..> Employee : uses
@@ -578,6 +637,31 @@ classDiagram
     ApprovalService ..> Approval : uses
     ApprovalService ..> Leave : uses
     ApprovalService ..> Overtime : uses
+    ApprovalService ..> Reimbursement : uses
+    
+    GeofenceService ..> Branch : uses
+    GeofenceService ..> CompanySetting : uses
+    
+    FaceRecognitionService ..> Employee : uses
+    
+    KnowledgeBaseService ..> KnowledgeBase : uses
+    KnowledgeBaseService ..> EmbeddingService : uses
+    KnowledgeBaseService ..> GeminiClient : uses
+    
+    ReimbursementService ..> Employee : uses
+    ReimbursementService ..> Reimbursement : uses
+    ReimbursementService ..> ApprovalService : uses
+    
+    EmployeeTerminationService ..> Employee : uses
+    EmployeeTerminationService ..> PayrollCalculatorService : uses
+    
+    EmbeddingService ..> GeminiClient : uses
+    
+    PayrollExportService ..> Payroll : uses
+    PayrollExportService ..> PayrollCalculatorService : uses
+    
+    PayslipPdfService ..> Employee : uses
+    PayslipPdfService ..> Payroll : uses
 ```
 
 ---
@@ -739,7 +823,9 @@ classDiagram
 
 ---
 
-## 6. Class Diagram - Enums (17)
+## 6. Class Diagram - Enums (34)
+
+**Catatan:** Berikut subset 17 enum utama. 17 sisanya (EmployeeStatus, TerminationType, LeaveType, ShiftScheduleType, DayType, NotificationType, DeviceType, BloodType, EducationLevel, FamilyRelationship, ResignationReason, SalaryType, CompanySettingType, HandoverCategory, LoanInstallmentStatus, VerificationMethod, BpjsType, LeaveQuotaReset, KnowledgeBaseCategory, Permission) di `app/Enums/`.
 
 ```mermaid
 classDiagram
@@ -776,8 +862,8 @@ classDiagram
     
     class ApprovalLevel {
         <<enum>>
-        +LEVEL_1 = 1
-        +LEVEL_2 = 2
+        +L1_SUPERVISOR = 1
+        +L2_HR_MANAGER = 2
     }
     
     class ApprovalStatus {
@@ -808,7 +894,7 @@ classDiagram
         +ADJUSTMENT = "adjustment"
     }
     
-    class TERCategory {
+    class TerCategory {
         <<enum>>
         +A = "A"
         +B = "B"
@@ -828,7 +914,7 @@ classDiagram
         +FEMALE = "female"
     }
     
-    class Relationship {
+    class FamilyRelationship {
         <<enum>>
         +SPOUSE = "spouse"
         +CHILD = "child"
@@ -848,7 +934,7 @@ classDiagram
         +PENDING = "pending"
         +APPROVED = "approved"
         +PAID = "paid"
-        +OFF = "off"
+        +WRITTEN_OFF = "written_off"
     }
     
     class ReimbursementStatus {
@@ -863,6 +949,14 @@ classDiagram
         +PROCESSING = "processing"
         +READY = "ready"
         +ERROR = "error"
+    }
+    
+    class TerminationType {
+        <<enum>>
+        +RESIGN = "resign"
+        +PHK = "phk"
+        +CONTRACT_END = "contract_end"
+        +DECEASED = "deceased"
     }
 ```
 
@@ -927,19 +1021,15 @@ classDiagram
 | Kategori | Jumlah | Daftar |
 |----------|--------|--------|
 | Models (Existing) | 25 | User, Company, Branch, Department, Position, Employee, Shift, Attendance, LeaveType, Leave, Overtime, Payroll, PayrollItem, FamilyDetail, Device, Approval, Holiday, KnowledgeBase, ActivityLog, Asset, AssetHandover, PerformanceReview, Reimbursement, Loan, LoanInstallment |
-| Models (New) | 5 | CompanySetting, ReimbursementCategory, ShiftSchedule, LeaveBalance, PayrollAdjustment |
-| Service Classes | 4 | PayrollCalculatorService, AttendanceService, LeaveService, ApprovalService |
+| Models (New) | 6 | CompanySetting, ReimbursementCategory, ShiftSchedule, LeaveBalance, PayrollAdjustment, PayrollAdjustmentItem |
+| Service Classes | 13 | PayrollCalculatorService, AttendanceService, LeaveService, ApprovalService, GeofenceService, FaceRecognitionService, KnowledgeBaseService, ReimbursementService, EmployeeTerminationService, EmbeddingService, GeminiClient, PayrollExportService, PayslipPdfService |
 | Jobs | 2 | GenerateEmployeePayrollJob, ProcessKnowledgeBaseEmbedding |
-| Commands | 2 | AttendanceDetectAlphaCommand, LeaveResetQuotaCommand |
-| Notifications | 6 | LeaveRequestSubmitted, LeaveApproved, LeaveRejected, PayrollPublished, ApprovalOverdue, NewDeviceLogin |
-| Enums | 17 | EmploymentType, LeaveDayType, AttendanceStatus, WfaStatus, ApprovalLevel, ApprovalStatus, RequestStatus, PayrollStatus, PayrollItemType, TERCategory, MaritalStatus, Gender, Relationship, AssetStatus, LoanStatus, ReimbursementStatus, KnowledgeBaseStatus |
+| Commands | 8 | AttendanceDetectAlphaCommand, AttendanceDetectChronicLateCommand, LeaveResetQuotaCommand, PayrollGenerateCommand, CacheWarmCommand, AuditCleanupCommand, DebugPermissionCommand, UserCreateCommand |
+| Notifications | 7 | LeaveRequestSubmitted, LeaveApproved, LeaveRejected, PayrollPublished, ApprovalOverdue, NewDeviceLogin, AttendanceAlert |
+| Enums | 34 | EmploymentType, LeaveDayType, AttendanceStatus, WfaStatus, ApprovalLevel, ApprovalStatus, RequestStatus, PayrollStatus, PayrollItemType, TerCategory, MaritalStatus, Gender, FamilyRelationship, AssetStatus, LoanStatus, ReimbursementStatus, KnowledgeBaseStatus, EmployeeStatus, TerminationType, LeaveType, ShiftScheduleType, DayType, NotificationType, DeviceType, BloodType, EducationLevel, ResignationReason, SalaryType, CompanySettingType, HandoverCategory, LoanInstallmentStatus, VerificationMethod, BpjsType, LeaveQuotaReset, KnowledgeBaseCategory, Permission |
 
-⚠️ **ERRATA NOTES**:
-- C1: ApprovalLevel enum comparison — use `$approval->level === ApprovalLevel::L1_SUPERVISOR`, not `$approval->level === 1`
-- C3: User model missing `HasApiTokens` trait (laravel/sanctum not installed)
-- C4: Permission enum + RoleAndPermissionSeeder not yet created
-- C5(SEC-5): BusinessRuleException should extend HttpException(422), not base Exception
-| **TOTAL** | **61** | |
+⚠️ **ERRATA NOTES** (semua sudah diperbaiki):
+| **TOTAL** | **95** | |
 
 ---
 
@@ -947,7 +1037,7 @@ classDiagram
 
 1. **Face Embedding**: Employee.face_embedding (vector(128)) untuk face-api.js FaceNet (PRD 2.1)
 2. **Haversine Formula**: AttendanceService.validateGPS() menggunakan Haversine (PRD 2.2)
-3. **PPh21 TER**: PayrollCalculatorService dengan kategori A/B/C dari PTKP (PRD 11.4)
+3. **PPh21 TER**: PayrollCalculatorService.getTERCategory() + calculatePPh21() — kategori A/B/C ditentukan dari status marital + tanggungan (PRD 11.4)
 4. **BPJS Rates**: BpjsConfig dengan employer_rate, employee_rate, ceiling (PRD 11.5)
 5. **Leave Quota**: LeaveBalance.quota, used, carry_forward (max 3) (PRD 7.3)
 6. **Approval Workflow**: ApprovalService dengan Level 1 (Manager) & Level 2 (HR Manager) (PRD 12.1) ⚠️ ERRATA C1: Approval.level casts to ApprovalLevel enum — use enum comparison
@@ -961,4 +1051,4 @@ classDiagram
 
 ---
 
-*Terakhir diupdate: 2026-05-31*
+*Terakhir diupdate: 2026-06-06*

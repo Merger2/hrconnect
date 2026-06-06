@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin IdeHelperBranch
+ */
 #[Fillable(['company_id', 'name', 'address', 'is_main', 'is_active', 'latitude', 'longitude', 'radius'])]
 class Branch extends Model
 {

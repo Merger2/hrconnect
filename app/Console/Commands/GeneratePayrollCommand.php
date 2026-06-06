@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\EmployeeStatus;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Employee;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 /**
@@ -38,7 +38,7 @@ class GeneratePayrollCommand extends Command
 
         // Validasi format Y-m
         try {
-            Carbon::createFromFormat('Y-m', $period);
+            CarbonImmutable::createFromFormat('Y-m', $period);
         } catch (\Exception $e) {
             $this->error("Format periode tidak valid: '{$period}'. Pakai format YYYY-MM (contoh: 2026-05).");
 
@@ -49,7 +49,13 @@ class GeneratePayrollCommand extends Command
 
         // Single-employee mode
         if ($employeeId = $this->option('employee')) {
-            $employee = Employee::find($employeeId);
+            if (! is_numeric($employeeId)) {
+                $this->error("ID karyawan harus berupa angka, diberikan: '{$employeeId}'.");
+
+                return self::FAILURE;
+            }
+
+            $employee = Employee::find((int) $employeeId);
 
             if (! $employee) {
                 $this->error("Karyawan ID {$employeeId} tidak ditemukan.");

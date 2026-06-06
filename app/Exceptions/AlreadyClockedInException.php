@@ -17,6 +17,6 @@ class AlreadyClockedInException extends Exception
         return response()->json([
             'status' => 'error',
             'message' => $this->getMessage(),
-        ], $this->getCode() ?: 400);
+        ], $this->getCode() ?: 409);
     }
 }

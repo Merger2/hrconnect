@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @mixin IdeHelperTaxConfig
+ */
 #[Fillable(['ter_category', 'min_income', 'max_income', 'rate', 'effective_rate'])]
 class TaxConfig extends Model
 {

@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Enums\Permission;
 use App\Enums\PayrollStatus;
+use App\Enums\Permission;
 use App\Models\Payroll;
 use App\Models\User;
 

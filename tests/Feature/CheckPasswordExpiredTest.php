@@ -1,12 +1,14 @@
 <?php
 
+use App\Models\CompanySetting;
 use App\Models\User;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
+    $this->seed(RoleAndPermissionSeeder::class);
 });
 
 /**
@@ -15,7 +17,6 @@ beforeEach(function () {
  * Default 90 hari, configurable via CompanySetting key 'password_expiry_days'.
  * Middleware diaktifkan via alias 'password.expired' di route group dashboard.
  */
-
 test('user dengan password baru (< 90 hari) bisa akses dashboard', function () {
     $user = User::factory()->create([
         'password_changed_at' => now()->subDays(30),
@@ -85,7 +86,7 @@ test('logout dapat dipanggil walaupun password expired', function () {
 });
 
 test('expiry days configurable via CompanySetting', function () {
-    \App\Models\CompanySetting::set('password_expiry_days', 30);
+    CompanySetting::set('password_expiry_days', 30);
 
     // Password 60 hari, dengan setting 30 hari → expired
     $user = User::factory()->create([

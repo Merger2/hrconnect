@@ -28,7 +28,7 @@ class LeaveApproved extends Notification implements ShouldQueue
             ->line('Pengajuan cuti Anda telah disetujui oleh atasan.')
             ->line('Jenis cuti: '.$this->leave->leaveType->name)
             ->line('Periode: '.$this->leave->start_date->format('d M Y').' — '.$this->leave->end_date->format('d M Y'))
-            ->line('Durasi: '.$this->leave->duration.' hari')
+            ->line('Durasi: '.$this->leave->total_days.' hari')
             ->action('Lihat Payslip', url('/leaves/'.$this->leave->id));
     }
 

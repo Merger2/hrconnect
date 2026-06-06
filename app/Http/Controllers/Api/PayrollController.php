@@ -6,34 +6,33 @@ use App\Enums\EmployeeStatus;
 use App\Enums\PayrollStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ExportMonthlyRequest;
+use App\Http\Requests\Api\ExportPeriodRequest;
+use App\Http\Requests\Api\GeneratePayrollRequest;
+use App\Http\Requests\Api\ListPayrollRequest;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\PayrollExportService;
 use App\Services\PayslipPdfService;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-/**
- * PayrollController — list/show payroll + download payslip + generate batch.
- *
- * Authorization via PayrollPolicy:
- * - viewAny / view: Finance / Super Admin all, Employee self only
- * - generate: permission process_payroll
- * - downloadPayslip: status PUBLISHED/PAID, owner atau Finance
- */
+#[Group('Payroll')]
 class PayrollController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    #[Endpoint(title: 'List Payrolls', description: 'Paginated payroll list with year filter.')]
+    #[QueryParameter(name: 'year', description: 'Filter by year (YYYY)', type: 'integer')]
+    #[QueryParameter(name: 'employee_id', description: 'Filter by employee (Finance only)', type: 'integer')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
+    public function index(ListPayrollRequest $request): JsonResponse
     {
-        $request->validate([
-            'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
-            'employee_id' => ['nullable', 'integer'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $this->authorize('viewAny', Payroll::class);
 
         $user = $request->user();
@@ -77,6 +76,7 @@ class PayrollController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Get Payroll', description: 'Get payroll detail with all salary components.')]
     public function show(Request $request, Payroll $payroll): JsonResponse
     {
         $this->authorize('view', $payroll);
@@ -104,6 +104,7 @@ class PayrollController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Download Payslip', description: 'Download payslip PDF for published/paid payroll.')]
     public function payslip(Request $request, Payroll $payroll): BinaryFileResponse
     {
         $this->authorize('downloadPayslip', $payroll);
@@ -128,22 +129,16 @@ class PayrollController extends Controller
         ]);
     }
 
-    /**
-     * POST /payroll/export/monthly — Excel rekap payroll per periode.
-     * Permission: process_payroll (Finance + Super Admin).
-     */
-    public function exportMonthly(Request $request): BinaryFileResponse
+    #[Endpoint(title: 'Export Monthly', description: 'Export monthly payroll recap as Excel.')]
+    #[BodyParameter(name: 'period', description: 'Payroll period (YYYY-MM)', required: true, type: 'string')]
+    #[BodyParameter(name: 'branch_id', description: 'Filter by branch', required: false, type: 'integer')]
+    public function exportMonthly(ExportMonthlyRequest $request): BinaryFileResponse
     {
         $this->authorize('create', Payroll::class);
 
-        $data = $request->validate([
-            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
-            'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
-        ]);
-
         $path = app(PayrollExportService::class)->exportMonthly(
-            $data['period'],
-            $data['branch_id'] ?? null,
+            $request->validated('period'),
+            $request->validated('branch_id'),
         );
 
         return response()->download($path, basename($path), [
@@ -151,49 +146,38 @@ class PayrollController extends Controller
         ]);
     }
 
-    /**
-     * POST /payroll/export/1721-a1 — Bukti potong PPh 21 bulanan (DJP).
-     */
-    public function export1721A1(Request $request): BinaryFileResponse
+    #[Endpoint(title: 'Export 1721-A1', description: 'Export PPh 21 tax certificate as Excel (DJP format).')]
+    #[BodyParameter(name: 'period', description: 'Tax period (YYYY-MM)', required: true, type: 'string')]
+    public function export1721A1(ExportPeriodRequest $request): BinaryFileResponse
     {
         $this->authorize('create', Payroll::class);
 
-        $data = $request->validate([
-            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
-        ]);
-
-        $path = app(PayrollExportService::class)->export1721A1($data['period']);
+        $path = app(PayrollExportService::class)->export1721A1($request->validated('period'));
 
         return response()->download($path, basename($path), [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 
-    /**
-     * POST /payroll/export/bpjs — Laporan iuran BPJS Kesehatan + Ketenagakerjaan.
-     */
-    public function exportBpjs(Request $request): BinaryFileResponse
+    #[Endpoint(title: 'Export BPJS', description: 'Export BPJS health and employment insurance report as Excel.')]
+    #[BodyParameter(name: 'period', description: 'BPJS period (YYYY-MM)', required: true, type: 'string')]
+    public function exportBpjs(ExportPeriodRequest $request): BinaryFileResponse
     {
         $this->authorize('create', Payroll::class);
 
-        $data = $request->validate([
-            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
-        ]);
-
-        $path = app(PayrollExportService::class)->exportBpjsReport($data['period']);
+        $path = app(PayrollExportService::class)->exportBpjsReport($request->validated('period'));
 
         return response()->download($path, basename($path), [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 
-    public function generate(Request $request): JsonResponse
+    #[Endpoint(title: 'Generate Payroll', description: 'Queue payroll generation jobs for active employees.')]
+    #[BodyParameter(name: 'period', description: 'Payroll period (YYYY-MM)', required: true, type: 'string')]
+    #[BodyParameter(name: 'employee_ids', description: 'Specific employees to process (null = all active)', required: false, type: 'array')]
+    public function generate(GeneratePayrollRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
-            'employee_ids' => ['nullable', 'array'],
-            'employee_ids.*' => ['integer', 'exists:employees,id'],
-        ]);
+        $data = $request->validated();
 
         $employeeIds = $data['employee_ids'] ?? null;
 

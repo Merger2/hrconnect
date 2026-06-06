@@ -4,29 +4,32 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreOvertimeRequest;
 use App\Models\Overtime;
 use App\Services\ApprovalService;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * OvertimeController — request/list/cancel lembur.
- */
+#[Group('Overtime')]
 class OvertimeController extends Controller
 {
     public function __construct(
         protected ApprovalService $approvalService,
     ) {}
 
-    public function store(Request $request): JsonResponse
+    #[Endpoint(title: 'Create Overtime', description: 'Submit overtime request with date, time range, and description (max 4h/day, 18h/week).')]
+    #[BodyParameter(name: 'date', description: 'Overtime date (Y-m-d, today or future)', required: true, type: 'string', format: 'date')]
+    #[BodyParameter(name: 'start_time', description: 'Start time (H:i)', required: true, type: 'string', format: 'time')]
+    #[BodyParameter(name: 'end_time', description: 'End time (H:i, must be after start_time)', required: true, type: 'string', format: 'time')]
+    #[BodyParameter(name: 'description', description: 'Overtime reason (min 10 chars)', required: true, type: 'string')]
+    public function store(StoreOvertimeRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'date' => ['required', 'date', 'after_or_equal:today'],
-            'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
-            'description' => ['required', 'string', 'min:10', 'max:500'],
-        ]);
+        $data = $request->validated();
 
         $employee = $request->user()->employee;
 
@@ -37,17 +40,9 @@ class OvertimeController extends Controller
             ], 404);
         }
 
-        // Validasi durasi max 4 jam (UU Cipta Kerja)
-        $start = Carbon::parse($data['date'].' '.$data['start_time']);
-        $end = Carbon::parse($data['date'].' '.$data['end_time']);
+        $start = CarbonImmutable::parse($data['date'].' '.$data['start_time']);
+        $end = CarbonImmutable::parse($data['date'].' '.$data['end_time']);
         $hours = $end->floatDiffInHours($start);
-
-        if ($hours > 4) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Durasi lembur tidak boleh lebih dari 4 jam per hari (UU Cipta Kerja).',
-            ], 422);
-        }
 
         $overtime = Overtime::create([
             'employee_id' => $employee->id,
@@ -68,6 +63,11 @@ class OvertimeController extends Controller
         ], 201);
     }
 
+    #[Endpoint(title: 'List Overtimes', description: 'Paginated overtime list with status/period filters.')]
+    #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
+    #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
+    #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
+    #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
     public function index(Request $request): JsonResponse
     {
         $request->validate([
@@ -118,6 +118,7 @@ class OvertimeController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Get Overtime', description: 'Get overtime detail with approvals.')]
     public function show(Request $request, Overtime $overtime): JsonResponse
     {
         $this->authorize('view', $overtime);
@@ -128,6 +129,7 @@ class OvertimeController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Cancel Overtime', description: 'Cancel pending overtime request.')]
     public function destroy(Request $request, Overtime $overtime): JsonResponse
     {
         $this->authorize('delete', $overtime);

@@ -5,13 +5,16 @@ namespace App\Models;
 use App\Enums\DayType;
 use App\Enums\RequestStatus;
 use App\Traits\Approvable;
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperLeave
+ */
 #[Fillable(['employee_id', 'leave_type_id', 'start_date', 'end_date', 'day_type', 'total_days', 'reason', 'proof_file', 'status', 'rejection_reason'])]
 class Leave extends Model
 {
@@ -45,7 +48,7 @@ class Leave extends Model
             if (! $start->isWeekend() && ! Holiday::isHoliday($start)) {
                 $totalDays += $dayTypeMultiplier;
             }
-            $start->addDay();
+            $start = $start->addDay();
         }
 
         return $totalDays;
@@ -75,7 +78,7 @@ class Leave extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public static function hasOverlap(int $employeeId, Carbon $start, Carbon $end): bool
+    public static function hasOverlap(int $employeeId, CarbonInterface $start, CarbonInterface $end): bool
     {
         $activeStatuses = [
             RequestStatus::PENDING->value,

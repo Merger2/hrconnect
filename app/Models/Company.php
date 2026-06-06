@@ -12,6 +12,9 @@ use ParagonIE\CipherSweet\EncryptedRow;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
+/**
+ * @mixin IdeHelperCompany
+ */
 #[Fillable(['name', 'phone', 'email', 'website', 'npwp', 'code', 'logo', 'is_active'])]
 #[Hidden(['npwp'])]
 

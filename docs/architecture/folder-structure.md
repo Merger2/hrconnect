@@ -693,24 +693,24 @@ hrconnect/
 
 ## KEY FOLDERS SUMMARY
 
-| Folder | Purpose | Target Files | Realisasi (2026-05-31) |
+| Folder | Purpose | Target Files | Realisasi (2026-06-06) |
 |--------|---------|--------------|------------------------|
-| `app/Enums/` | PHP 8.1 Enums | 33 files | ✅ 33 files |
+| `app/Enums/` | PHP 8.1 Enums | 33 files | ✅ 34 files (termasuk Permission) |
 | `app/Models/` | Eloquent Models | 31 files | ✅ 31 files |
-| `app/Services/` | Business Logic | 7 files | ✅ 7 files (Approval, Attendance, FaceRecognition, Geofence, Leave, PayrollCalculator, Reimbursement) |
-| `app/Observers/` | Model Event Handlers | 5 files | ✅ 5 files (Attendance, BpjsConfig, Employee, Holiday, TaxConfig) |
-| `app/Jobs/` | Queue Jobs | 9 files | ⚠️ 1 file (GenerateEmployeePayrollJob) — 8 pending |
-| `app/Notifications/` | Mail/Database Notifications | 12 files | ❌ 0 files (folder belum ada — Phase 2) |
-| `app/Livewire/` | Livewire Components | 69 files | ❌ 0 files (Phase 2-4) |
-| `app/Http/Requests/` | Form Validation | 15 files | ❌ 0 files (Phase 2) |
-| `app/Http/Middleware/` | HTTP Middleware | 5 files | ❌ 0 files (Phase 2) |
-| `app/Policies/` | Authorization Policies | 8 files | ❌ 0 files (Phase 1.2) |
-| `app/Console/Commands/` | Artisan Commands | 7 files | ❌ 0 files (Phase 1) |
-| `database/migrations/` | Database Schema | 48 files | ⚠️ 42 files — 6 pending (sanctum, password_changed_at, FK indexes, performance_reviews, BPJS unique, exception fields) |
-| `database/seeders/` | Database Seeders | 12 files | ⚠️ partial |
-| `resources/views/` | Blade Templates | 110+ files | ❌ 0 files (Phase 2-4) |
-| `resources/js/` | JavaScript Files | 8 files | ⚠️ partial |
-| `lang/id/` | Bahasa Indonesia Translations | 13 files | ⚠️ partial |
+| `app/Services/` | Business Logic | 13 files | ✅ 13 files (Approval, Attendance, FaceRecognition, Geofence, Leave, PayrollCalculator, PayrollExport, PayslipPdf, Reimbursement, EmployeeTermination, KnowledgeBase, Embedding, GeminiClient) |
+| `app/Observers/` | Model Event Handlers | 6 files | ✅ 6 files (Attendance, BpjsConfig, Employee, Holiday, TaxConfig, Leave) |
+| `app/Jobs/` | Queue Jobs | 2 files | ✅ 2 files (GenerateEmployeePayrollJob, ProcessKnowledgeBaseEmbedding) |
+| `app/Notifications/` | Mail/Database Notifications | 7 files | ✅ 7 files (folder ada) |
+| `app/Livewire/` | Livewire Components | 69 files | ⚠️ 1 file (Logout.php) — Sprint 16-30 |
+| `app/Http/Requests/Api/` | Form Validation | 14 files | ✅ 14 files |
+| `app/Http/Middleware/` | HTTP Middleware | 3 files | ✅ 3 files (CheckPasswordExpired, DeviceDetection, GeofenceValidation) |
+| `app/Policies/` | Authorization Policies | 8 files | ✅ 8 files |
+| `app/Console/Commands/` | Artisan Commands | 8 files | ✅ 8 files (semua terdaftar di routes/console.php) |
+| `database/migrations/` | Database Schema | 48 files | ⚠️ 43 files (migrasi phk_variant baru) — 5 pending |
+| `database/seeders/` | Database Seeders | 12 files | ✅ 12 files (11 terdaftar di DatabaseSeeder) |
+| `resources/views/` | Blade Templates | 110+ files | ⚠️ 38 files — Sprint 16-30 |
+| `resources/js/` | JavaScript Files | 2 files (app.js, pwa-install.js) | ⚠️ 2 files — Sprint 16-30 |
+| `lang/id/` | Bahasa Indonesia Translations | 6 files + id.json | ⚠️ partial |
 | `tests/Feature/` | Feature Tests | 49 files | ⚠️ partial |
 | `tests/Unit/` | Unit Tests | 14 files | ⚠️ partial |
 | `docs/` | Project Documentation | 25+ files | ✅ 27 files |

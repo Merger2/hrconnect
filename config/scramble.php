@@ -1,6 +1,8 @@
 <?php
 
 use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
+use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 
 return [
     /*
@@ -32,15 +34,11 @@ return [
     'export_path' => 'api.json',
 
     'info' => [
-        /*
-         * API version.
-         */
-        'version' => env('API_VERSION', '0.0.1'),
-
-        /*
-         * Description rendered on the home page of the API documentation (`/docs/api`).
-         */
-        'description' => '',
+        'version' => env('API_VERSION', '1.0.0'),
+        'description' => 'HRConnect Enterprise HRIS API. <br><br>'
+            .'**Authentication:** Bearer token via Sanctum. '
+            .'Login via `POST /api/v1/auth/login` to obtain token. '
+            .'Include as `Authorization: Bearer {token}` header.',
     ],
 
     /*
@@ -50,7 +48,7 @@ return [
         /*
          * Define the title of the documentation's website. App name is used when this config is `null`.
          */
-        'title' => null,
+        'title' => 'HRConnect API',
 
         /*
          * Define the theme of the documentation. Available options are `light`, `dark`, and `system`.
@@ -167,6 +165,11 @@ return [
      *     ],
      * ],
      */
-    // 'security_strategy' => \Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy::class,
-    'security_strategy' => null,
+    'security_strategy' => [
+        MiddlewareAuthSecurityStrategy::class,
+        [
+            'middleware' => ['auth', 'auth:sanctum'],
+            'scheme' => SecurityScheme::http('bearer'),
+        ],
+    ],
 ];

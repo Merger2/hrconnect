@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperPerformanceReview
+ */
 #[Fillable(['employee_id', 'reviewer_id', 'status', 'review_date', 'period', 'final_score', 'notes'])]
 class PerformanceReview extends Model
 {

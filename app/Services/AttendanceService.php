@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\AttendanceStatus;
 use App\Enums\VerificationMethod;
+use App\Enums\WfaStatus;
 use App\Exceptions\AlreadyClockedInException;
 use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
@@ -80,6 +83,7 @@ class AttendanceService
                     'clock_in_is_mocked' => $data['is_mocked'] ?? false,
                     'clock_in_accuracy' => $data['accuracy'] ?? null,
                     'is_wfa' => $isWfa,
+                    'status_wfa' => $isWfa ? WfaStatus::PENDING->value : null,
                     'wfa_note' => $data['wfa_note'] ?? null,
                     'late_minutes' => $lateMinutes,
                     'verification_method' => $verificationMethod,
@@ -160,7 +164,7 @@ class AttendanceService
         );
     }
 
-    public function clockOut(Employee $employee, array $data, string $verificationMethod = 'face_verified'): Attendance
+    public function clockOut(Employee $employee, array $data): Attendance
     {
         // Tier 0: Anti-Tuyul GPS
         if (isset($data['is_mocked']) && $data['is_mocked'] == true) {
@@ -174,26 +178,13 @@ class AttendanceService
         }
 
         if (! $attendance->is_wfa) {
-            // WFO: cek dulu apakah karyawan punya branch
             if (! $employee->branch) {
                 throw new BusinessRuleException('Data lokasi kerja Anda belum diatur. Hubungi HRD.');
             }
             $this->geofenceService->validateLocation($employee->branch, $data);
         }
 
-        $faceSimilarityScore = null;
-
-        if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
-            $this->verifyPin($employee, $data['pin'] ?? '');
-            $this->logBypass($employee, 'pin_verified_clock_out');
-        } else {
-            $faceResult = $this->faceRecognitionService->verifyFace(
-                $employee,
-                $data['face_embedding'] ?? []
-            );
-            $faceSimilarityScore = $faceResult['similarity_percentage'];
-            $verificationMethod = VerificationMethod::FACE_VERIFIED->value;
-        }
+        [$verificationMethod, $faceSimilarityScore] = $this->resolveClockOutVerification($employee, $data);
 
         return DB::transaction(function () use ($employee, $data, $verificationMethod, $faceSimilarityScore) {
             $lockedAttendance = $employee->getTodayActiveAttendance(lockForUpdate: true);
@@ -215,6 +206,60 @@ class AttendanceService
 
             return $lockedAttendance->fresh();
         });
+    }
+
+    /**
+     * Tiered verification untuk clock-out (Face → PIN → throw).
+     * Mengembalikan [verification_method, similarity_score|null].
+     */
+    private function resolveClockOutVerification(Employee $employee, array $data): array
+    {
+        $hasFaceEnrolled = ! empty($employee->getRawOriginal('face_embedding'))
+            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
+        $hasFacePayload = ! empty($data['face_embedding']);
+        $hasPinPayload = ! empty($data['pin']);
+
+        // Tier 1: Face Recognition (jika kedua sisi siap)
+        if ($hasFaceEnrolled && $hasFacePayload) {
+            try {
+                $faceResult = $this->faceRecognitionService->verifyFace(
+                    $employee,
+                    $data['face_embedding']
+                );
+
+                return [
+                    VerificationMethod::FACE_VERIFIED->value,
+                    $faceResult['similarity_percentage'],
+                ];
+            } catch (FaceNotRegisteredException $e) {
+                Log::warning('Face embedding hilang saat clock-out: '.$e->getMessage());
+            } catch (FaceNotRecognizedException $e) {
+                Log::warning('Verifikasi wajah clock-out gagal: '.$e->getMessage());
+            }
+        }
+
+        // Tier 2: PIN fallback
+        if ($hasPinPayload) {
+            $this->verifyPin($employee, $data['pin']);
+
+            $bypassReason = $hasFaceEnrolled
+                ? 'pin_verified_clock_out_face_failed'
+                : 'pin_verified_clock_out_face_not_enrolled';
+            $this->logBypass($employee, $bypassReason);
+
+            return [VerificationMethod::PIN_VERIFIED->value, null];
+        }
+
+        // Tier 3: Tidak ada verifikasi valid
+        if (! $hasFaceEnrolled) {
+            throw new BusinessRuleException(
+                'Wajah belum terdaftar. Gunakan PIN sebagai fallback untuk clock-out.'
+            );
+        }
+
+        throw new BusinessRuleException(
+            'Verifikasi clock-out gagal. Pastikan wajah terdeteksi dengan jelas atau gunakan PIN sebagai fallback.'
+        );
     }
 
     private function verifyPin(Employee $employee, string $pin): void

@@ -18,7 +18,7 @@ test('applyLeave reject saat end_date sebelum start_date', function () {
     $approvalService = mock(ApprovalService::class);
     $service = new LeaveService($approvalService);
 
-    $employee = new Employee();
+    $employee = new Employee;
 
     expect(fn () => $service->applyLeave($employee, [
         'leave_type_id' => 1,
@@ -34,7 +34,7 @@ test('applyLeave reject saat end_date jauh sebelum start_date', function () {
     $approvalService = mock(ApprovalService::class);
     $service = new LeaveService($approvalService);
 
-    $employee = new Employee();
+    $employee = new Employee;
 
     expect(fn () => $service->applyLeave($employee, [
         'leave_type_id' => 1,

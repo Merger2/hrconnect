@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @mixin IdeHelperHoliday
+ */
 #[Fillable(['date', 'name', 'is_active'])]
 class Holiday extends Model
 {
@@ -53,7 +56,7 @@ class Holiday extends Model
      * Cek apakah tanggal adalah holiday.
      * Internal pakai cachedYear() — sekali query per tahun, lalu in_array() di memory.
      */
-    public static function isHoliday(Carbon $date): bool
+    public static function isHoliday(CarbonInterface $date): bool
     {
         return in_array(
             $date->toDateString(),

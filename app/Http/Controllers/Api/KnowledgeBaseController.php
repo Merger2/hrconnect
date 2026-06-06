@@ -4,41 +4,29 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\KnowledgeBaseCategory;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ChatRequest;
+use App\Http\Requests\Api\UploadDocumentRequest;
 use App\Models\KnowledgeBase;
 use App\Services\KnowledgeBaseService;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
-/**
- * KnowledgeBaseController — RAG chat + upload PDF.
- *
- * Authorization via KnowledgeBasePolicy:
- * - chat: VIEW_KNOWLEDGEBASE permission (default super-admin + hr-manager)
- * - upload/destroy: MANAGE_KNOWLEDGEBASE (super-admin + hr-manager)
- *
- * Endpoints:
- * - POST /api/v1/knowledgebase/chat (throttle 20/menit)
- * - POST /api/v1/knowledgebase (multipart PDF upload, max 10MB)
- * - DELETE /api/v1/knowledgebase/{id}
- */
+#[Group('Knowledge Base')]
 class KnowledgeBaseController extends Controller
 {
     public function __construct(
         protected KnowledgeBaseService $kbService,
     ) {}
 
-    /**
-     * POST /knowledgebase/chat — RAG query (Gemini + pgvector + pg_trgm fallback).
-     */
-    public function chat(Request $request): JsonResponse
+    #[Endpoint(title: 'Chat', description: 'Ask a question against the knowledge base (RAG with Gemini + pgvector + pg_trgm fallback).')]
+    #[BodyParameter(name: 'question', description: 'Question text (min 5, max 500 chars)', required: true, type: 'string')]
+    public function chat(ChatRequest $request): JsonResponse
     {
         $this->authorize('chat', KnowledgeBase::class);
 
-        $data = $request->validate([
-            'question' => ['required', 'string', 'min:5', 'max:500'],
-        ]);
-
-        $result = $this->kbService->chat($data['question']);
+        $result = $this->kbService->chat($request->validated('question'));
 
         return response()->json([
             'status' => 'success',
@@ -46,24 +34,19 @@ class KnowledgeBaseController extends Controller
         ]);
     }
 
-    /**
-     * POST /knowledgebase — upload PDF + dispatch embedding jobs per chunk.
-     */
-    public function upload(Request $request): JsonResponse
+    #[Endpoint(title: 'Upload Document', description: 'Upload PDF document to knowledge base (max 10MB). Embedding processing is async.')]
+    #[BodyParameter(name: 'title', description: 'Document title', required: true, type: 'string')]
+    #[BodyParameter(name: 'category', description: 'Document category', required: false, type: 'string')]
+    #[BodyParameter(name: 'file', description: 'PDF file (max 10MB)', required: true, type: 'string', format: 'binary')]
+    public function upload(UploadDocumentRequest $request): JsonResponse
     {
         $this->authorize('create', KnowledgeBase::class);
 
-        $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'category' => ['nullable', 'in:hr_policy,it_guide,general,finance,other'],
-            'file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
-        ]);
-
-        $category = isset($data['category']) ? KnowledgeBaseCategory::from($data['category']) : null;
+        $category = $request->validated('category') ? KnowledgeBaseCategory::from($request->validated('category')) : null;
 
         $kb = $this->kbService->uploadPdf(
             pdf: $request->file('file'),
-            title: $data['title'],
+            title: $request->validated('title'),
             category: $category,
         );
 
@@ -80,9 +63,7 @@ class KnowledgeBaseController extends Controller
         ], 201);
     }
 
-    /**
-     * DELETE /knowledgebase/{id} — hapus KB record + semua chunks dengan source_document sama.
-     */
+    #[Endpoint(title: 'Delete Document', description: 'Delete knowledge base document and all associated chunks.')]
     public function destroy(Request $request, KnowledgeBase $knowledgeBase): JsonResponse
     {
         $this->authorize('delete', $knowledgeBase);

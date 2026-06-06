@@ -11,7 +11,7 @@ class ShiftSeeder extends Seeder
     {
         $shifts = [
             [
-                'name' => 'Regular',
+                'name' => 'Office Hour',
                 'start_time' => '08:00:00',
                 'end_time' => '17:00:00',
                 'late_tolerance_minutes' => 15,
@@ -32,16 +32,9 @@ class ShiftSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name' => 'Afternoon',
+                'name' => 'Night 14-22',
                 'start_time' => '14:00:00',
                 'end_time' => '22:00:00',
-                'late_tolerance_minutes' => 10,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Night',
-                'start_time' => '22:00:00',
-                'end_time' => '06:00:00',
                 'late_tolerance_minutes' => 10,
                 'is_active' => true,
             ],

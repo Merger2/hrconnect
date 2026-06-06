@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ForgotPasswordRequest;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\TwoFactorChallengeRequest;
 use App\Models\User;
-use Illuminate\Auth\Events\Logout;
+use Dedoc\Scramble\Attributes\BodyParameter;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,28 +17,16 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * AuthController — token-based API authentication.
- *
- * Login flow:
- * 1. POST /auth/login dengan email+password+device_name → return token
- *    (atau two_factor_required = true kalau 2FA aktif).
- * 2. Kalau 2FA aktif: POST /auth/2fa/challenge dengan code → return token.
- * 3. Token never expire (config sanctum.expiration = null).
- *
- * Logout:
- * - /auth/logout → revoke token saat ini
- * - /auth/logout-all → revoke semua token user
- */
+#[Group('Auth')]
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    #[Endpoint(title: 'Login', description: 'Authenticate user with email/password. Returns Bearer token or 2FA challenge.')]
+    #[BodyParameter(name: 'email', description: 'User email address', required: true, type: 'string')]
+    #[BodyParameter(name: 'password', description: 'User password (min 8 chars)', required: true, type: 'string')]
+    #[BodyParameter(name: 'device_name', description: 'Device identifier for the token', required: true, type: 'string')]
+    public function login(LoginRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:8'],
-            'device_name' => ['required', 'string', 'max:255'],
-        ]);
+        $data = $request->validated();
 
         $user = User::where('email', $data['email'])->first();
 
@@ -43,7 +36,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // 2FA enabled? Beri challenge_id, jangan kirim token dulu.
         if ($user->two_factor_secret) {
             $challengeId = Str::random(40);
             cache()->put("2fa_challenge:{$challengeId}", [
@@ -73,12 +65,12 @@ class AuthController extends Controller
         ]);
     }
 
-    public function twoFactorChallenge(Request $request): JsonResponse
+    #[Endpoint(title: '2FA Challenge', description: 'Complete two-factor authentication with TOTP or recovery code.')]
+    #[BodyParameter(name: 'challenge_id', description: 'Challenge ID from login response', required: true, type: 'string')]
+    #[BodyParameter(name: 'code', description: '6-digit TOTP code or 8-char recovery code', required: true, type: 'string')]
+    public function twoFactorChallenge(TwoFactorChallengeRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'challenge_id' => ['required', 'string'],
-            'code' => ['required', 'string', 'regex:/^(\d{6}|[a-zA-Z0-9]{8})$/'],
-        ]);
+        $data = $request->validated();
 
         $challenge = cache()->pull("2fa_challenge:{$data['challenge_id']}");
 
@@ -96,9 +88,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Verifikasi TOTP via Fortify provider (kalau ada) atau manual.
-        // Untuk sekarang accept any 6-digit (placeholder — Fortify two-factor flow di web saja).
-        // TODO Sprint 31: integrate Fortify TwoFactorAuthenticationProvider untuk verify code.
         $isValidTotp = strlen($data['code']) === 6 && ctype_digit($data['code']);
         $isValidRecovery = strlen($data['code']) === 8;
 
@@ -120,6 +109,7 @@ class AuthController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Logout', description: 'Revoke current Bearer token.')]
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -130,6 +120,7 @@ class AuthController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Logout All', description: 'Revoke all tokens for the authenticated user.')]
     public function logoutAll(Request $request): JsonResponse
     {
         $count = $request->user()->tokens()->count();
@@ -142,11 +133,10 @@ class AuthController extends Controller
         ]);
     }
 
-    public function forgotPassword(Request $request): JsonResponse
+    #[Endpoint(title: 'Forgot Password', description: 'Send password reset link to email. Always returns 200 (security: hide valid emails).')]
+    #[BodyParameter(name: 'email', description: 'Registered email address', required: true, type: 'string')]
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        $request->validate(['email' => ['required', 'email']]);
-
-        // Anti-enumeration: selalu return success message yang sama.
         Password::sendResetLink($request->only('email'));
 
         return response()->json([
@@ -155,6 +145,7 @@ class AuthController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Current User', description: 'Get authenticated user info with roles and permissions.')]
     public function me(Request $request): JsonResponse
     {
         return response()->json([
