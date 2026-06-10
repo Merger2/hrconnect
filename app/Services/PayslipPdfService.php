@@ -35,7 +35,13 @@ class PayslipPdfService
         $relativePath = "payslips/{$period}/{$empNumber}.pdf";
         $absolutePath = storage_path('app/private/'.$relativePath);
 
-        @mkdir(dirname($absolutePath), 0755, recursive: true);
+        // B-23: Don't suppress mkdir errors — throw if directory can't be created
+        $dir = dirname($absolutePath);
+        if (! is_dir($dir)) {
+            if (! mkdir($dir, 0755, recursive: true) && ! is_dir($dir)) {
+                throw new \RuntimeException("Tidak dapat membuat direktori payslip: {$dir}");
+            }
+        }
 
         Pdf::loadView('payroll.payslip', $data)
             ->setPaper('A4')

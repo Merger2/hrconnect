@@ -319,4 +319,31 @@ describe('generatePayroll', function () {
         expect(fn () => $this->service->generatePayroll($employee, '2026-06'))
             ->toThrow(BusinessRuleException::class, 'sudah dikunci permanen');
     });
+
+    test('throws BusinessRuleException when payroll generation lock is unavailable', function () {
+        $user = User::factory()->create();
+        $employee = Employee::factory()->create([
+            'user_id' => $user->id,
+            'company_id' => $this->companyId,
+            'branch_id' => $this->branchId,
+            'department_id' => $this->deptId,
+            'position_id' => $this->positionId,
+            'marital_status' => 'single',
+            'employment_type' => 'permanent',
+            'join_date' => '2020-01-01',
+            'employee_number' => 'EMP-TEST-004',
+        ]);
+
+        $employee->setRelation('position', Position::find($this->positionId));
+        $lock = Cache::lock("payroll:generate:{$employee->id}:2026-06", 120);
+
+        expect($lock->get())->toBeTrue();
+
+        try {
+            expect(fn () => $this->service->generatePayroll($employee, '2026-06'))
+                ->toThrow(BusinessRuleException::class, 'sedang diproses');
+        } finally {
+            $lock->release();
+        }
+    });
 });

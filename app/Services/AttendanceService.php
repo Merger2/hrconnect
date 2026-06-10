@@ -18,6 +18,7 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -85,7 +86,8 @@ class AttendanceService
                     'is_wfa' => $isWfa,
                     'status_wfa' => $isWfa ? WfaStatus::PENDING->value : null,
                     'wfa_note' => $data['wfa_note'] ?? null,
-                    'late_minutes' => $lateMinutes,
+                    // B-34: WFA attendance should not be penalized with late_minutes
+                    'late_minutes' => $isWfa ? 0 : $lateMinutes,
                     'verification_method' => $verificationMethod,
                     'face_similarity_score' => $faceSimilarityScore,
                     'photo_selfie_in' => $data['photo_selfie'] ?? null,
@@ -126,6 +128,9 @@ class AttendanceService
                     $data['face_embedding']
                 );
 
+                // B-37: Reset PIN streak on successful face verification
+                Cache::forget("pin_streak:{$employee->id}");
+
                 return [
                     VerificationMethod::FACE_VERIFIED->value,
                     $faceResult['similarity_percentage'],
@@ -142,7 +147,19 @@ class AttendanceService
 
         // Tier 2: PIN fallback
         if ($hasPinPayload) {
+            // B-37: PIN fallback rate limit — max 5 consecutive PIN-only days
+            $pinStreakKey = "pin_streak:{$employee->id}";
+            $pinStreak = (int) Cache::get($pinStreakKey, 0);
+            if ($pinStreak >= 5) {
+                throw new BusinessRuleException(
+                    'Anda sudah 5 hari berturut-turut menggunakan PIN. Silakan hubungi atasan untuk aktivasi ulang face recognition.'
+                );
+            }
+
             $this->verifyPin($employee, $data['pin']);
+
+            // Increment PIN streak
+            Cache::put($pinStreakKey, $pinStreak + 1, now()->addWeek());
 
             $bypassReason = $hasFaceEnrolled
                 ? 'pin_verified_clock_in_face_failed'

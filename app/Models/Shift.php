@@ -35,7 +35,7 @@ class Shift extends Model
                 $end = CarbonImmutable::parse($this->attributes['end_time']);
 
                 if ($end->lessThan($start)) {
-                    $end->addDay();
+                    $end = $end->addDay();
                 }
 
                 return $start->diffInHours($end);

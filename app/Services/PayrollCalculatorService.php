@@ -24,6 +24,7 @@ use App\Models\Reimbursement;
 use App\Models\TaxConfig;
 use App\Traits\ManagesWorkDays;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PayrollCalculatorService
@@ -49,6 +50,10 @@ class PayrollCalculatorService
             $actualStart = $employee->join_date;
         }
         if ($employee->resign_date && $employee->resign_date->between($startOfMonth, $endOfMonth)) {
+            // B-39: Guard against resign_date before join_date
+            if ($employee->join_date && $employee->resign_date->lt($employee->join_date)) {
+                throw new BusinessRuleException('Tanggal resign tidak boleh sebelum tanggal join.');
+            }
             $actualEnd = $employee->resign_date;
         }
 
@@ -89,10 +94,27 @@ class PayrollCalculatorService
             return 0.0;
         }
 
+        // B-33: Round fractional hours to nearest 0.5 for legal compliance
+        $hours = round($hours * 2) / 2;
+
         $employee = $overtime->employee;
-        $basicSalary = $employee->position?->basic_salary ?? 0;
-        $fixedAllowance = $employee->position?->allowance_jabatan ?? 0;
+
+        // B-38: Throw if employee has no position with salary data
+        if (! $employee->position || ! $employee->position->basic_salary) {
+            throw new BusinessRuleException(
+                'Karyawan '.($employee->full_name ?? 'ID: '.$employee->id).' belum memiliki posisi dengan gaji pokok.'
+            );
+        }
+
+        $basicSalary = $employee->position->basic_salary;
+        $fixedAllowance = $employee->position->allowance_jabatan ?? 0;
         $monthlyHours = (int) config('hrconnect.monthly_working_hours', 173);
+
+        // B-21: Guard division by zero
+        if ($monthlyHours <= 0) {
+            $monthlyHours = 173;
+        }
+
         $hourlyRate = ($basicSalary + $fixedAllowance) / $monthlyHours;
 
         $date = CarbonImmutable::parse($overtime->date);
@@ -160,8 +182,13 @@ class PayrollCalculatorService
             && $t['max_income'] >= $grossIncome
         );
 
+        // B-28: Array index safety — validate keys exist
         if (! $taxRate) {
             return 0.0;
+        }
+
+        if (! array_key_exists('effective_rate', $taxRate) && ! array_key_exists('rate', $taxRate)) {
+            throw new BusinessRuleException('Tax rate data invalid: missing rate keys.');
         }
 
         $rateToUse = $taxRate['effective_rate'] ?? $taxRate['rate'];
@@ -228,7 +255,11 @@ class PayrollCalculatorService
      */
     public function calculatePesangon(Employee $employee): float
     {
-        $years = (int) ($employee->join_date?->diffInMonths(now()) / 12);
+        if (! $employee->join_date) {
+            return 0.0;
+        }
+
+        $years = (int) ($employee->join_date->diffInMonths(now()) / 12);
 
         $monthMultiplier = match (true) {
             $years < 1 => 0,
@@ -374,122 +405,146 @@ class PayrollCalculatorService
         $parsedPeriod = CarbonImmutable::createFromFormat('Y-m', $period);
         $targetYear = $parsedPeriod->year;
         $targetMonth = $parsedPeriod->month;
+        $lock = Cache::lock("payroll:generate:{$employee->id}:{$period}", 120);
 
-        return DB::transaction(function () use ($employee, $period, $targetYear, $targetMonth, $parsedPeriod) {
-            $existingPayroll = Payroll::where('employee_id', $employee->id)
-                ->where('period', $period)
-                ->lockForUpdate()
-                ->first();
-            if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
-                // B3.6 fix: BusinessRuleException → HTTP 422 (business rule violation),
-                // bukan DomainException → HTTP 500 (generic server error).
-                throw new BusinessRuleException("Payroll untuk periode {$period} sudah dikunci permanen.");
-            }
-            // pendapatan kena pajak
-            $grossSalary = $this->calculateProratedSalary($employee, $period);
+        if (! $lock->get()) {
+            throw new BusinessRuleException("Payroll untuk periode {$period} sedang diproses. Coba lagi beberapa saat.");
+        }
 
-            // 3.9 fix: cegah N+1 query Overtime → Employee → Position.
-            // Query overtimes lalu set relation ke $employee yang SUDAH dimuat
-            // di parameter generatePayroll(). Tanpa ini, calculateOvertimePay()
-            // akan trigger 2N extra queries (employee + position per overtime).
-            $overtimes = Overtime::where('employee_id', $employee->id)
-                ->where('status', RequestStatus::APPROVED)
-                ->whereYear('date', $targetYear)
-                ->whereMonth('date', $targetMonth)
-                ->get()
-                ->each(fn (Overtime $ot) => $ot->setRelation('employee', $employee));
+        try {
+            return DB::transaction(function () use ($employee, $period, $targetYear, $targetMonth, $parsedPeriod) {
+                $existingPayroll = Payroll::where('employee_id', $employee->id)
+                    ->where('period', $period)
+                    ->lockForUpdate()
+                    ->first();
+                if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
+                    // B3.6 fix: BusinessRuleException → HTTP 422 (business rule violation),
+                    // bukan DomainException → HTTP 500 (generic server error).
+                    throw new BusinessRuleException("Payroll untuk periode {$period} sudah dikunci permanen.");
+                }
+                // pendapatan kena pajak
+                $grossSalary = $this->calculateProratedSalary($employee, $period);
 
-            $totalOvertimePay = $overtimes
-                ->map(fn (Overtime $ot) => $this->calculateOvertimePay($ot))
-                ->sum();
+                $overtimes = Overtime::where('employee_id', $employee->id)
+                    ->where('status', RequestStatus::APPROVED)
+                    ->whereYear('date', $targetYear)
+                    ->whereMonth('date', $targetMonth)
+                    ->get()
+                    ->each(fn (Overtime $ot) => $ot->setRelation('employee', $employee));
 
-            $taxableIncome = $grossSalary + $totalOvertimePay;
+                $totalOvertimePay = $overtimes
+                    ->map(fn (Overtime $ot) => $this->calculateOvertimePay($ot))
+                    ->sum();
 
-            // pendapatan bebas pajak - Reimbursment
-            $reimbursements = Reimbursement::where('employee_id', $employee->id)
-                ->where('status', ReimbursementStatus::APPROVED)
-                ->get();
-            $totalReimbursment = $reimbursements->sum('amount');
-            $totalGross = $taxableIncome + $totalReimbursment;
+                $taxableIncome = $grossSalary + $totalOvertimePay;
 
-            // flat per hari
-            $penaltyPerDay = (int) CompanySetting::get('attendance_penalty_per_day', 50000);
+                // B-3: Filter reimbursement berdasarkan bulan periode
+                $reimbursements = Reimbursement::where('employee_id', $employee->id)
+                    ->where('status', ReimbursementStatus::APPROVED)
+                    ->whereYear('expense_date', $targetYear)
+                    ->whereMonth('expense_date', $targetMonth)
+                    ->get();
+                $totalReimbursment = $reimbursements->sum('amount');
+                $totalGross = $taxableIncome + $totalReimbursment;
 
-            // 3.11 fix: lateCount filter WFA + exception. Karyawan WFA tidak
-            // kena denda telat (tidak ada toleransi GPS), dan late yang sudah
-            // di-approve exception (force majeure) juga tidak boleh kena denda.
-            $lateCount = Attendance::where('employee_id', $employee->id)
-                ->whereYear('date', $targetYear)
-                ->whereMonth('date', $targetMonth)
-                ->where('late_minutes', '>', 0)
-                ->where('is_wfa', false)
-                ->whereNull('exception_type')
-                ->count();
-            $latePenalty = $lateCount * $penaltyPerDay;
+                // flat per hari
+                $penaltyPerDay = (int) CompanySetting::get('attendance_penalty_per_day', 50000);
 
-            // 3.11 fix: alphaCount filter exception. Alpha yang punya exception
-            // approved (sakit mendadak diakui, izin force majeure) tidak kena denda.
-            $alphaCount = Attendance::where('employee_id', $employee->id)
-                ->whereYear('date', $targetYear)
-                ->whereMonth('date', $targetMonth)
-                ->where('status', AttendanceStatus::ABSENT)
-                ->whereNull('exception_type')
-                ->count();
-            $dailyRate = $employee->position?->basic_salary ?? 0;
-            // B6 fix: hari kerja efektif dihitung dinamis per bulan (exclude weekend + holiday),
-            // bukan hardcoded 22. Cegah perhitungan denda alpha tidak akurat di bulan dengan
-            // jumlah hari kerja berbeda (Februari 20 hari, Lebaran 16 hari, dll).
-            $workingDaysInMonth = $this->countWorkingDays(
-                $parsedPeriod->copy()->startOfMonth(),
-                $parsedPeriod->copy()->endOfMonth()
-            );
-            $alphaPenalty = $alphaCount * ($dailyRate > 0 && $workingDaysInMonth > 0
-                ? $dailyRate / $workingDaysInMonth
-                : 0);
+                // 3.11 fix: lateCount filter WFA + exception. Karyawan WFA tidak
+                // kena denda telat (tidak ada toleransi GPS), dan late yang sudah
+                // di-approve exception (force majeure) juga tidak boleh kena denda.
+                $lateCount = Attendance::where('employee_id', $employee->id)
+                    ->whereYear('date', $targetYear)
+                    ->whereMonth('date', $targetMonth)
+                    ->where('late_minutes', '>', 0)
+                    ->where('is_wfa', false)
+                    ->whereNull('exception_type')
+                    ->count();
+                $latePenalty = $lateCount * $penaltyPerDay;
 
-            $attendancePenalty = $latePenalty + $alphaPenalty;
+                // 3.11 fix: alphaCount filter exception. Alpha yang punya exception
+                // approved (sakit mendadak diakui, izin force majeure) tidak kena denda.
+                $alphaCount = Attendance::where('employee_id', $employee->id)
+                    ->whereYear('date', $targetYear)
+                    ->whereMonth('date', $targetMonth)
+                    ->where('status', AttendanceStatus::ABSENT)
+                    ->whereNull('exception_type')
+                    ->count();
+                $dailyRate = $employee->position?->basic_salary ?? 0;
+                // B6 fix: hari kerja efektif dihitung dinamis per bulan (exclude weekend + holiday),
+                // bukan hardcoded 22. Cegah perhitungan denda alpha tidak akurat di bulan dengan
+                // jumlah hari kerja berbeda (Februari 20 hari, Lebaran 16 hari, dll).
+                $workingDaysInMonth = $this->countWorkingDays(
+                    $parsedPeriod->copy()->startOfMonth(),
+                    $parsedPeriod->copy()->endOfMonth()
+                );
+                $alphaPenalty = $alphaCount * ($dailyRate > 0 && $workingDaysInMonth > 0
+                    ? $dailyRate / $workingDaysInMonth
+                    : 0);
 
-            // BPJS & PPh21 dari taxable income (Reimbursement tidak dipajaki)
-            $bpjsComponents = $this->calculateBPJS($employee, $taxableIncome);
-            $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
-            $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
-            $terCategory = $this->getTERCategory($employee);
-            $pph21Deduction = $this->calculatePPh21($employee, ($taxableIncome - $attendancePenalty), $terCategory);
-            $totalDeduction = $attendancePenalty + $bpjsKesehatanDeduction + $bpjsEmploymentDeduction + $pph21Deduction;
-            $basicSalary = $employee->position?->basic_salary ?? 0;
-            $totalAllowance = $employee->position?->allowance_jabatan ?? 0;
-            $netSalary = $totalGross - $totalDeduction;
+                $attendancePenalty = $latePenalty + $alphaPenalty;
 
-            // forceDelete supaya unique (employee_id, period) tidak violation karena soft delete
-            if ($existingPayroll) {
-                $existingPayroll->forceDelete();
-            }
-            $payroll = Payroll::create([
-                'employee_id' => $employee->id,
-                'period' => $period,
-                'basic_salary' => $basicSalary,
-                'total_allowance' => $totalAllowance,
-                'gross_salary' => $totalGross,
-                'overtime_pay' => $totalOvertimePay,
-                'pph21' => $pph21Deduction,
-                'bpjs_health' => $bpjsKesehatanDeduction,
-                'bpjs_employment' => $bpjsEmploymentDeduction,
-                'loan_deduction' => 0,
-                'attendance_penalty' => $attendancePenalty,
-                'total_deduction' => $totalDeduction,
-                'net_salary' => $netSalary,
-                'status' => PayrollStatus::DRAFT,
-            ]);
+                // BPJS & PPh21 dari taxable income (Reimbursement tidak dipajaki)
+                $bpjsComponents = $this->calculateBPJS($employee, $taxableIncome);
+                $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
+                $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
+                $terCategory = $this->getTERCategory($employee);
+                $pph21Deduction = $this->calculatePPh21($employee, ($taxableIncome - $attendancePenalty), $terCategory);
+                $totalDeduction = $attendancePenalty + $bpjsKesehatanDeduction + $bpjsEmploymentDeduction + $pph21Deduction;
+                $basicSalary = $employee->position?->basic_salary ?? 0;
+                $totalAllowance = $employee->position?->allowance_jabatan ?? 0;
+                $netSalary = $totalGross - $totalDeduction;
 
-            if ($reimbursements->isNotEmpty()) {
-                Reimbursement::whereIn('id', $reimbursements->pluck('id'))
-                    ->update([
-                        'payroll_id' => $payroll->id,
-                        'status' => ReimbursementStatus::PAID,
+                // B-1: UPDATE existing DRAFT instead of forceDelete+create
+                // Preserve pdf_path, adjustments, and other data
+                if ($existingPayroll) {
+                    $existingPayroll->update([
+                        'basic_salary' => $basicSalary,
+                        'total_allowance' => $totalAllowance,
+                        'gross_salary' => $totalGross,
+                        'overtime_pay' => $totalOvertimePay,
+                        'pph21' => $pph21Deduction,
+                        'bpjs_health' => $bpjsKesehatanDeduction,
+                        'bpjs_employment' => $bpjsEmploymentDeduction,
+                        'loan_deduction' => 0,
+                        'attendance_penalty' => $attendancePenalty,
+                        'total_deduction' => $totalDeduction,
+                        'net_salary' => $netSalary,
+                        'status' => PayrollStatus::DRAFT,
                     ]);
-            }
 
-            return $payroll;
-        });
+                    $payroll = $existingPayroll;
+                } else {
+                    $payroll = Payroll::create([
+                        'employee_id' => $employee->id,
+                        'period' => $period,
+                        'basic_salary' => $basicSalary,
+                        'total_allowance' => $totalAllowance,
+                        'gross_salary' => $totalGross,
+                        'overtime_pay' => $totalOvertimePay,
+                        'pph21' => $pph21Deduction,
+                        'bpjs_health' => $bpjsKesehatanDeduction,
+                        'bpjs_employment' => $bpjsEmploymentDeduction,
+                        'loan_deduction' => 0,
+                        'attendance_penalty' => $attendancePenalty,
+                        'total_deduction' => $totalDeduction,
+                        'net_salary' => $netSalary,
+                        'status' => PayrollStatus::DRAFT,
+                    ]);
+                }
+
+                if ($reimbursements->isNotEmpty()) {
+                    Reimbursement::whereIn('id', $reimbursements->pluck('id'))
+                        ->update([
+                            'payroll_id' => $payroll->id,
+                            'status' => ReimbursementStatus::PAID,
+                        ]);
+                }
+
+                return $payroll;
+            });
+        } finally {
+            $lock->release();
+        }
     }
 }

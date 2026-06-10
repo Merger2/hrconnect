@@ -28,8 +28,8 @@ class StoreOvertimeRequest extends FormRequest
         return [
             'date' => ['required', 'date'],
             'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
-            'description' => ['nullable', 'string', 'min:10'],
+            'end_time' => ['required', 'date_format:H:i'],
+            'description' => ['required', 'string', 'min:10'],
         ];
     }
 
@@ -41,8 +41,13 @@ class StoreOvertimeRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                $start = CarbonImmutable::parse($this->input('start_time'));
-                $end = CarbonImmutable::parse($this->input('end_time'));
+                $start = CarbonImmutable::parse($this->input('date').' '.$this->input('start_time'));
+                $end = CarbonImmutable::parse($this->input('date').' '.$this->input('end_time'));
+
+                if ($end->lessThanOrEqualTo($start)) {
+                    $end = $end->addDay();
+                }
+
                 $hoursToday = $start->diffInMinutes($end) / 60;
 
                 if ($hoursToday > 4) {

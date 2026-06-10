@@ -1,387 +1,75 @@
 {
   "$schema": "https://opencode.ai/config.json",
-   "mcp": {
-        "laravel-boost": {
-            "type": "local",
-            "enabled": true,
-            "command": [
-                "php",
-                "artisan",
-                "boost:mcp"
-            ]
-        }
-    },
+  "mcp": {
+    "laravel-boost": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "php",
+        "artisan",
+        "boost:mcp"
+      ]
+    }
+  },
   "provider": {
-    "x5lab": {
-      "name": "x5lab",
+    "chenzk": {
+      "name": "Chenzk API",
       "npm": "@ai-sdk/openai-compatible",
       "options": {
-        "baseURL": "https://api.x5lab.dev/v1",
-        "apiKey": "x5-2a2d4f1e1b872d80cfeace684efbbad9"
+        "baseURL": "https://www.chenzk.top/v1",
+        "apiKey": "sk-b6Z18FauNeX1QDzIKKTw7hauXKTKdLi34PGWuiNfSiwcDnyN"
       },
       "models": {
-        "MiniMax-M2.5": {
-          "name": "MiniMax M2.5",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "claude-haiku-4-5-20251001": {
-          "name": "Claude Haiku 4 5 20251001",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "claude-haiku-4.5": {
-          "name": "Claude Haiku 4.5",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "claude-opus-4-6": {
-          "name": "Claude Opus 4 6",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "claude-opus-4.6": {
-          "name": "Claude Opus 4.6",
+        "gpt-5.5": {
+          "name": "GPT 5.5",
           "limit": {
             "context": 1000000,
-            "output": 243303
+            "output": 128000
           },
           "modalities": {
             "input": [
-              "text",
-              "image"
+              "text"
             ],
             "output": [
               "text"
             ]
           }
         },
-        "claude-opus-4.7": {
-          "name": "Claude Opus 4.7",
+        "gpt-5.5-openai-compact": {
+          "name": "GPT 5.5 Open AI Compact",
           "limit": {
             "context": 1000000,
-            "output": 243303
+            "output": 128000
           },
           "modalities": {
             "input": [
-              "text",
-              "image"
+              "text"
             ],
             "output": [
               "text"
             ]
           }
         },
-        "claude-sonnet-4.5": {
-          "name": "Claude Sonnet 4.5",
+        "gpt-5.4": {
+          "name": "GPT 5.4",
           "limit": {
             "context": 200000,
-            "output": 64000
+            "output": 128000
           },
           "modalities": {
             "input": [
-              "text",
-              "image"
+              "text"
             ],
             "output": [
               "text"
             ]
           }
         },
-        "deepseek-3.2": {
-          "name": "Deepseek 3.2",
+        "gpt-5.4-mini": {
+          "name": "GPT 5.4 Mini",
           "limit": {
             "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "deepseek-v4-flash": {
-          "name": "Deepseek V4 Flash",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "deepseek-v4-pro": {
-          "name": "Deepseek V4 Pro",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "deepseek/deepseek-chat": {
-          "name": "Deepseek Deepseek Chat",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "deepseek/deepseek-reasoner": {
-          "name": "Deepseek Deepseek Reasoner",
-          "limit": {
-            "context": 164000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-2.0-flash-lite": {
-          "name": "Gemini 2.0 Flash Lite",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3-flash-preview": {
-          "name": "Gemini 3 Flash Preview",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3-pro-preview": {
-          "name": "Gemini 3 Pro Preview",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3.1-flash-lite-preview": {
-          "name": "Gemini 3.1 Flash Lite Preview",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3.1-pro-preview": {
-          "name": "Gemini 3.1 Pro Preview",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemma-4-31b-it": {
-          "name": "Gemma 4 31b It",
-          "limit": {
-            "context": 128000,
-            "output": 32000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "glm-5": {
-          "name": "Glm 5",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "glm-5.1": {
-          "name": "Glm 5.1",
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "google/gemini-2.5-flash": {
-          "name": "Google Gemini 2.5 Flash",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "google/gemini-2.5-pro": {
-          "name": "Google Gemini 2.5 Pro",
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "openai/o3": {
-          "name": "Openai O3",
-          "limit": {
-            "context": 200000,
-            "output": 100000
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "qwen3-coder-next": {
-          "name": "Qwen3 Coder Next",
-          "limit": {
-            "context": 200000,
-            "output": 64000
+            "output": 128000
           },
           "modalities": {
             "input": [

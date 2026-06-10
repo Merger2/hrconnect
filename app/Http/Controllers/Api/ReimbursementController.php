@@ -83,7 +83,9 @@ class ReimbursementController extends Controller
         $user = $request->user();
         $perPage = (int) $request->input('per_page', 20);
 
-        $query = Reimbursement::query()->orderBy('created_at', 'desc');
+        // A-6: Eager load employee + category to prevent N+1
+        $query = Reimbursement::with('employee:id,employee_number,full_name', 'category:id,name')
+            ->orderBy('created_at', 'desc');
 
         if (! $user->hasRole(['super-admin', 'hr-manager', 'finance'])) {
             if ($user->can('approve_reimbursements_l1') && $user->employee) {

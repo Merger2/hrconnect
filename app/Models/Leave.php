@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DayType;
 use App\Enums\RequestStatus;
 use App\Traits\Approvable;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Leave extends Model
 {
     use Approvable, HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        // B-20: Refund quota when deleting approved leave
+        static::deleting(function (Leave $leave) {
+            if ($leave->status === RequestStatus::APPROVED && $leave->leaveType?->deductsFromQuota()) {
+                $balance = LeaveBalance::where('employee_id', $leave->employee_id)
+                    ->where('leave_type_id', $leave->leave_type_id)
+                    ->where('year', CarbonImmutable::parse($leave->start_date)->year)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($balance) {
+                    $balance->refund((float) $leave->total_days);
+                }
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -78,7 +97,11 @@ class Leave extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public static function hasOverlap(int $employeeId, CarbonInterface $start, CarbonInterface $end): bool
+    /**
+     * B-6 fix: Tambah parameter day_type untuk support half-day overlap.
+     * Morning + afternoon pada tanggal yang sama TIDAK overlap.
+     */
+    public static function hasOverlap(int $employeeId, CarbonInterface $start, CarbonInterface $end, ?string $dayType = null): bool
     {
         $activeStatuses = [
             RequestStatus::PENDING->value,
@@ -86,7 +109,7 @@ class Leave extends Model
             RequestStatus::APPROVED->value,
         ];
 
-        return self::where('employee_id', $employeeId)
+        $query = self::where('employee_id', $employeeId)
             ->whereIn('status', $activeStatuses)
             ->where(function ($query) use ($start, $end) {
                 $query->whereBetween('start_date', [$start, $end])
@@ -95,8 +118,14 @@ class Leave extends Model
                         $q->where('start_date', '<=', $start)
                             ->where('end_date', '>=', $end);
                     });
-            })
-            ->exists();
+            });
+
+        // B-6: Same date with different day_type is allowed
+        if ($start->eq($end) && in_array($dayType, ['morning', 'afternoon'])) {
+            $query->where('day_type', $dayType);
+        }
+
+        return $query->exists();
     }
 
     public function leaveType(): BelongsTo

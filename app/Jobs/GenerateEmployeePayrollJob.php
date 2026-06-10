@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Enums\ReimbursementStatus;
 use App\Models\Employee;
+use App\Models\Reimbursement;
 use App\Services\PayrollCalculatorService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -62,5 +64,23 @@ class GenerateEmployeePayrollJob implements ShouldQueue
             'employee' => $this->employee->full_name,
             'period' => $this->period,
         ]);
+    }
+
+    /**
+     * B-9: Handle job failure — rollback reimbursements marked PAID without payroll.
+     */
+    public function failed(?\Throwable $exception): void
+    {
+        Log::error('Payroll generation failed permanently', [
+            'employee_id' => $this->employee->id,
+            'period' => $this->period,
+            'error' => $exception?->getMessage(),
+        ]);
+
+        // Rollback reimbursements that might have been marked PAID
+        Reimbursement::where('employee_id', $this->employee->id)
+            ->whereNull('payroll_id')
+            ->where('status', ReimbursementStatus::PAID)
+            ->update(['status' => ReimbursementStatus::APPROVED]);
     }
 }

@@ -241,7 +241,13 @@ class PayrollExportService
     protected function resolveExportPath(string $filename): string
     {
         $dir = storage_path('app/private/exports');
-        @mkdir($dir, 0755, recursive: true);
+
+        // B-23: Don't suppress mkdir errors
+        if (! is_dir($dir)) {
+            if (! mkdir($dir, 0755, recursive: true) && ! is_dir($dir)) {
+                throw new \RuntimeException("Tidak dapat membuat direktori export: {$dir}");
+            }
+        }
 
         return $dir.'/'.$filename;
     }

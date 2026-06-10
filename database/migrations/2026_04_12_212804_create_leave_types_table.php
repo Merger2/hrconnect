@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('quota')->default(12);
             $table->boolean('is_paid')->default(true);
             $table->boolean('deducts_from_quota')->default(true);
+            $table->boolean('eligible_for_carry_forward')->default(true);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

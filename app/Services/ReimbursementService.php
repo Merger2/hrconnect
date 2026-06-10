@@ -20,13 +20,19 @@ class ReimbursementService
 
     /**
      * Buat pengajuan reimbursement baru + rantai approval.
+     *
+     * B-27: File upload wrapped in try-catch for storage failures.
      */
     public function createReimbursement(Employee $employee, array $data): Reimbursement
     {
         $attachmentPath = null;
 
         if (isset($data['attachment']) && $data['attachment'] instanceof UploadedFile) {
-            $attachmentPath = $data['attachment']->store('reimbursements', 'public');
+            try {
+                $attachmentPath = $data['attachment']->store('reimbursements', 'public');
+            } catch (\Throwable $e) {
+                throw new BusinessRuleException('Gagal menyimpan lampiran: '.$e->getMessage());
+            }
         }
 
         return DB::transaction(function () use ($employee, $data, $attachmentPath) {
@@ -78,6 +84,9 @@ class ReimbursementService
 
     /**
      * Sambungkan reimbursement approved ke payroll.
+     *
+     * B-8 fix: tambah DB::transaction + lockForUpdate() cegah race condition
+     * di mana reimbursement yang sama bisa di-link ke 2 payroll berbeda.
      */
     public function linkToPayroll(Reimbursement $reimbursement, int $payrollId): void
     {
@@ -85,18 +94,23 @@ class ReimbursementService
             throw new BusinessRuleException('Hanya reimbursement yang sudah disetujui penuh yang dapat dimasukkan ke payroll.');
         }
 
-        if ($reimbursement->payroll_id !== null) {
-            throw new BusinessRuleException('Reimbursement sudah terhubung ke payroll lain.');
-        }
+        DB::transaction(function () use ($reimbursement, $payrollId) {
+            // B-8: Lock reimbursement untuk cegah race condition
+            $locked = Reimbursement::lockForUpdate()->findOrFail($reimbursement->id);
 
-        $payroll = Payroll::findOrFail($payrollId);
-        if ($payroll->isLocked()) {
-            throw new BusinessRuleException('Payroll sudah dikunci dan tidak dapat diubah.');
-        }
+            if ($locked->payroll_id !== null) {
+                throw new BusinessRuleException('Reimbursement sudah terhubung ke payroll lain.');
+            }
 
-        $reimbursement->update([
-            'payroll_id' => $payrollId,
-            'status' => ReimbursementStatus::PAID,
-        ]);
+            $payroll = Payroll::lockForUpdate()->findOrFail($payrollId);
+            if ($payroll->isLocked()) {
+                throw new BusinessRuleException('Payroll sudah dikunci dan tidak dapat diubah.');
+            }
+
+            $locked->update([
+                'payroll_id' => $payrollId,
+                'status' => ReimbursementStatus::PAID,
+            ]);
+        });
     }
 }

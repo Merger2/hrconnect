@@ -3,6 +3,7 @@
 use App\Enums\ApprovalLevel;
 use App\Enums\ApprovalStatus;
 use App\Enums\RequestStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Department;
@@ -197,6 +198,36 @@ test('approve sets APPROVED_L1 when level is L1 and not fully approved', functio
 
     $leave->refresh();
     expect($leave->status)->toBe(RequestStatus::APPROVED_L1);
+});
+
+test('approve rejects higher level approval before previous levels are approved', function () {
+    $hrEmployee = approval_hr();
+    $supervisor = approval_emp();
+    $employee = approval_emp(['parent_id' => $supervisor->id]);
+    $leaveType = LeaveType::factory()->create(['deducts_from_quota' => false]);
+
+    $leave = Leave::factory()->create([
+        'employee_id' => $employee->id,
+        'leave_type_id' => $leaveType->id,
+        'status' => RequestStatus::PENDING,
+    ]);
+
+    $leave->approvals()->create([
+        'approver_id' => $supervisor->id,
+        'level' => ApprovalLevel::L1_SUPERVISOR,
+        'status' => ApprovalStatus::PENDING,
+    ]);
+
+    $l2 = $leave->approvals()->create([
+        'approver_id' => $hrEmployee->id,
+        'level' => ApprovalLevel::L2_MANAGER,
+        'status' => ApprovalStatus::PENDING,
+    ]);
+
+    expect(fn () => $this->service->approve($l2))
+        ->toThrow(BusinessRuleException::class, 'Approval level sebelumnya');
+
+    expect($l2->fresh()->status)->toBe(ApprovalStatus::PENDING);
 });
 
 test('approve deducts leave quota when fully approved and leave deducts quota', function () {

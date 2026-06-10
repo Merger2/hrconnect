@@ -6,6 +6,7 @@ use App\Enums\EmployeeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreEmployeeRequest;
 use App\Http\Requests\Api\UpdateEmployeeRequest;
+use App\Http\Resources\EmployeePiiResource;
 use App\Models\Employee;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\BodyParameter;
@@ -153,6 +154,8 @@ class EmployeeController extends Controller
     #[BodyParameter(name: 'status', description: 'Employment status', required: false, type: 'string')]
     public function update(UpdateEmployeeRequest $request, Employee $employee): JsonResponse
     {
+        $this->authorize('update', $employee);
+
         $data = $request->validated();
 
         $employee->update($data);
@@ -179,6 +182,19 @@ class EmployeeController extends Controller
         ]);
     }
 
+    #[Endpoint(title: 'Get Employee PII', description: 'Reveal sensitive employee PII. Requires manage_employees and records audit log. Flow: Employee Management (PII reveal).')]
+    public function showPii(Request $request, Employee $employee): EmployeePiiResource
+    {
+        $this->authorize('viewPii', $employee);
+
+        activity('security')
+            ->performedOn($employee)
+            ->causedBy($request->user())
+            ->log('Mengakses data PII sensitif karyawan tanpa masking.');
+
+        return EmployeePiiResource::make($employee);
+    }
+
     private function formatEmployeeListing(Employee $e): array
     {
         return [
@@ -201,11 +217,7 @@ class EmployeeController extends Controller
             'employee_number' => $e->employee_number,
             'full_name' => $e->full_name,
             'email' => $e->user?->email,
-            'phone' => $e->phone,
-            'nik' => $e->nik,
-            'npwp' => $e->npwp,
             'bank_name' => $e->bank_name,
-            'bank_account_number' => $e->bank_account_number,
             'gender' => $e->gender?->value,
             'marital_status' => $e->marital_status?->value,
             'blood_type' => $e->blood_type?->value,

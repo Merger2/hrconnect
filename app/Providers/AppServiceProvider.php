@@ -16,11 +16,16 @@ use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
 use App\Observers\PayrollObserver;
 use App\Observers\TaxConfigObserver;
+use App\Services\EmbeddingService;
+use App\Services\FaceRecognitionService;
+use App\Services\GeminiClient;
+use App\Services\GeofenceService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Pgvector\Laravel\Schema as PgvectorSchema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,7 +34,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // A-7: Service bindings for DI
+        $this->app->singleton(FaceRecognitionService::class);
+        $this->app->singleton(GeofenceService::class);
+        $this->app->singleton(GeminiClient::class);
+        $this->app->singleton(EmbeddingService::class);
     }
 
     /**
@@ -38,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        PgvectorSchema::register();
         $this->registerObservers();
     }
 

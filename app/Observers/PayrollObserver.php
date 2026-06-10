@@ -11,7 +11,8 @@ class PayrollObserver
     public function updated(Payroll $payroll): void
     {
         if ($payroll->wasChanged('status') && $payroll->status === PayrollStatus::PUBLISHED) {
-            GeneratePayslipPdfJob::dispatch($payroll);
+            // B-2: afterCommit() — jangan dispatch sebelum transaction commit
+            GeneratePayslipPdfJob::dispatch($payroll)->afterCommit();
         }
     }
 }

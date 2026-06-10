@@ -3,6 +3,7 @@
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Fortify\Fortify;
 
 uses(RefreshDatabase::class);
 
@@ -104,4 +105,48 @@ test('User dapat revoke specific token', function () {
 
     expect($user->tokens()->count())->toBe(1);
     expect($user->tokens()->first()->name)->toBe('device-2');
+});
+
+test('API 2FA challenge rejects correctly shaped but invalid TOTP code', function () {
+    $user = User::factory()->create([
+        'two_factor_secret' => Fortify::currentEncrypter()->encrypt('JBSWY3DPEHPK3PXP'),
+        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['ABCDEFGH'])),
+    ]);
+
+    $challengeId = 'test-challenge-id';
+    cache()->put("2fa_challenge:{$challengeId}", [
+        'user_id' => $user->id,
+        'device_name' => 'test-device',
+    ], now()->addMinutes(5));
+
+    $this->postJson('/api/v1/auth/2fa/challenge', [
+        'challenge_id' => $challengeId,
+        'code' => '123456',
+    ])->assertStatus(422)
+        ->assertJsonValidationErrors(['code']);
+
+    expect($user->tokens()->count())->toBe(0);
+});
+
+test('API 2FA challenge accepts recovery code once and rotates it', function () {
+    $user = User::factory()->create([
+        'two_factor_secret' => Fortify::currentEncrypter()->encrypt('JBSWY3DPEHPK3PXP'),
+        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['ABCDEFGH'])),
+    ]);
+
+    $challengeId = 'test-recovery-challenge-id';
+    cache()->put("2fa_challenge:{$challengeId}", [
+        'user_id' => $user->id,
+        'device_name' => 'test-device',
+    ], now()->addMinutes(5));
+
+    $this->postJson('/api/v1/auth/2fa/challenge', [
+        'challenge_id' => $challengeId,
+        'code' => 'ABCDEFGH',
+    ])->assertOk()
+        ->assertJsonPath('status', 'success')
+        ->assertJsonStructure(['data' => ['token']]);
+
+    expect($user->fresh()->recoveryCodes())->not->toContain('ABCDEFGH');
+    expect($user->tokens()->count())->toBe(1);
 });

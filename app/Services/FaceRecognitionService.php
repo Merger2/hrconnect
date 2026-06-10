@@ -62,14 +62,14 @@ class FaceRecognitionService
         $vector = new Vector($embedding);
 
         $result = Employee::where('id', $employee->id)
-            ->nearest('face_embedding', $vector, Distance::COSINE)
+            ->nearestNeighbors('face_embedding', $vector, Distance::Cosine)
             ->first();
 
         if (! $result) {
             throw new FaceNotRecognizedException('Wajah tidak dikenali. Silakan coba lagi dengan pencahayaan yang cukup.');
         }
 
-        $distance = $result->distance;
+        $distance = $result->neighbor_distance;
 
         if ($distance > $maxDistance) {
             $similarityPercentage = (1 - $distance) * 100;

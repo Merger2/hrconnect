@@ -38,14 +38,17 @@ class HolidayObserver
     /**
      * Invalidate cache 'holidays:{year}' untuk tahun terkait.
      * Kalau date berubah cross-year (saat update), invalidate 2 tahun.
+     *
+     * B-7 fix: isDirty() di hook saved selalu false karena model sudah di-save.
+     * Ganti ke wasChanged() yang compare dengan original values sebelum save.
      */
     private function invalidateCache(Holiday $holiday): void
     {
         $currentYear = $this->extractYear($holiday->date);
         Cache::forget("holidays:{$currentYear}");
 
-        // Edge case: date di-edit ke tahun berbeda → invalidate juga tahun lama
-        if ($holiday->isDirty('date') && $holiday->getOriginal('date') !== null) {
+        // B-7 fix: wasChanged() — bandingkan dengan original sebelum save
+        if ($holiday->wasChanged('date') && $holiday->getOriginal('date') !== null) {
             $originalYear = $this->extractYear($holiday->getOriginal('date'));
             if ($originalYear !== $currentYear) {
                 Cache::forget("holidays:{$originalYear}");

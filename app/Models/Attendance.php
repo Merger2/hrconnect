@@ -6,6 +6,7 @@ use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\VerificationMethod;
 use App\Enums\WfaStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Attendance extends Model
 {
     use Approvable, HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $attendance) {
+            if ($attendance->date && $attendance->date->isFuture()) {
+                throw new BusinessRuleException('Tanggal absensi tidak boleh di masa depan.');
+            }
+        });
+    }
 
     protected function casts(): array
     {

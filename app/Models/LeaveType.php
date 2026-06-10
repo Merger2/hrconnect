@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @mixin IdeHelperLeaveType
  */
-#[Fillable(['name', 'code', 'quota', 'is_paid', 'is_active', 'deducts_from_quota'])]
+#[Fillable(['name', 'code', 'quota', 'is_paid', 'is_active', 'deducts_from_quota', 'eligible_for_carry_forward'])]
 class LeaveType extends Model
 {
     use HasFactory;
@@ -22,6 +22,7 @@ class LeaveType extends Model
             'is_paid' => 'boolean',
             'is_active' => 'boolean',
             'deducts_from_quota' => 'boolean',
+            'eligible_for_carry_forward' => 'boolean',
         ];
     }
 

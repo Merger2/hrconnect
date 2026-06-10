@@ -13,7 +13,7 @@ enum TerCategory: string
         return match ($this) {
             self::A => 'Kategori A (TK/0, TK/1)',
             self::B => 'Kategori B (TK/2, TK/3, K/0, K/1)',
-            self::C => 'Kategori C (K/2, K/3)',
+            self::C => 'Kategori C (K/2, K/3 atau lebih)',
         };
     }
 

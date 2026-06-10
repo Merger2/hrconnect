@@ -155,10 +155,10 @@ class KnowledgeBaseService
             throw new BusinessRuleException('PDF tidak menghasilkan chunk yang valid.');
         }
 
-        return DB::transaction(function () use ($chunks, $title, $category, $filename, $owner) {
+        $createdRecords = DB::transaction(function () use ($chunks, $title, $category, $filename, $owner) {
             $morphType = $owner ? $owner::class : KnowledgeBase::class;
             $morphIdPlaceholder = $owner?->getKey() ?? 0;
-            $createdRecords = [];
+            $records = [];
 
             foreach ($chunks as $index => $chunkContent) {
                 $kb = KnowledgeBase::create([
@@ -172,13 +172,19 @@ class KnowledgeBaseService
                     'page_number' => $index,
                 ]);
 
-                $createdRecords[] = $kb;
-                ProcessKnowledgeBaseEmbedding::dispatch($kb);
+                $records[] = $kb;
             }
 
-            // First chunk dianggap sebagai "head record" untuk reference
-            return $createdRecords[0];
+            return $records;
         });
+
+        // B-2: Dispatch jobs AFTER transaction commit
+        foreach ($createdRecords as $kb) {
+            ProcessKnowledgeBaseEmbedding::dispatch($kb);
+        }
+
+        // First chunk dianggap sebagai "head record" untuk reference
+        return $createdRecords[0];
     }
 
     /**
@@ -192,15 +198,19 @@ class KnowledgeBaseService
 
     /**
      * Hapus KB record beserta semua chunks dengan source_document yang sama.
+     *
+     * B-15: Wrapping in DB::transaction to prevent partial delete.
      */
     public function deleteKnowledgeBase(KnowledgeBase $kb): int
     {
-        if ($kb->source_document) {
-            return KnowledgeBase::where('source_document', $kb->source_document)->delete();
-        }
+        return DB::transaction(function () use ($kb) {
+            if ($kb->source_document) {
+                return KnowledgeBase::where('source_document', $kb->source_document)->delete();
+            }
 
-        $kb->delete();
+            $kb->delete();
 
-        return 1;
+            return 1;
+        });
     }
 }

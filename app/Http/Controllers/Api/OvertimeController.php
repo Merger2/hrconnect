@@ -6,9 +6,8 @@ use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreOvertimeRequest;
 use App\Models\Overtime;
-use App\Services\ApprovalService;
+use App\Services\OvertimeService;
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -20,13 +19,13 @@ use Illuminate\Http\Request;
 class OvertimeController extends Controller
 {
     public function __construct(
-        protected ApprovalService $approvalService,
+        protected OvertimeService $overtimeService,
     ) {}
 
     #[Endpoint(title: 'Create Overtime', description: 'Submit overtime request with date, time range, and description (max 4h/day, 18h/week). Flow: Overtime (Step 1/2) → Approval.')]
     #[BodyParameter(name: 'date', description: 'Overtime date (Y-m-d, today or future)', required: true, type: 'string', format: 'date')]
     #[BodyParameter(name: 'start_time', description: 'Start time (H:i)', required: true, type: 'string', format: 'time')]
-    #[BodyParameter(name: 'end_time', description: 'End time (H:i, must be after start_time)', required: true, type: 'string', format: 'time')]
+    #[BodyParameter(name: 'end_time', description: 'End time (H:i). If earlier than start_time, it is treated as next-day overtime.', required: true, type: 'string', format: 'time')]
     #[BodyParameter(name: 'description', description: 'Overtime reason (min 10 chars)', required: true, type: 'string')]
     public function store(StoreOvertimeRequest $request): JsonResponse
     {
@@ -41,21 +40,7 @@ class OvertimeController extends Controller
             ], 404);
         }
 
-        $start = CarbonImmutable::parse($data['date'].' '.$data['start_time']);
-        $end = CarbonImmutable::parse($data['date'].' '.$data['end_time']);
-        $hours = $end->floatDiffInHours($start);
-
-        $overtime = Overtime::create([
-            'employee_id' => $employee->id,
-            'date' => $data['date'],
-            'start_time' => $start,
-            'end_time' => $end,
-            'description' => $data['description'],
-            'status' => RequestStatus::PENDING,
-            'total_hours' => round($hours, 2),
-        ]);
-
-        $this->approvalService->createApprovalWorkflow($overtime);
+        $overtime = $this->overtimeService->createOvertime($employee, $data);
 
         return response()->json([
             'status' => 'success',
@@ -83,7 +68,9 @@ class OvertimeController extends Controller
         $user = $request->user();
         $perPage = (int) $request->input('per_page', 20);
 
-        $query = Overtime::query()->orderBy('date', 'desc');
+        // A-6: Eager load employee to prevent N+1
+        $query = Overtime::with('employee:id,employee_number,full_name')
+            ->orderBy('date', 'desc');
 
         if (! $user->hasRole(['super-admin', 'hr-manager'])) {
             if ($user->can('approve_overtimes_l1') && $user->employee) {

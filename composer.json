@@ -21,6 +21,7 @@
         "livewire/livewire": "^4.1",
         "openspout/openspout": "^5.7",
         "paragonie/ciphersweet": "^4.10",
+        "pgvector/pgvector": "^0.2.2",
         "smalot/pdfparser": "^2.12",
         "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-ciphersweet": "^1.7",
@@ -104,7 +105,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "pgvector/pgvector"
+            ]
         }
     },
     "config": {

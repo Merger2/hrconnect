@@ -194,10 +194,16 @@ class EmbeddingService
     /**
      * Format float array → pgvector format string '[0.1,0.2,...]'.
      *
+     * B-24: Guard empty array — return empty vector string instead of invalid SQL.
+     *
      * @param  array<int, float>  $vector
      */
     public function formatVector(array $vector): string
     {
+        if (empty($vector)) {
+            return '[]';
+        }
+
         return '['.implode(',', array_map('floatval', $vector)).']';
     }
 }

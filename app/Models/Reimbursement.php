@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ReimbursementStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Reimbursement extends Model
 {
     use Approvable, HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        // B-19: Block terminal state changes — PAID/APPROVED/REJECTED cannot revert
+        static::updating(function (Reimbursement $reimbursement) {
+            $originalStatus = $reimbursement->getOriginal('status');
+
+            $terminalStates = [
+                ReimbursementStatus::PAID->value,
+                ReimbursementStatus::APPROVED->value,
+                ReimbursementStatus::REJECTED->value,
+            ];
+
+            if (in_array($originalStatus, $terminalStates)) {
+                throw new BusinessRuleException(
+                    'Reimbursement dengan status '.$originalStatus.' tidak dapat diubah.'
+                );
+            }
+        });
+    }
 
     protected function casts(): array
     {

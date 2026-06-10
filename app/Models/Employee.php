@@ -25,6 +25,8 @@ use Laravolt\Indonesia\Models\Province;
 use Laravolt\Indonesia\Models\Village;
 use ParagonIE\CipherSweet\BlindIndex;
 use ParagonIE\CipherSweet\EncryptedRow;
+use Pgvector\Laravel\HasNeighbors;
+use Pgvector\Laravel\Vector;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
@@ -45,7 +47,7 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
 class Employee extends Model implements CipherSweetEncrypted
 {
-    use HasFactory, SoftDeletes, UsesCipherSweet;
+    use HasFactory, HasNeighbors, SoftDeletes, UsesCipherSweet;
 
     public function scopeActive(Builder $query): void
     {
@@ -71,7 +73,7 @@ class Employee extends Model implements CipherSweetEncrypted
             'termination_type' => TerminationType::class,
             'graduation_year' => 'integer',
             'pin' => 'hashed',
-            'face_embedding' => 'vector',
+            'face_embedding' => Vector::class,
         ];
     }
 
@@ -273,7 +275,14 @@ class Employee extends Model implements CipherSweetEncrypted
 
     public function getDirectApprover(): ?Employee
     {
-        return $this->manager;
+        // B-12: Only active managers can approve
+        $manager = $this->manager;
+
+        if ($manager && $manager->status !== EmployeeStatus::ACTIVE) {
+            return null;
+        }
+
+        return $manager;
     }
 
     public function calculatePtkp(): float

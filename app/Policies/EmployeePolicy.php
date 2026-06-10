@@ -43,9 +43,12 @@ class EmployeePolicy
 
     public function update(User $user, Employee $employee): bool
     {
-        // Boleh kalau punya permission manage, ATAU edit profil sendiri
-        return $user->can(Permission::MANAGE_EMPLOYEES->value)
-            || $user->employee?->id === $employee->id;
+        return $user->can(Permission::MANAGE_EMPLOYEES->value);
+    }
+
+    public function viewPii(User $user, Employee $employee): bool
+    {
+        return $user->can(Permission::MANAGE_EMPLOYEES->value);
     }
 
     public function delete(User $user, Employee $employee): bool

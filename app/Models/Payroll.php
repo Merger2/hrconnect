@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PayrollStatus;
+use App\Exceptions\BusinessRuleException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Payroll extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        // B-18: Block terminal state changes — PUBLISHED/PAID cannot revert
+        static::updating(function (Payroll $payroll) {
+            $originalStatus = $payroll->getOriginal('status');
+
+            if (in_array($originalStatus, [PayrollStatus::PUBLISHED, PayrollStatus::PAID])) {
+                throw new BusinessRuleException(
+                    'Payroll dengan status '.$originalStatus->value.' tidak dapat diubah.'
+                );
+            }
+        });
+    }
 
     protected function casts(): array
     {

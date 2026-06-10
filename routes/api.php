@@ -157,10 +157,15 @@ Route::middleware('auth:sanctum')->group(function () {
         ->group(function () {
             Route::get('/', [EmployeeController::class, 'index'])->name('index');
             Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
+            Route::get('/{employee}/pii', [EmployeeController::class, 'showPii'])
+                ->middleware('permission:manage_employees')
+                ->name('pii');
             Route::post('/', [EmployeeController::class, 'store'])
                 ->middleware('permission:manage_employees')
                 ->name('store');
-            Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
+            Route::put('/{employee}', [EmployeeController::class, 'update'])
+                ->middleware('permission:manage_employees')
+                ->name('update');
             Route::delete('/{employee}', [EmployeeController::class, 'destroy'])
                 ->middleware('permission:manage_employees')
                 ->name('destroy');

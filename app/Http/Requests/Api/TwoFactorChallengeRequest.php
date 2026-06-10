@@ -15,7 +15,7 @@ class TwoFactorChallengeRequest extends FormRequest
     {
         return [
             'challenge_id' => ['required', 'string'],
-            'code' => ['required', 'string', 'regex:/^(\d{6}|[a-zA-Z0-9]{8})$/'],
+            'code' => ['required', 'string'],
         ];
     }
 }

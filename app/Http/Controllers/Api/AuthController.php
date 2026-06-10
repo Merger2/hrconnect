@@ -16,10 +16,18 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
+use Laravel\Fortify\Fortify;
+use Laravel\Sanctum\TransientToken;
+use Throwable;
 
 #[Group('Auth')]
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly TwoFactorAuthenticationProvider $twoFactorProvider,
+    ) {}
+
     #[Endpoint(title: 'Login', description: 'Authenticate user with email/password. Returns Bearer token or 2FA challenge. Flow: Auth — Login → (2FA jika perlu) → Get Profile.')]
     #[BodyParameter(name: 'email', description: 'User email address', required: true, type: 'string')]
     #[BodyParameter(name: 'password', description: 'User password (min 8 chars)', required: true, type: 'string')]
@@ -88,13 +96,31 @@ class AuthController extends Controller
             ]);
         }
 
-        $isValidTotp = strlen($data['code']) === 6 && ctype_digit($data['code']);
-        $isValidRecovery = strlen($data['code']) === 8;
+        $validRecoveryCode = collect($user->recoveryCodes())->first(
+            fn (string $recoveryCode): bool => hash_equals($recoveryCode, $data['code'])
+        );
 
-        if (! $isValidTotp && ! $isValidRecovery) {
+        $isValidTotp = false;
+
+        if (! $validRecoveryCode) {
+            try {
+                $isValidTotp = $this->twoFactorProvider->verify(
+                    Fortify::currentEncrypter()->decrypt($user->two_factor_secret),
+                    $data['code']
+                );
+            } catch (Throwable) {
+                $isValidTotp = false;
+            }
+        }
+
+        if (! $isValidTotp && ! $validRecoveryCode) {
             throw ValidationException::withMessages([
                 'code' => ['Kode 2FA tidak valid.'],
             ]);
+        }
+
+        if ($validRecoveryCode) {
+            $user->replaceRecoveryCode($validRecoveryCode);
         }
 
         $token = $user->createToken($challenge['device_name'])->plainTextToken;
@@ -112,7 +138,11 @@ class AuthController extends Controller
     #[Endpoint(title: 'Logout', description: 'Revoke current Bearer token. Flow: Auth (logout device).')]
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+
+        if ($token && ! $token instanceof TransientToken) {
+            $token->delete();
+        }
 
         return response()->json([
             'status' => 'success',

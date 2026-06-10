@@ -38,7 +38,9 @@ class PayrollController extends Controller
         $user = $request->user();
         $perPage = (int) $request->input('per_page', 20);
 
-        $query = Payroll::query()->orderBy('period', 'desc');
+        // A-6: Eager load employee to prevent N+1
+        $query = Payroll::with('employee:id,employee_number,full_name')
+            ->orderBy('period', 'desc');
 
         // Employee → diri sendiri saja
         if (! $user->hasRole(['super-admin', 'finance']) && $user->employee) {

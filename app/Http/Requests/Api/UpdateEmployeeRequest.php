@@ -22,7 +22,12 @@ class UpdateEmployeeRequest extends FormRequest
             'branch_id' => ['sometimes', 'integer', 'exists:branches,id'],
             'department_id' => ['sometimes', 'integer', 'exists:departments,id'],
             'position_id' => ['sometimes', 'integer', 'exists:positions,id'],
-            'parent_id' => ['sometimes', 'nullable', 'integer', 'exists:employees,id'],
+            'parent_id' => ['sometimes', 'nullable', 'integer', 'exists:employees,id', function ($attribute, $value, $fail) {
+                $employee = $this->route('employee');
+                if ($value !== null && $employee && (int) $value === (int) $employee->id) {
+                    $fail('Manager tidak boleh merujuk ke dirinya sendiri.');
+                }
+            }],
             'employment_type' => ['sometimes', 'in:permanent,contract,probation,intern'],
             'status' => ['sometimes', Rule::enum(EmployeeStatus::class)],
             'address_detail' => ['sometimes', 'nullable', 'string', 'max:500'],

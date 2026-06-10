@@ -68,6 +68,17 @@ Update progress per folder. Sebelumnya banyak yang kosong — sebagian sudah pop
   - `AlreadyClockedInException` / `AlreadyClockedOutException` → 409
   - `AntiFakeGPSException`, `FaceNotRecognizedException`, `GeofenceViolationException`, `InvalidPinException`
 
+## Authorization Pattern (A-5)
+
+- **Middleware** (`permission:X`) — used on route groups for broad access control (e.g., `auth:sanctum`, `permission:manage-payroll`). Define in route files, not controllers.
+- **Policies** (resource-based) — used for per-instance authorization inside controllers via `$this->authorize()`.
+  - 8 policies exist: `EmployeePolicy`, `AttendancePolicy`, `LeavePolicy`, `OvertimePolicy`, `ReimbursementPolicy`, `PayrollPolicy`, `KnowledgeBasePolicy`, `AssetPolicy`.
+  - Auto-discovery via Laravel 11+ (no manual registration needed).
+- **Rule of thumb**:
+  - Middleware for "can this user access this endpoint at all?" (role/permission gate)
+  - Policy for "can this user perform this action on this specific resource?" (ownership/state check)
+- **IDOR prevention**: Policies call `$user->id === $model->employee_id` or Spatie `can()` for ownership check. All `show/update/delete` actions are policy-gated.
+
 ## 3NF Companies / Branches / Employees
 
 - **Companies**: legal identity only (name, phone, email, website, npwp, code, logo, is_active). NO address FK.

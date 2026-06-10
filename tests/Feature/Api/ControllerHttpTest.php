@@ -13,6 +13,7 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Leave;
+use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Models\Position;
 use App\Models\Reimbursement;
@@ -147,6 +148,10 @@ describe('EmployeeController CRUD', function () {
             'branch_id' => $this->branch->id,
             'department_id' => $this->department->id,
             'position_id' => $this->position->id,
+            'nik' => '3276010101990001',
+            'npwp' => '12.345.678.9-012.345',
+            'phone' => '081234567890',
+            'bank_account_number' => '1234567890',
         ]);
         $token = $this->hrUser->createToken('test')->plainTextToken;
 
@@ -154,7 +159,56 @@ describe('EmployeeController CRUD', function () {
             ->getJson("/api/v1/employees/{$employee->id}")
             ->assertOk()
             ->assertJsonPath('data.id', $employee->id)
-            ->assertJsonPath('data.full_name', $employee->full_name);
+            ->assertJsonPath('data.full_name', $employee->full_name)
+            ->assertJsonMissingPath('data.nik')
+            ->assertJsonMissingPath('data.npwp')
+            ->assertJsonMissingPath('data.phone')
+            ->assertJsonMissingPath('data.bank_account_number');
+    });
+
+    it('reveals employee PII only through dedicated audited endpoint', function () {
+        $employee = Employee::factory()->create([
+            'user_id' => $this->employeeUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+            'nik' => '3276010101990001',
+            'npwp' => '12.345.678.9-012.345',
+            'phone' => '081234567890',
+            'bank_account_number' => '1234567890',
+        ]);
+        $token = $this->hrUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson("/api/v1/employees/{$employee->id}/pii")
+            ->assertOk()
+            ->assertJsonPath('data.nik', '3276010101990001')
+            ->assertJsonPath('data.npwp', '12.345.678.9-012.345')
+            ->assertJsonPath('data.phone', '081234567890')
+            ->assertJsonPath('data.bank_account_number', '1234567890');
+
+        $this->assertDatabaseHas('activity_log', [
+            'log_name' => 'security',
+            'subject_type' => Employee::class,
+            'subject_id' => $employee->id,
+            'causer_id' => $this->hrUser->id,
+        ]);
+    });
+
+    it('forbids employee PII endpoint for view-only employee role', function () {
+        $employee = Employee::factory()->create([
+            'user_id' => $this->employeeUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+        ]);
+        $token = $this->managerUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson("/api/v1/employees/{$employee->id}/pii")
+            ->assertStatus(403);
     });
 
     it('updates employee fields', function () {
@@ -180,6 +234,26 @@ describe('EmployeeController CRUD', function () {
             'full_name' => 'Nama Updated',
             'employment_type' => 'contract',
         ]);
+    });
+
+    it('forbids employee update for view-only manager role', function () {
+        $employee = Employee::factory()->create([
+            'user_id' => $this->employeeUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+            'full_name' => 'Nama Awal',
+        ]);
+        $token = $this->managerUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->putJson("/api/v1/employees/{$employee->id}", [
+                'full_name' => 'Nama Tidak Boleh Update',
+            ])
+            ->assertStatus(403);
+
+        expect($employee->fresh()->full_name)->toBe('Nama Awal');
     });
 
     it('soft-deletes employee', function () {
@@ -245,6 +319,13 @@ describe('ApprovalController flow', function () {
         ]);
 
         $leaveType = LeaveType::factory()->create(['deducts_from_quota' => true]);
+
+        LeaveBalance::factory()->create([
+            'employee_id' => $this->submitterEmp->id,
+            'leave_type_id' => $leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
 
         $this->leave = Leave::factory()->create([
             'employee_id' => $this->submitterEmp->id,
@@ -320,6 +401,26 @@ describe('ApprovalController flow', function () {
                 'notes' => 'Coba approve lagi',
             ])
             ->assertStatus(409);
+    });
+
+    it('rejects L2 approval before L1 is approved', function () {
+        $hrEmp = $this->hrUser->employee;
+
+        $l2 = $this->leave->approvals()->create([
+            'approver_id' => $hrEmp->id,
+            'level' => ApprovalLevel::L2_MANAGER,
+            'status' => ApprovalStatus::PENDING,
+        ]);
+
+        $token = $this->hrUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve", [
+                'notes' => 'Mencoba bypass L1',
+            ])
+            ->assertStatus(422);
+
+        expect($l2->fresh()->status)->toBe(ApprovalStatus::PENDING);
     });
 
     it('returns 404 when employee has no user link for pending approvals', function () {

@@ -57,6 +57,10 @@ class EmployeeTerminationController extends Controller
     #[BodyParameter(name: 'date', description: 'Reference date (Y-m-d, defaults to today)', required: false, type: 'string', format: 'date')]
     public function processContractEnd(Request $request): JsonResponse
     {
+        $request->validate([
+            'date' => ['nullable', 'date'],
+        ]);
+
         $date = $request->filled('date') ? CarbonImmutable::parse($request->input('date')) : null;
         $count = $this->terminationService->processContractEnd($date);
 

@@ -52,6 +52,13 @@ Schedule::command('attendance:auto-approve-wfa')
 
 // payroll:generate TIDAK auto-scheduled — manual trigger via Finance UI / artisan.
 
+// B-5: Missed clock detection: setiap hari jam 00:01 (deteksi hari sebelumnya)
+Schedule::command('attendance:detect-missed-clock')
+    ->dailyAt('00:01')
+    ->withoutOverlapping()
+    ->onSuccess(fn () => logger()->info('attendance:detect-missed-clock selesai'))
+    ->onFailure(fn () => logger()->error('attendance:detect-missed-clock gagal'));
+
 // Attendance reminder: setiap jam kerja jam 09:00
 Schedule::command('attendance:send-reminders')
     ->weekdays()

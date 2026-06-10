@@ -28,7 +28,11 @@ class StoreEmployeeRequest extends FormRequest
             'branch_id' => ['required', 'integer', 'exists:branches,id'],
             'department_id' => ['required', 'integer', 'exists:departments,id'],
             'position_id' => ['required', 'integer', 'exists:positions,id'],
-            'parent_id' => ['nullable', 'integer', 'exists:employees,id'],
+            'parent_id' => ['nullable', 'integer', 'exists:employees,id', function ($attribute, $value, $fail) {
+                if ($value !== null && (int) $value === (int) $this->input('id')) {
+                    $fail('Manager tidak boleh merujuk ke dirinya sendiri.');
+                }
+            }],
             'gender' => ['required', 'in:L,P'],
             'marital_status' => ['required', 'in:single,married,divorced,widowed'],
             'employment_type' => ['required', 'in:permanent,contract,probation,intern'],

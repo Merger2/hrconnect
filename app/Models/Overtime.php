@@ -46,8 +46,15 @@ class Overtime extends Model
             return 0.0;
         }
 
+        $end = $this->end_time;
+
+        // B-11: Detect overnight shift (end < start) → add 1 day
+        if ($this->end_time->lessThan($this->start_time)) {
+            $end = $this->end_time->copy()->addDay();
+        }
+
         // diffInMinutes / 60 mencegah pembulatan ke bawah yang merugikan uang karyawan
-        $minutes = $this->start_time->diffInMinutes($this->end_time);
+        $minutes = $this->start_time->diffInMinutes($end);
 
         return round($minutes / 60, 2);
     }

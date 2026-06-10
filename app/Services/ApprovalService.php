@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\ApprovalLevel;
 use App\Enums\ApprovalStatus;
 use App\Enums\RequestStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Models\Approval;
 use App\Models\Employee;
 use App\Models\Leave;
@@ -65,8 +66,33 @@ class ApprovalService
     public function approve(Approval $approval, string $notes = ''): void
     {
         DB::transaction(function () use ($approval, $notes) {
-            $approvable = $approval->approvable()->lockForUpdate()->first();
-            $approval->update([
+            $lockedApproval = Approval::query()
+                ->whereKey($approval->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($lockedApproval->status !== ApprovalStatus::PENDING) {
+                throw new BusinessRuleException('Approval sudah diproses sebelumnya.');
+            }
+
+            $approvable = $lockedApproval->approvable()->lockForUpdate()->first();
+
+            if (! $approvable) {
+                throw new BusinessRuleException('Pengajuan tidak ditemukan.');
+            }
+
+            if ($lockedApproval->level->value > ApprovalLevel::L1_SUPERVISOR->value) {
+                $hasPendingPreviousLevel = $approvable->approvals()
+                    ->where('level', '<', $lockedApproval->level->value)
+                    ->where('status', '!=', ApprovalStatus::APPROVED)
+                    ->exists();
+
+                if ($hasPendingPreviousLevel) {
+                    throw new BusinessRuleException('Approval level sebelumnya harus disetujui terlebih dahulu.');
+                }
+            }
+
+            $lockedApproval->update([
                 'status' => ApprovalStatus::APPROVED,
                 'approved_at' => now(),
                 'notes' => $notes ?: null,
@@ -83,9 +109,15 @@ class ApprovalService
                         ->where('year', CarbonImmutable::parse($approvable->start_date)->year)
                         ->lockForUpdate()
                         ->first();
-                    $balance?->deduct((float) $approvable->total_days);
+
+                    // B-22: Throw if balance not found instead of silent null
+                    if (! $balance) {
+                        throw new BusinessRuleException('Saldo cuti tidak ditemukan saat approval.');
+                    }
+
+                    $balance->deduct((float) $approvable->total_days);
                 }
-            } elseif ($approval->level === ApprovalLevel::L1_SUPERVISOR) {
+            } elseif ($lockedApproval->level === ApprovalLevel::L1_SUPERVISOR) {
                 $approvable->update(['status' => RequestStatus::APPROVED_L1]);
             }
         });
@@ -97,9 +129,22 @@ class ApprovalService
     public function reject(Approval $approval, string $reason): void
     {
         DB::transaction(function () use ($approval, $reason) {
-            $approvable = $approval->approvable()->lockForUpdate()->first();
+            $lockedApproval = Approval::query()
+                ->whereKey($approval->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            $approval->update([
+            if ($lockedApproval->status !== ApprovalStatus::PENDING) {
+                throw new BusinessRuleException('Approval sudah diproses sebelumnya.');
+            }
+
+            $approvable = $lockedApproval->approvable()->lockForUpdate()->first();
+
+            if (! $approvable) {
+                throw new BusinessRuleException('Pengajuan tidak ditemukan.');
+            }
+
+            $lockedApproval->update([
                 'status' => ApprovalStatus::REJECTED,
                 'notes' => $reason,
             ]);
