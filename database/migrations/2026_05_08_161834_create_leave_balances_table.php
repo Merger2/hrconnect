@@ -24,11 +24,11 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['employee_id', 'leave_type_id', 'year']);
-
-            if (DB::getDriverName() === 'pgsql') {
-                DB::statement('ALTER TABLE leave_balances ADD CONSTRAINT leave_balances_used_check CHECK (used <= quota + carry_forward)');
-            }
         });
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE leave_balances ADD CONSTRAINT leave_balances_used_check CHECK (used <= quota + carry_forward)');
+        }
     }
 
     /**
