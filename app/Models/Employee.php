@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\PgVector;
 use App\Enums\BloodType;
 use App\Enums\EducationLevel;
 use App\Enums\EmployeeStatus;
@@ -26,7 +27,6 @@ use Laravolt\Indonesia\Models\Village;
 use ParagonIE\CipherSweet\BlindIndex;
 use ParagonIE\CipherSweet\EncryptedRow;
 use Pgvector\Laravel\HasNeighbors;
-use Pgvector\Laravel\Vector;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
@@ -73,7 +73,7 @@ class Employee extends Model implements CipherSweetEncrypted
             'termination_type' => TerminationType::class,
             'graduation_year' => 'integer',
             'pin' => 'hashed',
-            'face_embedding' => Vector::class,
+            'face_embedding' => PgVector::class,
         ];
     }
 

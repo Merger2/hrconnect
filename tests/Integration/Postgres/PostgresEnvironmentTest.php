@@ -6,6 +6,7 @@ use App\Services\FaceRecognitionService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Pgvector\Laravel\Distance;
 use Pgvector\Laravel\Vector;
 
 uses(RefreshDatabase::class);
@@ -99,7 +100,7 @@ function createPostgresEmployee(array $attributes = []): int
         'birth_date' => '1990-01-01',
         'join_date' => '2020-01-01',
         'face_embedding' => $attributes['face_embedding'] ?? null,
-        'education_level' => 's1',
+        'education_level' => 'bachelor',
         'institution_name' => 'PostgreSQL University',
         'graduation_year' => 2012,
         'created_at' => now(),
@@ -173,7 +174,7 @@ test('pgvector stores 128 dimension face embeddings and supports nearest neighbo
     ]);
 
     $nearest = Employee::query()
-        ->nearestNeighbors('face_embedding', new Vector($nearEmbedding))
+        ->nearestNeighbors('face_embedding', new Vector($nearEmbedding), Distance::Cosine)
         ->first();
 
     expect($nearest)->not->toBeNull()

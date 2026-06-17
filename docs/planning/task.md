@@ -1,7 +1,7 @@
 # Task Tracker — HRConnect Backend
 
 > **Source of truth** untuk progress backend.
-> Last updated: 2026-06-10 (Audit backend/API — security P0 + selected P1/P2 fixes completed with focused regression tests; API/PWA password expiry intentionally not enforced per architecture decision; remaining backlog A-2, A-3, T-10 s.d. T-12, D-1, D-2, and original P3 items)
+> Last updated: 2026-06-17 (Phase 1 Pipeline Green — SQLite-safe vector cast added, PostgreSQL enum blocker fixed, PostgreSQL CI job added, test CipherSweet key configured. PostgreSQL suite: 7 tests passed locally.)
 
 ---
 
@@ -100,21 +100,71 @@
 
 ---
 
-## 📦 ARCHITECTURAL IMPROVEMENTS — 7 items ⚠️ MOSTLY DONE / NEED CLEANUP
+## 🔍 COMPREHENSIVE BACKEND AUDIT (2026-06-17) — 33 actionable findings
+
+### 🔴 CRITICAL (4)
+
+| # | Finding | File | Priority | Status |
+|---|---------|------|----------|--------|
+| C-1 | **KnowledgeBaseService hardcoded `knowledgeable_id=1`** — Ownerless PDF upload assigns morph ID `1` regardless of actual record. Data integrity corrupt. Fix: throw `ValidationException` when no authenticated user. | `KnowledgeBaseService.php:164-166` | P0 | ⏳ |
+| C-2 | **`KnowledgeBase::$casts['embedding'] = 'vector'` has no SQLite fallback** — Fixed with `App\Casts\PgVector`, preserving pgvector behavior on PostgreSQL and string fallback on SQLite. | `app/Casts/PgVector.php`<br>`app/Models/KnowledgeBase.php` | P0 | ✅ |
+| C-3 | **`Employee::$casts['face_embedding']` crashes on SQLite** — Fixed with `App\Casts\PgVector`; focused EmployeeTermination test passes. | `app/Casts/PgVector.php`<br>`app/Models/Employee.php` | P0 | ✅ |
+| C-6 | **PostgreSQL integration suite tidak jalan di CI** — Fixed by adding a dedicated PostgreSQL job using `pgvector/pgvector:pg16` and required extensions. | `.github/workflows/tests.yml` | P0 | ✅ |
+
+### 🟠 HIGH (13)
+
+| # | Finding | File | Priority | Status |
+|---|---------|------|----------|--------|
+| H-1 | **`logBypass()` before transaction (clock-in)** — Orphan activity log jika transaksi rollback. Fix: move inside transaction after commit. | `AttendanceService.php:62` | P1 | ⏳ |
+| H-2 | **`logBypass()` before transaction (clock-out)** — Same issue in clock-out path. | `AttendanceService.php:204` | P1 | ⏳ |
+| H-3 | **`createApprovalWorkflow()` nested in Leave transaction** — Nested transaction is unnecessary complexity and makes rollback behavior harder to reason about. Fix: move workflow creation into one transaction boundary or use `DB::afterCommit()` intentionally. | `LeaveService.php:105` | P1 | ⏳ |
+| H-4 | **`createApprovalWorkflow()` nested in Overtime transaction** — Same nested transaction complexity. | `OvertimeService.php:44` | P1 | ⏳ |
+| H-5 | **PayrollExportService Writer tanpa try-finally** — Exception → resource leak, file corrupt. Fix: wrap in try-finally. | `PayrollExportService.php:50-104` | P1 | ⏳ |
+| H-6 | **5 dead FormRequest classes (`authorize(): false`, never injected)** — `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`. All return `authorize(): false`, empty `rules()`, **never used**. Dead code + security illusion. Fix: implement proper `authorize()` + `rules()` + inject into controllers. | 5 FormRequest files + 5 controllers | P1 | ⏳ |
+| H-7 | **N+1 query in ApprovalController::index()** — `$a->approvable->employee` lazy-loaded per row (20+ queries per page). Fix: add eager load `with(['approvable.employee'])`. | `ApprovalController.php:73` | P1 | ⏳ |
+| H-8 | **AttendanceController::index() uses inline validation** — `ListAttendanceRequest` exists but never injected. | `AttendanceController.php` | P1 | ⏳ |
+| H-9 | **destroy() cancellation consistency** — Leave/Overtime do `status update + delete()` without transaction; Reimbursement directly deletes. Standardize cancellation flow and wrap multi-write cancellation in `DB::transaction()`. | `LeaveController`, `OvertimeController`, `ReimbursementController` | P1 | ⏳ |
+| H-10 | **Default phpunit.xml missing `CIPHERSWEET_KEY`** — Fixed with deterministic test-only CipherSweet key in `phpunit.xml`. | `phpunit.xml` | P1 | ✅ |
+| H-11 | **Testing-strategy.md references 36+ non-existent test files** — Dokumentasi tidak sinkron dengan codebase. Fix: audit and update doc. | `docs/testing/testing-strategy.md` | P1 | ⏳ |
+| H-12 | **OvertimeService lacks direct service tests** — Covered indirectly through API flow tests, but service business rules should have focused tests. Fix: create `OvertimeServiceTest`. | `app/Services/OvertimeService.php`<br>`tests/Unit/Services/OvertimeServiceTest.php` | P1 | ⏳ |
+| H-13 | **Payroll PostgreSQL/concurrency coverage gap** — `generatePayroll()` has direct SQLite/unit coverage, but PostgreSQL locking/concurrency scenarios still need integration coverage. | `tests/Integration/Postgres/*` | P1 | ⏳ |
+
+### 🟡 MEDIUM / DECISION ITEMS (16)
+
+| # | Finding | File | Priority | Status |
+|---|---------|------|----------|--------|
+| M-1 | **`AttendanceService::clockIn()` double check `hasClockedInToday()`** — Checked before and inside transaction. Remove redundant check. | `AttendanceService.php` | P2 | ⏳ |
+| M-2 | **`logBypass()` uses `request()->ip()` directly** — Works in normal HTTP flow, but should tolerate CLI/queue/test contexts with null-safe request/IP handling. | `AttendanceService.php` | P2 | ⏳ |
+| M-3 | **`FaceRecognitionService::nearestNeighbors()` QueryException tidak ditangkap** — pgvector outage → uncaught crash. Wrap in try-catch. | `FaceRecognitionService.php:64` | P2 | ⏳ |
+| M-4 | **GeminiClient `sleep()` blocking retry** — Harusnya `Http::retry()` non-blocking. | `GeminiClient.php:202` | P2 | ⏳ |
+| M-5 | **Reimbursement status update ke PAID tanpa `lockForUpdate()`** — Race condition risk. | `PayrollCalculatorService.php:536` | P2 | ⏳ |
+| M-6 | **EmployeeTerminationService activity log inside transaction** — Usually rolls back with the same DB connection, but side-effect timing should be reviewed and made explicit. | `EmployeeTerminationService.php:81` | P2 | ⏳ |
+| M-7 | **ClockInRequest `embedding` tanpa validasi** — Missing `size:128` / `numeric\|between:-1.5,1.5` per element. | `ClockInRequest.php` | P2 | ⏳ |
+| M-8 | **ClockOutRequest — same missing validation** | `ClockOutRequest.php` | P2 | ⏳ |
+| M-9 | **LeaveController::store() tidak ada `$this->authorize('create')`** | `LeaveController.php` | P2 | ⏳ |
+| M-11 | **EmployeeController::store() — `phone` tanpa format regex, `nik` tanpa `digits:16`** | `StoreEmployeeRequest.php` | P2 | ⏳ |
+| M-12 | **ProfileController update should use explicit field mapping** — Current `UpdateProfileRequest` already whitelists safe fields; explicit mapping would make the self-service boundary clearer. | `ProfileController.php:62` | P2 | ⏳ |
+| M-13 | **Sanctum token `expiration => null` decision** — Intentional for PWA/API token reuse unless product requires forced token expiry. Document final decision. | `config/sanctum.php` | Decision | ⏳ |
+| M-14 | **Store endpoints (`/leave`, `/overtime`, `/reimbursement`) tidak ada rate limiting** | `routes/api.php` | P2 | ⏳ |
+| M-15 | **Fortify `registration()` enabled decision** — Confirm whether self-registration is intentional. If HR-only employee creation is required, disable in production. | `config/fortify.php:147` | Decision | ⏳ |
+| M-16 | **Employee `created_by`, `updated_by`, `face_embedding`, `pin` di `#[Fillable]`** — Seharusnya hanya via service. | `app/Models/Employee.php` | P2 | ⏳ |
+| M-17 | **Employee `bank_account_number` blind-index decision** — Encrypted field has no blind index. Add one only if the product requires searchable bank-account lookups. | `app/Models/Employee.php` | Decision | ⏳ |
+
+---
+
+## 📦 ARCHITECTURAL IMPROVEMENTS — 7 items ⚠️ IN PROGRESS / NEEDS CLEANUP
 
 | # | Task | Files | Est. | Status |
-|---|------|-------|------|--------|
+|---|------|------|------|--------|
 | A-1 | **Create missing Services** — Extract controller logic to OvertimeService, ProfileService | `OvertimeService.php`<br>`ProfileService.php` | ~4h | ✅ |
-| A-2 | **Create API Resources** — Standardize JSON response for all entities. Resource files exist, but several controllers still use manual `format*()` response methods. | 15 Resource classes + API controllers | ~6h | ⚠️ |
-| A-3 | **Create missing FormRequests** — Extract manual validation from index() to List*Request. FormRequests exist, but some controllers still use raw `Request` / inline validation. | `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`, controllers | ~2h | ⚠️ |
+| A-2 | **Create API Resources** — Standardize JSON response for all entities. Resource files exist, but several controllers still use manual `format*()` response methods. | 15 Resource classes + API controllers | ~6h | 🚧 **IN PROGRESS** |
+| A-3 | **Create missing FormRequests** — Extract manual validation from index() to List*Request. FormRequests exist, but some controllers still use raw `Request` / inline validation. | `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`, controllers | ~2h | 🚧 **IN PROGRESS** |
 | A-4 | **Create missing Policies** — Already exist: OvertimePolicy, ReimbursementPolicy, Approval via Approvable trait | (8 policies already exist) | ~3h | ✅ |
 | A-5 | **Standardize authorization** — Add Middleware vs Policy documentation to AGENTS.md | `AGENTS.md` | ~2h | ✅ |
 | A-6 | **Add eager loading** — Prevent N+1 in PayrollController, ReimbursementController, OvertimeController index() | 3 controller `index()` methods | ~1h | ✅ |
 | A-7 | **Extract hard-coded values** — Register service singletons in AppServiceProvider | `AppServiceProvider::register()` | ~1h | ✅ |
 
----
-
-## 🧪 TESTING & FRONTEND — 12 items ❌ NOT STARTED
+## 🧪 TESTING & FRONTEND — 15 items ⏳ 10 PENDING, 2 PARTIAL, 3 CANCELLED (T-13–T-15)
 
 | # | Task | Scope | Est. | Status |
 |---|------|-------|------|--------|
@@ -127,17 +177,20 @@
 | T-7 | **AuthController 2FA + FaceController + ProfileController tests** | Test files | ~1h | ⏳ |
 | T-8 | **Service + Job tests** — PayslipPdfService, GeneratePayslipPdfJob, EmbeddingService | Test files | ~2h | ⏳ |
 | T-9 | **Bug regression tests** — Write tests for critical bugs (B-1 to B-8) to prevent regression | Test files | ~3h | ⏳ |
-| T-10 | **PostgreSQL integration test suite** — Add dedicated pgsql integration coverage for `pgvector`, `pg_trgm`, `pgcrypto`, CHECK constraints, `lockForUpdate()`, and payroll/approval concurrency. Keep SQLite fast suite unless a full pgsql suite is explicitly chosen. | `phpunit.pgsql.xml` or `.env.testing.pgsql`<br>`tests/Integration/Postgres/*` | TBD | ⏳ |
+| T-10 | **PostgreSQL integration test suite** — Dedicated pgsql suite is unblocked and passes locally (7 tests). CI PostgreSQL job added. Remaining: expand coverage for payroll/approval concurrency and additional `lockForUpdate()` scenarios. | `phpunit.pgsql.xml`<br>`.env.testing.pgsql.example`<br>`tests/Integration/Postgres/*`<br>`.github/workflows/tests.yml` | TBD | 🚧 **PARTIAL** |
 | T-11 | **Scramble/OpenAPI contract tests** — Generate OpenAPI docs in CI/test flow and assert representative `/api/v1/*` paths, bearer security on protected routes, public health/login routes, and docs alignment for overtime/reimbursement request fields. | `config/scramble.php`<br>`tests/Feature/OpenApi/*` | TBD | ⏳ |
-| T-12 | **CipherSweet + PII integration tests** — Verify encrypted round-trip, `whereBlind()` lookups, raw database values not plaintext, and PII reveal endpoint audit logging under PostgreSQL-compatible setup. | `tests/Integration/Postgres/CipherSweetTest.php`<br>`tests/Feature/Api/*` | TBD | ⏳ |
+| T-12 | **CipherSweet + PII integration tests** — Partial PostgreSQL coverage already exists in `PostgresEnvironmentTest.php` for encrypted raw values + `whereBlind()` lookups. Remaining: dedicated test file and PII reveal endpoint audit logging coverage. | `tests/Integration/Postgres/PostgresEnvironmentTest.php`<br>`tests/Integration/Postgres/CipherSweetTest.php`<br>`tests/Feature/Api/*` | TBD | 🚧 **PARTIAL** |
+| T-13 | **PWA Password Expiry Testing** — Cancelled by architecture decision (B-49). PWA/API tokens intentionally not blocked by password expiry. | Test files | ~2h | 🚫 |
+| T-14 | **PWA Authentication Middleware Testing** — Cancelled by architecture decision (B-49). Same rationale. | Test files | ~2h | 🚫 |
+| T-15 | **PWA Route Whitelist Testing** — Cancelled by architecture decision (B-49). Same rationale. | Test files | ~1h | 🚫 |
 
 ---
 
-## 🛠️ DEVELOPMENT INFRASTRUCTURE — 2 items ❌ NOT STARTED
+## 🛠️ DEVELOPMENT INFRASTRUCTURE — 2 items ⚠️ PARTIAL
 
 | # | Task | Scope | Est. | Status |
 |---|------|-------|------|--------|
-| D-1 | **Testing environment split** — Define whether HRConnect uses dual test strategy (SQLite fast suite + PostgreSQL integration suite) or full PostgreSQL tests. If dual, add `phpunit.pgsql.xml` / `.env.testing.pgsql` and document commands. If full pgsql, update `phpunit.xml` after ensuring CI/local PostgreSQL is always available. | `phpunit.xml`<br>`phpunit.pgsql.xml`<br>`.env.testing.example`<br>`docs/testing/testing-strategy.md` | TBD | ⏳ |
+| D-1 | **Testing environment split** — Dual strategy implemented and unblocked: SQLite fast suite + PostgreSQL integration suite. Files exist: `phpunit.pgsql.xml`, `.env.testing.pgsql.example`, `tests/Integration/Postgres/PostgresEnvironmentTest.php`, `composer.json` script `test:pgsql`, plus PostgreSQL CI job. | `phpunit.xml`<br>`phpunit.pgsql.xml`<br>`.env.testing.pgsql.example`<br>`.github/workflows/tests.yml`<br>`docs/testing/testing-strategy.md` | TBD | ✅ |
 | D-2 | **Scramble docs regeneration workflow** — Add a reliable command/test path to regenerate/export `api.json`, clear stale docs safely, and avoid `optimize:clear` failures when DB cache points to an unavailable PostgreSQL instance. | `config/scramble.php`<br>`composer.json` scripts<br>CI workflow | TBD | ⏳ |
 
 ---
@@ -150,12 +203,13 @@
 | **Sprint 2** — Production Readiness | B-9 to B-16 (P1) | ✅ COMPLETED | ~6h |
 | **Sprint 3** — Exception Handling | B-17 to B-28 (P2) | ✅ COMPLETED | ~7h |
 | **Sprint 4** — Clean Architecture | A-1 to A-7 | ⚠️ PARTIAL CLEANUP REQUIRED (A-2, A-3) | ~19h |
-| **Sprint 5** — Test Coverage | T-3 to T-12 | ⏳ PENDING | ~13.5h+ |
+| **Sprint 5** — Test Coverage | T-3 to T-15 | ⚠️ 3 CANCELLED (T-13 to T-15 by design), T-10/T-12 PARTIAL, 10 PENDING | ~13.5h+ |
 | **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⏳ PENDING | ~9h+ |
 | **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2, A-3 pending) | TBD |
-| **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ❌ NOT STARTED | TBD |
+| **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING) | TBD |
+| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-2/C-3/C-6/H-10 done) | TBD |
 
-**Total original bugs fixed: 29/40 confirmed done, 11 original P3 pending. New audit findings: 12/13 fixed, 1 cancelled by design (B-49). Latest focused regression suite: 38 tests passed.**
+**Total original bugs fixed: 29/40 confirmed done, 11 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; PostgreSQL suite now passes locally (7 tests). Latest focused SQLite suite: 16 tests passed.**
 
 ---
 
@@ -185,6 +239,7 @@ Phase A–E (35 tasks) + recent completions:
 - 🚧 **In Progress** — Currently working
 - ✅ **Done** — Completed & tested
 - ❌ **Blocked** — Waiting on dependency
+- 🚫 **Cancelled** — Cancelled by architecture decision
 
 **Bug Priority Rules:**
 - 🔴 P0: Drop everything, fix immediately (financial/data loss)
@@ -197,3 +252,6 @@ Phase A–E (35 tasks) + recent completions:
 - `A-X` = Architectural improvement
 - `T-X` = Testing task
 - `D-X` = Development infrastructure / workflow task
+- `C-X` = Critical finding from Comprehensive Backend Audit (2026-06-17)
+- `H-X` = High-priority finding from Comprehensive Backend Audit (2026-06-17)
+- `M-X` = Medium-priority finding from Comprehensive Backend Audit (2026-06-17)

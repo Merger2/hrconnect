@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\PgVector;
 use App\Enums\KnowledgeBaseCategory;
 use App\Enums\KnowledgeBaseStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,7 +21,7 @@ class KnowledgeBase extends Model
             'metadata' => 'array',
             'status' => KnowledgeBaseStatus::class,
             'category' => KnowledgeBaseCategory::class,
-            'embedding' => 'vector',
+            'embedding' => PgVector::class,
         ];
     }
 
