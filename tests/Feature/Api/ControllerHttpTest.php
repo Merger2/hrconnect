@@ -265,6 +265,24 @@ describe('EmployeeController CRUD', function () {
         expect($employee->fresh()->full_name)->toBe('Nama Awal');
     });
 
+    it('rejects assigning employee as their own manager', function () {
+        $employee = Employee::factory()->create([
+            'user_id' => $this->employeeUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+        ]);
+        $token = $this->hrUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->putJson("/api/v1/employees/{$employee->id}", [
+                'parent_id' => $employee->id,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['parent_id']);
+    });
+
     it('soft-deletes employee', function () {
         $employee = Employee::factory()->create([
             'user_id' => $this->employeeUser->id,

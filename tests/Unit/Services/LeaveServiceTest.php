@@ -365,3 +365,46 @@ test('carryForward caps at 3 even when remaining is larger', function () {
 
     expect((float) $newBalance->carry_forward)->toBe(3.0);
 });
+
+test('carryForward skips leave types that are not eligible for carry forward', function () {
+    $employee = leave_emp();
+    $annualLeave = leave_type_build([
+        'is_active' => true,
+        'quota' => 12,
+        'eligible_for_carry_forward' => true,
+    ]);
+    $sickLeave = leave_type_build([
+        'name' => 'Cuti Sakit',
+        'code' => 'SICK',
+        'is_active' => true,
+        'quota' => 12,
+        'eligible_for_carry_forward' => false,
+    ]);
+    $fromYear = now()->year - 1;
+    $toYear = now()->year;
+
+    foreach ([$annualLeave, $sickLeave] as $leaveType) {
+        LeaveBalance::create([
+            'employee_id' => $employee->id,
+            'leave_type_id' => $leaveType->id,
+            'year' => $fromYear,
+            'quota' => 12,
+            'used' => 8,
+            'carry_forward' => 0,
+        ]);
+    }
+
+    $this->service->carryForward($employee, $fromYear, $toYear);
+
+    expect(LeaveBalance::query()
+        ->where('employee_id', $employee->id)
+        ->where('leave_type_id', $annualLeave->id)
+        ->where('year', $toYear)
+        ->exists())->toBeTrue();
+
+    expect(LeaveBalance::query()
+        ->where('employee_id', $employee->id)
+        ->where('leave_type_id', $sickLeave->id)
+        ->where('year', $toYear)
+        ->exists())->toBeFalse();
+});

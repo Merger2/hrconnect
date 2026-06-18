@@ -73,6 +73,10 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE employees ADD CONSTRAINT employees_parent_not_self_check CHECK (parent_id IS NULL OR parent_id <> id)');
+        }
     }
 
     public function down(): void

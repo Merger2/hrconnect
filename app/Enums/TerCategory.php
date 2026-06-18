@@ -42,4 +42,16 @@ enum TerCategory: string
             2, 3 => self::C,
         };
     }
+
+    public static function ptkpLabel(MaritalStatus $status, int $dependents): string
+    {
+        $prefix = match ($status) {
+            MaritalStatus::MARRIED => 'K',
+            default => 'TK',
+        };
+
+        $dependentsLabel = $dependents > 3 ? '3+' : (string) max(0, $dependents);
+
+        return "{$prefix}/{$dependentsLabel}";
+    }
 }

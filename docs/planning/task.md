@@ -58,18 +58,18 @@
 
 | # | Issue | File | Est. | Status |
 |---|-------|------|------|--------|
-| B-29 | **Circular manager reference** — No prevention of `parent_id=id`. Fix: Validation rule + DB CHECK constraint | Employee validation + migration | ~1h | ⏳ |
-| B-30 | **Future attendance** — No validation prevents future date. Fix: Add CHECK `date <= CURRENT_DATE` | Attendance migration | ~30m | ⏳ |
+| B-29 | **Circular manager reference** — Fixed: employee update validation rejects `parent_id=id`, PostgreSQL CHECK constraint blocks self-manager rows, and regression coverage added. | `UpdateEmployeeRequest.php`<br>`employees migration`<br>`ControllerHttpTest.php`<br>`PostgresEnvironmentTest.php` | ~1h | ✅ |
+| B-30 | **Future attendance** — Fixed: `Attendance` model blocks future dates and PostgreSQL CHECK constraint enforces `date <= CURRENT_DATE`; integration coverage added. | `Attendance.php`<br>`attendances migration`<br>`PostgresEnvironmentTest.php` | ~30m | ✅ |
 | B-31 | **LeaveBalance corruption** — CHECK constraint updated in original development migration to `used <= quota + carry_forward` (guarded for pgsql). | Migration | ~30m | ✅ |
 | B-32 | **Null propagation guards** — Fixed: termination compensation/masa kerja calculations now explicitly return 0 when `join_date` is missing, with regression coverage. | `PayrollCalculatorService.php`<br>`TerminationCalculationTest.php` | ~30m | ✅ |
-| B-33 | **Overtime fractional rounding** — 0.3h pays 0.3×1.5x (legal gray area). Fix: Round to 0.5h | `PayrollCalculatorService.php:118` | ~1h | ⏳ |
-| B-34 | **WFA late_minutes misleading** — Stored but not penalized. Fix: Set to 0 or NULL for WFA | `AttendanceService.php:88` | ~30m | ⏳ |
-| B-35 | **Carry-forward all types** — Should only "Cuti Tahunan". Fix: Filter by eligibility flag | `LeaveService::carryForward()` | ~1h | ⏳ |
-| B-36 | **TER K/3 label for 4+ kids** — Should show "K/3+" for clarity. Fix: UX improvement in label | `PayrollCalculatorService.php:31` | ~30m | ⏳ |
-| B-37 | **PIN fallback rate limit** — No limit on consecutive PIN-only days. Fix: Add manager approval after N days | `AttendanceService::resolveVerification()` | ~2h | ⏳ |
+| B-33 | **Overtime fractional rounding** — Fixed: overtime hours are rounded to the nearest 0.5 hour before tiered pay calculation; fractional regression test added. | `PayrollCalculatorService.php`<br>`OvertimeRateTest.php` | ~1h | ✅ |
+| B-34 | **WFA late_minutes misleading** — Fixed: WFA clock-in persists `late_minutes=0`; payroll late penalty already excludes WFA. | `AttendanceService.php`<br>`AttendanceServiceTest.php` | ~30m | ✅ |
+| B-35 | **Carry-forward all types** — Fixed: carry-forward filters by `LeaveType::eligible_for_carry_forward`; regression covers ineligible leave types. | `LeaveService.php`<br>`LeaveServiceTest.php` | ~1h | ✅ |
+| B-36 | **TER K/3 label for 4+ kids** — Fixed: `TerCategory::ptkpLabel()` shows `K/3+` / `TK/3+` for >3 dependents. | `TerCategory.php`<br>`PayrollCalculatorTerCategoryTest.php` | ~30m | ✅ |
+| B-37 | **PIN fallback rate limit** — Fixed: PIN-only fallback is capped at 5 consecutive uses and successful face verification resets the streak; regression coverage added. | `AttendanceService.php`<br>`AttendancePinFallbackTest.php` | ~2h | ✅ |
 | B-38 | **Employee no position** — Fixed: overtime pay calculation throws `BusinessRuleException` when employee has no position salary data; direct regression test added. | `PayrollCalculatorService.php`<br>`OvertimeRateTest.php` | ~15m | ✅ |
 | B-39 | **Resign < join date** — Fixed: pro-rated salary throws `BusinessRuleException` when resignation date is before join date; contract compensation also returns 0 for invalid end-before-join periods. | `PayrollCalculatorService.php`<br>`PayrollCalculatorCoreTest.php`<br>`TerminationCalculationTest.php` | ~15m | ✅ |
-| B-40 | **WFA without branch** — Policy unclear. Fix: Document rule or enforce branch assignment | `AttendanceService::clockIn():50-53` | ~30m | ⏳ |
+| B-40 | **WFA without branch** — Decision documented by regression: WFA skips geofence/branch requirement when note is valid; non-WFA still requires branch. | `AttendanceService.php`<br>`AttendanceServiceTest.php` | ~30m | ✅ |
 
 ---
 
@@ -204,12 +204,12 @@
 | **Sprint 3** — Exception Handling | B-17 to B-28 (P2) | ✅ COMPLETED | ~7h |
 | **Sprint 4** — Clean Architecture | A-1 to A-7 | ⚠️ PARTIAL CLEANUP REQUIRED (A-2 pending) | ~19h |
 | **Sprint 5** — Test Coverage | T-3 to T-15 | ⚠️ 3 CANCELLED (T-13 to T-15 by design), T-10/T-12 PARTIAL, 10 PENDING | ~13.5h+ |
-| **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⏳ PENDING | ~9h+ |
+| **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⚠️ PARTIAL (B-29 to B-40 done; T-1/T-2 pending) | ~9h+ |
 | **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2 pending) | TBD |
 | **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING; H-13 PostgreSQL payroll coverage done) | TBD |
 | **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-6/H-7/H-8/H-9/H-10/H-12/H-13/M-1/M-2/M-3/M-4/M-5/M-6/M-7/M-8/M-9/M-11/M-12/M-14 done) | TBD |
 
-**Total original bugs fixed: 32/40 confirmed done, 8 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, H-13, M-1, M-2, M-3, M-4, M-5, M-6, M-7, M-8, M-9, M-11, M-12, M-14 fixed/reviewed; A-3 completed. PostgreSQL suite includes payroll regeneration and published-lock coverage. Latest focused suites: Termination 10 passed, Gemini/Attendance 16 passed.**
+**Total original bugs fixed: 40/40 confirmed done, 0 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, H-13, M-1, M-2, M-3, M-4, M-5, M-6, M-7, M-8, M-9, M-11, M-12, M-14 fixed/reviewed; A-3 completed. PostgreSQL suite includes payroll regeneration and published-lock coverage. Latest focused suites: Termination 10 passed, Gemini/Attendance 16 passed.**
 
 ---
 

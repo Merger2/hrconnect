@@ -37,6 +37,14 @@ test('TerCategory dependent count di-cap pada 3', function () {
         ->toBe(TerCategory::C);
 });
 
+test('TerCategory PTKP label shows K/3+ for married employees with more than 3 dependents', function () {
+    expect(TerCategory::ptkpLabel(MaritalStatus::MARRIED, 4))->toBe('K/3+');
+});
+
+test('TerCategory PTKP label caps single employees with more than 3 dependents as TK/3+', function () {
+    expect(TerCategory::ptkpLabel(MaritalStatus::SINGLE, 5))->toBe('TK/3+');
+});
+
 test('FamilyRelationship enum punya case CHILD untuk filter', function () {
     expect(FamilyRelationship::CHILD)->toBeInstanceOf(FamilyRelationship::class);
 });

@@ -127,6 +127,16 @@ test('overtime 0 jam return 0', function () {
     expect($svc->calculateOvertimePay($overtime))->toBe(0.0);
 });
 
+test('weekday fractional overtime rounds to nearest half hour', function () {
+    $tuesday = Carbon::create(2026, 6, 2);
+    $overtime = makeOvertime($tuesday, hours: 0.3);
+
+    $pay = app(PayrollCalculatorService::class)->calculateOvertimePay($overtime);
+
+    // 0.3 jam dibulatkan ke 0.5 jam × 10.000 × 1.5 = 7.500
+    expect($pay)->toBe(7500.00);
+});
+
 test('overtime pay throws when employee has no position salary data', function () {
     $employee = new Employee;
     $employee->id = 99;

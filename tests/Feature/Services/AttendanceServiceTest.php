@@ -142,6 +142,7 @@ describe('clockIn', function () {
         expect($result->clock_in)->not->toBeNull();
         expect($result->lat_in)->toBeNull();
         expect($result->long_in)->toBeNull();
+        expect($result->late_minutes)->toBe(0);
     });
 
     it('throws BusinessRuleException for non-WFA without branch', function () {
@@ -159,6 +160,29 @@ describe('clockIn', function () {
             'longitude' => 106.8456,
             'pin' => '123456',
         ]))->toThrow(BusinessRuleException::class, 'Data lokasi kerja');
+    });
+
+    it('allows WFA clock-in without branch when note is valid', function () {
+        $employee = createTestEmployee();
+        $employee->setRelation('branch', null);
+
+        $geofence = mock(GeofenceService::class);
+        $geofence->shouldNotReceive('validateLocation');
+
+        $service = new AttendanceService(
+            $geofence,
+            mock(FaceRecognitionService::class),
+        );
+
+        $result = $service->clockIn($employee, [
+            'is_wfa' => true,
+            'wfa_note' => 'Saya bekerja dari rumah karena perlu fokus menyelesaikan laporan.',
+            'pin' => '123456',
+        ]);
+
+        expect($result->is_wfa)->toBeTrue();
+        expect($result->status_wfa)->toBe(WfaStatus::PENDING);
+        expect($result->late_minutes)->toBe(0);
     });
 
     it('creates attendance successfully with face verification and all fields', function () {

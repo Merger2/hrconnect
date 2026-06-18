@@ -10,6 +10,7 @@ use App\Services\AttendanceService;
 use App\Services\FaceRecognitionService;
 use App\Services\GeofenceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
@@ -206,4 +207,50 @@ test('Face match tapi PIN ada → tetap pakai face (Face takes priority)', funct
     // Face menang — PIN tidak diperiksa
     expect($result[0])->toBe(VerificationMethod::FACE_VERIFIED->value);
     expect($result[1])->toBe(90.0);
+});
+
+test('PIN fallback lebih dari 5 hari berturut-turut ditolak', function () {
+    $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldNotReceive('verifyFace');
+
+    $service = new AttendanceService(
+        mock(GeofenceService::class),
+        $faceService,
+    );
+
+    $employee = new Employee;
+    $employee->id = 99;
+    $employee->pin = Hash::make('123456');
+    $employee->setRelation('user', null);
+
+    Cache::put('pin_streak:99', 5, now()->addWeek());
+
+    expect(fn () => callResolveVerification($service, $employee, [
+        'pin' => '123456',
+    ]))->toThrow(BusinessRuleException::class, '5 hari berturut-turut menggunakan PIN');
+});
+
+test('Face match reset PIN fallback streak', function () {
+    $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('verifyFace')
+        ->once()
+        ->andReturn(['valid' => true, 'similarity_percentage' => 92.0]);
+
+    $service = new AttendanceService(
+        mock(GeofenceService::class),
+        $faceService,
+    );
+
+    $employee = new Employee;
+    $employee->id = 99;
+    setRawAttribute($employee, 'face_embedding', '[0.1,0.2,0.3]');
+
+    Cache::put('pin_streak:99', 5, now()->addWeek());
+
+    $result = callResolveVerification($service, $employee, [
+        'face_embedding' => [0.1, 0.2, 0.3],
+    ]);
+
+    expect($result)->toBe([VerificationMethod::FACE_VERIFIED->value, 92.0]);
+    expect(Cache::has('pin_streak:99'))->toBeFalse();
 });

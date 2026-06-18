@@ -234,6 +234,32 @@ test('CipherSweet encrypts employee PII and supports blind index lookups', funct
         ->and(Employee::whereBlind('phone', 'phone_hash', $phone)->first()?->is($employee))->toBeTrue();
 });
 
+test('PostgreSQL rejects employees managed by themselves', function () {
+    $employeeId = createPostgresEmployee(['employee_number' => 'PG-SELF']);
+
+    $this->expectException(QueryException::class);
+
+    DB::table('employees')
+        ->where('id', $employeeId)
+        ->update(['parent_id' => $employeeId]);
+});
+
+test('PostgreSQL rejects future attendance dates', function () {
+    $employeeId = createPostgresEmployee(['employee_number' => 'PG-FUTURE']);
+
+    $this->expectException(QueryException::class);
+
+    DB::table('attendances')->insert([
+        'employee_id' => $employeeId,
+        'date' => now()->addDay()->toDateString(),
+        'status' => 'on_time',
+        'is_wfa' => false,
+        'late_minutes' => 0,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+});
+
 test('payroll generation updates existing draft row instead of creating duplicate on PostgreSQL', function () {
     $this->seed(PayrollConfigSeeder::class);
     Cache::forget('tax_configs');

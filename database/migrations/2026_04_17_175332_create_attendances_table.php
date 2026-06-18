@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -43,6 +44,10 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE attendances ADD CONSTRAINT attendances_date_not_future_check CHECK (date <= CURRENT_DATE)');
+        }
     }
 
     public function down(): void
