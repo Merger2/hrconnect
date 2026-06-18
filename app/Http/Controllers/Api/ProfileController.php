@@ -58,8 +58,15 @@ class ProfileController extends Controller
         }
 
         $data = $request->validated();
+        $profileData = [];
 
-        $employee->update($data);
+        foreach (['phone', 'address_detail', 'bank_name', 'bank_account_number'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $profileData[$field] = $data[$field];
+            }
+        }
+
+        $employee->update($profileData);
 
         return response()->json([
             'status' => 'success',

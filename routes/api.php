@@ -99,7 +99,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Leave ────────────────────────────────────────────────────────
     Route::prefix('leave')->name('api.leave.')->group(function () {
-        Route::post('/', [LeaveController::class, 'store'])->name('store');
+        Route::post('/', [LeaveController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('store');
         Route::get('/', [LeaveController::class, 'index'])->name('index');
         Route::get('/quota', [LeaveController::class, 'quota'])->name('quota');
         Route::get('/{leave}', [LeaveController::class, 'show'])->name('show');
@@ -108,7 +110,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Overtime ─────────────────────────────────────────────────────
     Route::prefix('overtime')->name('api.overtime.')->group(function () {
-        Route::post('/', [OvertimeController::class, 'store'])->name('store');
+        Route::post('/', [OvertimeController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('store');
         Route::get('/', [OvertimeController::class, 'index'])->name('index');
         Route::get('/{overtime}', [OvertimeController::class, 'show'])->name('show');
         Route::delete('/{overtime}', [OvertimeController::class, 'destroy'])->name('destroy');
@@ -116,7 +120,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Reimbursement ────────────────────────────────────────────────
     Route::prefix('reimbursement')->name('api.reimbursement.')->group(function () {
-        Route::post('/', [ReimbursementController::class, 'store'])->name('store');
+        Route::post('/', [ReimbursementController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('store');
         Route::get('/', [ReimbursementController::class, 'index'])->name('index');
         Route::get('/{reimbursement}', [ReimbursementController::class, 'show'])->name('show');
         Route::delete('/{reimbursement}', [ReimbursementController::class, 'destroy'])

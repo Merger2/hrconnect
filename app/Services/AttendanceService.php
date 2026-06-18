@@ -289,7 +289,10 @@ class AttendanceService
         activity()
             ->causedBy($employee->user)
             ->performedOn($employee)
-            ->withProperties(['ip' => request()->ip(), 'method' => $method])
+            ->withProperties([
+                'ip' => app()->bound('request') ? request()->ip() : null,
+                'method' => $method,
+            ])
             ->log('Melakukan bypass absensi menggunakan '.$method);
     }
 

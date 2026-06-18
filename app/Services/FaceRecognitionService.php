@@ -61,9 +61,18 @@ class FaceRecognitionService
         $employee->load('user');
         $vector = new Vector($embedding);
 
-        $result = Employee::where('id', $employee->id)
-            ->nearestNeighbors('face_embedding', $vector, Distance::Cosine)
-            ->first();
+        try {
+            $result = Employee::where('id', $employee->id)
+                ->nearestNeighbors('face_embedding', $vector, Distance::Cosine)
+                ->first();
+        } catch (QueryException $e) {
+            Log::error('Face recognition vector query failed', [
+                'employee_id' => $employee->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new BusinessRuleException('Layanan face recognition sedang tidak tersedia. Gunakan PIN sebagai fallback.');
+        }
 
         if (! $result) {
             throw new FaceNotRecognizedException('Wajah tidak dikenali. Silakan coba lagi dengan pencahayaan yang cukup.');

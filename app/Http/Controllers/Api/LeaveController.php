@@ -34,6 +34,8 @@ class LeaveController extends Controller
     #[BodyParameter(name: 'proof_file', description: 'Supporting document (jpg/jpeg/png/pdf, max 5MB)', required: false, type: 'string', format: 'binary')]
     public function store(StoreLeaveRequest $request): JsonResponse
     {
+        $this->authorize('create', Leave::class);
+
         $data = $request->validated();
 
         $employee = $request->user()->employee;

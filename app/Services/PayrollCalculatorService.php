@@ -443,6 +443,7 @@ class PayrollCalculatorService
                     ->where('status', ReimbursementStatus::APPROVED)
                     ->whereYear('expense_date', $targetYear)
                     ->whereMonth('expense_date', $targetMonth)
+                    ->lockForUpdate()
                     ->get();
                 $totalReimbursment = $reimbursements->sum('amount');
                 $totalGross = $taxableIncome + $totalReimbursment;
