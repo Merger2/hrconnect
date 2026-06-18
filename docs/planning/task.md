@@ -1,7 +1,7 @@
 # Task Tracker — HRConnect Backend
 
 > **Source of truth** untuk progress backend.
-> Last updated: 2026-06-17 (Phase 2 Core Fixes — C-1, H-1/H-2, H-3/H-4, H-5, H-7, H-8, H-9, H-12, M-2/M-3/M-5/M-7/M-8/M-9/M-11/M-12/M-14 fixed; H-6/A-3 partial. Latest focused suites: Face/Attendance 22 passed, Payroll/API 86 passed.)
+> Last updated: 2026-06-17 (Phase 2 Core Fixes — M-1/M-4 reviewed, M-6 fixed with after-commit termination logging. Latest focused suites: Termination 10 passed, Gemini/Attendance 16 passed.)
 
 ---
 
@@ -133,12 +133,12 @@
 
 | # | Finding | File | Priority | Status |
 |---|---------|------|----------|--------|
-| M-1 | **`AttendanceService::clockIn()` double check `hasClockedInToday()`** — Checked before and inside transaction. Remove redundant check. | `AttendanceService.php` | P2 | ⏳ |
+| M-1 | **`AttendanceService::clockIn()` double check `hasClockedInToday()`** — Reviewed: intentionally kept as two-layer guard (fast user-facing precheck + transaction-time race guard). | `AttendanceService.php` | P2 | ✅ |
 | M-2 | **`logBypass()` uses `request()->ip()` directly** — Fixed: bypass log properties now resolve request IP null-safely for non-HTTP contexts. | `AttendanceService.php` | P2 | ✅ |
 | M-3 | **`FaceRecognitionService::nearestNeighbors()` QueryException tidak ditangkap** — Fixed: vector query failure is logged and converted to `BusinessRuleException` so PIN fallback can be used. | `FaceRecognitionService.php` | P2 | ✅ |
-| M-4 | **GeminiClient `sleep()` blocking retry** — Harusnya `Http::retry()` non-blocking. | `GeminiClient.php:202` | P2 | ⏳ |
+| M-4 | **GeminiClient `sleep()` blocking retry** — Reviewed: Laravel `Http::retry()` is also synchronous; current manual retry preserves no-retry-on-4xx behavior. No code change needed. | `GeminiClient.php` | P2 | ✅ |
 | M-5 | **Reimbursement status update ke PAID tanpa `lockForUpdate()`** — Fixed: approved reimbursements are selected with `lockForUpdate()` inside payroll transaction before status update. | `PayrollCalculatorService.php` | P2 | ✅ |
-| M-6 | **EmployeeTerminationService activity log inside transaction** — Usually rolls back with the same DB connection, but side-effect timing should be reviewed and made explicit. | `EmployeeTerminationService.php:81` | P2 | ⏳ |
+| M-6 | **EmployeeTerminationService activity log inside transaction** — Fixed: termination activity log now runs via `DB::afterCommit()` after the termination transaction succeeds. | `EmployeeTerminationService.php` | P2 | ✅ |
 | M-7 | **ClockInRequest `embedding` tanpa validasi** — Fixed: `embedding` must be a 128-element numeric array with values between -1.5 and 1.5. | `ClockInRequest.php`<br>`EndpointsTest.php` | P2 | ✅ |
 | M-8 | **ClockOutRequest — same missing validation** — Fixed with the same 128D numeric array validation and regression test. | `ClockOutRequest.php`<br>`EndpointsTest.php` | P2 | ✅ |
 | M-9 | **LeaveController::store() tidak ada `$this->authorize('create')`** — Fixed: `store()` now calls `authorize('create', Leave::class)` before applying leave. | `LeaveController.php` | P2 | ✅ |
@@ -207,9 +207,9 @@
 | **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⏳ PENDING | ~9h+ |
 | **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2 pending) | TBD |
 | **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING) | TBD |
-| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-6/H-7/H-8/H-9/H-10/H-12/M-2/M-3/M-5/M-7/M-8/M-9/M-11/M-12/M-14 done) | TBD |
+| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-6/H-7/H-8/H-9/H-10/H-12/M-1/M-2/M-3/M-4/M-5/M-6/M-7/M-8/M-9/M-11/M-12/M-14 done) | TBD |
 
-**Total original bugs fixed: 30/40 confirmed done, 10 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, M-2, M-3, M-5, M-7, M-8, M-9, M-11, M-12, M-14 fixed; A-3 completed. PostgreSQL suite passes locally (7 tests). Latest focused suites: Face/Attendance 22 passed, Payroll/API 86 passed.**
+**Total original bugs fixed: 30/40 confirmed done, 10 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, M-1, M-2, M-3, M-4, M-5, M-6, M-7, M-8, M-9, M-11, M-12, M-14 fixed/reviewed; A-3 completed. PostgreSQL suite passes locally (7 tests). Latest focused suites: Termination 10 passed, Gemini/Attendance 16 passed.**
 
 ---
 

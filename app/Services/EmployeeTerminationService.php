@@ -55,7 +55,7 @@ class EmployeeTerminationService
             $lockedEmployee->update($updateData);
 
             if ($lockedEmployee->face_embedding) {
-                $lockedEmployee->update(['face_embedding' => null]);
+                $lockedEmployee->forceFill(['face_embedding' => null])->save();
             }
 
             if ($type !== TerminationType::DECEASED && $lockedEmployee->user) {
@@ -78,7 +78,13 @@ class EmployeeTerminationService
                 $financialSummary['leave_cash_out'] = $this->payrollCalculator->calculateLeaveCashOut($lockedEmployee);
             }
 
-            $this->logTermination($lockedEmployee, $type, $reason, $terminationDate, $financialSummary);
+            DB::afterCommit(fn () => $this->logTermination(
+                $lockedEmployee,
+                $type,
+                $reason,
+                $terminationDate,
+                $financialSummary,
+            ));
 
             $result = $lockedEmployee->fresh();
             $result->financial_summary = $financialSummary;

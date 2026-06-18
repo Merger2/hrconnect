@@ -82,7 +82,9 @@ function createPostgresEmployee(array $attributes = []): int
         'updated_at' => now(),
     ]);
 
-    return Employee::query()->create([
+    $faceEmbedding = $attributes['face_embedding'] ?? null;
+
+    $employee = Employee::query()->create([
         'user_id' => $userId,
         'company_id' => $companyId,
         'branch_id' => $branchId,
@@ -99,13 +101,18 @@ function createPostgresEmployee(array $attributes = []): int
         'status' => 'active',
         'birth_date' => '1990-01-01',
         'join_date' => '2020-01-01',
-        'face_embedding' => $attributes['face_embedding'] ?? null,
         'education_level' => 'bachelor',
         'institution_name' => 'PostgreSQL University',
         'graduation_year' => 2012,
         'created_at' => now(),
         'updated_at' => now(),
-    ])->id;
+    ]);
+
+    if ($faceEmbedding !== null) {
+        $employee->forceFill(['face_embedding' => $faceEmbedding])->save();
+    }
+
+    return $employee->id;
 }
 
 function createPostgresLeaveType(): int

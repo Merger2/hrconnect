@@ -38,15 +38,18 @@ function createTestEmployee(): Employee
     $shift = Shift::factory()->create();
     $user = User::factory()->create();
 
-    return Employee::factory()->create([
+    $employee = Employee::factory()->create([
         'user_id' => $user->id,
         'company_id' => $company->id,
         'branch_id' => $branch->id,
         'department_id' => $department->id,
         'position_id' => $position->id,
         'shift_id' => $shift->id,
-        'pin' => '123456',
     ]);
+
+    $employee->forceFill(['pin' => '123456'])->save();
+
+    return $employee;
 }
 
 function createActiveAttendance(Employee $employee): Attendance
