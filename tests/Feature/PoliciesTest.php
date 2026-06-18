@@ -4,9 +4,11 @@ use App\Enums\PayrollStatus;
 use App\Enums\ReimbursementStatus;
 use App\Enums\RequestStatus;
 use App\Models\Asset;
+use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\KnowledgeBase;
 use App\Models\Leave;
+use App\Models\Overtime;
 use App\Models\Payroll;
 use App\Models\Reimbursement;
 use App\Models\User;
@@ -257,10 +259,162 @@ test('KnowledgeBasePolicy: HR Manager bisa manage, Employee tidak', function () 
 
 // ─── AssetPolicy (V2 deferred — basic check) ──────────────────────────
 
+// ─── AssetPolicy (V2 deferred — basic check) ──────────────────────────
+
 test('AssetPolicy: hanya HR Manager bisa manage Asset', function () {
     $hr = userWithRole('hr-manager', employeeId: 1);
     $emp = userWithRole('employee', employeeId: 2);
 
     expect($hr->can('create', Asset::class))->toBeTrue();
     expect($emp->can('create', Asset::class))->toBeFalse();
+});
+
+// ─── AttendancePolicy ────────────────────────────────────────────────
+
+function makeAttendance(int $employeeId, int $parentId = 0): Attendance
+{
+    $employeeStub = new Employee;
+    $employeeStub->id = $employeeId;
+    $employeeStub->parent_id = $parentId ?: null;
+
+    $attendance = new Attendance;
+    $attendance->id = $employeeId * 100;
+    $attendance->employee_id = $employeeId;
+    $attendance->setRelation('employee', $employeeStub);
+
+    return $attendance;
+}
+
+test('AttendancePolicy: HR Manager bisa view semua attendance', function () {
+    $hr = userWithRole('hr-manager', employeeId: 1);
+    $any = makeAttendance(employeeId: 99);
+
+    expect($hr->can('view', $any))->toBeTrue();
+});
+
+test('AttendancePolicy: Employee bisa view attendance sendiri', function () {
+    $emp = userWithRole('employee', employeeId: 5);
+    $own = makeAttendance(employeeId: 5);
+
+    expect($emp->can('view', $own))->toBeTrue();
+});
+
+test('AttendancePolicy: Employee TIDAK bisa view attendance orang lain (IDOR)', function () {
+    $emp = userWithRole('employee', employeeId: 5);
+    $other = makeAttendance(employeeId: 99);
+
+    expect($emp->can('view', $other))->toBeFalse();
+});
+
+test('AttendancePolicy: Manager bisa view attendance timnya (parent_id match)', function () {
+    $manager = userWithRole('manager', employeeId: 10);
+    $teamAtt = makeAttendance(employeeId: 5, parentId: 10);
+
+    expect($manager->can('view', $teamAtt))->toBeTrue();
+});
+
+test('AttendancePolicy: Manager TIDAK bisa view attendance luar tim', function () {
+    $manager = userWithRole('manager', employeeId: 10);
+    $outsideAtt = makeAttendance(employeeId: 5, parentId: 999);
+
+    expect($manager->can('view', $outsideAtt))->toBeFalse();
+});
+
+test('AttendancePolicy: Only HR Manager bisa update/delete attendance', function () {
+    $hr = userWithRole('hr-manager', employeeId: 1);
+    $emp = userWithRole('employee', employeeId: 5);
+    $any = makeAttendance(employeeId: 99);
+
+    expect($hr->can('update', $any))->toBeTrue();
+    expect($hr->can('delete', $any))->toBeTrue();
+    expect($emp->can('update', $any))->toBeFalse();
+    expect($emp->can('delete', $any))->toBeFalse();
+});
+
+// ─── OvertimePolicy ──────────────────────────────────────────────────
+
+function makeOvertimeStub(int $employeeId, int $parentId = 0, RequestStatus $status = RequestStatus::PENDING): Overtime
+{
+    $employeeStub = new Employee;
+    $employeeStub->id = $employeeId;
+    $employeeStub->parent_id = $parentId ?: null;
+
+    $overtime = new Overtime;
+    $overtime->id = $employeeId * 1000;
+    $overtime->employee_id = $employeeId;
+    $overtime->status = $status;
+    $overtime->setRelation('employee', $employeeStub);
+
+    return $overtime;
+}
+
+test('OvertimePolicy: Employee bisa view overtime sendiri', function () {
+    $emp = userWithRole('employee', employeeId: 5);
+    $own = makeOvertimeStub(employeeId: 5);
+
+    expect($emp->can('view', $own))->toBeTrue();
+});
+
+test('OvertimePolicy: Employee TIDAK bisa view overtime orang lain (IDOR)', function () {
+    $emp = userWithRole('employee', employeeId: 5);
+    $other = makeOvertimeStub(employeeId: 99);
+
+    expect($emp->can('view', $other))->toBeFalse();
+});
+
+test('OvertimePolicy: Manager bisa view overtime timnya (parent_id match)', function () {
+    $manager = userWithRole('manager', employeeId: 10);
+    $teamOt = makeOvertimeStub(employeeId: 5, parentId: 10);
+
+    expect($manager->can('view', $teamOt))->toBeTrue();
+});
+
+test('OvertimePolicy: Manager TIDAK bisa view overtime luar tim', function () {
+    $manager = userWithRole('manager', employeeId: 10);
+    $outsideOt = makeOvertimeStub(employeeId: 5, parentId: 999);
+
+    expect($manager->can('view', $outsideOt))->toBeFalse();
+});
+
+test('OvertimePolicy: Employee bisa create overtime (has employee record)', function () {
+    $emp = userWithRole('employee', employeeId: 5);
+    $noEmp = User::factory()->create();
+    $noEmp->assignRole('employee');
+
+    expect($emp->can('create', Overtime::class))->toBeTrue();
+    expect($noEmp->can('create', Overtime::class))->toBeFalse();
+});
+
+test('OvertimePolicy: Owner bisa update/delete overtime saat PENDING saja', function () {
+    $emp = userWithRole('employee', employeeId: 5);
+    $pending = makeOvertimeStub(employeeId: 5, status: RequestStatus::PENDING);
+    $approved = makeOvertimeStub(employeeId: 5, status: RequestStatus::APPROVED);
+
+    expect($emp->can('update', $pending))->toBeTrue();
+    expect($emp->can('update', $approved))->toBeFalse();
+    expect($emp->can('delete', $pending))->toBeTrue();
+    expect($emp->can('delete', $approved))->toBeFalse();
+});
+
+test('OvertimePolicy: Manager bisa approveLevel1 untuk timnya saja', function () {
+    $manager = userWithRole('manager', employeeId: 10);
+    $teamOt = makeOvertimeStub(employeeId: 5, parentId: 10);
+    $outsideOt = makeOvertimeStub(employeeId: 6, parentId: 999);
+
+    expect($manager->can('approveLevel1', $teamOt))->toBeTrue();
+    expect($manager->can('approveLevel1', $outsideOt))->toBeFalse();
+});
+
+test('OvertimePolicy: HR Manager bisa approveLevel2 semua overtime', function () {
+    $hr = userWithRole('hr-manager', employeeId: 1);
+    $anyOt = makeOvertimeStub(employeeId: 99);
+
+    expect($hr->can('approveLevel2', $anyOt))->toBeTrue();
+});
+
+test('OvertimePolicy: Manager TIDAK bisa approveLevel2', function () {
+    $manager = userWithRole('manager', employeeId: 10);
+    $anyOt = makeOvertimeStub(employeeId: 5, parentId: 10);
+
+    expect($manager->can('approveLevel2', $anyOt))->toBeFalse();
 });

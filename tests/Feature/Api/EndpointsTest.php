@@ -364,7 +364,7 @@ test('POST /leave validasi field wajib', function () {
         ]);
 });
 
-test('POST /overtime tanpa Employee record return 404', function () {
+test('POST /overtime tanpa Employee record return 403', function () {
     $user = User::factory()->create();
     $user->assignRole('employee');
     $token = $user->createToken('test')->plainTextToken;
@@ -378,7 +378,7 @@ test('POST /overtime tanpa Employee record return 404', function () {
             'end_time' => '20:00',
             'description' => 'Test overtime',
         ])
-        ->assertStatus(404);
+        ->assertStatus(403);
 });
 
 test('POST /payroll/generate validasi format periode', function () {

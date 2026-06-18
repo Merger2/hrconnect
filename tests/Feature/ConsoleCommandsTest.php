@@ -3,19 +3,24 @@
 use App\Enums\AttendanceStatus;
 use App\Enums\EmployeeStatus;
 use App\Enums\RequestStatus;
+use App\Enums\VerificationMethod;
+use App\Enums\WfaStatus;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\KnowledgeBase;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
+use App\Services\KnowledgeBaseService;
 use Carbon\Carbon;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
@@ -315,4 +320,170 @@ test('cache:warm dengan opsi year', function () {
 
     expect($exitCode)->toBe(0);
     expect(Cache::has('holidays:2026'))->toBeTrue();
+});
+
+// ─── attendance:detect-missed-clock ────────────────────────────────────
+
+test('detect-missed-clock jalan tanpa error kalau tidak ada attendance', function () {
+    $exitCode = Artisan::call('attendance:detect-missed-clock');
+    $output = Artisan::output();
+
+    expect($exitCode)->toBe(0);
+    expect($output)->toContain('Marked 0 missed clock-out, 0 missed clock-in');
+});
+
+test('detect-missed-clock tandai missed clock-out', function () {
+    $emp = makeActiveEmployee($this->masterData, 'MissedOut');
+    $yesterday = now()->subDay()->toDateString();
+
+    Attendance::create([
+        'employee_id' => $emp->id,
+        'date' => $yesterday,
+        'clock_in' => $yesterday.' 08:00:00',
+        'clock_out' => null,
+        'status' => AttendanceStatus::ON_TIME,
+        'verification_method' => 'face_verified',
+    ]);
+
+    Artisan::call('attendance:detect-missed-clock');
+    $output = Artisan::output();
+
+    expect($output)->toContain('Marked 1 missed clock-out');
+    expect(Attendance::first()->status)->toBe(AttendanceStatus::MISSED_CLOCK_OUT);
+});
+
+test('detect-missed-clock tandai missed clock-in', function () {
+    $emp = makeActiveEmployee($this->masterData, 'MissedIn');
+    $yesterday = now()->subDay()->toDateString();
+
+    Attendance::create([
+        'employee_id' => $emp->id,
+        'date' => $yesterday,
+        'clock_in' => null,
+        'clock_out' => $yesterday.' 17:00:00',
+        'status' => AttendanceStatus::ON_TIME,
+        'verification_method' => 'face_verified',
+    ]);
+
+    Artisan::call('attendance:detect-missed-clock');
+    $output = Artisan::output();
+
+    expect($output)->toContain('Marked 0 missed clock-out, 1 missed clock-in');
+    expect(Attendance::first()->status)->toBe(AttendanceStatus::MISSED_CLOCK_IN);
+});
+
+// ─── attendance:auto-approve-wfa ───────────────────────────────────────
+
+test('auto-approve-wfa jalan tanpa error kalau tidak ada WFA pending', function () {
+    $exitCode = Artisan::call('attendance:auto-approve-wfa');
+
+    expect($exitCode)->toBe(0);
+});
+
+test('auto-approve-wfa approve WFA yang sudah melebihi batas waktu', function () {
+    $emp = makeActiveEmployee($this->masterData, 'LateWfa');
+
+    $fiveDaysAgo = now()->subWeekdays(5)->toDateString();
+    Attendance::create([
+        'employee_id' => $emp->id,
+        'date' => $fiveDaysAgo,
+        'clock_in' => $fiveDaysAgo.' 08:00:00',
+        'clock_out' => $fiveDaysAgo.' 17:00:00',
+        'status' => AttendanceStatus::ON_TIME,
+        'verification_method' => VerificationMethod::FACE_VERIFIED,
+        'is_wfa' => true,
+        'status_wfa' => WfaStatus::PENDING,
+    ]);
+
+    Artisan::call('attendance:auto-approve-wfa', ['--date' => now()->toDateString()]);
+    $output = Artisan::output();
+
+    expect($output)->toContain('1 WFA di-auto-approve');
+    expect(Attendance::first()->status_wfa)->toBe(WfaStatus::APPROVED);
+});
+
+test('auto-approve-wfa skip WFA yang masih dalam batas waktu', function () {
+    $emp = makeActiveEmployee($this->masterData, 'RecentWfa');
+
+    $yesterday = now()->subDay()->toDateString();
+    Attendance::create([
+        'employee_id' => $emp->id,
+        'date' => $yesterday,
+        'clock_in' => $yesterday.' 08:00:00',
+        'clock_out' => $yesterday.' 17:00:00',
+        'status' => AttendanceStatus::ON_TIME,
+        'verification_method' => VerificationMethod::FACE_VERIFIED,
+        'is_wfa' => true,
+        'status_wfa' => WfaStatus::PENDING,
+    ]);
+
+    Artisan::call('attendance:auto-approve-wfa', ['--date' => now()->toDateString()]);
+    $output = Artisan::output();
+
+    expect($output)->toContain('0 WFA di-auto-approve');
+    expect(Attendance::first()->status_wfa)->toBe(WfaStatus::PENDING);
+});
+
+// ─── attendance:send-reminders ─────────────────────────────────────────
+
+test('send-reminders jalan tanpa error kalau semua sudah clock-in', function () {
+    $emp = makeActiveEmployee($this->masterData, 'OnTime');
+    Attendance::create([
+        'employee_id' => $emp->id,
+        'date' => now()->toDateString(),
+        'clock_in' => now()->setTime(8, 0),
+        'clock_out' => null,
+        'status' => AttendanceStatus::ON_TIME,
+        'verification_method' => 'face_verified',
+    ]);
+
+    $exitCode = Artisan::call('attendance:send-reminders');
+
+    expect($exitCode)->toBe(0);
+});
+
+test('send-reminders dry-run tidak kirim notifikasi', function () {
+    Notification::fake();
+    makeActiveEmployee($this->masterData, 'NoClock');
+
+    $exitCode = Artisan::call('attendance:send-reminders', ['--dry-run' => true]);
+
+    expect($exitCode)->toBe(0);
+    Notification::assertNothingSent();
+});
+
+// ─── knowledgebase:index ───────────────────────────────────────────────
+
+test('knowledgebase:index tanpa --all atau --kb-id tampilkan warning', function () {
+    $exitCode = Artisan::call('knowledgebase:index');
+    $output = Artisan::output();
+
+    expect($exitCode)->toBe(0);
+    expect($output)->toContain('Gunakan --all');
+});
+
+test('knowledgebase:index --kb-id non-existent return FAILURE', function () {
+    $exitCode = Artisan::call('knowledgebase:index', ['--kb-id' => 999]);
+    $output = Artisan::output();
+
+    expect($exitCode)->toBe(1);
+    expect($output)->toContain('tidak ditemukan');
+});
+
+test('knowledgebase:index --kb-id panggil reindex', function () {
+    $kbService = mock(KnowledgeBaseService::class);
+    $kbService->shouldReceive('reindex')->once();
+    $this->instance(KnowledgeBaseService::class, $kbService);
+
+    $kb = KnowledgeBase::create([
+        'title' => 'Test',
+        'content' => 'Test content',
+        'knowledgeable_type' => 'App\Models\Employee',
+        'knowledgeable_id' => 1,
+        'is_active' => true,
+    ]);
+
+    $exitCode = Artisan::call('knowledgebase:index', ['--kb-id' => $kb->id]);
+
+    expect($exitCode)->toBe(0);
 });

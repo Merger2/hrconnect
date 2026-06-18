@@ -32,6 +32,8 @@ class ReimbursementController extends Controller
     #[BodyParameter(name: 'receipt', description: 'Receipt file (jpg/jpeg/png/pdf, max 5MB)', required: true, type: 'string', format: 'binary')]
     public function store(StoreReimbursementRequest $request): JsonResponse
     {
+        $this->authorize('create', Reimbursement::class);
+
         $data = $request->validated();
 
         $employee = $request->user()->employee;

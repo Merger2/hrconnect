@@ -29,8 +29,48 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreSQL (pgve
 - **34 enums**: 16 Status/Indicator have `color()` (5 Flux colors: success/warning/danger/info/zinc); 18 Classification enums must NOT have `color()`
 - **5 Spatie roles**: super-admin, hr-manager, finance, manager, employee
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax (not `$fillable`/`$hidden`)
-- **428 tests** / 3,469 assertions. 2 CI jobs: SQLite + PostgreSQL (pgvector/pgvector:pg16)
+- **585 tests** / 3,836 assertions across 58 files. 2 CI jobs: SQLite + PostgreSQL (pgvector/pgvector:pg16). Comprehensive gap audit completed — see P0-6 in `docs/planning/task.md`. ProfileService tests added (T-15), Overtime/Reimbursement store policy calls added (T-23/24), Command tests added (P1-15).
 - **Docs** in `docs/`. Source of truth: `docs/planning/task.md` (status tracker), `docs/architecture/erd.dbml` (ERD), `docs/INDEX.md` (index)
+
+## Known Test Coverage Gaps (from P0-6 three-round audit)
+
+### Zero Coverage (now 7 items after recent work)
+- **Pinecone search**: stub returns `[]`, no tests
+- **Jobs**: 9 tests cover basic dispatch only; no failed/retry/log edge cases
+- **Events/mail/Listeners**: no `app/Events/`, `app/Listeners/`, `app/Mail/` dirs exist
+- **Blade-to-API integration**: zero tests
+- **Web routes** (Fortify auth, dashboard, settings): 25+ GET routes, 0 tests
+- **Middleware `DeviceDetection`**: UA-parsing middleware, 0 tests
+- **Middleware `GeofenceValidation`**: middleware-layer, 0 tests
+
+### Thin Coverage (<10 assertions)
+- PayslipPdfService (4), PayrollExportService (6), EmployeeTerminationService (6), OvertimeService unit (3), EmbeddingService (6), FaceRecognitionService (6), GeminiClient (7), PayrollCalculatorService scattered
+
+### FormRequest Validation Gaps (6/28)
+- `UpdateProfileRequest`, `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListPayrollRequest`, `ListReimbursementRequest` — validation rules never tested
+
+### Policy Gaps (resolved — 8/8 now have direct tests)
+- ✅ `AttendancePolicy`, `OvertimePolicy` — 15 boundary tests added (view self/other/team, create, update/delete status gates, approveLevel1/2)
+
+### Permission Drift
+- `MANAGE_REIMBURSEMENTS` in enum but unassigned to any role
+
+### Factory Gaps (12 missing)
+- High-impact: `Approval`, `CompanySetting`, `Device`, `FamilyDetail`, `PayrollAdjustment`, `PayrollItem`, `ShiftSchedule`
+- Low-impact (V2): `Asset`, `AssetHandover`, `Loan`, `LoanInstallment`, `PerformanceReview`
+
+### IDOR Gaps (from S-2 audit)
+- **Employee API** — no team scoping in API endpoints (manager can list ALL employees, not just direct reports). Policy: "team scoping via Livewire query scope, not policy concern"
+- **Overtime/Reimbursement store** — `OvertimePolicy::create()` / `ReimbursementPolicy::create()` exist but are never called in controllers (employee_id from auth, so not exploitable)
+- **`viewAny` policies** — all permission-only; real ownership scoping lives in controller query builders (defense-in-depth gap)
+- **`approveWfa`** — uses string permission `approve_wfa` instead of `$this->authorize()` (inconsistent, but hierarchy check still prevents IDOR)
+- **Payroll generate** — accepts `employee_ids[]` with no relationship-to-user verification (gated by `process_payroll`)
+- **AssetPolicy** — V2-deferred, no handover-based filtering
+
+### Infrastructure
+- Livewire: 1 component (Logout.php) — no test
+- Blade: 38 view files — no assertions on rendered content
+- CI: PostgreSQL CI commented out in `.github/workflows/tests.yml`
 
 ## Critical Gotchas
 

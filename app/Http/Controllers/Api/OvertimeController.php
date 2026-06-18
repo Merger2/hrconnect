@@ -31,6 +31,8 @@ class OvertimeController extends Controller
     #[BodyParameter(name: 'description', description: 'Overtime reason (min 10 chars)', required: true, type: 'string')]
     public function store(StoreOvertimeRequest $request): JsonResponse
     {
+        $this->authorize('create', Overtime::class);
+
         $data = $request->validated();
 
         $employee = $request->user()->employee;

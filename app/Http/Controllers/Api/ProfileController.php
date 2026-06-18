@@ -6,28 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
 use App\Http\Resources\ProfileResource;
+use App\Services\ProfileService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 #[Group('Profile')]
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected ProfileService $profileService,
+    ) {}
+
     #[Endpoint(title: 'Get Profile', description: 'Get authenticated employee profile with masked PII fields. Flow: Profile (read).')]
     public function show(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $employee = $user->employee()->with([
-            'branch:id,name',
-            'department:id,name',
-            'position:id,name,grade',
-            'shift:id,name',
-            'manager:id,full_name',
-        ])->first();
+        $employee = $this->profileService->getProfile($request->user());
 
         if (! $employee) {
             return $this->employeeNotFound();
@@ -52,9 +48,9 @@ class ProfileController extends Controller
             return $this->employeeNotFound();
         }
 
-        $profileData = $request->only(['phone', 'address_detail', 'bank_name', 'bank_account_number']);
-
-        $employee->update($profileData);
+        $this->profileService->updateProfile($employee, $request->only([
+            'phone', 'address_detail', 'bank_name', 'bank_account_number',
+        ]));
 
         return response()->json([
             'status' => 'success',
@@ -75,18 +71,11 @@ class ProfileController extends Controller
     #[BodyParameter(name: 'password_confirmation', description: 'Confirm new password', required: true, type: 'string')]
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
-        $data = $request->validated();
-
-        if (! Hash::check($data['current_password'], $request->user()->password)) {
-            throw ValidationException::withMessages([
-                'current_password' => ['Password saat ini salah.'],
-            ]);
-        }
-
-        $request->user()->forceFill([
-            'password' => Hash::make($data['password']),
-            'password_changed_at' => now(),
-        ])->save();
+        $this->profileService->changePassword(
+            $request->user(),
+            $request->input('current_password'),
+            $request->input('password'),
+        );
 
         return response()->json([
             'status' => 'success',

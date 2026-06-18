@@ -37,15 +37,15 @@ class AutoApproveWfaCommand extends Command
 
         $approvedCount = 0;
         foreach ($pendingAttendances as $attendance) {
-            DB::transaction(function () use ($attendance) {
+            DB::transaction(function () use ($attendance, $timeoutDays) {
                 $locked = Attendance::lockForUpdate()->find($attendance->id);
 
-                if (! $locked || $locked->status_wfa !== WfaStatus::PENDING->value) {
+                if (! $locked || $locked->status_wfa !== WfaStatus::PENDING) {
                     return;
                 }
 
                 $locked->update([
-                    'status_wfa' => WfaStatus::APPROVED->value,
+                    'status_wfa' => WfaStatus::APPROVED,
                 ]);
 
                 activity()

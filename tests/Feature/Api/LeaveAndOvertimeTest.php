@@ -325,7 +325,7 @@ describe('OvertimeController', function () {
             ->assertJsonPath('status', 'success');
     });
 
-    it('returns 404 when user has no employee record', function () {
+    it('returns 403 when user has no employee record', function () {
         $userWithoutEmp = User::factory()->create();
         $userWithoutEmp->assignRole('employee');
         $token = $userWithoutEmp->createToken('test')->plainTextToken;
@@ -337,7 +337,7 @@ describe('OvertimeController', function () {
                 'end_time' => '20:00',
                 'description' => 'Test lembur tanpa employee record.',
             ])
-            ->assertStatus(404);
+            ->assertStatus(403);
     });
 
     it('returns 403 when non-owner tries to view overtime detail', function () {
