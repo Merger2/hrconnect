@@ -63,9 +63,29 @@ Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task
 |---|---|---|---|
 | P0-1 | Freeze backend V1 scope | Daftar final fitur V1 dan V2 | ⏳ |
 | P0-2 | Mark V2 modules as out-of-scope for backend 100% | Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications tetap V2 kecuali user ubah scope | ⏳ |
-| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | Matrix endpoint -> controller -> request -> middleware -> policy -> resource -> test -> status | ⏳ |
+| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | Route inventory complete: 51 API routes grouped below. Remaining: per-endpoint test/policy/resource proof pass. | 🚧 |
 | P0-4 | Build service audit matrix | Matrix service -> workflow -> transaction -> cache -> tests -> status | ⏳ |
 | P0-5 | Decide remaining product decisions | Sanctum token expiration, Fortify registration in production, searchable bank-account blind index | ⏳ |
+
+## API Endpoint Audit Matrix
+
+Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06-18.
+
+| Group | Routes | Controllers | Request Coverage | Auth/Permission | Test Status | Gaps |
+|---|---:|---|---|---|---|---|
+| Health | 1 | `HealthController` | N/A | Public | Needs smoke proof | None known |
+| Auth public | 3 | `AuthController@login`, `twoFactorChallenge`, `forgotPassword` | `LoginRequest`, `TwoFactorChallengeRequest`, `ForgotPasswordRequest` | Public + throttle | Partial | Confirm OpenAPI/security contract |
+| Auth protected/user | 3 | `AuthController@logout`, `logoutAll`, `me` | Basic `Request` | `auth:sanctum` | Partial | Token lifetime decision `P0-5` |
+| Profile | 3 | `ProfileController` | `UpdateProfileRequest`, `ChangePasswordRequest`; show uses `Request` | `auth:sanctum` | Partial | Final profile response contract |
+| Face | 2 | `FaceController` | `RegisterFaceRequest` | `auth:sanctum` + throttle | Partial | Browser/client face-api flow deferred to FE |
+| Attendance | 5 | `AttendanceController` | `ClockInRequest`, `ClockOutRequest`, `ListAttendanceRequest`; `today/approveWfa` use `Request` | `auth:sanctum`, throttles on writes | Partial | Need full API tests for today/index/WFA approval edge cases |
+| Leave | 5 | `LeaveController` | `StoreLeaveRequest`, `ListLeaveRequest`; quota/show/delete use `Request` | `auth:sanctum`, policy, throttle on store | Partial | Quota response contract and role matrix proof |
+| Overtime | 4 | `OvertimeController` | `StoreOvertimeRequest`, `ListOvertimeRequest`; show/delete use `Request` | `auth:sanctum`, policy, throttle on store | Partial | Role matrix and payroll-impact proof |
+| Reimbursement | 4 | `ReimbursementController` | `StoreReimbursementRequest`, `ListReimbursementRequest`; show/delete use `Request` | `auth:sanctum`, policy, throttle on store | Partial | Upload failure and payment-state proof |
+| Approval | 3 | `ApprovalController` | `PendingApprovalsRequest`, `ApproveRequest`, `RejectRequest` | `auth:sanctum`, policy/service checks | Partial | L1/L2 and double-processing coverage exists but needs matrix link |
+| Payroll | 7 | `PayrollController` | `ListPayrollRequest`, `GeneratePayrollRequest`, `ExportMonthlyRequest`, `ExportPeriodRequest`; show/payslip use `Request` | `auth:sanctum`, policy, `process_payroll` permissions | Partial | Export/download contract and published-lock proof |
+| Employees | 8 | `EmployeeController`, `EmployeeTerminationController` | `ListEmployeeRequest`, `StoreEmployeeRequest`, `UpdateEmployeeRequest`, `TerminateEmployeeRequest`; contract-end uses inline validation | `auth:sanctum`, `view_employees`/`manage_employees`, policies | Partial | Contract-end FormRequest decision; PII audit proof |
+| KnowledgeBase | 3 | `KnowledgeBaseController` | `ChatRequest`, `UploadDocumentRequest`; destroy uses `Request` | `auth:sanctum`, throttle chat, `manage_knowledgebase` for mutations | Partial | Laravel AI SDK RAG refactor and fallback tests |
 
 ## P1 — API And Service Completion
 
