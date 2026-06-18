@@ -110,6 +110,13 @@ test('Penghargaan < 3 tahun = 0', function () {
     expect($this->service->calculateUangPenghargaanMasaKerja($emp))->toBe(0.0);
 });
 
+test('Penghargaan tanpa join date = 0', function () {
+    $emp = makeEmployee(['join_date' => null]);
+    $emp = withPosition($emp);
+
+    expect($this->service->calculateUangPenghargaanMasaKerja($emp))->toBe(0.0);
+});
+
 test('Penghargaan 3-6 tahun = 2 bulan salary', function () {
     $emp = makeEmployee(['join_date' => now()->subYears(4)->toDateString()]);
     $emp = withPosition($emp, 7_000_000);
@@ -170,6 +177,28 @@ test('Uang kompensasi untuk CONTRACT < 1 bulan = 0', function () {
         'employment_type' => EmploymentType::CONTRACT->value,
         'join_date' => now()->subDays(15)->toDateString(),
         'contract_end_date' => now()->toDateString(),
+    ]);
+    $emp = withPosition($emp, 6_000_000);
+
+    expect($this->service->calculateUangKompensasi($emp))->toBe(0.0);
+});
+
+test('Uang kompensasi untuk CONTRACT tanpa join date = 0', function () {
+    $emp = makeEmployee([
+        'employment_type' => EmploymentType::CONTRACT->value,
+        'join_date' => null,
+        'contract_end_date' => now()->toDateString(),
+    ]);
+    $emp = withPosition($emp, 6_000_000);
+
+    expect($this->service->calculateUangKompensasi($emp))->toBe(0.0);
+});
+
+test('Uang kompensasi untuk CONTRACT dengan end date sebelum join date = 0', function () {
+    $emp = makeEmployee([
+        'employment_type' => EmploymentType::CONTRACT->value,
+        'join_date' => '2026-06-15',
+        'contract_end_date' => '2026-06-01',
     ]);
     $emp = withPosition($emp, 6_000_000);
 

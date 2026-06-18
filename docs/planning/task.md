@@ -61,14 +61,14 @@
 | B-29 | **Circular manager reference** — No prevention of `parent_id=id`. Fix: Validation rule + DB CHECK constraint | Employee validation + migration | ~1h | ⏳ |
 | B-30 | **Future attendance** — No validation prevents future date. Fix: Add CHECK `date <= CURRENT_DATE` | Attendance migration | ~30m | ⏳ |
 | B-31 | **LeaveBalance corruption** — CHECK constraint updated in original development migration to `used <= quota + carry_forward` (guarded for pgsql). | Migration | ~30m | ✅ |
-| B-32 | **Null propagation guards** — `join_date?->diffInMonths()` can null. Fix: Explicit guard before diff | `PayrollCalculatorService.php:231,295` | ~30m | ⏳ |
+| B-32 | **Null propagation guards** — Fixed: termination compensation/masa kerja calculations now explicitly return 0 when `join_date` is missing, with regression coverage. | `PayrollCalculatorService.php`<br>`TerminationCalculationTest.php` | ~30m | ✅ |
 | B-33 | **Overtime fractional rounding** — 0.3h pays 0.3×1.5x (legal gray area). Fix: Round to 0.5h | `PayrollCalculatorService.php:118` | ~1h | ⏳ |
 | B-34 | **WFA late_minutes misleading** — Stored but not penalized. Fix: Set to 0 or NULL for WFA | `AttendanceService.php:88` | ~30m | ⏳ |
 | B-35 | **Carry-forward all types** — Should only "Cuti Tahunan". Fix: Filter by eligibility flag | `LeaveService::carryForward()` | ~1h | ⏳ |
 | B-36 | **TER K/3 label for 4+ kids** — Should show "K/3+" for clarity. Fix: UX improvement in label | `PayrollCalculatorService.php:31` | ~30m | ⏳ |
 | B-37 | **PIN fallback rate limit** — No limit on consecutive PIN-only days. Fix: Add manager approval after N days | `AttendanceService::resolveVerification()` | ~2h | ⏳ |
 | B-38 | **Employee no position** — Fixed: overtime pay calculation throws `BusinessRuleException` when employee has no position salary data; direct regression test added. | `PayrollCalculatorService.php`<br>`OvertimeRateTest.php` | ~15m | ✅ |
-| B-39 | **Resign < join date** — No validation. Fix: Guard in pro-rated calc | `PayrollCalculatorService.php:52` | ~15m | ⏳ |
+| B-39 | **Resign < join date** — Fixed: pro-rated salary throws `BusinessRuleException` when resignation date is before join date; contract compensation also returns 0 for invalid end-before-join periods. | `PayrollCalculatorService.php`<br>`PayrollCalculatorCoreTest.php`<br>`TerminationCalculationTest.php` | ~15m | ✅ |
 | B-40 | **WFA without branch** — Policy unclear. Fix: Document rule or enforce branch assignment | `AttendanceService::clockIn():50-53` | ~30m | ⏳ |
 
 ---
@@ -127,7 +127,7 @@
 | H-10 | **Default phpunit.xml missing `CIPHERSWEET_KEY`** — Fixed with deterministic test-only CipherSweet key in `phpunit.xml`. | `phpunit.xml` | P1 | ✅ |
 | H-11 | **Testing-strategy.md references 36+ non-existent test files** — Dokumentasi tidak sinkron dengan codebase. Fix: audit and update doc. | `docs/testing/testing-strategy.md` | P1 | ⏳ |
 | H-12 | **OvertimeService lacks direct service tests** — Fixed: direct service tests cover creation, overnight duration, approval workflow call, and cancellation soft delete. | `tests/Unit/Services/OvertimeServiceTest.php` | P1 | ✅ |
-| H-13 | **Payroll PostgreSQL/concurrency coverage gap** — `generatePayroll()` has direct SQLite/unit coverage, but PostgreSQL locking/concurrency scenarios still need integration coverage. | `tests/Integration/Postgres/*` | P1 | ⏳ |
+| H-13 | **Payroll PostgreSQL/concurrency coverage gap** — Fixed: PostgreSQL integration suite now covers draft regeneration on the unique `(employee_id, period)` row and rejects existing PUBLISHED payrolls; lock-unavailable behavior remains covered in unit/API regression tests. | `PostgresEnvironmentTest.php`<br>`PayrollCalculatorCoreTest.php`<br>`SecurityRegressionTest.php` | P1 | ✅ |
 
 ### 🟡 MEDIUM / DECISION ITEMS (16)
 
@@ -206,10 +206,10 @@
 | **Sprint 5** — Test Coverage | T-3 to T-15 | ⚠️ 3 CANCELLED (T-13 to T-15 by design), T-10/T-12 PARTIAL, 10 PENDING | ~13.5h+ |
 | **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⏳ PENDING | ~9h+ |
 | **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2 pending) | TBD |
-| **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING) | TBD |
-| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-6/H-7/H-8/H-9/H-10/H-12/M-1/M-2/M-3/M-4/M-5/M-6/M-7/M-8/M-9/M-11/M-12/M-14 done) | TBD |
+| **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING; H-13 PostgreSQL payroll coverage done) | TBD |
+| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-6/H-7/H-8/H-9/H-10/H-12/H-13/M-1/M-2/M-3/M-4/M-5/M-6/M-7/M-8/M-9/M-11/M-12/M-14 done) | TBD |
 
-**Total original bugs fixed: 30/40 confirmed done, 10 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, M-1, M-2, M-3, M-4, M-5, M-6, M-7, M-8, M-9, M-11, M-12, M-14 fixed/reviewed; A-3 completed. PostgreSQL suite passes locally (7 tests). Latest focused suites: Termination 10 passed, Gemini/Attendance 16 passed.**
+**Total original bugs fixed: 32/40 confirmed done, 8 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, H-13, M-1, M-2, M-3, M-4, M-5, M-6, M-7, M-8, M-9, M-11, M-12, M-14 fixed/reviewed; A-3 completed. PostgreSQL suite includes payroll regeneration and published-lock coverage. Latest focused suites: Termination 10 passed, Gemini/Attendance 16 passed.**
 
 ---
 

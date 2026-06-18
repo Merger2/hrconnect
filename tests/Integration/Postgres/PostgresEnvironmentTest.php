@@ -1,10 +1,16 @@
 <?php
 
+use App\Enums\PayrollStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Exceptions\FaceNotRecognizedException;
 use App\Models\Employee;
+use App\Models\Payroll;
 use App\Services\FaceRecognitionService;
+use App\Services\PayrollCalculatorService;
+use Database\Seeders\PayrollConfigSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Pgvector\Laravel\Distance;
 use Pgvector\Laravel\Vector;
@@ -226,4 +232,56 @@ test('CipherSweet encrypts employee PII and supports blind index lookups', funct
         ->and($employee->phone)->toBe($phone)
         ->and(Employee::whereBlind('nik', 'nik_hash', $nik)->first()?->is($employee))->toBeTrue()
         ->and(Employee::whereBlind('phone', 'phone_hash', $phone)->first()?->is($employee))->toBeTrue();
+});
+
+test('payroll generation updates existing draft row instead of creating duplicate on PostgreSQL', function () {
+    $this->seed(PayrollConfigSeeder::class);
+    Cache::forget('tax_configs');
+    Cache::forget('bpjs_configs');
+
+    $employeeId = createPostgresEmployee(['employee_number' => 'PG-PAY1']);
+    $employee = Employee::query()->with('position')->findOrFail($employeeId);
+    $service = app(PayrollCalculatorService::class);
+
+    $first = $service->generatePayroll($employee, '2026-06');
+    $first->update(['pdf_path' => 'payslips/original.pdf']);
+
+    $employee->position->update(['basic_salary' => 6_000_000]);
+    $employee->load('position');
+
+    $second = $service->generatePayroll($employee, '2026-06');
+
+    expect($second->id)->toBe($first->id)
+        ->and((float) $second->basic_salary)->toBe(6_000_000.0)
+        ->and($second->pdf_path)->toBe('payslips/original.pdf')
+        ->and(Payroll::query()->where('employee_id', $employeeId)->where('period', '2026-06')->count())->toBe(1);
+});
+
+test('payroll generation rejects existing published payroll on PostgreSQL', function () {
+    $this->seed(PayrollConfigSeeder::class);
+    Cache::forget('tax_configs');
+    Cache::forget('bpjs_configs');
+
+    $employeeId = createPostgresEmployee(['employee_number' => 'PG-PAY2']);
+    $employee = Employee::query()->with('position')->findOrFail($employeeId);
+
+    Payroll::query()->create([
+        'employee_id' => $employeeId,
+        'period' => '2026-06',
+        'basic_salary' => 5_000_000,
+        'total_allowance' => 0,
+        'gross_salary' => 5_000_000,
+        'overtime_pay' => 0,
+        'pph21' => 0,
+        'bpjs_health' => 0,
+        'bpjs_employment' => 0,
+        'loan_deduction' => 0,
+        'attendance_penalty' => 0,
+        'total_deduction' => 0,
+        'net_salary' => 5_000_000,
+        'status' => PayrollStatus::PUBLISHED,
+    ]);
+
+    expect(fn () => app(PayrollCalculatorService::class)->generatePayroll($employee, '2026-06'))
+        ->toThrow(BusinessRuleException::class, 'sudah dikunci permanen');
 });

@@ -94,6 +94,17 @@ test('prorated zero actual working days returns 0 when join+resign span only wee
     expect($this->service->calculateProratedSalary($emp, '2026-06'))->toBe(0.0);
 });
 
+test('prorated salary throws when resign date is before join date', function () {
+    $emp = payrollTestEmployee([
+        'join_date' => '2026-06-15',
+        'resign_date' => '2026-06-10',
+    ]);
+    $emp = payrollTestPosition($emp, 7_000_000);
+
+    expect(fn () => $this->service->calculateProratedSalary($emp, '2026-06'))
+        ->toThrow(BusinessRuleException::class, 'Tanggal resign tidak boleh sebelum tanggal join');
+});
+
 // ─── calculatePPh21 ──────────────────────────────────────────
 
 test('PPh21 INTERN returns 0 regardless of income', function () {

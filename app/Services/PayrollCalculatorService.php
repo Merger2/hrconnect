@@ -323,10 +323,17 @@ class PayrollCalculatorService
             return 0.0;
         }
 
+        if (! $employee->join_date) {
+            return 0.0;
+        }
+
         $endDate = $employee->resign_date ?? $employee->contract_end_date ?? now();
-        $bulanKerja = $employee->join_date
-            ? $employee->join_date->diffInMonths($endDate)
-            : 0;
+
+        if ($endDate->lt($employee->join_date)) {
+            return 0.0;
+        }
+
+        $bulanKerja = $employee->join_date->diffInMonths($endDate);
 
         if ($bulanKerja < 1) {
             return 0.0;
@@ -346,7 +353,11 @@ class PayrollCalculatorService
      */
     public function calculateUangPenghargaanMasaKerja(Employee $employee): float
     {
-        $years = (int) ($employee->join_date?->diffInMonths(now()) / 12);
+        if (! $employee->join_date) {
+            return 0.0;
+        }
+
+        $years = (int) ($employee->join_date->diffInMonths(now()) / 12);
 
         $monthMultiplier = match (true) {
             $years < 3 => 0,
