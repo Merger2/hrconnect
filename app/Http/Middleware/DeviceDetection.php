@@ -26,12 +26,12 @@ class DeviceDetection
 
     private function detectDeviceType(string $ua): string
     {
-        if (preg_match('/Mobile|Android|iPhone|iPod|Opera Mini|IEMobile|WPDesktop/i', $ua)) {
-            return 'mobile';
-        }
-
         if (preg_match('/Tablet|iPad|Android(?!.*Mobile)/i', $ua)) {
             return 'tablet';
+        }
+
+        if (preg_match('/Mobile|Android|iPhone|iPod|Opera Mini|IEMobile|WPDesktop/i', $ua)) {
+            return 'mobile';
         }
 
         return 'desktop';
@@ -60,20 +60,24 @@ class DeviceDetection
 
     private function detectOs(string $ua): string
     {
-        if (preg_match('/Windows NT/', $ua)) {
-            return 'windows';
+        if (preg_match('/iPhone|iPad|iPod/', $ua)) {
+            return 'ios';
         }
-        if (preg_match('/Mac OS X/', $ua)) {
-            return 'mac';
-        }
-        if (preg_match('/Linux/', $ua)) {
-            return 'linux';
-        }
+
         if (preg_match('/Android/', $ua)) {
             return 'android';
         }
-        if (preg_match('/iPhone|iPad|iPod/', $ua)) {
-            return 'ios';
+
+        if (preg_match('/Windows NT/', $ua)) {
+            return 'windows';
+        }
+
+        if (preg_match('/Mac OS X/', $ua)) {
+            return 'mac';
+        }
+
+        if (preg_match('/Linux/', $ua)) {
+            return 'linux';
         }
 
         return 'unknown';

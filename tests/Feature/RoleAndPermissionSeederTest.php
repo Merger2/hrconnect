@@ -74,12 +74,13 @@ test('hr-manager dapat approve L2 leaves & overtimes (bukan reimbursement)', fun
     expect($permissions)->not->toContain('process_payroll');
 });
 
-test('finance dapat process payroll + approve L2 reimbursement + manage tax/bpjs', function () {
+test('finance dapat process payroll + approve L2 reimbursement + manage reimbursements + tax/bpjs', function () {
     $role = Role::where('name', 'finance')->first();
     $permissions = $role->permissions->pluck('name')->toArray();
 
     expect($permissions)->toContain('process_payroll');
     expect($permissions)->toContain('approve_reimbursements_l2');
+    expect($permissions)->toContain('manage_reimbursements');
     expect($permissions)->toContain('manage_tax_configs');
     expect($permissions)->toContain('manage_bpjs_configs');
     expect($permissions)->toContain('manage_loans');

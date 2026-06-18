@@ -123,8 +123,9 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::VIEW_DASHBOARD,
             // View context
             PermissionEnum::VIEW_EMPLOYEES,
-            // Reimbursement L2 approval (Finance)
+            // Reimbursement management + L2 approval (Finance)
             PermissionEnum::VIEW_REIMBURSEMENTS,
+            PermissionEnum::MANAGE_REIMBURSEMENTS,
             PermissionEnum::APPROVE_REIMBURSEMENTS_L2,
             // Loan management
             PermissionEnum::VIEW_LOANS,
