@@ -3,6 +3,7 @@
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -202,6 +203,44 @@ test('POST /api/v1/auth/logout-all revoke semua token user', function () {
         ->assertJsonPath('data.revoked_count', 3);
 
     expect($user->tokens()->count())->toBe(0);
+});
+
+test('logout-all invalidates token for subsequent requests', function () {
+    $user = User::factory()->create();
+    $user->assignRole('employee');
+    $token = $user->createToken('current')->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson('/api/v1/user')
+        ->assertOk();
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->postJson('/api/v1/auth/logout-all')
+        ->assertOk();
+
+    // Force flush guard cache so next request re-authenticates from DB
+    Auth::forgetGuards();
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson('/api/v1/user')
+        ->assertStatus(401);
+});
+
+test('logout-all with no tokens', function () {
+    $user = User::factory()->create(["name" => "NoToken", "email" => "no-token@test.com"]);
+    $user->assignRole('employee');
+    $token = $user->createToken('temp')->plainTextToken;
+
+    $user->tokens()->delete();
+
+    $freshUser = User::factory()->create();
+    $freshUser->assignRole('employee');
+    $newToken = $freshUser->createToken('test')->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$newToken}")
+        ->postJson('/api/v1/auth/logout-all')
+        ->assertOk()
+        ->assertJsonPath('data.revoked_count', 1);
 });
 
 // ─── Permission gating ────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (T-3 PII/CipherSweet tests completed. Test suite: 668 / 3,994 assertions).
+> Last updated: 2026-06-18 (P1-1 password expiry + logout-all completed. Test suite: 673 / 4,006 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -21,7 +21,7 @@
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 654 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). |
 | Production hardening | ~65-70% | IDOR audit done (0 vulnerable). Security/PII audit partial — enkripsi verified, tapi S-4/S-5/S-7/S-8 belum. Queue/scheduler, deployment rehearsal belumlah. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 668 tests / 3,994 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 673 tests / 4,006 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -168,6 +168,7 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 
 | P1-12a | Web route smoke tests: 18 tests covering 6 public Fortify auth pages, 6 unauthenticated redirects, 3 authenticated pages (dashboard, email/verify, confirm-password), 3 Livewire settings pages. | `php artisan test --compact --filter='WebRouteSmoke'` -> 18 passed, 26 assertions. | ✅ |
 | T-3a | PII/CipherSweet tests: 14 tests covering Employee/Company/FamilyDetail encryption round-trip, blind index lookups, empty encrypted field, ProfileResource masking, encryptedUnique duplicate NIK, PII audit log, and forbidden PII access. | `php artisan test --compact --filter='PiiCipherSweet'` -> 14 passed, 36 assertions. | ✅ |
+| P1-1a | Password expiry + logout-all: fixed 2 bugs (ResetUserPassword + CreateNewUser set password_changed_at). 7 tests: change-password resets clock, forgot-password sets password_changed_at, logout-all token invalidation, edge cases. | `php artisan test --compact --filter='PasswordExpiry|logout-all'` -> 7 passed, 17 assertions. | ✅ |
 
 ## Carried Forward From Previous Tracker
 
