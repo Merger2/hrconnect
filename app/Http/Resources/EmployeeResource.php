@@ -11,13 +11,42 @@ class EmployeeResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
             'employee_number' => $this->employee_number,
             'full_name' => $this->full_name,
+            'email' => $this->whenLoaded('user', fn () => $this->user?->email),
+            'bank_name' => $this->bank_name,
+            'gender' => $this->gender?->value,
+            'marital_status' => $this->marital_status?->value,
+            'blood_type' => $this->blood_type?->value,
+            'education_level' => $this->education_level?->value,
+            'birth_date' => $this->birth_date?->toDateString(),
+            'join_date' => $this->join_date?->toDateString(),
             'status' => $this->status?->value,
             'employment_type' => $this->employment_type?->value,
-            'position' => PositionResource::make($this->whenLoaded('position')),
+            'salary_type' => $this->salary_type?->value,
+            'address_detail' => $this->address_detail,
+            'face_registered' => ! empty($this->resource->getRawOriginal('face_embedding')),
+            'pin_set' => ! empty($this->pin),
+            'position' => $this->whenLoaded('position', fn () => $this->position ? [
+                'id' => $this->position->id,
+                'name' => $this->position->name,
+                'grade' => $this->position->grade,
+                'basic_salary' => array_key_exists('basic_salary', $this->position->getAttributes())
+                    ? $this->position->basic_salary
+                    : null,
+            ] : null),
             'department' => DepartmentResource::make($this->whenLoaded('department')),
             'branch' => BranchResource::make($this->whenLoaded('branch')),
+            'shift' => $this->whenLoaded('shift', fn () => $this->shift ? [
+                'id' => $this->shift->id,
+                'name' => $this->shift->name,
+            ] : null),
+            'manager' => $this->whenLoaded('manager', fn () => $this->manager ? [
+                'id' => $this->manager->id,
+                'full_name' => $this->manager->full_name,
+            ] : null),
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }

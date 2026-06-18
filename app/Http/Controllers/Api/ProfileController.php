@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
+use App\Http\Resources\ProfileResource;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -37,7 +38,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $this->formatEmployee($employee, $user),
+            'data' => ProfileResource::make($employee)->resolve($request),
         ]);
     }
 
@@ -71,13 +72,13 @@ class ProfileController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Profil berhasil diperbarui',
-            'data' => $this->formatEmployee($employee->fresh()->load([
+            'data' => ProfileResource::make($employee->fresh()->load([
                 'branch:id,name',
                 'department:id,name',
                 'position:id,name,grade',
                 'shift:id,name',
                 'manager:id,full_name',
-            ]), $request->user()),
+            ]))->resolve($request),
         ]);
     }
 
@@ -104,76 +105,5 @@ class ProfileController extends Controller
             'status' => 'success',
             'message' => 'Password berhasil diubah. Token lama tetap valid.',
         ]);
-    }
-
-    private function formatEmployee($employee, $user): array
-    {
-        return [
-            'id' => $employee->id,
-            'user_id' => $user->id,
-            'employee_number' => $employee->employee_number,
-            'full_name' => $employee->full_name,
-            'email' => $user->email,
-            'phone' => $this->maskPhone($employee->phone),
-            'join_date' => $employee->join_date?->toDateString(),
-            'employment_type' => $employee->employment_type?->value,
-            'status' => $employee->status?->value,
-            'marital_status' => $employee->marital_status?->value,
-            'gender' => $employee->gender?->value,
-            'blood_type' => $employee->blood_type?->value,
-            'branch' => $employee->branch ? [
-                'id' => $employee->branch->id,
-                'name' => $employee->branch->name,
-            ] : null,
-            'department' => $employee->department ? [
-                'id' => $employee->department->id,
-                'name' => $employee->department->name,
-            ] : null,
-            'position' => $employee->position ? [
-                'id' => $employee->position->id,
-                'name' => $employee->position->name,
-                'grade' => $employee->position->grade,
-            ] : null,
-            'shift' => $employee->shift ? [
-                'id' => $employee->shift->id,
-                'name' => $employee->shift->name,
-            ] : null,
-            'manager' => $employee->manager ? [
-                'id' => $employee->manager->id,
-                'full_name' => $employee->manager->full_name,
-            ] : null,
-            'face_registered' => ! empty($employee->getRawOriginal('face_embedding')),
-            'pin_set' => ! empty($employee->pin),
-            'bank_name' => $employee->bank_name,
-            'bank_account_number' => $this->maskBankAccount($employee->bank_account_number),
-        ];
-    }
-
-    private function maskPhone(?string $phone): ?string
-    {
-        if (! $phone) {
-            return null;
-        }
-
-        $len = strlen($phone);
-        if ($len <= 4) {
-            return $phone;
-        }
-
-        return substr($phone, 0, 4).str_repeat('*', max(0, $len - 8)).substr($phone, -4);
-    }
-
-    private function maskBankAccount(?string $account): ?string
-    {
-        if (! $account) {
-            return null;
-        }
-
-        $len = strlen($account);
-        if ($len <= 4) {
-            return $account;
-        }
-
-        return str_repeat('*', $len - 4).substr($account, -4);
     }
 }

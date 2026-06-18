@@ -80,7 +80,7 @@ Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task
 | P1-7 | Approval API audit | Pending, approve, reject, L1/L2 sequencing, wrong approver, double-processing tested | ⏳ |
 | P1-8 | Payroll API audit | List, show, generate, payslip, monthly export, 1721-A1 export, BPJS export, lock behavior and race handling tested | ⏳ |
 | P1-9 | KnowledgeBase API audit | Chat, upload, delete, owner morph, source citations, fallback behavior, authorization tested | ⏳ |
-| P1-10 | Standardize API resources/responses | Partial: Leave, Overtime, Reimbursement now use API Resources inside existing response envelope. Remaining: Employee/Profile manual formatters and final response-envelope decision. | 🚧 |
+| P1-10 | Standardize API resources/responses | Partial: manual `format*()` methods removed; Leave, Overtime, Reimbursement, Employee, and Profile now use API Resources inside existing response envelope. Remaining: final response-envelope decision/API contract tests. | 🚧 |
 
 ## P1 — RAG Production Refactor With Laravel AI SDK
 

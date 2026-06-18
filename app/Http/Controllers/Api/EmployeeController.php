@@ -8,6 +8,7 @@ use App\Http\Requests\Api\ListEmployeeRequest;
 use App\Http\Requests\Api\StoreEmployeeRequest;
 use App\Http\Requests\Api\UpdateEmployeeRequest;
 use App\Http\Resources\EmployeePiiResource;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\BodyParameter;
@@ -64,7 +65,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $paginated->getCollection()->map(fn (Employee $e) => $this->formatEmployeeListing($e)),
+            'data' => EmployeeResource::collection($paginated->getCollection())->resolve($request),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -90,7 +91,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $this->formatEmployeeFull($employee),
+            'data' => EmployeeResource::make($employee)->resolve($request),
         ]);
     }
 
@@ -130,9 +131,9 @@ class EmployeeController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Karyawan berhasil ditambahkan',
-            'data' => $this->formatEmployeeFull($employee->load([
+            'data' => EmployeeResource::make($employee->load([
                 'user', 'branch', 'department', 'position', 'shift', 'manager',
-            ])),
+            ]))->resolve($request),
         ], 201);
     }
 
@@ -156,9 +157,9 @@ class EmployeeController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Data karyawan berhasil diperbarui',
-            'data' => $this->formatEmployeeFull($employee->fresh()->load([
+            'data' => EmployeeResource::make($employee->fresh()->load([
                 'user', 'branch', 'department', 'position', 'shift', 'manager',
-            ])),
+            ]))->resolve($request),
         ]);
     }
 
@@ -186,49 +187,5 @@ class EmployeeController extends Controller
             ->log('Mengakses data PII sensitif karyawan tanpa masking.');
 
         return EmployeePiiResource::make($employee);
-    }
-
-    private function formatEmployeeListing(Employee $e): array
-    {
-        return [
-            'id' => $e->id,
-            'employee_number' => $e->employee_number,
-            'full_name' => $e->full_name,
-            'status' => $e->status?->value,
-            'employment_type' => $e->employment_type?->value,
-            'branch' => $e->branch?->only(['id', 'name']),
-            'department' => $e->department?->only(['id', 'name']),
-            'position' => $e->position?->only(['id', 'name', 'grade']),
-        ];
-    }
-
-    private function formatEmployeeFull(Employee $e): array
-    {
-        return [
-            'id' => $e->id,
-            'user_id' => $e->user_id,
-            'employee_number' => $e->employee_number,
-            'full_name' => $e->full_name,
-            'email' => $e->user?->email,
-            'bank_name' => $e->bank_name,
-            'gender' => $e->gender?->value,
-            'marital_status' => $e->marital_status?->value,
-            'blood_type' => $e->blood_type?->value,
-            'education_level' => $e->education_level?->value,
-            'birth_date' => $e->birth_date?->toDateString(),
-            'join_date' => $e->join_date?->toDateString(),
-            'employment_type' => $e->employment_type?->value,
-            'salary_type' => $e->salary_type?->value,
-            'status' => $e->status?->value,
-            'address_detail' => $e->address_detail,
-            'face_registered' => ! empty($e->getRawOriginal('face_embedding')),
-            'pin_set' => ! empty($e->pin),
-            'branch' => $e->branch?->only(['id', 'name']),
-            'department' => $e->department?->only(['id', 'name']),
-            'position' => $e->position?->only(['id', 'name', 'grade', 'basic_salary']),
-            'shift' => $e->shift?->only(['id', 'name']),
-            'manager' => $e->manager?->only(['id', 'full_name']),
-            'created_at' => $e->created_at?->toIso8601String(),
-        ];
     }
 }
