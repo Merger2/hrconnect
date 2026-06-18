@@ -18,6 +18,7 @@ class LeaveResource extends JsonResource
             'day_type' => $this->day_type?->value,
             'total_days' => (float) $this->total_days,
             'reason' => $this->reason,
+            'proof_file' => $this->proof_file,
             'status' => $this->status?->value,
             'approvals' => ApprovalResource::collection($this->whenLoaded('approvals')),
             'created_at' => $this->created_at?->toIso8601String(),

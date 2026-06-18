@@ -6,9 +6,9 @@ use App\Enums\ReimbursementStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ListReimbursementRequest;
 use App\Http\Requests\Api\StoreReimbursementRequest;
+use App\Http\Resources\ReimbursementResource;
 use App\Models\Reimbursement;
 use App\Services\ApprovalService;
-use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -61,7 +61,7 @@ class ReimbursementController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Pengajuan reimbursement berhasil dikirim',
-            'data' => $this->formatReimbursement($reimbursement->fresh(['approvals'])),
+            'data' => ReimbursementResource::make($reimbursement->fresh(['approvals']))->resolve($request),
         ], 201);
     }
 
@@ -106,7 +106,7 @@ class ReimbursementController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $paginated->getCollection()->map(fn (Reimbursement $r) => $this->formatReimbursement($r)),
+            'data' => ReimbursementResource::collection($paginated->getCollection())->resolve($request),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -123,9 +123,7 @@ class ReimbursementController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $this->formatReimbursement(
-                $reimbursement->load(['approvals.approver:id,full_name', 'category:id,name'])
-            ),
+            'data' => ReimbursementResource::make($reimbursement->load(['approvals.approver:id,full_name', 'category:id,name']))->resolve($request),
         ]);
     }
 
@@ -140,28 +138,5 @@ class ReimbursementController extends Controller
             'status' => 'success',
             'message' => 'Pengajuan reimbursement berhasil dibatalkan',
         ]);
-    }
-
-    private function formatReimbursement(Reimbursement $r): array
-    {
-        return [
-            'id' => $r->id,
-            'employee_id' => $r->employee_id,
-            'category_id' => $r->category_id,
-            'category' => $r->relationLoaded('category') && $r->category ? [
-                'id' => $r->category->id,
-                'name' => $r->category->name,
-            ] : null,
-            'title' => $r->title,
-            'amount' => (int) $r->amount,
-            'description' => $r->description,
-            'expense_date' => $r->expense_date instanceof Carbon
-                ? $r->expense_date->toDateString()
-                : (string) $r->expense_date,
-            'receipt_file' => $r->receipt_file,
-            'status' => $r->status?->value,
-            'payroll_id' => $r->payroll_id,
-            'created_at' => $r->created_at?->toIso8601String(),
-        ];
     }
 }

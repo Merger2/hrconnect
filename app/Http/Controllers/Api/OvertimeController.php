@@ -6,9 +6,9 @@ use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ListOvertimeRequest;
 use App\Http\Requests\Api\StoreOvertimeRequest;
+use App\Http\Resources\OvertimeResource;
 use App\Models\Overtime;
 use App\Services\OvertimeService;
-use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -47,7 +47,7 @@ class OvertimeController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Pengajuan lembur berhasil dikirim',
-            'data' => $this->formatOvertime($overtime->fresh(['approvals'])),
+            'data' => OvertimeResource::make($overtime->fresh(['approvals']))->resolve($request),
         ], 201);
     }
 
@@ -91,7 +91,7 @@ class OvertimeController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $paginated->getCollection()->map(fn (Overtime $o) => $this->formatOvertime($o)),
+            'data' => OvertimeResource::collection($paginated->getCollection())->resolve($request),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -108,7 +108,7 @@ class OvertimeController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $this->formatOvertime($overtime->load(['approvals.approver:id,full_name'])),
+            'data' => OvertimeResource::make($overtime->load(['approvals.approver:id,full_name']))->resolve($request),
         ]);
     }
 
@@ -126,23 +126,5 @@ class OvertimeController extends Controller
             'status' => 'success',
             'message' => 'Pengajuan lembur berhasil dibatalkan',
         ]);
-    }
-
-    private function formatOvertime(Overtime $overtime): array
-    {
-        return [
-            'id' => $overtime->id,
-            'employee_id' => $overtime->employee_id,
-            'date' => $overtime->date instanceof Carbon
-                ? $overtime->date->toDateString()
-                : (string) $overtime->date,
-            'start_time' => $overtime->start_time?->toIso8601String(),
-            'end_time' => $overtime->end_time?->toIso8601String(),
-            'total_hours' => (float) $overtime->total_hours,
-            'description' => $overtime->description,
-            'status' => $overtime->status?->value,
-            'amount' => $overtime->amount,
-            'created_at' => $overtime->created_at?->toIso8601String(),
-        ];
     }
 }

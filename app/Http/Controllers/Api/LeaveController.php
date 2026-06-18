@@ -6,10 +6,10 @@ use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ListLeaveRequest;
 use App\Http\Requests\Api\StoreLeaveRequest;
+use App\Http\Resources\LeaveResource;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Services\LeaveService;
-use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -34,8 +34,6 @@ class LeaveController extends Controller
     #[BodyParameter(name: 'proof_file', description: 'Supporting document (jpg/jpeg/png/pdf, max 5MB)', required: false, type: 'string', format: 'binary')]
     public function store(StoreLeaveRequest $request): JsonResponse
     {
-        $this->authorize('create', Leave::class);
-
         $data = $request->validated();
 
         $employee = $request->user()->employee;
@@ -47,6 +45,8 @@ class LeaveController extends Controller
             ], 404);
         }
 
+        $this->authorize('create', Leave::class);
+
         if ($request->hasFile('proof_file')) {
             $data['proof_file'] = $request->file('proof_file')
                 ->store('leaves/proofs', 'public');
@@ -57,7 +57,7 @@ class LeaveController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Pengajuan cuti berhasil dikirim',
-            'data' => $this->formatLeave($leave->fresh(['leaveType', 'approvals'])),
+            'data' => LeaveResource::make($leave->fresh(['leaveType', 'approvals']))->resolve($request),
         ], 201);
     }
 
@@ -105,7 +105,7 @@ class LeaveController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $paginated->getCollection()->map(fn (Leave $l) => $this->formatLeave($l)),
+            'data' => LeaveResource::collection($paginated->getCollection())->resolve($request),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page' => $paginated->lastPage(),
@@ -122,7 +122,7 @@ class LeaveController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $this->formatLeave($leave->load(['leaveType', 'approvals.approver:id,full_name', 'employee:id,full_name'])),
+            'data' => LeaveResource::make($leave->load(['leaveType', 'approvals.approver:id,full_name', 'employee:id,full_name']))->resolve($request),
         ]);
     }
 
@@ -178,41 +178,5 @@ class LeaveController extends Controller
                 'available' => (float) $b->available(),
             ]),
         ]);
-    }
-
-    private function formatLeave(Leave $leave): array
-    {
-        return [
-            'id' => $leave->id,
-            'employee_id' => $leave->employee_id,
-            'leave_type' => $leave->leaveType ? [
-                'id' => $leave->leaveType->id,
-                'name' => $leave->leaveType->name,
-                'code' => $leave->leaveType->code,
-            ] : null,
-            'start_date' => $leave->start_date instanceof Carbon
-                ? $leave->start_date->toDateString()
-                : (string) $leave->start_date,
-            'end_date' => $leave->end_date instanceof Carbon
-                ? $leave->end_date->toDateString()
-                : (string) $leave->end_date,
-            'day_type' => $leave->day_type instanceof \BackedEnum ? $leave->day_type->value : $leave->day_type,
-            'total_days' => (float) $leave->total_days,
-            'reason' => $leave->reason,
-            'proof_file' => $leave->proof_file,
-            'status' => $leave->status?->value,
-            'approvals' => $leave->relationLoaded('approvals')
-                ? $leave->approvals->map(fn ($a) => [
-                    'level' => $a->level instanceof \BackedEnum ? $a->level->value : $a->level,
-                    'status' => $a->status?->value,
-                    'approver' => $a->approver ? [
-                        'id' => $a->approver->id,
-                        'full_name' => $a->approver->full_name,
-                    ] : null,
-                    'notes' => $a->notes,
-                ])
-                : null,
-            'created_at' => $leave->created_at?->toIso8601String(),
-        ];
     }
 }
