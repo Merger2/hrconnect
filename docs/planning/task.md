@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (P1-11 ProfileService, P1-15 command tests, T-15/17/23/24 completed. Test suite: 585 / 3,836 assertions).
+> Last updated: 2026-06-18 (T-8 job edge case tests completed. Test suite: 636 / 3,932 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,10 +18,10 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~75% | 15 services exist. RAG refactor (RAG-1–9) belum dimulai. Pinecone search masih stub (return []). All services now have at least some test coverage (ProfileService ✅ +5 tests). |
-| Backend API layer | ~82% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 585 tests total. 25 web GET routes (Fortify auth + dashboard) have zero test coverage. 1 Livewire component (Logout). Tidak ada tests untuk Blade-to-API integration flow. |
+| Backend API layer | ~88% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 636 tests total. 25 web GET routes (Fortify auth + dashboard) have zero test coverage. 1 Livewire component (Logout). Tidak ada tests untuk Blade-to-API integration flow. |
 | Production hardening | ~65-70% | IDOR audit done (0 vulnerable). Security/PII audit partial — enkripsi verified, tapi S-4/S-5/S-7/S-8 belum. Queue/scheduler, deployment rehearsal belumlah. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 585 tests / 3,836 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: queue/job (9 tests), observer/cache (16 tests), notification/mail/events (8 tests), web routes (0 tests), middleware (2/3 untested), form request validation (6/28 untested), factories (12 missing). Comprehensive gap audit completed — see P0-6. |
+| Test suite | 636 tests / 3,932 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, web routes, factories. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -278,7 +278,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
 | T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). Remaining: regenerate draft, reject published/paid, concurrent lock. |
 | T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | 🚧 | KnowledgeBaseProof covers chat, upload, delete (+14 tests with mock mode + partialMock). Remaining: RAG refactor (RAG-1–9), fallback keyword search test. |
-| T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ⏳ |
+| T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ✅ |
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ⏳ |
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | 🚧 |
 | T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ⏳ |

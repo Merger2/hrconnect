@@ -1,12 +1,14 @@
 <?php
 
 use App\Enums\PayrollStatus;
+use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -241,12 +243,28 @@ test('show returns 404 for non-existent payroll', function () {
 // ─── Generate ─────────────────────────────────────────────────────
 
 test('generate queues job for active employees', function () {
+    Queue::fake();
+
     $response = $this->withHeader('Authorization', "Bearer {$this->financeToken}")
         ->postJson('/api/v1/payroll/generate', ['period' => '2026-07']);
 
     $response->assertStatus(202)
         ->assertJsonPath('status', 'success')
         ->assertJsonStructure(['data' => ['queued_jobs', 'queue', 'period']]);
+
+    Queue::assertPushed(GenerateEmployeePayrollJob::class, 2);
+});
+
+test('generate dispatches job with correct employee and period', function () {
+    Queue::fake();
+
+    $this->withHeader('Authorization', "Bearer {$this->financeToken}")
+        ->postJson('/api/v1/payroll/generate', ['period' => '2026-07']);
+
+    Queue::assertPushed(GenerateEmployeePayrollJob::class, function ($job) {
+        return $job->period === '2026-07'
+            && in_array($job->employee->id, [$this->employee->id, $this->financeEmployee->id]);
+    });
 });
 
 test('generate returns 422 when no active employees', function () {
@@ -258,6 +276,23 @@ test('generate returns 422 when no active employees', function () {
 
     $response->assertStatus(422)
         ->assertJsonPath('status', 'error');
+});
+
+test('generate only queues jobs for specified employee_ids', function () {
+    Queue::fake();
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->financeToken}")
+        ->postJson('/api/v1/payroll/generate', [
+            'period' => '2026-07',
+            'employee_ids' => [$this->employee->id],
+        ]);
+
+    $response->assertStatus(202);
+
+    Queue::assertPushed(GenerateEmployeePayrollJob::class, 1);
+    Queue::assertPushed(GenerateEmployeePayrollJob::class, function ($job) {
+        return $job->employee->id === $this->employee->id;
+    });
 });
 
 test('generate validates period format', function () {
