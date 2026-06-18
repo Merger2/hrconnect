@@ -252,7 +252,7 @@ class Employee extends Model implements CipherSweetEncrypted
     public function hasClockedInToday(): bool
     {
         return $this->attendances()
-            ->where('date', now()->toDateString())
+            ->whereDate('date', now()->toDateString())
             ->whereNotNull('clock_in')
             ->exists();
     }
@@ -260,7 +260,7 @@ class Employee extends Model implements CipherSweetEncrypted
     public function getTodayActiveAttendance(bool $lockForUpdate = false): ?Attendance
     {
         $query = $this->attendances()
-            ->where('date', now()->toDateString())
+            ->whereDate('date', now()->toDateString())
             ->whereNotNull('clock_in')
             ->whereNull('clock_out');
 

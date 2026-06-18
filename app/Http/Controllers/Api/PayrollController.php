@@ -208,8 +208,7 @@ class PayrollController extends Controller
 
         $dispatched = 0;
         foreach ($employees as $employee) {
-            GenerateEmployeePayrollJob::dispatch($employee, $data['period'])
-                ->onQueue('payroll_high');
+            GenerateEmployeePayrollJob::dispatch($employee, $data['period']);
             $dispatched++;
         }
 

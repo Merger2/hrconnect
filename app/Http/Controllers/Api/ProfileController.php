@@ -30,10 +30,7 @@ class ProfileController extends Controller
         ])->first();
 
         if (! $employee) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Akun Anda belum terhubung dengan data karyawan.',
-            ], 404);
+            return $this->employeeNotFound();
         }
 
         return response()->json([
@@ -52,20 +49,10 @@ class ProfileController extends Controller
         $employee = $request->user()->employee;
 
         if (! $employee) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Akun Anda belum terhubung dengan data karyawan.',
-            ], 404);
+            return $this->employeeNotFound();
         }
 
-        $data = $request->validated();
-        $profileData = [];
-
-        foreach (['phone', 'address_detail', 'bank_name', 'bank_account_number'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $profileData[$field] = $data[$field];
-            }
-        }
+        $profileData = $request->only(['phone', 'address_detail', 'bank_name', 'bank_account_number']);
 
         $employee->update($profileData);
 

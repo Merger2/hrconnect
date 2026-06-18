@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18.
+> Last updated: 2026-06-18 (updated 2026-06-18: P0-3a + P0-3b completed, P0/P1 status bumped to 🚧).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -17,10 +17,11 @@
 
 | Area | Status | Notes |
 |---|---:|---|
-| Backend core services | ~70-80% | Service utama sudah ada: attendance, geofence, face recognition, leave, approval, payroll, reimbursement, KB/RAG, termination. |
-| Backend API layer | ~65-75% | `/api/v1` sudah mencakup auth, profile, face, attendance, leave, overtime, reimbursement, approval, payroll, employees, knowledgebase. |
+| Backend core services | ~72% | 15 services exist (attendance, face, geofence, leave, approval, payroll, reimbursement, KB/RAG, termination, dll). RAG refactor (RAG-1–9) belum dimulai. |
+| Backend API layer | ~65% | 51 routes at `/api/v1`, 13 controllers, all module routes active. Attendance/Payroll/KB endpoints masih partial test coverage. |
 | Production hardening | ~55-65% | Perlu audit endpoint penuh, security/PII, queue/scheduler, deployment rehearsal, dan API contract freeze. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
+| Test suite | 505 tests / 3,683 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: queue/job, observer/cache, role matrix. |
 
 ## Completed Summary
 
@@ -36,6 +37,11 @@
 |---|---|---|
 | P1-10a | Removed all API controller `private format*()` methods and moved Leave, Overtime, Reimbursement, Employee, and Profile serialization to API Resources. | `php artisan test --compact tests/Feature/Api/LeaveAndOvertimeTest.php tests/Feature/Api/ControllerHttpTest.php tests/Feature/Api/EndpointsTest.php tests/Feature/Api/SecurityRegressionTest.php --filter='LeaveController|OvertimeController|ReimbursementController|EmployeeController CRUD|profile|Profile|change-password'` -> 39 passed, 179 assertions. |
 | P0-3a | Added grouped inventory for all 51 `/api/v1` routes. | `php artisan route:list --path=api --except-vendor` |
+| P0-3b | Added 401 smoke tests for all 51 routes (GET, POST, PUT, DELETE) — every protected endpoint returns 401 without token. | `php artisan test --compact --filter='EndpointsTest'` -> 57 passed, 116 assertions. |
+| P1-9a | KnowledgeBase API audit: upload, chat, delete with auth/permission/validation coverage. | `php artisan test --compact --filter='KnowledgeBaseProof'` -> 14 passed, 40 assertions. |
+| P1-8a | Payroll API audit: list, show, generate, payslip, exports, permission gating. | `php artisan test --compact --filter='PayrollProof'` -> 20 passed, 81 assertions. |
+| P1-3a | Attendance API audit: clock-in/out, GPS/WFA edge cases, today, index, permission gating. | `php artisan test --compact --filter='AttendanceProof'` -> 20 passed, 60 assertions. |
+| P1-1a | Auth API audit: 2FA login + TOTP challenge, rate limit, forgot-password, validation. | `php artisan test --compact --filter='AuthProof'` -> 14 passed, 55 assertions. |
 
 ## Carried Forward From Previous Tracker
 
@@ -76,12 +82,12 @@ Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task
 ## P0 — Scope Freeze And Audit
 
 | ID | Task | Output | Status |
-|---|---|---|---|
-| P0-1 | Freeze backend V1 scope | Daftar final fitur V1 dan V2 | ⏳ |
-| P0-2 | Mark V2 modules as out-of-scope for backend 100% | Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications tetap V2 kecuali user ubah scope | ⏳ |
-| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory complete: 51 API routes grouped below. 🚧 Remaining: per-endpoint test/policy/resource proof pass. | 🚧 |
-| P0-4 | Build service audit matrix | Matrix service -> workflow -> transaction -> cache -> tests -> status | ⏳ |
-| P0-5 | Decide remaining product decisions | Sanctum token expiration, Fortify registration in production, searchable bank-account blind index | ⏳ |
+|---|---|---|---|---|
+| P0-1 | Freeze backend V1 scope | Daftar final fitur V1 dan V2 | 🚧 |
+| P0-2 | Mark V2 modules as out-of-scope for backend 100% | Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications tetap V2 kecuali user ubah scope | 🚧 |
+| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory complete: 51 API routes grouped below. ✅ 401 smoke tests for all routes. 🚧 Remaining: per-endpoint policy/resource proof pass. | 🚧 |
+| P0-4 | Build service audit matrix | Matrix service -> workflow -> transaction -> cache -> tests -> status | 🚧 |
+| P0-5 | Decide remaining product decisions | Sanctum token expiration, Fortify registration in production, searchable bank-account blind index | 🚧 |
 
 ## API Endpoint Audit Matrix
 
@@ -106,16 +112,16 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 ## P1 — API And Service Completion
 
 | ID | Task | Acceptance Criteria | Status |
-|---|---|---|---|
-| P1-1 | Auth/Profile API audit | Login, logout, logout-all, 2FA challenge, forgot password, change password, token revoke, password expiry behavior documented/tested | ⏳ |
-| P1-2 | Employee API audit | CRUD, PII reveal, encrypted uniqueness, termination, contract-end processing, ownership/permission checks tested | ⏳ |
-| P1-3 | Attendance API audit | Clock-in/out, today, index, WFA approval, face/PIN fallback, fake GPS, geofence, WFA note, duplicate state conflicts tested | ⏳ |
-| P1-4 | Leave API audit | Apply, index, show, quota, delete/cancel, approval quota deduction, overlap, insufficient balance tested | ⏳ |
-| P1-5 | Overtime API audit | Submit, index, show, delete/cancel, approval workflow, overnight and payroll impact tested | ⏳ |
-| P1-6 | Reimbursement API audit | Submit, index, show, delete, approval/payment state, upload failure behavior tested | ⏳ |
-| P1-7 | Approval API audit | Pending, approve, reject, L1/L2 sequencing, wrong approver, double-processing tested | ⏳ |
-| P1-8 | Payroll API audit | List, show, generate, payslip, monthly export, 1721-A1 export, BPJS export, lock behavior and race handling tested | ⏳ |
-| P1-9 | KnowledgeBase API audit | Chat, upload, delete, owner morph, source citations, fallback behavior, authorization tested | ⏳ |
+|---|---|---|---|---|
+| P1-1 | Auth/Profile API audit | Login, logout, logout-all, 2FA challenge, forgot password, change password, token revoke, password expiry behavior documented/tested | 🚧 |
+| P1-2 | Employee API audit | CRUD, PII reveal, encrypted uniqueness, termination, contract-end processing, ownership/permission checks tested | 🚧 |
+| P1-3 | Attendance API audit | Clock-in/out, today, index, WFA approval, face/PIN fallback, fake GPS, geofence, WFA note, duplicate state conflicts tested | 🚧 |
+| P1-4 | Leave API audit | Apply, index, show, quota, delete/cancel, approval quota deduction, overlap, insufficient balance tested | 🚧 |
+| P1-5 | Overtime API audit | Submit, index, show, delete/cancel, approval workflow, overnight and payroll impact tested | 🚧 |
+| P1-6 | Reimbursement API audit | Submit, index, show, delete, approval/payment state, upload failure behavior tested | 🚧 |
+| P1-7 | Approval API audit | Pending, approve, reject, L1/L2 sequencing, wrong approver, double-processing tested | 🚧 |
+| P1-8 | Payroll API audit | List, show, generate, payslip, monthly export, 1721-A1 export, BPJS export, lock behavior and race handling tested | 🚧 |
+| P1-9 | KnowledgeBase API audit | Chat, upload, delete, owner morph, source citations, fallback behavior, authorization tested | 🚧 |
 | P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no API controller `format*()` methods remain. 🚧 Remaining: final response-envelope decision and API contract tests (`API-1`, `T-11`). | 🚧 |
 
 ## P1 — RAG Production Refactor With Laravel AI SDK
@@ -136,7 +142,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Minimum Coverage | Status |
 |---|---|---|---|
-| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | ⏳ |
+| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 |
 | T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ⏳ |
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | 🚧 |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
@@ -153,11 +159,11 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
-| S-1 | Authorization audit | Every non-public endpoint has correct `auth:sanctum`, permission middleware, and/or policy | ⏳ |
+| S-1 | Authorization audit | Every non-public endpoint has correct `auth:sanctum`, permission middleware, and/or policy | 🚧 |
 | S-2 | IDOR audit | Employee/manager/finance/hr access boundaries tested on show/update/delete/download endpoints | ⏳ |
-| S-3 | PII response audit | General resources never expose NIK, phone, NPWP, bank account, PIN, or face embedding | ⏳ |
+| S-3 | PII response audit | General resources never expose NIK, phone, NPWP, bank account, PIN, or face embedding | 🚧 |
 | S-4 | Log/audit privacy audit | Logs and activity records do not store raw sensitive PII or secrets | ⏳ |
-| S-5 | Rate-limit audit | Login, 2FA, face verify, attendance writes, leave/overtime/reimbursement writes, KB chat/upload are throttled appropriately | ⏳ |
+| S-5 | Rate-limit audit | Login, 2FA, face verify, attendance writes, leave/overtime/reimbursement writes, KB chat/upload are throttled appropriately | 🚧 |
 | S-6 | Secret audit | No real API keys or production credentials committed; rotate any exposed key if real | ⏳ |
 | S-7 | File upload audit | PDF/reimbursement upload validates mime, size, storage failures, filename safety, and authorization | ⏳ |
 | S-8 | Production env checklist | `APP_DEBUG=false`, `APP_ENV=production`, secure `APP_KEY`, `CIPHERSWEET_KEY`, AI keys, DB credentials | ⏳ |

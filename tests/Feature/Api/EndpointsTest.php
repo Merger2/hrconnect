@@ -117,6 +117,42 @@ test('protected POST endpoints return 401 tanpa token', function (string $endpoi
     $this->postJson($endpoint, [])->assertStatus(401);
 })->with('protected_post_endpoints');
 
+dataset('protected_post_endpoints_more', [
+    '/api/v1/knowledgebase',
+    '/api/v1/knowledgebase/chat',
+    '/api/v1/payroll/generate',
+    '/api/v1/payroll/export/monthly',
+    '/api/v1/payroll/export/1721-a1',
+    '/api/v1/payroll/export/bpjs',
+    '/api/v1/employees',
+    '/api/v1/employees/terminate/contract-end',
+]);
+
+test('protected POST endpoints (more) return 401 tanpa token', function (string $endpoint) {
+    $this->postJson($endpoint, [])->assertStatus(401);
+})->with('protected_post_endpoints_more');
+
+dataset('protected_put_endpoints', [
+    '/api/v1/profile',
+    '/api/v1/employees/0',
+]);
+
+test('protected PUT endpoints return 401 tanpa token', function (string $endpoint) {
+    $this->putJson($endpoint, [])->assertStatus(401);
+})->with('protected_put_endpoints');
+
+dataset('protected_delete_endpoints', [
+    '/api/v1/leave/0',
+    '/api/v1/overtime/0',
+    '/api/v1/reimbursement/0',
+    '/api/v1/employees/0',
+    '/api/v1/knowledgebase/0',
+]);
+
+test('protected DELETE endpoints return 401 tanpa token', function (string $endpoint) {
+    $this->deleteJson($endpoint)->assertStatus(401);
+})->with('protected_delete_endpoints');
+
 // ─── /user endpoint dengan token ──────────────────────────────────────
 
 test('GET /api/v1/user dengan token return user payload', function () {

@@ -26,15 +26,13 @@ class EmployeeResource extends JsonResource
             'employment_type' => $this->employment_type?->value,
             'salary_type' => $this->salary_type?->value,
             'address_detail' => $this->address_detail,
-            'face_registered' => ! empty($this->resource->getRawOriginal('face_embedding')),
+            'face_registered' => ! empty($this->getRawOriginal('face_embedding')),
             'pin_set' => ! empty($this->pin),
             'position' => $this->whenLoaded('position', fn () => $this->position ? [
                 'id' => $this->position->id,
                 'name' => $this->position->name,
                 'grade' => $this->position->grade,
-                'basic_salary' => array_key_exists('basic_salary', $this->position->getAttributes())
-                    ? $this->position->basic_salary
-                    : null,
+                'basic_salary' => $this->position->basic_salary,
             ] : null),
             'department' => DepartmentResource::make($this->whenLoaded('department')),
             'branch' => BranchResource::make($this->whenLoaded('branch')),
