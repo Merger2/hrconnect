@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (P1-12/T-13 web route smoke tests completed. Test suite: 654 / 3,958 assertions).
+> Last updated: 2026-06-18 (T-3 PII/CipherSweet tests completed. Test suite: 668 / 3,994 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -21,7 +21,7 @@
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 654 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). |
 | Production hardening | ~65-70% | IDOR audit done (0 vulnerable). Security/PII audit partial — enkripsi verified, tapi S-4/S-5/S-7/S-8 belum. Queue/scheduler, deployment rehearsal belumlah. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 654 tests / 3,958 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 668 tests / 3,994 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -167,6 +167,7 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | T-17a | Policy boundary tests: 15 new tests for AttendancePolicy (6) and OvertimePolicy (9) — all 8 policies now have direct tests. | `php artisan test --compact --filter='PoliciesTest'` -> 36 passed, 57 assertions. |
 
 | P1-12a | Web route smoke tests: 18 tests covering 6 public Fortify auth pages, 6 unauthenticated redirects, 3 authenticated pages (dashboard, email/verify, confirm-password), 3 Livewire settings pages. | `php artisan test --compact --filter='WebRouteSmoke'` -> 18 passed, 26 assertions. | ✅ |
+| T-3a | PII/CipherSweet tests: 14 tests covering Employee/Company/FamilyDetail encryption round-trip, blind index lookups, empty encrypted field, ProfileResource masking, encryptedUnique duplicate NIK, PII audit log, and forbidden PII access. | `php artisan test --compact --filter='PiiCipherSweet'` -> 14 passed, 36 assertions. | ✅ |
 
 ## Carried Forward From Previous Tracker
 
@@ -275,7 +276,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 |---|---|---|---|
 | T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 585 total across 58 files. Remaining: deeper edge cases per group, web route smoke tests (T-13), form request validation tests (P1-14). |
 | T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ⏳ |
-| T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | 🚧 |
+| T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | ✅ |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
 | T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
 | T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). Remaining: regenerate draft, reject published/paid, concurrent lock. |
