@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (T-8 job edge case tests completed. Test suite: 636 / 3,932 assertions).
+> Last updated: 2026-06-18 (P1-12/T-13 web route smoke tests completed. Test suite: 654 / 3,958 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,10 +18,10 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~75% | 15 services exist. RAG refactor (RAG-1–9) belum dimulai. Pinecone search masih stub (return []). All services now have at least some test coverage (ProfileService ✅ +5 tests). |
-| Backend API layer | ~88% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 636 tests total. 25 web GET routes (Fortify auth + dashboard) have zero test coverage. 1 Livewire component (Logout). Tidak ada tests untuk Blade-to-API integration flow. |
+| Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 654 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). |
 | Production hardening | ~65-70% | IDOR audit done (0 vulnerable). Security/PII audit partial — enkripsi verified, tapi S-4/S-5/S-7/S-8 belum. Queue/scheduler, deployment rehearsal belumlah. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 636 tests / 3,932 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, web routes, factories. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 654 tests / 3,958 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -166,6 +166,8 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | T-23a | Added `$this->authorize('create')` to OvertimeController and ReimbursementController store methods. | `php artisan test --compact --filter='OvertimeProof|ReimbursementProof|EndpointsTest'` -> 44 passed, 88 assertions. |
 | T-17a | Policy boundary tests: 15 new tests for AttendancePolicy (6) and OvertimePolicy (9) — all 8 policies now have direct tests. | `php artisan test --compact --filter='PoliciesTest'` -> 36 passed, 57 assertions. |
 
+| P1-12a | Web route smoke tests: 18 tests covering 6 public Fortify auth pages, 6 unauthenticated redirects, 3 authenticated pages (dashboard, email/verify, confirm-password), 3 Livewire settings pages. | `php artisan test --compact --filter='WebRouteSmoke'` -> 18 passed, 26 assertions. | ✅ |
+
 ## Carried Forward From Previous Tracker
 
 Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task aktif berikut.
@@ -248,7 +250,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-9 | KnowledgeBase API audit | ✅ KnowledgeBaseProof (+14 tests: chat mock mode, upload partialMock+Queue::fake, delete, auth/permission). | 🚧 |
 | P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no API controller `format*()` methods remain. 🚧 Remaining: final response-envelope decision and API contract tests (`API-1`, `T-11`). | 🚧 |
 | P1-11 | ProfileService test coverage | ✅ 5 tests written (getProfile with/without employee, updateProfile, changePassword success, changePassword wrong current). Refactored ProfileController to use ProfileService (eliminated dead code). | ✅ |
-| P1-12 | Web route smoke tests | 25+ web GET routes (Fortify auth pages, dashboard, settings) have zero test coverage. Add smoke tests. | ⏳ |
+| P1-12 | Web route smoke tests | 25+ web GET routes (Fortify auth pages, dashboard, settings) have zero test coverage. Add smoke tests. | ✅ |
 | P1-13 | Middleware test coverage | Add tests for `DeviceDetection` and `GeofenceValidation` middleware (2 of 3 untested). | ⏳ |
 | P1-14 | FormRequest validation tests | Add validation rule tests for 6 untested list-endpoint FormRequests + `UpdateProfileRequest`. | ⏳ |
 | P1-15 | Scheduled command tests | ✅ 12 tests added: detect-missed-clock (3), auto-approve-wfa (3), send-reminders (2), knowledgebase:index (3). **2 bugs found + fixed** in AutoApproveWfaCommand (enum comparison with ->value vs enum, missing $timeoutDays in closure scope). DetectMissedClockCommand fixed (referenced nonexistent columns). All 9 commands now have test coverage. | ✅ |
@@ -283,7 +285,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | 🚧 |
 | T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ⏳ |
 | T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ⏳ |
-| T-13 | Web route smoke tests | Add smoke/health tests for 25+ Fortify auth routes, dashboard, and settings pages | ⏳ |
+| T-13 | Web route smoke tests | ✅ 18 smoke tests: 6 public auth pages (200), 6 unauthenticated redirects (302), 3 authenticated pages (200), 2 special pages (email_verify→dashboard, security→confirm-password), 1 2FA-challenge redirect. | ✅ |
 | T-14 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
 | T-15 | ProfileService test | ✅ 5 tests (getProfile with/without employee, updateProfile, changePassword success/wrong current). Plus refactored ProfileController to use the service (eliminated dead code). | ✅ |
 | T-16 | Pinecone search stub test | Test that Pinecone search gracefully degrades (current stub returns []) | ⏳ |
