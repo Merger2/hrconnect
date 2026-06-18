@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (P0-3a + P0-3b + P1-1a–P1-9a completed; P0-6 comprehensive gap audit completed; test count corrected to 528 / 1,077 assertions).
+> Last updated: 2026-06-18 (P1-11 ProfileService, P1-15 command tests, T-15/17/23/24 completed. Test suite: 585 / 3,836 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,7 +18,7 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~75% | 15 services exist. RAG refactor (RAG-1–9) belum dimulai. Pinecone search masih stub (return []). All services now have at least some test coverage (ProfileService ✅ +5 tests). |
-| Backend API layer | ~80% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups now have dedicated proof test files (528 tests total). 25 web GET routes (Fortify auth + dashboard) have zero test coverage. 1 Livewire component (Logout). Tidak ada tests untuk Blade-to-API integration flow. |
+| Backend API layer | ~82% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 585 tests total. 25 web GET routes (Fortify auth + dashboard) have zero test coverage. 1 Livewire component (Logout). Tidak ada tests untuk Blade-to-API integration flow. |
 | Production hardening | ~65-70% | IDOR audit done (0 vulnerable). Security/PII audit partial — enkripsi verified, tapi S-4/S-5/S-7/S-8 belum. Queue/scheduler, deployment rehearsal belumlah. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
 | Test suite | 585 tests / 3,836 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: queue/job (9 tests), observer/cache (16 tests), notification/mail/events (8 tests), web routes (0 tests), middleware (2/3 untested), form request validation (6/28 untested), factories (12 missing). Comprehensive gap audit completed — see P0-6. |
@@ -87,11 +87,11 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | `DELETE /employees/{id}` | `manage_employees` permission | Same pattern |
 | `GET /employees/{id}/pii` | `manage_employees` + audit log | Same pattern (PII reveal is intentional + audited) |
 
-#### Overtime & Reimbursement Store — Policy Not Invoked
+#### Overtime & Reimbursement Store — Policy Not Invoked (✅ FIXED)
 | Endpoint | Issue |
 |----------|-------|
-| `POST /overtime` | `OvertimePolicy::create()` exists but **never called**. Employee from auth, so no actual IDOR, but policy bypassed. |
-| `POST /reimbursement` | `ReimbursementPolicy::create()` exists but **never called**. Same pattern. |
+| `POST /overtime` | ✅ `$this->authorize('create', Overtime::class)` added. |
+| `POST /reimbursement` | ✅ `$this->authorize('create', Reimbursement::class)` added. |
 
 #### Defense-in-Depth Gaps
 - **All `viewAny` policies** (Attendance, Leave, Overtime, Reimbursement) are permission-only. Real ownership scoping happens in controller query builders. If a future `index` omits the query scope, the policy alone won't prevent IDOR.
@@ -161,6 +161,10 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | P1-7a | Approval API audit: auth, validation, resource gaps. | `php artisan test --compact --filter='ApprovalProof'` -> 8 passed, 12 assertions. |
 | P1-2a | Employee API audit: auth, permission gating gaps. | `php artisan test --compact --filter='EmployeeProof'` -> 8 passed, 16 assertions. |
 | P1-3b | Face API audit: register, verify, validation, auth. | `php artisan test --compact --filter='FaceProof'` -> 8 passed, 26 assertions. |
+| P1-11a | ProfileService test coverage (was zero) + refactor ProfileController to use service. | `php artisan test --compact --filter='ProfileService'` -> 5 passed, 19 assertions. |
+| P1-15a | Scheduled command tests: 12 tests for detect-missed-clock, auto-approve-wfa, send-reminders, knowledgebase:index. Fixed 3 production bugs found. | `php artisan test --compact --filter='ConsoleCommands'` -> 25 passed, 41 assertions. |
+| T-23a | Added `$this->authorize('create')` to OvertimeController and ReimbursementController store methods. | `php artisan test --compact --filter='OvertimeProof|ReimbursementProof|EndpointsTest'` -> 44 passed, 88 assertions. |
+| T-17a | Policy boundary tests: 15 new tests for AttendancePolicy (6) and OvertimePolicy (9) — all 8 policies now have direct tests. | `php artisan test --compact --filter='PoliciesTest'` -> 36 passed, 57 assertions. |
 
 ## Carried Forward From Previous Tracker
 
@@ -247,7 +251,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-12 | Web route smoke tests | 25+ web GET routes (Fortify auth pages, dashboard, settings) have zero test coverage. Add smoke tests. | ⏳ |
 | P1-13 | Middleware test coverage | Add tests for `DeviceDetection` and `GeofenceValidation` middleware (2 of 3 untested). | ⏳ |
 | P1-14 | FormRequest validation tests | Add validation rule tests for 6 untested list-endpoint FormRequests + `UpdateProfileRequest`. | ⏳ |
-| P1-15 | Scheduled command tests | ✅ 12 tests added: detect-missed-clock (3), auto-approve-wfa (3), send-reminders (2), knowledgebase:index (3). **2 bugs found + fixed** in AutoApproveWfaCommand (enum comparison with ->value vs enum, missing $timeoutDays in closure scope). DetectMissedClockCommand fixed (referenced `clock_in_time`/`clock_out_time` columns that don't exist — fixed to `clock_in`/`clock_out`). All 9 commands now have test coverage. | ✅ |
+| P1-15 | Scheduled command tests | ✅ 12 tests added: detect-missed-clock (3), auto-approve-wfa (3), send-reminders (2), knowledgebase:index (3). **2 bugs found + fixed** in AutoApproveWfaCommand (enum comparison with ->value vs enum, missing $timeoutDays in closure scope). DetectMissedClockCommand fixed (referenced nonexistent columns). All 9 commands now have test coverage. | ✅ |
 
 ## P1 — RAG Production Refactor With Laravel AI SDK
 
@@ -267,7 +271,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Minimum Coverage | Status |
 |---|---|---|---|
-| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups: Attendance(+20), Payroll(+20), Auth(+8), KB(+14), Face(+8), Leave(+9), Overtime(+6), Reimbursement(+9), Approval(+7), Employee(+10), Endpoints(+26). Total 528 tests across 57 files. Remaining: deeper edge cases per group, web route smoke tests (T-13). |
+| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 585 total across 58 files. Remaining: deeper edge cases per group, web route smoke tests (T-13), form request validation tests (P1-14). |
 | T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ⏳ |
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | 🚧 |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
@@ -281,7 +285,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ⏳ |
 | T-13 | Web route smoke tests | Add smoke/health tests for 25+ Fortify auth routes, dashboard, and settings pages | ⏳ |
 | T-14 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
-| T-15 | ProfileService test | Add tests for show, update, change-password flows (currently zero coverage) | ⏳ |
+| T-15 | ProfileService test | ✅ 5 tests (getProfile with/without employee, updateProfile, changePassword success/wrong current). Plus refactored ProfileController to use the service (eliminated dead code). | ✅ |
 | T-16 | Pinecone search stub test | Test that Pinecone search gracefully degrades (current stub returns []) | ⏳ |
 | T-17 | Policy direct tests | ✅ 15 new boundary tests for `AttendancePolicy` (6) and `OvertimePolicy` (9) covering view self/other/team, create, update/delete status gates, approveLevel1/2 scoping. All 8 policies now have direct tests. | ✅ |
 | T-18 | Factory gap closure | Create factory classes for high-priority models: `Approval`, `Device`, `CompanySetting`, `FamilyDetail`, `PayrollAdjustment`, `PayrollItem`, `ShiftSchedule` | ⏳ |
@@ -289,7 +293,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-20 | PayrollCalculatorService dedicated tests | Extract `generatePayroll()` coverage from integration tests into dedicated service test file | ⏳ |
 | T-21 | FaceRecognitionService pgvector test | Add test that actually invokes `nearestNeighbors()` against DB | ⏳ |
 | T-22 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
-| T-23 | Overtime store policy call | ✅ Added `$this->authorize('create', Overtime::class)` to `OvertimeController::store()`. Fixed EndpointsTest + LeaveAndOvertimeTest 404→403 expectation. | ✅ |
+| T-23 | Overtime store policy call | ✅ Added `$this->authorize('create', Overtime::class)` to `OvertimeController::store()`. Fixed 2 test expectations (404→403). | ✅ |
 | T-24 | Reimbursement store policy call | ✅ Added `$this->authorize('create', Reimbursement::class)` to `ReimbursementController::store()`. | ✅ |
 | T-25 | Employee API team scope decision | Decide if API should scope employees by manager team (currently deferred to Livewire only) | ⏳ |
 
@@ -347,7 +351,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | Milestone | Target Readiness | Gate |
 |---|---:|---|
 | M1 — Scope + audit complete | 75-80% | P0 complete with endpoint/service matrices. |
-| M2 — Feature gaps closed | ~72% | P1 API/service tasks complete. Deep audit reveals: 12 zero-coverage items (ProfileService, Pinecone, web routes, 2 middleware, 4 commands, blade-to-API, events/mail, 2 policies), 6 form-request validation gaps, 10 thin-coverage services, 12 missing factories. Actual coverage ~60-65% considering all gaps. |
+| M2 — Feature gaps closed | ~75% | P1 API/service tasks complete. ProfileService zero coverage eliminated. Policy boundary tests done (all 8). Command tests done (all 9, with 3 bugfixes). Remaining gaps: web routes, middleware, form requests, factories, queue edge cases, Pinecone stub. |
 | M3 — RAG production-ready | 85-90% | Laravel AI SDK adoption completed or explicitly deferred with stable custom implementation. |
 | M4 — Test coverage complete | 90-93% | `composer test` and `composer test:pgsql` pass with required coverage. |
 | M5 — Security hardened | 93-95% | Authorization, IDOR, PII, rate limit, secret audits complete. |
