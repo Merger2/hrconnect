@@ -4,6 +4,15 @@
 > Last updated: 2026-06-18.
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
+## Status Legend
+
+| Status | Meaning |
+|---|---|
+| ✅ | Done and verified in this tracker. |
+| 🚧 | In progress / partial; see remaining work in the row. |
+| ⏳ | Not started. |
+| 🚫 | Deferred/cancelled by decision. |
+
 ## Status Snapshot
 
 | Area | Status | Notes |
@@ -20,6 +29,13 @@
 - Test infrastructure split sudah ada: fast SQLite suite (`phpunit.xml`) dan PostgreSQL integration suite (`phpunit.pgsql.xml`).
 - CI sudah memiliki PostgreSQL job dengan `pgvector/pgvector:pg16` dan extension `vector`, `pg_trgm`, `pgcrypto`.
 - Core guards sudah diterapkan: pgvector SQLite fallback cast, CipherSweet test key, payroll/leave/overtime/reimbursement race-condition fixes, PII endpoint split, and API throttling for core write endpoints.
+
+## Completed In Current Backend-100% Pass
+
+| ID | Done | Verification |
+|---|---|---|
+| P1-10a | Removed all API controller `private format*()` methods and moved Leave, Overtime, Reimbursement, Employee, and Profile serialization to API Resources. | `php artisan test --compact tests/Feature/Api/LeaveAndOvertimeTest.php tests/Feature/Api/ControllerHttpTest.php tests/Feature/Api/EndpointsTest.php tests/Feature/Api/SecurityRegressionTest.php --filter='LeaveController|OvertimeController|ReimbursementController|EmployeeController CRUD|profile|Profile|change-password'` -> 39 passed, 179 assertions. |
+| P0-3a | Added grouped inventory for all 51 `/api/v1` routes. | `php artisan route:list --path=api --except-vendor` |
 
 ## Carried Forward From Previous Tracker
 
@@ -63,7 +79,7 @@ Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task
 |---|---|---|---|
 | P0-1 | Freeze backend V1 scope | Daftar final fitur V1 dan V2 | ⏳ |
 | P0-2 | Mark V2 modules as out-of-scope for backend 100% | Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications tetap V2 kecuali user ubah scope | ⏳ |
-| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | Route inventory complete: 51 API routes grouped below. Remaining: per-endpoint test/policy/resource proof pass. | 🚧 |
+| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory complete: 51 API routes grouped below. 🚧 Remaining: per-endpoint test/policy/resource proof pass. | 🚧 |
 | P0-4 | Build service audit matrix | Matrix service -> workflow -> transaction -> cache -> tests -> status | ⏳ |
 | P0-5 | Decide remaining product decisions | Sanctum token expiration, Fortify registration in production, searchable bank-account blind index | ⏳ |
 
@@ -100,7 +116,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-7 | Approval API audit | Pending, approve, reject, L1/L2 sequencing, wrong approver, double-processing tested | ⏳ |
 | P1-8 | Payroll API audit | List, show, generate, payslip, monthly export, 1721-A1 export, BPJS export, lock behavior and race handling tested | ⏳ |
 | P1-9 | KnowledgeBase API audit | Chat, upload, delete, owner morph, source citations, fallback behavior, authorization tested | ⏳ |
-| P1-10 | Standardize API resources/responses | Partial: manual `format*()` methods removed; Leave, Overtime, Reimbursement, Employee, and Profile now use API Resources inside existing response envelope. Remaining: final response-envelope decision/API contract tests. | 🚧 |
+| P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no API controller `format*()` methods remain. 🚧 Remaining: final response-envelope decision and API contract tests (`API-1`, `T-11`). | 🚧 |
 
 ## P1 — RAG Production Refactor With Laravel AI SDK
 
