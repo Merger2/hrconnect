@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListKnowledgeBaseRequest extends FormRequest
+class ListEmployeeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,10 @@ class ListKnowledgeBaseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'branch_id' => ['nullable', 'integer'],
+            'department_id' => ['nullable', 'integer'],
             'status' => ['nullable', 'string'],
-            'category' => ['nullable', 'string'],
+            'search' => ['nullable', 'string', 'min:2'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];

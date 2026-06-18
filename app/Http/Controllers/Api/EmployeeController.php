@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\EmployeeStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ListEmployeeRequest;
 use App\Http\Requests\Api\StoreEmployeeRequest;
 use App\Http\Requests\Api\UpdateEmployeeRequest;
 use App\Http\Resources\EmployeePiiResource;
@@ -27,20 +28,12 @@ class EmployeeController extends Controller
     #[QueryParameter(name: 'search', description: 'Search by name or employee number (min 2 chars)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
-    public function index(Request $request): JsonResponse
+    public function index(ListEmployeeRequest $request): JsonResponse
     {
-        $request->validate([
-            'branch_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
-            'status' => ['nullable', 'string'],
-            'search' => ['nullable', 'string', 'min:2'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $this->authorize('viewAny', Employee::class);
 
-        $perPage = (int) $request->input('per_page', 20);
+        $data = $request->validated();
+        $perPage = (int) ($data['per_page'] ?? 20);
 
         $query = Employee::query()
             ->with([
@@ -50,17 +43,17 @@ class EmployeeController extends Controller
             ])
             ->orderBy('full_name');
 
-        if ($request->filled('branch_id')) {
-            $query->where('branch_id', (int) $request->input('branch_id'));
+        if (isset($data['branch_id'])) {
+            $query->where('branch_id', (int) $data['branch_id']);
         }
-        if ($request->filled('department_id')) {
-            $query->where('department_id', (int) $request->input('department_id'));
+        if (isset($data['department_id'])) {
+            $query->where('department_id', (int) $data['department_id']);
         }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+        if (isset($data['status'])) {
+            $query->where('status', $data['status']);
         }
-        if ($request->filled('search')) {
-            $term = $request->input('search');
+        if (isset($data['search'])) {
+            $term = $data['search'];
             $query->where(function ($q) use ($term) {
                 $q->where('full_name', 'like', "%{$term}%")
                     ->orWhere('employee_number', 'like', "%{$term}%");

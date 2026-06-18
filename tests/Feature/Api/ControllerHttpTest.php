@@ -141,6 +141,15 @@ describe('EmployeeController CRUD', function () {
             ]);
     });
 
+    it('validates employee list query parameters', function () {
+        $token = $this->hrUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/employees?search=a&per_page=101&page=0')
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['search', 'per_page', 'page']);
+    });
+
     it('shows employee detail', function () {
         $employee = Employee::factory()->create([
             'user_id' => $this->employeeUser->id,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\BusinessRuleException;
 use App\Models\Employee;
 use App\Models\Overtime;
 use App\Models\Position;
@@ -124,4 +125,22 @@ test('overtime 0 jam return 0', function () {
 
     $svc = app(PayrollCalculatorService::class);
     expect($svc->calculateOvertimePay($overtime))->toBe(0.0);
+});
+
+test('overtime pay throws when employee has no position salary data', function () {
+    $employee = new Employee;
+    $employee->id = 99;
+    $employee->full_name = 'No Position Employee';
+    $employee->setRelation('position', null);
+
+    $start = Carbon::create(2026, 6, 2, 17, 0);
+
+    $overtime = new Overtime;
+    $overtime->date = $start->toDateString();
+    $overtime->start_time = $start;
+    $overtime->end_time = $start->copy()->addHour();
+    $overtime->setRelation('employee', $employee);
+
+    expect(fn () => app(PayrollCalculatorService::class)->calculateOvertimePay($overtime))
+        ->toThrow(BusinessRuleException::class, 'belum memiliki posisi dengan gaji pokok');
 });

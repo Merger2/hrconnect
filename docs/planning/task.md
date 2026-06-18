@@ -67,7 +67,7 @@
 | B-35 | **Carry-forward all types** — Should only "Cuti Tahunan". Fix: Filter by eligibility flag | `LeaveService::carryForward()` | ~1h | ⏳ |
 | B-36 | **TER K/3 label for 4+ kids** — Should show "K/3+" for clarity. Fix: UX improvement in label | `PayrollCalculatorService.php:31` | ~30m | ⏳ |
 | B-37 | **PIN fallback rate limit** — No limit on consecutive PIN-only days. Fix: Add manager approval after N days | `AttendanceService::resolveVerification()` | ~2h | ⏳ |
-| B-38 | **Employee no position** — Overtime calc returns 0 silently. Fix: Throw exception like payroll | `PayrollCalculatorService.php:92` | ~15m | ⏳ |
+| B-38 | **Employee no position** — Fixed: overtime pay calculation throws `BusinessRuleException` when employee has no position salary data; direct regression test added. | `PayrollCalculatorService.php`<br>`OvertimeRateTest.php` | ~15m | ✅ |
 | B-39 | **Resign < join date** — No validation. Fix: Guard in pro-rated calc | `PayrollCalculatorService.php:52` | ~15m | ⏳ |
 | B-40 | **WFA without branch** — Policy unclear. Fix: Document rule or enforce branch assignment | `AttendanceService::clockIn():50-53` | ~30m | ⏳ |
 
@@ -120,7 +120,7 @@
 | H-3 | **`createApprovalWorkflow()` nested in Leave transaction** — Fixed: `ApprovalService::createApprovalWorkflow()` now reuses an active transaction instead of opening a nested transaction. | `ApprovalService.php`<br>`LeaveService.php` | P1 | ✅ |
 | H-4 | **`createApprovalWorkflow()` nested in Overtime transaction** — Fixed by the same transaction-level guard in `ApprovalService`. | `ApprovalService.php`<br>`OvertimeService.php` | P1 | ✅ |
 | H-5 | **PayrollExportService Writer tanpa try-finally** — Fixed with shared `writeXlsx()` helper that opens the writer once and always closes it in `finally`. | `PayrollExportService.php` | P1 | ✅ |
-| H-6 | **5 dead FormRequest classes (`authorize(): false`, never injected)** — Partial fix: all 5 `List*Request` classes now authorize authenticated users and define rules; active list endpoints now inject Attendance/Leave/Overtime/Reimbursement requests. Remaining: decide whether to add a KnowledgeBase list endpoint or remove `ListKnowledgeBaseRequest`. | 5 FormRequest files + 4 controllers | P1 | 🚧 **PARTIAL** |
+| H-6 | **5 dead FormRequest classes (`authorize(): false`, never injected)** — Fixed: active list endpoints now inject their `List*Request` classes, Employee index uses `ListEmployeeRequest`, and unused `ListKnowledgeBaseRequest` was removed because no list endpoint exists. | List FormRequests + list controllers | P1 | ✅ |
 | H-7 | **N+1 query in ApprovalController::index()** — Fixed: pending approvals now eager-load morph-specific `employee` relations via `morphWith()`. | `ApprovalController.php` | P1 | ✅ |
 | H-8 | **AttendanceController::index() uses inline validation** — Fixed: `AttendanceController::index()` now injects `ListAttendanceRequest`. | `AttendanceController.php`<br>`ListAttendanceRequest.php` | P1 | ✅ |
 | H-9 | **destroy() cancellation consistency** — Fixed for multi-write cancellation: Leave/Overtime now wrap `status update + delete()` in `DB::transaction()`. Reimbursement remains direct delete because enum has no `cancelled` state. | `LeaveController`<br>`OvertimeController` | P1 | ✅ |
@@ -147,7 +147,7 @@
 | M-13 | **Sanctum token `expiration => null` decision** — Intentional for PWA/API token reuse unless product requires forced token expiry. Document final decision. | `config/sanctum.php` | Decision | ⏳ |
 | M-14 | **Store endpoints (`/leave`, `/overtime`, `/reimbursement`) tidak ada rate limiting** — Fixed: write endpoints now use `throttle:10,1`. | `routes/api.php` | P2 | ✅ |
 | M-15 | **Fortify `registration()` enabled decision** — Confirm whether self-registration is intentional. If HR-only employee creation is required, disable in production. | `config/fortify.php:147` | Decision | ⏳ |
-| M-16 | **Employee `created_by`, `updated_by`, `face_embedding`, `pin` di `#[Fillable]`** — Seharusnya hanya via service. | `app/Models/Employee.php` | P2 | ⏳ |
+| M-16 | **Employee `created_by`, `updated_by`, `face_embedding`, `pin` di `#[Fillable]`** — Fixed: service-managed fields are not mass assignable and covered by regression test. | `app/Models/Employee.php`<br>`EmployeeFillableTest.php` | P2 | ✅ |
 | M-17 | **Employee `bank_account_number` blind-index decision** — Encrypted field has no blind index. Add one only if the product requires searchable bank-account lookups. | `app/Models/Employee.php` | Decision | ⏳ |
 
 ---
@@ -158,7 +158,7 @@
 |---|------|------|------|--------|
 | A-1 | **Create missing Services** — Extract controller logic to OvertimeService, ProfileService | `OvertimeService.php`<br>`ProfileService.php` | ~4h | ✅ |
 | A-2 | **Create API Resources** — Standardize JSON response for all entities. Resource files exist, but several controllers still use manual `format*()` response methods. | 15 Resource classes + API controllers | ~6h | 🚧 **IN PROGRESS** |
-| A-3 | **Create missing FormRequests** — Active index validation extracted to `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`. Remaining: Employee index still inline; KnowledgeBase has a request but no list endpoint decision yet. | `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`, controllers | ~2h | 🚧 **IN PROGRESS** |
+| A-3 | **Create missing FormRequests** — Active index validation extracted to `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, and `ListEmployeeRequest`; unused KnowledgeBase list request removed because no list endpoint exists. | `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListEmployeeRequest`, controllers | ~2h | ✅ |
 | A-4 | **Create missing Policies** — Already exist: OvertimePolicy, ReimbursementPolicy, Approval via Approvable trait | (8 policies already exist) | ~3h | ✅ |
 | A-5 | **Standardize authorization** — Add Middleware vs Policy documentation to AGENTS.md | `AGENTS.md` | ~2h | ✅ |
 | A-6 | **Add eager loading** — Prevent N+1 in PayrollController, ReimbursementController, OvertimeController index() | 3 controller `index()` methods | ~1h | ✅ |
@@ -202,14 +202,14 @@
 | **Sprint 1** — Critical Stabilization | B-1 to B-8 (P0) | ✅ COMPLETED | ~11h |
 | **Sprint 2** — Production Readiness | B-9 to B-16 (P1) | ✅ COMPLETED | ~6h |
 | **Sprint 3** — Exception Handling | B-17 to B-28 (P2) | ✅ COMPLETED | ~7h |
-| **Sprint 4** — Clean Architecture | A-1 to A-7 | ⚠️ PARTIAL CLEANUP REQUIRED (A-2, A-3) | ~19h |
+| **Sprint 4** — Clean Architecture | A-1 to A-7 | ⚠️ PARTIAL CLEANUP REQUIRED (A-2 pending) | ~19h |
 | **Sprint 5** — Test Coverage | T-3 to T-15 | ⚠️ 3 CANCELLED (T-13 to T-15 by design), T-10/T-12 PARTIAL, 10 PENDING | ~13.5h+ |
 | **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⏳ PENDING | ~9h+ |
-| **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2, A-3 pending) | TBD |
+| **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2 pending) | TBD |
 | **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING) | TBD |
-| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-7/H-8/H-9/H-10/H-12/M-2/M-3/M-5/M-7/M-8/M-9/M-11/M-12/M-14 done, H-6 partial) | TBD |
+| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-6/H-7/H-8/H-9/H-10/H-12/M-2/M-3/M-5/M-7/M-8/M-9/M-11/M-12/M-14 done) | TBD |
 
-**Total original bugs fixed: 29/40 confirmed done, 11 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-7, H-8, H-9, H-12, M-2, M-3, M-5, M-7, M-8, M-9, M-11, M-12, M-14 fixed; H-6/A-3 partial. PostgreSQL suite passes locally (7 tests). Latest focused suites: Face/Attendance 22 passed, Payroll/API 86 passed.**
+**Total original bugs fixed: 30/40 confirmed done, 10 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 in progress: C-1, H-1, H-2, H-3, H-4, H-5, H-6, H-7, H-8, H-9, H-12, M-2, M-3, M-5, M-7, M-8, M-9, M-11, M-12, M-14 fixed; A-3 completed. PostgreSQL suite passes locally (7 tests). Latest focused suites: Face/Attendance 22 passed, Payroll/API 86 passed.**
 
 ---
 

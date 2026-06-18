@@ -40,11 +40,9 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
     'npwp', 'nik', 'marital_status', 'blood_type', 'gender', 'status',
     'birth_date', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
     'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'phk_variant', 'photo',
-    'face_embedding', 'pin', 'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
-    'created_by', 'updated_by',
+    'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
 ])]
 #[Hidden(['face_embedding', 'pin', 'nik', 'phone', 'npwp', 'bank_account_number'])]
-
 class Employee extends Model implements CipherSweetEncrypted
 {
     use HasFactory, HasNeighbors, SoftDeletes, UsesCipherSweet;
