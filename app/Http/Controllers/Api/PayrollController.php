@@ -119,12 +119,7 @@ class PayrollController extends Controller
 
         $service = app(PayslipPdfService::class);
         $cachedPath = $service->getPayslipPath($payroll);
-
-        if ($cachedPath) {
-            $pdfPath = $cachedPath;
-        } else {
-            $pdfPath = $service->generateAndStore($payroll);
-        }
+        $pdfPath = $cachedPath ?? $service->generateAndStore($payroll);
 
         $filename = sprintf(
             'payslip-%s-%s.pdf',

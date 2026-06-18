@@ -5,7 +5,6 @@ use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Fortify\Fortify;
-use Laravel\Fortify\TwoFactorAuthenticationProvider;
 use PragmaRX\Google2FA\Google2FA;
 
 uses(RefreshDatabase::class);
@@ -14,9 +13,8 @@ beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
 });
 
-// ─── Login with 2FA ──────────────────────────────────────────────
-
-test('login returns challenge when user has 2FA enabled', function () {
+function createTwoFactorUser(): User
+{
     $secret = 'JBSWY3DPEHPK3PXP';
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -25,6 +23,25 @@ test('login returns challenge when user has 2FA enabled', function () {
         'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-code-1'])),
     ]);
     $user->assignRole('employee');
+
+    return $user;
+}
+
+function createChallenge(User $user): string
+{
+    $challengeId = Str::random(40);
+    Cache::put("2fa_challenge:{$challengeId}", [
+        'user_id' => $user->id,
+        'device_name' => 'test-device',
+    ], now()->addMinutes(5));
+
+    return $challengeId;
+}
+
+// ─── Login with 2FA ──────────────────────────────────────────────
+
+test('login returns challenge when user has 2FA enabled', function () {
+    $user = createTwoFactorUser();
 
     $response = $this->postJson('/api/v1/auth/login', [
         'email' => 'test@example.com',
@@ -42,19 +59,12 @@ test('login returns challenge when user has 2FA enabled', function () {
 test('2FA challenge succeeds with valid TOTP code', function () {
     $secret = 'JBSWY3DPEHPK3PXP';
     $user = User::factory()->create([
-        'email' => 'test@example.com',
-        'password' => Hash::make('secret123'),
         'two_factor_secret' => Fortify::currentEncrypter()->encrypt($secret),
         'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-code-1'])),
     ]);
     $user->assignRole('employee');
 
-    $challengeId = Str::random(40);
-    Cache::put("2fa_challenge:{$challengeId}", [
-        'user_id' => $user->id,
-        'device_name' => 'test-device',
-    ], now()->addMinutes(5));
-
+    $challengeId = createChallenge($user);
     $validCode = app(Google2FA::class)->getCurrentOtp($secret);
 
     $response = $this->postJson('/api/v1/auth/2fa/challenge', [
@@ -83,17 +93,8 @@ test('2FA challenge validates required fields', function () {
 });
 
 test('2FA challenge returns 422 for invalid code', function () {
-    $secret = 'JBSWY3DPEHPK3PXP';
-    $user = User::factory()->create([
-        'two_factor_secret' => Fortify::currentEncrypter()->encrypt($secret),
-        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-code-1'])),
-    ]);
-
-    $challengeId = Str::random(40);
-    Cache::put("2fa_challenge:{$challengeId}", [
-        'user_id' => $user->id,
-        'device_name' => 'test-device',
-    ], now()->addMinutes(5));
+    $user = createTwoFactorUser();
+    $challengeId = createChallenge($user);
 
     $response = $this->postJson('/api/v1/auth/2fa/challenge', [
         'challenge_id' => $challengeId,
@@ -104,17 +105,8 @@ test('2FA challenge returns 422 for invalid code', function () {
 });
 
 test('2FA challenge throttled at 5 requests per minute', function () {
-    $secret = 'JBSWY3DPEHPK3PXP';
-    $user = User::factory()->create([
-        'two_factor_secret' => Fortify::currentEncrypter()->encrypt($secret),
-        'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(['recovery-code-1'])),
-    ]);
-
-    $challengeId = Str::random(40);
-    Cache::put("2fa_challenge:{$challengeId}", [
-        'user_id' => $user->id,
-        'device_name' => 'test-device',
-    ], now()->addMinutes(5));
+    $user = createTwoFactorUser();
+    $challengeId = createChallenge($user);
 
     for ($i = 0; $i < 5; $i++) {
         $this->postJson('/api/v1/auth/2fa/challenge', [

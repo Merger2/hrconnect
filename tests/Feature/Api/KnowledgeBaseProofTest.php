@@ -24,6 +24,19 @@ beforeEach(function () {
     $this->employeeToken = $this->employeeUser->createToken('test')->plainTextToken;
 });
 
+function makeKb(array $overrides = []): KnowledgeBase
+{
+    return KnowledgeBase::create(array_merge([
+        'knowledgeable_type' => User::class,
+        'knowledgeable_id' => User::factory()->create()->id,
+        'title' => 'Test Document',
+        'content' => 'Test chunk content',
+        'category' => 'general',
+        'status' => 'ready',
+        'source_document' => 'kb_test.pdf',
+    ], $overrides));
+}
+
 // ─── Chat ─────────────────────────────────────────────────────────
 
 test('chat rejects question over max length', function () {
@@ -157,15 +170,7 @@ test('upload requires authentication', function () {
 // ─── Delete ───────────────────────────────────────────────────────
 
 test('delete removes knowledge base record', function () {
-    $kb = KnowledgeBase::create([
-        'knowledgeable_type' => User::class,
-        'knowledgeable_id' => $this->hrUser->id,
-        'title' => 'Test Document',
-        'content' => 'Test chunk content',
-        'category' => 'general',
-        'status' => 'ready',
-        'source_document' => 'kb_test.pdf',
-    ]);
+    $kb = makeKb(['knowledgeable_id' => $this->hrUser->id]);
 
     $response = $this->withHeader('Authorization', "Bearer {$this->hrToken}")
         ->deleteJson("/api/v1/knowledgebase/{$kb->id}");
@@ -183,14 +188,7 @@ test('delete returns 404 for non-existent record', function () {
 });
 
 test('delete requires manage_knowledgebase permission', function () {
-    $kb = KnowledgeBase::create([
-        'knowledgeable_type' => User::class,
-        'knowledgeable_id' => $this->hrUser->id,
-        'title' => 'Test',
-        'content' => 'Test',
-        'category' => 'general',
-        'status' => 'ready',
-    ]);
+    $kb = makeKb(['knowledgeable_id' => $this->hrUser->id]);
 
     $response = $this->withHeader('Authorization', "Bearer {$this->employeeToken}")
         ->deleteJson("/api/v1/knowledgebase/{$kb->id}");
@@ -199,14 +197,7 @@ test('delete requires manage_knowledgebase permission', function () {
 });
 
 test('delete requires authentication', function () {
-    $kb = KnowledgeBase::create([
-        'knowledgeable_type' => User::class,
-        'knowledgeable_id' => $this->hrUser->id,
-        'title' => 'Test',
-        'content' => 'Test',
-        'category' => 'general',
-        'status' => 'ready',
-    ]);
+    $kb = makeKb(['knowledgeable_id' => $this->hrUser->id]);
 
     $response = $this->deleteJson("/api/v1/knowledgebase/{$kb->id}");
 

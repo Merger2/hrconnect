@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\WfaStatus;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Company;

@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (updated 2026-06-18: P0-3a + P0-3b completed, P0/P1 status bumped to 🚧).
+> Last updated: 2026-06-18 (updated 2026-06-18: P0-3a + P0-3b + P1-1a + P1-3a + P1-8a + P1-9a completed; P0/P1 status bumped to 🚧).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,7 +18,7 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~72% | 15 services exist (attendance, face, geofence, leave, approval, payroll, reimbursement, KB/RAG, termination, dll). RAG refactor (RAG-1–9) belum dimulai. |
-| Backend API layer | ~65% | 51 routes at `/api/v1`, 13 controllers, all module routes active. Attendance/Payroll/KB endpoints masih partial test coverage. |
+| Backend API layer | ~75% | 51 routes at `/api/v1`, 13 controllers, all module routes active. Attendance/Payroll/Auth/KB proof tests completed (+62 tests). Remaining: Leave, Overtime, Reimbursement, Approval, Employee, Face, Profile. |
 | Production hardening | ~55-65% | Perlu audit endpoint penuh, security/PII, queue/scheduler, deployment rehearsal, dan API contract freeze. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
 | Test suite | 505 tests / 3,683 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: queue/job, observer/cache, role matrix. |
@@ -85,7 +85,7 @@ Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task
 |---|---|---|---|---|
 | P0-1 | Freeze backend V1 scope | Daftar final fitur V1 dan V2 | 🚧 |
 | P0-2 | Mark V2 modules as out-of-scope for backend 100% | Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications tetap V2 kecuali user ubah scope | 🚧 |
-| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory complete: 51 API routes grouped below. ✅ 401 smoke tests for all routes. 🚧 Remaining: per-endpoint policy/resource proof pass. | 🚧 |
+| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory complete: 51 API routes grouped below. ✅ 401 smoke tests for all routes. ✅ Auth/Attendance/Payroll/KB proof tests completed. 🚧 Remaining: Leave, Overtime, Reimbursement, Approval, Employee, Face, Profile per-endpoint policy/resource proof pass. | 🚧 |
 | P0-4 | Build service audit matrix | Matrix service -> workflow -> transaction -> cache -> tests -> status | 🚧 |
 | P0-5 | Decide remaining product decisions | Sanctum token expiration, Fortify registration in production, searchable bank-account blind index | 🚧 |
 
@@ -96,32 +96,32 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | Group | Routes | Controllers | Request Coverage | Auth/Permission | Test Status | Gaps |
 |---|---:|---|---|---|---|---|
 | Health | 1 | `HealthController` | N/A | Public | Needs smoke proof | None known |
-| Auth public | 3 | `AuthController@login`, `twoFactorChallenge`, `forgotPassword` | `LoginRequest`, `TwoFactorChallengeRequest`, `ForgotPasswordRequest` | Public + throttle | Partial | Confirm OpenAPI/security contract |
+| Auth public | 3 | `AuthController@login`, `twoFactorChallenge`, `forgotPassword` | `LoginRequest`, `TwoFactorChallengeRequest`, `ForgotPasswordRequest` | Public + throttle | ✅ | AuthProofTest covers login→2FA, TOTP valid/invalid, rate limit, forgot-password validation. Confirm OpenAPI/security contract. |
 | Auth protected/user | 3 | `AuthController@logout`, `logoutAll`, `me` | Basic `Request` | `auth:sanctum` | Partial | Token lifetime decision `P0-5` |
 | Profile | 3 | `ProfileController` | `UpdateProfileRequest`, `ChangePasswordRequest`; show uses `Request` | `auth:sanctum` | Partial | Final profile response contract |
 | Face | 2 | `FaceController` | `RegisterFaceRequest` | `auth:sanctum` + throttle | Partial | Browser/client face-api flow deferred to FE |
-| Attendance | 5 | `AttendanceController` | `ClockInRequest`, `ClockOutRequest`, `ListAttendanceRequest`; `today/approveWfa` use `Request` | `auth:sanctum`, throttles on writes | Partial | Need full API tests for today/index/WFA approval edge cases |
+| Attendance | 5 | `AttendanceController` | `ClockInRequest`, `ClockOutRequest`, `ListAttendanceRequest`; `today/approveWfa` use `Request` | `auth:sanctum`, throttles on writes | ✅ | AttendanceProofTest covers clock-in/out PIN+GPS+WFA, today, index, WFA approval (+20 tests). Gaps: face recognition 128D flow. |
 | Leave | 5 | `LeaveController` | `StoreLeaveRequest`, `ListLeaveRequest`; quota/show/delete use `Request` | `auth:sanctum`, policy, throttle on store | Partial | Quota response contract and role matrix proof |
 | Overtime | 4 | `OvertimeController` | `StoreOvertimeRequest`, `ListOvertimeRequest`; show/delete use `Request` | `auth:sanctum`, policy, throttle on store | Partial | Role matrix and payroll-impact proof |
 | Reimbursement | 4 | `ReimbursementController` | `StoreReimbursementRequest`, `ListReimbursementRequest`; show/delete use `Request` | `auth:sanctum`, policy, throttle on store | Partial | Upload failure and payment-state proof |
 | Approval | 3 | `ApprovalController` | `PendingApprovalsRequest`, `ApproveRequest`, `RejectRequest` | `auth:sanctum`, policy/service checks | Partial | L1/L2 and double-processing coverage exists but needs matrix link |
-| Payroll | 7 | `PayrollController` | `ListPayrollRequest`, `GeneratePayrollRequest`, `ExportMonthlyRequest`, `ExportPeriodRequest`; show/payslip use `Request` | `auth:sanctum`, policy, `process_payroll` permissions | Partial | Export/download contract and published-lock proof |
+| Payroll | 7 | `PayrollController` | `ListPayrollRequest`, `GeneratePayrollRequest`, `ExportMonthlyRequest`, `ExportPeriodRequest`; show/payslip use `Request` | `auth:sanctum`, policy, `process_payroll` permissions | ✅ | PayrollProofTest covers list, show, generate, payslip gating, exports, permission gating (+20 tests). Gaps: lock behavior, concurrent generate. |
 | Employees | 8 | `EmployeeController`, `EmployeeTerminationController` | `ListEmployeeRequest`, `StoreEmployeeRequest`, `UpdateEmployeeRequest`, `TerminateEmployeeRequest`; contract-end uses inline validation | `auth:sanctum`, `view_employees`/`manage_employees`, policies | Partial | Contract-end FormRequest decision; PII audit proof |
-| KnowledgeBase | 3 | `KnowledgeBaseController` | `ChatRequest`, `UploadDocumentRequest`; destroy uses `Request` | `auth:sanctum`, throttle chat, `manage_knowledgebase` for mutations | Partial | Laravel AI SDK RAG refactor and fallback tests |
+| KnowledgeBase | 3 | `KnowledgeBaseController` | `ChatRequest`, `UploadDocumentRequest`; destroy uses `Request` | `auth:sanctum`, throttle chat, `manage_knowledgebase` for mutations | ✅ | KnowledgeBaseProofTest covers chat, upload, delete, auth/permission (+14 tests). Gaps: Laravel AI SDK RAG refactor and fallback tests (RAG-1–9). |
 
 ## P1 — API And Service Completion
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| P1-1 | Auth/Profile API audit | Login, logout, logout-all, 2FA challenge, forgot password, change password, token revoke, password expiry behavior documented/tested | 🚧 |
+| P1-1 | Auth/Profile API audit | ✅ AuthProof (+8 tests: login→2FA, TOTP, rate limit, forgot-password). 🚧 Remaining: password expiry behavior, logout-all token revoke test. | 🚧 |
 | P1-2 | Employee API audit | CRUD, PII reveal, encrypted uniqueness, termination, contract-end processing, ownership/permission checks tested | 🚧 |
-| P1-3 | Attendance API audit | Clock-in/out, today, index, WFA approval, face/PIN fallback, fake GPS, geofence, WFA note, duplicate state conflicts tested | 🚧 |
+| P1-3 | Attendance API audit | ✅ AttendanceProof (+20 tests: clock-in/out PIN+GPS+WFA, today, index, WFA approval). 🚧 Remaining: face recognition 128D flow. | 🚧 |
 | P1-4 | Leave API audit | Apply, index, show, quota, delete/cancel, approval quota deduction, overlap, insufficient balance tested | 🚧 |
 | P1-5 | Overtime API audit | Submit, index, show, delete/cancel, approval workflow, overnight and payroll impact tested | 🚧 |
 | P1-6 | Reimbursement API audit | Submit, index, show, delete, approval/payment state, upload failure behavior tested | 🚧 |
 | P1-7 | Approval API audit | Pending, approve, reject, L1/L2 sequencing, wrong approver, double-processing tested | 🚧 |
-| P1-8 | Payroll API audit | List, show, generate, payslip, monthly export, 1721-A1 export, BPJS export, lock behavior and race handling tested | 🚧 |
-| P1-9 | KnowledgeBase API audit | Chat, upload, delete, owner morph, source citations, fallback behavior, authorization tested | 🚧 |
+| P1-8 | Payroll API audit | ✅ PayrollProof (+20 tests: list, show, generate, payslip gating, exports, permission). 🚧 Remaining: lock behavior (published/paid), concurrent generate race. | 🚧 |
+| P1-9 | KnowledgeBase API audit | ✅ KnowledgeBaseProof (+14 tests: chat mock mode, upload partialMock+Queue::fake, delete, auth/permission). | 🚧 |
 | P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no API controller `format*()` methods remain. 🚧 Remaining: final response-envelope decision and API contract tests (`API-1`, `T-11`). | 🚧 |
 
 ## P1 — RAG Production Refactor With Laravel AI SDK
@@ -142,13 +142,13 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Minimum Coverage | Status |
 |---|---|---|---|
-| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 |
+| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done: Attendance(+20), Payroll(+20), Auth(+8), KB(+14). Route matrix smoke tests for all 51 routes (401). Remaining: Leave, Overtime, Reimbursement, Approval, Employee, Face, Profile. |
 | T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ⏳ |
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | 🚧 |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
 | T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
-| T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 |
-| T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | ⏳ |
+| T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). Remaining: regenerate draft, reject published/paid, concurrent lock. |
+| T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | 🚧 | KnowledgeBaseProof covers chat, upload, delete (+14 tests with mock mode + partialMock). Remaining: RAG refactor (RAG-1–9), fallback keyword search test. |
 | T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ⏳ |
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ⏳ |
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | 🚧 |

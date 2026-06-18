@@ -10,6 +10,28 @@ use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
+function makePayrollEmployee(array $overrides = []): Employee
+{
+    return Employee::create(array_merge([
+        'phone' => '0811111111',
+        'nik' => '3276010101010001',
+        'npwp' => '01.001.001.1-001.001',
+        'bank_account_number' => '1111111',
+        'bank_name' => 'BCA',
+        'status' => 'active',
+        'gender' => 'L',
+        'marital_status' => 'single',
+        'blood_type' => 'O+',
+        'education_level' => 'bachelor',
+        'institution_name' => 'Univ',
+        'major' => 'CS',
+        'graduation_year' => 2015,
+        'birth_date' => '1990-01-01',
+        'join_date' => '2025-01-01',
+        'salary_type' => 'monthly',
+    ], $overrides));
+}
+
 beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
 
@@ -36,59 +58,31 @@ beforeEach(function () {
 
     $this->financeUser = User::factory()->create();
     $this->financeUser->assignRole('finance');
-    $this->financeEmployee = Employee::create([
+    $this->financeEmployee = makePayrollEmployee([
         'user_id' => $this->financeUser->id,
         'employee_number' => 'EMP-FIN',
         'full_name' => 'Finance User',
-        'phone' => '0811111111',
-        'nik' => '3276010101010001',
-        'npwp' => '01.001.001.1-001.001',
-        'bank_account_number' => '1111111',
-        'bank_name' => 'BCA',
         'company_id' => $this->companyId,
         'branch_id' => $this->branchId,
         'department_id' => $this->deptId,
         'position_id' => $this->positionId,
-        'status' => 'active',
-        'gender' => 'L',
-        'marital_status' => 'single',
-        'blood_type' => 'O+',
-        'education_level' => 'bachelor',
-        'institution_name' => 'Univ',
-        'major' => 'CS',
-        'graduation_year' => 2015,
-        'birth_date' => '1990-01-01',
-        'join_date' => '2025-01-01',
-        'salary_type' => 'monthly',
+        'nik' => '3276010101010001',
+        'bank_account_number' => '1111111',
     ]);
     $this->financeToken = $this->financeUser->createToken('test')->plainTextToken;
 
     $this->employeeUser = User::factory()->create();
     $this->employeeUser->assignRole('employee');
-    $this->employee = Employee::create([
+    $this->employee = makePayrollEmployee([
         'user_id' => $this->employeeUser->id,
         'employee_number' => 'EMP-REG',
         'full_name' => 'Regular Employee',
-        'phone' => '0822222222',
-        'nik' => '3276010101010002',
-        'npwp' => '01.001.001.1-001.002',
-        'bank_account_number' => '2222222',
-        'bank_name' => 'BCA',
         'company_id' => $this->companyId,
         'branch_id' => $this->branchId,
         'department_id' => $this->deptId,
         'position_id' => $this->positionId,
-        'status' => 'active',
-        'gender' => 'L',
-        'marital_status' => 'single',
-        'blood_type' => 'O+',
-        'education_level' => 'bachelor',
-        'institution_name' => 'Univ',
-        'major' => 'CS',
-        'graduation_year' => 2015,
-        'birth_date' => '1990-01-01',
-        'join_date' => '2025-01-01',
-        'salary_type' => 'monthly',
+        'nik' => '3276010101010002',
+        'bank_account_number' => '2222222',
     ]);
     $this->employeeToken = $this->employeeUser->createToken('test')->plainTextToken;
 });
