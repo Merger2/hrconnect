@@ -16,6 +16,7 @@ use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\JsonResponse;
 
 #[Group('Approvals')]
@@ -43,7 +44,14 @@ class ApprovalController extends Controller
 
         $perPage = (int) $request->input('per_page', 20);
 
-        $query = Approval::with(['approvable', 'approver:id,full_name'])
+        $query = Approval::with([
+            'approver:id,full_name',
+            'approvable' => fn (MorphTo $morphTo) => $morphTo->morphWith([
+                Leave::class => ['employee:id,full_name'],
+                Overtime::class => ['employee:id,full_name'],
+                Reimbursement::class => ['employee:id,full_name'],
+            ]),
+        ])
             ->where('approver_id', $employee->id)
             ->where('status', ApprovalStatus::PENDING)
             ->orderBy('created_at', 'desc');

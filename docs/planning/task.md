@@ -1,7 +1,7 @@
 # Task Tracker — HRConnect Backend
 
 > **Source of truth** untuk progress backend.
-> Last updated: 2026-06-17 (Phase 1 Pipeline Green — SQLite-safe vector cast added, PostgreSQL enum blocker fixed, PostgreSQL CI job added, test CipherSweet key configured. PostgreSQL suite: 7 tests passed locally.)
+> Last updated: 2026-06-17 (Phase 2 Core Fixes — C-1, H-1/H-2, H-3/H-4, H-5, H-7, H-8, H-9, H-12, M-7/M-8 fixed; H-6/A-3 partial. Focused suites: KnowledgeBase 18, Attendance 16, Approval/Leave/Overtime 26, PayrollExport 13, Approval controller 7, API focused 83, Endpoint/Attendance 51, OvertimeService 3 passed.)
 
 ---
 
@@ -106,7 +106,7 @@
 
 | # | Finding | File | Priority | Status |
 |---|---------|------|----------|--------|
-| C-1 | **KnowledgeBaseService hardcoded `knowledgeable_id=1`** — Ownerless PDF upload assigns morph ID `1` regardless of actual record. Data integrity corrupt. Fix: throw `ValidationException` when no authenticated user. | `KnowledgeBaseService.php:164-166` | P0 | ⏳ |
+| C-1 | **KnowledgeBaseService hardcoded `knowledgeable_id=1`** — Fixed: upload now requires a valid owner and API upload passes authenticated user as owner. Missing owner throws `ValidationException`; no fallback morph ID is used. | `KnowledgeBaseService.php`<br>`KnowledgeBaseController.php`<br>`KnowledgeBaseServiceTest.php` | P0 | ✅ |
 | C-2 | **`KnowledgeBase::$casts['embedding'] = 'vector'` has no SQLite fallback** — Fixed with `App\Casts\PgVector`, preserving pgvector behavior on PostgreSQL and string fallback on SQLite. | `app/Casts/PgVector.php`<br>`app/Models/KnowledgeBase.php` | P0 | ✅ |
 | C-3 | **`Employee::$casts['face_embedding']` crashes on SQLite** — Fixed with `App\Casts\PgVector`; focused EmployeeTermination test passes. | `app/Casts/PgVector.php`<br>`app/Models/Employee.php` | P0 | ✅ |
 | C-6 | **PostgreSQL integration suite tidak jalan di CI** — Fixed by adding a dedicated PostgreSQL job using `pgvector/pgvector:pg16` and required extensions. | `.github/workflows/tests.yml` | P0 | ✅ |
@@ -115,18 +115,18 @@
 
 | # | Finding | File | Priority | Status |
 |---|---------|------|----------|--------|
-| H-1 | **`logBypass()` before transaction (clock-in)** — Orphan activity log jika transaksi rollback. Fix: move inside transaction after commit. | `AttendanceService.php:62` | P1 | ⏳ |
-| H-2 | **`logBypass()` before transaction (clock-out)** — Same issue in clock-out path. | `AttendanceService.php:204` | P1 | ⏳ |
-| H-3 | **`createApprovalWorkflow()` nested in Leave transaction** — Nested transaction is unnecessary complexity and makes rollback behavior harder to reason about. Fix: move workflow creation into one transaction boundary or use `DB::afterCommit()` intentionally. | `LeaveService.php:105` | P1 | ⏳ |
-| H-4 | **`createApprovalWorkflow()` nested in Overtime transaction** — Same nested transaction complexity. | `OvertimeService.php:44` | P1 | ⏳ |
-| H-5 | **PayrollExportService Writer tanpa try-finally** — Exception → resource leak, file corrupt. Fix: wrap in try-finally. | `PayrollExportService.php:50-104` | P1 | ⏳ |
-| H-6 | **5 dead FormRequest classes (`authorize(): false`, never injected)** — `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`. All return `authorize(): false`, empty `rules()`, **never used**. Dead code + security illusion. Fix: implement proper `authorize()` + `rules()` + inject into controllers. | 5 FormRequest files + 5 controllers | P1 | ⏳ |
-| H-7 | **N+1 query in ApprovalController::index()** — `$a->approvable->employee` lazy-loaded per row (20+ queries per page). Fix: add eager load `with(['approvable.employee'])`. | `ApprovalController.php:73` | P1 | ⏳ |
-| H-8 | **AttendanceController::index() uses inline validation** — `ListAttendanceRequest` exists but never injected. | `AttendanceController.php` | P1 | ⏳ |
-| H-9 | **destroy() cancellation consistency** — Leave/Overtime do `status update + delete()` without transaction; Reimbursement directly deletes. Standardize cancellation flow and wrap multi-write cancellation in `DB::transaction()`. | `LeaveController`, `OvertimeController`, `ReimbursementController` | P1 | ⏳ |
+| H-1 | **`logBypass()` before transaction (clock-in)** — Fixed: PIN bypass logging now runs inside the clock-in transaction after attendance creation succeeds. | `AttendanceService.php` | P1 | ✅ |
+| H-2 | **`logBypass()` before transaction (clock-out)** — Fixed: PIN bypass logging now runs inside the clock-out transaction after attendance update succeeds. | `AttendanceService.php` | P1 | ✅ |
+| H-3 | **`createApprovalWorkflow()` nested in Leave transaction** — Fixed: `ApprovalService::createApprovalWorkflow()` now reuses an active transaction instead of opening a nested transaction. | `ApprovalService.php`<br>`LeaveService.php` | P1 | ✅ |
+| H-4 | **`createApprovalWorkflow()` nested in Overtime transaction** — Fixed by the same transaction-level guard in `ApprovalService`. | `ApprovalService.php`<br>`OvertimeService.php` | P1 | ✅ |
+| H-5 | **PayrollExportService Writer tanpa try-finally** — Fixed with shared `writeXlsx()` helper that opens the writer once and always closes it in `finally`. | `PayrollExportService.php` | P1 | ✅ |
+| H-6 | **5 dead FormRequest classes (`authorize(): false`, never injected)** — Partial fix: all 5 `List*Request` classes now authorize authenticated users and define rules; active list endpoints now inject Attendance/Leave/Overtime/Reimbursement requests. Remaining: decide whether to add a KnowledgeBase list endpoint or remove `ListKnowledgeBaseRequest`. | 5 FormRequest files + 4 controllers | P1 | 🚧 **PARTIAL** |
+| H-7 | **N+1 query in ApprovalController::index()** — Fixed: pending approvals now eager-load morph-specific `employee` relations via `morphWith()`. | `ApprovalController.php` | P1 | ✅ |
+| H-8 | **AttendanceController::index() uses inline validation** — Fixed: `AttendanceController::index()` now injects `ListAttendanceRequest`. | `AttendanceController.php`<br>`ListAttendanceRequest.php` | P1 | ✅ |
+| H-9 | **destroy() cancellation consistency** — Fixed for multi-write cancellation: Leave/Overtime now wrap `status update + delete()` in `DB::transaction()`. Reimbursement remains direct delete because enum has no `cancelled` state. | `LeaveController`<br>`OvertimeController` | P1 | ✅ |
 | H-10 | **Default phpunit.xml missing `CIPHERSWEET_KEY`** — Fixed with deterministic test-only CipherSweet key in `phpunit.xml`. | `phpunit.xml` | P1 | ✅ |
 | H-11 | **Testing-strategy.md references 36+ non-existent test files** — Dokumentasi tidak sinkron dengan codebase. Fix: audit and update doc. | `docs/testing/testing-strategy.md` | P1 | ⏳ |
-| H-12 | **OvertimeService lacks direct service tests** — Covered indirectly through API flow tests, but service business rules should have focused tests. Fix: create `OvertimeServiceTest`. | `app/Services/OvertimeService.php`<br>`tests/Unit/Services/OvertimeServiceTest.php` | P1 | ⏳ |
+| H-12 | **OvertimeService lacks direct service tests** — Fixed: direct service tests cover creation, overnight duration, approval workflow call, and cancellation soft delete. | `tests/Unit/Services/OvertimeServiceTest.php` | P1 | ✅ |
 | H-13 | **Payroll PostgreSQL/concurrency coverage gap** — `generatePayroll()` has direct SQLite/unit coverage, but PostgreSQL locking/concurrency scenarios still need integration coverage. | `tests/Integration/Postgres/*` | P1 | ⏳ |
 
 ### 🟡 MEDIUM / DECISION ITEMS (16)
@@ -139,8 +139,8 @@
 | M-4 | **GeminiClient `sleep()` blocking retry** — Harusnya `Http::retry()` non-blocking. | `GeminiClient.php:202` | P2 | ⏳ |
 | M-5 | **Reimbursement status update ke PAID tanpa `lockForUpdate()`** — Race condition risk. | `PayrollCalculatorService.php:536` | P2 | ⏳ |
 | M-6 | **EmployeeTerminationService activity log inside transaction** — Usually rolls back with the same DB connection, but side-effect timing should be reviewed and made explicit. | `EmployeeTerminationService.php:81` | P2 | ⏳ |
-| M-7 | **ClockInRequest `embedding` tanpa validasi** — Missing `size:128` / `numeric\|between:-1.5,1.5` per element. | `ClockInRequest.php` | P2 | ⏳ |
-| M-8 | **ClockOutRequest — same missing validation** | `ClockOutRequest.php` | P2 | ⏳ |
+| M-7 | **ClockInRequest `embedding` tanpa validasi** — Fixed: `embedding` must be a 128-element numeric array with values between -1.5 and 1.5. | `ClockInRequest.php`<br>`EndpointsTest.php` | P2 | ✅ |
+| M-8 | **ClockOutRequest — same missing validation** — Fixed with the same 128D numeric array validation and regression test. | `ClockOutRequest.php`<br>`EndpointsTest.php` | P2 | ✅ |
 | M-9 | **LeaveController::store() tidak ada `$this->authorize('create')`** | `LeaveController.php` | P2 | ⏳ |
 | M-11 | **EmployeeController::store() — `phone` tanpa format regex, `nik` tanpa `digits:16`** | `StoreEmployeeRequest.php` | P2 | ⏳ |
 | M-12 | **ProfileController update should use explicit field mapping** — Current `UpdateProfileRequest` already whitelists safe fields; explicit mapping would make the self-service boundary clearer. | `ProfileController.php:62` | P2 | ⏳ |
@@ -158,7 +158,7 @@
 |---|------|------|------|--------|
 | A-1 | **Create missing Services** — Extract controller logic to OvertimeService, ProfileService | `OvertimeService.php`<br>`ProfileService.php` | ~4h | ✅ |
 | A-2 | **Create API Resources** — Standardize JSON response for all entities. Resource files exist, but several controllers still use manual `format*()` response methods. | 15 Resource classes + API controllers | ~6h | 🚧 **IN PROGRESS** |
-| A-3 | **Create missing FormRequests** — Extract manual validation from index() to List*Request. FormRequests exist, but some controllers still use raw `Request` / inline validation. | `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`, controllers | ~2h | 🚧 **IN PROGRESS** |
+| A-3 | **Create missing FormRequests** — Active index validation extracted to `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`. Remaining: Employee index still inline; KnowledgeBase has a request but no list endpoint decision yet. | `ListAttendanceRequest`, `ListLeaveRequest`, `ListOvertimeRequest`, `ListReimbursementRequest`, `ListKnowledgeBaseRequest`, controllers | ~2h | 🚧 **IN PROGRESS** |
 | A-4 | **Create missing Policies** — Already exist: OvertimePolicy, ReimbursementPolicy, Approval via Approvable trait | (8 policies already exist) | ~3h | ✅ |
 | A-5 | **Standardize authorization** — Add Middleware vs Policy documentation to AGENTS.md | `AGENTS.md` | ~2h | ✅ |
 | A-6 | **Add eager loading** — Prevent N+1 in PayrollController, ReimbursementController, OvertimeController index() | 3 controller `index()` methods | ~1h | ✅ |
@@ -207,9 +207,9 @@
 | **Sprint 6** — Polish & Tech Debt | B-29 to B-40, T-1, T-2 | ⏳ PENDING | ~9h+ |
 | **Sprint 7** — Audit Fixes | B-41 to B-53 + follow-ups B-10/B-11/B-17/B-20/B-31/A-2/A-3 | ⚠️ MOSTLY DONE (A-2, A-3 pending) | TBD |
 | **Sprint 8** — Test Infrastructure | D-1, D-2, T-10, T-11, T-12 | ⚠️ PARTIAL (D-1 ✅ DONE, T-10/T-12 🚧 PARTIAL, T-11 ⏳ PENDING) | TBD |
-| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-2/C-3/C-6/H-10 done) | TBD |
+| **Sprint 9 (NEW)** — Comprehensive Audit | C-1/C-2/C-3/C-6, H-1 to H-13, M-1 to M-17 (excluding removed false positives M-10/M-18) | ⚠️ PARTIAL (C-1/C-2/C-3/C-6/H-1/H-2/H-3/H-4/H-5/H-7/H-8/H-9/H-10/H-12/M-7/M-8 done, H-6 partial) | TBD |
 
-**Total original bugs fixed: 29/40 confirmed done, 11 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; PostgreSQL suite now passes locally (7 tests). Latest focused SQLite suite: 16 tests passed.**
+**Total original bugs fixed: 29/40 confirmed done, 11 original P3 pending. Comprehensive audit (2026-06-17): 33 actionable findings — 4 Critical, 13 High, 16 Medium/decision items. Phase 1 completed: C-2, C-3, C-6, H-10 fixed; Phase 2 started: C-1, H-1, H-2, H-3, H-4, H-5, H-7, H-8, H-9, H-12, M-7, M-8 fixed; H-6/A-3 partial. PostgreSQL suite passes locally (7 tests). Latest focused suites: KnowledgeBase 18 passed, Attendance 16 passed, Approval/Leave/Overtime 26 passed, PayrollExport 13 passed, Approval controller 7 passed, API focused 83 passed, Endpoint/Attendance 51 passed, OvertimeService 3 passed.**
 
 ---
 

@@ -28,7 +28,7 @@ class ApprovalService
      */
     public function createApprovalWorkflow(Model $approvable): void
     {
-        DB::transaction(function () use ($approvable) {
+        $createWorkflow = function () use ($approvable): void {
             $employee = $approvable->employee;
             $directApprover = $employee->getDirectApprover();
             $l2Approver = $this->resolveL2Approver($approvable);
@@ -56,7 +56,15 @@ class ApprovalService
             if ($approversCount === 0) {
                 throw new LogicException('Tidak ada Approver (Atasan/HR) yang tersedia.');
             }
-        });
+        };
+
+        if (DB::transactionLevel() > 0) {
+            $createWorkflow();
+
+            return;
+        }
+
+        DB::transaction($createWorkflow);
     }
 
     /**

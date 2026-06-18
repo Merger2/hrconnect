@@ -94,6 +94,10 @@ class AttendanceService
                     'status' => $status,
                 ]);
 
+                if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
+                    $this->logBypass($employee, $this->pinBypassReason($employee, 'clock_in'));
+                }
+
                 return $attendance;
             });
         } catch (UniqueConstraintViolationException $e) {
@@ -161,11 +165,6 @@ class AttendanceService
             // Increment PIN streak
             Cache::put($pinStreakKey, $pinStreak + 1, now()->addWeek());
 
-            $bypassReason = $hasFaceEnrolled
-                ? 'pin_verified_clock_in_face_failed'
-                : 'pin_verified_clock_in_face_not_enrolled';
-            $this->logBypass($employee, $bypassReason);
-
             return [VerificationMethod::PIN_VERIFIED->value, null];
         }
 
@@ -221,6 +220,10 @@ class AttendanceService
                 'photo_selfie_out' => $data['photo_selfie'] ?? null,
             ]);
 
+            if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
+                $this->logBypass($employee, $this->pinBypassReason($employee, 'clock_out'));
+            }
+
             return $lockedAttendance->fresh();
         });
     }
@@ -259,11 +262,6 @@ class AttendanceService
         if ($hasPinPayload) {
             $this->verifyPin($employee, $data['pin']);
 
-            $bypassReason = $hasFaceEnrolled
-                ? 'pin_verified_clock_out_face_failed'
-                : 'pin_verified_clock_out_face_not_enrolled';
-            $this->logBypass($employee, $bypassReason);
-
             return [VerificationMethod::PIN_VERIFIED->value, null];
         }
 
@@ -293,5 +291,15 @@ class AttendanceService
             ->performedOn($employee)
             ->withProperties(['ip' => request()->ip(), 'method' => $method])
             ->log('Melakukan bypass absensi menggunakan '.$method);
+    }
+
+    private function pinBypassReason(Employee $employee, string $direction): string
+    {
+        $hasFaceEnrolled = ! empty($employee->getRawOriginal('face_embedding'))
+            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
+
+        return $hasFaceEnrolled
+            ? "pin_verified_{$direction}_face_failed"
+            : "pin_verified_{$direction}_face_not_enrolled";
     }
 }

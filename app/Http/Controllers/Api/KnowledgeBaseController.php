@@ -49,6 +49,7 @@ class KnowledgeBaseController extends Controller
             pdf: $request->file('file'),
             title: $request->validated('title'),
             category: $category,
+            owner: $request->user(),
         );
 
         return response()->json([

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ListOvertimeRequest;
 use App\Http\Requests\Api\StoreOvertimeRequest;
 use App\Models\Overtime;
 use App\Services\OvertimeService;
@@ -14,6 +15,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 #[Group('Overtime')]
 class OvertimeController extends Controller
@@ -54,15 +56,8 @@ class OvertimeController extends Controller
     #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
-    public function index(Request $request): JsonResponse
+    public function index(ListOvertimeRequest $request): JsonResponse
     {
-        $request->validate([
-            'status' => ['nullable', 'string'],
-            'period' => ['nullable', 'regex:/^\d{4}-\d{2}$/'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $this->authorize('viewAny', Overtime::class);
 
         $user = $request->user();
@@ -122,8 +117,10 @@ class OvertimeController extends Controller
     {
         $this->authorize('delete', $overtime);
 
-        $overtime->update(['status' => RequestStatus::CANCELLED]);
-        $overtime->delete();
+        DB::transaction(function () use ($overtime): void {
+            $overtime->update(['status' => RequestStatus::CANCELLED]);
+            $overtime->delete();
+        });
 
         return response()->json([
             'status' => 'success',

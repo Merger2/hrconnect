@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ListLeaveRequest;
 use App\Http\Requests\Api\StoreLeaveRequest;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
@@ -15,6 +16,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 #[Group('Leave')]
 class LeaveController extends Controller
@@ -63,16 +65,8 @@ class LeaveController extends Controller
     #[QueryParameter(name: 'employee_id', description: 'Filter by employee (HR only)', type: 'integer')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
-    public function index(Request $request): JsonResponse
+    public function index(ListLeaveRequest $request): JsonResponse
     {
-        $request->validate([
-            'status' => ['nullable', 'string'],
-            'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
-            'employee_id' => ['nullable', 'integer'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $this->authorize('viewAny', Leave::class);
 
         $user = $request->user();
@@ -135,8 +129,10 @@ class LeaveController extends Controller
     {
         $this->authorize('delete', $leave);
 
-        $leave->update(['status' => RequestStatus::CANCELLED]);
-        $leave->delete();
+        DB::transaction(function () use ($leave): void {
+            $leave->update(['status' => RequestStatus::CANCELLED]);
+            $leave->delete();
+        });
 
         return response()->json([
             'status' => 'success',

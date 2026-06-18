@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
@@ -144,6 +145,12 @@ class KnowledgeBaseService
             throw new BusinessRuleException('PDF maksimal 10 MB.');
         }
 
+        if (! $owner) {
+            throw ValidationException::withMessages([
+                'owner' => ['Upload knowledge base membutuhkan owner yang valid.'],
+            ]);
+        }
+
         $filename = uniqid('kb_').'.pdf';
         $path = $pdf->storeAs('knowledgebase', $filename, 'local');
         $absolutePath = storage_path('app/'.$path);
@@ -156,14 +163,12 @@ class KnowledgeBaseService
         }
 
         $createdRecords = DB::transaction(function () use ($chunks, $title, $category, $filename, $owner) {
-            $morphType = $owner ? $owner::class : KnowledgeBase::class;
-            $morphIdPlaceholder = $owner?->getKey() ?? 0;
             $records = [];
 
             foreach ($chunks as $index => $chunkContent) {
                 $kb = KnowledgeBase::create([
-                    'knowledgeable_type' => $morphType,
-                    'knowledgeable_id' => $morphIdPlaceholder ?: 1,
+                    'knowledgeable_type' => $owner::class,
+                    'knowledgeable_id' => $owner->getKey(),
                     'title' => $title,
                     'content' => $chunkContent,
                     'category' => $category ?? KnowledgeBaseCategory::GENERAL,

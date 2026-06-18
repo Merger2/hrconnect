@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\ReimbursementStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ListReimbursementRequest;
 use App\Http\Requests\Api\StoreReimbursementRequest;
 use App\Models\Reimbursement;
 use App\Services\ApprovalService;
@@ -69,15 +70,8 @@ class ReimbursementController extends Controller
     #[QueryParameter(name: 'period', description: 'Filter by period (YYYY-MM)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
-    public function index(Request $request): JsonResponse
+    public function index(ListReimbursementRequest $request): JsonResponse
     {
-        $request->validate([
-            'status' => ['nullable', 'string'],
-            'period' => ['nullable', 'regex:/^\d{4}-\d{2}$/'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $this->authorize('viewAny', Reimbursement::class);
 
         $user = $request->user();

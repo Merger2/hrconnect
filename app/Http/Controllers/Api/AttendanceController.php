@@ -8,6 +8,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ClockInRequest;
 use App\Http\Requests\Api\ClockOutRequest;
+use App\Http\Requests\Api\ListAttendanceRequest;
 use App\Models\Attendance;
 use App\Services\AttendanceService;
 use Carbon\CarbonImmutable;
@@ -147,15 +148,8 @@ class AttendanceController extends Controller
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
-    public function index(Request $request): JsonResponse
+    public function index(ListAttendanceRequest $request): JsonResponse
     {
-        $request->validate([
-            'period' => ['nullable', 'regex:/^\d{4}-\d{2}$/'],
-            'status' => ['nullable', 'string'],
-            'page' => ['nullable', 'integer', 'min:1'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
         $this->authorize('viewAny', Attendance::class);
 
         $employee = $request->user()->employee;

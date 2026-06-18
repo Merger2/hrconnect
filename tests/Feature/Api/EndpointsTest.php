@@ -284,6 +284,37 @@ test('POST /attendance/clock-in validasi WFA wajib note >= 20 char', function ()
         ->assertJsonValidationErrors(['wfa_note']);
 });
 
+test('POST /attendance/clock-in validasi embedding harus 128D', function () {
+    $user = User::factory()->create();
+    $user->assignRole('employee');
+    $token = $user->createToken('test')->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->postJson('/api/v1/attendance/clock-in', [
+            'is_wfa' => true,
+            'wfa_note' => 'Melakukan pekerjaan dari rumah dengan koneksi stabil.',
+            'embedding' => array_fill(0, 64, 0.1),
+        ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['embedding']);
+});
+
+test('POST /attendance/clock-out validasi embedding harus numerik', function () {
+    $user = User::factory()->create();
+    $user->assignRole('employee');
+    $token = $user->createToken('test')->plainTextToken;
+
+    $embedding = array_fill(0, 128, 0.1);
+    $embedding[0] = 'invalid';
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->postJson('/api/v1/attendance/clock-out', [
+            'embedding' => $embedding,
+        ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['embedding.0']);
+});
+
 test('POST /leave validasi field wajib', function () {
     $user = User::factory()->create();
     $user->assignRole('employee');

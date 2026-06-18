@@ -5,6 +5,7 @@ use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Jobs\ProcessKnowledgeBaseEmbedding;
 use App\Models\KnowledgeBase;
+use App\Models\User;
 use App\Services\EmbeddingService;
 use App\Services\GeminiClient;
 use App\Services\KnowledgeBaseService;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
@@ -128,18 +130,33 @@ describe('uploadPdf', function () {
         $embedding->shouldReceive('chunkText')->once()->andReturn(['Chunk one', 'Chunk two', 'Chunk three']);
 
         $pdf = UploadedFile::fake()->create('test.pdf', 1024, 'application/pdf');
+        $owner = User::factory()->create();
 
         $svc = new KnowledgeBaseService($gemini, $embedding);
-        $result = $svc->uploadPdf($pdf, 'Test Document', KnowledgeBaseCategory::HR_POLICY);
+        $result = $svc->uploadPdf($pdf, 'Test Document', KnowledgeBaseCategory::HR_POLICY, $owner);
 
         expect($result)->toBeInstanceOf(KnowledgeBase::class);
         expect($result->title)->toBe('Test Document');
+        expect($result->knowledgeable_type)->toBe($owner::class);
+        expect($result->knowledgeable_id)->toBe($owner->id);
         expect($result->category)->toBe(KnowledgeBaseCategory::HR_POLICY);
         expect($result->status)->toBe(KnowledgeBaseStatus::PROCESSING);
         expect($result->source_document)->toStartWith('kb_');
         expect($result->page_number)->toBe(0);
 
         Queue::assertPushed(ProcessKnowledgeBaseEmbedding::class, 3);
+    });
+
+    it('throws ValidationException when owner is missing', function () {
+        $gemini = mock(GeminiClient::class);
+        $embedding = mock(EmbeddingService::class);
+
+        $pdf = UploadedFile::fake()->create('test.pdf', 1024, 'application/pdf');
+
+        $svc = new KnowledgeBaseService($gemini, $embedding);
+
+        expect(fn () => $svc->uploadPdf($pdf, 'Test Document', KnowledgeBaseCategory::HR_POLICY))
+            ->toThrow(ValidationException::class);
     });
 });
 
