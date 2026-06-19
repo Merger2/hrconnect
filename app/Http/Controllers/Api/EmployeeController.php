@@ -177,7 +177,7 @@ class EmployeeController extends Controller
     }
 
     #[Endpoint(title: 'Get Employee PII', description: 'Reveal sensitive employee PII. Requires manage_employees and records audit log. Flow: Employee Management (PII reveal).')]
-    public function showPii(Request $request, Employee $employee): EmployeePiiResource
+    public function showPii(Request $request, Employee $employee): JsonResponse
     {
         $this->authorize('viewPii', $employee);
 
@@ -186,6 +186,9 @@ class EmployeeController extends Controller
             ->causedBy($request->user())
             ->log('Mengakses data PII sensitif karyawan tanpa masking.');
 
-        return EmployeePiiResource::make($employee);
+        return response()->json([
+            'status' => 'success',
+            'data' => EmployeePiiResource::make($employee)->resolve($request),
+        ]);
     }
 }

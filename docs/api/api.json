@@ -888,33 +888,45 @@
                     {
                         "name": "period",
                         "in": "query",
-                        "description": "Filter by period (YYYY-MM)",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "pattern": "^\\d{4}-\\d{2}$"
                         }
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -1001,14 +1013,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1691,49 +1703,65 @@
                     {
                         "name": "branch_id",
                         "in": "query",
-                        "description": "Filter by branch",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "department_id",
                         "in": "query",
-                        "description": "Filter by department",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "search",
                         "in": "query",
-                        "description": "Search by name or employee number (min 2 chars)",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "minLength": 2
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -1751,45 +1779,7 @@
                                         },
                                         "data": {
                                             "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "employee_number": {
-                                                        "type": "string"
-                                                    },
-                                                    "full_name": {
-                                                        "type": "string"
-                                                    },
-                                                    "status": {
-                                                        "type": "string"
-                                                    },
-                                                    "employment_type": {
-                                                        "type": "string"
-                                                    },
-                                                    "branch": {
-                                                        "type": "string"
-                                                    },
-                                                    "department": {
-                                                        "type": "string"
-                                                    },
-                                                    "position": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "id",
-                                                    "employee_number",
-                                                    "full_name",
-                                                    "status",
-                                                    "employment_type",
-                                                    "branch",
-                                                    "department",
-                                                    "position"
-                                                ]
-                                            }
+                                            "items": {}
                                         },
                                         "meta": {
                                             "type": "object",
@@ -1824,14 +1814,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             },
@@ -1956,135 +1946,8 @@
                                             "const": "Karyawan berhasil ditambahkan"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "user_id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_number": {
-                                                    "type": "string"
-                                                },
-                                                "full_name": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": "string"
-                                                },
-                                                "nik": {
-                                                    "type": "string"
-                                                },
-                                                "npwp": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "bank_name": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "bank_account_number": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "marital_status": {
-                                                    "type": "string"
-                                                },
-                                                "blood_type": {
-                                                    "type": "string"
-                                                },
-                                                "education_level": {
-                                                    "type": "string"
-                                                },
-                                                "birth_date": {
-                                                    "type": "string"
-                                                },
-                                                "join_date": {
-                                                    "type": "string"
-                                                },
-                                                "employment_type": {
-                                                    "type": "string"
-                                                },
-                                                "salary_type": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "address_detail": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "face_registered": {
-                                                    "type": "boolean"
-                                                },
-                                                "pin_set": {
-                                                    "type": "boolean"
-                                                },
-                                                "branch": {
-                                                    "type": "string"
-                                                },
-                                                "department": {
-                                                    "type": "string"
-                                                },
-                                                "position": {
-                                                    "type": "string"
-                                                },
-                                                "shift": {
-                                                    "type": "string"
-                                                },
-                                                "manager": {
-                                                    "type": "string"
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "user_id",
-                                                "employee_number",
-                                                "full_name",
-                                                "email",
-                                                "phone",
-                                                "nik",
-                                                "npwp",
-                                                "bank_name",
-                                                "bank_account_number",
-                                                "gender",
-                                                "marital_status",
-                                                "blood_type",
-                                                "education_level",
-                                                "birth_date",
-                                                "join_date",
-                                                "employment_type",
-                                                "salary_type",
-                                                "status",
-                                                "address_detail",
-                                                "face_registered",
-                                                "pin_set",
-                                                "branch",
-                                                "department",
-                                                "position",
-                                                "shift",
-                                                "manager",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -2140,135 +2003,8 @@
                                             "const": "success"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "user_id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_number": {
-                                                    "type": "string"
-                                                },
-                                                "full_name": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": "string"
-                                                },
-                                                "nik": {
-                                                    "type": "string"
-                                                },
-                                                "npwp": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "bank_name": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "bank_account_number": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "marital_status": {
-                                                    "type": "string"
-                                                },
-                                                "blood_type": {
-                                                    "type": "string"
-                                                },
-                                                "education_level": {
-                                                    "type": "string"
-                                                },
-                                                "birth_date": {
-                                                    "type": "string"
-                                                },
-                                                "join_date": {
-                                                    "type": "string"
-                                                },
-                                                "employment_type": {
-                                                    "type": "string"
-                                                },
-                                                "salary_type": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "address_detail": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "face_registered": {
-                                                    "type": "boolean"
-                                                },
-                                                "pin_set": {
-                                                    "type": "boolean"
-                                                },
-                                                "branch": {
-                                                    "type": "string"
-                                                },
-                                                "department": {
-                                                    "type": "string"
-                                                },
-                                                "position": {
-                                                    "type": "string"
-                                                },
-                                                "shift": {
-                                                    "type": "string"
-                                                },
-                                                "manager": {
-                                                    "type": "string"
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "user_id",
-                                                "employee_number",
-                                                "full_name",
-                                                "email",
-                                                "phone",
-                                                "nik",
-                                                "npwp",
-                                                "bank_name",
-                                                "bank_account_number",
-                                                "gender",
-                                                "marital_status",
-                                                "blood_type",
-                                                "education_level",
-                                                "birth_date",
-                                                "join_date",
-                                                "employment_type",
-                                                "salary_type",
-                                                "status",
-                                                "address_detail",
-                                                "face_registered",
-                                                "pin_set",
-                                                "branch",
-                                                "department",
-                                                "position",
-                                                "shift",
-                                                "manager",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -2375,135 +2111,8 @@
                                             "const": "Data karyawan berhasil diperbarui"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "user_id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_number": {
-                                                    "type": "string"
-                                                },
-                                                "full_name": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": "string"
-                                                },
-                                                "nik": {
-                                                    "type": "string"
-                                                },
-                                                "npwp": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "bank_name": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "bank_account_number": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "marital_status": {
-                                                    "type": "string"
-                                                },
-                                                "blood_type": {
-                                                    "type": "string"
-                                                },
-                                                "education_level": {
-                                                    "type": "string"
-                                                },
-                                                "birth_date": {
-                                                    "type": "string"
-                                                },
-                                                "join_date": {
-                                                    "type": "string"
-                                                },
-                                                "employment_type": {
-                                                    "type": "string"
-                                                },
-                                                "salary_type": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "address_detail": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "face_registered": {
-                                                    "type": "boolean"
-                                                },
-                                                "pin_set": {
-                                                    "type": "boolean"
-                                                },
-                                                "branch": {
-                                                    "type": "string"
-                                                },
-                                                "department": {
-                                                    "type": "string"
-                                                },
-                                                "position": {
-                                                    "type": "string"
-                                                },
-                                                "shift": {
-                                                    "type": "string"
-                                                },
-                                                "manager": {
-                                                    "type": "string"
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "user_id",
-                                                "employee_number",
-                                                "full_name",
-                                                "email",
-                                                "phone",
-                                                "nik",
-                                                "npwp",
-                                                "bank_name",
-                                                "bank_account_number",
-                                                "gender",
-                                                "marital_status",
-                                                "blood_type",
-                                                "education_level",
-                                                "birth_date",
-                                                "join_date",
-                                                "employment_type",
-                                                "salary_type",
-                                                "status",
-                                                "address_detail",
-                                                "face_registered",
-                                                "pin_set",
-                                                "branch",
-                                                "department",
-                                                "position",
-                                                "shift",
-                                                "manager",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -2515,6 +2124,9 @@
                             }
                         }
                     },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
                     },
@@ -2523,9 +2135,6 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
@@ -2567,6 +2176,62 @@
                                     "required": [
                                         "status",
                                         "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/employees/{employee}/pii": {
+            "get": {
+                "operationId": "employees.pii",
+                "description": "Reveal sensitive employee PII. Requires manage_employees and records audit log. Flow: Employee Management (PII reveal).",
+                "summary": "Get Employee PII",
+                "tags": [
+                    "Employees"
+                ],
+                "parameters": [
+                    {
+                        "name": "employee",
+                        "in": "path",
+                        "required": true,
+                        "description": "The employee ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data"
                                     ]
                                 }
                             }
@@ -2803,6 +2468,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -3525,145 +3193,37 @@
                                             "const": "Pengajuan cuti berhasil dikirim"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "leave_type": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        },
-                                                        "code": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name",
-                                                        "code"
-                                                    ]
-                                                },
-                                                "start_date": {
-                                                    "type": "string"
-                                                },
-                                                "end_date": {
-                                                    "type": "string"
-                                                },
-                                                "day_type": {
-                                                    "anyOf": [
-                                                        {
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/DayType"
-                                                        }
-                                                    ]
-                                                },
-                                                "total_days": {
-                                                    "type": "number"
-                                                },
-                                                "reason": {
-                                                    "type": "string"
-                                                },
-                                                "proof_file": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "approvals": {
-                                                    "type": [
-                                                        "array",
-                                                        "null"
-                                                    ],
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "level": {
-                                                                "anyOf": [
-                                                                    {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    {
-                                                                        "$ref": "#/components/schemas/ApprovalLevel"
-                                                                    }
-                                                                ]
-                                                            },
-                                                            "status": {
-                                                                "type": "string"
-                                                            },
-                                                            "approver": {
-                                                                "type": [
-                                                                    "object",
-                                                                    "null"
-                                                                ],
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "full_name": {
-                                                                        "type": "string"
-                                                                    }
-                                                                },
-                                                                "required": [
-                                                                    "id",
-                                                                    "full_name"
-                                                                ]
-                                                            },
-                                                            "notes": {
-                                                                "type": [
-                                                                    "string",
-                                                                    "null"
-                                                                ]
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "level",
-                                                            "status",
-                                                            "approver",
-                                                            "notes"
-                                                        ]
-                                                    }
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "leave_type",
-                                                "start_date",
-                                                "end_date",
-                                                "day_type",
-                                                "total_days",
-                                                "reason",
-                                                "proof_file",
-                                                "status",
-                                                "approvals",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
                                         "status",
                                         "message",
                                         "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
                                     ]
                                 }
                             }
@@ -3693,14 +3253,14 @@
                             }
                         }
                     },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
@@ -3715,41 +3275,56 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "year",
                         "in": "query",
-                        "description": "Filter by year",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 2000,
+                            "maximum": 2100
                         }
                     },
                     {
                         "name": "employee_id",
                         "in": "query",
-                        "description": "Filter by employee (HR only)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -3767,141 +3342,7 @@
                                         },
                                         "data": {
                                             "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "employee_id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "leave_type": {
-                                                        "type": [
-                                                            "object",
-                                                            "null"
-                                                        ],
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "name": {
-                                                                "type": "string"
-                                                            },
-                                                            "code": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "id",
-                                                            "name",
-                                                            "code"
-                                                        ]
-                                                    },
-                                                    "start_date": {
-                                                        "type": "string"
-                                                    },
-                                                    "end_date": {
-                                                        "type": "string"
-                                                    },
-                                                    "day_type": {
-                                                        "anyOf": [
-                                                            {
-                                                                "type": "string"
-                                                            },
-                                                            {
-                                                                "$ref": "#/components/schemas/DayType"
-                                                            }
-                                                        ]
-                                                    },
-                                                    "total_days": {
-                                                        "type": "number"
-                                                    },
-                                                    "reason": {
-                                                        "type": "string"
-                                                    },
-                                                    "proof_file": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "status": {
-                                                        "type": "string"
-                                                    },
-                                                    "approvals": {
-                                                        "type": [
-                                                            "array",
-                                                            "null"
-                                                        ],
-                                                        "items": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "level": {
-                                                                    "anyOf": [
-                                                                        {
-                                                                            "type": "integer"
-                                                                        },
-                                                                        {
-                                                                            "$ref": "#/components/schemas/ApprovalLevel"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                "status": {
-                                                                    "type": "string"
-                                                                },
-                                                                "approver": {
-                                                                    "type": [
-                                                                        "object",
-                                                                        "null"
-                                                                    ],
-                                                                    "properties": {
-                                                                        "id": {
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "full_name": {
-                                                                            "type": "string"
-                                                                        }
-                                                                    },
-                                                                    "required": [
-                                                                        "id",
-                                                                        "full_name"
-                                                                    ]
-                                                                },
-                                                                "notes": {
-                                                                    "type": [
-                                                                        "string",
-                                                                        "null"
-                                                                    ]
-                                                                }
-                                                            },
-                                                            "required": [
-                                                                "level",
-                                                                "status",
-                                                                "approver",
-                                                                "notes"
-                                                            ]
-                                                        }
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "id",
-                                                    "employee_id",
-                                                    "leave_type",
-                                                    "start_date",
-                                                    "end_date",
-                                                    "day_type",
-                                                    "total_days",
-                                                    "reason",
-                                                    "proof_file",
-                                                    "status",
-                                                    "approvals",
-                                                    "created_at"
-                                                ]
-                                            }
+                                            "items": {}
                                         },
                                         "meta": {
                                             "type": "object",
@@ -3936,14 +3377,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -4110,139 +3551,8 @@
                                             "const": "success"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "leave_type": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        },
-                                                        "code": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name",
-                                                        "code"
-                                                    ]
-                                                },
-                                                "start_date": {
-                                                    "type": "string"
-                                                },
-                                                "end_date": {
-                                                    "type": "string"
-                                                },
-                                                "day_type": {
-                                                    "anyOf": [
-                                                        {
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/DayType"
-                                                        }
-                                                    ]
-                                                },
-                                                "total_days": {
-                                                    "type": "number"
-                                                },
-                                                "reason": {
-                                                    "type": "string"
-                                                },
-                                                "proof_file": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "approvals": {
-                                                    "type": [
-                                                        "array",
-                                                        "null"
-                                                    ],
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "level": {
-                                                                "anyOf": [
-                                                                    {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    {
-                                                                        "$ref": "#/components/schemas/ApprovalLevel"
-                                                                    }
-                                                                ]
-                                                            },
-                                                            "status": {
-                                                                "type": "string"
-                                                            },
-                                                            "approver": {
-                                                                "type": [
-                                                                    "object",
-                                                                    "null"
-                                                                ],
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "full_name": {
-                                                                        "type": "string"
-                                                                    }
-                                                                },
-                                                                "required": [
-                                                                    "id",
-                                                                    "full_name"
-                                                                ]
-                                                            },
-                                                            "notes": {
-                                                                "type": [
-                                                                    "string",
-                                                                    "null"
-                                                                ]
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "level",
-                                                            "status",
-                                                            "approver",
-                                                            "notes"
-                                                        ]
-                                                    }
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "leave_type",
-                                                "start_date",
-                                                "end_date",
-                                                "day_type",
-                                                "total_days",
-                                                "reason",
-                                                "proof_file",
-                                                "status",
-                                                "approvals",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -4351,7 +3661,7 @@
                                             "end_time": {
                                                 "type": "string",
                                                 "format": "time",
-                                                "description": "End time (H:i, must be after start_time)"
+                                                "description": "End time (H:i). If earlier than start_time, it is treated as next-day overtime."
                                             },
                                             "description": {
                                                 "type": "string",
@@ -4387,57 +3697,8 @@
                                             "const": "Pengajuan lembur berhasil dikirim"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "date": {
-                                                    "type": "string"
-                                                },
-                                                "start_time": {
-                                                    "type": "string"
-                                                },
-                                                "end_time": {
-                                                    "type": "string"
-                                                },
-                                                "total_hours": {
-                                                    "type": "number"
-                                                },
-                                                "description": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "amount": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "date",
-                                                "start_time",
-                                                "end_time",
-                                                "total_hours",
-                                                "description",
-                                                "status",
-                                                "amount",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -4473,14 +3734,14 @@
                             }
                         }
                     },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
@@ -4495,33 +3756,45 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "period",
                         "in": "query",
-                        "description": "Filter by period (YYYY-MM)",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "pattern": "^\\d{4}-\\d{2}$"
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -4539,59 +3812,7 @@
                                         },
                                         "data": {
                                             "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "employee_id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "date": {
-                                                        "type": "string"
-                                                    },
-                                                    "start_time": {
-                                                        "type": "string"
-                                                    },
-                                                    "end_time": {
-                                                        "type": "string"
-                                                    },
-                                                    "total_hours": {
-                                                        "type": "number"
-                                                    },
-                                                    "description": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "status": {
-                                                        "type": "string"
-                                                    },
-                                                    "amount": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "id",
-                                                    "employee_id",
-                                                    "date",
-                                                    "start_time",
-                                                    "end_time",
-                                                    "total_hours",
-                                                    "description",
-                                                    "status",
-                                                    "amount",
-                                                    "created_at"
-                                                ]
-                                            }
+                                            "items": {}
                                         },
                                         "meta": {
                                             "type": "object",
@@ -4626,14 +3847,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -4670,57 +3891,8 @@
                                             "const": "success"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "date": {
-                                                    "type": "string"
-                                                },
-                                                "start_time": {
-                                                    "type": "string"
-                                                },
-                                                "end_time": {
-                                                    "type": "string"
-                                                },
-                                                "total_hours": {
-                                                    "type": "number"
-                                                },
-                                                "description": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "amount": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "date",
-                                                "start_time",
-                                                "end_time",
-                                                "total_hours",
-                                                "description",
-                                                "status",
-                                                "amount",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -5464,180 +4636,8 @@
                                             "const": "success"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string"
-                                                },
-                                                "user_id": {
-                                                    "type": "string"
-                                                },
-                                                "employee_number": {
-                                                    "type": "string"
-                                                },
-                                                "full_name": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "join_date": {
-                                                    "type": "string"
-                                                },
-                                                "employment_type": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "marital_status": {
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "blood_type": {
-                                                    "type": "string"
-                                                },
-                                                "branch": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "department": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "position": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        },
-                                                        "grade": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name",
-                                                        "grade"
-                                                    ]
-                                                },
-                                                "shift": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "manager": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "full_name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "full_name"
-                                                    ]
-                                                },
-                                                "face_registered": {
-                                                    "type": "boolean"
-                                                },
-                                                "pin_set": {
-                                                    "type": "boolean"
-                                                },
-                                                "bank_name": {
-                                                    "type": "string"
-                                                },
-                                                "bank_account_number": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "user_id",
-                                                "employee_number",
-                                                "full_name",
-                                                "email",
-                                                "phone",
-                                                "join_date",
-                                                "employment_type",
-                                                "status",
-                                                "marital_status",
-                                                "gender",
-                                                "blood_type",
-                                                "branch",
-                                                "department",
-                                                "position",
-                                                "shift",
-                                                "manager",
-                                                "face_registered",
-                                                "pin_set",
-                                                "bank_name",
-                                                "bank_account_number"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -5735,180 +4735,8 @@
                                             "const": "Profil berhasil diperbarui"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string"
-                                                },
-                                                "user_id": {
-                                                    "type": "string"
-                                                },
-                                                "employee_number": {
-                                                    "type": "string"
-                                                },
-                                                "full_name": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "join_date": {
-                                                    "type": "string"
-                                                },
-                                                "employment_type": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "marital_status": {
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "blood_type": {
-                                                    "type": "string"
-                                                },
-                                                "branch": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "department": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "position": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        },
-                                                        "grade": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name",
-                                                        "grade"
-                                                    ]
-                                                },
-                                                "shift": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "manager": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "string"
-                                                        },
-                                                        "full_name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "full_name"
-                                                    ]
-                                                },
-                                                "face_registered": {
-                                                    "type": "boolean"
-                                                },
-                                                "pin_set": {
-                                                    "type": "boolean"
-                                                },
-                                                "bank_name": {
-                                                    "type": "string"
-                                                },
-                                                "bank_account_number": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "user_id",
-                                                "employee_number",
-                                                "full_name",
-                                                "email",
-                                                "phone",
-                                                "join_date",
-                                                "employment_type",
-                                                "status",
-                                                "marital_status",
-                                                "gender",
-                                                "blood_type",
-                                                "branch",
-                                                "department",
-                                                "position",
-                                                "shift",
-                                                "manager",
-                                                "face_registered",
-                                                "pin_set",
-                                                "bank_name",
-                                                "bank_account_number"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -6109,92 +4937,37 @@
                                             "const": "Pengajuan reimbursement berhasil dikirim"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "category_id": {
-                                                    "type": [
-                                                        "integer",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "category": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "title": {
-                                                    "type": "string"
-                                                },
-                                                "amount": {
-                                                    "type": "integer"
-                                                },
-                                                "description": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "expense_date": {
-                                                    "type": "string"
-                                                },
-                                                "receipt_file": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "payroll_id": {
-                                                    "type": [
-                                                        "integer",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "category_id",
-                                                "category",
-                                                "title",
-                                                "amount",
-                                                "description",
-                                                "expense_date",
-                                                "receipt_file",
-                                                "status",
-                                                "payroll_id",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
                                         "status",
                                         "message",
                                         "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
                                     ]
                                 }
                             }
@@ -6224,14 +4997,14 @@
                             }
                         }
                     },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
@@ -6246,33 +5019,45 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by status",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         }
                     },
                     {
                         "name": "period",
                         "in": "query",
-                        "description": "Filter by period (YYYY-MM)",
                         "schema": {
-                            "type": "string"
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "pattern": "^\\d{4}-\\d{2}$"
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Items per page (max 100)",
                         "schema": {
-                            "type": "integer"
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
                         }
                     }
                 ],
@@ -6290,88 +5075,7 @@
                                         },
                                         "data": {
                                             "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "employee_id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "category_id": {
-                                                        "type": [
-                                                            "integer",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "category": {
-                                                        "type": [
-                                                            "object",
-                                                            "null"
-                                                        ],
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "name": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "id",
-                                                            "name"
-                                                        ]
-                                                    },
-                                                    "title": {
-                                                        "type": "string"
-                                                    },
-                                                    "amount": {
-                                                        "type": "integer"
-                                                    },
-                                                    "description": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "expense_date": {
-                                                        "type": "string"
-                                                    },
-                                                    "receipt_file": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "status": {
-                                                        "type": "string"
-                                                    },
-                                                    "payroll_id": {
-                                                        "type": [
-                                                            "integer",
-                                                            "null"
-                                                        ]
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "id",
-                                                    "employee_id",
-                                                    "category_id",
-                                                    "category",
-                                                    "title",
-                                                    "amount",
-                                                    "description",
-                                                    "expense_date",
-                                                    "receipt_file",
-                                                    "status",
-                                                    "payroll_id",
-                                                    "created_at"
-                                                ]
-                                            }
+                                            "items": {}
                                         },
                                         "meta": {
                                             "type": "object",
@@ -6406,14 +5110,14 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -6450,86 +5154,8 @@
                                             "const": "success"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "category_id": {
-                                                    "type": [
-                                                        "integer",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "category": {
-                                                    "type": [
-                                                        "object",
-                                                        "null"
-                                                    ],
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "id",
-                                                        "name"
-                                                    ]
-                                                },
-                                                "title": {
-                                                    "type": "string"
-                                                },
-                                                "amount": {
-                                                    "type": "integer"
-                                                },
-                                                "description": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "expense_date": {
-                                                    "type": "string"
-                                                },
-                                                "receipt_file": {
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "payroll_id": {
-                                                    "type": [
-                                                        "integer",
-                                                        "null"
-                                                    ]
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "category_id",
-                                                "category",
-                                                "title",
-                                                "amount",
-                                                "description",
-                                                "expense_date",
-                                                "receipt_file",
-                                                "status",
-                                                "payroll_id",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -6697,15 +5323,6 @@
                             "null"
                         ]
                     },
-                    "embedding": {
-                        "type": [
-                            "array",
-                            "null"
-                        ],
-                        "items": {
-                            "type": "string"
-                        }
-                    },
                     "pin": {
                         "type": [
                             "string",
@@ -6721,6 +5338,19 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "embedding": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "number",
+                            "minimum": -1.5,
+                            "maximum": 1.5
+                        },
+                        "minItems": 128,
+                        "maxItems": 128
                     }
                 },
                 "title": "ClockInRequest"
@@ -6757,15 +5387,6 @@
                             "null"
                         ]
                     },
-                    "embedding": {
-                        "type": [
-                            "array",
-                            "null"
-                        ],
-                        "items": {
-                            "type": "string"
-                        }
-                    },
                     "pin": {
                         "type": [
                             "string",
@@ -6788,18 +5409,48 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "embedding": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "number",
+                            "minimum": -1.5,
+                            "maximum": 1.5
+                        },
+                        "minItems": 128,
+                        "maxItems": 128
                     }
                 },
                 "title": "ClockOutRequest"
             },
-            "DayType": {
+            "EducationLevel": {
                 "type": "string",
                 "enum": [
-                    "full_day",
-                    "morning",
-                    "afternoon"
+                    "sd",
+                    "smp",
+                    "sma",
+                    "smk",
+                    "diploma",
+                    "bachelor",
+                    "master",
+                    "doctorate",
+                    "other"
                 ],
-                "title": "DayType"
+                "title": "EducationLevel"
+            },
+            "EmployeeStatus": {
+                "type": "string",
+                "enum": [
+                    "active",
+                    "inactive",
+                    "resigned",
+                    "terminated",
+                    "deceased"
+                ],
+                "title": "EmployeeStatus"
             },
             "ExportMonthlyRequest": {
                 "type": "object",
@@ -6947,17 +5598,11 @@
                         "maxLength": 255
                     },
                     "phone": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
                         "pattern": "^(\\+62|0)\\d{9,12}$"
                     },
                     "nik": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string"
                     },
                     "company_id": {
                         "type": "integer"
@@ -7035,19 +5680,16 @@
                         ]
                     },
                     "education_level": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "enum": [
-                            "sd",
-                            "smp",
-                            "sma",
-                            "d3",
-                            "s1",
-                            "s2",
-                            "s3"
-                        ]
+                        "$ref": "#/components/schemas/EducationLevel"
+                    },
+                    "institution_name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "graduation_year": {
+                        "type": "integer",
+                        "minimum": 1950,
+                        "maximum": 2026
                     }
                 },
                 "required": [
@@ -7056,6 +5698,8 @@
                     "password",
                     "employee_number",
                     "full_name",
+                    "phone",
+                    "nik",
                     "company_id",
                     "branch_id",
                     "department_id",
@@ -7065,7 +5709,10 @@
                     "employment_type",
                     "birth_date",
                     "join_date",
-                    "salary_type"
+                    "salary_type",
+                    "education_level",
+                    "institution_name",
+                    "graduation_year"
                 ],
                 "title": "StoreEmployeeRequest"
             },
@@ -7130,17 +5777,15 @@
                         "type": "string"
                     },
                     "description": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
                         "minLength": 10
                     }
                 },
                 "required": [
                     "date",
                     "start_time",
-                    "end_time"
+                    "end_time",
+                    "description"
                 ],
                 "title": "StoreOvertimeRequest"
             },
@@ -7150,16 +5795,9 @@
                     "category_id": {
                         "type": "integer"
                     },
-                    "title": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "maxLength": 200
-                    },
                     "amount": {
-                        "type": "integer",
-                        "minimum": 1
+                        "type": "number",
+                        "minimum": 1000
                     },
                     "description": {
                         "type": "string",
@@ -7235,8 +5873,7 @@
                         "type": "string"
                     },
                     "code": {
-                        "type": "string",
-                        "pattern": "^(\\d{6}|[a-zA-Z0-9]{8})$"
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -7253,11 +5890,8 @@
                         "maxLength": 255
                     },
                     "phone": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "pattern": "^(\\+62|0)\\d{9,12}$"
+                        "type": "string",
+                        "maxLength": 20
                     },
                     "company_id": {
                         "type": "integer"
@@ -7287,12 +5921,7 @@
                         ]
                     },
                     "status": {
-                        "type": "string",
-                        "enum": [
-                            "active",
-                            "inactive",
-                            "resigned"
-                        ]
+                        "$ref": "#/components/schemas/EmployeeStatus"
                     },
                     "address_detail": {
                         "type": [

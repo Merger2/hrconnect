@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (S-8 production env checklist completed. Test suite: 695 / 4,042 assertions).
+> Last updated: 2026-06-18 (API-1–7 contract freeze completed. Test suite: 695 / 4,042 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -330,13 +330,13 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
-| API-1 | Standard response envelope | Success/error response shapes finalized and applied/documented | ⏳ |
-| API-2 | Error code contract | 200/201/204/401/403/404/409/422/429/500 usage finalized and tested | ⏳ |
-| API-3 | Pagination/filter contract | List endpoint pagination, filters, sort fields, and meta shape finalized | ⏳ |
-| API-4 | Enum contract | All frontend-facing enum values, labels, and color names documented/frozen | ⏳ |
-| API-5 | File upload/download contract | KB upload, reimbursement attachment, payroll export, payslip download behavior finalized | ⏳ |
-| API-6 | Auth/token contract | Login, 2FA, logout, logout-all, token lifetime, and password expiry behavior finalized | ⏳ |
-| API-7 | Generate/export docs | Scramble/OpenAPI output generated and checked into agreed location or CI artifact | ⏳ |
+| API-1 | Standard response envelope | ✅ Response envelope standardized: 4 patterns (data, list+meta, action+message+data, action+message). Fixed EmployeePiiController::showPii() — was returning raw resource without `status` wrapper. Health endpoint uses `ok`/`degraded` (intentional — different domain). | ✅ |
+| API-2 | Error code contract | ✅ Error code table finalized and documented: 10 error status codes, 15+ domain-specific error keys with HTTP mapping. All custom exceptions use uniform `{ status: 'error', message }` shape. | ✅ |
+| API-3 | Pagination/filter contract | ✅ All list endpoints use consistent `{ data, meta: { current_page, last_page, per_page, total } }` shape. `per_page` capped at 100. Documented in contract. | ✅ |
+| API-4 | Enum contract | ✅ Complete enum reference documented in contracts: 13 enum types (EmployeeStatus, AttendanceStatus, RequestStatus, WfaStatus, PayrollStatus, KBStatus, Gender, MaritalStatus, BloodType, EducationLevel, DayType, ApprovalLevel, SalaryType) with values, labels, Flux colors. | ✅ |
+| API-5 | File upload/download contract | ✅ All 3 upload endpoints documented (leave proof_file, reimbursement receipt, KB PDF). All 4 download endpoints documented (payslip + 3 payroll exports). MIME/size limits, storage paths, error handling patterns documented. | ✅ |
+| API-6 | Auth/token contract | ✅ Auth flow documented: login → (2FA challenge) → token. Logout revokes current, logout-all revokes all. Token never expires (design decision). Password expiry via `password_changed_at`. All public endpoints listed with throttle limits. | ✅ |
+| API-7 | Generate/export docs | ✅ Scramble OpenAPI 3.1 spec generated (275KB, 51+ routes). Exported to `docs/api/api.json`. `api-contracts.md` rewritten (v3.0) — was 1360 lines outdated (~2% implemented), now accurate reflecting current state (51 routes, 13 controllers, 695 tests). | ✅ |
 
 ## Verification Commands
 
