@@ -108,3 +108,131 @@ test('seeder idempotent — jalan dua kali tidak duplicate', function () {
     expect(Permission::count())->toBe($countBefore);
     expect(Role::count())->toBe($rolesBefore);
 });
+
+// ─── Full Permission × Role Matrix ─────────────────────────
+
+function permissionMatrix(): Generator
+{
+    $roles = ['super-admin', 'hr-manager', 'finance', 'manager', 'employee'];
+
+    // super-admin: ALL 44 permissions
+    foreach (PermissionEnum::cases() as $perm) {
+        yield "super-admin can {$perm->value}" => ['super-admin', $perm->value, true];
+    }
+
+    // hr-manager
+    $hrCan = [
+        'view_dashboard', 'view_branches', 'view_departments', 'view_positions',
+        'view_employees', 'manage_employees', 'view_attendances', 'manage_attendances',
+        'view_leaves', 'approve_leaves_l2', 'view_overtimes', 'approve_overtimes_l2',
+        'view_reimbursements', 'view_loans', 'view_assets', 'manage_assets',
+        'view_activity_logs', 'view_audit_logs',
+        'manage_knowledgebase', 'view_knowledgebase', 'view_wfa_pending',
+    ];
+    $hrCannot = [
+        'view_companies', 'manage_companies', 'manage_branches', 'manage_departments',
+        'manage_positions', 'approve_leaves_l1', 'approve_overtimes_l1',
+        'manage_reimbursements', 'approve_reimbursements_l1', 'approve_reimbursements_l2',
+        'manage_loans', 'process_payroll', 'view_payslip', 'download_payslip', 'view_payrolls',
+        'manage_tax_configs', 'manage_bpjs_configs', 'manage_settings',
+        'manage_company_settings', 'manage_roles', 'manage_holidays', 'manage_shifts',
+        'approve_wfa',
+    ];
+    foreach ($hrCan as $p) {
+        yield "hr-manager can {$p}" => ['hr-manager', $p, true];
+    }
+    foreach ($hrCannot as $p) {
+        yield "hr-manager cannot {$p}" => ['hr-manager', $p, false];
+    }
+
+    // finance
+    $finCan = [
+        'view_dashboard', 'view_employees', 'view_reimbursements', 'manage_reimbursements',
+        'approve_reimbursements_l2',
+        'view_loans', 'manage_loans',
+        'view_payslip', 'download_payslip', 'process_payroll', 'view_payrolls',
+        'manage_tax_configs', 'manage_bpjs_configs',
+    ];
+    $finCannot = [
+        'manage_companies', 'view_companies', 'manage_branches', 'view_branches',
+        'manage_departments', 'view_departments', 'manage_positions', 'view_positions',
+        'manage_employees', 'view_attendances', 'manage_attendances',
+        'view_leaves', 'approve_leaves_l1', 'approve_leaves_l2',
+        'view_overtimes', 'approve_overtimes_l1', 'approve_overtimes_l2',
+        'view_assets', 'manage_assets',
+        'view_activity_logs', 'view_audit_logs',
+        'manage_settings', 'manage_company_settings', 'manage_roles',
+        'manage_holidays', 'manage_shifts', 'manage_knowledgebase', 'view_knowledgebase',
+        'approve_wfa', 'view_wfa_pending',
+    ];
+    foreach ($finCan as $p) {
+        yield "finance can {$p}" => ['finance', $p, true];
+    }
+    foreach ($finCannot as $p) {
+        yield "finance cannot {$p}" => ['finance', $p, false];
+    }
+
+    // manager
+    $mgrCan = [
+        'view_dashboard', 'view_employees', 'view_attendances', 'view_leaves',
+        'approve_leaves_l1', 'view_overtimes', 'approve_overtimes_l1',
+        'view_reimbursements', 'approve_reimbursements_l1',
+        'approve_wfa', 'view_wfa_pending',
+    ];
+    $mgrCannot = [
+        'manage_companies', 'view_companies', 'manage_branches', 'view_branches',
+        'manage_departments', 'view_departments', 'manage_positions', 'view_positions',
+        'manage_employees', 'manage_attendances',
+        'approve_leaves_l2', 'approve_overtimes_l2',
+        'manage_reimbursements', 'approve_reimbursements_l2',
+        'view_loans', 'manage_loans', 'view_assets', 'manage_assets',
+        'view_payslip', 'download_payslip', 'process_payroll', 'view_payrolls',
+        'manage_tax_configs', 'manage_bpjs_configs',
+        'view_activity_logs', 'view_audit_logs',
+        'manage_settings', 'manage_company_settings', 'manage_roles',
+        'manage_holidays', 'manage_shifts', 'manage_knowledgebase', 'view_knowledgebase',
+    ];
+    foreach ($mgrCan as $p) {
+        yield "manager can {$p}" => ['manager', $p, true];
+    }
+    foreach ($mgrCannot as $p) {
+        yield "manager cannot {$p}" => ['manager', $p, false];
+    }
+
+    // employee
+    $empCan = [
+        'view_dashboard', 'view_attendances', 'view_leaves', 'view_overtimes',
+        'view_reimbursements', 'view_loans', 'view_assets',
+        'view_payslip', 'download_payslip', 'view_payrolls',
+    ];
+    $empCannot = [
+        'view_companies', 'manage_companies', 'view_branches', 'manage_branches',
+        'view_departments', 'manage_departments', 'view_positions', 'manage_positions',
+        'view_employees', 'manage_employees', 'manage_attendances',
+        'approve_leaves_l1', 'approve_leaves_l2', 'approve_overtimes_l1', 'approve_overtimes_l2',
+        'manage_reimbursements', 'approve_reimbursements_l1', 'approve_reimbursements_l2',
+        'manage_loans', 'manage_assets',
+        'process_payroll', 'manage_tax_configs', 'manage_bpjs_configs',
+        'view_activity_logs', 'view_audit_logs',
+        'manage_settings', 'manage_company_settings', 'manage_roles',
+        'manage_holidays', 'manage_shifts', 'manage_knowledgebase', 'view_knowledgebase',
+        'approve_wfa', 'view_wfa_pending',
+    ];
+    foreach ($empCan as $p) {
+        yield "employee can {$p}" => ['employee', $p, true];
+    }
+    foreach ($empCannot as $p) {
+        yield "employee cannot {$p}" => ['employee', $p, false];
+    }
+}
+
+it('validates full permission x role matrix', function (string $roleName, string $permission, bool $expected) {
+    $user = User::factory()->create();
+    $user->assignRole($roleName);
+
+    if ($expected) {
+        expect($user->can($permission))->toBeTrue("Role {$roleName} should be able to {$permission}");
+    } else {
+        expect($user->can($permission))->toBeFalse("Role {$roleName} should NOT be able to {$permission}");
+    }
+})->with(permissionMatrix());

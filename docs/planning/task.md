@@ -21,7 +21,7 @@
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 705 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules now tested (6 files in 1 test file). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 737 tests / 2,561 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, role/permission matrix, attendance regression, leave/approval regression, OpenAPI contract, FaceRecognition pgvector, Livewire component. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 956 tests / 2,780 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, attendance regression, leave/approval regression, OpenAPI contract, FaceRecognition pgvector, Livewire component. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -276,7 +276,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | ID | Task | Minimum Coverage | Status |
 |---|---|---|---|
 | T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 585 total across 58 files. Remaining: deeper edge cases per group, web route smoke tests (T-13), form request validation tests (P1-14). |
-| T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ⏳ |
+| T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ✅ | Full 5-role × 44-permission matrix validated via data-driven test (217 cases: 118 can + 99 cannot). Matrix added to RoleAndPermissionSeederTest. |
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | ✅ |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
 | T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
