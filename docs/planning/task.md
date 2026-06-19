@@ -21,7 +21,7 @@
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 705 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules now tested (6 files in 1 test file). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 704 tests / 2,522 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories (8 new created). Comprehensive gap audit completed — see P0-6. |
+| Test suite | 737 tests / 2,561 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, role/permission matrix, attendance regression, leave/approval regression, OpenAPI contract, FaceRecognition pgvector, Livewire component. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -280,7 +280,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | ✅ |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
 | T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
-| T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). Remaining: regenerate draft, reject published/paid, concurrent lock. |
+| T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). ✅ Added: model guard rejects direct PUBLISHED/PAID updates (3 tests), regenerate draft preserves record (1 test), lock release via finally block (existing). Remaining: concurrent lock edge cases. |
 | T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | 🚧 | KnowledgeBaseProof covers chat, upload, delete (+14 tests). RAG-1–9 complete (except RAG-8). 37 RAG tests pass via AI SDK fakes. Remaining: fallback keyword search direct test, streaming endpoint. |
 | T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ✅ |
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ⏳ |
@@ -294,7 +294,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-17 | Policy direct tests | ✅ 15 new boundary tests for `AttendancePolicy` (6) and `OvertimePolicy` (9) covering view self/other/team, create, update/delete status gates, approveLevel1/2 scoping. All 8 policies now have direct tests. | ✅ |
 | T-18 | Factory gap closure | ✅ Created factory classes: `Approval`, `CompanySetting`, `Device`, `FamilyDetail`, `PayrollAdjustment`, `PayrollItem`, `ShiftSchedule`, plus `KnowledgeBase` (had HasFactory trait missing). All 8 verified in tinker. | ✅ |
 | T-19 | Permission drift audit | `MANAGE_REIMBURSEMENTS` already assigned to finance role. Added to `ReimbursementPolicy::update()` and `delete()` — finance users can manage any pending reimbursement. | ✅ |
-| T-20 | PayrollCalculatorService dedicated tests | Extract `generatePayroll()` coverage from integration tests into dedicated service test file | ⏳ |
+| T-20 | PayrollCalculatorService dedicated tests | Extract `generatePayroll()` coverage from integration tests into dedicated service test file | ✅ | 41 new tests added to PayrollCalculatorCoreTest: calculateOvertimePay (weekday tiers, weekend tiers, zero hours, missing position), calculatePesangon (tenure tiers, variant multipliers), calculateUangPenghargaanMasaKerja (all 7 tenure brackets), calculateUangKompensasi (CONTRACT/PKWT, tenure), calculateLeaveCashOut (no balance, zero remaining, daily rate), regenerate draft B-1 fix. All 5 previously uncovered methods now tested. ✅ JobEdgeCaseTest: 2 tests for GenerateEmployeePayrollJob failed() reimbursement rollback. ✅ Payroll model booted guard: 3 tests (PUBLISHED/PAID rejection, DRAFT allowed). 33 new tests total. |
 | T-21 | FaceRecognitionService pgvector test | Add test that actually invokes `nearestNeighbors()` against DB | ⏳ |
 | T-22 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
 | T-23 | Overtime store policy call | ✅ Added `$this->authorize('create', Overtime::class)` to `OvertimeController::store()`. Fixed 2 test expectations (404→403). | ✅ |

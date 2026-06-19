@@ -1,7 +1,5 @@
 <?php
 
-use App\Enums\EmployeeStatus;
-use App\Enums\KnowledgeBaseStatus;
 use App\Enums\ReimbursementStatus;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Jobs\GeneratePayslipPdfJob;
@@ -19,10 +17,10 @@ use App\Models\User;
 use App\Services\EmbeddingService;
 use App\Services\PayrollCalculatorService;
 use App\Services\PayslipPdfService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class)->group('jobs', 'unit');
+uses(RefreshDatabase::class)->group('jobs', 'unit');
 
 beforeEach(function () {
     $this->company = Company::factory()->create();
@@ -141,6 +139,75 @@ test('ProcessKnowledgeBaseEmbedding logs on success', function () {
     Log::shouldHaveReceived('info')
         ->withArgs(fn ($msg) => str_contains($msg, 'KB embedding generated'))
         ->once();
+});
+
+test('GenerateEmployeePayrollJob failed() rollback reimbursements from PAID to APPROVED', function () {
+    $category = ReimbursementCategory::create([
+        'company_id' => $this->company->id,
+        'name' => 'Transportasi',
+        'code' => 'TRN',
+        'is_active' => true,
+    ]);
+
+    $reimbursement = Reimbursement::create([
+        'employee_id' => $this->employee->id,
+        'category_id' => $category->id,
+        'title' => 'Test Reimbursement',
+        'expense_date' => now()->format('Y-m-d'),
+        'amount' => 100_000,
+        'description' => 'Test',
+        'payroll_id' => null,
+        'status' => ReimbursementStatus::PAID,
+    ]);
+
+    $job = new GenerateEmployeePayrollJob($this->employee, '2026-06');
+    $job->failed(new RuntimeException('Test failure'));
+
+    $reimbursement->refresh();
+    expect($reimbursement->status)->toBe(ReimbursementStatus::APPROVED);
+});
+
+test('GenerateEmployeePayrollJob failed() does not rollback reimbursements with payroll_id', function () {
+    $category = ReimbursementCategory::create([
+        'company_id' => $this->company->id,
+        'name' => 'Konsumsi',
+        'code' => 'KON',
+        'is_active' => true,
+    ]);
+
+    $payroll = Payroll::create([
+        'employee_id' => $this->employee->id,
+        'period' => '2026-06',
+        'basic_salary' => 5_000_000,
+        'total_allowance' => 0,
+        'gross_salary' => 5_000_000,
+        'overtime_pay' => 0,
+        'pph21' => 0,
+        'bpjs_health' => 0,
+        'bpjs_employment' => 0,
+        'loan_deduction' => 0,
+        'attendance_penalty' => 0,
+        'total_deduction' => 0,
+        'net_salary' => 5_000_000,
+        'status' => 'draft',
+    ]);
+
+    $reimbursement = Reimbursement::create([
+        'employee_id' => $this->employee->id,
+        'category_id' => $category->id,
+        'title' => 'Test Reimbursement 2',
+        'expense_date' => now()->format('Y-m-d'),
+        'amount' => 200_000,
+        'description' => 'Test 2',
+        'payroll_id' => $payroll->id,
+        'status' => ReimbursementStatus::PAID,
+    ]);
+
+    $job = new GenerateEmployeePayrollJob($this->employee, '2026-06');
+    $job->failed(new RuntimeException('Test failure'));
+
+    $reimbursement->refresh();
+    expect($reimbursement->status)->toBe(ReimbursementStatus::PAID);
 });
 
 test('ProcessKnowledgeBaseEmbedding logs on failure', function () {
