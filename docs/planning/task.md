@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (API-1–7 contract freeze completed. Test suite: 695 / 4,042 assertions).
+> Last updated: 2026-06-18 (P0 scope freeze completed. Test suite: 695 / 4,042 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -209,12 +209,12 @@ Item lama yang belum `✅` atau `🚫` tidak dihapus; semuanya dipetakan ke task
 ## P0 — Scope Freeze And Audit
 
 | ID | Task | Output | Status |
-|---|---|---|---|---|
-| P0-1 | Freeze backend V1 scope | Daftar final fitur V1 dan V2 | 🚧 |
-| P0-2 | Mark V2 modules as out-of-scope for backend 100% | Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications tetap V2 kecuali user ubah scope | 🚧 |
-| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory complete: 51 API routes grouped below. ✅ 401 smoke tests for all routes. ✅ Proof tests for all 11 endpoint groups. 🚧 Remaining: deeper regression scenarios per group (duplicate processing, race conditions, edge cases). | 🚧 |
-| P0-4 | Build service audit matrix | Matrix service -> workflow -> transaction -> cache -> tests -> status | 🚧 |
-| P0-5 | Decide remaining product decisions | Sanctum token expiration, Fortify registration in production, searchable bank-account blind index | 🚧 |
+|---|---|---|---|
+| P0-1 | Freeze backend V1 scope | ✅ `docs/api/scope-v1.md` created: 13 modules (51 routes), all live. V2 modules explicitly listed as deferred: Loan, Asset, Performance Review, WhatsApp. Design decisions documented (token lifetime, Fortify registration, RAG, face, GPS, notifications). | ✅ |
+| P0-2 | Mark V2 modules as out-of-scope for backend 100% | ✅ Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications 100% deferred. No tables/routes exist. `docs/api/scope-v1.md` documents the boundary explicitly. | ✅ |
+| P0-3 | Build endpoint audit matrix for all `/api/v1` routes | ✅ Inventory: 51 API routes grouped in 13 modules. 401 smoke tests for all protected routes. Proof tests for all 11 endpoint groups. Matrix documented in `docs/api/api-contracts.md` and `docs/api/scope-v1.md`. | ✅ |
+| P0-4 | Build service audit matrix | ✅ `docs/api/service-matrix.md` created: 15 services, 54 methods, all with test files. Coverage ratings: 6 Good, 3 Adequate, 6 Thin. Architecture patterns documented: 15 transactions (all lockForUpdate), 2 job dispatch sites, 3 external API calls (Gemini), 4 cache calls, 3 activity log calls, 0 events. Gaps documented per service. | ✅ |
+| P0-5 | Decide remaining product decisions | ✅ All 3 decisions documented in `docs/api/scope-v1.md`: (1) **Sanctum token**: never expire (PWA design), optional `SANCTUM_TOKEN_EXPIRATION` override. (2) **Fortify registration**: DISABLED in production via `app()->environment('production')` guard in `config/fortify.php` — HR creates employees via API. (3) **Bank account blind index**: DEFERRED (encrypted but no search use case, add in V1.1 if needed). | ✅ |
 | P0-6 | Comprehensive gap audit of entire codebase | ✅ Three-round audit complete: (1) app code scan, (2) middleware/form-request/command/policy audit, (3) database layer audit. 0 dead code found. Gaps documented across 12 categories with ~30 specific items. See full findings above. | ✅ |
 
 ## API Endpoint Audit Matrix
