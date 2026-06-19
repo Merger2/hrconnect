@@ -140,3 +140,37 @@ test('forgot-password validates email format', function () {
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
 });
+
+// ─── Rate Limiting ──────────────────────────────────────────────
+
+test('login throttled at 5 requests per minute', function () {
+    for ($i = 0; $i < 5; $i++) {
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'test@example.com',
+            'password' => 'wrong',
+            'device_name' => 'test-device',
+        ]);
+    }
+
+    $response = $this->postJson('/api/v1/auth/login', [
+        'email' => 'test@example.com',
+        'password' => 'wrong',
+        'device_name' => 'test-device',
+    ]);
+
+    $response->assertStatus(429);
+});
+
+test('forgot-password throttled at 5 requests per minute', function () {
+    for ($i = 0; $i < 5; $i++) {
+        $this->postJson('/api/v1/auth/forgot-password', [
+            'email' => 'test@example.com',
+        ]);
+    }
+
+    $response = $this->postJson('/api/v1/auth/forgot-password', [
+        'email' => 'test@example.com',
+    ]);
+
+    $response->assertStatus(429);
+});
