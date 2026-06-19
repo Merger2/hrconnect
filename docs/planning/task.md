@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (P1-1 password expiry + logout-all completed. Test suite: 673 / 4,006 assertions).
+> Last updated: 2026-06-18 (S-1 auth audit completed. Test suite: 687 / 4,020 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -21,7 +21,7 @@
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 654 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). |
 | Production hardening | ~65-70% | IDOR audit done (0 vulnerable). Security/PII audit partial — enkripsi verified, tapi S-4/S-5/S-7/S-8 belum. Queue/scheduler, deployment rehearsal belumlah. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 673 tests / 4,006 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 687 tests / 4,020 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -305,7 +305,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
-| S-1 | Authorization audit | Every non-public endpoint has correct `auth:sanctum`, permission middleware, and/or policy | 🚧 |
+| S-1 | Authorization audit | ✅ All 51 routes audited: 4 public (no auth), 47 protected with `auth:sanctum`. ~28 routes use `$this->authorize()`. 15 use permission middleware. 73 endpoint tests pass. 10 low-severity gaps documented (approvals no policy, leave/quota no policy, processContractEnd no policy, approveWfa inconsistent). | ✅ |
 | S-2 | IDOR audit | ✅ Audit complete: 0 vulnerable methods. 14 partial/defense-in-depth gaps found: Employee team scoping in API (by design per policy comment), Overtime/Reimbursement store not invoking policy, all `viewAny` policies permission-only. See P0-6 IDOR section. | ✅ |
 | S-3 | PII response audit | General resources never expose NIK, phone, NPWP, bank account, PIN, or face embedding | 🚧 |
 | S-4 | Log/audit privacy audit | Logs and activity records do not store raw sensitive PII or secrets | ⏳ |

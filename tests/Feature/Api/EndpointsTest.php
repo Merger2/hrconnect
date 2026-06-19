@@ -36,6 +36,19 @@ test('GET /api/v1/health public, return ok status', function () {
         ]);
 });
 
+test('public routes do not return 401', function (string $method, string $uri) {
+    $response = match ($method) {
+        'GET' => $this->getJson($uri),
+        'POST' => $this->postJson($uri, ['email' => 'test@test.com', 'password' => 'Pass1234!', 'device_name' => 'test']),
+    };
+
+    expect($response->status())->not->toBe(401);
+})->with([
+    ['GET', '/api/v1/health'],
+    ['POST', '/api/v1/auth/login'],
+    ['POST', '/api/v1/auth/forgot-password'],
+]);
+
 test('POST /api/v1/auth/login public, validation works', function () {
     $this->postJson('/api/v1/auth/login', [])
         ->assertStatus(422)
@@ -90,11 +103,18 @@ dataset('protected_get_endpoints', [
     '/api/v1/attendance',
     '/api/v1/leave',
     '/api/v1/leave/quota',
+    '/api/v1/leave/0',
     '/api/v1/overtime',
+    '/api/v1/overtime/0',
     '/api/v1/reimbursement',
+    '/api/v1/reimbursement/0',
     '/api/v1/approvals/pending',
     '/api/v1/payroll',
+    '/api/v1/payroll/0',
+    '/api/v1/payroll/0/payslip',
     '/api/v1/employees',
+    '/api/v1/employees/0',
+    '/api/v1/employees/0/pii',
 ]);
 
 test('protected GET endpoints return 401 tanpa token', function (string $endpoint) {
@@ -127,6 +147,10 @@ dataset('protected_post_endpoints_more', [
     '/api/v1/payroll/export/bpjs',
     '/api/v1/employees',
     '/api/v1/employees/terminate/contract-end',
+    '/api/v1/attendance/0/approve-wfa',
+    '/api/v1/approvals/0/approve',
+    '/api/v1/approvals/0/reject',
+    '/api/v1/employees/0/terminate',
 ]);
 
 test('protected POST endpoints (more) return 401 tanpa token', function (string $endpoint) {
