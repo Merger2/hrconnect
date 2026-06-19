@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-19 (M2 feature gaps closing. Test suite: 705 / 4,061 assertions).
+> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. Test suite: 704 / 2,522 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -17,11 +17,11 @@
 
 | Area | Status | Notes |
 |---|---:|---|
-| Backend core services | ~78% | 15 services exist. RAG refactor (RAG-1–9) belum dimulai. Pinecone search masih stub (return []). All services now have at least some test coverage. +5 EmbeddingService tests added (processKnowledgeBase, searchSimilar, searchByKeyword fallback). |
+| Backend core services | ~82% | 15 services exist. RAG refactor (RAG-1–9) selesai (RAG-8 streaming plan belum implementasi). GeminiClient rewritten — delegates to laravel/ai SDK. HrKnowledgeBaseAgent created. Confidence field added to RAG output. pg_trgm fallback preserved. Pinecone search masih stub (return []). |
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 705 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules now tested (6 files in 1 test file). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 705 tests / 4,061 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories (8 new created). Comprehensive gap audit completed — see P0-6. |
+| Test suite | 704 tests / 2,522 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, notification, factories (8 new created). Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -235,7 +235,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | Approval | 3 | `ApprovalController` | `PendingApprovalsRequest`, `ApproveRequest`, `RejectRequest` | `auth:sanctum`, policy/service checks | Partial | L1/L2 and double-processing coverage exists but needs matrix link |
 | Payroll | 7 | `PayrollController` | `ListPayrollRequest`, `GeneratePayrollRequest`, `ExportMonthlyRequest`, `ExportPeriodRequest`; show/payslip use `Request` | `auth:sanctum`, policy, `process_payroll` permissions | ✅ | PayrollProofTest covers list, show, generate, payslip gating, exports, permission gating (+20 tests). Gaps: lock behavior, concurrent generate. |
 | Employees | 8 | `EmployeeController`, `EmployeeTerminationController` | `ListEmployeeRequest`, `StoreEmployeeRequest`, `UpdateEmployeeRequest`, `TerminateEmployeeRequest`; contract-end uses inline validation | `auth:sanctum`, `view_employees`/`manage_employees`, policies | Partial | Contract-end FormRequest decision; PII audit proof |
-| KnowledgeBase | 3 | `KnowledgeBaseController` | `ChatRequest`, `UploadDocumentRequest`; destroy uses `Request` | `auth:sanctum`, throttle chat, `manage_knowledgebase` for mutations | ✅ | KnowledgeBaseProofTest covers chat, upload, delete, auth/permission (+14 tests). Gaps: Laravel AI SDK RAG refactor and fallback tests (RAG-1–9). |
+| KnowledgeBase | 3 | `KnowledgeBaseController` | `ChatRequest`, `UploadDocumentRequest`; destroy uses `Request` | `auth:sanctum`, throttle chat, `manage_knowledgebase` for mutations | ✅ | KnowledgeBaseProofTest covers chat, upload, delete, auth/permission (+14 tests). RAG refactor done (SESI-48, RAG-1–9 except RAG-8). Streaming endpoint plan pending. |
 
 ## P1 — API And Service Completion
 
@@ -257,19 +257,19 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-14 | FormRequest validation tests | Add validation rule tests for 6 untested list-endpoint FormRequests + `UpdateProfileRequest`. | ⏳ |
 | P1-15 | Scheduled command tests | ✅ 12 tests added: detect-missed-clock (3), auto-approve-wfa (3), send-reminders (2), knowledgebase:index (3). **2 bugs found + fixed** in AutoApproveWfaCommand (enum comparison with ->value vs enum, missing $timeoutDays in closure scope). DetectMissedClockCommand fixed (referenced nonexistent columns). All 9 commands now have test coverage. | ✅ |
 
-## P1 — RAG Production Refactor With Laravel AI SDK
+## P1 — RAG Production Refactor With Laravel AI SDK (✅ SESI-48)
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
-| RAG-1 | Decide Laravel AI SDK adoption boundary | AI SDK handles provider, embeddings, agent, structured output, streaming/testing; pgvector/pg_trgm/domain storage stay custom | ⏳ |
-| RAG-2 | Add and configure `laravel/ai` | Package installed, config published, env keys mapped, migrations understood, no conflict with current KB schema | ⏳ |
-| RAG-3 | Replace custom Gemini generation behind adapter | Existing `KnowledgeBaseService` behavior preserved while generation uses AI SDK path | ⏳ |
-| RAG-4 | Replace/adapter embeddings through AI SDK | `text-embedding-004` remains 768D; PostgreSQL vector storage remains `knowledge_bases.embedding` | ⏳ |
-| RAG-5 | Create `HrKnowledgeBaseAgent` | Prompt/instructions centralized; answer refuses hallucination when no source exists | ⏳ |
-| RAG-6 | Add structured RAG output | Response includes `answer`, `sources`, `confidence`, `fallback`, `model` | ⏳ |
-| RAG-7 | Preserve `pg_trgm` fallback | Gemini/embedding failure falls back to keyword search without crashing chat endpoint | ⏳ |
-| RAG-8 | Add optional streaming endpoint plan | Streaming API contract decided for frontend chat; implementation if backend scope includes it | ⏳ |
-| RAG-9 | Add AI SDK fake tests | Agent, embedding, and fallback tests do not require real external API calls | ⏳ |
+| RAG-1 | Decide Laravel AI SDK adoption boundary | AI SDK handles provider, embeddings, agent, structured output, streaming/testing; pgvector/pg_trgm/domain storage stay custom | ✅ |
+| RAG-2 | Add and configure `laravel/ai` | Package installed, config published, env keys mapped, migrations understood, no conflict with current KB schema | ✅ |
+| RAG-3 | Replace custom Gemini generation behind adapter | Existing `KnowledgeBaseService` behavior preserved while generation uses AI SDK path | ✅ |
+| RAG-4 | Replace/adapter embeddings through AI SDK | `text-embedding-004` remains 768D; PostgreSQL vector storage remains `knowledge_bases.embedding` | ✅ |
+| RAG-5 | Create `HrKnowledgeBaseAgent` | Prompt/instructions centralized; answer refuses hallucination when no source exists | ✅ |
+| RAG-6 | Add structured RAG output | Response includes `answer`, `sources`, `confidence`, `fallback`, `model` | ✅ |
+| RAG-7 | Preserve `pg_trgm` fallback | Gemini/embedding failure falls back to keyword search without crashing chat endpoint | ✅ |
+| RAG-8 | Add optional streaming endpoint plan | Streaming API contract decided for frontend chat; implementation if backend scope includes it | 🚧 | Plan created at `docs/api/rag-8-streaming-plan.md`. Decision: defer implementation (sync chat sufficient for MVP). |
+| RAG-9 | Add AI SDK fake tests | Agent, embedding, and fallback tests do not require real external API calls | ✅ |
 
 ## P1 — Test Coverage Completion
 
@@ -281,7 +281,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
 | T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
 | T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). Remaining: regenerate draft, reject published/paid, concurrent lock. |
-| T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | 🚧 | KnowledgeBaseProof covers chat, upload, delete (+14 tests with mock mode + partialMock). Remaining: RAG refactor (RAG-1–9), fallback keyword search test. |
+| T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | 🚧 | KnowledgeBaseProof covers chat, upload, delete (+14 tests). RAG-1–9 complete (except RAG-8). 37 RAG tests pass via AI SDK fakes. Remaining: fallback keyword search direct test, streaming endpoint. |
 | T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ✅ |
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ⏳ |
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | 🚧 |

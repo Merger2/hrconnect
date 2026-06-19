@@ -1,18 +1,18 @@
 <?php
 
+use App\Ai\Agents\HrKnowledgeBaseAgent;
 use App\Models\KnowledgeBase;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Config;
+use Laravel\Ai\Embeddings;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
-
-    // Force mock mode untuk test (no real Gemini API call)
-    Config::set('services.gemini.mock_mode', true);
+    Embeddings::fake();
+    HrKnowledgeBaseAgent::fake();
 });
 
 /**
@@ -54,6 +54,7 @@ test('POST /knowledgebase/chat hr-manager dengan question valid return 200', fun
             'data' => [
                 'answer',
                 'sources',
+                'confidence',
                 'fallback',
                 'model',
             ],

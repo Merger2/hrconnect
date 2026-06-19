@@ -1,19 +1,21 @@
 <?php
 
+use App\Ai\Agents\HrKnowledgeBaseAgent;
 use App\Models\KnowledgeBase;
 use App\Models\User;
 use App\Services\EmbeddingService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\Embeddings;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
-    Config::set('services.gemini.mock_mode', true);
+    Embeddings::fake();
+    HrKnowledgeBaseAgent::fake();
 
     $this->hrUser = User::factory()->create();
     $this->hrUser->assignRole('hr-manager');
@@ -58,7 +60,7 @@ test('chat returns structured response', function () {
     $response->assertOk()
         ->assertJsonStructure([
             'status',
-            'data' => ['answer', 'sources', 'fallback', 'model'],
+            'data' => ['answer', 'sources', 'confidence', 'fallback', 'model'],
         ])
         ->assertJsonPath('status', 'success');
 });

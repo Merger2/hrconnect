@@ -1,71 +1,53 @@
 <?php
 
+use App\Ai\Agents\HrKnowledgeBaseAgent;
 use App\Exceptions\BusinessRuleException;
 use App\Services\GeminiClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Ai\Embeddings;
 
 uses(RefreshDatabase::class);
 
-/**
- * GeminiClient unit tests — fokus mock mode + retry logic.
- *
- * Real API calls tidak di-test karena butuh API key. Mock mode di-cover
- * untuk validasi shape response + deterministic vector.
- */
-test('mock mode return 768D vector', function () {
-    $client = new GeminiClient(mockMode: true);
+beforeEach(function () {
+    Embeddings::fake();
+});
+
+test('embed returns 768D vector via SDK fake', function () {
+    $client = new GeminiClient;
 
     $vector = $client->embed('Test pertanyaan');
 
     expect($vector)->toBeArray();
     expect(count($vector))->toBe(768);
-
     foreach ($vector as $v) {
         expect($v)->toBeFloat();
-        expect(abs($v))->toBeLessThanOrEqual(1.5);
     }
 });
 
-test('mock mode return deterministic vector untuk teks apapun', function () {
-    $client = new GeminiClient(mockMode: true);
+test('generateContent returns answer via SDK fake', function () {
+    HrKnowledgeBaseAgent::fake([[
+        'answer' => 'Cuti tahunan karyawan adalah 12 hari.',
+        'confidence' => 'high',
+    ]]);
 
-    $vector1 = $client->embed('apa pun');
-    $vector2 = $client->embed('teks lain');
-
-    // Mock mode: vector identik karena hash-based deterministic dari sin()
-    expect($vector1)->toBe($vector2);
-});
-
-test('mock mode generateContent return canned response saat context kosong', function () {
-    $client = new GeminiClient(mockMode: true);
-
-    $answer = $client->generateContent('Apa kabar?', []);
-
-    expect($answer)->toContain('Maaf');
-    expect($answer)->toContain('mock mode');
-});
-
-test('mock mode generateContent return response dengan context', function () {
-    $client = new GeminiClient(mockMode: true);
+    $client = new GeminiClient;
 
     $answer = $client->generateContent('Berapa cuti tahunan?', [
         ['content' => 'Cuti tahunan karyawan adalah 12 hari', 'source' => 'Employee Handbook'],
     ]);
 
-    expect($answer)->toContain('Berdasarkan');
-    expect($answer)->toContain('Berapa cuti tahunan?');
-    expect($answer)->toContain('mock mode');
+    expect($answer)->toBe('Cuti tahunan karyawan adalah 12 hari.');
 });
 
 test('embed reject teks kosong', function () {
-    $client = new GeminiClient(mockMode: false);
+    $client = new GeminiClient;
 
     expect(fn () => $client->embed(''))
         ->toThrow(BusinessRuleException::class, 'harus 1-30000 karakter');
 });
 
 test('embed reject teks terlalu panjang (> 30000 char)', function () {
-    $client = new GeminiClient(mockMode: false);
+    $client = new GeminiClient;
 
     $longText = str_repeat('a', 30_001);
 
@@ -73,8 +55,21 @@ test('embed reject teks terlalu panjang (> 30000 char)', function () {
         ->toThrow(BusinessRuleException::class, 'harus 1-30000 karakter');
 });
 
-test('isHealthy return true di mock mode', function () {
-    $client = new GeminiClient(mockMode: true);
+test('isHealthy return false ketika agent gagal', function () {
+    HrKnowledgeBaseAgent::fake(fn () => throw new RuntimeException('API down'));
+
+    $client = new GeminiClient;
+
+    expect($client->isHealthy())->toBeFalse();
+});
+
+test('isHealthy return true dengan SDK fake', function () {
+    HrKnowledgeBaseAgent::fake([[
+        'answer' => 'ok',
+        'confidence' => 'high',
+    ]]);
+
+    $client = new GeminiClient;
 
     expect($client->isHealthy())->toBeTrue();
 });

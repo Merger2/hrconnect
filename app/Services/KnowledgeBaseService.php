@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Ai\Agents\HrKnowledgeBaseAgent;
 use App\Enums\KnowledgeBaseCategory;
 use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
@@ -47,7 +48,7 @@ class KnowledgeBaseService
      * 3. Generate response via Gemini 2.5 Flash dengan context
      * 4. Fallback ke pg_trgm kalau Gemini fail
      *
-     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, fallback: bool, model: string}
+     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string}
      */
     public function chat(string $question): array
     {
@@ -67,10 +68,21 @@ class KnowledgeBaseService
                 'source' => $kb->title.($kb->page_number !== null ? " (chunk #{$kb->page_number})" : ''),
             ])->all();
 
-            $answer = $this->gemini->generateContent($question, $context);
+            $contextText = $this->buildContextSection($context);
+            $agentPrompt = <<<PROMPT
+KONTEKS:
+{$contextText}
+
+PERTANYAAN: {$question}
+
+JAWABAN:
+PROMPT;
+
+            $agent = new HrKnowledgeBaseAgent;
+            $result = $agent->prompt($agentPrompt);
 
             return [
-                'answer' => $answer,
+                'answer' => $result['answer'],
                 'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
                     'id' => $kb->id,
                     'title' => $kb->title,
@@ -78,6 +90,7 @@ class KnowledgeBaseService
                     'page_number' => $kb->page_number,
                     'source_document' => $kb->source_document,
                 ])->all(),
+                'confidence' => $result['confidence'] ?? 'low',
                 'fallback' => false,
                 'model' => config('services.gemini.model'),
             ];
@@ -93,7 +106,7 @@ class KnowledgeBaseService
     /**
      * Fallback kalau Gemini API down — pg_trgm keyword search.
      *
-     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, fallback: bool, model: string}
+     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string}
      */
     protected function fallbackKeywordSearch(string $question): array
     {
@@ -103,6 +116,7 @@ class KnowledgeBaseService
             return [
                 'answer' => 'Maaf, tidak ada informasi yang cocok dengan pertanyaan Anda di basis data HRConnect saat ini. Sistem AI sedang offline.',
                 'sources' => [],
+                'confidence' => 'low',
                 'fallback' => true,
                 'model' => 'pg_trgm',
             ];
@@ -120,9 +134,27 @@ class KnowledgeBaseService
                 'page_number' => $kb->page_number,
                 'source_document' => $kb->source_document,
             ])->all(),
+            'confidence' => 'low',
             'fallback' => true,
             'model' => 'pg_trgm',
         ];
+    }
+
+    protected function buildContextSection(array $context): string
+    {
+        if (empty($context)) {
+            return '(tidak ada konteks yang relevan ditemukan)';
+        }
+
+        $parts = [];
+        foreach ($context as $i => $chunk) {
+            $no = $i + 1;
+            $source = $chunk['source'] ?? 'unknown';
+            $content = $chunk['content'] ?? '';
+            $parts[] = "[Sumber {$no}: {$source}]\n{$content}";
+        }
+
+        return implode("\n\n", $parts);
     }
 
     /**

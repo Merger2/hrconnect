@@ -1,5 +1,6 @@
 <?php
 
+use App\Ai\Agents\HrKnowledgeBaseAgent;
 use App\Enums\KnowledgeBaseCategory;
 use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
@@ -62,7 +63,11 @@ describe('chat', function () {
 
         $gemini->shouldReceive('embed')->once()->andReturn(array_fill(0, 768, 0.1));
         $embedding->shouldReceive('searchSimilar')->once()->andReturn(new Collection([$kb1, $kb2]));
-        $gemini->shouldReceive('generateContent')->once()->andReturn('Karyawan berhak atas 12 hari cuti tahunan.');
+
+        HrKnowledgeBaseAgent::fake([[
+            'answer' => 'Karyawan berhak atas 12 hari cuti tahunan.',
+            'confidence' => 'high',
+        ]]);
 
         $svc = new KnowledgeBaseService($gemini, $embedding);
         $result = $svc->chat('Apa itu cuti tahunan?');
