@@ -366,14 +366,66 @@ tail -f /var/log/nginx/hrconnect-error.log
 ```
 
 ### 6.2 Backup Strategy
-```bash
-# Database backup (Neon handles this automatically)
-# But you can also create manual backups:
-pg_dump -h ep-xxx.neon.tech -U hrconnect -d hrconnect -F c -f backup-$(date +%Y%m%d).dump
 
-# File backup
-tar -czf storage-backup-$(date +%Y%m%d).tar.gz storage/app/private/
+HRConnect uses `spatie/laravel-backup` v10 for automated daily backups.
+
+```bash
+# Manual backup (test)
+php artisan backup:run
+
+# List backups
+php artisan backup:list
+
+# Check health of backups
+php artisan backup:monitor
 ```
+
+**Schedule (auto):**
+| Command | Time |
+|---------|------|
+| `backup:clean` | Daily 01:00 |
+| `backup:run` | Daily 01:30 |
+
+**Included in backup:**
+- Full PostgreSQL database dump (Gzip compressed)
+- Application code + storage files
+- Excluded: vendor, node_modules, .git, cache
+
+**Encryption:** AES-256 archive encryption via `BACKUP_ARCHIVE_PASSWORD`.
+
+**Retention:**
+- All backups: 7 days
+- Daily: 16 days
+- Weekly: 8 weeks
+- Monthly: 4 months
+- Yearly: 2 years
+
+**Restore procedure:**
+```bash
+# 1. Find the latest backup
+ls -la storage/app/backups/
+
+# 2. Restore database
+#    2a. Extract DB dump from archive
+#    2b. Run pg_restore
+pg_restore -h <host> -U hrconnect -d hrconnect --clean --if-exists \
+  <backup-path>/db-dumps/pgsql-hrconnect-*.sql
+
+# 3. Restore files
+#    Extract zip archive to application root
+
+# 4. Post-restore
+php artisan cache:clear
+php artisan config:cache
+php artisan migrate --status
+
+# 5. Smoke test
+curl -s https://hrconnect.company.com/api/v1/health | jq .
+```
+
+**Neon auto-backup:** Provider also takes daily snapshots (fallback).
+
+**Off-site (S3):** Set `BACKUP_DISK=s3` in `.env` with valid AWS credentials.
 
 ### 6.3 Health Check
 ```bash
@@ -486,6 +538,10 @@ CIPHERSWEET_KEY=base64:...
 # Cache & Queue: database driver (KISS, no Redis)
 CACHE_STORE=database
 QUEUE_CONNECTION=database
+
+# Backup
+BACKUP_DISK=backups
+BACKUP_ARCHIVE_PASSWORD=xxx  # 32+ char AES-256 password
 
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.company.com

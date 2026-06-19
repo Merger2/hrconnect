@@ -81,3 +81,21 @@ Schedule::command('attendance:send-reminders')
     ->appendOutputTo(storage_path('logs/schedule.log'))
     ->onSuccess(fn () => logger()->info('attendance:send-reminders selesai'))
     ->onFailure(fn () => logger()->error('attendance:send-reminders gagal'));
+
+// Backup: setiap hari jam 01:00 (setelah auto-approve WFA, sebelum cache warm)
+Schedule::command('backup:clean')
+    ->dailyAt('01:00')
+    ->environments(['production'])
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/schedule.log'))
+    ->onSuccess(fn () => logger()->info('backup:clean selesai'))
+    ->onFailure(fn () => logger()->error('backup:clean gagal'));
+
+Schedule::command('backup:run')
+    ->dailyAt('01:30')
+    ->environments(['production'])
+    ->runInBackground()
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/schedule.log'))
+    ->onSuccess(fn () => logger()->info('backup:run selesai'))
+    ->onFailure(fn () => logger()->error('backup:run gagal'));

@@ -49,12 +49,20 @@ class ReimbursementPolicy
 
     public function update(User $user, Reimbursement $reimbursement): bool
     {
+        if ($user->can(Permission::MANAGE_REIMBURSEMENTS->value)) {
+            return true;
+        }
+
         return $user->employee?->id === $reimbursement->employee_id
             && $reimbursement->status === ReimbursementStatus::PENDING;
     }
 
     public function delete(User $user, Reimbursement $reimbursement): bool
     {
+        if ($user->can(Permission::MANAGE_REIMBURSEMENTS->value)) {
+            return true;
+        }
+
         return $user->employee?->id === $reimbursement->employee_id
             && $reimbursement->status === ReimbursementStatus::PENDING;
     }

@@ -115,23 +115,56 @@
 
 ## O-6: Backup
 
-**Status: ⚠️ PENDING (MEDIUM)**
+**Status: ✅ SETUP (MEDIUM)**
 
 | Check | Finding | Action |
 |-------|---------|--------|
-| Backup package | `spatie/laravel-backup` NOT installed | Install when V1.1 starts |
-| Backup commands | No artisan backup commands exist | Pending |
-| Scheduled backup | No cron/schedule for backup | Pending |
-| Neon auto-backup | Provider-managed daily backups (Neon) | Documented in deployment guide |
-| Manual commands | `pg_dump` + `tar` documented in deployment guide sec 6.2 | Verified |
-| Restore drill | Never performed | O-6 task pending in task.md |
+| Backup package | `spatie/laravel-backup` v10.3 installed | Done |
+| Config | `config/backup.php` customized for HRConnect | Done |
+| Files included | `base_path()` + `storage_path()` (excludes vendor/node_modules/.git/framework/backup-temp/backups) | Done |
+| Database | `pgsql` connection with Gzip compression | Done |
+| Destination disk | `backups` disk at `storage/app/backups` (configurable via `BACKUP_DISK` env) | Done |
+| Off-site optional | Set `BACKUP_DISK=s3` with AWS creds for off-site storage | Documented |
+| Encryption | AES-256 via `BACKUP_ARCHIVE_PASSWORD` env var | Done |
+| Archive verify | Enabled (`verify_backup => true`) | Done |
+| Cleanup retention | 7 days all, 16 daily, 8 weekly, 4 monthly, 2 yearly | Done |
+| Health monitoring | Max age 1 day, max size 5 GB | Done |
+| Schedule | `backup:clean` daily 01:00, `backup:run` daily 01:30 | Done |
+| Retry | 2 tries, 60s delay between attempts | Done |
 
-**Recommended:** At minimum, perform a restore drill against Neon backup before V1 launch. For V1.1, install `spatie/laravel-backup` with S3.
+**Composer package:** `spatie/laravel-backup` v10.3
 
-Manual fallback (from deployment guide):
+**Scheduled:**
+| Command | Schedule |
+|---------|----------|
+| `backup:clean` | Daily 01:00 |
+| `backup:run` | Daily 01:30 |
+
+**Env vars:**
+```
+BACKUP_DISK=backups               # or 's3' for off-site
+BACKUP_ARCHIVE_PASSWORD=          # 32+ char AES-256 password
+```
+
+**Restore drill:** Not yet performed. Documented procedure below.
+
+### Backup Restore Procedure
+
+1. List available backups: `php artisan backup:list`
+2. Restore database: `pg_restore -h <host> -U hrconnect -d hrconnect --clean --if-exists <backup-path>/db-dumps/pgsql-hrconnect-*.sql.gz`
+3. Restore files: `tar -xzf <backup-path>/<name>.zip -C /var/www/hrconnect`
+4. Verify: `php artisan cache:clear && php artisan config:cache && php artisan migrate --status`
+5. Smoke test: `curl -s https://hrconnect.example.com/api/v1/health | jq .`
+
+### Off-Site (S3) Setup
+
 ```bash
-pg_dump -h ep-xxx.neon.tech -U hrconnect -d hrconnect -F c -f backup-$(date +%Y%m%d).dump
-tar -czf storage-backup-$(date +%Y%m%d).tar.gz storage/app/private/
+# In .env.production:
+BACKUP_DISK=s3
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_DEFAULT_REGION=ap-southeast-1
+AWS_BUCKET=hrconnect-backups
 ```
 
 ---
@@ -163,5 +196,5 @@ tar -czf storage-backup-$(date +%Y%m%d).tar.gz storage/app/private/
 | O-3 CompanySettingObserver | ✅ Fixed | MEDIUM | Created + registered observer |
 | O-4 Storage audit | ✅ Audited | LOW | No changes needed |
 | O-5 Health endpoint | ✅ Audited | LOW | No changes needed |
-| O-6 Backup rehearsal | ⚠️ Pending | MEDIUM | Install `spatie/laravel-backup` or perform restore drill |
+| O-6 Backup | ✅ Setup | MEDIUM | Installed `spatie/laravel-backup`, configured, scheduled |
 | O-7 Deployment guide | ✅ Audited | LOW | Supervisor queue fix applied |

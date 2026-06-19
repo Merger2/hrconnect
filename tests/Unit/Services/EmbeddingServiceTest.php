@@ -64,3 +64,50 @@ test('extractTextFromPdf throw kalau file tidak ada', function () {
     expect(fn () => $svc->extractTextFromPdf('/nonexistent/file.pdf'))
         ->toThrow(BusinessRuleException::class, 'tidak dapat dibaca');
 });
+
+test('processKnowledgeBase set status error kalau content kosong', function () {
+    $svc = new EmbeddingService(new GeminiClient(mockMode: true));
+
+    $kb = \App\Models\KnowledgeBase::factory()->create();
+    $kb->update(['content' => '']);
+
+    $svc->processKnowledgeBase($kb);
+
+    expect($kb->fresh()->status->value)->toBe('error');
+});
+
+test('processKnowledgeBase set status ready on success', function () {
+    $svc = new EmbeddingService(new GeminiClient(mockMode: true));
+
+    $kb = \App\Models\KnowledgeBase::factory()->create([
+        'content' => 'Some test content for embedding.',
+    ]);
+
+    $svc->processKnowledgeBase($kb);
+
+    expect($kb->fresh()->status->value)->toBe('ready');
+});
+
+test('searchSimilar returns ready records in SQLite (fallback)', function () {
+    $svc = new EmbeddingService(new GeminiClient(mockMode: true));
+
+    \App\Models\KnowledgeBase::factory()->count(3)->create(['status' => \App\Enums\KnowledgeBaseStatus::READY]);
+    \App\Models\KnowledgeBase::factory()->create(['status' => \App\Enums\KnowledgeBaseStatus::ERROR]);
+
+    $results = $svc->searchSimilar([0.1, 0.2, 0.3]);
+
+    expect($results)->toHaveCount(3);
+});
+
+test('searchByKeyword uses like fallback in SQLite', function () {
+    $svc = new EmbeddingService(new GeminiClient(mockMode: true));
+
+    \App\Models\KnowledgeBase::factory()->create([
+        'content' => 'BPJS Kesehatan dan BPJS Ketenagakerjaan',
+        'status' => \App\Enums\KnowledgeBaseStatus::READY,
+    ]);
+
+    $results = $svc->searchByKeyword('BPJS');
+
+    expect($results)->toHaveCount(1);
+});
