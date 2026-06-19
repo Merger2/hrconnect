@@ -15,6 +15,8 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 #[Group('Reimbursement')]
 class ReimbursementController extends Controller
@@ -45,20 +47,36 @@ class ReimbursementController extends Controller
             ], 404);
         }
 
-        $receiptPath = $request->file('receipt')->store('reimbursements', 'public');
+        $receiptPath = null;
 
-        $reimbursement = Reimbursement::create([
-            'employee_id' => $employee->id,
-            'category_id' => $data['category_id'],
-            'title' => $data['title'] ?? mb_substr($data['description'], 0, 100),
-            'amount' => $data['amount'],
-            'description' => $data['description'],
-            'expense_date' => $data['expense_date'],
-            'receipt_file' => $receiptPath,
-            'status' => ReimbursementStatus::PENDING,
-        ]);
+        try {
+            $receiptPath = $request->file('receipt')->store('reimbursements', 'public');
+        } catch (Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan bukti pembayaran: '.$e->getMessage(),
+            ], 500);
+        }
 
-        $this->approvalService->createApprovalWorkflow($reimbursement);
+        try {
+            $reimbursement = Reimbursement::create([
+                'employee_id' => $employee->id,
+                'category_id' => $data['category_id'],
+                'title' => $data['title'] ?? mb_substr($data['description'], 0, 100),
+                'amount' => $data['amount'],
+                'description' => $data['description'],
+                'expense_date' => $data['expense_date'],
+                'receipt_file' => $receiptPath,
+                'status' => ReimbursementStatus::PENDING,
+            ]);
+
+            $this->approvalService->createApprovalWorkflow($reimbursement);
+        } catch (Throwable $e) {
+            if ($receiptPath !== null) {
+                Storage::disk('public')->delete($receiptPath);
+            }
+            throw $e;
+        }
 
         return response()->json([
             'status' => 'success',

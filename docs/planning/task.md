@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (S-6 secret audit completed. Test suite: 689 / 4,029 assertions).
+> Last updated: 2026-06-18 (S-7 file upload audit completed. Test suite: 695 / 4,042 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -311,7 +311,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | S-4 | Log/audit privacy audit | ✅ All 40+ log statements audited. No NIK/phone/NPWP/bank/PIN/face/password/token/API key logged anywhere. 3 MEDIUM findings fixed: (1) KB question text removed from Gemini fallback log, (2) Gemini 4xx body removed from log, (3) Gemini 5xx full error body replaced with status-only. Low-risk: employee name in payroll job logs, IP in attendance bypass activity log. No HIGH/CRITICAL findings. | ✅ |
 | S-5 | Rate-limit audit | ✅ All 13 inline throttles verified in code. 11 throttles exist: auth endpoints (5/min), face (10/min), attendance (5/5min), leave/overtime/reimbursement (10/min), KB chat (20/min). 2 named Fortify limiters (login, two-factor: 5/min). Findings: KB chat 20/min too generous (→ 10/min recommended), face verify 10/min too generous (→ 5/min recommended), password-change missing throttle. 2 phantom limiters documented but never registered (`api` 60/min, `attendance` 10/min). Added throttle tests for login + forgot-password (2 new tests). 3/13 throttles now tested. | ✅ |
 | S-6 | Secret audit | ✅ No secrets ever committed. .env gitignored, never in git history. Full git history pickaxe scan (api_key/password/secret/APP_KEY/DB_PASSWORD/CIPHERSWEET/FLUX/SANCTUM/gemini) = no real credentials found. Config files all use env() — no hardcoded secrets. No .pem/.key/.cert/credentials.json in repo. | ✅ |
-| S-7 | File upload audit | PDF/reimbursement upload validates mime, size, storage failures, filename safety, and authorization | ⏳ |
+| S-7 | File upload audit | ✅ All 3 upload endpoints audited (KB + reimbursement + leave). MIME/size validated via FormRequests. Filenames sanitized (UUID/uniqid). Auth via policies + Sanctum. Fixed: (1) KB storeAs wrapped in try/catch + orphan cleanup on transaction/extraction failure, (2) Leave proof_file wrapped in try/catch + orphan cleanup on applyLeave failure, (3) Reimbursement receipt wrapped in try/catch + orphan cleanup on create failure. Added 6 tests: leave proof_file upload, invalid type, oversized; reimbursement receipt upload, invalid type, oversized. Findings: employee photo field is dead code (fillable but no endpoint), no file cleanup on soft-delete. | ✅ |
 | S-8 | Production env checklist | `APP_DEBUG=false`, `APP_ENV=production`, secure `APP_KEY`, `CIPHERSWEET_KEY`, AI keys, DB credentials | ⏳ |
 
 ## P2 — Operations Readiness

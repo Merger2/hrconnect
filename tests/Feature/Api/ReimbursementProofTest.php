@@ -7,6 +7,7 @@ use App\Models\ReimbursementCategory;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
@@ -176,10 +177,63 @@ test('employee cannot view another employee reimbursement returns 403', function
     ]);
 
     $response = $this->withHeader('Authorization', "Bearer {$this->employeeToken}")
-        ->getJson("/api/v1/reimbursement/{$reimbursement->id}");
+        ->deleteJson("/api/v1/reimbursement/{$reimbursement->id}");
 
     $response->assertStatus(403);
 });
+
+// ─── File Upload ─────────────────────────────────────────────────
+
+test('submit reimbursement with receipt returns 201', function () {
+    $file = UploadedFile::fake()->image('receipt.jpg');
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->employeeToken}")
+        ->post('/api/v1/reimbursement', [
+            'category_id' => $this->category->id,
+            'amount' => 150_000,
+            'description' => 'Biaya pengobatan rawat jalan.',
+            'expense_date' => '2026-06-01',
+            'receipt' => $file,
+        ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('status', 'success')
+        ->assertJsonStructure(['data' => ['receipt_file']]);
+});
+
+test('submit reimbursement with invalid receipt type returns 422', function () {
+    $file = UploadedFile::fake()->create('receipt.txt', 100);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->employeeToken}")
+        ->post('/api/v1/reimbursement', [
+            'category_id' => $this->category->id,
+            'amount' => 150_000,
+            'description' => 'Biaya pengobatan rawat jalan.',
+            'expense_date' => '2026-06-01',
+            'receipt' => $file,
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['receipt']);
+});
+
+test('submit reimbursement with receipt larger than 5MB returns 422', function () {
+    $file = UploadedFile::fake()->image('receipt.jpg')->size(6000);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->employeeToken}")
+        ->post('/api/v1/reimbursement', [
+            'category_id' => $this->category->id,
+            'amount' => 150_000,
+            'description' => 'Biaya pengobatan rawat jalan.',
+            'expense_date' => '2026-06-01',
+            'receipt' => $file,
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['receipt']);
+});
+
+// ─── Authorization / Scoping ────────────────────────────────────
 
 test('finance can view all reimbursements index shows 200', function () {
     createReimbursement([

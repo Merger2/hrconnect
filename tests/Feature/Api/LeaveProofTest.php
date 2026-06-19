@@ -14,6 +14,7 @@ use App\Models\Shift;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 
 uses(RefreshDatabase::class);
 
@@ -206,4 +207,65 @@ test('employee index shows only own leaves', function () {
 
     $response->assertOk()
         ->assertJsonPath('meta.total', 1);
+});
+
+// ─── File Upload ─────────────────────────────────────────────────
+
+test('leave store with proof file returns 201', function () {
+    LeaveBalance::factory()->create([
+        'employee_id' => $this->employeeEmp->id,
+        'leave_type_id' => $this->leaveType->id,
+        'year' => now()->addWeek()->year,
+        'quota' => 12,
+    ]);
+
+    $file = UploadedFile::fake()->image('proof.jpg');
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->post('/api/v1/leave', [
+            'leave_type_id' => $this->leaveType->id,
+            'start_date' => now()->addWeek()->toDateString(),
+            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti tahunan dengan bukti.',
+            'proof_file' => $file,
+        ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('status', 'success')
+        ->assertJsonStructure(['data' => ['proof_file']]);
+});
+
+test('leave store with invalid proof file type returns 422', function () {
+    $file = UploadedFile::fake()->create('proof.txt', 100);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->post('/api/v1/leave', [
+            'leave_type_id' => $this->leaveType->id,
+            'start_date' => now()->addWeek()->toDateString(),
+            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti tahunan dengan bukti.',
+            'proof_file' => $file,
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['proof_file']);
+});
+
+test('leave store with proof file larger than 5MB returns 422', function () {
+    $file = UploadedFile::fake()->image('proof.jpg')->size(6000);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->post('/api/v1/leave', [
+            'leave_type_id' => $this->leaveType->id,
+            'start_date' => now()->addWeek()->toDateString(),
+            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti tahunan dengan bukti.',
+            'proof_file' => $file,
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['proof_file']);
 });

@@ -17,6 +17,8 @@ use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 #[Group('Leave')]
 class LeaveController extends Controller
@@ -47,12 +49,32 @@ class LeaveController extends Controller
 
         $this->authorize('create', Leave::class);
 
+        $proofFile = null;
+
         if ($request->hasFile('proof_file')) {
-            $data['proof_file'] = $request->file('proof_file')
-                ->store('leaves/proofs', 'public');
+            try {
+                $proofFile = $request->file('proof_file')
+                    ->store('leaves/proofs', 'public');
+            } catch (Throwable $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Gagal menyimpan file bukti: '.$e->getMessage(),
+                ], 500);
+            }
         }
 
-        $leave = $this->leaveService->applyLeave($employee, $data);
+        if ($proofFile !== null) {
+            $data['proof_file'] = $proofFile;
+        }
+
+        try {
+            $leave = $this->leaveService->applyLeave($employee, $data);
+        } catch (Throwable $e) {
+            if ($proofFile !== null) {
+                Storage::disk('public')->delete($proofFile);
+            }
+            throw $e;
+        }
 
         return response()->json([
             'status' => 'success',

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -151,36 +152,57 @@ class KnowledgeBaseService
         }
 
         $filename = uniqid('kb_').'.pdf';
-        $path = $pdf->storeAs('knowledgebase', $filename, 'local');
+
+        try {
+            $path = $pdf->storeAs('knowledgebase', $filename, 'local');
+        } catch (Throwable $e) {
+            throw new BusinessRuleException('Gagal menyimpan file PDF: '.$e->getMessage());
+        }
+
+        if ($path === false) {
+            throw new BusinessRuleException('Gagal menyimpan file PDF: penyimpanan tidak merespon.');
+        }
+
         $absolutePath = storage_path('app/'.$path);
 
-        $rawText = $this->embedding->extractTextFromPdf($absolutePath);
-        $chunks = $this->embedding->chunkText($rawText);
+        try {
+            $rawText = $this->embedding->extractTextFromPdf($absolutePath);
+            $chunks = $this->embedding->chunkText($rawText);
+        } catch (Throwable $e) {
+            Storage::disk('local')->delete('knowledgebase/'.$filename);
+            throw new BusinessRuleException('Gagal memproses PDF: '.$e->getMessage());
+        }
 
         if (empty($chunks)) {
+            Storage::disk('local')->delete('knowledgebase/'.$filename);
             throw new BusinessRuleException('PDF tidak menghasilkan chunk yang valid.');
         }
 
-        $createdRecords = DB::transaction(function () use ($chunks, $title, $category, $filename, $owner) {
-            $records = [];
+        try {
+            $createdRecords = DB::transaction(function () use ($chunks, $title, $category, $filename, $owner) {
+                $records = [];
 
-            foreach ($chunks as $index => $chunkContent) {
-                $kb = KnowledgeBase::create([
-                    'knowledgeable_type' => $owner::class,
-                    'knowledgeable_id' => $owner->getKey(),
-                    'title' => $title,
-                    'content' => $chunkContent,
-                    'category' => $category ?? KnowledgeBaseCategory::GENERAL,
-                    'status' => KnowledgeBaseStatus::PROCESSING,
-                    'source_document' => $filename,
-                    'page_number' => $index,
-                ]);
+                foreach ($chunks as $index => $chunkContent) {
+                    $kb = KnowledgeBase::create([
+                        'knowledgeable_type' => $owner::class,
+                        'knowledgeable_id' => $owner->getKey(),
+                        'title' => $title,
+                        'content' => $chunkContent,
+                        'category' => $category ?? KnowledgeBaseCategory::GENERAL,
+                        'status' => KnowledgeBaseStatus::PROCESSING,
+                        'source_document' => $filename,
+                        'page_number' => $index,
+                    ]);
 
-                $records[] = $kb;
-            }
+                    $records[] = $kb;
+                }
 
-            return $records;
-        });
+                return $records;
+            });
+        } catch (Throwable $e) {
+            Storage::disk('local')->delete('knowledgebase/'.$filename);
+            throw $e;
+        }
 
         // B-2: Dispatch jobs AFTER transaction commit
         foreach ($createdRecords as $kb) {
