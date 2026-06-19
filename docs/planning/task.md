@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-18 (S-1 auth audit completed. Test suite: 687 / 4,020 assertions).
+> Last updated: 2026-06-18 (S-3 PII response audit completed. Test suite: 687 / 4,020 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -307,7 +307,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 |---|---|---|---|
 | S-1 | Authorization audit | ✅ All 51 routes audited: 4 public (no auth), 47 protected with `auth:sanctum`. ~28 routes use `$this->authorize()`. 15 use permission middleware. 73 endpoint tests pass. 10 low-severity gaps documented (approvals no policy, leave/quota no policy, processContractEnd no policy, approveWfa inconsistent). | ✅ |
 | S-2 | IDOR audit | ✅ Audit complete: 0 vulnerable methods. 14 partial/defense-in-depth gaps found: Employee team scoping in API (by design per policy comment), Overtime/Reimbursement store not invoking policy, all `viewAny` policies permission-only. See P0-6 IDOR section. | ✅ |
-| S-3 | PII response audit | General resources never expose NIK, phone, NPWP, bank account, PIN, or face embedding | 🚧 |
+| S-3 | PII response audit | ✅ All 17 Resources audited: EmployeeResource properly hides nik/phone/npwp/bank_account/pin/face_embedding via #[Hidden] + manual exclusion. ProfileResource masks phone/bank_account. EmployeePiiResource gated by manage_employees + audit log. All controllers use manual field selection (no direct ->toArray()). No HIGH/CRITICAL leaks. Only finding: EmployeeResource exposes address_detail raw (LOW). | ✅ |
 | S-4 | Log/audit privacy audit | Logs and activity records do not store raw sensitive PII or secrets | ⏳ |
 | S-5 | Rate-limit audit | Login, 2FA, face verify, attendance writes, leave/overtime/reimbursement writes, KB chat/upload are throttled appropriately | 🚧 |
 | S-6 | Secret audit | No real API keys or production credentials committed; rotate any exposed key if real | ⏳ |
