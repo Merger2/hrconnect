@@ -83,7 +83,6 @@ class KnowledgeBaseService
         } catch (Throwable $e) {
             Log::warning('Gemini RAG flow gagal, fallback ke pg_trgm', [
                 'error' => $e->getMessage(),
-                'question' => $question,
             ]);
 
             return $this->fallbackKeywordSearch($question);

@@ -181,7 +181,6 @@ PROMPT;
                 if ($response->clientError()) {
                     Log::warning('Gemini API client error', [
                         'status' => $response->status(),
-                        'body' => $response->body(),
                     ]);
 
                     throw new BusinessRuleException(
@@ -203,7 +202,7 @@ PROMPT;
             }
         }
 
-        Log::error('Gemini API failed after max retries', ['error' => $lastError]);
+        Log::error('Gemini API failed after max retries', ['status' => $response?->status() ?? 'connection_failed']);
 
         throw new BusinessRuleException(
             "Gemini API tidak dapat diakses setelah {$this->maxRetries} percobaan. Detail: {$lastError}"
