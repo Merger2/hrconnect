@@ -24,29 +24,40 @@ Artisan::command('inspire', function () {
 Schedule::command('attendance:detect-alpha')
     ->dailyAt('23:59')
     ->withoutOverlapping()
+    ->environments(['production'])
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/schedule.log'))
     ->onSuccess(fn () => logger()->info('attendance:detect-alpha selesai'))
     ->onFailure(fn () => logger()->error('attendance:detect-alpha gagal'));
 
 // Chronic late warning: setiap Jumat jam 18:00
 Schedule::command('attendance:detect-chronic-late')
     ->weeklyOn(Illuminate\Console\Scheduling\Schedule::FRIDAY, '18:00')
-    ->withoutOverlapping();
+    ->withoutOverlapping()
+    ->environments(['production'])
+    ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Reset leave quota: 1 Januari 00:00 setiap tahun
 Schedule::command('leave:reset-quota')
     ->yearlyOn(1, 1, '00:00')
     ->withoutOverlapping()
+    ->environments(['production'])
+    ->appendOutputTo(storage_path('logs/schedule.log'))
     ->onFailure(fn () => logger()->error('leave:reset-quota gagal'));
 
 // Cache warm: setiap hari jam 05:00 (sebelum jam kerja)
 Schedule::command('cache:warm')
     ->dailyAt('05:00')
-    ->withoutOverlapping();
+    ->withoutOverlapping()
+    ->environments(['production'])
+    ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // WFA auto-approve: setiap hari jam 02:00 (cek WFA pending > 3 hari kerja)
 Schedule::command('attendance:auto-approve-wfa')
     ->dailyAt('02:00')
     ->withoutOverlapping()
+    ->environments(['production'])
+    ->appendOutputTo(storage_path('logs/schedule.log'))
     ->onSuccess(fn () => logger()->info('attendance:auto-approve-wfa selesai'))
     ->onFailure(fn () => logger()->error('attendance:auto-approve-wfa gagal'));
 
@@ -56,6 +67,8 @@ Schedule::command('attendance:auto-approve-wfa')
 Schedule::command('attendance:detect-missed-clock')
     ->dailyAt('00:01')
     ->withoutOverlapping()
+    ->environments(['production'])
+    ->appendOutputTo(storage_path('logs/schedule.log'))
     ->onSuccess(fn () => logger()->info('attendance:detect-missed-clock selesai'))
     ->onFailure(fn () => logger()->error('attendance:detect-missed-clock gagal'));
 
@@ -64,5 +77,7 @@ Schedule::command('attendance:send-reminders')
     ->weekdays()
     ->dailyAt('09:00')
     ->withoutOverlapping()
+    ->environments(['production'])
+    ->appendOutputTo(storage_path('logs/schedule.log'))
     ->onSuccess(fn () => logger()->info('attendance:send-reminders selesai'))
     ->onFailure(fn () => logger()->error('attendance:send-reminders gagal'));

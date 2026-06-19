@@ -318,13 +318,13 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
-| O-1 | Queue readiness | Worker command final, queue names documented, failed jobs observable/retryable, job timeouts/backoff reviewed | ⏳ |
-| O-2 | Scheduler readiness | `php artisan schedule:list` verified; production cron documented; overlapping prevented | ⏳ |
-| O-3 | Cache readiness | No `Cache::tags()` with database cache; all cached models have invalidation path | ⏳ |
-| O-4 | Storage readiness | Payslip/export/KB/reimbursement file disks, permissions, cleanup policy, and failure behavior verified | ⏳ |
-| O-5 | Health and observability | Health endpoint, logs, queue failures, scheduler logs, and alertable failure modes documented | ⏳ |
+| O-1 | Queue readiness | Worker command final, queue names documented, failed jobs observable/retryable, job timeouts/backoff reviewed | ✅ |
+| O-2 | Scheduler readiness | `php artisan schedule:list` verified; production cron documented; overlapping prevented | ✅ |
+| O-3 | Cache readiness | No `Cache::tags()` with database cache; all cached models have invalidation path | ✅ |
+| O-4 | Storage readiness | Payslip/export/KB/reimbursement file disks, permissions, cleanup policy, and failure behavior verified | ✅ |
+| O-5 | Health and observability | Health endpoint, logs, queue failures, scheduler logs, and alertable failure modes documented | ✅ |
 | O-6 | Backup and restore rehearsal | PostgreSQL backup and restore tested at least once with extension compatibility | ⏳ |
-| O-7 | Deployment rehearsal | Fresh production-like deploy, migrate, seed required data, queue, scheduler, and smoke API flow succeed | ⏳ |
+| O-7 | Deployment rehearsal | Fresh production-like deploy, migrate, seed required data, queue, scheduler, and smoke API flow succeed | ✅ |
 
 ## P2 — API Contract Freeze For Frontend
 

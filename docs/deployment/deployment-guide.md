@@ -266,7 +266,7 @@ nano /etc/supervisor/conf.d/hrconnect-worker.conf
 
 [program:hrconnect-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/hrconnect/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+ command=php /var/www/hrconnect/artisan queue:work --queue=default,payroll_high,notifications --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasuser=false

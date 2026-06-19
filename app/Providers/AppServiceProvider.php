@@ -7,10 +7,12 @@ use App\Models\BpjsConfig;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
+use App\Models\CompanySetting;
 use App\Models\Payroll;
 use App\Models\TaxConfig;
 use App\Observers\AttendanceObserver;
 use App\Observers\BpjsConfigObserver;
+use App\Observers\CompanySettingObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
@@ -88,6 +90,7 @@ class AppServiceProvider extends ServiceProvider
         Holiday::observe(HolidayObserver::class);
         Employee::observe(EmployeeObserver::class);
         Attendance::observe(AttendanceObserver::class);
+        CompanySetting::observe(CompanySettingObserver::class);
         Leave::observe(LeaveObserver::class);
         Payroll::observe(PayrollObserver::class);
     }
