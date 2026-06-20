@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21 selesai. Test suite: 993 / 2,899 assertions. PostgreSQL: 19 tests).
+> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21/T-11 selesai. Test suite: 1,018 / 3,516 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,10 +18,10 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~82% | 15 services exist. RAG refactor (RAG-1–9) selesai (RAG-8 streaming plan belum implementasi). GeminiClient rewritten — delegates to laravel/ai SDK. HrKnowledgeBaseAgent created. Confidence field added to RAG output. pg_trgm fallback preserved. Pinecone search masih stub (return []). |
-| Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 991 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
+| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. OpenAPI contract tests (25) verify route completeness, security, and response envelope alignment. 1,018 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 993 tests / 2,899 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). PostgreSQL: 19 tests covering pgvector (128D/768D/ranking/HNSW), CipherSweet, constraints, payroll locking, FaceRecognitionService (5). Gaps: OpenAPI contract, Livewire component. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 1,018 tests / 3,516 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). SQLite: 1,018 covering API endpoints, services, policies, observers, cache, commands, FormRequest validation, middleware, PII/CipherSweet, payroll calculator, KB/RAG, role/permission matrix, OpenAPI contract (25). PostgreSQL: 19 tests covering pgvector (128D/768D/ranking/HNSW), CipherSweet, constraints, payroll locking, FaceRecognitionService (5). Gaps: Livewire component. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -285,7 +285,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ✅ |
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ✅ | Added CompanySettingObserver tests (2 — was the only gap). Created CacheIntegrationTest (8 tests: TaxConfig cachedAll, CompanySetting get/set/fallback, Holiday cachedYear active/inactive, BpjsConfig cachedAll). |
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | ✅ | 15 total tests (up from 10). Added: 768D KB embedding cosine search, nearest neighbor ranking (3 non-collinear vectors), CipherSweet whereBlind null return, HNSW index existence verification on knowledge_bases.embedding. |
-| T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ⏳ |
+| T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ✅ | 25 contract tests: spec structure (version, tags, schemas, paths, ops), route completeness (all 51 routes documented, no extras), security contract (4 public routes security: [], 47 protected 401 via ref), validation contract (all POST/PUT with requestBody have 422), pagination contract (7 list endpoints with meta.current_page/last_page/per_page/total), operationId uniqueness, smoke tests (health 200, 401/403/422 shapes, 404). |
 | T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ⏳ |
 | T-13 | Web route smoke tests | ✅ 18 smoke tests: 6 public auth pages (200), 6 unauthenticated redirects (302), 3 authenticated pages (200), 2 special pages (email_verify→dashboard, security→confirm-password), 1 2FA-challenge redirect. | ✅ |
 | T-14 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
