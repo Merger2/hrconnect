@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (P1-1 ✅, P1-10 ✅, P1-13 ✅ — password expiry, API response standard, middleware coverage).
+> Last updated: 2026-06-20 (P1-1 ✅, P1-10 ✅, P1-13 ✅, P1-14 ✅ — password expiry, API response, middleware, FormRequest coverage).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -256,7 +256,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-11 | ProfileService test coverage | ✅ 5 tests written (getProfile with/without employee, updateProfile, changePassword success, changePassword wrong current). Refactored ProfileController to use ProfileService (eliminated dead code). | ✅ |
 | P1-12 | Web route smoke tests | 25+ web GET routes (Fortify auth pages, dashboard, settings) have zero test coverage. Add smoke tests. | ✅ |
 | P1-13 | Middleware test coverage | ✅ All 3 middleware tested: CheckPasswordExpired (7 web-layer tests), DeviceDetection (9 unit tests — UA parsing for mobile/tablet/desktop + all browsers/OS), GeofenceValidation (7 feature/integration tests — auth, branch, GPS radius, edge cases). | ✅ |
-| P1-14 | FormRequest validation tests | Add validation rule tests for 6 untested list-endpoint FormRequests + `UpdateProfileRequest`. | ⏳ |
+| P1-14 | FormRequest validation tests | ✅ All 6 FormRequests already tested (22 total): UpdateProfileRequest (4), ListAttendanceRequest (4), ListLeaveRequest (4), ListOvertimeRequest (3), ListPayrollRequest (3), ListReimbursementRequest (4). Combined with T-28 (29 tests) = 51 total FormRequest tests. | ✅ |
 | P1-15 | Scheduled command tests | ✅ 12 tests added: detect-missed-clock (3), auto-approve-wfa (3), send-reminders (2), knowledgebase:index (3). **2 bugs found + fixed** in AutoApproveWfaCommand (enum comparison with ->value vs enum, missing $timeoutDays in closure scope). DetectMissedClockCommand fixed (referenced nonexistent columns). All 9 commands now have test coverage. | ✅ |
 
 ## P1 — RAG Production Refactor With Laravel AI SDK (✅ SESI-48)
