@@ -1,14 +1,25 @@
 <?php
 
+use App\Http\Requests\Api\ChatRequest;
+use App\Http\Requests\Api\ExportMonthlyRequest;
+use App\Http\Requests\Api\ExportPeriodRequest;
+use App\Http\Requests\Api\ForgotPasswordRequest;
 use App\Http\Requests\Api\ListAttendanceRequest;
 use App\Http\Requests\Api\ListLeaveRequest;
 use App\Http\Requests\Api\ListOvertimeRequest;
 use App\Http\Requests\Api\ListPayrollRequest;
 use App\Http\Requests\Api\ListReimbursementRequest;
+use App\Http\Requests\Api\PendingApprovalsRequest;
+use App\Http\Requests\Api\StoreOvertimeRequest;
+use App\Http\Requests\Api\TwoFactorChallengeRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
+use App\Http\Requests\Api\UploadDocumentRequest;
+use App\Models\Branch;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 
 uses(RefreshDatabase::class);
@@ -218,5 +229,220 @@ test('ListReimbursementRequest rejects per_page beyond max', function () {
 
 test('ListReimbursementRequest rejects non-integer page', function () {
     $v = validate(new ListReimbursementRequest, ['page' => 'not-a-number']);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── ForgotPasswordRequest ───────────────────────────────────────────
+
+test('ForgotPasswordRequest accepts valid email', function () {
+    $v = validate(new ForgotPasswordRequest, ['email' => 'user@example.com']);
+    expect($v->passes())->toBeTrue();
+});
+
+test('ForgotPasswordRequest rejects missing email', function () {
+    $v = validate(new ForgotPasswordRequest, []);
+    expect($v->fails())->toBeTrue();
+});
+
+test('ForgotPasswordRequest rejects invalid email format', function () {
+    $v = validate(new ForgotPasswordRequest, ['email' => 'not-an-email']);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── TwoFactorChallengeRequest ───────────────────────────────────────
+
+test('TwoFactorChallengeRequest accepts valid challenge data', function () {
+    $v = validate(new TwoFactorChallengeRequest, [
+        'challenge_id' => 'abc123',
+        'code' => '123456',
+    ]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('TwoFactorChallengeRequest rejects missing fields', function () {
+    $v1 = validate(new TwoFactorChallengeRequest, []);
+    expect($v1->fails())->toBeTrue();
+
+    $v2 = validate(new TwoFactorChallengeRequest, ['challenge_id' => 'abc']);
+    expect($v2->fails())->toBeTrue();
+
+    $v3 = validate(new TwoFactorChallengeRequest, ['code' => '123456']);
+    expect($v3->fails())->toBeTrue();
+});
+
+// ─── PendingApprovalsRequest ─────────────────────────────────────────
+
+test('PendingApprovalsRequest accepts valid params', function () {
+    $v = validate(new PendingApprovalsRequest, [
+        'type' => 'leave',
+        'page' => 1,
+        'per_page' => 25,
+    ]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('PendingApprovalsRequest accepts empty params', function () {
+    $v = validate(new PendingApprovalsRequest, []);
+    expect($v->passes())->toBeTrue();
+});
+
+test('PendingApprovalsRequest rejects invalid type', function () {
+    $v = validate(new PendingApprovalsRequest, ['type' => 'invalid_type']);
+    expect($v->fails())->toBeTrue();
+});
+
+test('PendingApprovalsRequest rejects per_page beyond max', function () {
+    $v = validate(new PendingApprovalsRequest, ['per_page' => 101]);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── ExportPeriodRequest ─────────────────────────────────────────────
+
+test('ExportPeriodRequest accepts valid period', function () {
+    $v = validate(new ExportPeriodRequest, ['period' => '2026-06']);
+    expect($v->passes())->toBeTrue();
+});
+
+test('ExportPeriodRequest rejects missing period', function () {
+    $v = validate(new ExportPeriodRequest, []);
+    expect($v->fails())->toBeTrue();
+});
+
+test('ExportPeriodRequest rejects invalid period format', function () {
+    $v = validate(new ExportPeriodRequest, ['period' => 'invalid']);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── ExportMonthlyRequest ────────────────────────────────────────────
+
+test('ExportMonthlyRequest accepts valid period', function () {
+    $v = validate(new ExportMonthlyRequest, ['period' => '2026-06']);
+    expect($v->passes())->toBeTrue();
+});
+
+test('ExportMonthlyRequest accepts period with branch_id', function () {
+    $company = Company::factory()->create();
+    $branch = Branch::factory()->for($company)->create();
+
+    $v = validate(new ExportMonthlyRequest, [
+        'period' => '2026-06',
+        'branch_id' => $branch->id,
+    ]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('ExportMonthlyRequest rejects non-existent branch_id', function () {
+    $v = validate(new ExportMonthlyRequest, [
+        'period' => '2026-06',
+        'branch_id' => 99999,
+    ]);
+    expect($v->fails())->toBeTrue();
+});
+
+test('ExportMonthlyRequest rejects invalid period', function () {
+    $v = validate(new ExportMonthlyRequest, ['period' => 'not-valid']);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── ChatRequest ─────────────────────────────────────────────────────
+
+test('ChatRequest accepts valid question', function () {
+    $v = validate(new ChatRequest, ['question' => 'Bagaimana cara mengajukan cuti?']);
+    expect($v->passes())->toBeTrue();
+});
+
+test('ChatRequest rejects missing question', function () {
+    $v = validate(new ChatRequest, []);
+    expect($v->fails())->toBeTrue();
+});
+
+test('ChatRequest rejects question too short', function () {
+    $v = validate(new ChatRequest, ['question' => 'abc']);
+    expect($v->fails())->toBeTrue();
+});
+
+test('ChatRequest rejects question too long', function () {
+    $v = validate(new ChatRequest, ['question' => str_repeat('a', 501)]);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── UploadDocumentRequest ───────────────────────────────────────────
+
+test('UploadDocumentRequest accepts valid pdf file', function () {
+    $v = validate(new UploadDocumentRequest, [
+        'title' => 'HR Policy Document',
+        'category' => 'hr_policy',
+        'file' => UploadedFile::fake()->create('policy.pdf', 500),
+    ]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('UploadDocumentRequest accepts without category', function () {
+    $v = validate(new UploadDocumentRequest, [
+        'title' => 'General Document',
+        'file' => UploadedFile::fake()->create('doc.pdf', 1000),
+    ]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('UploadDocumentRequest rejects invalid category', function () {
+    $v = validate(new UploadDocumentRequest, [
+        'title' => 'Test',
+        'category' => 'invalid_category',
+        'file' => UploadedFile::fake()->create('test.pdf', 100),
+    ]);
+    expect($v->fails())->toBeTrue();
+});
+
+test('UploadDocumentRequest rejects non-pdf file', function () {
+    $v = validate(new UploadDocumentRequest, [
+        'title' => 'Test',
+        'file' => UploadedFile::fake()->create('image.png', 100),
+    ]);
+    expect($v->fails())->toBeTrue();
+});
+
+test('UploadDocumentRequest rejects file over 10MB', function () {
+    $v = validate(new UploadDocumentRequest, [
+        'title' => 'Test',
+        'file' => UploadedFile::fake()->create('large.pdf', 11000),
+    ]);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── StoreOvertimeRequest ──────────────────────────────────────────
+
+test('StoreOvertimeRequest accepts valid overtime data', function () {
+    $v = validate(new StoreOvertimeRequest, [
+        'date' => now()->format('Y-m-d'),
+        'start_time' => '18:00',
+        'end_time' => '20:30',
+        'description' => 'Menangani insiden produksi.',
+    ]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('StoreOvertimeRequest rejects missing fields', function () {
+    $v = validate(new StoreOvertimeRequest, []);
+    expect($v->fails())->toBeTrue();
+});
+
+test('StoreOvertimeRequest rejects invalid time format', function () {
+    $v = validate(new StoreOvertimeRequest, [
+        'date' => now()->format('Y-m-d'),
+        'start_time' => '6pm',
+        'end_time' => '20:30',
+        'description' => 'Test',
+    ]);
+    expect($v->fails())->toBeTrue();
+});
+
+test('StoreOvertimeRequest rejects description too short', function () {
+    $v = validate(new StoreOvertimeRequest, [
+        'date' => now()->format('Y-m-d'),
+        'start_time' => '18:00',
+        'end_time' => '20:00',
+        'description' => 'Short',
+    ]);
     expect($v->fails())->toBeTrue();
 });
