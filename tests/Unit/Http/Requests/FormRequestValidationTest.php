@@ -10,6 +10,7 @@ use App\Http\Requests\Api\ListOvertimeRequest;
 use App\Http\Requests\Api\ListPayrollRequest;
 use App\Http\Requests\Api\ListReimbursementRequest;
 use App\Http\Requests\Api\PendingApprovalsRequest;
+use App\Http\Requests\Api\RegisterFaceRequest;
 use App\Http\Requests\Api\StoreOvertimeRequest;
 use App\Http\Requests\Api\TwoFactorChallengeRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
@@ -444,5 +445,49 @@ test('StoreOvertimeRequest rejects description too short', function () {
         'end_time' => '20:00',
         'description' => 'Short',
     ]);
+    expect($v->fails())->toBeTrue();
+});
+
+// ─── RegisterFaceRequest ────────────────────────────────────────────
+
+test('RegisterFaceRequest accepts valid 128D face embedding', function () {
+    $v = validate(new RegisterFaceRequest, [
+        'embedding' => array_fill(0, 128, 0.01),
+    ]);
+
+    expect($v->passes())->toBeTrue();
+});
+
+test('RegisterFaceRequest rejects wrong-size embedding', function () {
+    $v = validate(new RegisterFaceRequest, ['embedding' => array_fill(0, 64, 0.01)]);
+    expect($v->fails())->toBeTrue();
+
+    $v2 = validate(new RegisterFaceRequest, ['embedding' => array_fill(0, 256, 0.01)]);
+    expect($v2->fails())->toBeTrue();
+});
+
+test('RegisterFaceRequest rejects values outside -1.5 to 1.5 range', function () {
+    $embedding = array_fill(0, 128, 0.01);
+    $embedding[0] = 2.0;
+    $v = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
+    expect($v->fails())->toBeTrue();
+
+    $embedding[0] = -2.0;
+    $v2 = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
+    expect($v2->fails())->toBeTrue();
+});
+
+test('RegisterFaceRequest accepts values exactly at boundaries', function () {
+    $embedding = array_fill(0, 128, 0.01);
+    $embedding[0] = -1.5;
+    $embedding[1] = 1.5;
+    $v = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
+    expect($v->passes())->toBeTrue();
+});
+
+test('RegisterFaceRequest rejects non-numeric embedding values', function () {
+    $embedding = array_fill(0, 128, 0.01);
+    $embedding[50] = 'abc';
+    $v = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
     expect($v->fails())->toBeTrue();
 });

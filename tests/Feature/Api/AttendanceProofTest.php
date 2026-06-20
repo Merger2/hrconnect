@@ -508,6 +508,53 @@ test('clock-out with face verification succeeds', function () {
         ->assertJsonPath('status', 'success');
 });
 
+test('clock-out falls back to PIN when face not recognized', function () {
+    $this->employee->forceFill([
+        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+    ])->save();
+
+    $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'pin' => '123456',
+        ]))->assertStatus(201);
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('verifyFace')
+        ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-out', array_merge(gpsData(), [
+            'embedding' => array_fill(0, 128, 0.01),
+            'pin' => '123456',
+        ]));
+
+    $response->assertOk()
+        ->assertJsonPath('status', 'success');
+});
+
+test('clock-out with face fails when no fallback PIN given', function () {
+    $this->employee->forceFill([
+        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+    ])->save();
+
+    $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'pin' => '123456',
+        ]))->assertStatus(201);
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('verifyFace')
+        ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-out', array_merge(gpsData(), [
+            'embedding' => array_fill(0, 128, 0.01),
+        ]));
+
+    $response->assertStatus(422)
+        ->assertJsonPath('status', 'error');
+});
+
 // ═══════════════════════════════════════════════════════════════════════
 // WFA APPROVAL EDGE CASES
 // ═══════════════════════════════════════════════════════════════════════
