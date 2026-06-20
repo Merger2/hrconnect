@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9 selesai. Test suite: 991 / 2,887 assertions).
+> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10 selesai. Test suite: 993 / 2,899 assertions. PostgreSQL: 15 tests).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -21,7 +21,7 @@
 | Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 991 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 993 tests / 2,899 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: PostgreSQL integration, OpenAPI contract, FaceRecognition pgvector, Livewire component. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 993 tests / 2,899 assertions (SQLite) + 15 tests / 34 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). PostgreSQL: 15 tests covering pgvector (128D/768D/ranking/HNSW), CipherSweet, constraints, payroll locking. Gaps: OpenAPI contract, FaceRecognition pgvector, Livewire component. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -284,7 +284,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | ✅ | KnowledgeBaseProof covers chat, upload, delete (+14 tests). RAG-1–9 complete (except RAG-8 streaming deferred). 38 RAG tests pass via AI SDK fakes. Fallback keyword search: both branches tested (results found + empty results). Confidence field asserted. |
 | T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ✅ |
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ✅ | Added CompanySettingObserver tests (2 — was the only gap). Created CacheIntegrationTest (8 tests: TaxConfig cachedAll, CompanySetting get/set/fallback, Holiday cachedYear active/inactive, BpjsConfig cachedAll). |
-| T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | 🚧 |
+| T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | ✅ | 15 total tests (up from 10). Added: 768D KB embedding cosine search, nearest neighbor ranking (3 non-collinear vectors), CipherSweet whereBlind null return, HNSW index existence verification on knowledge_bases.embedding. |
 | T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ⏳ |
 | T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ⏳ |
 | T-13 | Web route smoke tests | ✅ 18 smoke tests: 6 public auth pages (200), 6 unauthenticated redirects (302), 3 authenticated pages (200), 2 special pages (email_verify→dashboard, security→confirm-password), 1 2FA-challenge redirect. | ✅ |

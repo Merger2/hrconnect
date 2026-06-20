@@ -311,3 +311,96 @@ test('payroll generation rejects existing published payroll on PostgreSQL', func
     expect(fn () => app(PayrollCalculatorService::class)->generatePayroll($employee, '2026-06'))
         ->toThrow(BusinessRuleException::class, 'sudah dikunci permanen');
 });
+
+test('pgvector stores 768D knowledge base embedding for cosine distance search', function () {
+    $kbId = DB::table('knowledge_bases')->insertGetId([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'Kebijakan Cuti',
+        'content' => 'Karyawan berhak atas 12 hari cuti tahunan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'embedding' => new Vector(array_fill(0, 768, 0.1)),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 2,
+        'title' => 'Kebijakan BPJS',
+        'content' => 'BPJS Kesehatan dan Ketenagakerjaan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'embedding' => new Vector(array_fill(0, 768, 0.9)),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $queryVector = new Vector(array_fill(0, 768, 0.11));
+    $nearestId = DB::selectOne(<<<'SQL'
+        SELECT id, embedding <=> ?::vector AS distance
+        FROM knowledge_bases
+        WHERE status = 'ready' AND embedding IS NOT NULL
+        ORDER BY distance
+        LIMIT 1
+    SQL, [$queryVector])->id;
+
+    expect($nearestId)->toBe($kbId);
+});
+
+test('pgvector nearest neighbor returns multiple results ordered by distance ascending', function () {
+    $employeeNumbers = ['PG-RNK1', 'PG-RNK2', 'PG-RNK3'];
+
+    $zero128 = fn () => array_fill(0, 128, 0.0);
+
+    // RNK1: dim[0]=1.0, all others 0 (matches query)
+    // RNK2: dim[0]=dim[1]=0.5, all others 0 (closer to query than RNK3)
+    // RNK3: dim[2]=0.5, all others 0 (furthest from query)
+    $vectors = [
+        'PG-RNK1' => array_replace($zero128(), [0 => 1.0]),
+        'PG-RNK2' => array_replace($zero128(), [0 => 0.5, 1 => 0.5]),
+        'PG-RNK3' => array_replace($zero128(), [2 => 0.5]),
+    ];
+
+    foreach ($employeeNumbers as $num) {
+        createPostgresEmployee([
+            'employee_number' => $num,
+            'face_embedding' => new Vector($vectors[$num]),
+        ]);
+    }
+
+    // Query vector = same as RNK1
+    $queryVector = new Vector(array_replace($zero128(), [0 => 1.0]));
+
+    $results = DB::select(<<<'SQL'
+        SELECT id, employee_number, face_embedding <=> ?::vector AS distance
+        FROM employees
+        WHERE employee_number IN ('PG-RNK1', 'PG-RNK2', 'PG-RNK3')
+          AND face_embedding IS NOT NULL
+        ORDER BY distance
+    SQL, [$queryVector]);
+
+    expect($results)->toHaveCount(3);
+    expect($results[0]->employee_number)->toBe('PG-RNK1');
+    expect((float) $results[0]->distance)->toBe(0.0);
+    expect((float) $results[1]->distance)->toBeGreaterThan(0.0);
+    expect((float) $results[2]->distance)->toBeGreaterThan((float) $results[1]->distance);
+});
+
+test('CipherSweet whereBlind returns null for non-existent value', function () {
+    $result = Employee::whereBlind('nik', 'nik_hash', 'NONEXISTENT_NIK_000000')->first();
+    expect($result)->toBeNull();
+});
+
+test('HNSW index exists on knowledge_bases embedding column', function () {
+    $index = DB::selectOne(<<<'SQL'
+        SELECT indexname, indexdef
+        FROM pg_indexes
+        WHERE tablename = 'knowledge_bases'
+          AND indexdef LIKE '%hnsw%'
+    SQL);
+
+    expect($index)->not->toBeNull();
+    expect($index->indexdef)->toContain('hnsw');
+});
