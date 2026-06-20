@@ -101,8 +101,35 @@ describe('chat', function () {
 
         expect($result['fallback'])->toBeTrue();
         expect($result['model'])->toBe('pg_trgm');
+        expect($result['confidence'])->toBe('low');
         expect($result['answer'])->toContain('offline');
         expect($result['sources'])->toHaveCount(1);
+    });
+
+    it('fallback keyword search returns empty message when no chunks match', function () {
+        $gemini = mock(GeminiClient::class);
+        $embedding = mock(EmbeddingService::class);
+
+        KnowledgeBase::create([
+            'knowledgeable_type' => KnowledgeBase::class,
+            'knowledgeable_id' => 1,
+            'title' => 'Cuti Tahunan',
+            'content' => 'Karyawan berhak atas 12 hari cuti tahunan.',
+            'category' => KnowledgeBaseCategory::HR_POLICY,
+            'status' => KnowledgeBaseStatus::READY,
+        ]);
+
+        $gemini->shouldReceive('embed')->once()->andThrow(new Exception('Gemini API down'));
+        $embedding->shouldReceive('searchByKeyword')->once()->andReturn(new Collection);
+
+        $svc = new KnowledgeBaseService($gemini, $embedding);
+        $result = $svc->chat('tidak ada yang cocok');
+
+        expect($result['fallback'])->toBeTrue();
+        expect($result['model'])->toBe('pg_trgm');
+        expect($result['confidence'])->toBe('low');
+        expect($result['answer'])->toContain('tidak ada informasi');
+        expect($result['sources'])->toBeEmpty();
     });
 });
 

@@ -80,7 +80,9 @@ test('Holiday cachedYear excludes inactive holidays', function () {
 });
 
 test('BpjsConfig cachedAll returns fresh data from DB', function () {
-    BpjsConfig::factory()->count(3)->create();
+    BpjsConfig::factory()->create(['name' => 'jkk']);
+    BpjsConfig::factory()->create(['name' => 'jht']);
+    BpjsConfig::factory()->create(['name' => 'jp']);
 
     $result = BpjsConfig::cachedAll();
     expect($result)->toHaveCount(3)
