@@ -85,12 +85,35 @@ test('logout dapat dipanggil walaupun password expired', function () {
     expect(auth()->check())->toBeFalse();
 });
 
+test('user tepat di 90 hari (exact boundary) masih bisa akses', function () {
+    $now = now();
+    $user = User::factory()->create([
+        'password_changed_at' => $now->copy()->subDays(90)->addSecond(),
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk();
+});
+
 test('expiry days configurable via CompanySetting', function () {
     CompanySetting::set('password_expiry_days', 30);
 
     // Password 60 hari, dengan setting 30 hari → expired
     $user = User::factory()->create([
         'password_changed_at' => now()->subDays(60),
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertRedirect(route('security.edit'));
+});
+
+test('password_expiry_days 0 means all passwords expired', function () {
+    CompanySetting::set('password_expiry_days', 0);
+
+    $user = User::factory()->create([
+        'password_changed_at' => now()->subDay(), // Baru 1 hari
     ]);
 
     $this->actingAs($user)

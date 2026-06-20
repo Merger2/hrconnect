@@ -170,7 +170,7 @@ Progress thin-coverage service, sekarang semua ≥7 assertions:
 
 | P1-12a | Web route smoke tests: 18 tests covering 6 public Fortify auth pages, 6 unauthenticated redirects, 3 authenticated pages (dashboard, email/verify, confirm-password), 3 Livewire settings pages. | `php artisan test --compact --filter='WebRouteSmoke'` -> 18 passed, 26 assertions. | ✅ |
 | T-3a | PII/CipherSweet tests: 14 tests covering Employee/Company/FamilyDetail encryption round-trip, blind index lookups, empty encrypted field, ProfileResource masking, encryptedUnique duplicate NIK, PII audit log, and forbidden PII access. | `php artisan test --compact --filter='PiiCipherSweet'` -> 14 passed, 36 assertions. | ✅ |
-| P1-1a | Password expiry + logout-all: fixed 2 bugs (ResetUserPassword + CreateNewUser set password_changed_at). 7 tests: change-password resets clock, forgot-password sets password_changed_at, logout-all token invalidation, edge cases. | `php artisan test --compact --filter='PasswordExpiry|logout-all'` -> 7 passed, 17 assertions. | ✅ |
+| P1-1a | Password expiry + logout-all: fixed 2 bugs (ResetUserPassword + CreateNewUser set password_changed_at). 10 tests: change-password resets clock, forgot-password sets password_changed_at, CreateNewUser sets password_changed_at, logout-all token invalidation, edge cases (boundary 90d, CompanySetting=0, unauthenticated, single-token). | `php artisan test --compact --filter='PasswordExpiry|CheckPasswordExpired|logout-all'` -> 19 passed, 38 assertions. | ✅ |
 
 ## Carried Forward From Previous Tracker
 
@@ -243,7 +243,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| P1-1 | Auth/Profile API audit | ✅ AuthProof (+8 tests: login→2FA, TOTP, rate limit, forgot-password). 🚧 Remaining: password expiry behavior, logout-all token revoke test. | 🚧 |
+| P1-1 | Auth/Profile API audit | ✅ AuthProof (+8 tests). ✅ Password expiry + logout-all (+5 edge-case/token tests: boundary 90 hari, CreateNewUser sets password_changed_at, CompanySetting=0 disable, unauthenticated 401, single-token revoke). | ✅ |
 | P1-2 | Employee API audit | ✅ EmployeeProof (+8 tests: auth/permission gating). Combined with ControllerHttpTest coverage (11 existing tests) = comprehensive. 🚧 Remaining: PII audit log verification. | 🚧 |
 | P1-3 | Attendance API audit | ✅ AttendanceProof (+20 tests: clock-in/out PIN+GPS+WFA, today, index, WFA approval). 🚧 Remaining: face recognition 128D flow. | 🚧 |
 | P1-4 | Leave API audit | ✅ LeaveProof (+9 tests: auth/permission/delete/owner gaps). Combined with LeaveAndOvertimeTest (9 existing) = comprehensive. 🚧 Remaining: approval quota deduction edge cases. | 🚧 |

@@ -267,6 +267,26 @@ test('logout-all with no tokens', function () {
         ->assertJsonPath('data.revoked_count', 1);
 });
 
+test('logout-all unauthenticated returns 401', function () {
+    $this->postJson('/api/v1/auth/logout-all')
+        ->assertUnauthorized();
+});
+
+test('logout-all with single current token', function () {
+    $user = User::factory()->create();
+    $user->assignRole('employee');
+    $token = $user->createToken('current')->plainTextToken;
+
+    expect($user->tokens()->count())->toBe(1);
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->postJson('/api/v1/auth/logout-all')
+        ->assertOk()
+        ->assertJsonPath('data.revoked_count', 1);
+
+    expect($user->tokens()->count())->toBe(0);
+});
+
 // ─── Permission gating ────────────────────────────────────────────────
 
 test('Employee tanpa permission process_payroll dapat 403 di POST /payroll/generate', function () {

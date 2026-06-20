@@ -3,6 +3,7 @@
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
 uses(RefreshDatabase::class);
@@ -70,5 +71,18 @@ test('forgot-password reset sets password_changed_at', function () {
     $action->reset($user, ['password' => 'NewPassword456!', 'password_confirmation' => 'NewPassword456!']);
 
     $user->refresh();
+    expect($user->password_changed_at->timestamp)->toBeGreaterThan(now()->subMinute()->timestamp);
+});
+
+test('registration via CreateNewUser sets password_changed_at', function () {
+    $action = app(CreatesNewUsers::class);
+    $user = $action->create([
+        'name' => 'New User',
+        'email' => 'newuser@test.com',
+        'password' => 'NewPassword123!',
+        'password_confirmation' => 'NewPassword123!',
+    ]);
+
+    expect($user->password_changed_at)->not->toBeNull();
     expect($user->password_changed_at->timestamp)->toBeGreaterThan(now()->subMinute()->timestamp);
 });
