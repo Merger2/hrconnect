@@ -1,38 +1,30 @@
-# HRConnect - Testing Strategy
+# HRConnect — Testing Strategy
 
-> **Dokumen ini berisi strategi pengujian lengkap untuk HRConnect.**
+> **Strategi pengujian lengkap untuk HRConnect.**
 > Setiap perubahan WAJIB disertai test yang sesuai.
-
-> **ERRATA (2026-05-13):** Beberapa fix kritis yang harus dites:
-> - **C1:** Test ApprovalLevel enum comparison — `$approval->level === 1` MUST fail, `$approval->level->value === 1` MUST pass
-> - **C2:** Test Payroll `forceDelete()` — soft-deleted payroll regenerasi MUST NOT throw unique constraint violation
-> - **C3:** Test Sanctum API auth — `POST /api/v1/auth/login` MUST return token, `Bearer {token}` MUST authenticate
-> - **C4:** Test Permission enum + seeder — `$user->can('view-employees')` MUST return true for assigned roles
-> - **SEC-5:** Test BusinessRuleException — MUST return HTTP 422, not 500
-> - Model `LeaveBalance` (bukan `LeaveQuota`) — semua test harus referensi `LeaveBalance`
 
 ---
 
-## 1. TESTING PYRAMID
+## 1. Testing Pyramid
 
 ```
                     /\
                    /  \
-                  / E2E \         Browser Tests (3 files)
+                  / API \          Feature Tests (47 files)
                  /________\
                 /          \
-               / Integration \   Feature Tests (36 files)
+               /   Unit     \     Unit Tests (26 files)
               /______________\
              /                \
-            /     Unit Tests   \  Unit Tests (14 files)
+            /  PostgreSQL Int.  \  Integration Tests (1 file)
            /____________________\
 ```
 
-**Rasio Ideal:** 70% Unit | 20% Feature | 10% Browser
+**Rasio aktual:** 64% Feature | 35% Unit | 1% Integration
 
 ---
 
-## 2. TEST TOOLS
+## 2. Test Tools
 
 | Tool | Usage | Version |
 |------|-------|---------|
@@ -41,346 +33,276 @@
 | Laravel RefreshDatabase | Database reset per test | Built-in |
 | Laravel Fake | Notification/Queue/Mail faking | Built-in |
 | Livewire Test | Component testing | v4 |
-| Pest Browser | E2E testing with Playwright | v4 |
+| Mockery | Mocking framework | Built-in |
 
 ---
 
-## 3. FEATURE TESTS (36 files)
+## 3. Feature Tests (47 files)
 
-### 3.1 Attendance Tests (`tests/Feature/Attendance/`)
+### 3.1 API Proof Tests (`tests/Feature/Api/`)
 
-| File | What It Tests |
-|------|--------------|
-| `ClockInTest.php` | - Employee can clock in with valid face + GPS<br>- Cannot clock in twice in same day<br>- Face recognition failure blocks clock in<br>- GPS outside geofence blocks clock in<br>- Mocked GPS detected and blocked<br>- Clock in creates attendance record |
-| `ClockOutTest.php` | - Employee can clock out after clock in<br>- Cannot clock out without clock in<br>- Face recognition on clock out<br>- GPS validation on clock out |
-| `GeofenceValidationTest.php` | - Haversine calculation correct<br>- Within radius allowed<br>- Outside radius blocked<br>- Per-branch radius respected<br>- WFA geofence works |
-| `AntiFakeGPSTest.php` | - `is_mocked` flag from client detected<br>- Low accuracy GPS flagged<br>- Device fingerprint tracked<br>- Repeated fake GPS blocks account |
-| `AttendanceHistoryTest.php` | - Employee can view own history<br>- Filter by date range works<br>- Monthly summary correct<br>- Export to PDF works |
+| File | Tests | Covers |
+|------|------:|--------|
+| `AuthProofTest.php` | Login, 2FA, TOTP, rate limit, forgot-password, password expiry, logout-all |
+| `AttendanceProofTest.php` | 30 | Clock-in/out face+GPS+WFA, PIN fallback, duplicate, geofence 403, low accuracy, scope, status filter |
+| `LeaveProofTest.php` | Leave CRUD, auth, permission, owner access, weekend dates |
+| `LeaveAndOvertimeTest.php` | 15 | Sick proof, probation, cancel, L1+L2 approval, double-action, wrong approver, rejection |
+| `OvertimeProofTest.php` | Overtime CRUD, auth, permission, owner access |
+| `ReimbursementProofTest.php` | Reimbursement CRUD, auth, permission, state conflict |
+| `ApprovalProofTest.php` | Pending approvals, approve/reject, auth, validation |
+| `PayrollProofTest.php` | 20 | List, show, generate, payslip gating, exports, permission |
+| `PayrollExportTest.php` | Payroll export formats |
+| `EmployeeProofTest.php` | Employee CRUD, auth, permission |
+| `FaceProofTest.php` | Face register/verify, auth, validation |
+| `KnowledgeBaseProofTest.php` | 14 | Chat mock mode, upload partialMock, delete, auth/permission |
+| `KnowledgeBaseEndpointTest.php` | KB upload/download edge cases |
 
-### 3.2 Leave Tests (`tests/Feature/Leave/`)
+### 3.2 API Integration Tests (`tests/Feature/Api/`)
 
-| File | What It Tests |
-|------|--------------|
-| `LeaveRequestTest.php` | - Employee can submit leave request<br>- Validation: dates, quota, reason<br>- Proof file upload (optional)<br>- Cannot submit overlapping dates<br>- Request creates approval chain |
-| `LeaveBalanceTest.php` | - Balance initialized correctly on hire<br>- Balance deducted on approved leave (after L2, not on submit — ERR-002)<br>- Balance restored on rejected/cancelled leave<br>- Balance does not go negative<br>- Annual balance reset works |
-| `LeaveApprovalTest.php` | - Approver can approve leave<br>- Approver can reject leave with reason<br>- Approval status updates correctly<br>- Notification sent to requester |
-| `ProbationLeaveBlockTest.php` | - Employee on probation cannot take annual leave<br>- Sick leave allowed during probation<br>- Error message clear |
+| File | Tests | Covers |
+|------|------:|--------|
+| `ControllerHttpTest.php` | HTTP response codes for all controllers |
+| `EndpointsTest.php` | 57 | 401 smoke tests for all 51 protected routes |
+| `SecurityRegressionTest.php` | Security regression scenarios |
+| `OpenApiContractTest.php` | 25 | OpenAPI spec structure, route completeness, security contract, pagination contract, operationId, smoke tests |
+| `WebRouteSmokeTest.php` | 18 | Fortify auth pages, dashboard, settings |
 
-### 3.3 Payroll Tests (`tests/Feature/Payroll/`)
+### 3.3 Auth Tests (`tests/Feature/Auth/`)
 
-| File | What It Tests |
-|------|--------------|
-| `PayrollGenerationTest.php` | - Generate payroll for single employee<br>- Generate bulk payroll via queue<br>- Payroll items created correctly<br>- Duplicate period prevented |
-| `PayrollCalculationTest.php` | - Basic salary correct<br>- Allowances calculated<br>- Deductions calculated<br>- Net salary = gross - deductions<br>- Overtime pay included |
-| `PayrollLockTest.php` | - Payroll can be locked<br>- Locked payroll cannot be edited<br>- Lock timestamp and user recorded<br>- Only authorized user can lock |
-| `BPJSAndTaxTest.php` | - BPJS Kesehatan 1% calculated<br>- BPJS Ketenagakerjaan correct rates<br>- PPh21 calculated correctly<br>- Intern exempt from BPJS and tax |
-| `InternExemptTest.php` | - Intern type: no BPJS<br>- Intern type: no PPh21<br>- Intern type: no leave quota<br>- Intern salary calculated differently |
+| File | Covers |
+|------|--------|
+| `AuthenticationTest.php` | Fortify login flow |
+| `EmailVerificationTest.php` | Email verification |
+| `PasswordConfirmationTest.php` | Password confirmation |
+| `PasswordResetTest.php` | Forgot password flow |
+| `RegistrationTest.php` | Registration (disabled in production) |
+| `TwoFactorChallengeTest.php` | 2FA/TOTP challenge |
 
-### 3.4 Loan Tests (`tests/Feature/Loan/`)
+### 3.4 Service Tests (`tests/Feature/Services/`)
 
-| File | What It Tests |
-|------|--------------|
-| `LoanRequestTest.php` | - Employee can submit loan request<br>- Monthly installment calculated<br>- Approval workflow triggered<br>- Max loan amount validation |
-| `LoanInstallmentTest.php` | - Installment deducted from payroll<br>- Installment count tracked<br>- Loan settled when paid off<br>- Manual payment recording |
+| File | Covers |
+|------|--------|
+| `AttendanceServiceTest.php` | Clock-in/out business logic |
+| `EmployeeTerminationServiceTest.php` | Termination happy path |
+| `KnowledgeBaseServiceTest.php` | RAG chat, fallback keyword search, confidence |
+| `PayrollExportServiceTest.php` | XLSX export creation |
+| `PayslipPdfServiceTest.php` | PDF template building |
 
-### 3.5 Reimbursement Tests (`tests/Feature/Reimbursement/`)
+### 3.5 Other Feature Tests
 
-| File | What It Tests |
-|------|--------------|
-| `ReimbursementRequestTest.php` | - Employee can submit reimbursement<br>- Receipt file required<br>- Approval workflow triggered<br>- Amount included in payroll |
-
-### 3.6 Approval Tests (`tests/Feature/Approval/`)
-
-| File | What It Tests |
-|------|--------------|
-| `MultiLevelApprovalTest.php` | - Approval chain created correctly<br>- Level 1 must approve before Level 2<br>- All levels required for full approval<br>- Rejection at any level stops process |
-| `ApprovalReassignmentTest.php` | - Approvals reassigned when HRD resigns<br>- Subordinates reassigned to new manager<br>- No orphaned approvals |
-
-### 3.7 Employee Tests (`tests/Feature/Employee/`)
-
-| File | What It Tests |
-|------|--------------|
-| `EmployeeCRUDTest.php` | - Create employee with all fields<br>- Update employee data<br>- Employee number auto-generated<br>- Delete employee (soft delete) |
-| `EmployeeNumberGenerationTest.php` | - Format: EMP-YYYYMM-NNN<br>- Sequential numbering per month<br>- No duplicate numbers<br>- Reset each month |
-| `ResignationTest.php` | - Employee can submit resignation<br>- HRD can approve/reject<br>- Resignation status updates<br>- Resign date recorded |
-| `HandoverTest.php` | - Handover items created on resignation<br>- Each category tracked<br>- Handover completion required<br>- Subordinates reassigned |
-| `ProbationTest.php` | - Probation end date set correctly<br>- Probation status updates<br>- No leave allowed during probation<br>- Probation extension possible |
-
-### 3.8 Face Recognition Tests (`tests/Feature/FaceRecognition/`)
-
-| File | What It Tests |
-|------|--------------|
-| `FaceEmbeddingTest.php` | - Face embedding generated from photo<br>- Embedding stored in database<br>- 128D vector format correct |
-| `FaceSimilarityTest.php` | - Similarity score calculated<br>- Threshold comparison works<br>- Match threshold 0.85 correct<br>- Non-match below threshold |
-
-### 3.9 Knowledge Base Tests (`tests/Feature/KnowledgeBase/`)
-
-| File | What It Tests |
-|------|--------------|
-| `KnowledgeBaseCRUDTest.php` | - Create article<br>- Upload PDF file<br>- Edit article<br>- Delete article (soft delete) |
-| `RagQueryTest.php` | - Query returns relevant results<br>- PDF chunked correctly<br>- Embedding generated<br>- Gemini response includes source |
-
-### 3.10 RBAC Tests (`tests/Feature/RBAC/`)
-
-| File | What It Tests |
-|------|--------------|
-| `RolePermissionTest.php` | - Roles created correctly<br>- Permissions assigned to roles<br>- Users can have multiple roles<br>- Permission check works |
-| `MiddlewareTest.php` | - Role middleware blocks unauthorized<br>- Permission middleware blocks unauthorized<br>- Redirect to 403 page |
-
-### 3.11 Device Tests (`tests/Feature/Device/`)
-
-| File | What It Tests |
-|------|--------------|
-| `DeviceDetectionTest.php` | - Mobile device detected correctly<br>- Desktop device detected correctly<br>- Browser detected<br>- OS detected |
-| `DeviceVerificationTest.php` | - Device registration works<br>- Verification required<br>- Verified device allows clock in |
-
-### 3.12 Notification Tests (`tests/Feature/Notification/`)
-
-| File | What It Tests |
-|------|--------------|
-| `NotificationTest.php` | - Notification sent on leave request<br>- Notification sent on approval<br>- Notification sent on payroll<br>- Mark as read works |
-
-### 3.13 Security Tests (`tests/Feature/Security/`)
-
-| File | What It Tests |
-|------|--------------|
-| `ForcePasswordChangeTest.php` | - First login requires password change<br>- Cannot skip password change<br>- Password change works |
-| `CipherSweetEncryptionTest.php` | - NIK encrypted in database<br>- Phone encrypted<br>- NPWP encrypted<br>- Blind index searchable |
-| `GoogleOAuthTest.php` | - Google login works<br>- Link Google to existing account<br>- Email verified via Google |
+| File | Covers |
+|------|--------|
+| `PoliciesTest.php` | 36 | Policy boundary tests (all 8 policies) |
+| `RoleAndPermissionSeederTest.php` | 217 | 5-role × 44-permission data-driven matrix |
+| `ConsoleCommandsTest.php` | 25 | 4 scheduled commands with 3 bugfixes |
+| `PiiCipherSweetTest.php` | 14 | CipherSweet encryption, blind index, encryptedUnique, PII audit |
+| `CacheIntegrationTest.php` | 8 | TaxConfig, CompanySetting, Holiday, BpjsConfig cachedAll |
+| `ObserverTest.php` | 2 | CompanySettingObserver cache invalidation |
+| `CheckPasswordExpiredTest.php` | Password expiry middleware |
+| `PasswordExpiryTest.php` | 7 | Change-password resets clock, forgot-password sets timestamp, logout-all |
+| `SanctumApiTest.php` | Sanctum token auth |
+| `SuperAdminSeederTest.php` | Super admin seeder |
+| `Middleware/GeofenceValidationTest.php` | 8 | Geofence middleware |
+| `Notifications/NotificationTest.php` | Notification dispatch |
+| `Settings/ProfileUpdateTest.php` | Profile update |
+| `Settings/SecurityTest.php` | Security settings |
+| `DashboardTest.php` | Dashboard access |
 
 ---
 
-## 4. UNIT TESTS (14 files)
+## 4. Unit Tests (26 files)
 
-### 4.1 Enum Tests (`tests/Unit/Enums/`)
+### 4.1 Service Tests (`tests/Unit/Services/`)
 
-| File | What It Tests |
-|------|--------------|
-| `EmploymentTypeTest.php` | - Enum values correct<br>- Labels correct<br>- Helper methods work |
-| `ApprovalStatusTest.php` | - Enum values correct<br>- Status flow logic |
+| File | Covers |
+|------|--------|
+| `FaceRecognitionServiceTest.php` | 6 | Dimension, validation, no-face, non-numeric |
+| `GeofenceServiceTest.php` | 11 | Haversine, within-radius, edge cases |
+| `LeaveServiceTest.php` | Leave balance validation, probation block |
+| `ApprovalServiceTest.php` | Approval chain, next approver |
+| `OvertimeServiceTest.php` | Creation, overnight logic, cancel |
+| `ReimbursementServiceTest.php` | Reimbursement business logic |
+| `EmbeddingServiceTest.php` | 6 | Chunking, format, Pinecone stub |
+| `GeminiClientTest.php` | 7 | Mock mode, retry logic |
+| `ProfileServiceTest.php` | 5 | Get profile, update, change password |
 
-### 4.2 Service Tests (`tests/Unit/Services/`)
+### 4.2 Payroll Tests (`tests/Unit/`)
 
-| File | What It Tests |
-|------|--------------|
-| `AttendanceServiceTest.php` | - clockIn() creates record<br>- clockOut() updates record<br>- validateGeofence() correct<br>- calculateLateMinutes() correct |
-| `PayrollCalculatorServiceTest.php` | - calculateBasicSalary() correct<br>- calculateBPJS() correct rates<br>- calculatePPh21() correct<br>- calculateNetSalary() correct |
-| `GeofenceServiceTest.php` | - Haversine formula correct<br>- isWithinRadius() correct<br>- Edge cases handled |
-| `LeaveServiceTest.php` | - requestLeave() validates<br>- validateLeaveBalance() correct (validates on submit, deducts after L2 approval — ERR-002)<br>- deductLeaveBalance() correct<br>- isProbationBlocked() correct (EmploymentType has 4 values: permanent, contract, probation, intern) |
-| `ApprovalServiceTest.php` | - createApprovalChain() correct<br>- getNextApprover() correct<br>- approve() updates status |
+| File | Covers |
+|------|--------|
+| `PayrollCalculatorCoreTest.php` | 41 | Overtime pay, BPJS, PPh21, THR, pesangon, leave cash-out |
+| `PayrollCalculatorTerCategoryTest.php` | PPh21 TER category calculation |
+| `OvertimeRateTest.php` | Overtime rate tiers |
+| `TerminationCalculationTest.php` | Termination payout calculation |
 
-### 4.3 Model Tests (`tests/Unit/Models/`)
+### 4.3 Job Tests (`tests/Unit/Jobs/`)
 
-| File | What It Tests |
-|------|--------------|
-| `EmployeeTest.php` | - Relationships work<br>- Scopes work<br>- Accessors/mutators work<br>- Employee number generated |
-| `AttendanceTest.php` | - Relationships work<br>- Status calculated correctly<br>- Late minutes calculated |
-| `PayrollTest.php` | - Relationships work<br>- Lock status works<br>- Net salary calculated |
-| `LeaveTest.php` | - Relationships work<br>- Total days calculated<br>- Overlapping dates detected |
+| File | Covers |
+|------|--------|
+| `JobTest.php` | 9 | Basic job dispatch |
+| `JobEdgeCaseTest.php` | Failed handler, reimbursement PAID→APPROVED rollback |
 
-### 4.4 Observer Tests (`tests/Unit/Observers/`)
+### 4.4 Other Unit Tests
 
-| File | What It Tests |
-|------|--------------|
-| `EmployeeObserverTest.php` | - creating: employee number generated<br>- created: default quota assigned<br>- updating: resignation triggers handover |
-| `AttendanceObserverTest.php` | - creating: geofence validated<br>- created: cache updated |
-| `LeaveObserverTest.php` | - creating: quota validated<br>- updated: quota deducted if approved |
+| File | Covers |
+|------|--------|
+| `ArchitectureTest.php` | Laravel architecture presets |
+| `EmployeeFillableTest.php` | Employee model fillable/hidden |
+| `LeaveDateRangeValidationTest.php` | Leave date overlap validation |
+| `AttendancePinFallbackTest.php` | PIN fallback logic |
+| `Phase3BugFixesTest.php` | Phase 3 regression bugfixes |
+| `RegressionModelTest.php` | Model regression checks |
+| `Http/Requests/FormRequestValidationTest.php` | 6 untested FormRequest validation rules |
+| `Requests/ListRequestValidationTest.php` | List endpoint request validation |
+| `Middleware/DeviceDetectionTest.php` | 8 | UA-parsing middleware |
 
 ---
 
-## 5. BROWSER TESTS (3 files - Opsional)
+## 5. PostgreSQL Integration Tests
 
-| File | What It Tests |
-|------|--------------|
-| `ClockInBrowserTest.php` | - Full clock in flow in browser<br>- Face capture UI works<br>- GPS permission requested |
-| `LeaveRequestBrowserTest.php` | - Full leave request flow<br>- Form validation shown<br>- Success message displayed |
-| `PayrollViewBrowserTest.php` | - Payroll slip renders correctly<br>- PDF download works |
+| File | Tests | Covers |
+|------|------:|--------|
+| `PostgresEnvironmentTest.php` | 19 | pgvector 128D/768D, HNSW index, nearest neighbor ranking, CipherSweet, constraints, payroll locking, FaceRecognitionService threshold override, similarity_percentage, FaceNotRegisteredException |
+
+**Run:** `php artisan test --configuration=phpunit.pgsql.xml --compact`
 
 ---
 
-## 6. TEST CONVENTIONS
+## 6. Test Conventions
 
 ### 6.1 Naming
-- Feature: `test_employee_can_clock_in()`
-- Unit: `test_haversine_calculates_correct_distance()`
-- Use `it()` syntax for Pest: `it('calculates correct distance', function () { })`
+- Feature API: `test('describes behavior', function () { })`
+- Use Pest `it()` / `test()` syntax throughout
 
 ### 6.2 Structure
 ```php
 it('allows clock in with valid face and gps', function () {
-    // Arrange
     $employee = Employee::factory()->create();
     $this->actingAs($employee->user);
 
-    // Act
     $response = $this->post(route('attendance.clock-in'), [
         'lat' => -6.2088,
         'long' => 106.8456,
-        'face_embedding' => '...',
     ]);
 
-    // Assert
-    $response->assertRedirect();
+    $response->assertOk();
     expect(Attendance::count())->toBe(1);
 });
 ```
 
 ### 6.3 Factories
-- Always use factories for test data
-- Check if factory has custom states before manually setting
+- Use factories for test data; use existing custom states
 - Use `fake()` for random data
+- 8 factories created: Approval, CompanySetting, Device, FamilyDetail, PayrollAdjustment, PayrollItem, ShiftSchedule, KnowledgeBase
 
 ### 6.4 Database
 - Use `RefreshDatabase` trait for feature tests
-- Do NOT use `DatabaseTransactions` for queue tests
+- SQLite in-memory for 95% of tests
+- PostgreSQL for vector/integration tests via `phpunit.pgsql.xml`
 
 ### 6.5 Mocking
-- Fake notifications: `Notification::fake()`
-- Fake queues: `Queue::fake()`
-- Fake mail: `Mail::fake()`
-- Fake storage: `Storage::fake()`
+- `Notification::fake()` for notifications
+- `Queue::fake()` for queueable jobs
+- `Storage::fake()` for file uploads
+- `Http::fake()` for external API calls
+- AI SDK `HrKnowledgeBaseAgent::fake()` for RAG mock mode
 
 ---
 
-## 7. RUNNING TESTS
+## 7. Running Tests
 
 ```bash
-# Run all tests
+# Full SQLite suite
+composer test
+
+# Fast SQLite
 php artisan test --compact
 
-# Run specific file
-php artisan test tests/Feature/Attendance/ClockInTest.php
+# Focused test
+php artisan test --compact --filter=Name
 
-# Run with filter
-php artisan test --filter=clock_in
+# PostgreSQL integration
+composer test:pgsql
 
-# Run with coverage
-php artisan test --coverage
+# Lint auto-fix
+vendor/bin/pint --dirty --format agent
 
-# Run only feature tests
-php artisan test tests/Feature
-
-# Run only unit tests
-php artisan test tests/Unit
+# Route audit
+php artisan route:list --path=api --except-vendor
 ```
 
 ---
 
-## 8. COVERAGE TARGETS
+## 8. Coverage Summary (Current)
 
-| Category | Target |
-|----------|--------|
-| Overall | > 80% |
-| Services | > 90% |
-| Models | > 85% |
-| Observers | > 80% |
-| Controllers/Livewire | > 75% |
-| Policies | > 90% |
+| Area | Tests | Assertions |
+|------|------:|----------:|
+| API Endpoint Proofs | ~200 | ~500 |
+| Auth/Web routes | ~50 | ~80 |
+| Services | ~80 | ~200 |
+| Policies & Permissions | ~250 | ~300 |
+| Payroll Calculator | ~50 | ~150 |
+| PII/CipherSweet | 14 | 36 |
+| Cache/Observers | 10 | 20 |
+| Console Commands | 25 | 41 |
+| PostgreSQL Integration | 19 | 43 |
+| OpenAPI Contract | 25 | 617 |
+| **Total** | **1,018** | **3,516** |
 
 ---
 
-## 9. DATABASE TESTING STRATEGY
+## 9. Database Testing Strategy
 
 ### 9.1 Dual Environment
 
-Aplikasi HRConnect berjalan di **PostgreSQL** (production) dengan ekstensi `pgvector`, `pg_trgm`, dan `pgcrypto`, tapi test suite (phpunit.xml) menggunakan **SQLite in-memory** untuk kecepatan.
-
 | Environment | Database | Tujuan |
 |------------|----------|--------|
-| Production/Development | PostgreSQL + pgvector | Data persist, vector search, full feature |
-| Testing (default) | SQLite `:memory:` | Unit & Feature test cepat (< 2 detik) |
-| Testing (opsional) | PostgreSQL `hrconnect_testing` | Integration test untuk vector similarity search |
-
-**Default:** `php artisan test` menggunakan SQLite. Cukup untuk 95% test case.
+| Production | PostgreSQL + pgvector | Data persist, vector search, full feature |
+| Testing (default) | SQLite `:memory:` | Unit & Feature test cepat |
+| Testing (PG) | PostgreSQL `hrconnect_testing` | Vector similarity, constraint, CipherSweet tests |
 
 ### 9.2 Defensive Migration Pattern
 
-Semua migration yang menggunakan fitur PostgreSQL-specific **WAJIB** di-guard dengan `DB::getDriverName()`:
+Semua migration yang menggunakan fitur PostgreSQL-specific **WAJIB** di-guard:
 
 ```php
-// ✅ BENAR — guard dengan driver check
 if (DB::getDriverName() === 'pgsql') {
-    Schema::ensureVectorExtensionExists();
-}
-
-// ❌ SALAH — akan crash di SQLite
-Schema::ensureVectorExtensionExists();
-```
-
-```php
-// ✅ BENAR — fallback kolom vector
-if (DB::getDriverName() === 'pgsql') {
-    $table->vector('embedding', dimensions: 768)->nullable();
+    $table->vector('face_embedding', dimensions: 128)->nullable();
 } else {
-    $table->text('embedding')->nullable();
+    $table->text('face_embedding')->nullable();
 }
 ```
+
+### 9.3 PostgreSQL-Specific Features
+
+| Feature | Guard Status |
+|---------|--------------|
+| `pgvector` extension | ✅ Guarded |
+| `pg_trgm` extension | ✅ Guarded |
+| `pgcrypto` extension | ✅ Guarded |
+| `vector(128)` column | ✅ Guarded |
+| `vector(768)` column | ✅ Guarded |
+| HNSW index | ✅ Guarded |
+| Unique constraints | ✅ Via `UniqueConstraintViolationException` (cross-database) |
+
+### 9.4 UniqueConstraintViolationException
+
+**JANGAN** hardcode SQL error code `23505` (PostgreSQL-only). Gunakan:
 
 ```php
-// ✅ BENAR — guard HNSW index
-if (DB::getDriverName() === 'pgsql') {
-    DB::statement('CREATE INDEX kb_embedding_hnsw_idx ON knowledge_bases USING hnsw (embedding vector_cosine_ops)');
-}
+catch (UniqueConstraintViolationException $e) { ... }
 ```
 
-### 9.3 PostgreSQL-Specific Features di HRConnect
-
-| Feature | File Migration | Guard Status |
-|---------|---------------|--------------|
-| `pgvector` extension | create_users_table | ✅ Guarded (CAT-018) |
-| `pg_trgm` extension | create_users_table | ✅ Guarded |
-| `pgcrypto` extension | create_users_table | ✅ Guarded |
-| `vector(128)` column | create_employees_table | ✅ Guarded (CAT-018) |
-| `vector(768)` column | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
-| HNSW index | create_knowledge_bases_table | ✅ Guarded (CAT-018) |
-| `jsonb` column | create_knowledge_bases_table | ⚠️ Not guarded (SQLite has json) |
-
-### 9.4 UniqueConstraintViolationException — Dilarang Hardcode Error Code
-
-**DILARANG** menangkap `QueryException` dan mengecek hardcoded error code seperti `$e->getCode() === '23505'`. Error code `23505` hanya berlaku di PostgreSQL; SQLite menggunakan code berbeda (`19` / `23000`).
-
-**WAJIB** menggunakan `Illuminate\Database\UniqueConstraintViolationException` yang otomatis menangkap unique constraint violation di semua driver:
-
-```php
-// ❌ SALAH — PostgreSQL-only
-} catch (QueryException $e) {
-    if ($e->getCode() === '23505') { ... }
-}
-
-// ✅ BENAR — Cross-database compatible
-} catch (UniqueConstraintViolationException $e) {
-    throw new AlreadyClockedInException('...');
-} catch (QueryException $e) {
-    throw $e;
-}
-```
-
-### 9.5 Vector/AI Test — Mocking Approach
-
-Fitur AI (face recognition similarity search, knowledge base RAG) **tidak bisa di-test secara real** di environment SQLite karena SQLite tidak mendukung `vector` column type.
-
-Pendekatan testing:
+### 9.5 AI/Vector Test Approach
 
 | Test Type | Pendekatan | Environment |
 |-----------|-----------|-------------|
-| Controller/Service logic | Mock `FaceRecognitionService` dan `RagService` | SQLite |
-| Model creation & fillable | `RefreshDatabase` — kolom `embedding` jadi `text` di SQLite | SQLite |
-| Vector similarity search | Skip atau gunakan PostgreSQL testing DB (`hrconnect_testing`) | PostgreSQL |
-| Face embedding format | Unit test serialization/deserialization dengan data dummy | SQLite |
-
-Contoh mock di Pest:
-```php
-it('allows clock in with valid face verification', function () {
-    $faceService = Mockery::mock(FaceRecognitionService::class);
-    $faceService->shouldReceive('verifyFace')
-        ->once()
-        ->andReturn(['similarity_percentage' => 95.5]);
-    
-    // ... test logic
-});
-```
+| Controller/Service logic | Mock service class | SQLite |
+| Model creation | `RefreshDatabase` — vector column fallback ke `text` | SQLite |
+| Vector similarity search | Real pgvector query | PostgreSQL |
+| RAG chat | AI SDK `HrKnowledgeBaseAgent::fake()` | SQLite |
 
 ---
 
-*Dokumen ini harus diikuti saat menulis test.*
-*Terakhir diupdate: 2026-05-31 — G1: Migrasi vector(1536)→vector(768) (Gemini text-embedding-004)*
+*Dokumen ini mencerminkan test suite aktual per 2026-06-20.*
+*73 test files, 1,018 tests, 3,516 assertions (SQLite) + 19 tests, 43 assertions (PostgreSQL).*

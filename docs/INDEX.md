@@ -54,10 +54,11 @@ docs/
 | Sprint & Branch Strategy | `planning/sprint-branch-strategy.md` | 35 sprint + branch naming |
 | Demo Preparation | `planning/demo-preparation.md` | Panduan presentasi skripsi |
 
-### 🔌 API (1 file)
+### 🔌 API (2 files)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
-| API Contracts | `api/api-contracts.md` | 43 endpoint API dengan request/response JSON |
+| API Contracts | `api/api-contracts.md` | 51 endpoint API (v3.0) — request/response JSON, auth, error codes |
+| OpenAPI Spec | `api/api.json` | OpenAPI 3.1 spec (auto-generated via Scramble) — 51 operations |
 
 ### 🎨 UI (1 file)
 | Dokumen | Path | Deskripsi |
@@ -74,7 +75,7 @@ docs/
 ### 🧪 Testing (1 file)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
-| Testing Strategy | `testing/testing-strategy.md` | Feature tests, unit tests, browser tests, §9 Database Testing Strategy |
+| Testing Strategy | `testing/testing-strategy.md` | Strategi testing, 73 test files, 1,018 tests (SQLite) + 19 (PG) |
 
 ### 🚀 Deployment (1 file)
 | Dokumen | Path | Deskripsi |
@@ -115,13 +116,13 @@ docs/
 | Core | 4 |
 | Architecture | 10 (termasuk SRS + SDD; erd.md dihapus → erd.dbml) |
 | Planning | 5 |
-| API | 1 |
+| API | 2 |
 | UI | 1 |
 | Security | 3 |
 | Testing | 1 |
 | Deployment | 1 |
 | Reference | 2 |
-| **TOTAL** | **27** |
+| **TOTAL** | **28** |
 
 > **PRD v3.1 NOTE (2026-05-21):** 35 koreksi konsolidasi di atas v3.0:
 > - **5 Kontradiksi Kritis (K1-K5):** LLM Gemini Pro→Flash, embedding dim 768, face distance threshold semantic, ERD source-of-truth, 33 enum lengkap
@@ -157,4 +158,4 @@ docs/
 
 ---
 
-> Last Updated: 2026-05-31
+> Last Updated: 2026-06-20
