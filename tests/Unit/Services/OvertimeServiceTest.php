@@ -89,3 +89,43 @@ test('cancelOvertime cancels and soft deletes overtime', function () {
     expect($cancelled->trashed())->toBeTrue()
         ->and($cancelled->status)->toBe(RequestStatus::CANCELLED);
 });
+
+test('createOvertime handles zero total hours (start_time equals end_time, treated as 24h overnight)', function () {
+    $employee = overtimeServiceEmployee();
+    $approvalService = Mockery::mock(ApprovalService::class);
+    $approvalService->shouldReceive('createApprovalWorkflow')
+        ->once()
+        ->with(Mockery::type(Overtime::class));
+
+    $service = new OvertimeService($approvalService);
+
+    $overtime = $service->createOvertime($employee, [
+        'date' => '2026-06-17',
+        'start_time' => '12:00',
+        'end_time' => '12:00',
+        'description' => 'Test',
+    ]);
+
+    expect((float) $overtime->total_hours)->toBe(24.0)
+        ->and($overtime->status)->toBe(RequestStatus::PENDING);
+});
+
+test('createOvertime handles very short duration (0.5 hour)', function () {
+    $employee = overtimeServiceEmployee();
+    $approvalService = Mockery::mock(ApprovalService::class);
+    $approvalService->shouldReceive('createApprovalWorkflow')
+        ->once()
+        ->with(Mockery::type(Overtime::class));
+
+    $service = new OvertimeService($approvalService);
+
+    $overtime = $service->createOvertime($employee, [
+        'date' => '2026-06-17',
+        'start_time' => '09:00',
+        'end_time' => '09:30',
+        'description' => 'Short task',
+    ]);
+
+    expect((float) $overtime->total_hours)->toBe(0.5)
+        ->and($overtime->status)->toBe(RequestStatus::PENDING);
+});

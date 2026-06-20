@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Company;
+use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\PayslipPdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,7 +63,7 @@ beforeEach(function () {
         'updated_at' => now(),
     ]);
 
-    DB::table('employees')->insertGetId([
+    $employee = Employee::create([
         'user_id' => $userId,
         'company_id' => 1,
         'branch_id' => $branchId,
@@ -82,12 +83,10 @@ beforeEach(function () {
         'education_level' => 'bachelor',
         'institution_name' => 'Univ A',
         'graduation_year' => 2015,
-        'created_at' => now(),
-        'updated_at' => now(),
     ]);
 
     $this->payrollId = DB::table('payrolls')->insertGetId([
-        'employee_id' => 1,
+        'employee_id' => $employee->id,
         'period' => '2026-06',
         'status' => 'published',
         'basic_salary' => 7_000_000,
@@ -152,4 +151,41 @@ test('buildTemplateData extra income includes payroll items', function () {
     expect($data['extra_income'])->toHaveCount(1);
     expect($data['extra_income'][0]['name'])->toBe('Bonus');
     expect($data['extra_income'][0]['amount'])->toBe(500_000);
+});
+
+test('buildTemplateData generated_at is a formatted date string', function () {
+    $ref = new ReflectionClass($this->service);
+    $method = $ref->getMethod('buildTemplateData');
+    $data = $method->invoke($this->service, $this->payroll);
+
+    expect($data['generated_at'])->toMatch('/^\d{2} \w+ \d{4} \d{2}:\d{2}$/');
+});
+
+test('buildTemplateData payroll contains salary breakdown keys', function () {
+    $ref = new ReflectionClass($this->service);
+    $method = $ref->getMethod('buildTemplateData');
+    $data = $method->invoke($this->service, $this->payroll);
+
+    expect($data['payroll'])->toHaveKeys([
+        'basic_salary', 'net_salary', 'gross_salary', 'total_deduction',
+        'pph21', 'bpjs_health', 'bpjs_employment',
+    ]);
+    expect((float) $data['payroll']['net_salary'])->toBe(7_700_000.0);
+    expect((float) $data['payroll']['gross_salary'])->toBe(8_500_000.0);
+});
+
+test('buildTemplateData employee name from payroll relation', function () {
+    $ref = new ReflectionClass($this->service);
+    $method = $ref->getMethod('buildTemplateData');
+    $data = $method->invoke($this->service, $this->payroll);
+
+    expect($data['payroll']['employee']['full_name'] ?? '')->toBe('John Doe');
+});
+
+test('buildTemplateData extra_income empty when no payroll items exist', function () {
+    $ref = new ReflectionClass($this->service);
+    $method = $ref->getMethod('buildTemplateData');
+    $data = $method->invoke($this->service, $this->payroll);
+
+    expect($data['extra_income'])->toBeArray()->toBeEmpty();
 });

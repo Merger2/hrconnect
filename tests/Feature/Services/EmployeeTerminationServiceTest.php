@@ -166,3 +166,41 @@ test('processContractEnd skips non-expired contracts', function () {
 
     expect($count)->toBe(0);
 });
+
+test('terminate DISMISSED sets termination_type and reason correctly', function () {
+    $this->calculator->method('calculatePesangon')->willReturn(10_000_000.0);
+    $this->calculator->method('calculateUangPenghargaanMasaKerja')->willReturn(14_000_000.0);
+    $this->calculator->method('calculateLeaveCashOut')->willReturn(2_000_000.0);
+
+    $employee = Employee::factory()->create([
+        'position_id' => $this->position->id,
+        'status' => EmployeeStatus::ACTIVE,
+    ]);
+
+    $result = $this->service->terminate(
+        $employee, TerminationType::DISMISSED, 'Efisiensi perusahaan', Carbon::now(),
+    );
+
+    expect($result->termination_type)->toBe(TerminationType::DISMISSED);
+    expect($result->termination_reason)->toBe('Efisiensi perusahaan');
+});
+
+test('terminate CONTRACT_END attaches financial_summary correctly', function () {
+    $this->calculator->method('calculateUangKompensasi')->willReturn(12_000_000.0);
+    $this->calculator->method('calculateLeaveCashOut')->willReturn(3_000_000.0);
+
+    $employee = Employee::factory()->create([
+        'position_id' => $this->position->id,
+        'status' => EmployeeStatus::ACTIVE,
+    ]);
+
+    $result = $this->service->terminate(
+        $employee, TerminationType::CONTRACT_END, null, Carbon::now(),
+    );
+
+    expect($result->financial_summary)->toHaveKeys(['uang_kompensasi', 'leave_cash_out']);
+    expect($result->financial_summary['uang_kompensasi'])->toBe(12_000_000.0);
+    expect($result->financial_summary['leave_cash_out'])->toBe(3_000_000.0);
+    expect($result->financial_summary)->not->toHaveKey('pesangon');
+    expect($result->financial_summary)->not->toHaveKey('uang_penghargaan_masa_kerja');
+});

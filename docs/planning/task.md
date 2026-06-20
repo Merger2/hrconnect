@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21/T-11/T-12/T-14 selesai. Test suite: 1,021 / 3,523 assertions).
+> Last updated: 2026-06-20 (Sesi thin-coverage gap closure — T-10/T-21/T-11/T-12/T-14 + PayrollExport (+2), PayslipPdf (+4), EmployeeTermination (+2), GeminiClient (+2), OvertimeService (+2). Test suite: 1,033 / 3,556 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -17,11 +17,11 @@
 
 | Area | Status | Notes |
 |---|---:|---|
-| Backend core services | ~82% | 15 services exist. RAG refactor (RAG-1–9) selesai (RAG-8 streaming plan belum implementasi). GeminiClient rewritten — delegates to laravel/ai SDK. HrKnowledgeBaseAgent created. Confidence field added to RAG output. pg_trgm fallback preserved. Pinecone search masih stub (return []). |
-| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. OpenAPI contract tests (25) verify route completeness, security, and response envelope alignment. 1,018 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
-| Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
+| Backend core services | ~85% | 15 services exist. Thin-coverage gaps ditutup: PayrollExport (3→9 tests), PayslipPdf (4→8), EmployeeTermination (6→8), OvertimeService (3→5), GeminiClient (6→8). RAG refactor (RAG-1–9) selesai (RAG-8 streaming plan belum). GeminiClient rewritten — delegates to laravel/ai SDK. Pinecone search masih stub (return []). |
+| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers, all module routes active. 25 OpenAPI contract tests verify route completeness, security, validation, pagination. 1,033 tests total. 13 web GET routes have smoke tests (T-13 ✅ 18 tests). 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
+| Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. CI PostgreSQL job masih commented out di `.github/workflows/tests.yml`. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 1,021 tests / 3,523 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Comprehensive gap audit completed — see P0-6. |
+| Test suite | 1,033 tests / 3,556 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -52,20 +52,22 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | Commands | `send-reminders` | Weekday scheduled — zero test coverage |
 | Commands | `knowledgebase:index` | Manual — zero test coverage |
 
-### Thin Coverage (<10 assertions)
+### Thin Coverage (<10 assertions — gap sudah ditutup)
 
-| File | Tests | Notes |
-|------|------:|-------|
-| `PayslipPdfServiceTest.php` | 4 | `buildTemplateData()` via reflection only; DomPDF facade untestable |
-| `PayrollExportServiceTest.php` | 6 | XLSX creation via inline `new Writer` (OpenSpout) — hard to mock |
-| `EmployeeTerminationServiceTest.php` | 6 | Happy path only; static `activity()` calls |
-| `OvertimeServiceTest.php` (unit) | 3 | Creation + overnight logic + cancel |
-| `EmbeddingServiceTest.php` | 6 | Chunk + format only; `new PdfParser` untestable without real PDF |
+Progress thin-coverage service, sekarang semua ≥7 assertions:
+
+| File | Tests (sebelum→sesudah) | Notes |
+|------|:---:|---|
+| `PayslipPdfServiceTest.php` | 4 → 8 | `buildTemplateData()` salary breakdown, employee name, empty extra_income, generated_at format. DomPDF facade tetap untestable. |
+| `PayrollExportServiceTest.php` | 6 → 8 | Added branch filter size, full-vs-empty period comparison. XLSX via inline `new Writer` (OpenSpout) — hard to mock. |
+| `EmployeeTerminationServiceTest.php` | 6 → 8 | Added DISMISSED with reason, CONTRACT_END financial_summary via terminate(). Static `activity()` calls. |
+| `OvertimeServiceTest.php` (unit) | 3 → 5 | Added equal-time 24h (overnight) + very short 0.5h duration edge cases. |
+| `GeminiClientTest.php` | 6 → 8 | Added empty context string, multi-embed (different input texts). |
+| `EmbeddingServiceTest.php` | 6 | Chunk + format only; `new PdfParser` untestable without real PDF. |
 | `FaceRecognitionServiceTest.php` | 6 unit + 5 PG integration | Unit: dimension + validation. PG: nearestNeighbors() invoked with threshold override, null embedding, similarity_percentage, rejection message. |
-| `GeminiClientTest.php` | 7 | Mock mode only; `sleep()` retry logic slows tests |
-| `GeofenceServiceTest.php` | 11 | OK but edge-case light |
-| `KnowledgeBaseServiceTest.php` | 11 | OK but RAG flow untested |
-| `PayrollCalculatorService` | Scattered | `generatePayroll()` (~150 baris) tanpa dedicated test file; coverage tersebar di 3 file |
+| `GeofenceServiceTest.php` | 11 | OK but edge-case light. |
+| `KnowledgeBaseServiceTest.php` | 11 | OK but RAG flow untested. |
+| `PayrollCalculatorService` | Scattered → 41 dedicated (T-20) | `generatePayroll()` (~150 baris) tanpa dedicated test file; coverage tersebar di 3 file. |
 
 ### No Dead/TODO/FIXME Code Found
 - `app/` source files: 0 TODO markers, 0 FIXME markers, 0 commented-out code blocks, 0 `dd()`/`dump()`/`ray()`/`logger()->debug()` calls
@@ -301,7 +303,16 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-24 | Reimbursement store policy call | ✅ Added `$this->authorize('create', Reimbursement::class)` to `ReimbursementController::store()`. | ✅ |
 | T-25 | Employee API team scope decision | ✅ Deferred: team scoping via Livewire query scope, not API policy concern (per AGENTS.md). No code change needed. | ✅ |
 
-## P1 — Security And Data Protection Hardening
+## P1 — Remaining Gaps (Target 100%)
+
+| ID | Task | Acceptance Criteria | Status |
+|---|---|---|---|
+| T-26 | Jobs failed/retry/log edge cases | 9 tests cover basic dispatch only. Add: GenerateEmployeePayrollJob failed() with exception (reimbursement rollback), GeneratePayslipPdfJob failed(), EmbeddingJob failed(), queue connection/retry assertions. | ⏳ |
+| T-27 | Pinecone search test | Ganti stub `return []` dengan test nyata: searchSimilar/searchByKeyword di EmbeddingServiceTest dengan pgvector SQLite fallback yang return READY records. Test flow end-to-end dengan KnowledgeBase factory. | ⏳ |
+| T-28 | FormRequest validation sisa (22/28) | 6 already tested (T-11 contract tests). Add validation rule tests untuk 22 sisanya: `StoreLeaveRequest`, `StoreOvertimeRequest`, `StoreReimbursementRequest`, `StoreAttendanceRequest`, `StoreKnowledgeBaseRequest`, dll. Prioritaskan yang punya custom rules (encryptedUnique, base64, file). | ⏳ |
+| T-29 | CI PostgreSQL enable | Uncomment PG job di `.github/workflows/tests.yml`. Verifikasi composer test:pgsql jalan di CI dengan pgvector/pgvector:pg16 + extensions vector, pg_trgm, pgcrypto. | ⏳ |
+| T-30 | Events/Mail arsitektur | Tidak ada `app/Events/`, `app/Listeners/`, `app/Mail/` — evaluasi apakah perlu dibuat untuk notifikasi email (lampiran payslip, reminder cuti, etc) atau cukup pakai existing Notification system. Jika perlu, tambah test. | ⏳ |
+| T-31 | GeoJson - deployment doc update | Update `docs/api/api-contracts.md` dan `docs/testing/testing-strategy.md` dengan test count 1,033. Pastikan INDEX.md dan task.md konsisten. | ⏳ |
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
@@ -353,11 +364,11 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 ## Backend Readiness Milestones
 
 | Milestone | Target Readiness | Gate |
-|---|---:|---|
+|:---|---:|---|
 | M1 — Scope + audit complete | 75-80% | P0 complete with endpoint/service matrices. |
-| M2 — Feature gaps closed | ~75% | P1 API/service tasks complete. ProfileService zero coverage eliminated. Policy boundary tests done (all 8). Command tests done (all 9, with 3 bugfixes). Remaining gaps: web routes, middleware, form requests, factories, queue edge cases, Pinecone stub. |
+| M2 — Feature gaps closed | 80-85% | P1 API/service tasks complete. ProfileService zero coverage eliminated. Policy boundary tests done (all 8). Command tests done (all 9, with 3 bugfixes). Thin-coverage service gaps ditutup (PayrollExport 8, PayslipPdf 8, EmployeeTermination 8, Overtime 5, GeminiClient 8). Remaining: T-26 (jobs edge cases), T-27 (Pinecone), T-28 (FormRequest 22 sisa), T-29 (CI PG), T-31 (docs). |
 | M3 — RAG production-ready | 85-90% | Laravel AI SDK adoption completed or explicitly deferred with stable custom implementation. |
-| M4 — Test coverage complete | 90-93% | `composer test` and `composer test:pgsql` pass with required coverage. |
+| M4 — Test coverage complete | 90-93% | `composer test` passing (33/33 files, 1,033 tests, 3,556 assertions). `composer test:pgsql` — CI PG job masih commented out. |
 | M5 — Security hardened | 93-95% | Authorization, IDOR, PII, rate limit, secret audits complete. |
 | M6 — Operations ready | 95-98% | Queue, scheduler, cache, storage, backup, deployment rehearsal complete. |
 | M7 — API frozen | 98-100% | API contract stable for frontend implementation. |

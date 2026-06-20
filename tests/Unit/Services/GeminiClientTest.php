@@ -73,3 +73,26 @@ test('isHealthy return true dengan SDK fake', function () {
 
     expect($client->isHealthy())->toBeTrue();
 });
+
+test('generateContent handles empty context gracefully', function () {
+    HrKnowledgeBaseAgent::fake([[
+        'answer' => 'Maaf, tidak ada informasi yang relevan.',
+        'confidence' => 'low',
+    ]]);
+
+    $client = new GeminiClient;
+
+    $answer = $client->generateContent('Pertanyaan tanpa konteks', []);
+
+    expect($answer)->toBeString()->not->toBeEmpty();
+});
+
+test('embed generates vectors for different input texts', function () {
+    $client = new GeminiClient;
+
+    $v1 = $client->embed('Cuti tahunan');
+    $v2 = $client->embed('BPJS Kesehatan');
+
+    expect($v1)->toHaveCount(768);
+    expect($v2)->toHaveCount(768);
+});

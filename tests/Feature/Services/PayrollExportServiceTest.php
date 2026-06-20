@@ -235,3 +235,17 @@ test('file is valid XLSX with ZIP header signature', function () {
     expect(file_exists($path))->toBeTrue();
     assertValidXlsx($path);
 });
+
+test('full monthly export file is larger than empty period export', function () {
+    $fullPath = $this->service->exportMonthly('2026-05');
+    $emptyPath = $this->service->exportMonthly('2099-12');
+
+    expect(filesize($fullPath))->toBeGreaterThan(filesize($emptyPath));
+});
+
+test('branch filter reduces export file size compared to full export', function () {
+    $fullPath = $this->service->exportMonthly('2026-05');
+    $filteredPath = $this->service->exportMonthly('2026-05', branchId: $this->branchId);
+
+    expect(filesize($fullPath))->toBeGreaterThan(filesize($filteredPath));
+});
