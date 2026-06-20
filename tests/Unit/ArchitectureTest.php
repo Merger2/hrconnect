@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateEmployeePayrollJob;
+use App\Jobs\GeneratePayslipPdfJob;
+use App\Jobs\ProcessKnowledgeBaseEmbedding;
 use App\Models\KnowledgeBase;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +15,21 @@ arch('services use strict types')
 arch('jobs use strict types')
     ->expect('App\Jobs')
     ->toUseStrictTypes();
+
+test('all jobs have retry configuration', function () {
+    $refs = [
+        GenerateEmployeePayrollJob::class,
+        GeneratePayslipPdfJob::class,
+        ProcessKnowledgeBaseEmbedding::class,
+    ];
+
+    foreach ($refs as $ref) {
+        $props = (new ReflectionClass($ref))->getDefaultProperties();
+        expect($props)->toHaveKey('tries');
+        expect($props)->toHaveKey('backoff');
+        expect($props)->toHaveKey('timeout');
+    }
+});
 
 arch('controllers extend base Controller')
     ->expect('App\Http\Controllers')

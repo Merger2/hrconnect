@@ -18,6 +18,7 @@ use App\Services\EmbeddingService;
 use App\Services\PayrollCalculatorService;
 use App\Services\PayslipPdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Support\Facades\Log;
 
 uses(RefreshDatabase::class)->group('jobs', 'unit');
@@ -221,6 +222,66 @@ test('ProcessKnowledgeBaseEmbedding logs on failure', function () {
 
     $job = new ProcessKnowledgeBaseEmbedding($kb);
     $job->failed(new RuntimeException('API timeout'));
+
+    Log::shouldHaveReceived('error')
+        ->withArgs(fn ($msg) => str_contains($msg, 'KB embedding job failed permanently'))
+        ->once();
+});
+
+test('GeneratePayslipPdfJob queue attribute is payroll_high', function () {
+    $ref = new ReflectionClass(GeneratePayslipPdfJob::class);
+    $attrs = $ref->getAttributes(Queue::class);
+
+    expect($attrs)->toHaveCount(1);
+    $queue = $attrs[0]->newInstance();
+    expect($queue->queue)->toBe('payroll_high');
+});
+
+test('ProcessKnowledgeBaseEmbedding queue is default', function () {
+    $kb = new KnowledgeBase;
+    $kb->title = 'Queue Test';
+    $kb->content = 'Content';
+    $kb->knowledgeable()->associate($this->employee);
+    $kb->save();
+
+    $job = new ProcessKnowledgeBaseEmbedding($kb);
+    expect($job->queue)->toBe('default');
+});
+
+test('GenerateEmployeePayrollJob failed handles null exception', function () {
+    Log::spy();
+
+    $job = new GenerateEmployeePayrollJob($this->employee, '2026-06');
+    $job->failed(null);
+
+    Log::shouldHaveReceived('error')
+        ->withArgs(fn ($msg) => str_contains($msg, 'Payroll generation failed permanently'))
+        ->once();
+});
+
+test('GeneratePayslipPdfJob failed handles null exception', function () {
+    Log::spy();
+
+    $payroll = Payroll::factory()->create(['employee_id' => $this->employee->id]);
+    $job = new GeneratePayslipPdfJob($payroll);
+    $job->failed(null);
+
+    Log::shouldHaveReceived('error')
+        ->withArgs(fn ($msg) => str_contains($msg, 'PDF generation failed permanently'))
+        ->once();
+});
+
+test('ProcessKnowledgeBaseEmbedding failed handles null exception', function () {
+    Log::spy();
+
+    $kb = new KnowledgeBase;
+    $kb->title = 'Null Exception';
+    $kb->content = 'Content';
+    $kb->knowledgeable()->associate($this->employee);
+    $kb->save();
+
+    $job = new ProcessKnowledgeBaseEmbedding($kb);
+    $job->failed(null);
 
     Log::shouldHaveReceived('error')
         ->withArgs(fn ($msg) => str_contains($msg, 'KB embedding job failed permanently'))
