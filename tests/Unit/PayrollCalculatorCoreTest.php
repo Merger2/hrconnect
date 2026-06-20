@@ -3,6 +3,7 @@
 use App\Enums\EmploymentType;
 use App\Enums\MaritalStatus;
 use App\Enums\PayrollStatus;
+use App\Enums\ReimbursementStatus;
 use App\Enums\TerCategory;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Employee;
@@ -10,6 +11,7 @@ use App\Models\LeaveBalance;
 use App\Models\Overtime;
 use App\Models\Payroll;
 use App\Models\Position;
+use App\Models\Reimbursement;
 use App\Models\User;
 use App\Services\ApprovalService;
 use App\Services\PayrollCalculatorService;
@@ -429,6 +431,41 @@ describe('generatePayroll', function () {
         expect((float) $second->basic_salary)->toBe(5_000_000.0);
         expect(Payroll::where('id', $firstId)->count())->toBe(1);
         expect(Payroll::count())->toBe(1);
+    });
+
+    test('reimbursements are claimed and not double-counted on regenerate', function () {
+        $user = User::factory()->create();
+        $employee = Employee::factory()->create([
+            'user_id' => $user->id,
+            'company_id' => $this->companyId,
+            'branch_id' => $this->branchId,
+            'department_id' => $this->deptId,
+            'position_id' => $this->positionId,
+            'marital_status' => 'single',
+            'employment_type' => 'permanent',
+            'join_date' => '2020-01-01',
+            'employee_number' => 'EMP-TEST-REIM-001',
+        ]);
+
+        $employee->setRelation('position', Position::find($this->positionId));
+
+        $reimbursement = Reimbursement::factory()->create([
+            'employee_id' => $employee->id,
+            'expense_date' => '2026-06-15',
+            'amount' => 500000,
+            'status' => ReimbursementStatus::APPROVED,
+        ]);
+
+        $payroll1 = $this->service->generatePayroll($employee, '2026-06');
+
+        $reimbursement->refresh();
+        expect($reimbursement->payroll_id)->toBe($payroll1->id);
+        expect($reimbursement->status)->toBe(ReimbursementStatus::PAID);
+        expect((float) $payroll1->gross_salary)->toBe(6000000.0);
+
+        $payroll2 = $this->service->generatePayroll($employee, '2026-06');
+
+        expect((float) $payroll2->gross_salary)->toBe(5500000.0);
     });
 });
 
