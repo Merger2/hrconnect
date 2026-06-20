@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21/T-11 selesai. Test suite: 1,018 / 3,516 assertions).
+> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21/T-11/T-12 selesai. Test suite: 1,018 / 3,516 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -106,7 +106,7 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | Blade view | 38 view files — no assertions on rendered content |
 | CI | `.github/workflows/tests.yml` — SQLite CI works; PostgreSQL CI commented out |
 | CI config | `phpunit.pgsql.xml` naming confirmed correct |
-| Docs | `docs/INDEX.md` outdated; `docs/testing/testing-strategy.md` references nonexistent files |
+| Docs | `docs/testing/testing-strategy.md` rewritten (was aspirational plan, now documents actual suite of 73 files, 1,018 tests). `docs/INDEX.md` updated (API count 1→2, total 27→28). | ✅ |
 
 ### FormRequest Gaps (6 of 28 have zero validation tests)
 
@@ -286,7 +286,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ✅ | Added CompanySettingObserver tests (2 — was the only gap). Created CacheIntegrationTest (8 tests: TaxConfig cachedAll, CompanySetting get/set/fallback, Holiday cachedYear active/inactive, BpjsConfig cachedAll). |
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | ✅ | 15 total tests (up from 10). Added: 768D KB embedding cosine search, nearest neighbor ranking (3 non-collinear vectors), CipherSweet whereBlind null return, HNSW index existence verification on knowledge_bases.embedding. |
 | T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ✅ | 25 contract tests: spec structure (version, tags, schemas, paths, ops), route completeness (all 51 routes documented, no extras), security contract (4 public routes security: [], 47 protected 401 via ref), validation contract (all POST/PUT with requestBody have 422), pagination contract (7 list endpoints with meta.current_page/last_page/per_page/total), operationId uniqueness, smoke tests (health 200, 401/403/422 shapes, 404). |
-| T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ⏳ |
+| T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ✅ | Rewritten from scratch (was aspirational plan referencing nonexistent files). Now documents 73 actual test files, 1,018 tests, PostgreSQL suite, AI/vector testing approach. INDEX.md updated: API count 1→2 (+api.json), total 27→28 files. |
 | T-13 | Web route smoke tests | ✅ 18 smoke tests: 6 public auth pages (200), 6 unauthenticated redirects (302), 3 authenticated pages (200), 2 special pages (email_verify→dashboard, security→confirm-password), 1 2FA-challenge redirect. | ✅ |
 | T-14 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
 | T-15 | ProfileService test | ✅ 5 tests (getProfile with/without employee, updateProfile, changePassword success/wrong current). Plus refactored ProfileController to use the service (eliminated dead code). | ✅ |
