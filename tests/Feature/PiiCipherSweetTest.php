@@ -252,4 +252,59 @@ test('PII endpoint returns forbidden for user without manage_employees', functio
     $this->withHeader('Authorization', "Bearer {$token}")
         ->getJson("/api/v1/employees/{$this->employee->id}/pii")
         ->assertStatus(403);
+
+    $this->assertDatabaseMissing('activity_log', [
+        'log_name' => 'security',
+        'subject_id' => $this->employee->id,
+    ]);
+});
+
+test('PII endpoint audit log has correct description', function () {
+    $hrUser = User::factory()->create()->assignRole('hr-manager');
+    $token = $hrUser->createToken('test')->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson("/api/v1/employees/{$this->employee->id}/pii")
+        ->assertOk();
+
+    $this->assertDatabaseHas('activity_log', [
+        'log_name' => 'security',
+        'subject_type' => Employee::class,
+        'subject_id' => $this->employee->id,
+        'causer_id' => $hrUser->id,
+        'description' => 'Mengakses data PII sensitif karyawan tanpa masking.',
+    ]);
+});
+
+test('regular employee show does not create audit log', function () {
+    $hrUser = User::factory()->create()->assignRole('hr-manager');
+    $token = $hrUser->createToken('test')->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson("/api/v1/employees/{$this->employee->id}")
+        ->assertOk();
+
+    $this->assertDatabaseMissing('activity_log', [
+        'log_name' => 'security',
+    ]);
+});
+
+test('multiple PII accesses create multiple audit entries', function () {
+    $hrUser = User::factory()->create()->assignRole('hr-manager');
+    $token = $hrUser->createToken('test')->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson("/api/v1/employees/{$this->employee->id}/pii")
+        ->assertOk();
+
+    $this->withHeader('Authorization', "Bearer {$token}")
+        ->getJson("/api/v1/employees/{$this->employee->id}/pii")
+        ->assertOk();
+
+    $count = DB::table('activity_log')
+        ->where('log_name', 'security')
+        ->where('subject_id', $this->employee->id)
+        ->count();
+
+    expect($count)->toBe(2);
 });

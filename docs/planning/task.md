@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (P1-1 ✅, P1-10 ✅, P1-13 ✅, P1-14 ✅ — password expiry, API response, middleware, FormRequest coverage).
+> Last updated: 2026-06-20 (P1-1 ✅, P1-2 ✅, P1-10 ✅, P1-13 ✅, P1-14 ✅).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -244,7 +244,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|---|
 | P1-1 | Auth/Profile API audit | ✅ AuthProof (+8 tests). ✅ Password expiry + logout-all (+5 edge-case/token tests: boundary 90 hari, CreateNewUser sets password_changed_at, CompanySetting=0 disable, unauthenticated 401, single-token revoke). | ✅ |
-| P1-2 | Employee API audit | ✅ EmployeeProof (+8 tests: auth/permission gating). Combined with ControllerHttpTest coverage (11 existing tests) = comprehensive. 🚧 Remaining: PII audit log verification. | 🚧 |
+| P1-2 | Employee API audit | ✅ EmployeeProof (+8 tests). Combined with ControllerHttpTest (11 existing). ✅ PII audit log verification: audit log written with correct description/log_name/causer, no audit for 403 or regular show(), multiple accesses create multiple entries. PiiCipherSweetTest now 17 tests (+3). | ✅ |
 | P1-3 | Attendance API audit | ✅ AttendanceProof (+20 tests: clock-in/out PIN+GPS+WFA, today, index, WFA approval). 🚧 Remaining: face recognition 128D flow. | 🚧 |
 | P1-4 | Leave API audit | ✅ LeaveProof (+9 tests: auth/permission/delete/owner gaps). Combined with LeaveAndOvertimeTest (9 existing) = comprehensive. 🚧 Remaining: approval quota deduction edge cases. | 🚧 |
 | P1-5 | Overtime API audit | ✅ OvertimeProof (+6 tests: auth/permission/owner gaps). Combined with LeaveAndOvertimeTest (8 existing) = covered. 🚧 Remaining: payroll-impact proof. | 🚧 |
