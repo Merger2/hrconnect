@@ -3,6 +3,8 @@
 use App\Enums\PayrollStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\FaceNotRecognizedException;
+use App\Exceptions\FaceNotRegisteredException;
+use App\Models\CompanySetting;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\FaceRecognitionService;
@@ -210,6 +212,61 @@ test('FaceRecognitionService verifies matching face embeddings and rejects dista
 
     $service->verifyFace($employee, [1.0, ...array_fill(0, 127, 0.0)]);
 })->throws(FaceNotRecognizedException::class);
+
+test('FaceRecognitionService respects CompanySetting threshold override on PostgreSQL', function () {
+    CompanySetting::set('face_distance_threshold', 0.5);
+
+    $employeeId = createPostgresEmployee([
+        'employee_number' => 'PG-F02',
+        'face_embedding' => new Vector(array_fill(0, 128, 0.1)),
+    ]);
+
+    $employee = Employee::query()->findOrFail($employeeId);
+    $service = app(FaceRecognitionService::class);
+
+    // Query with first 35 dims=1, rest=0 → cos_dist ≈ 0.477
+    // Fails at default 0.15 threshold, passes at overridden 0.5
+    $nearQuery = [...array_fill(0, 35, 1.0), ...array_fill(35, 93, 0.0)];
+
+    expect($service->verifyFace($employee, $nearQuery))
+        ->toMatchArray(['valid' => true]);
+});
+
+test('FaceRecognitionService throws FaceNotRegisteredException for null embedding on PostgreSQL', function () {
+    $employeeId = createPostgresEmployee(['employee_number' => 'PG-F03']);
+
+    $employee = Employee::query()->findOrFail($employeeId);
+    $service = app(FaceRecognitionService::class);
+
+    expect(fn () => $service->verifyFace($employee, array_fill(0, 128, 0.1)))
+        ->toThrow(FaceNotRegisteredException::class, 'belum terdaftar');
+});
+
+test('FaceRecognitionService returns similarity_percentage on successful match', function () {
+    $employeeId = createPostgresEmployee([
+        'employee_number' => 'PG-F04',
+        'face_embedding' => new Vector(array_fill(0, 128, 0.1)),
+    ]);
+
+    $employee = Employee::query()->findOrFail($employeeId);
+    $result = app(FaceRecognitionService::class)->verifyFace($employee, array_fill(0, 128, 0.1));
+
+    expect($result['valid'])->toBeTrue();
+    expect($result['similarity_percentage'])->toBeGreaterThanOrEqual(99.0);
+});
+
+test('FaceRecognitionService throws FaceNotRecognizedException with similarity message for distant match', function () {
+    $employeeId = createPostgresEmployee([
+        'employee_number' => 'PG-F05',
+        'face_embedding' => new Vector(array_fill(0, 128, 0.1)),
+    ]);
+
+    $employee = Employee::query()->findOrFail($employeeId);
+    $service = app(FaceRecognitionService::class);
+
+    expect(fn () => $service->verifyFace($employee, [1.0, ...array_fill(0, 127, 0.0)]))
+        ->toThrow(FaceNotRecognizedException::class, 'Kemiripan hanya');
+});
 
 test('CipherSweet encrypts employee PII and supports blind index lookups', function () {
     $nik = '3276010101999999';
