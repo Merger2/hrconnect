@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (P1-1 ✅ — password expiry + logout-all edge cases. Test suite: 1,074 / 3,599 assertions).
+> Last updated: 2026-06-20 (P1-1 ✅, P1-10 ✅ — password expiry + API response standardization complete).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -252,7 +252,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-7 | Approval API audit | ✅ ApprovalProof (+8 tests: auth/validation/resource gaps). Combined with ControllerHttpTest (7 existing) = covered. | 🚧 |
 | P1-8 | Payroll API audit | ✅ PayrollProof (+20 tests: list, show, generate, payslip gating, exports, permission). 🚧 Remaining: lock behavior (published/paid), concurrent generate race. | 🚧 |
 | P1-9 | KnowledgeBase API audit | ✅ KnowledgeBaseProof (+14 tests: chat mock mode, upload partialMock+Queue::fake, delete, auth/permission). | 🚧 |
-| P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no API controller `format*()` methods remain. 🚧 Remaining: final response-envelope decision and API contract tests (`API-1`, `T-11`). | 🚧 |
+| P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no `format*()` methods remain. ✅ Response envelope standardized: 4 patterns (data, list+meta, action+message+data, action+message). Health endpoint intentional exception. ✅ API contract tests pass (39 tests, API-1 ✅, T-11 ✅). | ✅ |
 | P1-11 | ProfileService test coverage | ✅ 5 tests written (getProfile with/without employee, updateProfile, changePassword success, changePassword wrong current). Refactored ProfileController to use ProfileService (eliminated dead code). | ✅ |
 | P1-12 | Web route smoke tests | 25+ web GET routes (Fortify auth pages, dashboard, settings) have zero test coverage. Add smoke tests. | ✅ |
 | P1-13 | Middleware test coverage | Add tests for `DeviceDetection` and `GeofenceValidation` middleware (2 of 3 untested). | ⏳ |
