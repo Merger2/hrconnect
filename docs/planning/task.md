@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (T-26/T-27/T-28/T-29/T-30/T-31 complete. Thin-coverage + Jobs + FormRequest + CI PG + Embedding edge cases + Events/Mail cleanup + Docs sync. Test suite: 1,069 / 3,589 assertions).
+> Last updated: 2026-06-20 (P1-1 ✅ — password expiry + logout-all edge cases. Test suite: 1,074 / 3,599 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,10 +18,10 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~88% | 15 services exist. Thin-coverage gaps ditutup (T-26/T-27/T-28). EmbeddingService edge cases: searchByKeyword empty, searchSimilar topK, end-to-end flow, Gemini failure. Jobs: queue config + null exception + arch test (28 tests). FormRequest: 29 new tests (7 zero-coverage + StoreOvertimeRequest). RAG refactor selesai. Semua notifikasi aktif: PayrollPublished di-wire. 4 dead notifications removed. |
-| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers. 25 OpenAPI contract tests. 1,069 tests total. Web smoke tests (T-13 ✅). FormRequest validation 7/8 zero-coverage closed. Middleware (16 tests). |
+| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers. 25 OpenAPI contract tests. 1,074 tests total. Web smoke tests (T-13 ✅). FormRequest validation 7/8 zero-coverage closed. Middleware (16 tests). |
 | Production hardening | ~82% | Semua audit selesai. CI PostgreSQL job aktif (T-29 ✅). Backup mail placeholder fix. Backup mail → env variable. |
 | Frontend integration | ~10-20% | Ditunda. PWA manifest/SW sudah ada tapi tidak sync dengan backend. |
-| Test suite | 1,069 tests / 3,589 assertions (SQLite) + 19 tests / 43 assertions (PG) | Semua T-26 s/d T-31 selesai. 28→28 test files (8 notification → 4, 15 EmbeddingService, 51 FormRequestValidation). |
+| Test suite | 1,074 tests / 3,599 assertions (SQLite) + 19 tests / 43 assertions (PG) | P1-1 ✅ — password expiry + logout-all edge cases (+5 tests, +10 assertions). |
 
 ## Completed Summary
 
@@ -277,7 +277,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Minimum Coverage | Status |
 |---|---|---|---|
-| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 991 total across 60+ files. Web route smoke tests (T-13) ✅, FormRequest validation tests (P1-14) ✅, Middleware tests ✅. Remaining: deeper edge cases per group. |
+| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 1,074 total across 60+ files. Web route smoke tests (T-13) ✅, FormRequest validation tests (P1-14) ✅, Middleware tests ✅, P1-1 ✅. Remaining: deeper edge cases per group. |
 | T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ✅ | Full 5-role × 44-permission matrix validated via data-driven test (217 cases: 118 can + 99 cannot). Matrix added to RoleAndPermissionSeederTest. |
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | ✅ |
 | T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ✅ | 10 new tests added to AttendanceProofTest. All 30 tests pass. Covers: face clock-in, PIN fallback, geofence 403, low accuracy, WFA clock-out, face clock-out, non-WFA approval rejection, manage_attendances scope, status filter. |
@@ -308,10 +308,10 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
 | T-26 | Jobs failed/retry/log edge cases | Tambah: queue name verification all 3 jobs (attribute + property), failed() with null exception (nullable ?Throwable), architecture test retry config all jobs. | ✅ 22→28 tests (JobTest 9 + JobEdgeCaseTest 18 + ArchitectureTest 1 = 28). Queue name: PayslipPdf via #[Queue('payroll_high')], KB via onQueue('default'), Payroll via $queue property. Null exception handling: all 3 jobs. Retry config arch test: tries + backoff + timeout. | ✅ |
-| T-27 | Pinecone search test | Tidak ada Pinecone di project — vector search pakai pgvector (native PostgreSQL). Test SQLite fallback: searchSimilar/ searchByKeyword dengan KnowledgeBase factory. Tambah end-to-end: processKnowledgeBase → embed → searchSimilar. | ✅ 6→15 tests (EmbeddingServiceTest). Ditambah: searchByKeyword no match empty, searchSimilar topK limit, processKnowledgeBase stores embedding content, error handling catch block, end-to-end flow. Status PROCESSING→ready + searchSimilar finds it. Full suite: 1,073 tests / 3,611 assertions. | ✅ |
-| T-28 | FormRequest validation sisa (22/28) | 6 already tested. Add validation rule tests untuk 7 zero-coverage FormRequests (ForgotPassword, TwoFactorChallenge, PendingApprovals, ExportPeriod, ExportMonthly, UploadDocument, Chat) + StoreOvertimeRequest dengan after() hook + DB overtime limits. 22 sisanya sudah punya feature-level HTTP 422 coverage. | ✅ 51 tests (29 baru): ForgotPasswordRequest (3), TwoFactorChallengeRequest (2), PendingApprovalsRequest (4), ExportPeriodRequest (3), ExportMonthlyRequest (4), ChatRequest (4), UploadDocumentRequest (5), StoreOvertimeRequest (4). Total suite: 1,068 tests / 3,602 assertions. | ✅ |
+| T-27 | Pinecone search test | Tidak ada Pinecone di project — vector search pakai pgvector (native PostgreSQL). Test SQLite fallback: searchSimilar/ searchByKeyword dengan KnowledgeBase factory. Tambah end-to-end: processKnowledgeBase → embed → searchSimilar. | ✅ 6→15 tests (EmbeddingServiceTest). Ditambah: searchByKeyword no match empty, searchSimilar topK limit, processKnowledgeBase stores embedding content, error handling catch block, end-to-end flow. Status PROCESSING→ready + searchSimilar finds it. Full suite: 1,074 tests / 3,599 assertions. | ✅ |
+| T-28 | FormRequest validation sisa (22/28) | 6 already tested. Add validation rule tests untuk 7 zero-coverage FormRequests (ForgotPassword, TwoFactorChallenge, PendingApprovals, ExportPeriod, ExportMonthly, UploadDocument, Chat) + StoreOvertimeRequest dengan after() hook + DB overtime limits. 22 sisanya sudah punya feature-level HTTP 422 coverage. | ✅ 51 tests (29 baru): ForgotPasswordRequest (3), TwoFactorChallengeRequest (2), PendingApprovalsRequest (4), ExportPeriodRequest (3), ExportMonthlyRequest (4), ChatRequest (4), UploadDocumentRequest (5), StoreOvertimeRequest (4). Total suite: 1,074 tests / 3,599 assertions. | ✅ |
 | T-29 | CI PostgreSQL enable | Uncomment PG job di `.github/workflows/tests.yml`. Verifikasi composer test:pgsql jalan di CI dengan pgvector/pgvector:pg16 + extensions vector, pg_trgm, pgcrypto. | ✅ Sudah aktif — PG job sudah terdefinisi di tests.yml, tidak perlu di-comment-out. `composer test:pgsql` jalan lokal 19 tests/43 assertions pass. CI perlu diverifikasi dengan push ke branch yang punya PG env. |
-| T-30 | Events/Mail arsitektur | Evaluasi: adequate with existing Notification system (8 classes, all via `toMail()`). No need for custom Events/Listeners/Mailables — observer + job sudah cukup. Wire up PayrollPublished di PayrollObserver (alongside GeneratePayslipPdfJob). Delete 4 dead notifications (LeaveApproved, LeaveRequestSubmitted, LeaveRejected, ApprovalOverdue — never dispatched anywhere). Keep NewDeviceLogin (desain bagus, trigger point nanti). Fix backup mail placeholder → env. | ✅ Dead code removed (4 files, 4 tests). PayrollPublished now triggers on payroll→PUBLISHED. Full suite: 1,069 tests / 3,589 assertions. | ✅ |
+| T-30 | Events/Mail arsitektur | Evaluasi: adequate with existing Notification system (8 classes, all via `toMail()`). No need for custom Events/Listeners/Mailables — observer + job sudah cukup. Wire up PayrollPublished di PayrollObserver (alongside GeneratePayslipPdfJob). Delete 4 dead notifications (LeaveApproved, LeaveRequestSubmitted, LeaveRejected, ApprovalOverdue — never dispatched anywhere). Keep NewDeviceLogin (desain bagus, trigger point nanti). Fix backup mail placeholder → env. | ✅ Dead code removed (4 files, 4 tests). PayrollPublished now triggers on payroll→PUBLISHED. Full suite: 1,074 tests / 3,599 assertions. | ✅ |
 | T-31 | Docs sync | Update test count di INDEX.md, testing-strategy.md, task.md. Semua sync ke 1,069 / 3,589. | ✅ |
 
 | ID | Task | Acceptance Criteria | Status |
@@ -368,7 +368,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | M1 — Scope + audit complete | 75-80% | P0 complete with endpoint/service matrices. |
 | M2 — Feature gaps closed | 80-85% | P1 API/service tasks complete. Thin-coverage, Jobs, FormRequest, Embedding, Events/Mail — semua selesai. Notifikasi: PayrollPublished di-wire, 4 dead removed. |
 | M3 — RAG production-ready | 85-90% | Laravel AI SDK adoption completed or explicitly deferred with stable custom implementation. |
-| M4 — Test coverage complete | 90-93% | `composer test` passing (1,069 tests, 3,589 assertions). `composer test:pgsql` passing (19 tests, 43 assertions). CI PG job aktif. |
+| M4 — Test coverage complete | 90-93% | `composer test` passing (1,074 tests, 3,599 assertions). `composer test:pgsql` passing (19 tests, 43 assertions). CI PG job aktif. |
 | M5 — Security hardened | 93-95% | Authorization, IDOR, PII, rate limit, secret audits complete. |
 | M6 — Operations ready | 95-98% | Queue, scheduler, cache, storage, backup, deployment rehearsal complete. |
 | M7 — API frozen | 98-100% | API contract stable. Semua T-26 s/d T-31 selesai. Frontend bisa mulai. |
