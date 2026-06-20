@@ -247,7 +247,7 @@ php artisan route:list --path=api --except-vendor
 | Console Commands | 25 | 41 |
 | PostgreSQL Integration | 19 | 43 |
 | OpenAPI Contract | 25 | 617 |
-| **Total** | **1,018** | **3,516** |
+| **Total** | **1,069** | **3,589** |
 
 ---
 
@@ -305,4 +305,4 @@ catch (UniqueConstraintViolationException $e) { ... }
 ---
 
 *Dokumen ini mencerminkan test suite aktual per 2026-06-20.*
-*73 test files, 1,018 tests, 3,516 assertions (SQLite) + 19 tests, 43 assertions (PostgreSQL).*
+*73 test files, 1,069 tests, 3,589 assertions (SQLite) + 19 tests, 43 assertions (PostgreSQL).*

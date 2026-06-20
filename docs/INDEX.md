@@ -75,7 +75,7 @@ docs/
 ### 🧪 Testing (1 file)
 | Dokumen | Path | Deskripsi |
 |---------|------|-----------|
-| Testing Strategy | `testing/testing-strategy.md` | Strategi testing, 73 test files, 1,018 tests (SQLite) + 19 (PG) |
+| Testing Strategy | `testing/testing-strategy.md` | Strategi testing, 73 test files, 1,069 tests (SQLite) + 19 (PG) |
 
 ### 🚀 Deployment (1 file)
 | Dokumen | Path | Deskripsi |

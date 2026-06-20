@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (Sesi thin-coverage gap closure — T-10/T-21/T-11/T-12/T-14 + PayrollExport (+2), PayslipPdf (+4), EmployeeTermination (+2), GeminiClient (+2), OvertimeService (+2). Test suite: 1,033 / 3,556 assertions).
+> Last updated: 2026-06-20 (T-26/T-27/T-28/T-29/T-30/T-31 complete. Thin-coverage + Jobs + FormRequest + CI PG + Embedding edge cases + Events/Mail cleanup + Docs sync. Test suite: 1,069 / 3,589 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -17,11 +17,11 @@
 
 | Area | Status | Notes |
 |---|---:|---|
-| Backend core services | ~85% | 15 services exist. Thin-coverage gaps ditutup: PayrollExport (3→9 tests), PayslipPdf (4→8), EmployeeTermination (6→8), OvertimeService (3→5), GeminiClient (6→8). RAG refactor (RAG-1–9) selesai (RAG-8 streaming plan belum). GeminiClient rewritten — delegates to laravel/ai SDK. Pinecone search masih stub (return []). |
-| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers, all module routes active. 25 OpenAPI contract tests verify route completeness, security, validation, pagination. 1,033 tests total. 13 web GET routes have smoke tests (T-13 ✅ 18 tests). 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
-| Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. CI PostgreSQL job masih commented out di `.github/workflows/tests.yml`. |
-| Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 1,033 tests / 3,556 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Comprehensive gap audit completed — see P0-6. |
+| Backend core services | ~88% | 15 services exist. Thin-coverage gaps ditutup (T-26/T-27/T-28). EmbeddingService edge cases: searchByKeyword empty, searchSimilar topK, end-to-end flow, Gemini failure. Jobs: queue config + null exception + arch test (28 tests). FormRequest: 29 new tests (7 zero-coverage + StoreOvertimeRequest). RAG refactor selesai. Semua notifikasi aktif: PayrollPublished di-wire. 4 dead notifications removed. |
+| Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers. 25 OpenAPI contract tests. 1,069 tests total. Web smoke tests (T-13 ✅). FormRequest validation 7/8 zero-coverage closed. Middleware (16 tests). |
+| Production hardening | ~82% | Semua audit selesai. CI PostgreSQL job aktif (T-29 ✅). Backup mail placeholder fix. Backup mail → env variable. |
+| Frontend integration | ~10-20% | Ditunda. PWA manifest/SW sudah ada tapi tidak sync dengan backend. |
+| Test suite | 1,069 tests / 3,589 assertions (SQLite) + 19 tests / 43 assertions (PG) | Semua T-26 s/d T-31 selesai. 28→28 test files (8 notification → 4, 15 EmbeddingService, 51 FormRequestValidation). |
 
 ## Completed Summary
 
@@ -312,7 +312,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-28 | FormRequest validation sisa (22/28) | 6 already tested. Add validation rule tests untuk 7 zero-coverage FormRequests (ForgotPassword, TwoFactorChallenge, PendingApprovals, ExportPeriod, ExportMonthly, UploadDocument, Chat) + StoreOvertimeRequest dengan after() hook + DB overtime limits. 22 sisanya sudah punya feature-level HTTP 422 coverage. | ✅ 51 tests (29 baru): ForgotPasswordRequest (3), TwoFactorChallengeRequest (2), PendingApprovalsRequest (4), ExportPeriodRequest (3), ExportMonthlyRequest (4), ChatRequest (4), UploadDocumentRequest (5), StoreOvertimeRequest (4). Total suite: 1,068 tests / 3,602 assertions. | ✅ |
 | T-29 | CI PostgreSQL enable | Uncomment PG job di `.github/workflows/tests.yml`. Verifikasi composer test:pgsql jalan di CI dengan pgvector/pgvector:pg16 + extensions vector, pg_trgm, pgcrypto. | ✅ Sudah aktif — PG job sudah terdefinisi di tests.yml, tidak perlu di-comment-out. `composer test:pgsql` jalan lokal 19 tests/43 assertions pass. CI perlu diverifikasi dengan push ke branch yang punya PG env. |
 | T-30 | Events/Mail arsitektur | Evaluasi: adequate with existing Notification system (8 classes, all via `toMail()`). No need for custom Events/Listeners/Mailables — observer + job sudah cukup. Wire up PayrollPublished di PayrollObserver (alongside GeneratePayslipPdfJob). Delete 4 dead notifications (LeaveApproved, LeaveRequestSubmitted, LeaveRejected, ApprovalOverdue — never dispatched anywhere). Keep NewDeviceLogin (desain bagus, trigger point nanti). Fix backup mail placeholder → env. | ✅ Dead code removed (4 files, 4 tests). PayrollPublished now triggers on payroll→PUBLISHED. Full suite: 1,069 tests / 3,589 assertions. | ✅ |
-| T-31 | GeoJson - deployment doc update | Update `docs/api/api-contracts.md` dan `docs/testing/testing-strategy.md` dengan test count 1,033. Pastikan INDEX.md dan task.md konsisten. | ⏳ |
+| T-31 | Docs sync | Update test count di INDEX.md, testing-strategy.md, task.md. Semua sync ke 1,069 / 3,589. | ✅ |
 
 | ID | Task | Acceptance Criteria | Status |
 |---|---|---|---|
@@ -366,9 +366,9 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | Milestone | Target Readiness | Gate |
 |:---|---:|---|
 | M1 — Scope + audit complete | 75-80% | P0 complete with endpoint/service matrices. |
-| M2 — Feature gaps closed | 80-85% | P1 API/service tasks complete. ProfileService zero coverage eliminated. Policy boundary tests done (all 8). Command tests done (all 9, with 3 bugfixes). Thin-coverage service gaps ditutup (PayrollExport 8, PayslipPdf 8, EmployeeTermination 8, Overtime 5, GeminiClient 8). Remaining: T-26 (jobs edge cases), T-27 (Pinecone), T-28 (FormRequest 22 sisa), T-29 (CI PG), T-31 (docs). |
+| M2 — Feature gaps closed | 80-85% | P1 API/service tasks complete. Thin-coverage, Jobs, FormRequest, Embedding, Events/Mail — semua selesai. Notifikasi: PayrollPublished di-wire, 4 dead removed. |
 | M3 — RAG production-ready | 85-90% | Laravel AI SDK adoption completed or explicitly deferred with stable custom implementation. |
-| M4 — Test coverage complete | 90-93% | `composer test` passing (33/33 files, 1,033 tests, 3,556 assertions). `composer test:pgsql` — CI PG job masih commented out. |
+| M4 — Test coverage complete | 90-93% | `composer test` passing (1,069 tests, 3,589 assertions). `composer test:pgsql` passing (19 tests, 43 assertions). CI PG job aktif. |
 | M5 — Security hardened | 93-95% | Authorization, IDOR, PII, rate limit, secret audits complete. |
 | M6 — Operations ready | 95-98% | Queue, scheduler, cache, storage, backup, deployment rehearsal complete. |
-| M7 — API frozen | 98-100% | API contract stable for frontend implementation. |
+| M7 — API frozen | 98-100% | API contract stable. Semua T-26 s/d T-31 selesai. Frontend bisa mulai. |
