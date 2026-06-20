@@ -70,7 +70,7 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreSQL (pgve
 ### Infrastructure
 - Livewire: 1 component (Logout.php) — no test
 - Blade: 38 view files — no assertions on rendered content
-- CI: PostgreSQL CI commented out in `.github/workflows/tests.yml`
+- CI: PostgreSQL job aktif di `.github/workflows/tests.yml` (pgvector/pgvector:pg16, extensions dibuat via psql). `composer test:pgsql` = 19 tests/43 assertions.
 
 ## Critical Gotchas
 
