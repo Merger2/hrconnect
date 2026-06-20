@@ -11,7 +11,7 @@ use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
 
 uses(RefreshDatabase::class);
 
@@ -41,7 +41,7 @@ beforeEach(function () {
     $this->user->employee()->save($this->employee);
 });
 
-function handleGeofence(Request $request): \Illuminate\Http\Response
+function handleGeofence(Request $request): Response
 {
     $middleware = new GeofenceValidation;
 
@@ -56,7 +56,7 @@ test('passes through when no user is authenticated', function () {
 
     $result = handleGeofence($request);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Http\Response::class);
+    expect($result)->toBeInstanceOf(Response::class);
 });
 
 test('passes through when user has no employee', function () {
@@ -69,7 +69,7 @@ test('passes through when user has no employee', function () {
 
     $result = handleGeofence($request);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Http\Response::class);
+    expect($result)->toBeInstanceOf(Response::class);
 });
 
 test('passes through when employee has no branch (zero coords)', function () {
@@ -95,7 +95,7 @@ test('passes through when employee has no branch (zero coords)', function () {
 
     $result = handleGeofence($request);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Http\Response::class);
+    expect($result)->toBeInstanceOf(Response::class);
 });
 
 test('passes through on GET request', function () {
@@ -104,7 +104,7 @@ test('passes through on GET request', function () {
 
     $result = handleGeofence($request);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Http\Response::class);
+    expect($result)->toBeInstanceOf(Response::class);
 });
 
 test('passes through when POST has no lat/lng', function () {
@@ -113,7 +113,7 @@ test('passes through when POST has no lat/lng', function () {
 
     $result = handleGeofence($request);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Http\Response::class);
+    expect($result)->toBeInstanceOf(Response::class);
 });
 
 test('passes through when user is within branch radius', function () {
@@ -126,7 +126,7 @@ test('passes through when user is within branch radius', function () {
 
     $result = handleGeofence($request);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Http\Response::class);
+    expect($result)->toBeInstanceOf(Response::class);
 });
 
 test('throws exception when user is outside branch radius', function () {

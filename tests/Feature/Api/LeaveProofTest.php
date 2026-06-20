@@ -20,9 +20,11 @@ uses(RefreshDatabase::class);
 
 function createLeave(array $overrides = []): Leave
 {
+    $start = now()->addWeekdays(2)->toDateString();
+
     return Leave::create(array_merge([
-        'start_date' => now()->addWeek()->toDateString(),
-        'end_date' => now()->addWeek()->addDays(2)->toDateString(),
+        'start_date' => $start,
+        'end_date' => now()->addWeekdays(2)->addDays(2)->toDateString(),
         'day_type' => DayType::FULL_DAY->value,
         'total_days' => 3.0,
         'reason' => 'Test leave',
@@ -72,8 +74,8 @@ beforeEach(function () {
 test('store requires authentication', function () {
     $this->postJson('/api/v1/leave', [
         'leave_type_id' => 1,
-        'start_date' => now()->addWeek()->toDateString(),
-        'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+        'start_date' => now()->addWeekdays(2)->toDateString(),
+        'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
         'day_type' => DayType::FULL_DAY->value,
         'reason' => 'Test',
     ])->assertStatus(401);
@@ -115,15 +117,15 @@ test('employee can view own leave', function () {
     LeaveBalance::factory()->create([
         'employee_id' => $this->employeeEmp->id,
         'leave_type_id' => $this->leaveType->id,
-        'year' => now()->addWeek()->year,
+        'year' => now()->year,
         'quota' => 12,
     ]);
 
     $createResponse = $this->withHeader('Authorization', "Bearer {$this->token}")
         ->postJson('/api/v1/leave', [
             'leave_type_id' => $this->leaveType->id,
-            'start_date' => now()->addWeek()->toDateString(),
-            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'start_date' => now()->addWeekdays(2)->toDateString(),
+            'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
             'day_type' => DayType::FULL_DAY->value,
             'reason' => 'Cuti tahunan.',
         ]);
@@ -161,15 +163,15 @@ test('employee can delete own pending leave', function () {
     LeaveBalance::factory()->create([
         'employee_id' => $this->employeeEmp->id,
         'leave_type_id' => $this->leaveType->id,
-        'year' => now()->addWeek()->year,
+        'year' => now()->year,
         'quota' => 12,
     ]);
 
     $createResponse = $this->withHeader('Authorization', "Bearer {$this->token}")
         ->postJson('/api/v1/leave', [
             'leave_type_id' => $this->leaveType->id,
-            'start_date' => now()->addWeek()->toDateString(),
-            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'start_date' => now()->addWeekdays(2)->toDateString(),
+            'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
             'day_type' => DayType::FULL_DAY->value,
             'reason' => 'Cuti tahunan.',
         ]);
@@ -215,7 +217,7 @@ test('leave store with proof file returns 201', function () {
     LeaveBalance::factory()->create([
         'employee_id' => $this->employeeEmp->id,
         'leave_type_id' => $this->leaveType->id,
-        'year' => now()->addWeek()->year,
+        'year' => now()->year,
         'quota' => 12,
     ]);
 
@@ -224,8 +226,8 @@ test('leave store with proof file returns 201', function () {
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
         ->post('/api/v1/leave', [
             'leave_type_id' => $this->leaveType->id,
-            'start_date' => now()->addWeek()->toDateString(),
-            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'start_date' => now()->addWeekdays(2)->toDateString(),
+            'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
             'day_type' => DayType::FULL_DAY->value,
             'reason' => 'Cuti tahunan dengan bukti.',
             'proof_file' => $file,
@@ -242,8 +244,8 @@ test('leave store with invalid proof file type returns 422', function () {
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
         ->post('/api/v1/leave', [
             'leave_type_id' => $this->leaveType->id,
-            'start_date' => now()->addWeek()->toDateString(),
-            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'start_date' => now()->addWeekdays(2)->toDateString(),
+            'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
             'day_type' => DayType::FULL_DAY->value,
             'reason' => 'Cuti tahunan dengan bukti.',
             'proof_file' => $file,
@@ -259,8 +261,8 @@ test('leave store with proof file larger than 5MB returns 422', function () {
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
         ->post('/api/v1/leave', [
             'leave_type_id' => $this->leaveType->id,
-            'start_date' => now()->addWeek()->toDateString(),
-            'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+            'start_date' => now()->addWeekdays(2)->toDateString(),
+            'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
             'day_type' => DayType::FULL_DAY->value,
             'reason' => 'Cuti tahunan dengan bukti.',
             'proof_file' => $file,

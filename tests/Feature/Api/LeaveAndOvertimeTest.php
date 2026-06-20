@@ -3,17 +3,21 @@
 namespace Tests\Feature\Api;
 
 use App\Enums\DayType;
+use App\Enums\EmploymentType;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Models\Overtime;
 use App\Models\Position;
 use App\Models\User;
+use App\Services\LeaveService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -50,6 +54,19 @@ beforeEach(function () {
 
     $this->token = $this->employeeUser->createToken('test')->plainTextToken;
 
+    $this->hrUser = User::factory()->create();
+    $this->hrUser->assignRole('hr-manager');
+    $this->hrEmp = Employee::factory()->create([
+        'user_id' => $this->hrUser->id,
+        'company_id' => $this->company->id,
+        'branch_id' => $this->branch->id,
+        'department_id' => $this->department->id,
+        'position_id' => $this->position->id,
+    ]);
+
+    $this->managerToken = $this->managerUser->createToken('test')->plainTextToken;
+    $this->hrToken = $this->hrUser->createToken('test')->plainTextToken;
+
     $this->leaveType = LeaveType::factory()->create(['deducts_from_quota' => true]);
 });
 
@@ -70,8 +87,8 @@ describe('LeaveController', function () {
         $response = $this->withHeader('Authorization', "Bearer {$this->token}")
             ->postJson('/api/v1/leave', [
                 'leave_type_id' => $this->leaveType->id,
-                'start_date' => now()->addWeek()->toDateString(),
-                'end_date' => now()->addWeek()->addDays(2)->toDateString(),
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(2)->toDateString(),
                 'day_type' => DayType::FULL_DAY->value,
                 'reason' => 'Cuti tahunan untuk keperluan keluarga.',
             ]);
@@ -87,12 +104,12 @@ describe('LeaveController', function () {
         LeaveBalance::factory()->create([
             'employee_id' => $this->employeeEmp->id,
             'leave_type_id' => $this->leaveType->id,
-            'year' => now()->addWeek()->year,
+            'year' => now()->year,
             'quota' => 12,
         ]);
 
-        $startDate = now()->addWeek()->toDateString();
-        $endDate = now()->addWeek()->addDays(2)->toDateString();
+        $startDate = now()->addWeekdays(2)->toDateString();
+        $endDate = now()->addWeekdays(2)->addDays(2)->toDateString();
 
         $this->withHeader('Authorization', "Bearer {$this->token}")
             ->postJson('/api/v1/leave', [
@@ -107,8 +124,8 @@ describe('LeaveController', function () {
         $this->withHeader('Authorization', "Bearer {$this->token}")
             ->postJson('/api/v1/leave', [
                 'leave_type_id' => $this->leaveType->id,
-                'start_date' => now()->addWeek()->addDay()->toDateString(),
-                'end_date' => now()->addWeek()->addDays(3)->toDateString(),
+                'start_date' => now()->addWeekdays(2)->addDay()->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(3)->toDateString(),
                 'day_type' => DayType::FULL_DAY->value,
                 'reason' => 'Cuti kedua yang overlap harus ditolak.',
             ])
@@ -133,8 +150,8 @@ describe('LeaveController', function () {
         $this->withHeader('Authorization', "Bearer {$token}")
             ->postJson('/api/v1/leave', [
                 'leave_type_id' => 1,
-                'start_date' => now()->addWeek()->toDateString(),
-                'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
                 'day_type' => DayType::FULL_DAY->value,
                 'reason' => 'Test cuti tanpa employee record.',
             ])
@@ -162,8 +179,8 @@ describe('LeaveController', function () {
         $createResponse = $this->withHeader('Authorization', "Bearer {$this->token}")
             ->postJson('/api/v1/leave', [
                 'leave_type_id' => $this->leaveType->id,
-                'start_date' => now()->addWeek()->toDateString(),
-                'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
                 'day_type' => DayType::FULL_DAY->value,
                 'reason' => 'Cuti tahunan untuk keperluan keluarga.',
             ]);
@@ -187,8 +204,8 @@ describe('LeaveController', function () {
         $createResponse = $this->withHeader('Authorization', "Bearer {$this->token}")
             ->postJson('/api/v1/leave', [
                 'leave_type_id' => $this->leaveType->id,
-                'start_date' => now()->addWeek()->toDateString(),
-                'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
                 'day_type' => DayType::FULL_DAY->value,
                 'reason' => 'Cuti tahunan untuk keperluan keluarga.',
             ]);
@@ -226,8 +243,8 @@ describe('LeaveController', function () {
         $createResponse = $this->withHeader('Authorization', "Bearer {$this->token}")
             ->postJson('/api/v1/leave', [
                 'leave_type_id' => $this->leaveType->id,
-                'start_date' => now()->addWeek()->toDateString(),
-                'end_date' => now()->addWeek()->addDays(1)->toDateString(),
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
                 'day_type' => DayType::FULL_DAY->value,
                 'reason' => 'Cuti tahunan untuk keperluan keluarga.',
             ]);
@@ -237,6 +254,86 @@ describe('LeaveController', function () {
         $this->withHeader('Authorization', "Bearer {$this->token}")
             ->getJson("/api/v1/leave/{$leaveId}")
             ->assertOk();
+    });
+
+    it('rejects sick leave without proof file', function () {
+        $sickLeaveType = LeaveType::factory()->create([
+            'code' => 'sick',
+            'deducts_from_quota' => true,
+        ]);
+
+        LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $sickLeaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+
+        $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->postJson('/api/v1/leave', [
+                'leave_type_id' => $sickLeaveType->id,
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
+                'day_type' => DayType::FULL_DAY->value,
+                'reason' => 'Saya sedang sakit dan perlu istirahat.',
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Cuti Sakit wajib menyertakan bukti (Surat Dokter).');
+    });
+
+    it('rejects probation employee applying quota leave', function () {
+        $probationUser = User::factory()->create();
+        $probationUser->assignRole('employee');
+        $probationToken = $probationUser->createToken('test')->plainTextToken;
+
+        Employee::factory()->create([
+            'user_id' => $probationUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+            'parent_id' => $this->managerEmp->id,
+            'employment_type' => EmploymentType::PROBATION,
+        ]);
+
+        $this->withHeader('Authorization', "Bearer {$probationToken}")
+            ->postJson('/api/v1/leave', [
+                'leave_type_id' => $this->leaveType->id,
+                'start_date' => now()->addWeekdays(2)->toDateString(),
+                'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
+                'day_type' => DayType::FULL_DAY->value,
+                'reason' => 'Mencoba mengajukan cuti saat probation.',
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Karyawan masa percobaan tidak dapat mengajukan cuti tahunan.');
+    });
+
+    it('rejects cancel of non-pending leave', function () {
+        LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+
+        $leave = app(LeaveService::class)->applyLeave($this->employeeEmp, [
+            'leave_type_id' => $this->leaveType->id,
+            'start_date' => now()->addWeekdays(2)->toDateString(),
+            'end_date' => now()->addWeekdays(2)->addDays(1)->toDateString(),
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti tahunan untuk keperluan keluarga.',
+        ]);
+
+        $approval = $leave->approvals()->where('level', 1)->first();
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$approval->id}/approve")
+            ->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->token}")
+            ->deleteJson("/api/v1/leave/{$leave->id}")
+            ->assertStatus(403);
     });
 });
 
@@ -352,5 +449,254 @@ describe('OvertimeController', function () {
         $this->withHeader('Authorization', "Bearer {$otherToken}")
             ->getJson("/api/v1/overtime/{$overtime->id}")
             ->assertStatus(403);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// APPROVAL CONTROLLER
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('ApprovalController', function () {
+
+    function createLeave(Employee $employee, LeaveType $leaveType, ?LeaveBalance $balance = null): array
+    {
+        $bal = $balance ?? LeaveBalance::factory()->create([
+            'employee_id' => $employee->id,
+            'leave_type_id' => $leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+
+        $start = now()->addWeekdays(2)->toDateString();
+        $leave = app(LeaveService::class)->applyLeave($employee, [
+            'leave_type_id' => $leaveType->id,
+            'start_date' => $start,
+            'end_date' => $start,
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti tahunan untuk keperluan keluarga.',
+        ]);
+
+        return [$leave, $bal];
+    }
+
+    it('approves L1 transitioning status to approved_l1', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")
+            ->assertOk()
+            ->assertJsonPath('data.is_final', false);
+
+        $leave->refresh();
+        expect($leave->status->value)->toBe('approved_l1');
+    });
+
+    it('full L1+L2 approval deducts quota and sets approved', function () {
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType, $balance);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")
+            ->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")
+            ->assertOk()
+            ->assertJsonPath('data.is_final', true);
+
+        $leave->refresh();
+        expect($leave->status->value)->toBe('approved');
+        expect($balance->fresh()->used)->toEqual(1);
+    });
+
+    it('direct L2 approval without supervisor deducts quota', function () {
+        $noManagerUser = User::factory()->create();
+        $noManagerUser->assignRole('employee');
+
+        $noManagerEmp = Employee::factory()->create([
+            'user_id' => $noManagerUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+            'parent_id' => null,
+        ]);
+
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $noManagerEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+
+        [$leave] = createLeave($noManagerEmp, $this->leaveType, $balance);
+
+        expect($leave->approvals)->toHaveCount(1);
+        $l2 = $leave->approvals->first();
+        expect($l2->level->value)->toBe(2);
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")
+            ->assertOk()
+            ->assertJsonPath('data.is_final', true);
+
+        $leave->refresh();
+        expect($leave->status->value)->toBe('approved');
+        expect($balance->fresh()->used)->toEqual(1);
+    });
+
+    it('rejects leave and sets rejection reason', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+        $l1 = $leave->approvals()->where('level', 1)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/reject", [
+                'rejection_reason' => 'Cuti ditolak karena alasan operasional yang sangat mendesak.',
+            ])
+            ->assertOk();
+
+        $leave->refresh();
+        expect($leave->status->value)->toBe('rejected');
+        expect($leave->rejection_reason)->toBe('Cuti ditolak karena alasan operasional yang sangat mendesak.');
+    });
+
+    it('shows pending approvals for approver', function () {
+        createLeave($this->employeeEmp, $this->leaveType);
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->getJson('/api/v1/approvals/pending')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.approvable_type', 'Leave');
+    });
+
+    it('filters pending approvals by type', function () {
+        createLeave($this->employeeEmp, $this->leaveType);
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->getJson('/api/v1/approvals/pending?type=leave')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1);
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->getJson('/api/v1/approvals/pending?type=overtime')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+    });
+
+    it('returns empty pending list when no approvals', function () {
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->getJson('/api/v1/approvals/pending')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+    });
+
+    it('returns 403 when non-approver tries to approve', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+        $l1 = $leave->approvals()->where('level', 1)->first();
+
+        $otherUser = User::factory()->create();
+        $otherUser->assignRole('employee');
+        $otherToken = $otherUser->createToken('test')->plainTextToken;
+        Employee::factory()->create([
+            'user_id' => $otherUser->id,
+            'company_id' => $this->company->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'position_id' => $this->position->id,
+        ]);
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$otherToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")
+            ->assertStatus(403);
+    });
+
+    it('returns 409 on double approval', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+        $l1 = $leave->approvals()->where('level', 1)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")
+            ->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Approval ini sudah diproses sebelumnya.');
+    });
+
+    it('returns 409 on double rejection', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+        $l1 = $leave->approvals()->where('level', 1)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/reject", [
+                'rejection_reason' => 'Cuti ditolak karena alasan operasional yang sangat mendesak.',
+            ])
+            ->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/reject", [
+                'rejection_reason' => 'Percobaan tolak kedua yang seharusnya gagal.',
+            ])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Approval ini sudah diproses sebelumnya.');
+    });
+
+    it('prevents L2 approval before L1', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Approval level sebelumnya harus disetujui terlebih dahulu.');
+    });
+
+    it('rejection does not deduct quota', function () {
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType, $balance);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+        $usedBefore = $balance->fresh()->used;
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/reject", [
+                'rejection_reason' => 'Cuti ditolak karena alasan operasional yang sangat mendesak.',
+            ])
+            ->assertOk();
+
+        expect($balance->fresh()->used)->toBe($usedBefore);
     });
 });

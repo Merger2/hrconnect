@@ -8,11 +8,12 @@ use App\Http\Requests\Api\ListReimbursementRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
-function validate(FormRequest $request, array $data): \Illuminate\Validation\Validator
+function validate(FormRequest $request, array $data): Illuminate\Validation\Validator
 {
     $request->setContainer(app());
     $request->merge($data);

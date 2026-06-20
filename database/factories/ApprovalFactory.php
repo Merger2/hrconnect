@@ -6,6 +6,9 @@ use App\Enums\ApprovalLevel;
 use App\Enums\ApprovalStatus;
 use App\Models\Approval;
 use App\Models\Employee;
+use App\Models\Leave;
+use App\Models\Overtime;
+use App\Models\Reimbursement;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,9 +22,9 @@ class ApprovalFactory extends Factory
     {
         return [
             'approvable_type' => $this->faker->randomElement([
-                \App\Models\Leave::class,
-                \App\Models\Overtime::class,
-                \App\Models\Reimbursement::class,
+                Leave::class,
+                Overtime::class,
+                Reimbursement::class,
             ]),
             'approvable_id' => $this->faker->numberBetween(1, 1000),
             'approver_id' => Employee::factory(),

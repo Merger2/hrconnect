@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\KnowledgeBaseCategory;
 use App\Enums\KnowledgeBaseStatus;
+use App\Models\Attendance;
 use App\Models\KnowledgeBase;
 use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,7 +18,7 @@ class KnowledgeBaseFactory extends Factory
     public function definition(): array
     {
         return [
-            'knowledgeable_type' => \App\Models\Attendance::class,
+            'knowledgeable_type' => Attendance::class,
             'knowledgeable_id' => 1,
             'title' => $this->faker->sentence(),
             'content' => $this->faker->paragraphs(3, true),

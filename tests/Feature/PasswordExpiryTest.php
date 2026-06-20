@@ -1,10 +1,9 @@
 <?php
 
-use App\Services\ProfileService;
-use App\Models\CompanySetting;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
 uses(RefreshDatabase::class);
 
@@ -67,7 +66,7 @@ test('forgot-password reset sets password_changed_at', function () {
         'password_changed_at' => now()->subDays(100),
     ]);
 
-    $action = app(\Laravel\Fortify\Contracts\ResetsUserPasswords::class);
+    $action = app(ResetsUserPasswords::class);
     $action->reset($user, ['password' => 'NewPassword456!', 'password_confirmation' => 'NewPassword456!']);
 
     $user->refresh();

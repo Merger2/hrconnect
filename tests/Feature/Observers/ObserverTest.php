@@ -4,6 +4,7 @@ use App\Enums\PayrollStatus;
 use App\Jobs\GeneratePayslipPdfJob;
 use App\Models\Attendance;
 use App\Models\BpjsConfig;
+use App\Models\CompanySetting;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
@@ -12,6 +13,7 @@ use App\Models\Shift;
 use App\Models\TaxConfig;
 use App\Observers\AttendanceObserver;
 use App\Observers\BpjsConfigObserver;
+use App\Observers\CompanySettingObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
@@ -150,6 +152,20 @@ describe('LeaveObserver', function () {
         Cache::shouldReceive('forget')->with('leave:summary:1:2026')->once();
 
         (new LeaveObserver)->deleted($leave);
+    });
+});
+
+describe('CompanySettingObserver', function () {
+    it('invalidates cache on saved', function () {
+        $setting = CompanySetting::factory()->make(['key' => 'leave_sick_code']);
+        Cache::shouldReceive('forget')->with('settings:leave_sick_code')->once();
+        (new CompanySettingObserver)->saved($setting);
+    });
+
+    it('invalidates cache on deleted', function () {
+        $setting = CompanySetting::factory()->make(['key' => 'leave_sick_code']);
+        Cache::shouldReceive('forget')->with('settings:leave_sick_code')->once();
+        (new CompanySettingObserver)->deleted($setting);
     });
 });
 

@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class KnowledgeBase extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [

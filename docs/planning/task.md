@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. Test suite: 704 / 2,522 assertions).
+> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9 selesai. Test suite: 991 / 2,887 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -18,10 +18,10 @@
 | Area | Status | Notes |
 |---|---:|---|
 | Backend core services | ~82% | 15 services exist. RAG refactor (RAG-1–9) selesai (RAG-8 streaming plan belum implementasi). GeminiClient rewritten — delegates to laravel/ai SDK. HrKnowledgeBaseAgent created. Confidence field added to RAG output. pg_trgm fallback preserved. Pinecone search masih stub (return []). |
-| Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 705 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules now tested (6 files in 1 test file). |
+| Backend API layer | ~90% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. 991 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 956 tests / 2,780 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: observer/cache, attendance regression, leave/approval regression, OpenAPI contract, FaceRecognition pgvector, Livewire component. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 991 tests / 2,887 assertions | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Gaps: PostgreSQL integration, OpenAPI contract, FaceRecognition pgvector, Livewire component, KB fallback keyword search test, Payroll concurrent lock edge cases. Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -45,8 +45,8 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 | Events/Mail | Architecture | No `app/Events/`, `app/Listeners/`, `app/Mail/` directories exist |
 | Integration | Blade-to-API | Zero tests for end-to-end frontend-backend flow |
 | Web routes | Fortify + dashboard | 25+ GET routes (auth pages, dashboard, settings) — zero smoke tests |
-| Middleware | `DeviceDetection` | UA-parsing middleware — zero test coverage |
-| Middleware | `GeofenceValidation` | Middleware-layer test coverage zero (service-layer tested via GeofenceServiceTest) |
+| Middleware | `DeviceDetection` | UA-parsing middleware — zero test coverage ✅ FIXED (8 tests in DeviceDetectionTest) |
+| Middleware | `GeofenceValidation` | Middleware-layer test coverage zero ✅ FIXED (8 tests in GeofenceValidationTest) |
 | Commands | `detect-missed-clock` | Daily scheduled — zero test coverage |
 | Commands | `auto-approve-wfa` | Daily scheduled — zero test coverage |
 | Commands | `send-reminders` | Weekday scheduled — zero test coverage |
@@ -275,15 +275,15 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 
 | ID | Task | Minimum Coverage | Status |
 |---|---|---|---|
-| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 585 total across 58 files. Remaining: deeper edge cases per group, web route smoke tests (T-13), form request validation tests (P1-14). |
+| T-1 | Full API endpoint tests | Happy path, validation error, unauthorized, forbidden, state conflict for all V1 endpoint groups | 🚧 | Proof tests done for all 11 groups + policy tests + command tests = 991 total across 60+ files. Web route smoke tests (T-13) ✅, FormRequest validation tests (P1-14) ✅, Middleware tests ✅. Remaining: deeper edge cases per group. |
 | T-2 | Role/permission matrix tests | super-admin, hr-manager, finance, manager, employee access boundaries | ✅ | Full 5-role × 44-permission matrix validated via data-driven test (217 cases: 118 can + 99 cannot). Matrix added to RoleAndPermissionSeederTest. |
 | T-3 | PII/CipherSweet tests | `whereBlind()`, `Rule::encryptedUnique()`, raw encrypted values, PII reveal audit logging | ✅ |
-| T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ⏳ |
-| T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ⏳ |
+| T-4 | Attendance regression tests | Face success, face fail -> PIN, PIN streak, fake GPS, outside geofence, WFA, duplicate clock-in/out | ✅ | 10 new tests added to AttendanceProofTest. All 30 tests pass. Covers: face clock-in, PIN fallback, geofence 403, low accuracy, WFA clock-out, face clock-out, non-WFA approval rejection, manage_attendances scope, status filter. |
+| T-5 | Leave/approval regression tests | Final approval quota deduction, reject no deduction, no negative balance, overlap, wrong approver | ✅ | 15 new tests in LeaveAndOvertimeTest. Covers: sick leave without proof, probation employee, cancel non-pending, L1→approved_l1, full L1+L2→approved+quota deducted, direct L2, reject→REJECTED+rejection_reason, pending list, wrong approver 403, double approve/reject 409, L2 before L1 422, rejection no deduction. |
 | T-6 | Payroll regression tests | Generate, regenerate draft, reject published/paid changes, payslip gating, exports, concurrent lock behavior | 🚧 | PayrollProof covers generate, payslip gating, exports (+10 tests). ✅ Added: model guard rejects direct PUBLISHED/PAID updates (3 tests), regenerate draft preserves record (1 test), lock release via finally block (existing). Remaining: concurrent lock edge cases. |
 | T-7 | KnowledgeBase/RAG tests | Upload, chunk, embedding job, vector search, fallback keyword search, structured response | 🚧 | KnowledgeBaseProof covers chat, upload, delete (+14 tests). RAG-1–9 complete (except RAG-8). 37 RAG tests pass via AI SDK fakes. Remaining: fallback keyword search direct test, streaming endpoint. |
 | T-8 | Queue/job tests | Payroll, payslip PDF, embedding, notifications failed handlers and retry/log behavior | ✅ |
-| T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ⏳ |
+| T-9 | Observer/cache tests | TaxConfig, BpjsConfig, Holiday, Employee, Attendance, Leave, Payroll invalidation behavior | ✅ | Added CompanySettingObserver tests (2 — was the only gap). Created CacheIntegrationTest (8 tests: TaxConfig cachedAll, CompanySetting get/set/fallback, Holiday cachedYear active/inactive, BpjsConfig cachedAll). |
 | T-10 | PostgreSQL integration expansion | pgvector, CipherSweet, constraints, payroll/approval locking, migration extension guards | 🚧 |
 | T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ⏳ |
 | T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ⏳ |

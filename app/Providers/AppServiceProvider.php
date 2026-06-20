@@ -4,10 +4,10 @@ namespace App\Providers;
 
 use App\Models\Attendance;
 use App\Models\BpjsConfig;
+use App\Models\CompanySetting;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
-use App\Models\CompanySetting;
 use App\Models\Payroll;
 use App\Models\TaxConfig;
 use App\Observers\AttendanceObserver;

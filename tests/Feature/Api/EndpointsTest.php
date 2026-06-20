@@ -251,7 +251,7 @@ test('logout-all invalidates token for subsequent requests', function () {
 });
 
 test('logout-all with no tokens', function () {
-    $user = User::factory()->create(["name" => "NoToken", "email" => "no-token@test.com"]);
+    $user = User::factory()->create(['name' => 'NoToken', 'email' => 'no-token@test.com']);
     $user->assignRole('employee');
     $token = $user->createToken('temp')->plainTextToken;
 

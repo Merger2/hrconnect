@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\FaceNotRecognizedException;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Company;
@@ -8,6 +9,7 @@ use App\Models\Employee;
 use App\Models\Position;
 use App\Models\Shift;
 use App\Models\User;
+use App\Services\FaceRecognitionService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -361,4 +363,235 @@ test('index validates per_page max 100', function () {
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['per_page']);
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// FACE RECOGNITION CLOCK-IN
+// ═══════════════════════════════════════════════════════════════════════
+
+test('clock-in with face recognition succeeds', function () {
+    $this->employee->forceFill([
+        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+    ])->save();
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('verifyFace')
+        ->andReturn([
+            'valid' => true,
+            'similarity_percentage' => 95.0,
+        ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'embedding' => array_fill(0, 128, 0.01),
+        ]));
+
+    $response->assertStatus(201)
+        ->assertJsonPath('data.verification_method', 'face_verified')
+        ->assertJsonPath('data.face_similarity_score', fn ($v) => (float) $v === 95.0);
+});
+
+test('clock-in falls back to PIN when face not recognized', function () {
+    $this->employee->forceFill([
+        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+    ])->save();
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('verifyFace')
+        ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'embedding' => array_fill(0, 128, 0.01),
+            'pin' => '123456',
+        ]));
+
+    $response->assertStatus(201)
+        ->assertJsonPath('data.verification_method', 'pin_verified')
+        ->assertJsonPath('data.face_similarity_score', null);
+});
+
+test('clock-in with face embedding but no fallback PIN returns 422', function () {
+    $this->employee->forceFill([
+        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+    ])->save();
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('verifyFace')
+        ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'embedding' => array_fill(0, 128, 0.01),
+        ]));
+
+    $response->assertStatus(422)
+        ->assertJsonPath('status', 'error');
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// GEOFENCE EDGE CASES
+// ═══════════════════════════════════════════════════════════════════════
+
+test('clock-in with coordinates outside branch radius returns 403', function () {
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', [
+            'latitude' => -6.3000,
+            'longitude' => 106.9000,
+            'accuracy' => 10,
+            'pin' => '123456',
+        ]);
+
+    $response->assertStatus(403)
+        ->assertJsonPath('status', 'error');
+});
+
+test('clock-in with low accuracy returns 422', function () {
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'accuracy' => 200,
+            'pin' => '123456',
+        ]));
+
+    $response->assertStatus(422)
+        ->assertJsonPath('status', 'error');
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// WFA CLOCK-OUT
+// ═══════════════════════════════════════════════════════════════════════
+
+test('WFA clock-out succeeds without location data', function () {
+    $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', [
+            'is_wfa' => true,
+            'wfa_note' => 'Bekerja dari rumah karena banjir di sekitar kantor hari ini.',
+            'pin' => '123456',
+        ])->assertStatus(201);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-out', [
+            'pin' => '123456',
+        ]);
+
+    $response->assertOk()
+        ->assertJsonPath('status', 'success');
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// CLOCK-OUT WITH FACE VERIFICATION
+// ═══════════════════════════════════════════════════════════════════════
+
+test('clock-out with face verification succeeds', function () {
+    $this->employee->forceFill([
+        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+    ])->save();
+
+    $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'pin' => '123456',
+        ]))->assertStatus(201);
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('verifyFace')
+        ->andReturn([
+            'valid' => true,
+            'similarity_percentage' => 92.3,
+        ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-out', array_merge(gpsData(), [
+            'embedding' => array_fill(0, 128, 0.01),
+        ]));
+
+    $response->assertOk()
+        ->assertJsonPath('status', 'success');
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// WFA APPROVAL EDGE CASES
+// ═══════════════════════════════════════════════════════════════════════
+
+test('approve-wfa on non-WFA attendance returns 422', function () {
+    $this->employee->update(['parent_id' => $this->managerUser->employee->id]);
+
+    $attend = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
+            'pin' => '123456',
+        ]));
+    $attendanceId = $attend->json('data.id');
+
+    $managerToken = $this->managerUser->createToken('test')->plainTextToken;
+
+    Auth::forgetGuards();
+
+    $response = $this->withHeader('Authorization', "Bearer {$managerToken}")
+        ->postJson("/api/v1/attendance/{$attendanceId}/approve-wfa", [
+            'decision' => 'approve',
+        ]);
+
+    $response->assertStatus(422)
+        ->assertJsonPath('message', 'Attendance ini bukan record WFA.');
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// INDEX WITH MANAGE ATTENDANCES PERMISSION
+// ═══════════════════════════════════════════════════════════════════════
+
+test('index shows all attendances for hr-manager', function () {
+    $hrUser = User::factory()->create();
+    $hrUser->assignRole('hr-manager');
+    $hrToken = $hrUser->createToken('test')->plainTextToken;
+    Employee::factory()->create([
+        'user_id' => $hrUser->id,
+        'company_id' => $this->employee->company_id,
+        'branch_id' => $this->employee->branch_id,
+        'department_id' => $this->employee->department_id,
+        'position_id' => $this->employee->position_id,
+    ]);
+
+    Attendance::factory()->create([
+        'employee_id' => $this->employee->id,
+        'shift_id' => $this->employee->shift_id,
+        'date' => now()->toDateString(),
+    ]);
+    Attendance::factory()->create([
+        'employee_id' => $this->employee->id,
+        'shift_id' => $this->employee->shift_id,
+        'date' => now()->subDay()->toDateString(),
+    ]);
+
+    Auth::forgetGuards();
+
+    $response = $this->withHeader('Authorization', "Bearer {$hrToken}")
+        ->getJson('/api/v1/attendance');
+
+    $response->assertOk()
+        ->assertJsonPath('status', 'success')
+        ->assertJsonPath('meta.total', 2);
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// INDEX WITH STATUS FILTER
+// ═══════════════════════════════════════════════════════════════════════
+
+test('index filters by status', function () {
+    Attendance::factory()->create([
+        'employee_id' => $this->employee->id,
+        'shift_id' => $this->employee->shift_id,
+        'date' => now()->toDateString(),
+        'status' => 'on_time',
+    ]);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->getJson('/api/v1/attendance?status=on_time');
+
+    $response->assertOk()
+        ->assertJsonPath('meta.total', 1);
+
+    $response = $this->withHeader('Authorization', "Bearer {$this->token}")
+        ->getJson('/api/v1/attendance?status=late');
+
+    $response->assertOk()
+        ->assertJsonPath('meta.total', 0);
 });

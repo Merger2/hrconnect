@@ -7,6 +7,7 @@ use App\Http\Requests\Api\ListPayrollRequest;
 use App\Http\Requests\Api\ListReimbursementRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 function validateOrFail(string $requestClass, array $data): void
 {
@@ -14,7 +15,7 @@ function validateOrFail(string $requestClass, array $data): void
     $validator = Validator::make($data, $request->rules());
 
     if ($validator->fails()) {
-        throw new \Illuminate\Validation\ValidationException($validator);
+        throw new ValidationException($validator);
     }
 }
 
@@ -28,15 +29,15 @@ it('validates UpdateProfileRequest', function () {
 
     expect(fn () => validateOrFail(UpdateProfileRequest::class, [
         'phone' => 'invalid-phone',
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(UpdateProfileRequest::class, [
         'bank_account_number' => '123',
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(UpdateProfileRequest::class, [
         'address_detail' => str_repeat('a', 501),
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 });
 
 it('validates ListAttendanceRequest', function () {
@@ -49,15 +50,15 @@ it('validates ListAttendanceRequest', function () {
 
     expect(fn () => validateOrFail(ListAttendanceRequest::class, [
         'period' => 'invalid',
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListAttendanceRequest::class, [
         'per_page' => 200,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListAttendanceRequest::class, [
         'page' => 0,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 });
 
 it('validates ListLeaveRequest', function () {
@@ -71,15 +72,15 @@ it('validates ListLeaveRequest', function () {
 
     expect(fn () => validateOrFail(ListLeaveRequest::class, [
         'year' => 1999,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListLeaveRequest::class, [
         'year' => 2101,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListLeaveRequest::class, [
         'per_page' => 0,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 });
 
 it('validates ListOvertimeRequest', function () {
@@ -92,11 +93,11 @@ it('validates ListOvertimeRequest', function () {
 
     expect(fn () => validateOrFail(ListOvertimeRequest::class, [
         'period' => 'not-a-period',
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListOvertimeRequest::class, [
         'per_page' => 101,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 });
 
 it('validates ListPayrollRequest', function () {
@@ -109,11 +110,11 @@ it('validates ListPayrollRequest', function () {
 
     expect(fn () => validateOrFail(ListPayrollRequest::class, [
         'year' => 1999,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListPayrollRequest::class, [
         'page' => -1,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 });
 
 it('validates ListReimbursementRequest', function () {
@@ -126,9 +127,9 @@ it('validates ListReimbursementRequest', function () {
 
     expect(fn () => validateOrFail(ListReimbursementRequest::class, [
         'period' => 'bad',
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 
     expect(fn () => validateOrFail(ListReimbursementRequest::class, [
         'per_page' => 1000,
-    ]))->toThrow(\Illuminate\Validation\ValidationException::class);
+    ]))->toThrow(ValidationException::class);
 });
