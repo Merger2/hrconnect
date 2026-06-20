@@ -1,14 +1,9 @@
 <?php
 
-use App\Notifications\ApprovalOverdue;
 use App\Notifications\AttendanceReminder;
 use App\Notifications\ChronicLateWarning;
-use App\Notifications\LeaveApproved;
-use App\Notifications\LeaveRejected;
-use App\Notifications\LeaveRequestSubmitted;
 use App\Notifications\NewDeviceLogin;
 use App\Notifications\PayrollPublished;
-use Carbon\CarbonImmutable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notifiable;
 
@@ -64,99 +59,6 @@ it('sends PayrollPublished via mail and database', function () {
     expect($array['message'])->toContain('diterbitkan');
 });
 
-it('sends LeaveRequestSubmitted via mail and database', function () {
-    $leaveType = Mockery::mock('App\Models\LeaveType');
-    $leaveType->shouldReceive('getAttribute')->with('name')->andReturn('Cuti Tahunan');
-
-    $employee = Mockery::mock('App\Models\Employee');
-    $employee->shouldReceive('getAttribute')->with('full_name')->andReturn('Test User');
-
-    $leave = Mockery::mock('App\Models\Leave');
-    $leave->shouldReceive('getAttribute')->with('id')->andReturn(1);
-    $leave->shouldReceive('getAttribute')->with('leaveType')->andReturn($leaveType);
-    $leave->shouldReceive('getAttribute')->with('employee')->andReturn($employee);
-    $leave->shouldReceive('getAttribute')->with('total_days')->andReturn(2);
-    $startDate = CarbonImmutable::parse('2026-06-01');
-    $endDate = CarbonImmutable::parse('2026-06-02');
-    $leave->shouldReceive('getAttribute')->with('start_date')->andReturn($startDate);
-    $leave->shouldReceive('getAttribute')->with('end_date')->andReturn($endDate);
-
-    $notification = new LeaveRequestSubmitted($leave);
-
-    $notifiable = new class
-    {
-        use Notifiable;
-
-        public $email = 'test@example.com';
-    };
-
-    expect($notification->via($notifiable))->toBe(['mail', 'database']);
-    expect($notification->toMail($notifiable)->subject)->toContain('Pengajuan Cuti Baru');
-
-    $array = $notification->toArray($notifiable);
-    expect($array)->toHaveKeys(['leave_id', 'employee_name', 'leave_type', 'start_date', 'end_date', 'message']);
-    expect($array['message'])->toContain('Pengajuan cuti baru');
-});
-
-it('sends LeaveApproved via mail and database', function () {
-    $leaveType = Mockery::mock('App\Models\LeaveType');
-    $leaveType->shouldReceive('getAttribute')->with('name')->andReturn('Cuti Tahunan');
-
-    $leave = Mockery::mock('App\Models\Leave');
-    $leave->shouldReceive('getAttribute')->with('id')->andReturn(1);
-    $leave->shouldReceive('getAttribute')->with('leaveType')->andReturn($leaveType);
-    $leave->shouldReceive('getAttribute')->with('total_days')->andReturn(2);
-    $startDate = CarbonImmutable::parse('2026-06-01');
-    $endDate = CarbonImmutable::parse('2026-06-02');
-    $leave->shouldReceive('getAttribute')->with('start_date')->andReturn($startDate);
-    $leave->shouldReceive('getAttribute')->with('end_date')->andReturn($endDate);
-
-    $notification = new LeaveApproved($leave);
-
-    $notifiable = new class
-    {
-        use Notifiable;
-
-        public $email = 'test@example.com';
-    };
-
-    expect($notification->via($notifiable))->toBe(['mail', 'database']);
-    expect($notification->toMail($notifiable)->subject)->toBe('Cuti Anda Telah Disetujui');
-
-    $array = $notification->toArray($notifiable);
-    expect($array['message'])->toBe('Cuti Anda telah disetujui.');
-});
-
-it('sends LeaveRejected via mail and database with rejection reason', function () {
-    $leaveType = Mockery::mock('App\Models\LeaveType');
-    $leaveType->shouldReceive('getAttribute')->with('name')->andReturn('Cuti Tahunan');
-
-    $leave = Mockery::mock('App\Models\Leave');
-    $leave->shouldReceive('getAttribute')->with('id')->andReturn(1);
-    $leave->shouldReceive('getAttribute')->with('leaveType')->andReturn($leaveType);
-    $leave->shouldReceive('getAttribute')->with('total_days')->andReturn(2);
-    $leave->shouldReceive('getAttribute')->with('rejection_reason')->andReturn('Kuota penuh');
-    $startDate = CarbonImmutable::parse('2026-06-01');
-    $endDate = CarbonImmutable::parse('2026-06-02');
-    $leave->shouldReceive('getAttribute')->with('start_date')->andReturn($startDate);
-    $leave->shouldReceive('getAttribute')->with('end_date')->andReturn($endDate);
-
-    $notification = new LeaveRejected($leave);
-
-    $notifiable = new class
-    {
-        use Notifiable;
-
-        public $email = 'test@example.com';
-    };
-
-    expect($notification->via($notifiable))->toBe(['mail', 'database']);
-    expect($notification->toMail($notifiable)->subject)->toBe('Cuti Anda Ditolak');
-
-    $array = $notification->toArray($notifiable);
-    expect($array['rejection_reason'])->toBe('Kuota penuh');
-});
-
 it('sends ChronicLateWarning via mail and database', function () {
     $employee = Mockery::mock('App\Models\Employee');
     $employee->shouldReceive('getAttribute')->with('id')->andReturn(1);
@@ -200,36 +102,4 @@ it('sends NewDeviceLogin via mail and database', function () {
 
     $array = $notification->toArray($notifiable);
     expect($array['device_name'])->toBe('Chrome on Linux');
-});
-
-it('sends ApprovalOverdue via database only', function () {
-    $approver = Mockery::mock('App\Models\Employee');
-    $approver->shouldReceive('getAttribute')->with('id')->andReturn(1);
-    $approver->shouldReceive('getAttribute')->with('full_name')->andReturn('Manager');
-    $approver->shouldReceive('offsetExists')->andReturn(true);
-    $approver->shouldReceive('offsetGet')->andReturn(null);
-
-    $approval = Mockery::mock('App\Models\Approval');
-    $approval->shouldReceive('getAttribute')->with('id')->andReturn(1);
-    $approval->shouldReceive('getAttribute')->with('approvable_type')->andReturn('Leave');
-    $approval->shouldReceive('getAttribute')->with('approvable_id')->andReturn(1);
-    $approval->shouldReceive('getAttribute')->with('approver')->andReturn($approver);
-    $approval->shouldReceive('getAttribute')->with('approvable')->andReturn(null);
-    $approval->shouldReceive('offsetExists')->andReturn(true);
-    $approval->shouldReceive('offsetGet')->andReturn(null);
-
-    $notification = new ApprovalOverdue($approval);
-
-    $notifiable = new class
-    {
-        use Notifiable;
-
-        public $email = 'test@example.com';
-    };
-
-    expect($notification->via($notifiable))->toBe(['database']);
-
-    $array = $notification->toArray($notifiable);
-    expect($array)->toHaveKeys(['approval_id', 'approvable_type', 'approvable_id', 'approver_name', 'message']);
-    expect($array['approver_name'])->toBe('Manager');
 });

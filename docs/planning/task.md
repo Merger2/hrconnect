@@ -41,8 +41,8 @@ Completed 2026-06-18. Scanned all 60+ PHP source files in `app/`, 50+ test files
 |------|------|--------|
 | Service | `ProfileService` | Only service class with zero test coverage (3 methods: getProfile, updateProfile, changePassword) |
 | Search | Pinecone search | Stub returns `[]`, no tests exist |
-| Jobs | Edge cases | 9 tests cover basic dispatch only; no failed/retry/log edge cases |
-| Events/Mail | Architecture | No `app/Events/`, `app/Listeners/`, `app/Mail/` directories exist |
+| Jobs | Edge cases | 9 tests cover basic dispatch only; no failed/retry/log edge cases ✅ T-26 completed (28 tests) |
+| Events/Mail | Architecture | No `app/Events/`, `app/Listeners/`, `app/Mail/` directories exist ✅ T-30: adequate with Notification system. PayrollPublished wired. Dead notifications removed. |
 | Integration | Blade-to-API | Zero tests for end-to-end frontend-backend flow |
 | Web routes | Fortify + dashboard | 25+ GET routes (auth pages, dashboard, settings) — zero smoke tests |
 | Middleware | `DeviceDetection` | UA-parsing middleware — zero test coverage ✅ FIXED (8 tests in DeviceDetectionTest) |
@@ -311,7 +311,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-27 | Pinecone search test | Tidak ada Pinecone di project — vector search pakai pgvector (native PostgreSQL). Test SQLite fallback: searchSimilar/ searchByKeyword dengan KnowledgeBase factory. Tambah end-to-end: processKnowledgeBase → embed → searchSimilar. | ✅ 6→15 tests (EmbeddingServiceTest). Ditambah: searchByKeyword no match empty, searchSimilar topK limit, processKnowledgeBase stores embedding content, error handling catch block, end-to-end flow. Status PROCESSING→ready + searchSimilar finds it. Full suite: 1,073 tests / 3,611 assertions. | ✅ |
 | T-28 | FormRequest validation sisa (22/28) | 6 already tested. Add validation rule tests untuk 7 zero-coverage FormRequests (ForgotPassword, TwoFactorChallenge, PendingApprovals, ExportPeriod, ExportMonthly, UploadDocument, Chat) + StoreOvertimeRequest dengan after() hook + DB overtime limits. 22 sisanya sudah punya feature-level HTTP 422 coverage. | ✅ 51 tests (29 baru): ForgotPasswordRequest (3), TwoFactorChallengeRequest (2), PendingApprovalsRequest (4), ExportPeriodRequest (3), ExportMonthlyRequest (4), ChatRequest (4), UploadDocumentRequest (5), StoreOvertimeRequest (4). Total suite: 1,068 tests / 3,602 assertions. | ✅ |
 | T-29 | CI PostgreSQL enable | Uncomment PG job di `.github/workflows/tests.yml`. Verifikasi composer test:pgsql jalan di CI dengan pgvector/pgvector:pg16 + extensions vector, pg_trgm, pgcrypto. | ✅ Sudah aktif — PG job sudah terdefinisi di tests.yml, tidak perlu di-comment-out. `composer test:pgsql` jalan lokal 19 tests/43 assertions pass. CI perlu diverifikasi dengan push ke branch yang punya PG env. |
-| T-30 | Events/Mail arsitektur | Tidak ada `app/Events/`, `app/Listeners/`, `app/Mail/` — evaluasi apakah perlu dibuat untuk notifikasi email (lampiran payslip, reminder cuti, etc) atau cukup pakai existing Notification system. Jika perlu, tambah test. | ⏳ |
+| T-30 | Events/Mail arsitektur | Evaluasi: adequate with existing Notification system (8 classes, all via `toMail()`). No need for custom Events/Listeners/Mailables — observer + job sudah cukup. Wire up PayrollPublished di PayrollObserver (alongside GeneratePayslipPdfJob). Delete 4 dead notifications (LeaveApproved, LeaveRequestSubmitted, LeaveRejected, ApprovalOverdue — never dispatched anywhere). Keep NewDeviceLogin (desain bagus, trigger point nanti). Fix backup mail placeholder → env. | ✅ Dead code removed (4 files, 4 tests). PayrollPublished now triggers on payroll→PUBLISHED. Full suite: 1,069 tests / 3,589 assertions. | ✅ |
 | T-31 | GeoJson - deployment doc update | Update `docs/api/api-contracts.md` dan `docs/testing/testing-strategy.md` dengan test count 1,033. Pastikan INDEX.md dan task.md konsisten. | ⏳ |
 
 | ID | Task | Acceptance Criteria | Status |

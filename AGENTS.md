@@ -37,7 +37,7 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreSQL (pgve
 ### Zero Coverage (now 7 items after recent work)
 - **Pinecone search**: stub returns `[]`, no tests
 - **Jobs**: 9 tests cover basic dispatch only; no failed/retry/log edge cases
-- **Events/mail/Listeners**: no `app/Events/`, `app/Listeners/`, `app/Mail/` dirs exist
+- **Events/mail/Listeners**: no `app/Events/`, `app/Listeners/`, `app/Mail/` dirs exist (evaluated T-30: adequate with Notification system — 4 live notifications, 4 deleted dead ones)
 - **Blade-to-API integration**: zero tests
 - **Web routes** (Fortify auth, dashboard, settings): 25+ GET routes, 0 tests
 - **Middleware `DeviceDetection`**: UA-parsing middleware, 0 tests
