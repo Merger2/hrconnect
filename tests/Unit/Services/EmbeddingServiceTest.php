@@ -112,3 +112,74 @@ test('searchByKeyword uses like fallback in SQLite', function () {
 
     expect($results)->toHaveCount(1);
 });
+
+test('searchByKeyword returns empty hasil kalau tidak ada kecocokan', function () {
+    $svc = new EmbeddingService(new GeminiClient);
+
+    KnowledgeBase::factory()->create([
+        'content' => 'Cuti tahunan karyawan adalah 12 hari.',
+        'status' => KnowledgeBaseStatus::READY,
+    ]);
+
+    $results = $svc->searchByKeyword('pajak');
+
+    expect($results)->toBeEmpty();
+});
+
+test('searchSimilar respects topK parameter in SQLite fallback', function () {
+    $svc = new EmbeddingService(new GeminiClient);
+
+    KnowledgeBase::factory()->count(5)->create(['status' => KnowledgeBaseStatus::READY]);
+
+    $results = $svc->searchSimilar([0.1, 0.2, 0.3], topK: 2);
+
+    expect($results)->toHaveCount(2);
+});
+
+test('processKnowledgeBase stores embedding vector content on success', function () {
+    $svc = new EmbeddingService(new GeminiClient);
+
+    $kb = KnowledgeBase::factory()->create([
+        'content' => 'BPJS Kesehatan mencakup layanan rawat inap dan rawat jalan.',
+    ]);
+    $kb->update(['embedding' => null]);
+
+    $svc->processKnowledgeBase($kb);
+
+    $fresh = $kb->fresh();
+    expect($fresh->status->value)->toBe('ready');
+    expect($fresh->embedding)->not->toBeNull();
+});
+
+test('processKnowledgeBase sets error status when GeminiClient embedding fails', function () {
+    $client = Mockery::mock(GeminiClient::class);
+    $client->shouldReceive('embed')
+        ->andThrow(new RuntimeException('API timeout'));
+
+    $svc = new EmbeddingService($client);
+
+    $kb = KnowledgeBase::factory()->create([
+        'content' => 'Test content that will fail embedding.',
+    ]);
+
+    expect(fn () => $svc->processKnowledgeBase($kb))
+        ->toThrow(RuntimeException::class);
+    expect($kb->fresh()->status->value)->toBe('error');
+});
+
+test('end-to-end: processKnowledgeBase then searchSimilar finds the record', function () {
+    $svc = new EmbeddingService(new GeminiClient);
+
+    KnowledgeBase::factory()->create([
+        'content' => 'BPJS Ketenagakerjaan meliputi JHT, JKK, JK, dan JP.',
+        'status' => KnowledgeBaseStatus::PROCESSING,
+    ]);
+
+    $kb = KnowledgeBase::where('status', KnowledgeBaseStatus::PROCESSING)->first();
+    $svc->processKnowledgeBase($kb);
+
+    $results = $svc->searchSimilar([0.1, 0.2, 0.3]);
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($kb->id);
+    expect($results->first()->status->value)->toBe('ready');
+});
