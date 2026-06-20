@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21/T-11/T-12 selesai. Test suite: 1,018 / 3,516 assertions).
+> Last updated: 2026-06-20 (RAG refactor SESI-48 selesai — RAG-1–9 done except RAG-8 streaming plan. T-4/T-5/T-9/T-10/T-21/T-11/T-12/T-14 selesai. Test suite: 1,021 / 3,523 assertions).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -21,7 +21,7 @@
 | Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers, all module routes active. All 11 endpoint groups have dedicated proof test files. OpenAPI contract tests (25) verify route completeness, security, and response envelope alignment. 1,018 tests total. 13 web GET routes (module index/apply pages) have missing views but routes exist. 1 Livewire component (Logout). FormRequest validation rules tested (6 files in 1 test file). Middleware tests: GeofenceValidation + DeviceDetection (16 tests). |
 | Production hardening | ~80% | IDOR, PII, security, rate-limit, secret, file upload, production env, queue, scheduler, cache, storage, health, backup, deployment — all audited and remediated. Ops readiness doc created. |
 | Frontend integration | ~10-20% | Ditunda sampai backend dinyatakan freeze; UI modul bisnis belum menjadi fokus file ini. |
-| Test suite | 1,018 tests / 3,516 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). SQLite: 1,018 covering API endpoints, services, policies, observers, cache, commands, FormRequest validation, middleware, PII/CipherSweet, payroll calculator, KB/RAG, role/permission matrix, OpenAPI contract (25). PostgreSQL: 19 tests covering pgvector (128D/768D/ranking/HNSW), CipherSweet, constraints, payroll locking, FaceRecognitionService (5). Gaps: Livewire component. Comprehensive gap audit completed — see P0-6. |
+| Test suite | 1,021 tests / 3,523 assertions (SQLite) + 19 tests / 43 assertions (PG) | Fast SQLite (default) dan PostgreSQL integration suite (`phpunit.pgsql.xml`). Comprehensive gap audit completed — see P0-6. |
 
 ## Completed Summary
 
@@ -288,7 +288,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-11 | OpenAPI/Scramble contract tests | Representative `/api/v1/*` paths, bearer security, public routes, request schema alignment | ✅ | 25 contract tests: spec structure (version, tags, schemas, paths, ops), route completeness (all 51 routes documented, no extras), security contract (4 public routes security: [], 47 protected 401 via ref), validation contract (all POST/PUT with requestBody have 422), pagination contract (7 list endpoints with meta.current_page/last_page/per_page/total), operationId uniqueness, smoke tests (health 200, 401/403/422 shapes, 404). |
 | T-12 | Remove/replace stale docs test references | `docs/testing/testing-strategy.md` reflects actual test suite, not nonexistent files | ✅ | Rewritten from scratch (was aspirational plan referencing nonexistent files). Now documents 73 actual test files, 1,018 tests, PostgreSQL suite, AI/vector testing approach. INDEX.md updated: API count 1→2 (+api.json), total 27→28 files. |
 | T-13 | Web route smoke tests | ✅ 18 smoke tests: 6 public auth pages (200), 6 unauthenticated redirects (302), 3 authenticated pages (200), 2 special pages (email_verify→dashboard, security→confirm-password), 1 2FA-challenge redirect. | ✅ |
-| T-14 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
+| T-14 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ✅ | 3 tests: logout clears auth, invalidates session, regenerates CSRF token. (Note: Logout is an invokable action class, not a Component — tested as unit action.) |
 | T-15 | ProfileService test | ✅ 5 tests (getProfile with/without employee, updateProfile, changePassword success/wrong current). Plus refactored ProfileController to use the service (eliminated dead code). | ✅ |
 | T-16 | Pinecone stub test | ✅ Test that pgvector SQLite fallback returns ready records (searchSimilar + searchByKeyword + processKnowledgeBase). Added 5 tests to EmbeddingServiceTest. | ✅ |
 | T-17 | Policy direct tests | ✅ 15 new boundary tests for `AttendancePolicy` (6) and `OvertimePolicy` (9) covering view self/other/team, create, update/delete status gates, approveLevel1/2 scoping. All 8 policies now have direct tests. | ✅ |
@@ -296,7 +296,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | T-19 | Permission drift audit | `MANAGE_REIMBURSEMENTS` already assigned to finance role. Added to `ReimbursementPolicy::update()` and `delete()` — finance users can manage any pending reimbursement. | ✅ |
 | T-20 | PayrollCalculatorService dedicated tests | Extract `generatePayroll()` coverage from integration tests into dedicated service test file | ✅ | 41 new tests added to PayrollCalculatorCoreTest: calculateOvertimePay (weekday tiers, weekend tiers, zero hours, missing position), calculatePesangon (tenure tiers, variant multipliers), calculateUangPenghargaanMasaKerja (all 7 tenure brackets), calculateUangKompensasi (CONTRACT/PKWT, tenure), calculateLeaveCashOut (no balance, zero remaining, daily rate), regenerate draft B-1 fix. All 5 previously uncovered methods now tested. ✅ JobEdgeCaseTest: 2 tests for GenerateEmployeePayrollJob failed() reimbursement rollback. ✅ Payroll model booted guard: 3 tests (PUBLISHED/PAID rejection, DRAFT allowed). 33 new tests total. |
 | T-21 | FaceRecognitionService pgvector test | Add test that actually invokes `nearestNeighbors()` against DB | ✅ | 5 PG tests total (1 existing + 4 new): CompanySetting threshold override, FaceNotRegisteredException for null embedding, similarity_percentage on match, FaceNotRecognizedException message with similarity. |
-| T-22 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` | ⏳ |
+| T-22 | Livewire component test | Add basic render test for `app/Livewire/Actions/Logout.php` (duplicate of T-14) | ✅ | Covered by T-14. |
 | T-23 | Overtime store policy call | ✅ Added `$this->authorize('create', Overtime::class)` to `OvertimeController::store()`. Fixed 2 test expectations (404→403). | ✅ |
 | T-24 | Reimbursement store policy call | ✅ Added `$this->authorize('create', Reimbursement::class)` to `ReimbursementController::store()`. | ✅ |
 | T-25 | Employee API team scope decision | ✅ Deferred: team scoping via Livewire query scope, not API policy concern (per AGENTS.md). No code change needed. | ✅ |
