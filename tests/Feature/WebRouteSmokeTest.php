@@ -13,16 +13,16 @@ beforeEach(function () {
 
 // ─── Public Auth Pages ─────────────────────────────────────────────
 
-test('welcome page returns 200', function () {
-    $this->get('/')->assertOk();
+test('welcome page redirects to login', function () {
+    $this->get('/')->assertRedirect('/login');
 });
 
 test('login page returns 200', function () {
     $this->get('/login')->assertOk();
 });
 
-test('register page returns 200', function () {
-    $this->get('/register')->assertOk();
+test('register page returns 404 when registration disabled', function () {
+    $this->get('/register')->assertNotFound();
 });
 
 test('forgot password page returns 200', function () {
@@ -101,4 +101,54 @@ test('settings/security requires password confirmation for 2FA', function () {
     $this->actingAs($this->user)
         ->get('/settings/security')
         ->assertRedirect('/user/confirm-password');
+});
+
+// ─── HR Module Pages (authenticated) ────────────────────────────────
+
+test('attendance index returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/attendance')
+        ->assertOk();
+});
+
+test('attendance clock-in returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/attendance/clock-in')
+        ->assertOk();
+});
+
+test('leaves index returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/leaves')
+        ->assertOk();
+});
+
+test('leaves apply returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/leaves/apply')
+        ->assertOk();
+});
+
+test('overtimes index returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/overtimes')
+        ->assertOk();
+});
+
+test('overtimes apply returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/overtimes/apply')
+        ->assertOk();
+});
+
+test('reimbursements index returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/reimbursements')
+        ->assertOk();
+});
+
+test('reimbursements apply returns 200 for authenticated user', function () {
+    $this->actingAs($this->user)
+        ->get('/reimbursements/apply')
+        ->assertOk();
 });

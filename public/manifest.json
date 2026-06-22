@@ -5,8 +5,8 @@
     "start_url": "/login",
     "display": "standalone",
     "orientation": "portrait-primary",
-    "background_color": "#ffffff",
-    "theme_color": "#2563eb",
+    "background_color": "#f7f2eb",
+    "theme_color": "#1a3a3a",
     "scope": "/",
     "lang": "id-ID",
     "icons": [

@@ -1,33 +1,36 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-canvas">
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-hairline bg-canvas">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
+                <flux:sidebar.group :heading="__('Main')">
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
-            </flux:sidebar.nav>
 
-            <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
+                <flux:sidebar.group :heading="__('HR')">
+                    <flux:sidebar.item icon="clock" :href="route('attendance.index')" :current="request()->routeIs('attendance.*')" wire:navigate>
+                        {{ __('Attendance') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="calendar" :href="route('leaves.index')" :current="request()->routeIs('leaves.*')" wire:navigate>
+                        {{ __('Leave') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="bolt" :href="route('overtimes.index')" :current="request()->routeIs('overtimes.*')" wire:navigate>
+                        {{ __('Overtime') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="wallet" :href="route('reimbursements.index')" :current="request()->routeIs('reimbursements.*')" wire:navigate>
+                        {{ __('Reimbursement') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
@@ -96,16 +99,16 @@
             </flux:toast.group>
         @endpersist
 
-        <div id="pwa-install-banner" class="hidden fixed bottom-0 inset-x-0 p-4 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 shadow-lg z-50">
+        <div id="pwa-install-banner" class="hidden fixed bottom-0 inset-x-0 p-4 bg-canvas border-t border-hairline shadow-lg z-50">
             <div class="flex items-center justify-between max-w-sm mx-auto">
                 <div class="flex items-center gap-3">
                     <img src="/icon-192.svg" alt="HRConnect" class="size-10 rounded-lg" />
                     <div>
-                        <p class="text-sm font-medium text-zinc-900 dark:text-white">Install HRConnect</p>
-                        <p class="text-xs text-zinc-500">Akses cepat dari layar utama</p>
+                        <p class="text-sm font-medium text-ink">Install HRConnect</p>
+                        <p class="text-xs text-muted">Akses cepat dari layar utama</p>
                     </div>
                 </div>
-                <button onclick="installPwa()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Install</button>
+                <button onclick="installPwa()" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary">Install</button>
             </div>
         </div>
 
