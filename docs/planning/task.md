@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-22 (P1 ✅ all, PG CI expanded to 24 tests. Remaining gaps documented: B-100-1 through B-100-9).
+> Last updated: 2026-06-22 (P1 ✅ all, PG CI expanded to 28 tests. B-100-1/2/3/4/7/9 done, B-100-6 Blade-to-API deferred — views not yet created). Total 1,115 tests / 3,697 assertions.
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -17,11 +17,11 @@
 
 | Area | Status | Notes |
 |---|---:|---|
-| Backend core services | ~94% | 15 services, 14 adequate. PayslipPdfService ✅ (4 public methods now covered, 12 tests). |
-| Backend API layer | ~98% | 51 routes, 13 controllers. 2FA challenge route (`POST /api/v1/auth/2fa/challenge`) — satu-satunya endpoint tanpa 401 smoke test. |
-| Production hardening | ~88% | Semua audit selesai. Permission drift ✅ (T-19). PG migration guards — 4 files, 8 guards — belum ada dedicated test. |
-| Frontend integration | ~35% | Web routes ✅ (18 smoke tests, P1-12). Blade-to-API integration — nol tests. |
-| Test suite | 1,108 tests / 3,685 assertions (SQLite) + 24 tests / 52 assertions (PG) | P1 all done. Remaining: 2FA smoke test (1), Blade-to-API (~5-8), PG guards (~4), IDOR hardening (~3). Estimate: ~1-2 days to 100%. |
+| Backend core services | ~95% | 15 services, 14 adequate. PayslipPdfService ✅ (12 tests). |
+| Backend API layer | ~99% | 51 routes, 13 controllers. 2FA challenge ✅ (smoke test added). |
+| Production hardening | ~92% | Semua audit selesai. Permission drift ✅. PG migration guards ✅ (4 tests). |
+| Frontend integration | ~35% | Web routes ✅ (18 smoke tests, P1-12). Blade-to-API — deferred, domain views belum dibuat. |
+| Test suite | 1,115 tests / 3,697 assertions (SQLite) + 28 tests / 61 assertions (PG) | Hampir semua gap tertutup. Sisa: Blade-to-API (butuh frontend views dulu). |
 
 ## Completed Summary
 
@@ -309,15 +309,15 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 |---|---|---|---|
 | B-100-1 | PayslipPdfService public methods | ✅ generate(), generateAndStore(), getPayslipPath() tests added (4 new). PayslipPdfServiceTest now 12 tests. | ✅ |
 | B-100-2 | FormRequest validation (6 files) | ✅ All 6 already tested in FormRequestValidationTest.php (22 tests total). Completed as P1-14. | ✅ |
-| B-100-3 | 2FA challenge smoke test | `POST /api/v1/auth/2fa/challenge` — tidak ada di EndpointsTest. Tambah 1 test. | ⏳ |
+| B-100-3 | 2FA challenge smoke test | ✅ Added `POST /api/v1/auth/2fa/challenge` to public routes dataset in EndpointsTest. | ✅ |
 | B-100-4 | Permission drift | ✅ MANAGE_REIMBURSEMENTS assigned to finance role + added to ReimbursementPolicy (T-19). | ✅ |
 | B-100-5 | Web routes (Fortify + Livewire) | ✅ P1-12/T-13: 18 smoke tests (auth pages, redirects, dashboard, settings). | ✅ |
-| B-100-6 | Blade-to-API integration | Zero tests untuk end-to-end HTTP→Blade rendering. Tambah ~5-8 tests untuk critical flows (clock-in, leave apply). | ⏳ |
-| B-100-7 | Migration PG guard tests | 8 `if (DB::getDriverName() === 'pgsql')` guards di 4 migration files — belum ada dedicated test yang verifikasi guard berjalan di PG. | ⏳ |
+| B-100-6 | Blade-to-API integration | 🚫 Deferred. Domain Blade views (attendance, leaves, overtimes, reimbursements) not yet created. FE routes exist but views missing. Create views first, then integration tests. | 🚫 |
+| B-100-7 | Migration PG guard tests | ✅ 4 new PG tests: vector columns on employees + knowledge_bases, jsonb metadata column, jsonb store/query. PostgresEnvironmentTest now 28 tests. | ✅ |
 | B-100-8 | Factory gaps (high-impact) | ✅ T-18: 8 factories created (Approval, CompanySetting, Device, FamilyDetail, PayrollAdjustment, PayrollItem, ShiftSchedule, KnowledgeBase). | ✅ |
-| B-100-9 | IDOR hardening tests | Defense-in-depth: employee team scoping di API, payroll generate `employee_ids[]` tanpa verifikasi relasi, approveWfa inconsistent. Tambah test konfirmasi gap sudah diketahui. | ⏳ |
+| B-100-9 | IDOR hardening tests | ✅ 6 tests documented known defense-in-depth gaps: employee team scoping (by design), payroll generate arbitrary employee_ids, approveWfa hierarchy check. See IdorGapDocumentationTest. | ✅ |
 
-**Estimasi total**: ~2 hari kerja fokus. B-100-6 item terbesar ~1 hari. Sisanya small-medium.
+**Estimasi total**: ~1 hari. Web views dulu dibutuhkan sebelum B-100-6 bisa dikerjakan.
 
 ### Completed (P1)
 
@@ -384,7 +384,7 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | M1 — Scope + audit complete | 75-80% | P0 complete with endpoint/service matrices. |
 | M2 — Feature gaps closed | 80-85% | P1 API/service tasks complete. Thin-coverage, Jobs, FormRequest, Embedding, Events/Mail — semua selesai. Notifikasi: PayrollPublished di-wire, 4 dead removed. |
 | M3 — RAG production-ready | 85-90% | Laravel AI SDK adoption completed or explicitly deferred with stable custom implementation. |
-| M4 — Test coverage complete | 93-95% | `composer test` passing (1,108 tests, 3,685 assertions). `composer test:pgsql` passing (24 tests, 52 assertions). CI PG job aktif. Remaining: 2FA smoke + Blade-to-API = ~10 tests. |
-| M5 — Security hardened | 95-97% | Authorization, IDOR, PII, rate limit, secret audits complete. Permission drift ✅ (T-19). Remaining: IDOR hardening tests. |
-| M6 — Operations ready | 96-98% | Queue, scheduler, cache, storage, backup, deployment rehearsal complete. Remaining: migration PG guard tests. |
-| M7 — API frozen | 98-100% | API contract stable. Semua T-26 s/d T-31 selesai. Web routes ✅ (18 smoke tests, P1-12). Remaining: Blade-to-API integration. |
+| M4 — Test coverage complete | 95-97% | `composer test` passing (1,115 tests, 3,697 assertions). `composer test:pgsql` passing (28 tests, 61 assertions). CI PG job aktif. Remaining: Blade-to-API (deferred, need views). |
+| M5 — Security hardened | 97-98% | Authorization, IDOR, PII, rate limit, secret audits complete. Permission drift ✅. IDOR hardening ✅ (6 gap-documentation tests). |
+| M6 — Operations ready | 97-98% | Queue, scheduler, cache, storage, backup, deployment rehearsal complete. PG migration guards ✅ (4 dedicated tests). |
+| M7 — API frozen | 99-100% | API contract stable. Web routes ✅ (18 smoke tests, P1-12). Semua endpoint API terdaftar, diaudit, dan dites. Blade-to-API integration menunggu frontend views. |

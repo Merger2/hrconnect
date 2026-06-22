@@ -4,6 +4,7 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\PayslipPdfService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -193,7 +194,7 @@ test('buildTemplateData extra_income empty when no payroll items exist', functio
 // ─── Public Methods ─────────────────────────────────────────
 
 test('generate returns PDF string', function () {
-    $mock = \Barryvdh\DomPDF\Facade\Pdf::partialMock();
+    $mock = Pdf::partialMock();
     $mock->shouldReceive('loadView')->once()->andReturnSelf();
     $mock->shouldReceive('setPaper')->once()->andReturnSelf();
     $mock->shouldReceive('setOptions')->once()->andReturnSelf();
@@ -206,7 +207,7 @@ test('generate returns PDF string', function () {
 });
 
 test('generateAndStore saves PDF and updates payroll pdf_path', function () {
-    $mock = \Barryvdh\DomPDF\Facade\Pdf::partialMock();
+    $mock = Pdf::partialMock();
     $mock->shouldReceive('loadView')->once()->andReturnSelf();
     $mock->shouldReceive('setPaper')->once()->andReturnSelf();
     $mock->shouldReceive('setOptions')->once()->andReturnSelf();

@@ -2812,6 +2812,10 @@
                                                                 ]
                                                             }
                                                         },
+                                                        "confidence": {
+                                                            "type": "string",
+                                                            "const": "low"
+                                                        },
                                                         "fallback": {
                                                             "type": "boolean"
                                                         },
@@ -2823,6 +2827,7 @@
                                                     "required": [
                                                         "answer",
                                                         "sources",
+                                                        "confidence",
                                                         "fallback",
                                                         "model"
                                                     ]
@@ -2843,6 +2848,10 @@
                                                             "maxItems": 0,
                                                             "additionalItems": false
                                                         },
+                                                        "confidence": {
+                                                            "type": "string",
+                                                            "const": "low"
+                                                        },
                                                         "fallback": {
                                                             "type": "boolean"
                                                         },
@@ -2854,6 +2863,7 @@
                                                     "required": [
                                                         "answer",
                                                         "sources",
+                                                        "confidence",
                                                         "fallback",
                                                         "model"
                                                     ]
@@ -2900,6 +2910,19 @@
                                                                 ]
                                                             }
                                                         },
+                                                        "confidence": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "low"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
                                                         "fallback": {
                                                             "type": "boolean"
                                                         },
@@ -2910,6 +2933,7 @@
                                                     "required": [
                                                         "answer",
                                                         "sources",
+                                                        "confidence",
                                                         "fallback",
                                                         "model"
                                                     ]
