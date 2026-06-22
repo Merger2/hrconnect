@@ -10,6 +10,7 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Leave;
+use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Models\Position;
 use App\Models\User;
@@ -94,6 +95,15 @@ describe('resource & validation gaps', function () {
             'employee_id' => $this->employeeEmp->id,
             'leave_type_id' => $leaveType->id,
             'status' => RequestStatus::PENDING,
+            'start_date' => '2026-06-15',
+        ]);
+
+        LeaveBalance::create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $leaveType->id,
+            'year' => 2026,
+            'quota' => 12,
+            'used' => 0,
         ]);
 
         $this->approval = $this->leave->approvals()->create([
@@ -129,5 +139,33 @@ describe('resource & validation gaps', function () {
             ->postJson("/api/v1/approvals/{$this->approval->id}/reject", [])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['rejection_reason']);
+    });
+
+    it('can successfully approve a pending approval', function () {
+        $token = $this->managerUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson("/api/v1/approvals/{$this->approval->id}/approve", [
+                'notes' => 'Setuju, lanjutkan.',
+            ])
+            ->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $this->approval->refresh();
+        expect($this->approval->status)->toBe(ApprovalStatus::APPROVED);
+    });
+
+    it('rejects with valid reason and marks approval as rejected', function () {
+        $token = $this->managerUser->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson("/api/v1/approvals/{$this->approval->id}/reject", [
+                'rejection_reason' => 'Dokumen pendukung tidak lengkap.',
+            ])
+            ->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $this->approval->refresh();
+        expect($this->approval->status)->toBe(ApprovalStatus::REJECTED);
     });
 });

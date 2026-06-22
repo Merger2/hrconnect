@@ -235,6 +235,46 @@ test('linkToPayroll throws if already linked to another payroll', function () {
     $service->linkToPayroll($reimbursement, 999);
 })->throws(BusinessRuleException::class, 'Reimbursement sudah terhubung ke payroll lain');
 
+// ─── Model Terminal Guard ───────────────────────────────────────────────
+
+test('reimbursement model blocks update when already APPROVED', function () {
+    $reimbursement = Reimbursement::factory()->create([
+        'employee_id' => $this->employee->id,
+        'status' => ReimbursementStatus::APPROVED,
+    ]);
+
+    $reimbursement->update(['description' => 'changed']);
+})->throws(BusinessRuleException::class, 'tidak dapat diubah');
+
+test('reimbursement model blocks update when already PAID', function () {
+    $reimbursement = Reimbursement::factory()->create([
+        'employee_id' => $this->employee->id,
+        'status' => ReimbursementStatus::PAID,
+    ]);
+
+    $reimbursement->update(['description' => 'changed']);
+})->throws(BusinessRuleException::class, 'tidak dapat diubah');
+
+test('reimbursement model blocks update when already REJECTED', function () {
+    $reimbursement = Reimbursement::factory()->create([
+        'employee_id' => $this->employee->id,
+        'status' => ReimbursementStatus::REJECTED,
+    ]);
+
+    $reimbursement->update(['description' => 'changed']);
+})->throws(BusinessRuleException::class, 'tidak dapat diubah');
+
+test('reimbursement model allows update when PENDING', function () {
+    $reimbursement = Reimbursement::factory()->create([
+        'employee_id' => $this->employee->id,
+        'status' => ReimbursementStatus::PENDING,
+    ]);
+
+    $reimbursement->update(['description' => 'still pending']);
+
+    expect($reimbursement->description)->toBe('still pending');
+});
+
 test('linkToPayroll throws if payroll is locked', function () {
     $reimbursement = Reimbursement::factory()->create([
         'employee_id' => $this->employee->id,

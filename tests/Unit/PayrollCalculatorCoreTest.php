@@ -6,6 +6,9 @@ use App\Enums\PayrollStatus;
 use App\Enums\ReimbursementStatus;
 use App\Enums\TerCategory;
 use App\Exceptions\BusinessRuleException;
+use App\Models\Branch;
+use App\Models\Company;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\Overtime;
@@ -399,6 +402,34 @@ describe('generatePayroll', function () {
         } finally {
             $lock->release();
         }
+    });
+
+    test('lock is released after exception so retry can proceed to same error', function () {
+        $user = User::factory()->create();
+        $employee = Employee::factory()->create([
+            'user_id' => $user->id,
+            'company_id' => $this->companyId,
+            'branch_id' => $this->branchId,
+            'department_id' => $this->deptId,
+            'position_id' => $this->positionId,
+            'marital_status' => 'single',
+            'employment_type' => 'permanent',
+            'join_date' => '2020-01-01',
+            'employee_number' => 'EMP-LOCK-TEST',
+        ]);
+        $employee->setRelation('position', Position::find($this->positionId));
+
+        $this->service->generatePayroll($employee, '2026-07');
+
+        Payroll::where('employee_id', $employee->id)
+            ->where('period', '2026-07')
+            ->update(['status' => PayrollStatus::PUBLISHED]);
+
+        expect(fn () => $this->service->generatePayroll($employee, '2026-07'))
+            ->toThrow(BusinessRuleException::class, 'sudah dikunci permanen');
+
+        expect(fn () => $this->service->generatePayroll($employee, '2026-07'))
+            ->toThrow(BusinessRuleException::class, 'sudah dikunci permanen');
     });
 
     test('regenerate draft preserves existing record and updates values (B-1 fix)', function () {
@@ -856,3 +887,77 @@ test('leave cash out uses remaining balance and daily rate', function () {
     // result = 10 * round(5_000_000 / 22, 2) = 2,272,727.27
     expect($result)->toBe(2_272_727.27);
 });
+
+// ─── Payroll Lock Behavior ───────────────────────────────────
+
+test('payroll isLocked returns true for PUBLISHED status', function () {
+    $payroll = new Payroll(['status' => PayrollStatus::PUBLISHED]);
+
+    expect($payroll->isLocked())->toBeTrue();
+});
+
+test('payroll isLocked returns true for PAID status', function () {
+    $payroll = new Payroll(['status' => PayrollStatus::PAID]);
+
+    expect($payroll->isLocked())->toBeTrue();
+});
+
+test('payroll isLocked returns false for DRAFT status', function () {
+    $payroll = new Payroll(['status' => PayrollStatus::DRAFT]);
+
+    expect($payroll->isLocked())->toBeFalse();
+});
+
+test('payroll model updating guard blocks PUBLISHED from further changes', function () {
+    $company = Company::factory()->create();
+    $branch = Branch::factory()->for($company)->create();
+    $department = Department::factory()->for($branch)->create();
+    $position = Position::factory()->for($department)->create();
+    $user = User::factory()->create();
+    $employee = Employee::factory()->for($company)->for($branch)->for($department)->for($position)->create(['user_id' => $user->id]);
+    $payroll = Payroll::create([
+        'employee_id' => $employee->id,
+        'period' => '2026-06',
+        'basic_salary' => 5_000_000,
+        'total_allowance' => 0,
+        'gross_salary' => 5_000_000,
+        'overtime_pay' => 0,
+        'pph21' => 0,
+        'bpjs_health' => 0,
+        'bpjs_employment' => 0,
+        'loan_deduction' => 0,
+        'attendance_penalty' => 0,
+        'total_deduction' => 0,
+        'net_salary' => 4_000_000,
+        'status' => PayrollStatus::PUBLISHED,
+    ]);
+
+    $payroll->update(['overtime_pay' => 100_000]);
+})->throws(BusinessRuleException::class);
+
+test('payroll model updating guard blocks PAID from further changes', function () {
+    $company = Company::factory()->create();
+    $branch = Branch::factory()->for($company)->create();
+    $department = Department::factory()->for($branch)->create();
+    $position = Position::factory()->for($department)->create();
+    $user = User::factory()->create();
+    $employee = Employee::factory()->for($company)->for($branch)->for($department)->for($position)->create(['user_id' => $user->id]);
+    $payroll = Payroll::create([
+        'employee_id' => $employee->id,
+        'period' => '2026-06',
+        'basic_salary' => 5_000_000,
+        'total_allowance' => 0,
+        'gross_salary' => 5_000_000,
+        'overtime_pay' => 0,
+        'pph21' => 0,
+        'bpjs_health' => 0,
+        'bpjs_employment' => 0,
+        'loan_deduction' => 0,
+        'attendance_penalty' => 0,
+        'total_deduction' => 0,
+        'net_salary' => 4_000_000,
+        'status' => PayrollStatus::PAID,
+    ]);
+
+    $payroll->update(['overtime_pay' => 100_000]);
+})->throws(BusinessRuleException::class);

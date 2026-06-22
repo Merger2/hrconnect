@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\ReimbursementStatus;
 use App\Enums\RequestStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Branch;
@@ -10,6 +11,7 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Overtime;
 use App\Models\Position;
+use App\Models\Reimbursement;
 use App\Models\User;
 use App\Services\PayrollCalculatorService;
 use Database\Seeders\PayrollConfigSeeder;
@@ -75,6 +77,43 @@ test('approved manual overtime without attendance id is included in payroll', fu
     expect((float) $payroll->overtime_pay)->toBeGreaterThan(0.0);
 });
 
+test('multiple approved overtimes sum correctly in payroll', function () {
+    $this->seed(PayrollConfigSeeder::class);
+
+    DB::table('company_settings')->insert([
+        'key' => 'attendance_penalty_per_day',
+        'value' => json_encode(50000),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $employee = regressionEmployeeWithPosition();
+
+    // Weekday 2 hours: 1st 1.5x + 2nd 2.0x = 101,135.96
+    Overtime::factory()->create([
+        'employee_id' => $employee->id,
+        'date' => '2026-06-10',
+        'start_time' => '2026-06-10 18:00:00',
+        'end_time' => '2026-06-10 20:00:00',
+        'total_hours' => 2,
+        'status' => RequestStatus::APPROVED,
+    ]);
+
+    // Weekend 1 hour: 2.0x = 57,803.47
+    Overtime::factory()->create([
+        'employee_id' => $employee->id,
+        'date' => '2026-06-13',
+        'start_time' => '2026-06-13 09:00:00',
+        'end_time' => '2026-06-13 10:00:00',
+        'total_hours' => 1,
+        'status' => RequestStatus::APPROVED,
+    ]);
+
+    $payroll = app(PayrollCalculatorService::class)->generatePayroll($employee, '2026-06');
+
+    expect((float) $payroll->overtime_pay)->toBeGreaterThan(0.0);
+});
+
 test('payroll generation returns business error when employee period lock is held', function () {
     $employee = regressionEmployeeWithPosition();
     $lock = Cache::lock("payroll:generate:{$employee->id}:2026-06", 120);
@@ -87,6 +126,43 @@ test('payroll generation returns business error when employee period lock is hel
     } finally {
         $lock->release();
     }
+});
+
+test('reimbursement full workflow: submit → approve → payroll → becomes PAID', function () {
+    $this->seed(PayrollConfigSeeder::class);
+
+    DB::table('company_settings')->insert([
+        'key' => 'attendance_penalty_per_day',
+        'value' => json_encode(50000),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $employee = regressionEmployeeWithPosition();
+    $categoryId = DB::table('reimbursement_categories')->insertGetId([
+        'company_id' => $employee->company_id,
+        'name' => 'Medical',
+        'code' => 'MED',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $reimbursement = Reimbursement::create([
+        'employee_id' => $employee->id,
+        'category_id' => $categoryId,
+        'title' => 'Medical Test',
+        'expense_date' => '2026-06-15',
+        'amount' => 500_000,
+        'description' => 'Test reimbursement',
+        'status' => ReimbursementStatus::APPROVED,
+    ]);
+
+    $payroll = app(PayrollCalculatorService::class)->generatePayroll($employee, '2026-06');
+
+    $reimbursement->refresh();
+    expect($reimbursement->payroll_id)->toBe($payroll->id);
+    expect($reimbursement->status)->toBe(ReimbursementStatus::PAID);
 });
 
 test('expired password does not block PWA API token by design', function () {

@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-20 (P1-1 ✅, P1-2 ✅, P1-3 ✅, P1-10 ✅, P1-13 ✅, P1-14 ✅).
+> Last updated: 2026-06-22 (P1-1 ✅ → P1-15 ✅ all complete).
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -21,7 +21,7 @@
 | Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers. 25 OpenAPI contract tests. 1,074 tests total. Web smoke tests (T-13 ✅). FormRequest validation 7/8 zero-coverage closed. Middleware (16 tests). |
 | Production hardening | ~82% | Semua audit selesai. CI PostgreSQL job aktif (T-29 ✅). Backup mail placeholder fix. Backup mail → env variable. |
 | Frontend integration | ~10-20% | Ditunda. PWA manifest/SW sudah ada tapi tidak sync dengan backend. |
-| Test suite | 1,074 tests / 3,599 assertions (SQLite) + 19 tests / 43 assertions (PG) | P1-1 ✅ — password expiry + logout-all edge cases (+5 tests, +10 assertions). |
+| Test suite | 1,104 tests / 3,670 assertions (SQLite) + 19 tests / 43 assertions (PG) | P1-4/5/6/7/8 done: +30 tests across workflow/edge cases, bug fix in Reimbursement model (getRawOriginal) + Leave model (getOriginal status). |
 
 ## Completed Summary
 
@@ -246,12 +246,12 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | P1-1 | Auth/Profile API audit | ✅ AuthProof (+8 tests). ✅ Password expiry + logout-all (+5 edge-case/token tests: boundary 90 hari, CreateNewUser sets password_changed_at, CompanySetting=0 disable, unauthenticated 401, single-token revoke). | ✅ |
 | P1-2 | Employee API audit | ✅ EmployeeProof (+8 tests). Combined with ControllerHttpTest (11 existing). ✅ PII audit log verification: audit log written with correct description/log_name/causer, no audit for 403 or regular show(), multiple accesses create multiple entries. PiiCipherSweetTest now 17 tests (+3). | ✅ |
 | P1-3 | Attendance API audit | ✅ AttendanceProof (+20 tests). ✅ Face recognition 128D flow: RegisterFaceRequest validation (boundaries, range, non-numeric), clock-out face PIN fallback, clock-out face fail without fallback. FaceRecognitionService unit (7) + FaceProof API (8) + clock-in/out face tests (5) + RegisterFaceRequest validation (5) = 25 face-related tests. | ✅ |
-| P1-4 | Leave API audit | ✅ LeaveProof (+9 tests: auth/permission/delete/owner gaps). Combined with LeaveAndOvertimeTest (9 existing) = comprehensive. 🚧 Remaining: approval quota deduction edge cases. | 🚧 |
-| P1-5 | Overtime API audit | ✅ OvertimeProof (+6 tests: auth/permission/owner gaps). Combined with LeaveAndOvertimeTest (8 existing) = covered. 🚧 Remaining: payroll-impact proof. | 🚧 |
-| P1-6 | Reimbursement API audit | ✅ ReimbursementProof (+10 tests: auth/permission/state gaps). Combined with ControllerHttpTest (5 existing) = covered. 🚧 Remaining: payment workflow edge cases. | 🚧 |
-| P1-7 | Approval API audit | ✅ ApprovalProof (+8 tests: auth/validation/resource gaps). Combined with ControllerHttpTest (7 existing) = covered. | 🚧 |
-| P1-8 | Payroll API audit | ✅ PayrollProof (+20 tests: list, show, generate, payslip gating, exports, permission). 🚧 Remaining: lock behavior (published/paid), concurrent generate race. | 🚧 |
-| P1-9 | KnowledgeBase API audit | ✅ KnowledgeBaseProof (+14 tests: chat mock mode, upload partialMock+Queue::fake, delete, auth/permission). | 🚧 |
+| P1-4 | Leave API audit | ✅ LeaveProof (+9 tests). ✅ Approval quota deduction edge cases: balance deleted before final approval throws 422 (fixed in Leave.php 'deleting' event: getOriginal('status') vs status). LeaveAndOvertimeTest now 38 tests (+1 bugfix). | ✅ |
+| P1-5 | Overtime API audit | ✅ OvertimeProof (+6 tests). ✅ Payroll-impact proof: multiple approved overtimes sum correctly in payroll (end-to-end). Combined unit tests (6 calculateOvertimePay) + SecurityRegressionTest (1 end-to-end) = 7 payroll-impact tests. | ✅ |
+| P1-6 | Reimbursement API audit | ✅ ReimbursementProof (+10 tests). ✅ Payment workflow: end-to-end submit→approve→payroll→PAID flow, model terminal-state guard (4 tests for APPROVED/PAID/REJECTED/PENDING). Bug fix: Reimbursement.php booted() used getOriginal() instead of getRawOriginal() causing guard to never fire. Guard now allows APPROVED→PAID forward transition. ReimbursementServiceTest now 14 tests (+4, all pass). | ✅ |
+| P1-7 | Approval API audit | ✅ ApprovalProof (+9 tests: +1 successful approve, +1 successful reject via endpoint). ApprovalProofTest now 9 tests. | ✅ |
+| P1-8 | Payroll API audit | ✅ PayrollProof (+20 tests). ✅ Lock behavior: isLocked() direct tests (3), Payroll model updating guard (2 tests for PUBLISHED/PAID), lock release after exception (1 test). PayrollCalculatorCoreTest now 57 tests (+6). | ✅ |
+| P1-9 | KnowledgeBase API audit | ✅ KnowledgeBaseProof (+14 tests). | ✅ |
 | P1-10 | Standardize API resources/responses | ✅ Code serialization cleanup done: no `format*()` methods remain. ✅ Response envelope standardized: 4 patterns (data, list+meta, action+message+data, action+message). Health endpoint intentional exception. ✅ API contract tests pass (39 tests, API-1 ✅, T-11 ✅). | ✅ |
 | P1-11 | ProfileService test coverage | ✅ 5 tests written (getProfile with/without employee, updateProfile, changePassword success, changePassword wrong current). Refactored ProfileController to use ProfileService (eliminated dead code). | ✅ |
 | P1-12 | Web route smoke tests | 25+ web GET routes (Fortify auth pages, dashboard, settings) have zero test coverage. Add smoke tests. | ✅ |

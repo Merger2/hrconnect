@@ -21,19 +21,22 @@ class Reimbursement extends Model
 
     protected static function booted(): void
     {
-        // B-19: Block terminal state changes — PAID/APPROVED/REJECTED cannot revert
         static::updating(function (Reimbursement $reimbursement) {
-            $originalStatus = $reimbursement->getOriginal('status');
+            $originalRaw = $reimbursement->getRawOriginal('status');
 
-            $terminalStates = [
+            // Allow APPROVED → PAID (forward transition via linkToPayroll)
+            if ($originalRaw === ReimbursementStatus::APPROVED->value
+                && $reimbursement->status === ReimbursementStatus::PAID) {
+                return;
+            }
+
+            if (in_array($originalRaw, [
                 ReimbursementStatus::PAID->value,
                 ReimbursementStatus::APPROVED->value,
                 ReimbursementStatus::REJECTED->value,
-            ];
-
-            if (in_array($originalStatus, $terminalStates)) {
+            ], true)) {
                 throw new BusinessRuleException(
-                    'Reimbursement dengan status '.$originalStatus.' tidak dapat diubah.'
+                    'Reimbursement dengan status '.$originalRaw.' tidak dapat diubah.'
                 );
             }
         });

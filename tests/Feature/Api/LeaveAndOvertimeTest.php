@@ -4,6 +4,7 @@ namespace Tests\Feature\Api;
 
 use App\Enums\DayType;
 use App\Enums\EmploymentType;
+use App\Enums\RequestStatus;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Department;
@@ -698,5 +699,194 @@ describe('ApprovalController', function () {
             ->assertOk();
 
         expect($balance->fresh()->used)->toBe($usedBefore);
+    });
+
+    // ─── P1-4: Quota Deduction Edge Cases ──────────────────────────
+
+    it('deleting approved leave directly refunds quota', function () {
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType, $balance);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")->assertOk();
+
+        $leave->refresh();
+        expect($leave->status)->toBe(RequestStatus::APPROVED);
+        expect($balance->fresh()->used)->toEqual(1);
+
+        // Langsung delete model (bukan via controller yang di-gate policy)
+        $leave->delete();
+
+        expect($balance->fresh()->used)->toEqual(0);
+    });
+
+    it('multiple approved leaves accumulate deduction', function () {
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+
+        foreach ([1, 2] as $i) {
+            $start = now()->addWeekdays(2 + $i * 5)->toDateString();
+            $leave = app(LeaveService::class)->applyLeave($this->employeeEmp, [
+                'leave_type_id' => $this->leaveType->id,
+                'start_date' => $start,
+                'end_date' => $start,
+                'day_type' => DayType::FULL_DAY->value,
+                'reason' => "Cuti ke-$i.",
+            ]);
+
+            $l1 = $leave->approvals()->where('level', 1)->first();
+            $l2 = $leave->approvals()->where('level', 2)->first();
+
+            Auth::forgetGuards();
+            $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+                ->postJson("/api/v1/approvals/{$l1->id}/approve")->assertOk();
+
+            Auth::forgetGuards();
+            $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+                ->postJson("/api/v1/approvals/{$l2->id}/approve")->assertOk();
+        }
+
+        expect($balance->fresh()->used)->toEqual(2);
+    });
+
+    it('half-day leave deducts 0.5 from quota', function () {
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 12,
+        ]);
+
+        $start = now()->addWeekdays(2)->toDateString();
+        $leave = app(LeaveService::class)->applyLeave($this->employeeEmp, [
+            'leave_type_id' => $this->leaveType->id,
+            'start_date' => $start,
+            'end_date' => $start,
+            'day_type' => DayType::MORNING->value,
+            'reason' => 'Cuti setengah hari keperluan pribadi.',
+        ]);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")->assertOk();
+
+        $leave->refresh();
+        expect($leave->status)->toBe(RequestStatus::APPROVED);
+        expect($balance->fresh()->used)->toEqual(0.5);
+    });
+
+    it('approves non-quota-deducting leave type without deduction', function () {
+        $nonQuotaType = LeaveType::factory()->create(['deducts_from_quota' => false]);
+
+        $start = now()->addWeekdays(2)->toDateString();
+        $leave = app(LeaveService::class)->applyLeave($this->employeeEmp, [
+            'leave_type_id' => $nonQuotaType->id,
+            'start_date' => $start,
+            'end_date' => $start,
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti tanpa potongan kuota.',
+        ]);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")->assertOk();
+
+        $leave->refresh();
+        expect($leave->status)->toBe(RequestStatus::APPROVED);
+
+        $balance = LeaveBalance::where('employee_id', $this->employeeEmp->id)
+            ->where('leave_type_id', $nonQuotaType->id)
+            ->first();
+        expect($balance)->toBeNull();
+    });
+
+    it('exact quota exhaustion deducts without error', function () {
+        $balance = LeaveBalance::factory()->create([
+            'employee_id' => $this->employeeEmp->id,
+            'leave_type_id' => $this->leaveType->id,
+            'year' => now()->year,
+            'quota' => 1,
+        ]);
+
+        $start = now()->addWeekdays(2)->toDateString();
+        $leave = app(LeaveService::class)->applyLeave($this->employeeEmp, [
+            'leave_type_id' => $this->leaveType->id,
+            'start_date' => $start,
+            'end_date' => $start,
+            'day_type' => DayType::FULL_DAY->value,
+            'reason' => 'Cuti menghabiskan sisa kuota.',
+        ]);
+
+        $l1 = $leave->approvals()->where('level', 1)->first();
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")->assertOk();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")->assertOk();
+
+        $leave->refresh();
+        expect($leave->status)->toBe(RequestStatus::APPROVED);
+        expect($balance->fresh()->used)->toEqual(1);
+        expect($balance->fresh()->available())->toEqual(0);
+    });
+
+    it('balance deleted before final approval throws 422', function () {
+        [$leave] = createLeave($this->employeeEmp, $this->leaveType);
+
+        // Approve L1 first (L1 doesn't check balance)
+        $l1 = $leave->approvals()->where('level', 1)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->managerToken}")
+            ->postJson("/api/v1/approvals/{$l1->id}/approve")
+            ->assertOk();
+
+        // Delete the balance before final L2 approval
+        LeaveBalance::where('employee_id', $this->employeeEmp->id)
+            ->where('leave_type_id', $this->leaveType->id)
+            ->delete();
+
+        // L2 tries to deduct quota but balance is gone → 422
+        $l2 = $leave->approvals()->where('level', 2)->first();
+
+        Auth::forgetGuards();
+        $this->withHeader('Authorization', "Bearer {$this->hrToken}")
+            ->postJson("/api/v1/approvals/{$l2->id}/approve")
+            ->assertStatus(422);
     });
 });

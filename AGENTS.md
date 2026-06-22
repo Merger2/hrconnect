@@ -29,7 +29,7 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreSQL (pgve
 - **34 enums**: 16 Status/Indicator have `color()` (5 Flux colors: success/warning/danger/info/zinc); 18 Classification enums must NOT have `color()`
 - **5 Spatie roles**: super-admin, hr-manager, finance, manager, employee
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax (not `$fillable`/`$hidden`)
-- **585 tests** / 3,836 assertions across 58 files. 2 CI jobs: SQLite + PostgreSQL (pgvector/pgvector:pg16). Comprehensive gap audit completed — see P0-6 in `docs/planning/task.md`. ProfileService tests added (T-15), Overtime/Reimbursement store policy calls added (T-23/24), Command tests added (P1-15).
+- **1,104 tests** / 3,670 assertions across SQLite suite. 2 CI jobs: SQLite + PostgreSQL (pgvector/pgvector:pg16). Comprehensive gap audit completed — see P0-6 in `docs/planning/task.md`. All P1 tasks complete (P1-1 through P1-15).
 - **Docs** in `docs/`. Source of truth: `docs/planning/task.md` (status tracker), `docs/architecture/erd.dbml` (ERD), `docs/INDEX.md` (index)
 
 ## Known Test Coverage Gaps (from P0-6 three-round audit)
