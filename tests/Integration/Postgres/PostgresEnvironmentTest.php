@@ -454,6 +454,68 @@ test('CipherSweet whereBlind returns null for non-existent value', function () {
     expect($result)->toBeNull();
 });
 
+// ─── Migration Guard Tests ──────────────────────────────
+
+test('employees table has vector type face_embedding column on PostgreSQL', function () {
+    $column = DB::selectOne(<<<'SQL'
+        SELECT data_type, udt_name
+        FROM information_schema.columns
+        WHERE table_name = 'employees'
+          AND column_name = 'face_embedding'
+    SQL);
+
+    expect($column)->not->toBeNull();
+    expect($column->udt_name)->toBe('vector');
+});
+
+test('knowledge_bases table has vector type embedding column on PostgreSQL', function () {
+    $column = DB::selectOne(<<<'SQL'
+        SELECT data_type, udt_name
+        FROM information_schema.columns
+        WHERE table_name = 'knowledge_bases'
+          AND column_name = 'embedding'
+    SQL);
+
+    expect($column)->not->toBeNull();
+    expect($column->udt_name)->toBe('vector');
+});
+
+test('knowledge_bases table has jsonb type metadata column on PostgreSQL', function () {
+    $column = DB::selectOne(<<<'SQL'
+        SELECT data_type
+        FROM information_schema.columns
+        WHERE table_name = 'knowledge_bases'
+          AND column_name = 'metadata'
+    SQL);
+
+    expect($column)->not->toBeNull();
+    expect($column->data_type)->toBe('jsonb');
+});
+
+test('jsonb metadata column stores and queries on PostgreSQL', function () {
+    $id = DB::table('knowledge_bases')->insertGetId([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'JSONB Test',
+        'content' => 'Testing jsonb column',
+        'category' => 'general',
+        'status' => 'ready',
+        'metadata' => json_encode(['source' => 'test', 'version' => 2]),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $result = DB::table('knowledge_bases')
+        ->where('id', $id)
+        ->select('metadata')
+        ->first();
+
+    expect($result)->not->toBeNull();
+    $meta = is_string($result->metadata) ? json_decode($result->metadata) : $result->metadata;
+    expect($meta->source)->toBe('test');
+    expect($meta->version)->toBe(2);
+});
+
 test('HNSW index exists on knowledge_bases embedding column', function () {
     $index = DB::selectOne(<<<'SQL'
         SELECT indexname, indexdef

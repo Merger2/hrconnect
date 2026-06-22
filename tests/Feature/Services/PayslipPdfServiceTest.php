@@ -189,3 +189,58 @@ test('buildTemplateData extra_income empty when no payroll items exist', functio
 
     expect($data['extra_income'])->toBeArray()->toBeEmpty();
 });
+
+// ─── Public Methods ─────────────────────────────────────────
+
+test('generate returns PDF string', function () {
+    $mock = \Barryvdh\DomPDF\Facade\Pdf::partialMock();
+    $mock->shouldReceive('loadView')->once()->andReturnSelf();
+    $mock->shouldReceive('setPaper')->once()->andReturnSelf();
+    $mock->shouldReceive('setOptions')->once()->andReturnSelf();
+    $mock->shouldReceive('output')->once()->andReturn('%PDF-1.4 fake pdf content');
+
+    $result = $this->service->generate($this->payroll);
+
+    expect($result)->toBeString();
+    expect($result)->toStartWith('%PDF-1.4');
+});
+
+test('generateAndStore saves PDF and updates payroll pdf_path', function () {
+    $mock = \Barryvdh\DomPDF\Facade\Pdf::partialMock();
+    $mock->shouldReceive('loadView')->once()->andReturnSelf();
+    $mock->shouldReceive('setPaper')->once()->andReturnSelf();
+    $mock->shouldReceive('setOptions')->once()->andReturnSelf();
+    $mock->shouldReceive('save')->once()->andReturnSelf();
+    Storage::fake('local');
+
+    $absolutePath = $this->service->generateAndStore($this->payroll);
+
+    expect($absolutePath)->toBeString();
+    expect($absolutePath)->toContain('payslips/2026-06/EMP001.pdf');
+
+    $this->payroll->refresh();
+    expect($this->payroll->pdf_path)->toBe('payslips/2026-06/EMP001.pdf');
+});
+
+test('getPayslipPath returns null when pdf_path is not set', function () {
+    $payroll = Payroll::find($this->payrollId);
+    $payroll->updateQuietly(['pdf_path' => null]);
+
+    $result = $this->service->getPayslipPath($payroll);
+
+    expect($result)->toBeNull();
+});
+
+test('getPayslipPath returns full path when file exists', function () {
+    $dir = storage_path('app/private/payslips/2026-06');
+    if (! is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+    $testPath = $dir.'/EMP001.pdf';
+    file_put_contents($testPath, 'fake-pdf');
+    $this->payroll->updateQuietly(['pdf_path' => 'payslips/2026-06/EMP001.pdf']);
+
+    $result = $this->service->getPayslipPath($this->payroll);
+
+    expect($result)->toBe($testPath);
+});

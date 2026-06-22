@@ -47,6 +47,7 @@ test('public routes do not return 401', function (string $method, string $uri) {
     ['GET', '/api/v1/health'],
     ['POST', '/api/v1/auth/login'],
     ['POST', '/api/v1/auth/forgot-password'],
+    ['POST', '/api/v1/auth/2fa/challenge'],
 ]);
 
 test('POST /api/v1/auth/login public, validation works', function () {
