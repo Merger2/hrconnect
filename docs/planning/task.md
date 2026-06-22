@@ -21,7 +21,7 @@
 | Backend API layer | ~95% | 51 routes at `/api/v1`, 13 controllers. 25 OpenAPI contract tests. 1,074 tests total. Web smoke tests (T-13 ✅). FormRequest validation 7/8 zero-coverage closed. Middleware (16 tests). |
 | Production hardening | ~82% | Semua audit selesai. CI PostgreSQL job aktif (T-29 ✅). Backup mail placeholder fix. Backup mail → env variable. |
 | Frontend integration | ~10-20% | Ditunda. PWA manifest/SW sudah ada tapi tidak sync dengan backend. |
-| Test suite | 1,104 tests / 3,670 assertions (SQLite) + 19 tests / 43 assertions (PG) | P1-4/5/6/7/8 done: +30 tests across workflow/edge cases, bug fix in Reimbursement model (getRawOriginal) + Leave model (getOriginal status). |
+| Test suite | 1,104 tests / 3,670 assertions (SQLite) + 24 tests / 52 assertions (PG) | P1-4/5/6/7/8 done: +30 tests. PG expanded: pg_trgm similarity search (2), pgcrypto gen_random_uuid (2) + gen_salt (1). Bug fix: future attendance test date collision (now()->addDay() matched CURRENT_DATE). |
 
 ## Completed Summary
 

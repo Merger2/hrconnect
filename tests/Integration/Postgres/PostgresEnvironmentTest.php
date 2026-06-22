@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\FaceRecognitionService;
 use App\Services\PayrollCalculatorService;
+use Carbon\CarbonImmutable;
 use Database\Seeders\PayrollConfigSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -304,11 +305,14 @@ test('PostgreSQL rejects employees managed by themselves', function () {
 test('PostgreSQL rejects future attendance dates', function () {
     $employeeId = createPostgresEmployee(['employee_number' => 'PG-FUTURE']);
 
+    $current = DB::selectOne('SELECT CURRENT_DATE AS d')->d;
+    $futureDate = CarbonImmutable::parse($current)->addDays(7)->toDateString();
+
     $this->expectException(QueryException::class);
 
     DB::table('attendances')->insert([
         'employee_id' => $employeeId,
-        'date' => now()->addDay()->toDateString(),
+        'date' => $futureDate,
         'status' => 'on_time',
         'is_wfa' => false,
         'late_minutes' => 0,
@@ -460,4 +464,89 @@ test('HNSW index exists on knowledge_bases embedding column', function () {
 
     expect($index)->not->toBeNull();
     expect($index->indexdef)->toContain('hnsw');
+});
+
+// ─── pg_trgm ────────────────────────────────────────────
+
+test('pg_trgm similarity finds matching text in knowledge base content', function () {
+    $targetId = DB::table('knowledge_bases')->insertGetId([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'Kebijakan Cuti Tahunan',
+        'content' => 'Setiap karyawan berhak atas 12 hari cuti tahunan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 2,
+        'title' => 'Kebijakan BPJS',
+        'content' => 'BPJS Kesehatan dan BPJS Ketenagakerjaan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Use a longer phrase that has enough trigram overlap to exceed threshold
+    $result = DB::selectOne(<<<'SQL'
+        SELECT id, similarity(content, 'hari cuti tahunan') AS score
+        FROM knowledge_bases
+        WHERE content % 'hari cuti tahunan'
+        ORDER BY score DESC
+        LIMIT 1
+    SQL);
+
+    expect($result)->not->toBeNull();
+    expect($result->id)->toBe($targetId);
+    expect((float) $result->score)->toBeGreaterThan(0.3);
+});
+
+test('pg_trgm similarity returns empty when no match', function () {
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'English Policy',
+        'content' => 'This is an English document with no Indonesian words.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $result = DB::selectOne(<<<'SQL'
+        SELECT id, similarity(content, 'xyzzy_nonexistent') AS score
+        FROM knowledge_bases
+        WHERE content % 'xyzzy_nonexistent'
+        ORDER BY score DESC
+        LIMIT 1
+    SQL);
+
+    expect($result)->toBeNull();
+});
+
+// ─── pgcrypto ────────────────────────────────────────────
+
+test('pgcrypto gen_random_uuid returns a valid UUID', function () {
+    $uuid = DB::selectOne('SELECT gen_random_uuid() AS uuid');
+
+    expect($uuid)->not->toBeNull();
+    expect($uuid->uuid)->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i');
+});
+
+test('pgcrypto gen_random_uuid produces unique values', function () {
+    $uuids = DB::select('SELECT gen_random_uuid() AS uuid FROM generate_series(1, 10)');
+
+    $raw = array_map(fn ($r) => $r->uuid, $uuids);
+    expect(count(array_unique($raw)))->toBe(10);
+});
+
+test('pgcrypto gen_salt produces a valid bcrypt salt string', function () {
+    $salt = DB::selectOne("SELECT gen_salt('bf') AS salt");
+
+    expect($salt)->not->toBeNull();
+    expect($salt->salt)->toMatch('/^\$2a\$\d{2}\$/');
 });
