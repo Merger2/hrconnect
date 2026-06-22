@@ -468,14 +468,14 @@ hrconnect/
 │       │   │   └── two-factor-challenge.blade.php   ✅
 │       │   └── settings/
 │       │       ├── layout.blade.php                 ✅
-│       │       ├── ⚡appearance.blade.php            ✅
-│       │       ├── ⚡profile.blade.php               ✅
-│       │       ├── ⚡security.blade.php              ✅
-│       │       ├── ⚡delete-user-form.blade.php      ✅
-│       │       ├── ⚡delete-user-modal.blade.php     ✅
-│       │       ├── ⚡two-factor-setup-modal.blade.php ✅
+│       │       ├── appearance.blade.php              ✅
+│       │       ├── profile.blade.php                 ✅
+│       │       ├── security.blade.php                ✅
+│       │       ├── delete-user-form.blade.php        ✅
+│       │       ├── delete-user-modal.blade.php       ✅
+│       │       ├── two-factor-setup-modal.blade.php  ✅
 │       │       └── two-factor/
-│       │           └── ⚡recovery-codes.blade.php    ✅
+│       │           └── recovery-codes.blade.php      ✅
 │       ├── partials/
 │       │   ├── head.blade.php                       ✅
 │       │   ├── settings-heading.blade.php           ✅

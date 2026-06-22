@@ -1,6 +1,6 @@
 # HRConnect — Agent Instructions
 
-Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreSQL (pgvector + pg_trgm + pgcrypto). Solo dev.
+Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + Tailwind CSS 4 + PostgreSQL (pgvector + pg_trgm + pgcrypto). Solo dev.
 
 ## Key Commands
 
@@ -8,52 +8,55 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Flux UI 2 + PostgreSQL (pgve
 |---------|---------|
 | Dev server | `composer run dev` (serve + queue + pail + vite) |
 | Full test suite | `composer test` (lint + phpunit, SQLite) |
-| PostgreSQL tests | `composer test:pgsql` |
+| PostgreSQL tests | `composer test:pgsql` (→ `phpunit.pgsql.xml`) |
 | Focused test | `php artisan test --compact --filter=Name` |
 | Lint auto-fix | `vendor/bin/pint --dirty --format agent` |
+| Lint check only | `composer lint:check` (CI-safe, no changes) |
+| PHPStan | `vendor/bin/phpstan analyse` (level 5, only `app/`) |
 | Route audit | `php artisan route:list --path=api --except-vendor` |
 | Queue worker | `php artisan queue:work --queue=default,payroll_high,notifications` |
 | Regenerate API docs | `php artisan scramble:export` (→ `docs/api/api.json`) |
 
-## Setup
+## Setup & Env Quirks
 
 - PG extensions before `migrate`: `CREATE EXTENSION IF NOT EXISTS vector; pg_trgm; pgcrypto`
 - Flux auth before install: `composer config http-basic.composer.fluxui.dev "${FLUX_USERNAME}" "${FLUX_LICENSE_KEY}"`
-- `.npmrc` sets `ignore-scripts=true`
-- `CIPHERSWEET_KEY` required (64-char hex)
+- `.npmrc` sets `ignore-scripts=true` — `npm install` won't run build scripts
+- `CIPHERSWEET_KEY` required (64-char hex). `.env.example` has a placeholder; `phpunit.xml` provides a test key.
+- Default env: `QUEUE_CONNECTION=database`, `SESSION_DRIVER=database` (encrypted), `HASH_DRIVER=argon2id`, `CACHE_STORE=database`.
+- `DB_URL` must be **empty** for SQLite tests (set `""` in phpunit.xml).
+- `APP_TIMEZONE=Asia/Jakarta`, `APP_LOCALE=id`.
+- `pgvector/pgvector` is in `dont-discover` — registered manually via `PgvectorSchema::register()` in `AppServiceProvider`.
+- `post-update-cmd` runs `boost:update` — needs `.env` present.
+- Livewire v4 SFC: `make_command.emoji` set to `false` — no ⚡ prefix in filenames.
+- `config/livewire.php` published (Livewire v4 defaults).
 
 ## Architecture
 
-- **51 API routes** at `/api/v1` (single `routes/api.php`, 13 controllers). Sanctum bearer auth, token never expires. Public: health, login, 2fa-challenge, forgot-password.
+- **13 API controllers** at `/api/v1` (single `routes/api.php`). Sanctum bearer auth, token never expires. Public: health, login, 2fa-challenge, forgot-password.
 - **15 services** in `App\Services`. Business logic lives here, not controllers.
-- **8 observers**, **8 policies** (auto-discovery), **4 live notifications**.
+- **8 observers** (registered manually in `AppServiceProvider`), **8 policies** (auto-discovery), **4 notifications**.
 - **34 enums**: 16 Status/Indicator have `color()` (5 Flux colors); 18 Classification enums must NOT.
 - **5 Spatie roles**: super-admin, hr-manager, finance, manager, employee.
-- **Web routes** auto-loaded via `bootstrap/app.php` `then` block — reads `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement}.php`.
+- **31 models**, **26 factories**, **13 route files**.
+- **Web routes** loaded via `bootstrap/app.php` `then` block — reads `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement}.php`. `routes/settings.php` is required from `web.php`.
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax.
-- **1,115 tests** / 3,697 assertions (SQLite) + **28 PG tests** / 61 assertions.
-- **All 8 factories** (high-impact) now exist: Approval, CompanySetting, Device, FamilyDetail, PayrollAdjustment, PayrollItem, ShiftSchedule, KnowledgeBase.
+- **+1,100 tests** / +3,600 assertions (SQLite) + **~28 PG tests** in `tests/Integration/Postgres/`.
 
-## Current Backend Status
+## Design System
 
-**Gap B-100-6 (Blade-to-API integration)** is the only remaining backend item, deferred — domain Blade views (`resources/views/attendance/`, `leaves/`, etc.) are not yet created. Everything else (P1 tasks, PG guards, FormRequest validation, permission drift, IDOR hardening) is ✅ complete.
+`DESIGN.md` is the source of truth. CSS variables come from `@theme` in `resources/css/app.css` — use `bg-canvas`, `text-ink`, `rounded-xl`, etc. Never hardcode colors/radius/fonts.
+- Brand colors (pink, teal, lavender, etc.) → landing page only. HR pages use minimal accents.
+- Layout: `x-layouts::app.sidebar`.
+- Font: Outfit 500 (display), Inter (fallback).
+- If DESIGN.md changes, update `app.css` first.
 
-See `docs/planning/task.md` (Remaining Gaps section) and `docs/INDEX.md`.
+## CI
 
-## Design System (DESIGN.md)
-
-**Wajib** — `DESIGN.md` di root adalah source of truth untuk semua UI. Setiap token warna, font, spacing, radius HARUS refer ke DESIGN.md, jangan hardcode nilai sendiri.
-
-### Aturan
-- Baca DESIGN.md sebelum nulis satu baris Blade/CSS/JS.
-- Setiap hex/px/value harus cocok dengan DESIGN.md YAML.
-- Gunakan CSS variable dari `@theme` di `resources/css/app.css` — nilai variable sudah di-set sesuai DESIGN.md, tinggal panggil `bg-canvas`, `text-ink`, `rounded-xl`, dll.
-- JANGAN hardcode warna/radius/font size di inline style atau kelas utility langsung. Kalau token tidak ada di CSS variable, cek DESIGN.md dulu — mungkin yang kurang token mapping-nya.
-- Brand color (pink, teal, lavender, peach, ochre, mint/coral): landing page (welcome) boleh penuh. Halaman HR fungsional (attendance, leaves, dll.) pakai aksen minimal.
-- Layout HR pages: `x-layouts::app.sidebar`.
-- Font display: **Outfit** weight 500 (subtitusi Plain Black). Fallback: Inter.
-
-Jika DESIGN.md di-update, update CSS variable di `app.css` dulu sebelum ubah Blade.
+`main`/`develop`/`master` pushes + PRs trigger:
+- **lint.yml**: PHP 8.4, runs `composer lint` (Pint).
+- **tests.yml (sqlite)**: PHP 8.5, `npm i` (ignore-scripts), `composer install --optimize-autoloader`, `./vendor/bin/pest`.
+- **tests.yml (postgres)**: PHP 8.5, `pgvector/pgvector:pg16` service, `./vendor/bin/pest --configuration=phpunit.pgsql.xml`.
 
 ## Critical Gotchas
 
