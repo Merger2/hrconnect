@@ -10,8 +10,20 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=outfit:500|inter:400,500,600" rel="stylesheet" />
     @vite(['resources/css/app.css'])
+    <style>
+        .landing-theme {
+            --color-canvas: #fffaf0;
+            --color-surface-soft: #faf5e8;
+            --color-surface-card: #f5f0e0;
+            --color-surface-strong: #ebe6d6;
+            --color-muted: #6a6a6a;
+            --color-muted-soft: #9a9a9a;
+            --color-hairline: #e5e5e5;
+            --color-hairline-soft: #f0f0f0;
+        }
+    </style>
 </head>
-<body class="bg-canvas text-ink font-sans antialiased">
+<body class="landing-theme bg-canvas text-ink font-sans antialiased">
     {{-- Top Nav --}}
     <header class="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-hairline bg-canvas px-6 lg:px-10">
         <a href="/" class="flex items-center gap-3">
