@@ -539,3 +539,66 @@ The system uses no heavy shadows. Depth comes from the saturated color contrast 
 - Animation and transition timings (3D illustration parallax on scroll, feature card entrance animations) are not in scope.
 - Form validation states beyond `{component.text-input-focused}` are not extracted.
 - The actual Clay product surface (in-app data tables, formula editor, agent builder) shares some tokens with the marketing site but adds many product-specific components that are out of scope.
+
+---
+
+## App Theme vs Landing Page Split (2026-06-23)
+
+HRConnect has **two CSS variable themes** that share the same token names but use different values:
+
+### App Theme (`resources/css/app.css` — DS-1)
+
+Used for all authenticated pages: dashboard, settings, ESS (attendance, leaves, overtimes, reimbursements). Neutral high-contrast palette optimized for readability:
+
+| Token | Value | On `#ffffff` | WCAG AA |
+|-------|-------|:------------:|:-------:|
+| `--color-canvas` | `#ffffff` | — | — |
+| `--color-ink` | `#0a0a0a` | 18.9:1 | ✅ |
+| `--color-body` | `#3a3a3a` | 8.1:1 | ✅ |
+| `--color-body-strong` | `#1a1a1a` | 15.2:1 | ✅ |
+| `--color-muted` | `#535353` | 6.7:1 | ✅ |
+| `--color-muted-soft` | `#888888` | 3.5:1 | ⚠️ |
+| `--color-hairline` | `#cfcfcf` | 1.4:1 | — |
+| `--color-hairline-soft` | `#f0f0f0` | 1.1:1 | — |
+| `--color-surface-soft` | `#f7f7f7` | 1.0:1 | — |
+| `--color-surface-card` | `#efefef` | 1.1:1 | — |
+| `--color-surface-strong` | `#d0d0d0` | 1.4:1 | — |
+
+All brand colors (`brand-pink`, `brand-teal`, etc.), surface-dark variants, and semantic colors (`success`, `warning`, `error`) are unchanged from the original values above.
+
+### Landing Theme (`resources/views/welcome.blade.php` — DS-2)
+
+Used exclusively on the public landing page. Overrides CSS variables via `.landing-theme` class to restore the original cream vintage palette. All brand-color feature cards, hero, and decorative elements retain their intended DESIGN.md appearance.
+
+Tokens overridden by `.landing-theme { ... }`:
+
+| Token | Value |
+|-------|-------|
+| `--color-canvas` | `#fffaf0` |
+| `--color-surface-soft` | `#faf5e8` |
+| `--color-surface-card` | `#f5f0e0` |
+| `--color-surface-strong` | `#ebe6d6` |
+| `--color-muted` | `#6a6a6a` |
+| `--color-muted-soft` | `#9a9a9a` |
+| `--color-hairline` | `#e5e5e5` |
+| `--color-hairline-soft` | `#f0f0f0` |
+
+### Token Mapping Guide
+
+| Design Token | App Value | Landing Value |
+|---|---|---|
+| `bg-canvas` | `#ffffff` | `#fffaf0` |
+| `bg-surface-soft` | `#f7f7f7` | `#faf5e8` |
+| `bg-surface-card` | `#efefef` | `#f5f0e0` |
+| `text-body` | `#3a3a3a` | `#3a3a3a` |
+| `text-muted` | `#535353` | `#6a6a6a` |
+| `text-muted-soft` | `#888888` | `#9a9a9a` |
+| `border-hairline` | `#cfcfcf` | `#e5e5e5` |
+
+All other tokens (`ink`, `body`, `body-strong`, `on-primary`, `on-dark`, brand colors, semantic colors, border radius) are identical across both themes.
+
+### Why Two Themes?
+
+The original cream palette (`#fffaf0` canvas, `#f5f0e0` surface-card) works beautifully for marketing pages with saturated brand-color feature cards and full-bleed illustrations, but fails WCAG AA contrast minimums for data-dense HR application pages. The app theme trades character for readability without affecting the landing page experience.
+
+This split is enforced purely via CSS variable override — no duplicate CSS, no separate builds. A single `<style>` block in `welcome.blade.php` scopes the cream palette to the landing page; all other pages inherit the neutral app theme from `@theme` in `app.css`.
