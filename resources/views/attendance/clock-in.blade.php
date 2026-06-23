@@ -5,7 +5,7 @@
     <div class="mx-auto max-w-md text-center">
         <flux:card class="p-8">
             <div class="mb-4 text-5xl font-display font-medium text-ink">08:02 AM</div>
-            <p class="text-sm text-muted">{{ __('Tuesday, June 23, 2026') }}</p>
+            <p class="text-sm text-body">{{ __('Tuesday, June 23, 2026') }}</p>
 
             <div class="mt-6 flex justify-center gap-4">
                 <flux:button variant="primary" class="min-w-[140px]">
@@ -21,15 +21,15 @@
             <flux:heading size="sm" class="mb-2">{{ __('Today\'s Activity') }}</flux:heading>
             <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                    <span class="text-muted">{{ __('Clock In') }}</span>
+                    <span class="text-body">{{ __('Clock In') }}</span>
                     <span class="font-medium text-ink">08:02 AM</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-muted">{{ __('Break') }}</span>
+                    <span class="text-body">{{ __('Break') }}</span>
                     <span class="font-medium text-ink">12:00 - 01:00 PM</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-muted">{{ __('Status') }}</span>
+                    <span class="text-body">{{ __('Status') }}</span>
                     <flux:badge color="success">{{ __('Active') }}</flux:badge>
                 </div>
             </div>

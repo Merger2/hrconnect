@@ -10,24 +10,24 @@
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <flux:card class="text-center">
-            <p class="text-xs text-muted">{{ __('Annual Leave') }}</p>
+            <p class="text-xs text-body">{{ __('Annual Leave') }}</p>
             <p class="mt-1 text-2xl font-display font-medium text-ink">8 / 12</p>
-            <p class="text-xs text-muted">{{ __('days remaining') }}</p>
+            <p class="text-xs text-body">{{ __('days remaining') }}</p>
         </flux:card>
         <flux:card class="text-center">
-            <p class="text-xs text-muted">{{ __('Sick Leave') }}</p>
+            <p class="text-xs text-body">{{ __('Sick Leave') }}</p>
             <p class="mt-1 text-2xl font-display font-medium text-ink">3 / 6</p>
-            <p class="text-xs text-muted">{{ __('days remaining') }}</p>
+            <p class="text-xs text-body">{{ __('days remaining') }}</p>
         </flux:card>
         <flux:card class="text-center">
-            <p class="text-xs text-muted">{{ __('Personal Leave') }}</p>
+            <p class="text-xs text-body">{{ __('Personal Leave') }}</p>
             <p class="mt-1 text-2xl font-display font-medium text-ink">2 / 3</p>
-            <p class="text-xs text-muted">{{ __('days remaining') }}</p>
+            <p class="text-xs text-body">{{ __('days remaining') }}</p>
         </flux:card>
         <flux:card class="text-center">
-            <p class="text-xs text-muted">{{ __('Pending') }}</p>
+            <p class="text-xs text-body">{{ __('Pending') }}</p>
             <p class="mt-1 text-2xl font-display font-medium text-ink">1</p>
-            <p class="text-xs text-muted">{{ __('awaiting approval') }}</p>
+            <p class="text-xs text-body">{{ __('awaiting approval') }}</p>
         </flux:card>
     </div>
 

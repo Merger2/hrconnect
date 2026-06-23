@@ -51,17 +51,17 @@
         <flux:card>
             <flux:heading size="sm">{{ __('This Month') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">18</p>
-            <p class="text-sm text-muted">{{ __('days worked') }}</p>
+            <p class="text-sm text-body">{{ __('days worked') }}</p>
         </flux:card>
         <flux:card>
             <flux:heading size="sm">{{ __('Late Arrivals') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">2</p>
-            <p class="text-sm text-muted">{{ __('this month') }}</p>
+            <p class="text-sm text-body">{{ __('this month') }}</p>
         </flux:card>
         <flux:card>
             <flux:heading size="sm">{{ __('Overtime') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">4.5</p>
-            <p class="text-sm text-muted">{{ __('hours this month') }}</p>
+            <p class="text-sm text-body">{{ __('hours this month') }}</p>
         </flux:card>
     </div>
 </x-layouts::app.sidebar>

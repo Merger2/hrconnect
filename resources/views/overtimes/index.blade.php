@@ -46,17 +46,17 @@
         <flux:card>
             <flux:heading size="sm">{{ __('This Month') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">4.5</p>
-            <p class="text-sm text-muted">{{ __('total hours') }}</p>
+            <p class="text-sm text-body">{{ __('total hours') }}</p>
         </flux:card>
         <flux:card>
             <flux:heading size="sm">{{ __('Pending') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">1.5</p>
-            <p class="text-sm text-muted">{{ __('hours awaiting approval') }}</p>
+            <p class="text-sm text-body">{{ __('hours awaiting approval') }}</p>
         </flux:card>
         <flux:card>
             <flux:heading size="sm">{{ __('Approved') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">3.0</p>
-            <p class="text-sm text-muted">{{ __('hours approved') }}</p>
+            <p class="text-sm text-body">{{ __('hours approved') }}</p>
         </flux:card>
     </div>
 </x-layouts::app.sidebar>

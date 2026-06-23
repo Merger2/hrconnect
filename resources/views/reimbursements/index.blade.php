@@ -46,17 +46,17 @@
         <flux:card>
             <flux:heading size="sm">{{ __('This Month') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">Rp 1,325,000</p>
-            <p class="text-sm text-muted">{{ __('total claims') }}</p>
+            <p class="text-sm text-body">{{ __('total claims') }}</p>
         </flux:card>
         <flux:card>
             <flux:heading size="sm">{{ __('Approved') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">Rp 350,000</p>
-            <p class="text-sm text-muted">{{ __('approved amount') }}</p>
+            <p class="text-sm text-body">{{ __('approved amount') }}</p>
         </flux:card>
         <flux:card>
             <flux:heading size="sm">{{ __('Pending') }}</flux:heading>
             <p class="mt-2 text-3xl font-display font-medium text-ink">Rp 850,000</p>
-            <p class="text-sm text-muted">{{ __('awaiting approval') }}</p>
+            <p class="text-sm text-body">{{ __('awaiting approval') }}</p>
         </flux:card>
     </div>
 </x-layouts::app.sidebar>
