@@ -1,7 +1,7 @@
 # Task Tracker — Backend 100% Completion
 
 > Source of truth untuk pekerjaan backend aktif sebelum pindah ke frontend.
-> Last updated: 2026-06-22 (P1 ✅ all, PG CI expanded to 28 tests. B-100-1/2/3/4/7/9 done, B-100-6 Blade-to-API deferred — views not yet created). Total 1,115 tests / 3,697 assertions.
+> Last updated: 2026-06-23 (Multi-agent audit — 5 agents covering PHPStan, security, models/migrations, tests, services. 33 hardcoded color violations, 2 audit corrections, 3 new code quality issues found. 620→711 lines.)
 > Note: item completed lama dipadatkan berdasarkan status tracker sebelumnya dan spot-check kode/test; full re-audit pembuktian dilakukan melalui task P0/P1 di bawah.
 
 ## Status Legend
@@ -17,11 +17,14 @@
 
 | Area | Status | Notes |
 |---|---:|---|
-| Backend core services | ~95% | 15 services, 14 adequate. PayslipPdfService ✅ (12 tests). |
-| Backend API layer | ~99% | 51 routes, 13 controllers. 2FA challenge ✅ (smoke test added). |
-| Production hardening | ~92% | Semua audit selesai. Permission drift ✅. PG migration guards ✅ (4 tests). |
-| Frontend integration | ~35% | Web routes ✅ (18 smoke tests, P1-12). Blade-to-API — deferred, domain views belum dibuat. |
-| Test suite | 1,115 tests / 3,697 assertions (SQLite) + 28 tests / 61 assertions (PG) | Hampir semua gap tertutup. Sisa: Blade-to-API (butuh frontend views dulu). |
+| Backend infrastructure (app/) | ~98% | 31 models, 34 enums, 15 services, 14 controllers, 28 requests, 17 resources, 8 policies, 8 observers, 3 jobs, 9 commands. 193 PHP files, ~12K LOC. ✅ |
+| API layer (routes/api.php) | ~99% | 51 endpoints at /api/v1, 13 controllers. Semua CRUD + auth + 2FA + exports. ✅ |
+| Production hardening | ~92% | CipherSweet (Employee), Sanctum, rate limits (12), 2FA, password expiry 90d, PII masking. Permission drift ✅. PG migration guards ✅ |
+| Frontend ESS (Employee Self-Service) | ~30% | 8 static Blade views (hardcoded data) — attendance (2), leaves (2), overtimes (2), reimbursements (2). 5 route views MISSING: payroll, approvals, KB, assets, loans. **0 Livewire components**. |
+| Design System compliance | ~40% | Flux UI 2 clashes with cream DESIGN.md. **33 hardcoded color violations** across 8 Blade files (stone-*, zinc-*, neutral-*, gray-*, green-*). muted #6a6a6a on canvas #fffaf0 = 3.9:1 contrast (fail WCAG AA). |
+| Security & encryption | ~90% | Employee PII encrypted via CipherSweet. FamilyDetail & Company.npwp encryption pending (post-MVP). Activity log on all models. ✅ |
+| PWA readiness | ~60% | service-worker.js ✅, manifest.json ✅, icons ✅, install banner ✅. **offline.html MISSING**. |
+| Test suite | 1,121 tests / 3,702 assertions (SQLite) + 28 tests / 61 assertions (PG) | 75 test files: 52 Feature, 21 Unit, 1 Integration/PG, 1 Arch. CI: lint + SQLite + PG. |
 
 ## Completed Summary
 
@@ -316,8 +319,22 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | B-100-7 | Migration PG guard tests | ✅ 4 new PG tests: vector columns on employees + knowledge_bases, jsonb metadata column, jsonb store/query. PostgresEnvironmentTest now 28 tests. | ✅ |
 | B-100-8 | Factory gaps (high-impact) | ✅ T-18: 8 factories created (Approval, CompanySetting, Device, FamilyDetail, PayrollAdjustment, PayrollItem, ShiftSchedule, KnowledgeBase). | ✅ |
 | B-100-9 | IDOR hardening tests | ✅ 6 tests documented known defense-in-depth gaps: employee team scoping (by design), payroll generate arbitrary employee_ids, approveWfa hierarchy check. See IdorGapDocumentationTest. | ✅ |
+| FE-1 | ESS Clock In/Out (Livewire) | GPS + face + PIN fallback. face-detection.js, gps-locator.js, face-enrollment.js | 📋 |
+| FE-2 | ESS Attendance History | Livewire component with filters, summary cards | 📋 |
+| FE-3 | ESS Leave (Apply + History + Quota) | Livewire SFC, quota management, approval flow | 📋 |
+| FE-4 | ESS Overtime (Apply + History) | Livewire SFC, payroll integration | 📋 |
+| FE-5 | ESS Reimbursement (Request + History) | Livewire SFC, receipt upload, approval flow | 📋 |
+| FE-6 | ESS Payroll Slip | Livewire SFC, PDF download | 📋 |
+| FE-7 | ESS Profile & Devices | Personal info, family details, device management | 📋 |
+| FE-8 | Missing route views | payroll, approvals, loans, knowledge-base, assets landing pages | 📋 |
+| DS-1 | Fix CSS variables (readability) | canvas #fffaf0→#ffffff, surface-card #f5f0e0→#efefef, muted #6a6a6a→#535353 | 📋 |
+| DS-2 | Landing page override | welcome.blade.php override CSS vars back to cream vintage | 📋 |
+| DS-3 | Fix hardcoded colors (30 HIGH) | two-factor-setup-modal (13: stone-*), dashboard (8: neutral-*, gray-*), navlist/group (3: zinc-*), recovery-codes (2: zinc-*), forgot-password (1: zinc-400), register (1: zinc-600), verify-email (1: green-600), auth-session-status (1: green-600) | 📋 |
+| DS-4 | Fix text-muted → text-body | 20+ replacements across 8 ESS Blade files | 📋 |
+| DS-5 | Vendor pagination customization | Republish + customize to design tokens | 📋 |
+| DS-6 | Update DESIGN.md | Note: App theme vs Landing page split | 📋 |
 
-**Estimasi total**: ~1 hari. Web views dulu dibutuhkan sebelum B-100-6 bisa dikerjakan.
+**Estimasi total**: ~2 minggu (DS-1 sampai DS-6 ≈ 2 hari, FE-1 sampai FE-8 ≈ 1.5 minggu).
 
 ### Completed (P1)
 
@@ -365,6 +382,219 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | API-6 | Auth/token contract | ✅ Auth flow documented: login → (2FA challenge) → token. Logout revokes current, logout-all revokes all. Token never expires (design decision). Password expiry via `password_changed_at`. All public endpoints listed with throttle limits. | ✅ |
 | API-7 | Generate/export docs | ✅ Scramble OpenAPI 3.1 spec generated (275KB, 51+ routes). Exported to `docs/api/api.json`. `api-contracts.md` rewritten (v3.0) — was 1360 lines outdated (~2% implemented), now accurate reflecting current state (51 routes, 13 controllers, 695 tests). | ✅ |
 
+## FE — Frontend ESS Development
+
+| ID | Task | Modul | Status |
+|---|---|---|---|
+| FE-1 | **Clock In/Out** | Attendance | 📋 |
+| | 1a. Livewire component: ClockInOut — face recognition + GPS + PIN fallback | | 📋 |
+| | 1b. JS modules: face-detection.js, gps-locator.js, face-enrollment.js | | 📋 |
+| | 1c. API integration layer: AttendanceService → clockIn(), clockOut() | | 📋 |
+| | 1d. Real-time status polling / Livewire event broadcasting | | 📋 |
+| | 1e. Tests: component render, clock-in flow, clock-out flow, error states | | 📋 |
+| FE-2 | **Attendance History** | Attendance | 📋 |
+| | 2a. Livewire component: AttendanceHistory — table + filters (date range, status) | | 📋 |
+| | 2b. Summary cards: on-time, late, absent, overtime hours | | 📋 |
+| | 2c. Pagination + export button | | 📋 |
+| | 2d. Tests | | 📋 |
+| FE-3 | **Leave** (Apply + History + Quota) | Leave | 📋 |
+| | 3a. Livewire component: LeaveApply — form (type, dates, reason, proof upload) | | 📋 |
+| | 3b. Livewire component: LeaveHistory — table with status badges | | 📋 |
+| | 3c. Quota display per leave type | | 📋 |
+| | 3d. Approval flow: supervisor modal | | 📋 |
+| | 3e. Tests | | 📋 |
+| FE-4 | **Overtime** (Apply + History) | Overtime | 📋 |
+| | 4a. Livewire component: OvertimeApply — form (date, hours, reason) | | 📋 |
+| | 4b. Livewire component: OvertimeHistory — table | | 📋 |
+| | 4c. Payroll integration indicator | | 📋 |
+| | 4d. Tests | | 📋 |
+| FE-5 | **Reimbursement** (Request + History) | Reimbursement | 📋 |
+| | 5a. Livewire component: ReimbursementRequest — form (type, amount, receipt upload) | | 📋 |
+| | 5b. Livewire component: ReimbursementHistory — table | | 📋 |
+| | 5c. Approval flow | | 📋 |
+| | 5d. Tests | | 📋 |
+| FE-6 | **Payroll Slip** | Payroll | 📋 |
+| | 6a. Livewire component: PayrollSlip — payslip list + PDF download | | 📋 |
+| | 6b. Summary: take-home pay, deductions, earnings | | 📋 |
+| | 6c. Tests | | 📋 |
+| FE-7 | **Profile & Devices** | Profile | 📋 |
+| | 7a. Livewire component: MyProfile — personal info, family, emergency contact | | 📋 |
+| | 7b. Livewire component: MyDevices — device list + add/remove | | 📋 |
+| | 7c. Tests | | 📋 |
+| FE-8 | **Missing Route Views** | Various | 📋 |
+| | 8a. Payroll landing page (routes/payroll.php) | | 📋 |
+| | 8b. Approvals landing page (routes/approval.php) | | 📋 |
+| | 8c. Loans landing page (routes/loan.php) | | 📋 |
+| | 8d. Knowledge Base landing page (routes/knowledge-base.php) | | 📋 |
+| | 8e. Assets landing page (routes/asset.php) | | 📋 |
+
+## DS — Design System & Readability
+
+| ID | Task | Modul | Status |
+|---|---|---|---|
+| DS-1 | **Fix CSS variables (readability)** | CSS | 📋 |
+| | 1a. canvas: #fffaf0 → #ffffff | | 📋 |
+| | 1b. surface-card: #f5f0e0 → #efefef | | 📋 |
+| | 1c. surface-soft: #faf5eb → #f7f7f7 | | 📋 |
+| | 1d. surface-strong: #e0daca → #d0d0d0 | | 📋 |
+| | 1e. muted: #6a6a6a → #535353 | | 📋 |
+| | 1f. muted-soft: #9a9a9a → #888888 | | 📋 |
+| | 1g. hairline: #e2dcca → #cfcfcf | | 📋 |
+| DS-2 | **Landing page override** | welcome.blade.php | 📋 |
+| | 2a. Wrap landing content with CSS variable overrides (cream vintage) | | 📋 |
+| DS-3 | **Fix hardcoded colors (33 HIGH)** | Multiple Blade files | 📋 |
+| | 3a. two-factor-setup-modal.blade.php (14 violations: stone-*, green-500) | | 📋 |
+| | 3b. dashboard.blade.php (8 violations: border-neutral-200, stroke-gray-900/20, dark: variants) | | 📋 |
+| | 3c. navlist/group.blade.php (3 violations: zinc-*) | | 📋 |
+| | 3d. recovery-codes.blade.php (2 violations: zinc-*) | | 📋 |
+| | 3e. auth pages (6 violations): forgot-password (zinc-400), register (zinc-600 + dark:zinc-400), verify-email (green-600 + dark:green-400), auth-session-status (green-600) | | 📋 |
+| DS-4 | **Fix text-muted → text-body** | 8 ESS Blade files | 📋 |
+| | 4a. attendance/, leaves/, overtimes/, reimbursements/ (20+ replacements) | | 📋 |
+| DS-5 | **Vendor pagination customization** | Pagination | 📋 |
+| | 5a. Republish pagination views | | 📋 |
+| | 5b. Customize to design tokens | | 📋 |
+| DS-6 | **Update DESIGN.md** | Documentation | 📋 |
+| | 6a. Note: App theme vs Landing page split | | 📋 |
+| | 6b. Document new CSS variable values | | 📋 |
+
+| | 6b. Document new CSS variable values | | 📋 |
+
+## Project Audit — 2026-06-23
+
+### File & Layer Counts
+
+| Layer | Count | Details |
+|---|---|---|
+| Models | 31 | Employee, User, Attendance, Leave, LeaveType, LeaveBalance, Overtime, Reimbursement, ReimbursementCategory, Payroll, PayrollItem, PayrollAdjustment, Approval, Company, Branch, Department, Position, Shift, ShiftSchedule, Holiday, CompanySetting, TaxConfig, BpjsConfig, Asset, AssetHandover, Loan, LoanInstallment, Device, FamilyDetail, KnowledgeBase, PerformanceReview |
+| Enums | 34 | 16 Status (+ `color()`) + 17 Classification (tanpa `color`) + 1 Permission (extra) |
+| Services | 15 | Attendance, Leave, Overtime, Reimbursement, Approval, PayrollCalculator, PayrollExport, PayslipPdf, Profile, FaceRecognition, Geofence, EmployeeTermination, KnowledgeBase, Embedding, GeminiClient |
+| API Controllers | 13 | Auth, Attendance, Leave, Overtime, Reimbursement, Approval, Payroll, Employee, EmployeeTermination, Face, Profile, KnowledgeBase, Health |
+| Form Requests | 28 | Login, ClockIn, ClockOut, StoreLeave, StoreOvertime, StoreReimbursement, StoreEmployee, UpdateEmployee, List* (6), Approve, Reject, PendingApprovals, RegisterFace, GeneratePayroll, Export* (2), ChangePassword, UpdateProfile, UploadDocument, Chat, ForgotPassword, TwoFactorChallenge, TerminateEmployee |
+| API Resources | 17 | Employee, EmployeePii, Attendance, Leave, LeaveType, Overtime, Reimbursement, ReimbursementCategory, Approval, Payroll, PayrollItem, Payslip, Profile, Branch, Department, Position, KnowledgeBase |
+| Policies | 8 | Employee, Attendance, Leave, Overtime, Reimbursement, Payroll, Asset, KnowledgeBase |
+| Observers | 8 | Employee, Attendance, Leave, Payroll, Holiday, TaxConfig, BpjsConfig, CompanySetting |
+| Middleware | 3 | CheckPasswordExpired, DeviceDetection, GeofenceValidation |
+| Jobs | 3 | GenerateEmployeePayroll, ProcessKnowledgeBaseEmbedding, GeneratePayslipPdf |
+| Commands | 9 | DetectAlphaAttendance, DetectChronicLate, ResetLeaveQuota, GeneratePayroll, AttendanceSendReminders, AutoApproveWfa, DetectMissedClock, KnowledgeBaseIndex, WarmCache |
+| Notifications | 4 | PayrollPublished, NewDeviceLogin, ChronicLateWarning, AttendanceReminder |
+
+### API Routes (51 endpoints at `/api/v1`)
+
+| Prefix | Endpoints | Auth | Throttle |
+|---|---|---|---|
+| `GET /health` | 1 | Public | — |
+| `POST /auth/*` | 4 (login, 2fa, forgot-password, logout) | Public (3) + Sanctum (1) | 5/min |
+| `GET /user` | 1 | Sanctum | — |
+| `/profile` | 3 (show, update, change-password) | Sanctum | — |
+| `/face` | 2 (register, verify) | Sanctum | 10/min |
+| `/attendance` | 5 (clock-in, clock-out, today, index, approve-wfa) | Sanctum | 5/5min |
+| `/leave` | 5 (store, index, quota, show, destroy) | Sanctum | 10/min |
+| `/overtime` | 4 (store, index, show, destroy) | Sanctum | 10/min |
+| `/reimbursement` | 4 (store, index, show, destroy) | Sanctum | 10/min |
+| `/approvals` | 3 (pending, approve, reject) | Sanctum | — |
+| `/payroll` | 7 (index, generate, export-monthly/1721/bpjs, show, payslip) | Sanctum | — |
+| `/employees` | 9 (index, show, pii, store, update, destroy, terminate, contract-end) | Sanctum + permission | — |
+| `/knowledgebase` | 3 (chat, upload, destroy) | Sanctum | 20/min |
+
+### Missing Views (route exists, file MISSING)
+
+| Route Name | Path | Priority |
+|---|---|---|
+| `payroll.index` | `resources/views/payroll/index.blade.php` | HIGH |
+| `approvals.index` | `resources/views/approvals/index.blade.php` | HIGH |
+| `knowledge-base.index` | `resources/views/knowledge-base/index.blade.php` | MEDIUM |
+| `assets.index` | `resources/views/assets/index.blade.php` | LOW (V2) |
+| `loans.index` | `resources/views/loans/index.blade.php` | LOW (V2) |
+
+### Design System Violations
+
+#### Hardcoded Colors (33 HIGH)
+
+| File | Lines | Violations |
+|---|---|---|
+| `two-factor-setup-modal.blade.php` | 14 | Lines 160,161,162,168,222,224,230,253,254,274,276,284,289,295: `stone-100/200/600/700/800/900`, `green-500`, `white`, `bg-white`, dark variants |
+| `dashboard.blade.php` | 8 | Lines 4,5,7,8,10,11,14,15: `border-neutral-200`, `dark:border-neutral-700`, `stroke-gray-900/20`, `dark:stroke-neutral-100/20` |
+| `navlist/group.blade.php` | 3 | Lines 16,27,37: `zinc-500`, `zinc-800/5`, `zinc-200`, `zinc-400`, `dark:text-white/80`, `dark:bg-white/30` |
+| `recovery-codes.blade.php` | 2 | Lines 49,115: `zinc-200`, `zinc-100`, `dark:border-white/10`, `dark:bg-white/5` |
+| `forgot-password.blade.php` | 1 | Line 26: `text-zinc-400` |
+| `register.blade.php` | 2 | Line 62: `text-zinc-600`, `dark:text-zinc-400` |
+| `verify-email.blade.php` | 2 | Line 8: `!text-green-600`, `!dark:text-green-400` |
+| `auth-session-status.blade.php` | 1 | Line 6: `text-green-600` |
+
+#### CSS Contrast Issues (DS-1)
+
+| Token | Current | On #fffaf0 | WCAG AA | Fix Target |
+|---|---|---|---|---|
+| `--color-muted` (#6a6a6a) | 3.9:1 | ❌ | → #535353 |
+| `--color-muted-soft` (#9a9a9a) | 2.5:1 | ❌ | → #888888 |
+| Flux `text-zinc-400` (#a1a1aa) | 2.1:1 | ❌ | → neutral palette |
+| Flux `text-zinc-500` (#71717a) | 3.5:1 | ❌ | → neutral palette |
+
+### Security & Encryption
+
+| Item | Status | Notes |
+|---|---|---|
+| CipherSweet (Employee PII) | ✅ | nik, phone, npwp, bank_account encrypted |
+| Blind indexes (nik_hash, phone_hash, npwp_hash) | ✅ | `whereBlind()` queries |
+| CipherSweet (FamilyDetail) | ⏳ | Post-MVP — PRD §17.1 CAT-003 |
+| CipherSweet (Company.npwp) | ⏳ | Post-MVP |
+| Sanctum token expiry | Never | By design (PWA reuse) |
+| 2FA TOTP | ✅ | Fortify built-in |
+| Password expiry 90d | ✅ | CheckPasswordExpired middleware |
+| Force change password | ✅ | `password_changed` column |
+| Rate limiting | ✅ | 11 inline + 2 Fortify named limiters |
+| PII masking (API) | ✅ | EmployeeResource hides nik/phone/npwp/bank |
+| Activity logging | ✅ | Spatie ActivityLog on all models |
+| Soft deletes | ✅ | employees, leaves, overtimes, payrolls, attendances, depts, positions |
+
+### Test Coverage
+
+| Area | Files | Coverage |
+|---|---|---|
+| API Endpoints | 17 | Auth, Attendance, Employee, Face, KB, Leave, Overtime, Payroll, Reimbursement, Approvals, IDOR, Security, Contract |
+| Auth (Feature) | 5 | Login, Register, 2FA, Password Reset, Email Verification, Password Confirm |
+| Services (Unit) | 9 | Attendance, Leave, Overtime, Reimbursement, Approval, Face, Geofence, Profile, Payroll |
+| Services (Feature) | 5 | Attendance, KB, PayslipPdf, PayrollExport, EmployeeTermination |
+| Jobs | 2 | Edge cases, Basic |
+| Middleware | 2 | Geofence, Device Detection |
+| Observers | 1 | All 8 observers |
+| Policies | 1 | All 8 policies |
+| Cache | 1 | Cache integration |
+| Console | 1 | All 9 commands |
+| Postgres (Integration) | 1 | 28 PG-specific tests (pgvector, jsonb, migration guards) |
+| Architecture | 1 | Laravel conventions |
+| **Total** | **75 files** | **~1,121 tests / ~3,702 assertions** |
+
+### PWA Status
+
+| Asset | Exists | Notes |
+|---|---|---|
+| `public/manifest.json` | ✅ | |
+| `public/service-worker.js` | ✅ | |
+| `public/pwa-install.js` | ✅ | |
+| `public/icon-192.svg` | ✅ | |
+| `public/icon-512.svg` | ✅ | |
+| `public/apple-touch-icon.png` | ✅ | |
+| **`public/offline.html`** | ❌ | Missing — service worker fetch fails offline |
+| Install banner (sidebar) | ✅ | `div#pwa-install-banner` in sidebar layout |
+
+### Project Size
+
+| Metric | Value |
+|---|---|
+| Total PHP files (excl vendor) | 2,370 |
+| App PHP files (app/) | 193 |
+| App LOC | ~12,070 |
+| Blade views | 50 |
+| Route files | 13 |
+| Config files | 23 |
+| Migrations | 45 |
+| Seeders | 12 |
+| Factories | 26 |
+| Test files | 75 |
+| Frontend assets (CSS/JS) | Vite + Tailwind v4 + Flux UI 2 |
+| NPM packages | @tailwindcss/vite, vite, alpinejs, concurrently, laravel-vite-plugin |
+
 ## Verification Commands
 
 | Purpose | Command |
@@ -384,7 +614,84 @@ Inventory source: `php artisan route:list --path=api --except-vendor` on 2026-06
 | M1 — Scope + audit complete | 75-80% | P0 complete with endpoint/service matrices. |
 | M2 — Feature gaps closed | 80-85% | P1 API/service tasks complete. Thin-coverage, Jobs, FormRequest, Embedding, Events/Mail — semua selesai. Notifikasi: PayrollPublished di-wire, 4 dead removed. |
 | M3 — RAG production-ready | 85-90% | Laravel AI SDK adoption completed or explicitly deferred with stable custom implementation. |
-| M4 — Test coverage complete | 95-97% | `composer test` passing (1,115 tests, 3,697 assertions). `composer test:pgsql` passing (28 tests, 61 assertions). CI PG job aktif. Remaining: Blade-to-API (deferred, need views). |
+| M4 — Test coverage complete | 95-97% | `composer test` passing (1,121 tests, 3,702 assertions). `composer test:pgsql` passing (28 tests, 61 assertions). 75 test files. CI PG job aktif. Remaining: FE-1 to FE-8 (Livewire components), DS-1 to DS-6 (design fixes). |
 | M5 — Security hardened | 97-98% | Authorization, IDOR, PII, rate limit, secret audits complete. Permission drift ✅. IDOR hardening ✅ (6 gap-documentation tests). |
 | M6 — Operations ready | 97-98% | Queue, scheduler, cache, storage, backup, deployment rehearsal complete. PG migration guards ✅ (4 dedicated tests). |
 | M7 — API frozen | 99-100% | API contract stable. Web routes ✅ (18 smoke tests, P1-12). Semua endpoint API terdaftar, diaudit, dan dites. Blade-to-API integration menunggu frontend views. |
+
+## Multi-Agent Audit — 2026-06-23
+
+Lima agen paralel mengaudit seluruh codebase (193 app PHP files, 50 Blade views, 75 test files). Berikut temuan terkini setelah koreksi:
+
+### 🔴 HIGH (3)
+
+| # | Issue | File | Detail |
+|---|-------|------|--------|
+| 1 | **PHPStan BLOCKER** | `phpstan-baseline.neon:741-781` | Baseline referensi 3 file notifikasi yang sudah dihapus: `app/Notifications/LeaveApproved.php`, `LeaveRejected.php`, `LeaveRequestSubmitted.php`. 1219 baris baseline, ~160 ignore entries, 203 ignored errors. Harus regenerate baseline. |
+| 2 | **buildContextSection duplikat** | `app/Services/GeminiClient.php:106` + `app/Services/KnowledgeBaseService.php:143` | Method 16 baris identik (DRY violation). Format context chunks untuk prompt LLM — harus diekstrak ke trait atau shared helper. Satu-satunya beda: PHPDoc `@param` ada di GeminiClient, tidak di KnowledgeBaseService. |
+| 3 | **5 missing route views** | `routes/payroll.php`, `approval.php`, `knowledge-base.php`, `asset.php`, `loan.php` | Akan throw `ViewNotFound` jika diakses. payroll cuma punya `payslip.blade.php` (PDF template). approvals, knowledge-base, assets, loans — direktori views tidak ada sama sekali. |
+
+### 🟠 MEDIUM (6)
+
+| # | Issue | Detail |
+|---|-------|--------|
+| 1 | `bank_account_number` tanpa blind index | Employee model punya `bank_account_number` dienkripsi via CipherSweet tapi tidak ada blind index → tidak bisa `whereBlind()`. Deferred sampai V1.1 (belum ada use case search). |
+| 2 | Password expiry middleware belum di-wire | `CheckPasswordExpired` sudah ada (7 web-layer tests) tapi belum didaftarkan di `bootstrap/app.php` → tidak aktif. |
+| 3 | `Device.device_type` tanpa enum cast | Device model punya kolom `device_type` (string) tapi tidak di-cast ke enum → bisa diisi string arbitrary. |
+| 4 | Observer tanpa `withoutEvents()` | 8 observer fire di setiap model event. `Model::withoutEvents()` tidak dipakai untuk batch operations → performance overhead. |
+| 5 | Exception non-custom | Beberapa service method throw `\Exception` raw, bukan custom exception class (e.g., `BusinessRuleException`, `NotFoundException`). |
+| 6 | `(int)` cast di prorata quota | `LeaveService::initializeBalance()` line 154: `(int) round()` — kalau quota leave type jadi fraksional (e.g., 12.5), truncate diam-diam. DB column `decimal(4,1)` — perlu konsisten. |
+
+### 🟡 LOW (7)
+
+| # | Issue | Detail |
+|---|-------|--------|
+| 1 | 5 model `HasFactory` tanpa factory | Approval, Asset, AssetHandover, Loan, LoanInstallment, PerformanceReview — semua V2 module, sengaja. |
+| 2 | 6 redundant indexes | Contoh: `users_email_unique` + `users_email_index` — unique sudah include index. |
+| 3 | `EmployeeSeeder` tidak idempotent | Jalan ulang `php artisan db:seed --class=EmployeeSeeder` bikin duplikat employee. |
+| 4 | Default password di `.env.example` | Super-admin password default harus diganti dengan placeholder. |
+| 5 | `TrustProxies` allow all | `trustProxies(at: '*')` — ok untuk dev, perlu di-tighten per deployment (Cloudflare/Load Balancer IP). |
+| 6 | 16 unused private methods | Tersebar di services/controllers — code coverage tapi tidak dipanggil. |
+| 7 | 13 controller tanpa `declare(strict_types=1)` | Semua API controllers — perlu ditambahkan untuk type safety. |
+
+### Koreksi Temuan Sebelumnya (3)
+
+| Temuan Lama | Status Sebenarnya | Penjelasan |
+|-------------|-------------------|------------|
+| `{!! !!}` XSS di 5 Blade files | ✅ **False positive** | 18 dari 19 `{!! !!}` ada di vendor Livewire pagination templates (standard). Hanya 1 di kode sendiri: QR code SVG di `two-factor-setup-modal.blade.php:233` — legitimate karena SVG tidak bisa di-escape. |
+| `processOfflineSync` dead code | ✅ **Tidak pernah ada** | Method tidak ditemukan di `AttendanceService` atau manapun. Tidak ada offline sync functionality di seluruh `app/`. |
+| `DemoDataSeeder` kolom salah | ✅ **Tidak benar** | Seeder menulis ke kolom standar (`full_name`, `employee_number`, `nik`). Tidak ada kolom `demo_*` di migrations. Seeder sudah benar. |
+
+### Data ESS Blade (8 static views, 0 Livewire)
+
+| Bladename | LOC | Isi |
+|-----------|:---:|-----|
+| `attendance/clock-in.blade.php` | 42 | Card jam realtime (hardcoded 08:02 AM), tombol Clock In/Out, Today's Activity (hardcoded), link ke history |
+| `attendance/index.blade.php` | 67 | Filter bulan, tabel attendance (3 baris hardcoded), summary cards (18 days worked, 2 late, 4.5h OT) |
+| `leaves/apply.blade.php` | 44 | Form leave type (select), start/end date, reason textarea, cancel/submit |
+| `leaves/index.blade.php` | 63 | Tombol Apply Leave, quota cards (4 kolom: Annual 8/12, Sick 3/6, Personal 2/3, Pending 1), tabel 2 baris hardcoded |
+| `overtimes/apply.blade.php` | 40 | Form date, start/end time, reason, cancel/submit |
+| `overtimes/index.blade.php` | 62 | Tombol Request Overtime, tabel 3 baris hardcoded, summary cards (4.5h total, 1.5h pending, 3.0h approved) |
+| `reimbursements/apply.blade.php` | 51 | Form category (select 5), amount, expense date, description, receipt upload (opsional) |
+| `reimbursements/index.blade.php` | 62 | Tombol New Claim, tabel 3 baris hardcoded (Travel/Medical/Supplies), summary cards (Rp1.325jt total) |
+
+Semua Static Blade — **0 Livewire binding**, 0 wire:model, 0 wire:click, 0 API integration. Data hardcoded. Layout: `<x-layouts::app.sidebar>`.
+
+### PHPStan Baseline Detail
+
+| Metrik | Nilai |
+|--------|-------|
+| Total baris `phpstan-baseline.neon` | 1,219 |
+| Total ignore entries | ~160 |
+| Total ignored errors | ~203 |
+| Files referenced | 38 files in `app/` |
+| Deleted files referenced | 3 (`LeaveApproved.php`, `LeaveRejected.php`, `LeaveRequestSubmitted.php`) |
+| Level | 5 |
+| Scan path | `app/` only |
+
+**Exact baseline lines untuk deleted files:**
+- `app/Notifications/LeaveApproved.php`: lines 745, 751 (6 ignored errors: $name property not found ×2, format() called on string ×4)
+- `app/Notifications/LeaveRejected.php`: lines 757, 763 (6 ignored errors: $name property not found ×2, format() called on string ×4)
+- `app/Notifications/LeaveRequestSubmitted.php`: lines 769, 775, 781 (10 ignored errors: $full_name ×4, $name ×2, format() ×4)
+
+**Fix:** Hapus 3 entry tersebut dari baseline + regenerate via `vendor/bin/phpstan analyse --generate-baseline`.
