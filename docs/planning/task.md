@@ -91,6 +91,222 @@
 
 ---
 
+## 📄 PAGE INVENTORY — 130 Pages + 4 Modals (46 ✅ / 84 ❌)
+
+Berdasarkan audit docs (PRD, SRS, SDD, wireframes) + file system `resources/views/`.
+
+### Ringkasan
+
+| Kategori | ✅ Existing | ❌ Missing | Total |
+|----------|:----------:|:----------:|:-----:|
+| **Halaman Fungsional** | 25 | 68 | **93** |
+| **Layouts** | 7 | 4 | **11** |
+| **Partials** | 2 | 7 | **9** |
+| **Shared Components** | 7 | 9 | **16** |
+| **Modals** | 3 | 1 | **4** |
+| **Other (welcome, vendor)** | 2 | 0 | **2** |
+| **TOTAL** | **46** | **89** | **135** |
+
+### Per Module — Halaman Fungsional (93)
+
+#### 🔐 AUTH (7/7 ✅ — selesai semua)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Login | `pages/auth/login.blade.php` | All | ✅ |
+| 2 | Register | `pages/auth/register.blade.php` | Super Admin | ✅ |
+| 3 | Forgot Password | `pages/auth/forgot-password.blade.php` | All | ✅ |
+| 4 | Reset Password | `pages/auth/reset-password.blade.php` | All | ✅ |
+| 5 | Verify Email | `pages/auth/verify-email.blade.php` | All | ✅ |
+| 6 | Two-Factor Challenge | `pages/auth/two-factor-challenge.blade.php` | All (2FA) | ✅ |
+| 7 | Confirm Password | `pages/auth/confirm-password.blade.php` | All | ✅ |
+
+#### 📊 DASHBOARD (1/5 ✅ — 4 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | ESS Dashboard | `dashboard.blade.php` | Employee, Manager | ✅ |
+| 2 | Manager Dashboard | `manager/dashboard.blade.php` | Manager | ❌ |
+| 3 | HR Dashboard | `hrd/dashboard.blade.php` | HR Manager | ❌ |
+| 4 | Finance Dashboard | `finance/dashboard.blade.php` | Finance | ❌ |
+| 5 | Admin Dashboard | `admin/dashboard.blade.php` | Super Admin | ❌ |
+
+#### 📍 ATTENDANCE / PRESENSI (2/6 ✅ — 4 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index / Riwayat | `attendance/index.blade.php` | All | ✅ |
+| 2 | Clock-In | `attendance/clock-in.blade.php` | Employee | ✅ (bugs) |
+| 3 | Clock-Out | `attendance/clock-out.blade.php` | Employee | ❌ |
+| 4 | Calendar / History | `attendance/history.blade.php` | Employee, Manager | ❌ |
+| 5 | Summary | `attendance/summary.blade.php` | Employee | ❌ |
+| 6 | HR Attendance Mgmt | `hrd/attendance/today.blade.php` | HR Manager | ❌ |
+
+#### 🌴 LEAVE / CUTI (2/8 ✅ — 6 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index | `leaves/index.blade.php` | All | ✅ |
+| 2 | Apply | `leaves/apply.blade.php` | Employee | ✅ |
+| 3 | History | `employee/leave/history.blade.php` | Employee, Manager | ❌ |
+| 4 | Quota / Balance | `employee/leave/quota.blade.php` | Employee | ❌ |
+| 5 | Calendar (HR) | `hrd/leaves/calendar.blade.php` | HR Manager | ❌ |
+| 6 | Pending (HR) | `hrd/leaves/pending.blade.php` | HR Manager | ❌ |
+| 7 | Quota Mgmt | `hrd/leaves/quota-management.blade.php` | HR Manager | ❌ |
+| 8 | Types Mgmt | `hrd/leaves/types.blade.php` | HR Manager | ❌ |
+
+#### ⏰ OVERTIME / LEMBUR (2/4 ✅ — 2 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index | `overtimes/index.blade.php` | All | ✅ |
+| 2 | Apply | `overtimes/apply.blade.php` | Employee | ✅ |
+| 3 | History | `employee/overtime/history.blade.php` | Employee, Manager | ❌ |
+| 4 | Pending (HR) | `hrd/approvals/pending.blade.php` | Manager, HR | ❌ |
+
+#### 💰 REIMBURSEMENT (2/4 ✅ — 2 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index | `reimbursements/index.blade.php` | All | ✅ |
+| 2 | Apply | `reimbursements/apply.blade.php` | Employee | ✅ |
+| 3 | Pending (Finance) | `finance/reimbursements/pending.blade.php` | Finance | ❌ |
+| 4 | Report | `finance/reimbursements/report.blade.php` | Finance | ❌ |
+
+#### 💵 PAYROLL (1/6 ✅ — 5 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Payslip | `payroll/payslip.blade.php` | Employee, Finance | ✅ |
+| 2 | Index | `payroll/index.blade.php` | Finance, Super Admin | ❌ ⚠️ 500 |
+| 3 | Generate | `finance/payroll/generate.blade.php` | Finance | ❌ |
+| 4 | Detail | `finance/payroll/detail.blade.php` | Finance | ❌ |
+| 5 | Publish | `finance/payroll/publish.blade.php` | Finance | ❌ |
+| 6 | Reports (payroll, tax) | `finance/reports/payroll.blade.php` | Finance | ❌ |
+
+#### 🏦 LOAN / KASBON — V2 (0/5 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index | `loans/index.blade.php` | All | ❌ ⚠️ 500 |
+| 2 | Apply | `employee/loan/apply.blade.php` | Employee | ❌ |
+| 3 | Pending (Finance) | `finance/loans/pending.blade.php` | Finance | ❌ |
+| 4 | Installments | `finance/loans/installments.blade.php` | Finance | ❌ |
+| 5 | Report | `finance/loans/report.blade.php` | Finance | ❌ |
+
+#### 📦 ASSET — V2 (0/2 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index | `assets/index.blade.php` | All | ❌ ⚠️ 500 |
+| 2 | Management | `hrd/assets/management.blade.php` | HR Manager | ❌ |
+
+#### 🤖 KNOWLEDGE BASE / RAG (0/3 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index / Chat UI | `knowledge-base/index.blade.php` | All (Employee + HR) | ❌ ⚠️ 500 |
+| 2 | Upload | `knowledge-base/upload.blade.php` | HR Manager | ❌ |
+| 3 | Manage Articles | `knowledge-base/manage.blade.php` | HR Manager | ❌ |
+
+#### ✅ APPROVAL WORKFLOW (0/4 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Index | `approvals/index.blade.php` | Manager, HR, Finance | ❌ ⚠️ 500 |
+| 2 | Pending (L1) | `approvals/pending.blade.php` | Manager | ❌ |
+| 3 | Pending (L2) | `approvals/l2-pending.blade.php` | HR, Finance | ❌ |
+| 4 | All / History | `approvals/all.blade.php` | Manager, HR | ❌ |
+
+#### 👥 EMPLOYEE MANAGEMENT — HR Only (0/8 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Employee List | `hrd/employees/index.blade.php` | HR Manager | ❌ |
+| 2 | Create | `hrd/employees/create.blade.php` | HR Manager | ❌ |
+| 3 | Edit | `hrd/employees/edit.blade.php` | HR Manager | ❌ |
+| 4 | Detail | `hrd/employees/show.blade.php` | HR Manager | ❌ |
+| 5 | Bulk Upload | `hrd/employees/bulk-upload.blade.php` | HR Manager | ❌ |
+| 6 | Terminations Pending | `hrd/terminations/pending.blade.php` | HR Manager | ❌ |
+| 7 | Termination Handover | `hrd/terminations/handover.blade.php` | HR Manager | ❌ |
+| 8 | Reassignment | `hrd/terminations/reassignment.blade.php` | HR Manager | ❌ |
+
+#### 🕐 SHIFT MANAGEMENT (0/2 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Shift List | `hrd/shifts/index.blade.php` | Super Admin | ❌ |
+| 2 | Schedule | `hrd/shifts/schedule.blade.php` | HR Manager | ❌ |
+
+#### 📈 REPORTS (0/5 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Attendance Report | `hrd/reports/attendance.blade.php` | HR Manager | ❌ |
+| 2 | Leave Report | `hrd/reports/leave.blade.php` | HR Manager | ❌ |
+| 3 | Employee Report | `hrd/reports/employee.blade.php` | HR Manager | ❌ |
+| 4 | Payroll Report | `finance/reports/payroll.blade.php` | Finance | ❌ |
+| 5 | Tax Report | `finance/reports/tax.blade.php` | Finance | ❌ |
+
+#### ⚙️ SETTINGS (8/14 ✅ — 6 missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Settings Layout | `pages/settings/layout.blade.php` | All | ✅ |
+| 2 | Profile | `pages/settings/profile.blade.php` | All | ✅ |
+| 3 | Appearance | `pages/settings/appearance.blade.php` | All | ✅ |
+| 4 | Security | `pages/settings/security.blade.php` | All | ✅ |
+| 5 | Company | `admin/settings/company.blade.php` | Super Admin | ❌ |
+| 6 | Attendance Settings | `admin/settings/attendance.blade.php` | Super Admin | ❌ |
+| 7 | Leave Settings | `admin/settings/leave.blade.php` | Super Admin | ❌ |
+| 8 | Branding | `admin/settings/branding.blade.php` | Super Admin | ❌ |
+| 9 | Security (Admin) | `admin/settings/security.blade.php` | Super Admin | ❌ |
+| 10 | System | `admin/settings/system.blade.php` | Super Admin | ❌ |
+
+#### 👤 USER MANAGEMENT — Super Admin Only (0/3 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | User List | `admin/users/index.blade.php` | Super Admin | ❌ |
+| 2 | Create | `admin/users/create.blade.php` | Super Admin | ❌ |
+| 3 | Edit | `admin/users/edit.blade.php` | Super Admin | ❌ |
+
+#### 📋 ACTIVITY LOG (0/1 ❌)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Activity Log | `admin/activity-log/index.blade.php` | Super Admin, HR | ❌ |
+
+#### 👤 PROFILE (ESS) (0/4 ❌ — semua missing)
+
+| # | Page | Route | Roles | Status |
+|---|------|-------|-------|:------:|
+| 1 | Personal Info | `employee/profile/personal-info.blade.php` | Employee | ❌ |
+| 2 | Family Details | `employee/profile/family-details.blade.php` | Employee | ❌ |
+| 3 | **Face Registration** | `employee/profile/face-registration.blade.php` | Employee | ❌ ⭐ |
+| 4 | Devices | `employee/profile/devices.blade.php` | Employee | ❌ |
+
+### Modals (4)
+
+| # | Modal | Module | Status |
+|---|-------|--------|:------:|
+| 1 | Setup 2FA (QR + confirm) | `pages/settings/two-factor-setup-modal.blade.php` | ✅ |
+| 2 | Konfirmasi Hapus Akun | `pages/settings/delete-user-modal.blade.php` | ✅ |
+| 3 | Recovery Codes (tampil sekali) | `pages/settings/two-factor/recovery-codes.blade.php` | ✅ |
+| 4 | Konfirmasi Umum (shared) | `components/confirmation-modal.blade.php` | ❌ |
+
+### ⚠️ Route 500 Errors (5) — view tidak ada
+
+| Route | View Hilang | Module |
+|-------|-------------|--------|
+| `payroll.index` | `payroll/index.blade.php` | ❌ |
+| `approvals.index` | `approvals/index.blade.php` | ❌ |
+| `knowledge-base.index` | `knowledge-base/index.blade.php` | ❌ |
+| `loans.index` | `loans/index.blade.php` | ❌ |
+| `assets.index` | `assets/index.blade.php` | ❌ |
+
+---
+
 ## Completed Backend Summary
 
 Semua task berikut ✅ **selesai dan diverifikasi** (tidak perlu diulang):
@@ -361,11 +577,15 @@ DESIGN.md sudah mendefinisikan **App Theme DS-1** dengan palet netral untuk HR p
 |--------|-------|
 | App PHP files | 193 |
 | App LOC | ~12,070 |
-| Blade views | 46 |
+| Blade views | 46 existing / **130 total planned** |
 | Route files | 13 (+5 web modules) |
 | API endpoints | 42 at `/api/v1` |
 | Test files | 75 |
 | Tests / assertions | 1,121 / 3,702 (SQLite) + ~28 / ~61 (PG) |
+| Halaman fungsional | 25 ✅ / 68 ❌ |
+| Layouts / Partials / Components | 16 ✅ / 20 ❌ |
+| Modals | 3 ✅ / 1 ❌ |
+| **Total views** | **46 ✅ / 89 ❌ = 135 total** |
 | Total perbaikan tersisa | **~55 item** |
 | Estimasi waktu sisa | **~40-55 jam** |
 
