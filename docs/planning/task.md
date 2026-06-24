@@ -1,8 +1,12 @@
-# Task Tracker — Frontend MD3 Migration + ESS Development
+# Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-06-24 — Flux UI sudah dihapus total. Fokus sekarang: **Perbaikan bug camera, DS-1 design system sync, architecture cleanup, dan penyelesaian ESS components**.
+> Updated: 2026-06-24 (sesi anchoring) — Seluruh diskusi hari ini telah dirangkum dan dikonfirmasi. Fokus akhir: **6 sesi eksekusi bertahap (A–F)** untuk menyelesaikan 3 pilar skripsi + auth/permission + ESS pages + cleanup.
 
-> **AUDIT FINDINGS (2026-06-24):** Full codebase audit + docs review selesai. Menemukan 15 item baru. Konteks: ±100 karyawan, HR buat akun (bukan self-register). Tidak perlu Opsi B (architectural refactor) — skala kecil. Lihat §AUDIT untuk detail.
+> **AUDIT FINDINGS (2026-06-24):** Full codebase audit + docs review selesai. Menemukan 15 item baru. ±100 karyawan, HR buat akun (bukan self-register). Tidak perlu Opsi B (architectural refactor). Lihat §AUDIT untuk detail.
+
+> **ANCHORING SUMMARY (2026-06-24):** Semua diskusi terdahulu telah dirangkum dan dikonfirmasi — termasuk 6 sesi eksekusi, 3 pilar skripsi (face, GPS, RAG), keputusan PIN 6 digit untuk payslip (bukan absensi), view_knowledgebase untuk semua role, permission matrix final, dan urutan prioritas AUTH sebagai #1. Lihat §ANCHORING untuk detail.
+
+> **SECURITY POSTURE (2026-06-24):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). Lihat §SECURITY untuk detail.
 
 ## Status Legend
 
@@ -18,9 +22,9 @@
 | Area | % | Status | Notes |
 |------|:-:|:------:|-------|
 | Backend (app/) | 95% | ✅ | 31 models, 34 enums, 15 services, 14 controllers. Kurang strict_types, base exception, queue consistency. |
-| Database (migrations) | 90% | ✅ | 47 migrations, 48 tables. 5 models without factories (deferred V2). |
-| API (routes) | 95% | ✅ | 42 endpoints, Sanctum auth, rate limits, permission guards. |
-| Security | 75% | 🚧 | CipherSweet ✅, Sanctum ✅, 2FA ✅, PII masking ✅. **Email verification ❌** (MustVerifyEmail di-comment). **Force change password ❌** (middleware skip null). **2FA enforcement ❌** (AUTH-09). Password expiry middleware belum di-wire. |
+| Database (migrations) | 90% | ✅ | 46 migrations, 48 tables. 5 models without factories (deferred V2). |
+| API (routes) | 95% | ✅ | 51 endpoints, Sanctum auth, rate limits, permission guards. |
+| Security | 70% | 🚧 | CipherSweet ✅, PII masking ✅, Argon2id ✅, rate limiting ✅, IDOR ✅, session encrypted ✅, host protection ✅, FormRequest ✅. **Sanctum token never-expire ❌** (SEC-1). **Email verification ❌** (MustVerifyEmail di-comment). **Force change password ❌** (middleware skip null). **2FA enforcement ❌** (AUTH-09). **Fake GPS client-trusted ❌** (SEC-GPS-1/2/3). **No liveness ❌** (FE-1d). **No security headers ❌** (SEC-5). |
 | Tests | 85% | ✅ | 1,121 tests / 3,702 assertions (SQLite) + ~28 PG. All services/controllers/policies covered. |
 | Flux → MD3 Migration | 100% | ✅ | **SELESAI** — Flux dihapus dari composer, views, CI, docs. 0 Flux references remain. |
 | **Design System DS-1** | **40%** | 🚧 | app.css masih pakai cream palette (#fffaf0), harusnya #ffffff. 11 item perlu sync dengan DESIGN.md. |
@@ -657,6 +661,254 @@ Skala ±100 karyawan, HR buat akun. Flow:
 | **DC-3** | **Satukan anti-fake-GPS check** | Hanya di GeofenceService, hapus dari AttendanceService | 🟢 | ⏳ |
 | **DC-4** | **PHPStan baseline** | Hapus 3 entry deleted notifications | 🟢 | ⏳ |
 
+## §ANCHORING — Ringkasan Akhir Diskusi (2026-06-24)
+
+### Goal  
+Complete **3 pilar skripsi** (Face Recognition, GPS Geofencing, RAG Knowledge Base) + auth/permission fix + ESS pages + approval pages untuk ±100 karyawan.
+
+### Constraints Final
+- ±100 karyawan, HR creates accounts — `FORTIFY_REGISTRATION_ENABLED=false` (sudah tepat).
+- **3 pilar wajib jadi**: Face Recognition, GPS Geofencing, RAG Knowledge Base — no feature trimmed.
+- `view_knowledgebase` granted ke **semua 5 role** (Employee, Manager, Finance, HR, Super-Admin); `manage_knowledgebase` tetap HR-only.
+- **PIN 6 digit** digunakan untuk **payslip download** — bukan untuk absensi.
+- Face enrollment: **6 frame sequential** via camera → `detectSingleFace().withFaceLandmarks().withFaceDescriptor()` × 6 → 6× 128D embeddings → `POST /api/v1/face/register` dengan `{ embeddings: [[...], ...] }`. Micro-movement antar 6 frame = **natural liveness detection**. Jika tidak ada face data, clock-in ditolak.
+- **Tidak perlu Opsi B** (architectural refactor) — skala 100 karyawan tidak memerlukan hasRole→can migration, team-scoped queries, atau policy gate di ApprovalController.
+- Design: DESIGN.md DS-1 App Theme (canvas #ffffff, body #3a3a3a, Inter font, neutral palette).
+- Camera di clock-in: **jangan pakai `display:none`** di iOS — gunakan `opacity-0 pointer-events-none`.
+
+### Key Decisions Final
+| # | Keputusan | Detail |
+|:-:|-----------|--------|
+| 1 | **6 sesi eksekusi (A–F)** | A (Auth) → B (Face) → C (RAG) → D (ESS pages) → E (Approvals) → F (Cleanup) |
+| 2 | **RAG is not minimal** | Full Chat + Upload PDF + Manage articles (3 halaman) required for skripsi completeness |
+| 3 | **Seed data tetap ada** | Q&A via seeder alongside real PDF upload |
+| 4 | **Gmail SMTP deferred** | `MAIL_MAILER=log` sampai App Password siap; backend code ready, switchable later |
+| 5 | **Sesi D hanya ESS yg relevan** | Attendance History, Leave (Apply+History+Quota), Overtime, Reimbursement, Payslip, Profile & Devices — Payroll/Loan/Asset pages wait for backend |
+| 6 | **PIN → payslip saja** | Bukan fallback absensi (revisi dari catatan sebelumnya) |
+| 7 | **4-layer GPS anti-spoofing** | Client flag + time-series variance + IP cross-check + Haversine anomaly score — layered defense untuk skripsi |
+| 8 | **Security items baru (SEC-1..5)** | Token expiry, API password middleware, 2FA format, change password rule, security headers |
+
+### Security Posture — Hasil Audit (2026-06-24)
+
+#### 🔴 Critical (4)
+| # | Issue | Dampak | File | Sesi |
+|:-:|-------|--------|------|:----:|
+| 1 | **Sanctum token never-expire** (`expiration = null`) | Bearer token bocor = akses permanen | `config/sanctum.php:53` | A |
+| 2 | **Fake GPS 100% client-trusted** — `is_mocked` dari JavaScript, bisa dipalsukan | Karyawan bisa absen dari mana saja | `app/Services/GeofenceService.php:19` | B |
+| 3 | **No liveness detection** — 1 foto statis bisa replay attack | Foto/video bisa lolos verifikasi | `app/Services/FaceRecognitionService.php` | B |
+| 4 | **No security headers middleware** — CSP, HSTS, X-Frame-Options tidak ada | Rentan clickjacking, XSS, MIME sniffing | `bootstrap/app.php` middleware config | F |
+
+**Approach Critical:**
+- **#1 Sanctum:** Set `expiration => 525600` (1 tahun) + hapus token saat logout. Tidak perlu refresh token — cukup untuk skripsi ±100 karyawan.
+- **#2 Fake GPS:** **4-layer defense** (lihat SEC-GPS-1/2/3 + Haversine existing) — jadi nilai tambah skripsi (sub-bab "Multi-layer GPS Anti-Spoofing").
+- **#3 Liveness:** **6 frame sequential** + micro-movement variance antar embedding (FE-1d). Variance > 0 = hidup. Blink detection via EAR dari face landmarks sebagai bonus.
+- **#4 Security headers:** Middleware Laravel atau Nginx (sudah di docs deployment). Untuk skripsi cukup docs → skip implementasi Laravel (SEC-5 deferred ke F).
+
+#### 🟡 Warning (8)
+| # | Issue | Status |
+|:-:|-------|:------:|
+| 5 | MustVerifyEmail di-comment (`User.php:5`) | ✅ EV-1 (Sesi A) |
+| 6 | API `login()` tidak cek `hasVerifiedEmail()` | ✅ EV-3 (Sesi A) |
+| 7 | 2FA tidak di-enforce per role (HR/Finance/SuperAdmin) | ✅ 2FA-1 (Sesi F) |
+| 8 | `password.expired` middleware tidak dipasang di route API | ✅ SEC-2 (Sesi A) |
+| 9 | Cache data tidak dienkripsi (`CACHE_STORE=database`) | ⏳ Deferred — tidak critical untuk skripsi |
+| 10 | Face registration self-service tanpa konfirmasi | ✅ SEC-5 (Sesi F — confirmation gate) |
+| 11 | TwoFactorChallengeRequest tidak validasi format kode | ✅ SEC-3 (Sesi A) |
+| 12 | ChangePasswordRequest override production rule (min:8) | ✅ SEC-4 (Sesi A) |
+
+#### ✅ Already Secure (8)
+- **CipherSweet** ✅ — 3 model encrypted + blind index + `encryptedUnique`
+- **PII masking** ✅ — EmployeeResource masking, `showPii()` via permission + audit log
+- **Argon2id** ✅ — 64MB memory, 4 iterasi, `rehash_on_login`
+- **Rate limiting** ✅ — 5/1 login/2FA, 10/1 face, 5/5 clock
+- **IDOR protection** ✅ — Policy cek ownership `$user->employee?->id === $employee->id`
+- **Session encrypted** ✅ — `SESSION_ENCRYPT=true`, JSON serialization, HttpOnly, SameSite=Lax
+- **Host protection** ✅ — `trustHosts()` aktif
+- **FormRequest** ✅ — Semua 28 endpoint API pakai FormRequest dengan validasi ketat
+
+---
+
+## §REALITY CHECK — Verifikasi Menyeluruh (2026-06-24)
+
+Semua klaim di `task.md` diverifikasi langsung ke filesystem + test suite (run actual) + route list + database.
+
+### ✅ Akurat (16/16)
+
+| Klaim task.md | Realitas | Metode Verifikasi |
+|:--------------|:---------|:-----------------|
+| 31 models | 31 file | `ls app/Models/*.php` |
+| 15 services | 15 file | `ls app/Services/*.php` |
+| 8 policies | 8 file | `ls app/Policies/*.php` |
+| 34 enums | 34 file | `ls app/Enums/*.php` |
+| 13 API controllers | 13 file | `ls app/Http/Controllers/Api/*.php` |
+| 13 route files | 13 file | `ls routes/*.php` |
+| 46 Blade views | 46 file | `find resources/views -name '*.blade.php' \| wc -l` |
+| **1,121 tests / 3,702 assertions** | **1,121 passed, 2 skipped** | **RUN ACTUAL** `php artisan test --compact` ✅ |
+| 75 test files | 75 file | `find tests -name '*.php' \| wc -l` |
+| 5 models tanpa factory | Asset, AssetHandover, Loan, LoanInstallment, PerformanceReview | Cross-check factory files |
+| 5 route-500 views | Semua MISSING: payroll, approvals, kb, loans, assets | `ls` masing-masing |
+| MustVerifyEmail di-comment | `// use` di User.php:5 | Read file langsung |
+| Sanctum expiration = null | `config:show sanctum.expiration` = null | Run command |
+| Argon2id + rehash | `HASH_DRIVER=argon2id`, `rehash_on_login=true` | `.env` + `config/hashing.php` |
+| CheckPasswordExpired wired | Alias di `bootstrap/app.php` | Read file langsung |
+| CipherSweet configured | 3 model, blind index, `encryptedUnique` | Read file langsung |
+
+### ❌ Discrepancies Minor
+
+| Klaim task.md | Realitas | Selisih |
+|:--------------|:---------|:--------|
+| 47 migrations | 46 | -1 (hitungan salah — mungkin 1 migration manual) |
+| 42 API endpoints | 51 | +9 (task.md outdated — kode sudah bertambah) |
+
+### 📊 Real Progress per Area
+
+```
+Backend code          ████████████░░░░  95%  — 31 models, 15 services, 13 controllers, tested ✅
+API routes            ████████████████ 100%  — 51 endpoints live, rate limited, permissioned ✅
+Tests                 ████████████░░░░  95%  — 1,121 pass, 3,702 assertions ✅
+Security foundation   ██████████░░░░░░  80%  — CipherSweet, Argon2id, PII, rate limit ✅
+                      ██░░░░░░░░░░░░░░  20%  — Sanctum expiry, fake GPS, liveness, headers ❌
+
+Frontend views        █████░░░░░░░░░░░  35%  — 46/130 views (auth ✅, settings ✅, modules ❌)
+Face recognition      ████░░░░░░░░░░░░  30%  — backend ready, camera broken, UI 0%
+RAG knowledge base    █████░░░░░░░░░░░  50%  — backend AI agent ready, UI 0%
+ESS interactive       ░░░░░░░░░░░░░░░░   0%  — 0 Livewire components
+Design sync DS-1      ████░░░░░░░░░░░░  40%  — CSS palette still cream #fffaf0
+```
+
+### 📐 face-api.js — Dokumentasi vs Implementasi
+
+Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
+
+#### ✅ Sesuai Docs
+
+| Aspek | Docs | Kode |
+|:------|:-----|:-----|
+| Model loading | `loadFromUri('/models')` | Sama ✅ |
+| Detection pipeline | `detectAllFaces().withFaceLandmarks().withFaceDescriptors()` | Sama persis ✅ |
+| SSD options | `SsdMobilenetv1Options({ minConfidence })` | Sama ✅ |
+| 128D descriptor | `Float32Array` — array length 128 | Sama ✅ |
+
+#### ❌ Tidak Sesuai / Gap
+
+| # | Docs Bilang | Implementasi | Dampak ke Skripsi |
+|:-:|:------------|:-------------|:-----------------|
+| 1 | **TinyFaceDetector** = "your GO-TO face detector on **mobile devices**" | Hanya SSD (5.4MB), tidak ada Tiny (190KB) | **Boros CPU/memory di HP**, loading lama, risk freeze |
+| 2 | `landmarks.getLeftEye()` / `getRightEye()` untuk EAR blink detection | Tidak digunakan | **Liveness 0%** — foto statis bisa lolos |
+| 3 | `LabeledFaceDescriptors` support **array descriptors per person** | 1 embedding per orang | Akurasi rendah — akan diperbaiki di FE-1c ✅ |
+| 4 | `extractFaces()` untuk crop & simpan face region | Tidak digunakan | Tidak ada audit trail wajah |
+| 5 | CDN **atau** npm (salah satu) | **Keduanya** — redundan | Waste bandwidth, bundle ganda |
+
+#### ✅ Recommended Adjustment untuk Sesi B (dari docs)
+
+| Adjustment | Rationale |
+|:-----------|:----------|
+| **Tambah TinyFaceDetector** (190KB) sebagai default mobile, fallback SSD | Docs merekomendasikan untuk PWA mobile. 190KB vs 5.4MB — signifikan. |
+| **EAR blink detection** via `landmarks.getLeftEye()` + `getRightEye()` | Liveness sederhana tanpa backend change. Pola open→closed→open = blink confirmed. |
+| **6 frame → `LabeledFaceDescriptors`** array | Sesuai docs tutorial FaceMatcher + LabeledFaceDescriptors. |
+| **Hapus CDN face-api.js**, bundle via npm + Vite | Satu sumber, bundle size terkontrol. |
+
+### 🎯 Risk Assessment Realistis
+
+| Sesi | Risk | Jam Estimasi | Notes |
+|:----|:----:|:------------:|:------|
+| A (Auth + Sec) | 🟢 Rendah | 4-6 jam | Backend changes minor, semua sudah tested |
+| B (Face + GPS) | 🟡 Sedang | 10-14 jam | Camera bugs tricky (iOS getUserMedia), GPS layers butuh GeoIP library, +4 item baru dari docs |
+| C (RAG) | 🟡 Sedang | 6-8 jam | Livewire chat from scratch, tapi backend AI agent sudah jadi |
+| D (ESS) | 🔴 Tinggi | 12-16 jam | 9 Blade views + Livewire interaktif — ini paling banyak kerja |
+| E (Approvals) | 🟡 Sedang | 4-6 jam | Dependen ke D (butuh data approval) |
+| F (Cleanup) | 🟢 Rendah | 3-5 jam | Mostly config/css, dead code removal |
+| **TOTAL** | | **39-55 jam** | Realistis untuk ±100 karyawan |
+
+### 💡 Kesimpulan Akhir
+
+1. **Backend genuinely strong.** 1,121 tests pass (dijalankan langsung). 51 API endpoints. CipherSweet, Argon2id, rate limiting, IDOR — semuanya berfungsi. Bukan klaim kosong.
+2. **Frontend genuinely weak.** 46/130 views selesai. 0 Livewire. 550 bytes app.js. Ini yang bikin overall progress terlihat kecil.
+3. **Tapi plan sudah tepat.** 6 sesi fokus ke frontend — Sesi B, C, D, E semuanya target Blade views + interaktif.
+4. **Sesi B perlu adjustment dari docs face-api.js:** TinyFaceDetector (190KB) untuk mobile, EAR blink detection, 6 foto enrollment pakai `LabeledFaceDescriptors`, hapus CDN redundan.
+5. **Estimasi real:** 39-55 jam. Realistis untuk ±100 karyawan.
+
+---
+
+### Status Perubahan Kode yang Perlu Dilakukan
+
+#### 🔴 Sesi A — Auth & Permission (14 item)
+| ID | Task | File | Prioritas |
+|:--:|------|------|:---------:|
+| EV-1 | Uncomment `MustVerifyEmail` interface + tambah trait | `app/Models/User.php:5` | 🔴 |
+| EV-2 | Setup Gmail SMTP (.env) — **deferred, pakai `log` dulu** | `.env` | 🔴 |
+| EV-3 | API gate verified di AuthController@login | `app/Http/Controllers/Api/AuthController.php:35` | 🔴 |
+| EV-4 | API endpoint verify + resend (mobile) | Controller baru + 2 route di `routes/api.php` | 🔴 |
+| EV-5 | CheckPasswordExpired Tier 3: null → force redirect | `app/Http/Middleware/CheckPasswordExpired.php:63-68` | 🔴 |
+| EV-6 | EmployeeController@store — kirim verifikasi email | `app/Http/Controllers/Api/EmployeeController.php:118` | 🔴 |
+| EV-7 | Set `password_changed_at = null` di store | `app/Http/Controllers/Api/EmployeeController.php:118` | 🔴 |
+| PERM-1 | `view_attendances` → Finance | `database/seeders/RoleAndPermissionSeeder.php:120` | 🔴 |
+| PERM-2 | `view_knowledgebase` → Employee | `database/seeders/RoleAndPermissionSeeder.php:170` | 🔴 |
+| PERM-3 | `approve_wfa` → hr-manager | `database/seeders/RoleAndPermissionSeeder.php:100` | 🔴 |
+| **SEC-1** | **Set Sanctum token expiry 1 tahun** + hapus token di logout | `config/sanctum.php:53` | 🔴 |
+| **SEC-2** | **Pasang middleware `password.expired` di route group API** | `routes/api.php` | 🔴 |
+| **SEC-3** | **Validasi format 2FA code** — 6 digit TOTP / 8 char recovery | `app/Http/Requests/Api/TwoFactorChallengeRequest.php:14-19` | 🔴 |
+| **SEC-4** | **ChangePasswordRequest** — ganti `Password::min(8)` → pakai default `AppServiceProvider` | `app/Http/Requests/Api/ChangePasswordRequest.php:19` | 🔴 |
+
+#### 🔴 Sesi B — Face Recognition + GPS Anti-Spoofing + Liveness (13 item)
+| ID | Task | File | Prioritas |
+|:--:|------|------|:---------:|
+| C-1 | Model path: `/models` → `/models/av1` | `resources/views/attendance/clock-in.blade.php` | 🔴 |
+| C-2 | Pisah try/catch: getUserMedia vs play() | `resources/views/attendance/clock-in.blade.php:30-38` | 🔴 |
+| C-3 | Toast event: `CustomEvent` → `Livewire.dispatch()` | `resources/views/attendance/clock-in.blade.php:76-82` + `app.js` | 🔴 |
+| C-4 | `video.play()` — hapus `catch {}` silent | `resources/views/attendance/clock-in.blade.php:35` | 🔴 |
+| **FE-1c** | **Face enrollment UI — 6 foto sequential** Camera → hitung mundur → `detectSingleFace().withFaceLandmarks().withFaceDescriptor()` × 6 frame (minta user geleng/ubah ekspresi) → 6× 128D embeddings via `LabeledFaceDescriptors` array pattern → `POST /api/v1/face/register` dengan `{ embeddings: [[...], ...] }`. Backend simpan sebagai pgvector array. | `resources/views/employee/profile/face-registration.blade.php` (baru) + `app/Services/FaceRecognitionService.php` | 🔴 |
+| **FE-1d** | **Liveness via micro-movement** — 6 frame berurutan dengan variance antar embedding. Variance > threshold = hidup (foto diam akan 0 variance). | `resources/views/attendance/clock-in.blade.php` + `resources/js/face-utils.js` (baru) | 🔴 |
+| **FE-1e** | **TinyFaceDetector model — download weights (190KB)** ke `public/models/av1/`. Ubah default detector: **TinyFaceDetector untuk mobile** (lebih ringan 28×, docs: "your GO-TO face detector on mobile devices"), fallback SSD untuk confidence rendah. | `resources/js/face-utils.js` + `clock-in.blade.php` | 🔴 |
+| **FE-1f** | **EAR blink detection** — implementasi via `landmarks.getLeftEye()` + `getRightEye()`. Hitung Eye Aspect Ratio: `EAR = (‖p2-p6‖ + ‖p3-p5‖) / (2 * ‖p1-p4‖)`. Threshold < 0.2 = mata tertutup. Pola open→closed→open = blink confirmed. | `resources/js/face-utils.js` (baru) | 🔴 |
+| **FE-1g** | **Hapus CDN face-api.js** — hapus `<script src="cdn">` dari `clock-in.blade.php`, bundle via npm + Vite saja. Satu sumber, bundle size terkontrol. | `clock-in.blade.php` + `resources/js/app.js` | 🔴 |
+| **FE-1h** | **Simpan face crop** — gunakan `faceapi.extractFaces()` untuk simpan snapshot wajah saat enrollment. Audit trail + bahan evaluasi akurasi. | `resources/js/face-utils.js` | 🔴 |
+| **SEC-GPS-1** | **Layer 1: Client-side validation** — `is_mocked` flag + `accuracy < 50m` (existing, improve threshold) | `app/Services/GeofenceService.php:19` | 🔴 |
+| **SEC-GPS-2** | **Layer 2: Time-series anomaly** — 3 sampel GPS dalam 5 detik. Kalau variance ≈ 0 (identical coordinate) = fake. Kalau kecepatan > 100km/jam = anomaly. | `app/Services/GeofenceService.php` (baru) | 🔴 |
+| **SEC-GPS-3** | **Layer 3: IP cross-check** — Catat IP + GeoIP lokasi. Kalau IP berasal dari kota berbeda dengan GPS, flag anomaly score. | `app/Services/GeofenceService.php` + `app/Services/AttendanceService.php` | 🔴 |
+
+#### 🟡 Sesi C — RAG Knowledge Base (3 item)
+| ID | Task | Detail |
+|:--:|------|--------|
+| RAG-1 | Livewire chat component + Blade | `resources/views/knowledge-base/index.blade.php` |
+| RAG-2 | Upload PDF UI + status embedding | `resources/views/knowledge-base/upload.blade.php` |
+| RAG-3 | Manage articles | `resources/views/knowledge-base/manage.blade.php` |
+
+#### 🟡 Sesi D — ESS Pages (7 item)
+| ID | Task | View Baru |
+|:--:|------|-----------|
+| FE-2 | Attendance History | `resources/views/attendance/history.blade.php` |
+| FE-3a | Leave Apply | `resources/views/leaves/apply.blade.php` (existing, upgrade) |
+| FE-3b | Leave History | `resources/views/employee/leave/history.blade.php` |
+| FE-3c | Leave Quota | `resources/views/employee/leave/quota.blade.php` |
+| FE-4 | Overtime (Apply + History) | `resources/views/overtimes/apply.blade.php` + history |
+| FE-5 | Reimbursement (Request + History) | `resources/views/reimbursements/index.blade.php` (upgrade) |
+| FE-6 | Payslip (PIN + download) | `resources/views/payroll/payslip.blade.php` (upgrade) |
+| FE-7 | Profile & Devices | `resources/views/employee/profile/*.blade.php` |
+| FE-8a | Approvals landing page | `resources/views/approvals/index.blade.php` |
+| FE-8b | Knowledge Base landing page | `resources/views/knowledge-base/index.blade.php` (same as RAG-1) |
+
+#### 🟢 Sesi E — Approvals (3 item)
+| ID | Task | View Baru |
+|:--:|------|-----------|
+| AP-1 | Approvals landing + pending L1 | `resources/views/approvals/index.blade.php` + `pending.blade.php` |
+| AP-2 | Approvals pending L2 | `resources/views/approvals/l2-pending.blade.php` |
+| AP-3 | Approvals history | `resources/views/approvals/all.blade.php` |
+
+#### 🟢 Sesi F — Cleanup + Security Headers (8 item)
+| ID | Task | Detail |
+|:--:|------|--------|
+| DC-1 | Hapus GeofenceValidation middleware | 0 caller, Haversine duplikat |
+| DC-2 | Hapus Branch::validateRadius() | 0 caller, Haversine ke-3 |
+| DC-3 | Satukan anti-fake-GPS check | Hanya di GeofenceService |
+| DC-4 | PHPStan baseline — hapus 3 entry | `phpstan-baseline.neon` |
+| C-5 | SW cache — hapus `/offline` dari PRECACHE | `public/service-worker.js` |
+| D-1..D-20 | Design Sync DS-1 | app.css palette + font + radius |
+| A-1..A-5 | Architecture cleanup (opsional) | strict_types, base exception, queue, etc. |
+| **SEC-5** | **Security headers middleware** — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy + face registration confirmation gate (konfirmasi sebelum overwrite embedding) | Middleware baru + `bootstrap/app.php` |
+
+---
+
 ## Verification Commands
 
 | Purpose | Command |
@@ -669,65 +921,65 @@ Skala ±100 karyawan, HR buat akun. Flow:
 | PHPStan | `vendor/bin/phpstan analyse` |
 | Dev server | `composer run dev` |
 
-## Execution Order (Revised 2026-06-24)
+## Execution Order — 6 Sesi (Final, 2026-06-24)
 
 ```
-PHASE AUTH (Email Verification + Password Policy)
-  │  EV-1: MustVerifyEmail uncomment + trait
-  │  EV-2: Gmail SMTP setup (.env)
-  │  EV-3: API gate verified di AuthController@login
-  │  EV-4: API endpoint verify + resend (mobile)
-  │  EV-5: CheckPasswordExpired Tier 3 — force redirect
-  │  EV-6: EmployeeController@store — kirim verifikasi email
-  │  EV-7: Set password_changed_at = null di store
+SESI A — AUTH & PERMISSION + SEC (🔴 blocking)
+  │  EV-1 s/d EV-7: Email Verification + Password Policy
+  │  PERM-1/2/3: Permission fixes (view_attendances, view_knowledgebase, approve_wfa)
+  │  SEC-1: Sanctum token expiry 1 tahun
+  │  SEC-2: password.expired middleware di API routes
+  │  SEC-3: Validasi format 2FA code (6 digit / 8 char)
+  │  SEC-4: ChangePasswordRequest → pakai default AppServiceProvider
+  │  Catatan: EV-2 (Gmail SMTP) deferred — backend code siap, switchable later
   ▼
-PHASE PERM (Permission Fix)
-  │  P-1: view_attendances ke Finance
-  │  P-2: view_knowledgebase ke Employee
+SESI B — FACE RECOGNITION + GPS ANTI-SPOOFING + LIVENESS (🔴 blocking)
+  │  C-1 s/d C-4: Camera bug fixes (model path, try/catch, toast, video.play)
+  │  FE-1c: Face enrollment — 6 foto sequential → LabeledFaceDescriptors array
+  │  FE-1d: Liveness via micro-movement variance
+  │  FE-1e: TinyFaceDetector (190KB) — default untuk mobile
+  │  FE-1f: EAR blink detection via landmarks.getLeftEye()/getRightEye()
+  │  FE-1g: Hapus CDN face-api.js, bundle via npm+Vite
+  │  FE-1h: Simpan face crop via extractFaces() untuk audit trail
+  │  SEC-GPS-1: Layer 1 — Client-side is_mocked + accuracy threshold
+  │  SEC-GPS-2: Layer 2 — Time-series 3 sampel GPS (variance + speed)
+  │  SEC-GPS-3: Layer 3 — IP cross-check GeoIP vs GPS coordinate
   ▼
-PHASE 3 (Critical Bugs)
-  │  C-1, C-2, C-3, C-4  →  C-5, C-6, C-7, C-8, C-9
+SESI C — RAG KNOWLEDGE BASE (🟡)
+  │  RAG-1: Livewire chat component + Blade view
+  │  RAG-2: Upload PDF UI + status
+  │  RAG-3: Manage articles (HR only)
   ▼
-PHASE RAG (Knowledge Base UI)
-  │  KB-1: Livewire chat component
-  │  KB-2: Upload PDF UI
-  │  KB-3: view_knowledgebase permission untuk Employee
+SESI D — ESS PAGES (🟡)
+  │  FE-2: Attendance History
+  │  FE-3a/b/c: Leave (Apply + History + Quota)
+  │  FE-4: Overtime (Apply + History)
+  │  FE-5: Reimbursement
+  │  FE-6: Payslip (PIN 6 digit)
+  │  FE-7: Profile & Devices
+  │  FE-8a: Approvals landing page
   ▼
-PHASE FACE (Face Enrollment)
-  │  FE-1c: Face enrollment UI
+SESI E — APPROVALS (🟢)
+  │  AP-1: Landing page + pending L1
+  │  AP-2: Pending L2
+  │  AP-3: History
   ▼
-PHASE 2FA (2FA Enforcement)
-  │  2FA-1: Enforce 2FA untuk HR/Finance/SuperAdmin (AUTH-09)
-  ▼
-PHASE 4 (DS-1 Design Sync)
-  │  D-1 to D-15 (colors)  →  D-16 to D-20 (font, radius, brand)
-  ▼
-PHASE 5 (Component Alignment)
-  │  S-1 to S-7
-  ▼
-PHASE 6 (Architecture Cleanup)
-  │  A-1 to A-5  →  Dead code cleanup
-  ▼
-PHASE 2 (ESS Frontend)
-  │  FE-1 (remaining)  →  L-2, L-5, L-6  →  FE-8 (remaining views)
-  │
-  ├──→  FE-2 (Attendance History)
-  ├──→  FE-3 (Leave) + FE-4 (Overtime) + FE-5 (Reimbursement)
-  ├──→  FE-6 (Payroll Slip)
-  └──→  FE-7 (Profile) + FE-8 (remaining views)
-          │
-          └──→  IN-1/2/3 (Inbox + RAG)  →  LP-1 + P-1 to P-4
-  ▼
-PHASE 7 (Feature Gaps)
-  │  F-1 to F-9
+SESI F — CLEANUP + SECURITY HEADERS (🟢)
+  │  DC-1/2/3: Dead code geofencing
+  │  DC-4: PHPStan baseline
+  │  C-5: SW /offline
+  │  D-1..D-20: Design Sync DS-1
+  │  SEC-5: Security headers middleware (CSP, HSTS, dll) + face registration confirmation
+  │  A-1..A-5: Architecture cleanup (opsional — jika waktu cukup)
 ```
 
-**Catatan penting (2026-06-24 update):**
-- **AUTH PHASE = PRIORITAS BARU #1.** Email verification + force change password harus beres dulu sebelum fitur lain. Ini prasyarat keamanan dasar.
-- **±100 karyawan → tidak perlu Opsi B** (hasRole → can refactor, team-scoped query, policy gate di ApprovalController). Skip semua architectural refactor.
-- **Critical bugs (C-1 s/d C-9) tetap prioritas tinggi** — camera clock-in harus berfungsi.
-- **FE-8c (Knowledge Base view) urgent** — route ada tapi view tidak, error 500.
-- **Face enrollment (FE-1c)** perlu dibuat dari nol — belum ada UI register face.
-- **2FA enforcement (AUTH-09)** untuk HR/Finance/SuperAdmin — SRS require, belum implement.
-- **PIN hanya untuk payslip** (download E-Payslip), bukan untuk absensi.
-- **Verifikasi Clock In:** Face recognition (128D embedding) → match → retry 3x → fallback PIN.
+### Catatan Kunci Eksekusi
+- **Sesi A adalah prasyarat #1** — email verification + force change password + permission fixes + SEC items harus beres sebelum sesi lain. Backend changes minor, low risk (4-6 jam).
+- **Sesi B bobot tertinggi** — 13 item: camera bugs + face enrollment (6 foto) + TinyFaceDetector + EAR blink + CDN cleanup + GPS 3-layer defense. Ini nilai tambah skripsi (sub-bab liveness + anti-spoofing).
+- **Sesi B+C bisa paralel** — Face Recognition dan RAG tidak saling dependen.
+- **Sesi D tergantung sesi B** — ESS pages butuh clock-in berfungsi (camera fixed).
+- **Sesi E tergantung sesi D** — Approvals page butuh backend approval items.
+- **Sesi F bisa di-merge** ke sesi lain jika waktu cukup.
+- **Gmail SMTP (EV-2) jangan ditunda terlalu lama** — backend code pakai `MAIL_MAILER=log` untuk development, tapi perlu SMTP untuk production.
+- **Realitas:** Backend genuinely solid (95% done, 1,121 tests pass). Frontend genuinely weak (35% views). 6 sesi ini fokus mengejar frontend.
+- **Estimasi total:** 39-55 jam kerja fokus. Realistis untuk ±100 karyawan.
