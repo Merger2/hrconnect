@@ -19,23 +19,16 @@
             </div>
         </div>
         @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
-        @endpersist
-
-        <div id="pwa-install-banner" class="hidden fixed bottom-0 inset-x-0 p-4 bg-canvas border-t border-hairline shadow-lg z-50">
-            <div class="flex items-center justify-between max-w-sm mx-auto">
-                <div class="flex items-center gap-3">
-                    <img src="/icon-192.svg" alt="HRConnect" class="size-10 rounded-lg" />
-                    <div>
-                        <p class="text-sm font-medium text-ink">Install HRConnect</p>
-                        <p class="text-xs text-muted">Akses cepat dari layar utama</p>
-                    </div>
-                </div>
-                <button onclick="installPwa()" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary">Install</button>
+            <div
+                x-data="toast"
+                x-show="show"
+                x-cloak
+                x-transition
+                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
+            >
+                <p x-text="message"></p>
             </div>
-        </div>
+        @endpersist
 
         <script>
             if ('serviceWorker' in navigator) {
@@ -45,6 +38,6 @@
             }
         </script>
 
-        @fluxScripts
+        @vite(['resources/js/app.js'])
     </body>
 </html>

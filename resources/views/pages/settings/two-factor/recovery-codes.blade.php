@@ -8,17 +8,11 @@ new class extends Component {
     #[Locked]
     public array $recoveryCodes = [];
 
-    /**
-     * Mount the component.
-     */
     public function mount(): void
     {
         $this->loadRecoveryCodes();
     }
 
-    /**
-     * Generate new recovery codes for the user.
-     */
     public function regenerateRecoveryCodes(GenerateNewRecoveryCodes $generateNewRecoveryCodes): void
     {
         $generateNewRecoveryCodes(auth()->user());
@@ -26,9 +20,6 @@ new class extends Component {
         $this->loadRecoveryCodes();
     }
 
-    /**
-     * Load the recovery codes for the user.
-     */
     private function loadRecoveryCodes(): void
     {
         $user = auth()->user();
@@ -46,55 +37,53 @@ new class extends Component {
 }; ?>
 
 <div
-    class="py-6 space-y-6 border shadow-sm rounded-xl border-hairline dark:border-on-dark/10"
+    class="space-y-6 rounded-xl border border-outline-variant bg-surface-container-low py-6 shadow-sm"
     wire:cloak
     x-data="{ showRecoveryCodes: false }"
 >
-    <div class="px-6 space-y-2">
+    <div class="space-y-2 px-6">
         <div class="flex items-center gap-2">
-            <flux:icon.lock-closed variant="outline" class="size-4"/>
-            <flux:heading size="lg" level="3">{{ __('2FA recovery codes') }}</flux:heading>
+            <span class="material-symbols-outlined text-lg text-ink">lock</span>
+            <h3 class="text-lg font-semibold text-ink">{{ __('2FA recovery codes') }}</h3>
         </div>
-        <flux:text variant="subtle">
+        <p class="text-sm text-on-surface-variant">
             {{ __('Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.') }}
-        </flux:text>
+        </p>
     </div>
 
     <div class="px-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <flux:button
+            <button
                 x-show="!showRecoveryCodes"
-                icon="eye"
-                icon:variant="outline"
-                variant="primary"
-                @click="showRecoveryCodes = true;"
+                class="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white"
+                @click="showRecoveryCodes = true"
                 aria-expanded="false"
                 aria-controls="recovery-codes-section"
             >
+                <span class="material-symbols-outlined text-base">visibility</span>
                 {{ __('View recovery codes') }}
-            </flux:button>
+            </button>
 
-            <flux:button
+            <button
                 x-show="showRecoveryCodes"
-                icon="eye-slash"
-                icon:variant="outline"
-                variant="primary"
+                class="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white"
                 @click="showRecoveryCodes = false"
                 aria-expanded="true"
                 aria-controls="recovery-codes-section"
             >
+                <span class="material-symbols-outlined text-base">visibility_off</span>
                 {{ __('Hide recovery codes') }}
-            </flux:button>
+            </button>
 
             @if (filled($recoveryCodes))
-                <flux:button
+                <button
                     x-show="showRecoveryCodes"
-                    icon="arrow-path"
-                    variant="filled"
+                    class="inline-flex items-center gap-2 rounded-xl border border-outline-variant bg-canvas px-6 py-2.5 text-sm font-semibold text-ink"
                     wire:click="regenerateRecoveryCodes"
                 >
+                    <span class="material-symbols-outlined text-base">autorenew</span>
                     {{ __('Regenerate codes') }}
-                </flux:button>
+                </button>
             @endif
         </div>
 
@@ -107,12 +96,14 @@ new class extends Component {
         >
             <div class="mt-3 space-y-3">
                 @error('recoveryCodes')
-                    <flux:callout variant="danger" icon="x-circle" heading="{{$message}}"/>
+                    <div class="rounded-xl border-l-4 border-error-container bg-surface-container-low p-4">
+                        <p class="font-semibold text-error">{{ $message }}</p>
+                    </div>
                 @enderror
 
                 @if (filled($recoveryCodes))
                     <div
-                        class="grid gap-1 p-4 font-mono text-sm rounded-lg bg-surface-soft dark:bg-on-dark/5"
+                        class="grid gap-1 rounded-lg bg-surface-soft p-4 font-mono text-sm dark:bg-on-dark/5"
                         role="list"
                         aria-label="{{ __('Recovery codes') }}"
                     >
@@ -120,15 +111,15 @@ new class extends Component {
                             <div
                                 role="listitem"
                                 class="select-text"
-                                wire:loading.class="opacity-50 animate-pulse"
+                                wire:loading.class="animate-pulse opacity-50"
                             >
                                 {{ $code }}
                             </div>
                         @endforeach
                     </div>
-                    <flux:text variant="subtle" class="text-xs">
+                    <p class="text-xs text-on-surface-variant">
                         {{ __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click Regenerate codes above.') }}
-                    </flux:text>
+                    </p>
                 @endif
             </div>
         </div>

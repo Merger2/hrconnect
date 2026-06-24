@@ -3,68 +3,60 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-canvas">
-        <flux:header container class="border-b border-hairline bg-canvas">
-            <flux:sidebar.toggle class="lg:hidden mr-2" icon="bars-2" inset="left" />
+    <body class="min-h-screen bg-canvas pb-20 lg:pb-0">
+        <!-- ─── Desktop TopAppBar ─── -->
+        <header class="sticky top-0 z-30 hidden border-b border-outline-variant bg-canvas lg:block">
+            <div class="flex h-16 items-center gap-6 px-6">
+                <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
 
+                <nav class="flex h-full items-center gap-1">
+                    <a href="{{ route('dashboard') }}"
+                       @class(['flex h-full items-center gap-2 border-b-2 px-2 text-sm font-medium transition-colors',
+                               'border-ink text-ink' => request()->routeIs('dashboard'),
+                               'border-transparent text-on-surface-variant hover:border-outline hover:text-ink' => !request()->routeIs('dashboard')])
+                       wire:navigate>
+                        <span class="material-symbols-outlined text-xl">grid_view</span>
+                        {{ __('Dashboard') }}
+                    </a>
+                </nav>
+
+                <div class="grow"></div>
+
+                <div class="flex items-center gap-1">
+                    <button class="flex size-10 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-ink">
+                        <span class="material-symbols-outlined text-xl">search</span>
+                    </button>
+                    <x-desktop-user-menu />
+                </div>
+            </div>
+        </header>
+
+        <!-- ─── Mobile Header ─── -->
+        <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-outline-variant bg-canvas px-4 lg:hidden">
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
-
-            <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                    {{ __('Dashboard') }}
-                </flux:navbar.item>
-            </flux:navbar>
-
-            <flux:spacer />
-
-            <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse py-0!">
-                <flux:tooltip :content="__('Search')" position="bottom">
-                    <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
-                </flux:tooltip>
-            </flux:navbar>
-
             <x-desktop-user-menu />
-        </flux:header>
+        </header>
 
-        <!-- Mobile Menu -->
-        <flux:sidebar collapsible="mobile" sticky class="lg:hidden border-e border-hairline bg-canvas">
-            <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
-            </flux:sidebar.header>
+        <!-- ─── Main Content ─── -->
+        <div class="px-4 py-4 lg:px-6 lg:py-6">
+            {{ $slot }}
+        </div>
 
-            <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Main')">
-                    <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard')  }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-
-                <flux:sidebar.group :heading="__('HR')">
-                    <flux:sidebar.item icon="clock" :href="route('attendance.index')" :current="request()->routeIs('attendance.*')" wire:navigate>
-                        {{ __('Attendance') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="calendar" :href="route('leaves.index')" :current="request()->routeIs('leaves.*')" wire:navigate>
-                        {{ __('Leave') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="bolt" :href="route('overtimes.index')" :current="request()->routeIs('overtimes.*')" wire:navigate>
-                        {{ __('Overtime') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="wallet" :href="route('reimbursements.index')" :current="request()->routeIs('reimbursements.*')" wire:navigate>
-                        {{ __('Reimbursement') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-            </flux:sidebar.nav>
-        </flux:sidebar>
-
-        {{ $slot }}
+        {{-- Mobile Bottom Navigation --}}
+        <x-bottom-nav />
 
         @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
+            <div
+                x-data="toast"
+                x-show="show"
+                x-cloak
+                x-transition
+                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
+            >
+                <p x-text="message"></p>
+            </div>
         @endpersist
 
-        @fluxScripts
+        @vite(['resources/js/app.js'])
     </body>
 </html>

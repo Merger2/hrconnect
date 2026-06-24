@@ -10,12 +10,12 @@
 <link rel="apple-touch-icon" href="/icon-512.svg">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1a3a3a">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" rel="stylesheet" />
-<link href="https://fonts.bunny.net/css?family=outfit:500&display=swap" rel="stylesheet" />
+<link href="https://fonts.bunny.net/css?family=rubik:500&display=swap" rel="stylesheet" />
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
-@fluxAppearance

@@ -11,41 +11,57 @@
             <input type="hidden" name="token" value="{{ request()->route('token') }}">
 
             <!-- Email Address -->
-            <flux:input
-                name="email"
-                value="{{ request('email') }}"
-                :label="__('Email')"
-                type="email"
-                required
-                autocomplete="email"
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Email') }}</label>
+                <input
+                    name="email"
+                    type="email"
+                    value="{{ request('email') }}"
+                    required
+                    autocomplete="email"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('email')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                viewable
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Password') }}</label>
+                <input
+                    name="password"
+                    type="password"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Password') }}"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('password')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                viewable
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Confirm password') }}</label>
+                <input
+                    name="password_confirmation"
+                    type="password"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Confirm password') }}"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('password_confirmation')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="reset-password-button">
+                <button type="submit" class="w-full rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white" data-test="reset-password-button">
                     {{ __('Reset password') }}
-                </flux:button>
+                </button>
             </div>
         </form>
     </div>

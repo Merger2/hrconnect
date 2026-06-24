@@ -3,123 +3,102 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-canvas">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-hairline bg-canvas">
-            <flux:sidebar.header>
+    <body class="min-h-screen bg-canvas pb-20 lg:pb-0">
+        <!-- ─── Desktop Sidebar ─── -->
+        <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-e border-outline-variant bg-canvas lg:flex">
+            {{-- Logo --}}
+            <div class="flex h-16 items-center px-4">
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
-            </flux:sidebar.header>
-
-            <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Main')">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-
-                <flux:sidebar.group :heading="__('HR')">
-                    <flux:sidebar.item icon="clock" :href="route('attendance.index')" :current="request()->routeIs('attendance.*')" wire:navigate>
-                        {{ __('Attendance') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="calendar" :href="route('leaves.index')" :current="request()->routeIs('leaves.*')" wire:navigate>
-                        {{ __('Leave') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="bolt" :href="route('overtimes.index')" :current="request()->routeIs('overtimes.*')" wire:navigate>
-                        {{ __('Overtime') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="wallet" :href="route('reimbursements.index')" :current="request()->routeIs('reimbursements.*')" wire:navigate>
-                        {{ __('Reimbursement') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-            </flux:sidebar.nav>
-
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
-        </flux:sidebar>
-
-        <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
-
-            <flux:spacer />
-
-            <flux:dropdown position="top" align="end">
-                <flux:profile
-                    :initials="auth()->user()->initials()"
-                    icon-trailing="chevron-down"
-                />
-
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <div class="p-0 text-sm font-normal">
-                            <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <flux:avatar
-                                    :name="auth()->user()->name"
-                                    :initials="auth()->user()->initials()"
-                                />
-
-                                <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
-                                    <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
-                                </div>
-                            </div>
-                        </div>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                            {{ __('Settings') }}
-                        </flux:menu.item>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <flux:menu.item
-                            as="button"
-                            type="submit"
-                            icon="arrow-right-start-on-rectangle"
-                            class="w-full cursor-pointer"
-                            data-test="logout-button"
-                        >
-                            {{ __('Log out') }}
-                        </flux:menu.item>
-                    </form>
-                </flux:menu>
-            </flux:dropdown>
-        </flux:header>
-
-        {{ $slot }}
-
-        @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
-        @endpersist
-
-        <div id="pwa-install-banner" class="hidden fixed bottom-0 inset-x-0 p-4 bg-canvas border-t border-hairline shadow-lg z-50">
-            <div class="flex items-center justify-between max-w-sm mx-auto">
-                <div class="flex items-center gap-3">
-                    <img src="/icon-192.svg" alt="HRConnect" class="size-10 rounded-lg" />
-                    <div>
-                        <p class="text-sm font-medium text-ink">Install HRConnect</p>
-                        <p class="text-xs text-muted">Akses cepat dari layar utama</p>
-                    </div>
-                </div>
-                <button onclick="installPwa()" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary">Install</button>
             </div>
+
+            {{-- Navigation --}}
+            <nav class="flex-1 overflow-y-auto py-2">
+                <div class="px-4 pb-2 pt-5">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Main') }}</p>
+                </div>
+
+                <a href="{{ route('dashboard') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('dashboard'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('dashboard')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">home</span>
+                    <span>{{ __('Dashboard') }}</span>
+                </a>
+
+                <div class="px-4 pb-2 pt-5">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('HR') }}</p>
+                </div>
+
+                <a href="{{ route('attendance.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('attendance.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('attendance.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">schedule</span>
+                    <span>{{ __('Attendance') }}</span>
+                </a>
+
+                <a href="{{ route('leaves.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('leaves.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('leaves.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">calendar_month</span>
+                    <span>{{ __('Leave') }}</span>
+                </a>
+
+                <a href="{{ route('overtimes.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('overtimes.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('overtimes.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">bolt</span>
+                    <span>{{ __('Overtime') }}</span>
+                </a>
+
+                <a href="{{ route('reimbursements.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('reimbursements.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('reimbursements.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">wallet</span>
+                    <span>{{ __('Reimbursement') }}</span>
+                </a>
+            </nav>
+
+            {{-- User --}}
+            <div class="border-t border-outline-variant p-3">
+                <x-desktop-user-menu />
+            </div>
+        </aside>
+
+        <!-- ─── Mobile Header ─── -->
+        <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-outline-variant bg-canvas px-4 lg:hidden">
+            <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
+            <x-desktop-user-menu />
+        </header>
+
+        <!-- ─── Main Content ─── -->
+        <div class="px-4 py-4 lg:ms-64 lg:px-6 lg:py-6">
+            {{ $slot }}
         </div>
 
-        <script>
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-                });
-            }
-        </script>
+        {{-- Mobile Bottom Navigation --}}
+        <x-bottom-nav />
 
-        @fluxScripts
+        @persist('toast')
+            <div
+                x-data="toast"
+                x-show="show"
+                x-cloak
+                x-transition
+                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
+            >
+                <p x-text="message"></p>
+            </div>
+        @endpersist
+
+        @vite(['resources/js/app.js'])
     </body>
 </html>

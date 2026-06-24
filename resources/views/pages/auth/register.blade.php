@@ -8,60 +8,82 @@
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
             <!-- Name -->
-            <flux:input
-                name="name"
-                :label="__('Name')"
-                :value="old('name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-                :placeholder="__('Full name')"
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Name') }}</label>
+                <input
+                    name="name"
+                    type="text"
+                    value="{{ old('name') }}"
+                    required
+                    autofocus
+                    autocomplete="name"
+                    placeholder="{{ __('Full name') }}"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('name')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Email address') }}</label>
+                <input
+                    name="email"
+                    type="email"
+                    value="{{ old('email') }}"
+                    required
+                    autocomplete="email"
+                    placeholder="email@example.com"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('email')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                viewable
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Password') }}</label>
+                <input
+                    name="password"
+                    type="password"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Password') }}"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('password')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                viewable
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Confirm password') }}</label>
+                <input
+                    name="password_confirmation"
+                    type="password"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Confirm password') }}"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('password_confirmation')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
             <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
+                <button type="submit" class="w-full rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white" data-test="register-user-button">
                     {{ __('Create account') }}
-                </flux:button>
+                </button>
             </div>
         </form>
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-muted dark:text-muted-soft">
             <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
+            <a href="{{ route('login') }}" class="text-ink underline hover:text-on-surface-variant" wire:navigate>{{ __('Log in') }}</a>
         </div>
     </div>
 </x-layouts::auth>

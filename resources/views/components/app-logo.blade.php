@@ -3,15 +3,17 @@
 ])
 
 @if($sidebar)
-    <flux:sidebar.brand name="HRConnect" {{ $attributes }}>
-        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
-        </x-slot>
-    </flux:sidebar.brand>
+    <a {{ $attributes->merge(['class' => 'flex items-center gap-2 px-4 py-3']) }}>
+        <div class="flex aspect-square size-8 items-center justify-center rounded-md bg-ink text-white">
+            <x-app-logo-icon class="size-5 fill-current text-white" />
+        </div>
+        <span class="font-display text-base font-medium text-ink">HRConnect</span>
+    </a>
 @else
-    <flux:brand name="HRConnect" {{ $attributes }}>
-        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
-        </x-slot>
-    </flux:brand>
+    <a {{ $attributes->merge(['class' => 'flex items-center gap-2']) }}>
+        <div class="flex aspect-square size-8 items-center justify-center rounded-md bg-ink text-white">
+            <x-app-logo-icon class="size-5 fill-current text-white" />
+        </div>
+        <span class="font-display text-base font-medium text-ink">HRConnect</span>
+    </a>
 @endif

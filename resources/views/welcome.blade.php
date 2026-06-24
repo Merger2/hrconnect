@@ -33,17 +33,17 @@
         <nav class="flex items-center gap-4">
             @if (Route::has('login'))
                 @auth
-                    <flux:button href="{{ route('dashboard') }}" wire:navigate>
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center rounded-xl border border-hairline bg-canvas px-6 py-2.5 text-sm font-semibold text-ink" wire:navigate>
                         {{ __('Dashboard') }}
-                    </flux:button>
+                    </a>
                 @else
-                    <flux:button variant="ghost" href="{{ route('login') }}" wire:navigate>
+                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-xl border border-hairline bg-canvas px-6 py-2.5 text-sm font-semibold text-ink" wire:navigate>
                         {{ __('Log in') }}
-                    </flux:button>
+                    </a>
                     @if (Route::has('register'))
-                        <flux:button variant="primary" href="{{ route('register') }}" wire:navigate>
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white" wire:navigate>
                             {{ __('Register') }}
-                        </flux:button>
+                        </a>
                     @endif
                 @endauth
             @endif
@@ -63,16 +63,16 @@
             <div class="mt-10 flex items-center justify-center gap-4">
                 @if (Route::has('login'))
                     @auth
-                        <flux:button href="{{ route('dashboard') }}" wire:navigate variant="primary" size="lg">
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center rounded-xl bg-ink px-8 py-3 text-base font-semibold text-white" wire:navigate>
                             {{ __('Go to Dashboard') }}
-                        </flux:button>
+                        </a>
                     @else
-                        <flux:button href="{{ route('register') }}" wire:navigate variant="primary" class="h-11 rounded-md bg-primary px-6 text-sm font-semibold text-on-primary">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white" wire:navigate>
                             {{ __('Get Started Free') }}
-                        </flux:button>
-                        <flux:button href="{{ route('login') }}" wire:navigate class="h-11 rounded-md border border-hairline bg-canvas px-6 text-sm font-semibold text-ink">
+                        </a>
+                        <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-xl border border-hairline bg-canvas px-6 py-3 text-sm font-semibold text-ink" wire:navigate>
                             {{ __('Sign In') }}
-                        </flux:button>
+                        </a>
                     @endauth
                 @endif
             </div>
@@ -82,7 +82,7 @@
     {{-- Feature Cards --}}
     <section class="mx-auto max-w-7xl px-6 pb-24">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {{-- Attendance — Brand Pink --}}
+            {{-- Attendance --}}
             <div class="rounded-xl bg-brand-pink p-8 text-on-primary">
                 <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-white/20">
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -93,7 +93,7 @@
                 <p class="mt-2 text-sm text-white/80">{{ __('Clock in/out with geofence validation and real-time tracking.') }}</p>
             </div>
 
-            {{-- Leave — Brand Teal --}}
+            {{-- Leave --}}
             <div class="rounded-xl bg-brand-teal p-8 text-on-dark">
                 <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-white/20">
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -104,7 +104,7 @@
                 <p class="mt-2 text-sm text-white/80">{{ __('Apply for leave, track quotas, and get approval in one click.') }}</p>
             </div>
 
-            {{-- Overtime — Brand Lavender --}}
+            {{-- Overtime --}}
             <div class="rounded-xl bg-brand-lavender p-8 text-ink">
                 <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-black/10">
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -115,7 +115,7 @@
                 <p class="mt-2 text-sm text-black/70">{{ __('Submit overtime requests and automatic payroll calculations.') }}</p>
             </div>
 
-            {{-- Reimbursement — Brand Peach --}}
+            {{-- Reimbursement --}}
             <div class="rounded-xl bg-brand-peach p-8 text-ink">
                 <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-black/10">
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -126,7 +126,7 @@
                 <p class="mt-2 text-sm text-black/70">{{ __('Submit expense claims with receipt uploads and approval workflow.') }}</p>
             </div>
 
-            {{-- Payroll — Brand Ochre --}}
+            {{-- Payroll --}}
             <div class="rounded-xl bg-brand-ochre p-8 text-ink">
                 <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-black/10">
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -137,7 +137,7 @@
                 <p class="mt-2 text-sm text-black/70">{{ __('Seamless payroll processing with automated calculations.') }}</p>
             </div>
 
-            {{-- Knowledge Base — Brand Mint --}}
+            {{-- Knowledge Base --}}
             <div class="rounded-xl bg-brand-mint p-8 text-ink">
                 <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-black/10">
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -186,13 +186,13 @@
             <div class="mt-8">
                 @if (Route::has('login'))
                     @auth
-                        <flux:button href="{{ route('dashboard') }}" wire:navigate variant="primary">
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center rounded-xl bg-ink px-8 py-3 text-sm font-semibold text-white" wire:navigate>
                             {{ __('Go to Dashboard') }}
-                        </flux:button>
+                        </a>
                     @else
-                        <flux:button href="{{ route('register') }}" wire:navigate variant="primary">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-xl bg-ink px-8 py-3 text-sm font-semibold text-white" wire:navigate>
                             {{ __('Start Free Trial') }}
-                        </flux:button>
+                        </a>
                     @endauth
                 @endif
             </div>

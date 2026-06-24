@@ -1,41 +1,50 @@
+@import 'https://fonts.googleapis.com/css2?family=Rubik:wght@500&family=Inter:wght@400;600&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
 @import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
-@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    /* Fonts — Outfit (Plain Black substitute) for display, Inter for body */
+    /* Fonts — Rubik for display, Inter for body */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-display: 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Rubik', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-    /* Brand canvas — neutral white */
-    --color-canvas: #ffffff;
+    /* ═══════════════════════════════════════
+       MD3 Color Palette — Cream-Warm
+       ═══════════════════════════════════════ */
+
+    /* Canvas & Text */
+    --color-canvas: #fffaf0;
     --color-ink: #0a0a0a;
-    --color-body: #3a3a3a;
-    --color-body-strong: #1a1a1a;
-    --color-muted: #535353;
-    --color-muted-soft: #888888;
-    --color-hairline: #cfcfcf;
-    --color-hairline-soft: #f0f0f0;
 
-    /* Surface tokens */
-    --color-surface-soft: #f7f7f7;
-    --color-surface-card: #efefef;
-    --color-surface-strong: #d0d0d0;
-    --color-surface-dark: #0a1a1a;
-    --color-surface-dark-elevated: #1a2a2a;
+    /* MD3 Surface Layer Tokens */
+    --color-surface-container-low: #f7f3f2;
+    --color-surface-container: #f1edec;
+    --color-surface-container-high: #ebe7e6;
+    --color-surface-container-highest: #e5e2e1;
 
-    /* On-colors */
+    /* MD3 On-Surface Tokens */
+    --color-on-background: #1c1b1b;
+    --color-on-surface-variant: #444748;
+
+    /* MD3 Outline Tokens */
+    --color-outline: #747878;
+    --color-outline-variant: #c4c7c7;
+
+    /* Primary */
+    --color-primary: #000000;
+    --color-primary-container: #1c1b1b;
     --color-on-primary: #ffffff;
-    --color-on-dark: #ffffff;
-    --color-on-dark-soft: #a0a0a0;
 
-    /* Brand color palette */
+    /* Error */
+    --color-error: #ba1a1a;
+    --color-error-container: #ffdad6;
+    --color-on-error: #ffffff;
+
+    /* Brand Colors — Landing Page Only */
     --color-brand-pink: #ff4d8b;
     --color-brand-teal: #1a3a3a;
     --color-brand-lavender: #b8a4ed;
@@ -47,88 +56,34 @@
     /* Semantic */
     --color-success: #22c55e;
     --color-warning: #f59e0b;
-    --color-error: #ef4444;
 
-    /* Primary button tokens */
-    --color-primary: #0a0a0a;
-    --color-primary-active: #1f1f1f;
-    --color-primary-disabled: #e5e5e5;
+    /* ─── Legacy tokens (backward compat — remove after migration) ─── */
+    --color-body: #1c1b1b;
+    --color-body-strong: #0a0a0a;
+    --color-muted: #444748;
+    --color-muted-soft: #747878;
+    --color-hairline: #c4c7c7;
+    --color-hairline-soft: #e5e2e1;
+    --color-surface-soft: #f7f3f2;
+    --color-surface-card: #f1edec;
+    --color-surface-strong: #ebe7e6;
 
-    /* Border radius — DESIGN.md scale */
-    --radius-xs: 6px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
+    /* Dark mode — landing page only */
+    --color-surface-dark: #0a1a1a;
+    --color-surface-dark-elevated: #1a2a2a;
+    --color-on-dark: #ffffff;
+    --color-on-dark-soft: #a0a0a0;
 
-    /* Flux UI theme tokens */
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
-    --color-accent-foreground: var(--color-white);
+    /* Backward compat for vendor views (livewire pagination ring-accent) */
+    --color-accent: var(--color-ink);
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-hairline, currentColor);
+        border-color: var(--color-outline-variant, currentColor);
     }
-}
-
-[data-flux-field]:not(ui-radio, ui-checkbox) {
-    @apply grid gap-2;
-}
-
-[data-flux-label] {
-    @apply  !mb-0 !leading-tight;
-}
-
-input[data-flux-control],
-textarea[data-flux-control],
-select[data-flux-control] {
-    @apply bg-white;
-    border-color: var(--color-muted-soft);
-}
-
-input:focus[data-flux-control],
-textarea:focus[data-flux-control],
-select:focus[data-flux-control] {
-    @apply bg-white outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
-    border-color: var(--color-ink);
-}
-
-/* Make password toggle icon visible */
-[data-flux-input] [data-flux-input-viewable] {
-    @apply text-muted;
-}
-
-/* Checkbox label visibility */
-[data-flux-label] {
-    @apply text-body;
-}
-
-/* Placeholder text — cukup gelap biar terbaca */
-input[data-flux-control]::placeholder,
-textarea[data-flux-control]::placeholder,
-select[data-flux-control]::placeholder {
-    color: var(--color-muted);
-}
-
-/* Input text — paksa gelap biar tidak putih */
-input[data-flux-control],
-textarea[data-flux-control],
-select[data-flux-control] {
-    color: var(--color-ink);
-}
-
-/* Checkbox indicator — border lebih terlihat */
-[data-flux-checkbox-indicator] {
-    border-color: var(--color-muted-soft) !important;
-}
-
-[ui-checkbox[data-checked]] [data-flux-checkbox-indicator] {
-    background-color: var(--color-ink) !important;
 }

@@ -5,21 +5,29 @@
             x-cloak
             x-data="{
                 showRecoveryInput: @js($errors->has('recovery_code')),
-                code: '',
+                code: ['', '', '', '', '', ''],
                 recovery_code: '',
                 toggleInput() {
                     this.showRecoveryInput = !this.showRecoveryInput;
-
-                    this.code = '';
+                    this.code = ['', '', '', '', '', ''];
                     this.recovery_code = '';
-
                     $dispatch('clear-2fa-auth-code');
-
                     $nextTick(() => {
                         this.showRecoveryInput
                             ? this.$refs.recovery_code?.focus()
-                            : $dispatch('focus-2fa-auth-code');
+                            : this.$refs.otp0?.focus();
                     });
+                },
+                handleOtpInput(index, event) {
+                    const input = event.target;
+                    if (input.value.length >= 1 && index < 5) {
+                        this.$refs['otp' + (index + 1)]?.focus();
+                    }
+                },
+                handleOtpKeydown(index, event) {
+                    if (event.key === 'Backspace' && !this.code[index] && index > 0) {
+                        this.$refs['otp' + (index - 1)]?.focus();
+                    }
                 },
             }"
         >
@@ -42,49 +50,53 @@
 
                 <div class="space-y-5 text-center">
                     <div x-show="!showRecoveryInput">
-                        <div class="flex items-center justify-center my-5">
-                            <flux:otp
-                                x-model="code"
-                                length="6"
-                                name="code"
-                                label="OTP Code"
-                                label:sr-only
-                                class="mx-auto"
-                             />
+                        <div class="my-5 flex items-center justify-center gap-2">
+                            <template x-for="(_, i) in 6" :key="i">
+                                <input
+                                    :ref="'otp' + i"
+                                    x-model="code[i]"
+                                    @input="handleOtpInput(i, $event)"
+                                    @keydown="handleOtpKeydown(i, $event)"
+                                    type="text"
+                                    inputmode="numeric"
+                                    maxlength="1"
+                                    class="h-12 w-10 rounded-xl border border-outline-variant bg-canvas text-center text-lg font-semibold text-ink focus:border-ink focus:ring-1 focus:ring-ink"
+                                />
+                            </template>
                         </div>
                     </div>
 
                     <div x-show="showRecoveryInput">
                         <div class="my-5">
-                            <flux:input
+                            <input
                                 type="text"
                                 name="recovery_code"
                                 x-ref="recovery_code"
                                 x-bind:required="showRecoveryInput"
                                 autocomplete="one-time-code"
                                 x-model="recovery_code"
+                                class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
                             />
                         </div>
 
                         @error('recovery_code')
-                            <flux:text color="red">
+                            <p class="text-sm text-error">
                                 {{ $message }}
-                            </flux:text>
+                            </p>
                         @enderror
                     </div>
 
-                    <flux:button
-                        variant="primary"
+                    <button
                         type="submit"
-                        class="w-full"
+                        class="w-full rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white"
                     >
                         {{ __('Continue') }}
-                    </flux:button>
+                    </button>
                 </div>
 
-                <div class="mt-5 space-x-0.5 text-sm leading-5 text-center">
+                <div class="mt-5 space-x-0.5 text-center text-sm leading-5">
                     <span class="opacity-50">{{ __('or you can') }}</span>
-                    <div class="inline font-medium underline cursor-pointer opacity-80">
+                    <div class="inline cursor-pointer font-medium opacity-80 underline">
                         <span x-show="!showRecoveryInput" @click="toggleInput()">{{ __('login using a recovery code') }}</span>
                         <span x-show="showRecoveryInput" @click="toggleInput()">{{ __('login using an authentication code') }}</span>
                     </div>

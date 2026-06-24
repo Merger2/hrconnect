@@ -1,11 +1,11 @@
 # PRODUCT REQUIREMENTS DOCUMENT (PRD)
 ## HRConnect — HRIS Enterprise System
 **PT 521 Teknologi Indonesia**
-**Laravel 13 + Livewire 4 + Flux UI + PostgreSQL**
+**Laravel 13 + Livewire 4 + Material Design 3 + PostgreSQL**
 
-**Versi:** 3.1 — Final (Konsolidasi 35 koreksi: K1-K5 + M1-M8 + S1-S18 + N1-N12)
-**Tanggal Update:** 2026-05-21
-**Status:** LOCKED — Tidak ada perubahan scope setelah Week 4
+**Versi:** 4.0 — Flux UI dihapus, migrasi ke Material Design 3
+**Tanggal Update:** 2026-06-23
+**Status:** Frontend Development — Backend 100% selesai
 
 ---
 
@@ -58,7 +58,7 @@ HRConnect adalah sistem HRIS (Human Resource Information System) berskala Enterp
 
 **Tech Stack:**
 - Backend: Laravel 13, PHP 8.5
-- Frontend: Livewire 4, Flux UI, Tailwind CSS v4, Alpine.js
+- Frontend: Livewire 4, Tailwind CSS v4, Alpine.js, Material Symbols (Google Icons), Rubik + Inter (Google Fonts)
 - Database: PostgreSQL (dengan pgvector, pg_trgm, pgcrypto)
 - Queue: Database (default + payroll_high)
 - Auth: Laravel Fortify + Spatie Permission + 2FA (TOTP)
@@ -984,7 +984,7 @@ enum TerCategory: string {
 
 **Daftar PHP Enums (33 total — 16 Status dengan `color()` + 17 Classification tanpa `color()`) `[K5]`:**
 
-> **Aturan warna (AGENTS.md):** Status enum return Flux UI semantic name (`success`/`warning`/`danger`/`info`/`zinc`). Classification enum **TIDAK** punya `color()` — menambahkannya = visual noise. 5 nama Flux saja, **tidak ada** `violet`/`green`/`red`/`amber`/`blue`/`primary`/`slate`/`neutral`.
+> **Aturan warna:** Status enum return MD3 semantic token (`success`/`warning`/`danger`/`info`). Classification enum **TIDAK** punya `color()` — menambahkannya = visual noise.
 
 #### 16 Enum STATUS (dengan `color()`)
 
@@ -1348,7 +1348,7 @@ reject(Approval $approval, string $reason): void
 
 ### 23.5 Install Prompt UX
 - **Trigger:** setelah 2x login berturut-turut, ATAU setelah first successful clock-in.
-- **Custom UI:** Flux UI modal/banner (bukan default browser prompt) dengan tombol "Install Aplikasi" + "Nanti Saja".
+- **Custom UI:** Custom modal/bottom sheet (Alpine + Tailwind) dengan tombol "Install Aplikasi" + "Nanti Saja".
 - **Suppress:** simpan flag di localStorage; tidak muncul lagi 14 hari jika user dismiss.
 - **Bottom Navigation:** Beranda, Absensi, Inbox, Profil
 - **Mobile-first responsive design**
@@ -1359,73 +1359,182 @@ reject(Approval $approval, string $reason): void
 
 ## 24. UI/UX GUIDELINES
 
-### 24.1 Design Tokens
+### 24.1 Design System — Material Design 3
 
-| Element | Light | Dark |
-|---------|-------|------|
-| Background | #FDFBF7 | #0F172A |
-| Text | #334155 | #F8FAFC |
-| Primary | #EA580C | #06B6D4 |
-| Success | #16A34A | #22C55E |
-| Font | Inter / Public Sans | |
-| Desktop | Sidebar | |
-| Mobile | Bottom Nav | |
-| Dark Mode | **DITUNDA** | |
+HRConnect menggunakan **Material Design 3** sebagai design language dengan palette kustom cream-warm. Tidak ada Flux UI.
 
-### 24.2 Accessibility Commitment `[S8]`
+#### Color Palette
+
+| Token | Value | Penggunaan |
+|-------|-------|------------|
+| `canvas` | `#fffaf0` | Background utama (cream warm) |
+| `ink` | `#0a0a0a` | Headline, primary text |
+| `on-background` | `#1c1b1b` | Body text default |
+| `on-surface-variant` | `#444748` | Label, caption |
+| `surface-container-low` | `#f7f3f2` | Card background |
+| `surface-container` | `#f1edec` | Elevated card, panel |
+| `surface-container-high` | `#ebe7e6` | Hover state |
+| `surface-container-highest` | `#e5e2e1` | Active state |
+| `outline` | `#747878` | Border default |
+| `outline-variant` | `#c4c7c7` | Border soft |
+| `error` | `#ba1a1a` | Error text, icon |
+| `error-container` | `#ffdad6` | Error background |
+| `on-error` | `#ffffff` | Text on error |
+
+#### Brand Colors
+
+| Token | Value | Penggunaan |
+|-------|-------|------------|
+| `brand-pink` | `#ff4d8b` | Hero, illustration |
+| `brand-teal` | `#1a3a3a` | Feature cards, geofence badge |
+| `brand-lavender` | `#b8a4ed` | Camera card background |
+| `brand-peach` | `#ffb084` | Illustration |
+| `brand-ochre` | `#e8b94a` | WFA toggle active |
+| `brand-mint` | `#a4d4c5` | Geofence badge, success indicator |
+| `brand-coral` | `#ff6b5a` | Accent |
+| `primary` | `#000000` | Destructive CTA / branded text |
+| `primary-container` | `#1c1b1b` | Bottom nav active tab |
+
+#### Typography
+
+| Token | Font | Size | Weight | Penggunaan |
+|-------|------|:----:|:------:|------------|
+| `display-xl` | Rubik | 72px | 500 | Homepage h1 |
+| `display-lg` | Rubik | 56px | 500 | Section heads |
+| `display-md` | Rubik | 40px | 500 | Sub-section heads |
+| `display-sm` | Rubik | 32px | 500 | CTA heads |
+| `headline-lg-mobile` | Rubik | 36px | 500 | Mobile h1 |
+| `title-lg` | Inter | 24px | 600 | Page titles |
+| `title-md` | Inter | 18px | 600 | Card titles |
+| `body-md` | Inter | 16px | 400 | Default body text |
+| `body-sm` | Inter | 14px | 400 | Caption, metadata |
+| `button` | Inter | 14px | 600 | Button labels |
+| `cap-upper` | Inter | 12px | 600 | Section label, badge |
+
+#### Icons
+
+**Material Symbols** (Google Fonts) — semua ikon aplikasi. Variable font-weight (`wght` 100-700) dan fill (`FILL` 0/1). Import via CSS:
+
+```css
+@import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
+```
+
+#### Spacing
+
+| Token | Value |
+|-------|-------|
+| `xxs` | 4px |
+| `xs` | 8px |
+| `sm` | 12px |
+| `md` | 16px |
+| `lg` | 24px |
+| `xl` | 32px |
+| `xxl` | 48px |
+| `section` | 64px |
+
+#### Border Radius
+
+| Token | Value | Penggunaan |
+|-------|-------|------------|
+| DEFAULT | 4px | Small badge |
+| `rounded-lg` | 8px | Input, small button |
+| `rounded-xl` | 12px | Button, card standard |
+| `rounded-2xl` | 16px | Content card |
+| `rounded-3xl` | 24px | Feature card |
+| `rounded-[2rem]` | 32px | Camera card |
+| `rounded-full` | 9999px | Avatar, pill |
+
+### 24.2 Layout Strategy
+
+| Platform | Navigation | Komponen |
+|----------|-----------|----------|
+| **Mobile** (< 768px) | Bottom Nav (4 tab) + TopAppBar | PWA-first, touch target ≥ 44px |
+| **Desktop** (≥ 768px) | Sidebar + Top Header | Sidebar collapsible via Alpine |
+
+**Bottom Navigation (Mobile):**
+- 4 tab: Home, Absen, Inbox, Profile
+- Active tab: `bg-primary-container` + filled icon
+- Inactive tab: `text-on-surface-variant` + outlined icon
+- Height: `h-20` (80px), `rounded-t-xl`
+
+**TopAppBar:**
+- Avatar claymation (kiri) + Page title (tengah) + Notifications icon (kanan)
+- `sticky top-0 z-50 bg-canvas`
+- Hidden on desktop (`md:hidden`)
+
+### 24.3 Accessibility Commitment `[S8]`
 - **Target:** WCAG 2.1 Level AA (subset).
 - **Color contrast:** minimum 4.5:1 untuk text normal, 3:1 untuk large text/UI components.
 - **Keyboard navigation:** semua aksi (form submit, modal close, dropdown, dll) harus bisa dijangkau via Tab/Shift+Tab/Enter/Esc.
-- **Focus indicator:** visible (Flux UI default focus ring tidak boleh di-disable).
+- **Focus indicator:** visible (custom focus ring via Tailwind `focus:ring-2` — tidak boleh di-disable).
 - **ARIA labels:** wajib untuk icon-only button, form input, status indicator.
 - **Screen reader:** tested di NVDA (Windows) + VoiceOver (iOS) untuk halaman utama (Login, Clock-In, Inbox, Payslip).
 - **Catatan:** full WCAG validation memerlukan manual testing dengan assistive technologies + expert review accessibility — tidak fully automated.
 
-### 24.3 Component Standards `[N5]`
-- **Loading state:** Flux skeleton component untuk list/table; spinner untuk button submit.
-- **Empty state:** ilustrasi + pesan kontekstual + CTA primary (contoh: "Belum ada cuti — Ajukan Cuti").
-- **Error toast:** Flux toast (success/warning/danger/info) — durasi 5 detik, dismissible.
+### 24.4 Component Standards `[N5]`
+- **Loading state:** Skeleton card (Tailwind `animate-pulse bg-surface-container-high rounded-2xl`) untuk list/table; spinner untuk button submit.
+- **Empty state:** ilustrasi claymation + pesan kontekstual + CTA primary (contoh: "Belum ada cuti — Ajukan Cuti").
+- **Error toast:** Custom Alpine toast (success/warning/danger/info) — durasi 5 detik, dismissible.
 - **Breadcrumb:** position di top header (di bawah app bar), separator `/`, max 4 level deep.
-- **Form validation:** real-time via Livewire `wire:model.blur` + error message di bawah input.
-- **Confirmation dialog:** Flux modal untuk aksi destructive (delete, regenerate payroll, terminate employee).
+- **Form validation:** real-time via Livewire `wire:model.blur` + error message di bawah input (`text-body-sm text-error`).
+- **Confirmation dialog:** Alpine `x-show` modal + backdrop untuk aksi destructive (delete, regenerate payroll, terminate employee).
 - **Color contrast spec:** seluruh kombinasi text/background harus dicek dengan tool seperti Stark/axe DevTools sebelum commit.
+- **Camera card (Absensi):** rounded-[2rem], bg-brand-lavender, reticle oval dashed, status overlay "Wajah Terdeteksi".
+- **Geofence status:** Badge "Dalam Radius" — bg-brand-mint/20 text-brand-teal, pulsing dot.
 
 ---
 
-## 25. 12-WEEK EXECUTION PLAN
+## 25. EXECUTION PLAN
 
-### BULAN 1: Foundation + Face + Geofencing
+> **Update 2026-06-23:** Backend 100% ✅ selesai (193 app/ PHP files, 51 API endpoints, 1,121 tests). Sekarang fokus Frontend ESS.
 
-| Minggu | Task | Deliverables | Status |
-|--------|------|-------------|:---:|
-| **1** | Migrations (13 files), Seeders (8 files), Spatie Permissions | Database ready, login works | ⬜ |
-| **2** | Employee CRUD, Master Data CRUD, Company Settings | HRD bisa manage data | ⬜ |
-| **3** | **Face Recognition**: face-api.js, enrollment, embedding storage | HRD enroll → server simpan 128D | ⬜ |
-| **4** | **GPS Geofencing**: Haversine, radius check, WFA mode | Clock-In validasi GPS + Face | ⬜ |
-
-**Checkpoint Bulan 1:** Employee bisa login → absen dengan Face + GPS → HRD bisa lihat attendance. **Demo pertama.**
-
-### BULAN 2: RAG + Leave + Payroll
+### BULAN 1: Foundation + Face + Geofencing ✅ BACKEND DONE
 
 | Minggu | Task | Deliverables | Status |
 |--------|------|-------------|:---:|
-| **5** | **RAG - PDF Upload**: chunking, embedding, pgvector storage | HRD upload PDF → tersimpan | ⬜ |
-| **6** | **RAG - Chat Interface**: Gemini API, query vector, response + source | Employee tanya → AI jawab | ⬜ |
-| **7** | Leave Management: pengajuan, quota, approval | Employee bisa ajukan cuti | ⬜ |
-| **8** | Payroll Engine: Calculator, PPh21, BPJS, E-Payslip | Finance bisa generate gaji | ⬜ |
+| **1** | Migrations (13 files), Seeders (8 files), Spatie Permissions | Database ready, login works | ✅ |
+| **2** | Employee CRUD, Master Data CRUD, Company Settings | HRD bisa manage data | ✅ |
+| **3** | **Face Recognition**: face-api.js, enrollment, embedding storage | HRD enroll → server simpan 128D | ✅ |
+| **4** | **GPS Geofencing**: Haversine, radius check, WFA mode | Clock-In validasi GPS + Face | ✅ |
 
-**Checkpoint Bulan 2:** Full cycle: Absen (Face+GPS) → Cuti → Payroll + AI Chat bisa jawab. **Demo kedua.**
+**Checkpoint Bulan 1:** Employee bisa login → absen dengan Face + GPS → HRD bisa lihat attendance. ✅
 
-### BULAN 3: Overtime + Polish + Testing
+### BULAN 2: RAG + Leave + Payroll ✅ BACKEND DONE
 
 | Minggu | Task | Deliverables | Status |
 |--------|------|-------------|:---:|
-| **9** | Overtime: pengajuan, observer, calculation | Employee bisa ajukan lembur | ⬜ |
-| **10** | Notifications, Dashboard, Activity Log | Sistem lengkap | ⬜ |
-| **11** | PWA basics, Mobile responsive, Bug fixes | Siap demo | ⬜ |
-| **12** | Testing, Documentation, UAT | **READY FOR SIDANG** | ⬜ |
+| **5** | **RAG - PDF Upload**: chunking, embedding, pgvector storage | HRD upload PDF → tersimpan | ✅ |
+| **6** | **RAG - Chat Interface**: Gemini API, query vector, response + source | Employee tanya → AI jawab | ✅ |
+| **7** | Leave Management: pengajuan, quota, approval | Employee bisa ajukan cuti | ✅ |
+| **8** | Payroll Engine: Calculator, PPh21, BPJS, E-Payslip | Finance bisa generate gaji | ✅ |
 
-**Checkpoint Bulan 3:** Semua core features berfungsi, siap sidang.
+**Checkpoint Bulan 2:** Full cycle: Absen (Face+GPS) → Cuti → Payroll + AI Chat bisa jawab. ✅
+
+### BULAN 3: Overtime + Polish + Testing ✅ BACKEND DONE
+
+| Minggu | Task | Deliverables | Status |
+|--------|------|-------------|:---:|
+| **9** | Overtime: pengajuan, observer, calculation | Employee bisa ajukan lembur | ✅ |
+| **10** | Notifications, Dashboard, Activity Log | Sistem lengkap | ✅ |
+| **11** | Flux → MD3 Migration + Mobile ESS Frontend | Hapus Flux, implement MD3 design system | 🚧 |
+| **12** | Frontend completion, Testing, UAT | **READY FOR SIDANG** | ⏳ |
+
+### FRONTEND SCOPE (Saat Ini)
+
+| No | Task | Detail | Status |
+|:--:|------|--------|:-----:|
+| 1 | Hapus Flux UI | `composer remove`, CSS cleanup, 35 Blade files migrasi | ⏳ |
+| 2 | MD3 Design System | CSS variables, Rubik + Inter, Material Symbols, spacing/radius | ⏳ |
+| 3 | Mobile Layout | Bottom Nav 4 tab (Home/Absen/Inbox/Profile) + TopAppBar | ⏳ |
+| 4 | Clock In Livewire | face-api.js, GPS, WFA toggle, full desain HTML user | 🚧 |
+| 5 | Attendance History | Table + summary cards + filters | ⏳ |
+| 6 | Leave (Apply + History) | Livewire form + quota + table | ⏳ |
+| 7 | Overtime (Apply + History) | Livewire form + table | ⏳ |
+| 8 | Reimbursement (Request + History) | Livewire form + upload + table | ⏳ |
+| 9 | Payroll Slip | Period list + PIN prompt + PDF download | ⏳ |
+| 10 | Profile & Devices | Personal info + device management | ⏳ |
+| 11 | Inbox + RAG | Notifications + approval + RAG chat | ⏳ |
+| 12 | Missing Route Views | Payroll, Approvals, KB, Assets, Loans landing | ⏳ |
 
 ### STRICT RULES `[N11]`
 - **Tidak boleh nambah fitur baru DI LUAR PRD ini setelah Week 4** — item dalam PRD tetap dikerjakan sesuai jadwal Week 5-12.
@@ -1796,7 +1905,7 @@ activitylog:clean --days=365     → daily
 
 ---
 
-**PRD VERSI 3.1 — FINAL LOCKED. Tidak ada perubahan scope setelah Week 4.**
+**PRD VERSI 4.0 — Frontend Development Phase. Backend 100% ✅.**
 
 ---
 
@@ -1904,3 +2013,18 @@ activitylog:clean --days=365     → daily
 | CAT-017 | §21 | FaceNotRecognizedException tidak boleh di-swallow, tiered fallback wajib |
 | CAT-018 | §19 | Defensive Migration pattern: pgvector guard untuk SQLite compatibility |
 | CAT-019 | §21.1 | Hardcoded SQL error code 23505 dilarang, pakai UniqueConstraintViolationException |
+
+---
+
+## CHANGELOG v4.0 (2026-06-23)
+
+| Kode | Bagian | Perubahan |
+|------|--------|-----------|
+| MIG-1 | Header, §1 | Hapus "Flux UI" dari tech stack, ganti "Material Design 3" |
+| MIG-2 | §1 (Tech Stack) | Tambah Material Symbols + Rubik + Inter |
+| MIG-3 | §18 (Enum color) | Hapus referensi Flux UI semantic names → MD3 tokens |
+| MIG-4 | §23.5 (Install UX) | Flux UI modal → custom bottom sheet (Alpine + Tailwind) |
+| MIG-5 | §24 (UI/UX) | **Rewrite total**: Flux tokens → MD3 palette (canvas #fffaf0, surface-container-*, outline-variant, brand-*), Rubik + Inter, Material Symbols, spacing/radius MD3, layout strategy (Bottom Nav mobile) |
+| MIG-6 | §24.3 (Component Standards) | Flux skeleton/toast/modal → custom Tailwind + Alpine |
+| MIG-7 | §25 (Execution Plan) | Tandai backend items ✅, frontend scope baru (Flux removal, MD3, ESS Livewire) |
+| MIG-8 | Versi | 3.1 → 4.0 |

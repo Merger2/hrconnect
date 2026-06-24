@@ -1,40 +1,40 @@
 <x-layouts::app.sidebar>
-    <flux:heading size="xl" level="1" class="mb-4">{{ __('Request Overtime') }}</flux:heading>
-    <flux:subheading class="mb-6">{{ __('Submit a new overtime request') }}</flux:subheading>
+    <h1 class="mb-4 text-2xl font-semibold text-ink">{{ __('Request Overtime') }}</h1>
+    <p class="mb-6 text-sm text-on-surface-variant">{{ __('Submit a new overtime request') }}</p>
 
     <div class="mx-auto max-w-2xl">
-        <flux:card class="p-6">
-            <flux:fieldset>
-                <flux:field name="date">
-                    <flux:label>{{ __('Date') }}</flux:label>
-                    <flux:input type="date" />
-                </flux:field>
-
-                <div class="mt-4 grid grid-cols-2 gap-4">
-                    <flux:field name="start_time">
-                        <flux:label>{{ __('Start Time') }}</flux:label>
-                        <flux:input type="time" />
-                    </flux:field>
-                    <flux:field name="end_time">
-                        <flux:label>{{ __('End Time') }}</flux:label>
-                        <flux:input type="time" />
-                    </flux:field>
+        <div class="rounded-2xl border border-outline-variant bg-surface-container-low p-6">
+            <fieldset>
+                <div class="mb-5">
+                    <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('Date') }}</label>
+                    <input type="date" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink" />
                 </div>
 
-                <flux:field name="reason" class="mt-4">
-                    <flux:label>{{ __('Reason') }}</flux:label>
-                    <flux:textarea rows="4" placeholder="{{ __('Describe the reason for overtime...') }}" />
-                </flux:field>
+                <div class="mb-5 grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('Start Time') }}</label>
+                        <input type="time" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink" />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('End Time') }}</label>
+                        <input type="time" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink" />
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('Reason') }}</label>
+                    <textarea rows="4" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60" placeholder="{{ __('Describe the reason for overtime...') }}"></textarea>
+                </div>
 
                 <div class="mt-6 flex items-center justify-end gap-3">
-                    <flux:button href="{{ route('overtimes.index') }}" variant="ghost" wire:navigate>
+                    <a href="{{ route('overtimes.index') }}" class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-canvas px-6 py-2.5 text-sm font-semibold text-ink" wire:navigate>
                         {{ __('Cancel') }}
-                    </flux:button>
-                    <flux:button variant="primary">
+                    </a>
+                    <button class="inline-flex items-center justify-center rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white">
                         {{ __('Submit Request') }}
-                    </flux:button>
+                    </button>
                 </div>
-            </flux:fieldset>
-        </flux:card>
+            </fieldset>
+        </div>
     </div>
 </x-layouts::app.sidebar>

@@ -9,23 +9,29 @@
             @csrf
 
             <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                type="email"
-                required
-                autofocus
-                placeholder="email@example.com"
-            />
+            <div>
+                <label class="mb-1 block text-sm font-medium text-on-background">{{ __('Email address') }}</label>
+                <input
+                    name="email"
+                    type="email"
+                    required
+                    autofocus
+                    placeholder="email@example.com"
+                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                />
+                @error('email')
+                    <p class="mt-1 text-xs text-error">{{ $message }}</p>
+                @enderror
+            </div>
 
-            <flux:button variant="primary" type="submit" class="w-full" data-test="email-password-reset-link-button">
+            <button type="submit" class="w-full rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white" data-test="email-password-reset-link-button">
                 {{ __('Email password reset link') }}
-            </flux:button>
+            </button>
         </form>
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-muted-soft">
             <span>{{ __('Or, return to') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+            <a href="{{ route('login') }}" class="text-ink underline hover:text-on-surface-variant" wire:navigate>{{ __('log in') }}</a>
         </div>
     </div>
 </x-layouts::auth>

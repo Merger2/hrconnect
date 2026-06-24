@@ -15,18 +15,25 @@
                 </a>
 
                 <div class="flex flex-col gap-6">
-                    <div class="rounded-xl border border-hairline bg-canvas text-ink shadow-xs">
+                    <div class="rounded-xl border border-outline-variant bg-canvas text-ink shadow-xs">
                         <div class="px-10 py-8">{{ $slot }}</div>
                     </div>
                 </div>
             </div>
         </div>
+
         @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
+            <div
+                x-data="toast"
+                x-show="show"
+                x-cloak
+                x-transition
+                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
+            >
+                <p x-text="message"></p>
+            </div>
         @endpersist
 
-        @fluxScripts
+        @vite(['resources/js/app.js'])
     </body>
 </html>

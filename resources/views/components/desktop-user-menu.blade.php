@@ -1,39 +1,43 @@
-<flux:dropdown position="bottom" align="start">
-    <flux:sidebar.profile
-        :name="auth()->user()->name"
-        :initials="auth()->user()->initials()"
-        icon:trailing="chevrons-up-down"
-        data-test="sidebar-menu-button"
-    />
+<div
+    x-data="{ open: false }"
+    @click.away="open = false"
+    class="relative"
+    data-test="sidebar-menu-button"
+>
+    <button @click="open = !open" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-surface-container-high">
+        <div class="flex size-8 items-center justify-center rounded-full bg-surface-container text-sm font-semibold text-ink">
+            {{ auth()->user()->initials() }}
+        </div>
+        <span class="max-w-28 truncate">{{ auth()->user()->name }}</span>
+        <span class="material-symbols-outlined text-base text-on-surface-variant">unfold_more</span>
+    </button>
 
-    <flux:menu>
-        <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-            <flux:avatar
-                :name="auth()->user()->name"
-                :initials="auth()->user()->initials()"
-            />
-            <div class="grid flex-1 text-start text-sm leading-tight">
-                <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
-                <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
+    <div x-show="open" x-cloak class="absolute end-0 z-50 mt-1 w-56 rounded-xl border border-outline-variant bg-canvas py-1 shadow-lg">
+        <div class="flex items-center gap-2 px-4 py-2 text-sm">
+            <div class="flex size-8 items-center justify-center rounded-full bg-surface-container text-sm font-semibold text-ink">
+                {{ auth()->user()->initials() }}
+            </div>
+            <div class="grid flex-1 leading-tight">
+                <p class="truncate font-medium text-ink">{{ auth()->user()->name }}</p>
+                <p class="truncate text-xs text-on-surface-variant">{{ auth()->user()->email }}</p>
             </div>
         </div>
-        <flux:menu.separator />
-        <flux:menu.radio.group>
-            <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                {{ __('Settings') }}
-            </flux:menu.item>
-            <form method="POST" action="{{ route('logout') }}" class="w-full">
-                @csrf
-                <flux:menu.item
-                    as="button"
-                    type="submit"
-                    icon="arrow-right-start-on-rectangle"
-                    class="w-full cursor-pointer"
-                    data-test="logout-button"
-                >
-                    {{ __('Log out') }}
-                </flux:menu.item>
-            </form>
-        </flux:menu.radio.group>
-    </flux:menu>
-</flux:dropdown>
+
+        <hr class="border-outline-variant/50" />
+
+        <a href="{{ route('profile.edit') }}" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-surface-container-high" wire:navigate>
+            <span class="material-symbols-outlined text-base">settings</span>
+            {{ __('Settings') }}
+        </a>
+
+        <hr class="border-outline-variant/50" />
+
+        <form method="POST" action="{{ route('logout') }}" class="w-full">
+            @csrf
+            <button type="submit" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-surface-container-high" data-test="logout-button">
+                <span class="material-symbols-outlined text-base">logout</span>
+                {{ __('Log out') }}
+            </button>
+        </form>
+    </div>
+</div>
