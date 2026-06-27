@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RegisterFaceRequest;
+use App\Models\FaceDescriptor;
 use App\Services\FaceRecognitionService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -32,6 +33,16 @@ class FaceController extends Controller
         }
 
         $vectorString = '['.implode(',', $data['embedding']).']';
+
+        FaceDescriptor::create([
+            'employee_id' => $employee->id,
+            'embedding' => $vectorString,
+            'metadata' => [
+                'source' => 'web',
+                'captures_count' => count($data['captures'] ?? []),
+            ],
+        ]);
+
         $employee->forceFill(['face_embedding' => $vectorString])->save();
 
         $response = [
