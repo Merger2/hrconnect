@@ -1,7 +1,4 @@
 op<x-layouts::app.sidebar>
-    {{-- Load face-api.js from CDN --}}
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
     <div class="mx-auto flex max-w-[480px] flex-col gap-4 md:max-w-3xl md:gap-6"
          x-data="{
             faceDetected: false,
@@ -15,14 +12,20 @@ op<x-layouts::app.sidebar>
             detectionTimer: null,
             lastDescriptor: null,
             gps: { latitude: null, longitude: null, accuracy: null },
+            gpsSamples: [],
+            gpsVariance: null,
+            faceapi: null,
+            earHistory: [],
 
             async init() {
-                if (typeof faceapi === 'undefined') {
-                    await new Promise(r => { const c = () => { if (typeof faceapi !== 'undefined') r(); else setTimeout(c, 100); }; c(); });
-                }
-                await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
-                await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-                await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+                const mod = await import('face-api.js');
+                this.faceapi = mod.default || mod;
+
+                await Promise.all([
+                    this.faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
+                    this.faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
+                    this.faceapi.nets.faceRecognitionNet.loadFromUri('/models/av1'),
+                ]);
                 this.modelsLoading = false;
                 this.faceStatus = '{{ __('Memindai wajah...') }}';
 
@@ -30,20 +33,61 @@ op<x-layouts::app.sidebar>
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
                     this.cameraStream = stream;
+                    this.faceStatus = '{{ __('Kamera siap') }}';
+                } catch {
+                    this.faceStatus = '{{ __('Izin kamera ditolak') }}';
+                    return;
+                }
+                try {
                     const video = this.$refs.video;
-                    video.srcObject = stream;
+                    video.srcObject = this.cameraStream;
                     await video.play();
                     this.faceStatus = '{{ __('Memindai wajah...') }}';
                     this.startDetectionLoop();
-                } catch { this.faceStatus = '{{ __('Izin kamera ditolak') }}'; }
+                } catch {
+                    this.faceStatus = '{{ __('Gagal memutar video') }}';
+                    this.cameraStream.getTracks().forEach(t => t.stop());
+                    this.cameraStream = null;
+                }
 
                 if (navigator.geolocation) {
+                    this.gpsSamples = [];
+                    this.collectGpsSamples();
+                } else { this.geoStatus = '{{ __('Tidak Ada') }}'; }
+            },
+
+            collectGpsSamples() {
+                const sample = (i) => {
+                    if (i >= 3) {
+                        const lats = this.gpsSamples.map(s => s.latitude);
+                        const lngs = this.gpsSamples.map(s => s.longitude);
+                        const avgLat = lats.reduce((a, b) => a + b) / lats.length;
+                        const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
+                        const latVar = lats.reduce((s, v) => s + (v - avgLat) ** 2, 0) / lats.length;
+                        const lngVar = lngs.reduce((s, v) => s + (v - avgLng) ** 2, 0) / lngs.length;
+                        this.gpsVariance = Math.sqrt(latVar + lngVar);
+                        if (this.gpsVariance < 0.000001) {
+                            this.geoStatus = '{{ __('GPS Mencurigakan') }}';
+                        } else {
+                            this.geoStatus = '{{ __('Dalam Radius') }}';
+                        }
+                        this.gps = this.gpsSamples[this.gpsSamples.length - 1];
+                        return;
+                    }
                     navigator.geolocation.getCurrentPosition(
-                        pos => { this.gps = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) }; this.geoStatus = '{{ __('Dalam Radius') }}'; },
+                        pos => {
+                            this.gpsSamples.push({
+                                latitude: pos.coords.latitude,
+                                longitude: pos.coords.longitude,
+                                accuracy: Math.round(pos.coords.accuracy),
+                            });
+                            setTimeout(() => sample(i + 1), 1500);
+                        },
                         () => { this.geoStatus = '{{ __('Tidak Ada') }}'; },
                         { enableHighAccuracy: true, timeout: 10000 },
                     );
-                } else { this.geoStatus = '{{ __('Tidak Ada') }}'; }
+                };
+                sample(0);
             },
 
             startDetectionLoop() {
@@ -51,21 +95,80 @@ op<x-layouts::app.sidebar>
                 const detect = async () => {
                     if (!video.videoWidth) { this.detectionTimer = setTimeout(detect, 200); return; }
                     try {
-                        const d = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })).withFaceLandmarks().withFaceDescriptors();
-                        if (d.length > 0) { this.faceDetected = true; this.faceStatus = '{{ __('Wajah Terdeteksi') }}'; this.lastDescriptor = Array.from(d[0].descriptor); }
-                        else { this.faceDetected = false; this.faceStatus = '{{ __('Arahkan wajah ke kamera') }}'; this.lastDescriptor = null; }
-                    } catch {}
+                        const api = this.faceapi;
+                        const detOptions = new api.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
+                        const d = await api.detectAllFaces(video, detOptions).withFaceLandmarks().withFaceDescriptors();
+                        if (d.length > 0) {
+                            this.faceDetected = true;
+                            this.faceStatus = '{{ __('Wajah Terdeteksi') }}';
+                            this.lastDescriptor = Array.from(d[0].descriptor);
+                            const ear = this.computeEAR(d[0].landmarks);
+                            this.earHistory.push(ear);
+                            if (this.earHistory.length > 10) this.earHistory.shift();
+                        } else {
+                            this.faceDetected = false;
+                            this.faceStatus = '{{ __('Arahkan wajah ke kamera') }}';
+                            this.lastDescriptor = null;
+                        }
+                    } catch { this.faceStatus = '{{ __('Gagal deteksi') }}'; }
                     this.detectionTimer = setTimeout(detect, 300);
                 };
                 this.detectionTimer = setTimeout(detect, 500);
+            },
+
+            computeEAR(landmarks) {
+                const d = (a, b) => Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+                const leftEye = landmarks.getLeftEye();
+                const rightEye = landmarks.getRightEye();
+                const earLeft = (d(leftEye[1], leftEye[5]) + d(leftEye[2], leftEye[4])) / (2 * d(leftEye[0], leftEye[3]));
+                const earRight = (d(rightEye[1], rightEye[5]) + d(rightEye[2], rightEye[4])) / (2 * d(rightEye[0], rightEye[3]));
+                return (earLeft + earRight) / 2;
+            },
+
+            async captureFaceCrop(video) {
+                const api = this.faceapi;
+                const det = await api.detectSingleFace(video, new api.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withFaceLandmarks();
+                if (!det) return null;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                if (!ctx) return null;
+                const box = det.detection.box;
+                const padding = 0.2;
+                const x = Math.max(0, box.x - box.width * padding);
+                const y = Math.max(0, box.y - box.height * padding);
+                const w = Math.min(video.videoWidth - x, box.width * (1 + 2 * padding));
+                const h = Math.min(video.videoHeight - y, box.height * (1 + 2 * padding));
+                canvas.width = w;
+                canvas.height = h;
+                ctx.drawImage(video, x, y, w, h, 0, 0, w, h);
+                return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
             },
 
             async clockIn() {
                 if (this.clockingIn || !this.lastDescriptor) return;
                 this.clockingIn = true;
                 try {
-                    const payload = { embedding: this.lastDescriptor, latitude: this.gps.latitude, longitude: this.gps.longitude, accuracy: this.gps.accuracy, is_wfa: this.wfaMode, is_mocked: false };
+                    const video = this.$refs.video;
+                    const payload = {
+                        embedding: this.lastDescriptor,
+                        latitude: this.gps.latitude,
+                        longitude: this.gps.longitude,
+                        accuracy: this.gps.accuracy,
+                        gps_variance: this.gpsVariance,
+                        is_wfa: this.wfaMode,
+                        is_mocked: false,
+                    };
                     if (this.wfaMode) { payload.wfa_note = '{{ __('Absen WFA via aplikasi') }}'; }
+
+                    const cropBlob = await this.captureFaceCrop(video);
+                    if (cropBlob) {
+                        const reader = new FileReader();
+                        payload.face_crop = await new Promise(resolve => {
+                            reader.onload = () => resolve(reader.result.split(',')[1]);
+                            reader.readAsDataURL(cropBlob);
+                        });
+                    }
+
                     const res = await fetch('/api/v1/attendance/clock-in', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
@@ -73,13 +176,13 @@ op<x-layouts::app.sidebar>
                     });
                     const json = await res.json();
                     if (res.ok && json.status === 'success') {
-                        window.dispatchEvent(new CustomEvent('toast', { detail: { variant: 'success', text: json.message } }));
+                        Livewire.dispatch('toast', { variant: 'success', text: json.message });
                         setTimeout(() => window.location.href = '/attendance', 1500);
                     } else {
-                        window.dispatchEvent(new CustomEvent('toast', { detail: { variant: 'error', text: json.message || '{{ __('Clock In gagal') }}' } }));
+                        Livewire.dispatch('toast', { variant: 'error', text: json.message || '{{ __('Clock In gagal') }}' });
                     }
                 } catch {
-                    window.dispatchEvent(new CustomEvent('toast', { detail: { variant: 'error', text: '{{ __('Koneksi error') }}' } }));
+                    Livewire.dispatch('toast', { variant: 'error', text: '{{ __('Koneksi error') }}' });
                 } finally { this.clockingIn = false; }
             },
 
