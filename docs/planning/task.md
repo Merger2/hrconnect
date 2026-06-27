@@ -1,10 +1,12 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-06-28 — Sesi A ✅ (14 items: auth, permission, SEC, P0/P1) + Sesi B ✅ (13 items: camera bugs, face enrollment, liveness, TinyFaceDetector, EAR blink, CDN cleanup, GPS 3-layer, risk scorer, barcode, face_descriptors). 1,121 tests pass.
+> Updated: 2026-06-28 — Sesi A ✅ + Sesi B ✅. **Sesi C (RAG) 🚧 in progress** — plan dari ship-ai-with-laravel (SSE streaming, Alpine.js, Livewire minimal). 1,121 tests pass.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7 (email verification flow), PERM-1/2/3 (permission fixes), SEC-1/2/3/4 (Sanctum expiry, middleware, 2FA validation, password rule), P0-1..4, P1-5/6/7 (business logic fixes). **EV-2 (Gmail SMTP) deferred — `MAIL_MAILER=log` active, backend ready.**
 
 > **SESI B ✅ (2026-06-28):** 13/13 items completed + P2-2/3/4 extras — C-1..4 camera bugs, FE-1c face enrollment 6-foto sequential, FE-1d liveness micro-movement, FE-1e TinyFaceDetector default, FE-1f EAR blink, FE-1g CDN cleanup, FE-1h face crop, SEC-GPS-1/2/3 GPS 3-layer, P2-2 AttendanceRiskScorer (14 faktor), P2-3 DynamicBarcodeTokenService (HMAC-SHA256 anti-replay), P2-4 FaceDescriptor table (pgvector). **SEC-GPS-3 GeoIP deferred — framework ready, needs `torann/geoip` package.**
+
+> **SESI C PLAN (2026-06-28):** RAG Knowledge Base UI — 3 halaman (Chat AI, Upload PDF, Manage). Pola dari `/home/merger/RAG-repo/ship-ai-with-laravel`: **Livewire minimal + Alpine.js SSE streaming via `fetch()` + `ReadableStream.getReader()`**. DS-1 tokens only (no brand colors). Backend AI sudah 100% ready (Gemini, pgvector, pg_trgm fallback, HrKnowledgeBaseAgent). Estimasi 6-8 jam.
 
 > **DESIGN DECISION (2026-06-28):** UI follow DESIGN.md DS-1 (canvas #ffffff, body #3a3a3a, Inter font, neutral palette) — NOT copy PasPapan CSS. Only adopt UX/component patterns (flow, layout, interaction). PasPapan CSS (green/cream) is their IP.
 
@@ -32,7 +34,7 @@
 | Tests | 90% | ✅ | 1,121 tests / 3,729 assertions (SQLite) + ~28 PG. All services/controllers/policies covered. |
 | Flux → MD3 Migration | 100% | ✅ | **SELESAI** — Flux dihapus dari composer, views, CI, docs. 0 Flux references remain. |
 | **Design System DS-1** | **40%** | 🚧 | app.css masih pakai cream palette (#fffaf0), harusnya #ffffff. 11 item perlu sync dengan DESIGN.md. |
-| **Frontend Views (47 Blade)** | **36%** | 🚧 | Layouts ✅, Auth ✅, Settings ✅. Modules (attendance, leave, etc.) masih static Blade. |
+| **Frontend Views (47 Blade)** | **36%** | 🚧 | Layouts ✅, Auth ✅, Settings ✅. Knowledge-base index + manage akan ditambah (→ 49 views). |
 | **ESS Features** | **45%** | 🚧 | Clock-in page **fixed** (bugs C-1..4 ✅). **Face enrollment ✅** (FE-1c ✅). GPS ✅. **EAR blink ✅**. Belum Livewire interaktif sepenuhnya. |
 | **Architecture Cleanup** | **40%** | 🚧 | strict_types, base exception, queue pattern, GeofenceMiddleware duplikasi. |
 | **PWA readiness** | **40%** | 🚧 | SW ✅, manifest ✅, icons ✅. Tapi SW cache error, offline page ❌. |
@@ -213,9 +215,9 @@ Berdasarkan audit docs (PRD, SRS, SDD, wireframes) + file system `resources/view
 
 | # | Page | Route | Roles | Status |
 |---|------|-------|-------|:------:|
-| 1 | Index / Chat UI | `knowledge-base/index.blade.php` | All (Employee + HR) | ❌ ⚠️ 500 |
-| 2 | Upload | `knowledge-base/upload.blade.php` | HR Manager | ❌ |
-| 3 | Manage Articles | `knowledge-base/manage.blade.php` | HR Manager | ❌ |
+| 1 | Index / Chat UI | `knowledge-base/index.blade.php` | All (Employee + HR) | 🚧 (RAG-1) |
+| 2 | Upload | `knowledge-base/manage.blade.php` (merged with manage) | HR Manager | 🚧 (RAG-2) |
+| 3 | Manage Articles | `knowledge-base/manage.blade.php` | HR Manager | 🚧 (RAG-2) |
 
 #### ✅ APPROVAL WORKFLOW (0/4 ❌ — semua missing)
 
@@ -309,7 +311,7 @@ Berdasarkan audit docs (PRD, SRS, SDD, wireframes) + file system `resources/view
 |-------|-------------|--------|
 | `payroll.index` | `payroll/index.blade.php` | ❌ |
 | `approvals.index` | `approvals/index.blade.php` | ❌ |
-| `knowledge-base.index` | `knowledge-base/index.blade.php` | ❌ |
+| `knowledge-base.index` | `knowledge-base/index.blade.php` | 🚧 (Sesi C) |
 | `loans.index` | `loans/index.blade.php` | ❌ |
 | `assets.index` | `assets/index.blade.php` | ❌ |
 
@@ -630,13 +632,13 @@ Skala ±100 karyawan, HR buat akun. Flow:
 
 ---
 
-## 🤖 PHASE RAG: Knowledge Base UI (NEW — 2026-06-24)
+## 🤖 PHASE RAG: Knowledge Base UI (Sesi C — IN PROGRESS)
 
 | ID | Task | Detail | Priority | Status |
 |----|------|--------|:--------:|:------:|
-| **RAG-1** | **Web UI chat** | Livewire component + Blade untuk chat AI | 🟡 | ⏳ |
-| **RAG-2** | **Upload PDF UI** | Form upload + status embedding | 🟡 | ⏳ |
-| **RAG-3** | **view_knowledgebase di Employee** | Sudah di PERM-2 (link) | 🟡 | ⏳ |
+| **RAG-1** | **Web UI chat** | Livewire minimal + Alpine.js SSE streaming. Pola dari `ship-ai-with-laravel`: `fetch POST /chat-stream` → `ReadableStream.getReader()` → parse SSE `data:` events → update `messages[]`. Chat minimalis: input, bubble, typing indicator, suggestion buttons. | 🟡 | 🚧 |
+| **RAG-2** | **Upload PDF + Manage** | Satu halaman `manage.blade.php`: upload form (title, category, PDF) + document list table (status badge PROCESSING/READY/ERROR, delete). | 🟡 | ⏳ |
+| **RAG-3** | **Tests** | SSE endpoint test (`Content-Type: text/event-stream`), auth/permission/throttle, service generator yield. | 🟡 | ⏳ |
 
 ---
 
@@ -871,12 +873,12 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | **SEC-GPS-2** | **Layer 2: Time-series** — 3 sampel GPS dalam ~5dtk, variance + speed check via `validateGpsTimeSeries()`. | `app/Services/GeofenceService.php` | ✅ |
 | **SEC-GPS-3** | **Layer 3: IP cross-check** — framework `crossCheckIpLocation()` di GeofenceService. GeoIP opsional via `torann/geoip` — deferred. | `app/Services/GeofenceService.php` | ✅ |
 
-#### 🟡 Sesi C — RAG Knowledge Base (3 item)
-| ID | Task | Detail |
-|:--:|------|--------|
-| RAG-1 | Livewire chat component + Blade | `resources/views/knowledge-base/index.blade.php` |
-| RAG-2 | Upload PDF UI + status embedding | `resources/views/knowledge-base/upload.blade.php` |
-| RAG-3 | Manage articles | `resources/views/knowledge-base/manage.blade.php` |
+#### 🟡 Sesi C — RAG Knowledge Base UI (3 item) — IN PROGRESS
+| ID | Task | Detail | Files | Status |
+|:--:|------|--------|-------|:------:|
+| **RAG-1** | **Chat AI (halaman utama)** | Livewire minimal + Alpine.js SSE streaming. Pola dari `ship-ai-with-laravel`: `fetch POST /chat-stream` → `ReadableStream.getReader()` → parse `data: {"text":"..."}` events. Auto-resize textarea, Enter/Shift+Enter, typing indicator 3 bouncing dots, suggestion buttons (FAQ cuti/BPJS/jam kerja), `formatMessage()` bold/bullet/newline. | **NEW:** `app/Livewire/KnowledgeBaseChat.php`, `resources/views/livewire/knowledge-base-chat.blade.php`, `resources/views/knowledge-base/index.blade.php`, `app/Http/Requests/Api/ChatStreamRequest.php`. **EDIT:** `app/Http/Controllers/Api/KnowledgeBaseController.php` (+chatStream), `app/Services/KnowledgeBaseService.php` (+chatStream generator), `routes/api.php` (+/chat-stream). | 🚧 |
+| **RAG-2** | **Upload PDF (HR only)** | Form upload + document list table. `GET /knowledge-base/manage` — middleware `can:manage_knowledgebase`. Title input, category dropdown, PDF file input. Table: title, category, status badge (PROCESSING/READY/ERROR), upload date, delete action. | **NEW:** `resources/views/knowledge-base/manage.blade.php` | ⏳ |
+| **RAG-3** | **Tests** | Streaming endpoint assertion (`Content-Type: text/event-stream`), auth/permission/throttle, service layer generator yield. | **EDIT:** `tests/Feature/Api/KnowledgeBaseEndpointTest.php`, `tests/Feature/Api/KnowledgeBaseProofTest.php`, `tests/Feature/Services/KnowledgeBaseServiceTest.php` | ⏳ |
 
 #### 🟡 Sesi D — ESS Pages (7 item)
 | ID | Task | View Baru |
@@ -924,6 +926,18 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | **Laravel-Smarthr** | `/home/merger/laravel-smarthr/` | UI component reference (141 views) | 🟢 Low |
 | **HRMS Livewire** | `/home/merger/hrms-livewire/` | Queue progress bar pattern | 🟢 Low |
 | **hris** | `/home/merger/hris/` | Org structure hierarchy (React stack, different tech) | 🟢 Low |
+
+### ship-ai-with-laravel — RAG Chat Reference (Sesi C)
+
+| Pattern | File | What We Port |
+|:--------|:-----|:-------------|
+| **Livewire chat minimal** | `app/Livewire/SupportChat.php` | Public props `messages`, `input`, `conversationId`, `isStreaming` — semua interaktivitas di Alpine |
+| **Alpine SSE streaming** | `resources/views/livewire/support-chat.blade.php` | `fetch POST /chat/stream` → `response.body.getReader()` → `TextDecoder` → parse `data: {"text":"..."}` → update `messages[]` |
+| **ChatController SSE** | `app/Http/Controllers/ChatController.php` | `$agent->stream()` wrapped in `StreamedResponse` dengan `Content-Type: text/event-stream` |
+| **Typing indicator** | `support-chat.blade.php` | 3 bouncing dots + `pulse-dot` animation |
+| **Suggestion buttons** | `support-chat.blade.php` | Predefined FAQ buttons yang set `input` + trigger `sendMessage()` |
+| **formatMessage** | `support-chat.blade.php` | `**bold**` → `<strong>`, `- ` → `&bull; `, `\n` → `<br>` |
+| **Agent + tools** | `app/Ai/Agents/SupportAgent.php` | Pola `HasTools` + `SimilaritySearch::usingModel()` → HRConnect sudah punya HrKnowledgeBaseAgent setara |
 
 ### PasPapan — Primary Reference (251 views, 101 Livewire, 79 models, 22 services)
 
@@ -1079,10 +1093,24 @@ SESI B — FACE RECOGNITION + GPS ANTI-SPOOFING + LIVENESS (🔴 blocking) ✅ C
   │  SEC-GPS-2 ✅ — Layer 2: Time-series 3 sampel (variance + speed)
   │  SEC-GPS-3 ✅ — Layer 3: IP cross-check framework (GeoIP deferred)
   ▼
-SESI C — RAG KNOWLEDGE BASE (🟡)
-  │  RAG-1: Livewire chat component + Blade view
-  │  RAG-2: Upload PDF UI + status
-  │  RAG-3: Manage articles (HR only)
+SESI C — RAG KNOWLEDGE BASE (🟡) 🚧 IN PROGRESS
+  │  [NEW] app/Livewire/KnowledgeBaseChat.php — minimal Livewire class (public $messages, $input, $conversationId, $isStreaming)
+  │  [NEW] resources/views/livewire/knowledge-base-chat.blade.php — Alpine x-data="knowledgeBaseChat()"
+  │    ├── sendMessage() → fetch POST /api/v1/knowledgebase/chat-stream
+  │    ├── ReadableStream.getReader() → parse SSE data: events
+  │    ├── formatMessage() → bold **text**, bullet -, newline
+  │    ├── Typing indicator (3 bouncing dots + pulse-dot animation)
+  │    ├── Auto-resize textarea, Enter/Shift+Enter
+  │    └── Suggestion buttons: "Kebijakan cuti?", "BPJS?", "Jam kerja?"
+  │  [NEW] resources/views/knowledge-base/index.blade.php → <x-layouts::app.sidebar> <livewire:knowledge-base-chat />
+  │  [NEW] resources/views/knowledge-base/manage.blade.php → Upload form + document list table
+  │  [NEW] app/Http/Requests/Api/ChatStreamRequest.php
+  │  [EDIT] routes/api.php → POST /chat-stream (throttle:10,1)
+  │  [EDIT] app/Http/Controllers/Api/KnowledgeBaseController.php → +chatStream() returns StreamedResponse
+  │  [EDIT] app/Services/KnowledgeBaseService.php → +chatStream() returns Generator yielding TextDelta
+  │  SSE Protocol: data: {"text":"..."}\n\ndata: {"conversation_id":"...","sources":[...]}\n\ndata: [DONE]\n\n
+  │  Error: Gemini/embedding gagal → event error → frontend fallback message
+  │  Referensi: /home/merger/RAG-repo/ship-ai-with-laravel (SupportChat.php, support-chat.blade.php, ChatController.php)
   ▼
 SESI D — ESS PAGES (🟡)
   │  FE-2: Attendance History
@@ -1109,14 +1137,14 @@ SESI F — CLEANUP + SECURITY HEADERS (🟢)
 ```
 
 ### Catatan Kunci Eksekusi
-- **Sesi A ✅** — 14/14 items selesai. 7 P0/P1 business logic + email verification + permission fixes + SEC items. Backend changes minor, low risk (4-6 jam).
-- **Sesi B ✅** — 16/16 items selesai. Camera bugs C-1..4 ✅, face enrollment FE-1c ✅, liveness FE-1d ✅, TinyFaceDetector FE-1e ✅, EAR blink FE-1f ✅, CDN cleanup FE-1g ✅, face crop FE-1h ✅, GPS 3-layer SEC-GPS-1/2/3 ✅ + P2-2 (RiskScorer), P2-3 (Barcode), P2-4 (FaceDescriptor).
-- **Sesi B+C bisa paralel** — Face Recognition dan RAG tidak saling dependen.
+- **Sesi A ✅** — 14/14 items selesai. 7 P0/P1 business logic + email verification + permission fixes + SEC items.
+- **Sesi B ✅** — 16/16 items selesai. Camera, face enrollment, liveness, TinyFaceDetector, EAR blink, CDN cleanup, face crop, GPS 3-layer + P2-2/3/4.
+- **Sesi C 🚧** — RAG Knowledge Base UI. Pola dari `ship-ai-with-laravel`: Livewire minimal + Alpine.js SSE streaming via `ReadableStream`. Backend AI sudah 100% ready. 3 task: RAG-1 (Chat UI), RAG-2 (Upload+Manage), RAG-3 (Tests). Estimasi 6-8 jam.
 - **Sesi D tergantung sesi B** — ESS pages butuh clock-in berfungsi (camera fixed ✅).
 - **Sesi E tergantung sesi D** — Approvals page butuh backend approval items.
 - **Sesi F bisa di-merge** ke sesi lain jika waktu cukup.
-- **Gmail SMTP (EV-2) jangan ditunda terlalu lama** — backend code pakai `MAIL_MAILER=log` untuk development, tapi perlu SMTP untuk production.
-- **SEC-GPS-3 GeoIP deferred** — framework `crossCheckIpLocation()` sudah siap, butuh `torann/geoip` atau service eksternal.
-- **Design:** UI follow DESIGN.md DS-1 (canvas putih, Inter, netral) — NOT copy PasPapan CSS (green/cream). Adopt only UX patterns.
-- **Realitas:** 2/6 sesi done. **Sesi C (RAG)** adalah prioritas berikutnya. 1,121 tests pass, 0 failures.
-- **Estimasi total:** 4 sesi remaining ~25-40 jam kerja fokus.
+- **Gmail SMTP (EV-2) jangan ditunda terlalu lama** — backend code pakai `MAIL_MAILER=log`, tapi perlu SMTP untuk production.
+- **SEC-GPS-3 GeoIP deferred** — framework `crossCheckIpLocation()` siap, butuh `torann/geoip`.
+- **Design:** UI follow DESIGN.md DS-1 (canvas putih, Inter, netral) — NOT copy PasPapan CSS.
+- **Realitas:** 2/6 sesi done. **Sesi C (RAG) in progress.** 1,121 tests pass, 0 failures.
+- **Estimasi total:** 3 sesi remaining ~20-30 jam kerja fokus.
