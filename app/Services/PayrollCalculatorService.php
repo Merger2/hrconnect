@@ -428,9 +428,7 @@ class PayrollCalculatorService
                     ->where('period', $period)
                     ->lockForUpdate()
                     ->first();
-                if ($existingPayroll && $existingPayroll->status === PayrollStatus::PUBLISHED) {
-                    // B3.6 fix: BusinessRuleException → HTTP 422 (business rule violation),
-                    // bukan DomainException → HTTP 500 (generic server error).
+                if ($existingPayroll && in_array($existingPayroll->status, [PayrollStatus::PUBLISHED, PayrollStatus::PAID], true)) {
                     throw new BusinessRuleException("Payroll untuk periode {$period} sudah dikunci permanen.");
                 }
                 // pendapatan kena pajak

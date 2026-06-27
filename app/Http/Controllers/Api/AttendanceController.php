@@ -217,7 +217,15 @@ class AttendanceController extends Controller
 
         // Cek manager hierarchy via parent_id
         $employee = $attendance->employee;
-        if ($user->employee?->id !== $employee?->parent_id && ! $user->hasRole(['super-admin', 'hr-manager'])) {
+
+        if (! $employee) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data karyawan tidak ditemukan untuk attendance ini.',
+            ], 404);
+        }
+
+        if ($user->employee?->id !== $employee->parent_id && ! $user->hasRole(['super-admin', 'hr-manager'])) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda hanya bisa approve WFA tim Anda.',

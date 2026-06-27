@@ -53,6 +53,11 @@ Route::prefix('auth')->name('api.auth.')->group(function () {
         ->name('forgot-password');
 });
 
+// ─── Email Verification (public — signed URL from email) ────────────
+Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['throttle:5,1'])
+    ->name('api.verification.verify');
+
 // ─── AUTHENTICATED (Sanctum) ──────────────────────────────────────────
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -62,6 +67,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::post('/logout-all', [AuthController::class, 'logoutAll'])->name('logout-all');
     });
+
+    // ── Email Verification (authenticated) ──────────────────────────
+    Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:5,1')
+        ->name('api.verification.resend');
 
     // ── User & Profile ───────────────────────────────────────────────
     Route::get('/user', [AuthController::class, 'me'])->name('api.user');

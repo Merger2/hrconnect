@@ -128,6 +128,7 @@ function permissionMatrix(): Generator
         'view_reimbursements', 'view_loans', 'view_assets', 'manage_assets',
         'view_activity_logs', 'view_audit_logs',
         'manage_knowledgebase', 'view_knowledgebase', 'view_wfa_pending',
+        'approve_wfa',
     ];
     $hrCannot = [
         'view_companies', 'manage_companies', 'manage_branches', 'manage_departments',
@@ -136,7 +137,6 @@ function permissionMatrix(): Generator
         'manage_loans', 'process_payroll', 'view_payslip', 'download_payslip', 'view_payrolls',
         'manage_tax_configs', 'manage_bpjs_configs', 'manage_settings',
         'manage_company_settings', 'manage_roles', 'manage_holidays', 'manage_shifts',
-        'approve_wfa',
     ];
     foreach ($hrCan as $p) {
         yield "hr-manager can {$p}" => ['hr-manager', $p, true];
@@ -147,7 +147,8 @@ function permissionMatrix(): Generator
 
     // finance
     $finCan = [
-        'view_dashboard', 'view_employees', 'view_reimbursements', 'manage_reimbursements',
+        'view_dashboard', 'view_employees', 'view_attendances',
+        'view_reimbursements', 'manage_reimbursements',
         'approve_reimbursements_l2',
         'view_loans', 'manage_loans',
         'view_payslip', 'download_payslip', 'process_payroll', 'view_payrolls',
@@ -156,7 +157,7 @@ function permissionMatrix(): Generator
     $finCannot = [
         'manage_companies', 'view_companies', 'manage_branches', 'view_branches',
         'manage_departments', 'view_departments', 'manage_positions', 'view_positions',
-        'manage_employees', 'view_attendances', 'manage_attendances',
+        'manage_employees', 'manage_attendances',
         'view_leaves', 'approve_leaves_l1', 'approve_leaves_l2',
         'view_overtimes', 'approve_overtimes_l1', 'approve_overtimes_l2',
         'view_assets', 'manage_assets',
@@ -204,6 +205,7 @@ function permissionMatrix(): Generator
         'view_dashboard', 'view_attendances', 'view_leaves', 'view_overtimes',
         'view_reimbursements', 'view_loans', 'view_assets',
         'view_payslip', 'download_payslip', 'view_payrolls',
+        'view_knowledgebase',
     ];
     $empCannot = [
         'view_companies', 'manage_companies', 'view_branches', 'manage_branches',
@@ -215,7 +217,7 @@ function permissionMatrix(): Generator
         'process_payroll', 'manage_tax_configs', 'manage_bpjs_configs',
         'view_activity_logs', 'view_audit_logs',
         'manage_settings', 'manage_company_settings', 'manage_roles',
-        'manage_holidays', 'manage_shifts', 'manage_knowledgebase', 'view_knowledgebase',
+        'manage_holidays', 'manage_shifts', 'manage_knowledgebase',
         'approve_wfa', 'view_wfa_pending',
     ];
     foreach ($empCan as $p) {

@@ -99,6 +99,7 @@ class RoleAndPermissionSeeder extends Seeder
             // Reimbursement (view only — Finance yang approve L2)
             PermissionEnum::VIEW_REIMBURSEMENTS,
             // WFA
+            PermissionEnum::APPROVE_WFA,
             PermissionEnum::VIEW_WFA_PENDING,
             // Loan/Asset (view + manage assets)
             PermissionEnum::VIEW_LOANS,
@@ -123,6 +124,7 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::VIEW_DASHBOARD,
             // View context
             PermissionEnum::VIEW_EMPLOYEES,
+            PermissionEnum::VIEW_ATTENDANCES,
             // Reimbursement management + L2 approval (Finance)
             PermissionEnum::VIEW_REIMBURSEMENTS,
             PermissionEnum::MANAGE_REIMBURSEMENTS,
@@ -172,6 +174,7 @@ class RoleAndPermissionSeeder extends Seeder
         return [
             PermissionEnum::VIEW_DASHBOARD,
             PermissionEnum::VIEW_ATTENDANCES,
+            PermissionEnum::VIEW_KNOWLEDGEBASE,
             PermissionEnum::VIEW_LEAVES,
             PermissionEnum::VIEW_OVERTIMES,
             PermissionEnum::VIEW_REIMBURSEMENTS,

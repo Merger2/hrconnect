@@ -90,8 +90,8 @@ test('User token return roles dan permissions di response', function () {
     expect($permissions)->not->toContain('process_payroll');
 });
 
-test('Sanctum config: token never expire (expiration null)', function () {
-    expect(config('sanctum.expiration'))->toBeNull();
+test('Sanctum config: token expiration set to 1 year', function () {
+    expect(config('sanctum.expiration'))->toBe(525600);
 });
 
 test('User dapat revoke specific token', function () {

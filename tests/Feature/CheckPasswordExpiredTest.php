@@ -48,14 +48,15 @@ test('user tepat di 89 hari (sebelum batas) masih bisa akses', function () {
         ->assertOk();
 });
 
-test('user tanpa password_changed_at tidak di-block (legacy account)', function () {
+test('user tanpa password_changed_at di-redirect ke security.edit (harus ganti password)', function () {
     $user = User::factory()->create([
         'password_changed_at' => null,
     ]);
 
     $this->actingAs($user)
         ->get('/dashboard')
-        ->assertOk();
+        ->assertRedirect(route('security.edit'))
+        ->assertSessionHas('warning');
 });
 
 test('user kedaluwarsa tetap bisa akses security.edit (cegah redirect loop)', function () {

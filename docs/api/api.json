@@ -1157,11 +1157,11 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -1323,6 +1323,30 @@
                                                 "data"
                                             ]
                                         }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Email belum diverifikasi. Silakan cek email Anda untuk link verifikasi."
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
                                     ]
                                 }
                             }
@@ -2124,6 +2148,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
                     },
@@ -2132,9 +2159,6 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             },
@@ -2464,6 +2488,30 @@
                                         "status",
                                         "message",
                                         "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Anda tidak memiliki akses untuk terminasi massal kontrak."
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
                                     ]
                                 }
                             }
@@ -5897,7 +5945,8 @@
                         "type": "string"
                     },
                     "code": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^(\\d{6}|[a-zA-Z0-9]{8})$"
                     }
                 },
                 "required": [
