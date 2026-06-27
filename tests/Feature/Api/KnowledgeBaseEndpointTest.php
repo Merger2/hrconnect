@@ -27,7 +27,7 @@ test('POST /knowledgebase/chat tanpa auth return 401', function () {
     ])->assertStatus(401);
 });
 
-test('POST /knowledgebase/chat employee tanpa permission view_knowledgebase return 403', function () {
+test('POST /knowledgebase/chat employee dengan permission view_knowledgebase return 200', function () {
     $user = User::factory()->create();
     $user->assignRole('employee');
     $token = $user->createToken('test')->plainTextToken;
@@ -36,7 +36,7 @@ test('POST /knowledgebase/chat employee tanpa permission view_knowledgebase retu
         ->postJson('/api/v1/knowledgebase/chat', [
             'question' => 'Berapa cuti tahunan saya?',
         ])
-        ->assertStatus(403);
+        ->assertOk();
 });
 
 test('POST /knowledgebase/chat hr-manager dengan question valid return 200', function () {

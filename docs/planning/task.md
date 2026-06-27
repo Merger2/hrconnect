@@ -1,12 +1,16 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-06-24 (sesi anchoring) — Seluruh diskusi hari ini telah dirangkum dan dikonfirmasi. Fokus akhir: **6 sesi eksekusi bertahap (A–F)** untuk menyelesaikan 3 pilar skripsi + auth/permission + ESS pages + cleanup.
+> Updated: 2026-06-28 — +5 cloned repos analysis + 11 business logic vulnerabilities + PasPapan/Quanta pattern mapping & porting priority.
 
-> **AUDIT FINDINGS (2026-06-24):** Full codebase audit + docs review selesai. Menemukan 15 item baru. ±100 karyawan, HR buat akun (bukan self-register). Tidak perlu Opsi B (architectural refactor). Lihat §AUDIT untuk detail.
+> **REPO ANALYSIS (2026-06-28):** 5 cloned repos fully analyzed. **PasPapan** = primary reference (face enrollment guide overlay, 14-faktor risk scoring, HMAC-SHA256 anti-replay QR, approval lock, termination checklist, offline sync). **Quanta HRIS** = Indonesian payroll (PPh21 TER PMK 168/2023, BPJS, lembur PP 35/2021) — deferred to post-skripsi. Refer to §REFERENCE REPOS.
 
-> **ANCHORING SUMMARY (2026-06-24):** Semua diskusi terdahulu telah dirangkum dan dikonfirmasi — termasuk 6 sesi eksekusi, 3 pilar skripsi (face, GPS, RAG), keputusan PIN 6 digit untuk payslip (bukan absensi), view_knowledgebase untuk semua role, permission matrix final, dan urutan prioritas AUTH sebagai #1. Lihat §ANCHORING untuk detail.
+> **BUSINESS LOGIC AUDIT (2026-06-28):** 11 vulnerabilities mapped to PasPapan/Quanta solutions: P0-1 (termination auth), P0-2 (null radius), P0-3 (WFA null employee), P0-4 (status bypass), P1-5 (reimbursement TOCTOU), P1-6 (payroll PAID gap), P1-7 (overtime date), WFA race, risk scoring, anti-replay QR, face enrollment table. Refer to §BUSINESS_LOGIC_AUDIT.
 
-> **SECURITY POSTURE (2026-06-24):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). Lihat §SECURITY untuk detail.
+> **DESIGN DECISION (2026-06-28):** UI follow DESIGN.md DS-1 (canvas #ffffff, body #3a3a3a, Inter font, neutral palette) — NOT copy PasPapan CSS. Only adopt UX/component patterns (flow, layout, interaction). PasPapan CSS (green/cream) is their IP.
+
+> **EXECUTION STATUS (2026-06-28):** Semua analisis selesai, plan matang. Menunggu eksekusi Sesi A (fix 7 P0/P1 bugs → auth/permission/SEC fixes). ±100 karyawan, 1,121 tests pass, 51 API endpoints, 46 Blade views (35%). Frontend 0% Livewire — target 6 sesi (A–F) ~39-55 jam.
+
+> **SECURITY POSTURE (2026-06-28):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). Lihat §SECURITY untuk detail.
 
 ## Status Legend
 
@@ -909,6 +913,126 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 
 ---
 
+## §REFERENCE REPOS — 5 Cloned Repos Analysis (2026-06-28)
+
+### Source of Truth
+
+| Repo | Path | Primary Role | Priority |
+|:-----|:-----|:-------------|:--------:|
+| **PasPapan** | `/home/merger/PasPapan/` | Face enrollment, attendance flow, risk scoring, anti-replay QR, approval lock, termination checklist, offline sync | 🔴 Primary |
+| **Quanta HRIS** | `/home/merger/quanta-hris-laravel/` | Indonesian payroll (PPh21 TER, BPJS, lembur PP 35/2021, potongan, tunjangan 75% rule) | 🟢 Post-skripsi |
+| **Laravel-Smarthr** | `/home/merger/laravel-smarthr/` | UI component reference (141 views) | 🟢 Low |
+| **HRMS Livewire** | `/home/merger/hrms-livewire/` | Queue progress bar pattern | 🟢 Low |
+| **hris** | `/home/merger/hris/` | Org structure hierarchy (React stack, different tech) | 🟢 Low |
+
+### PasPapan — Primary Reference (251 views, 101 Livewire, 79 models, 22 services)
+
+#### Key Files & Patterns
+
+| Pattern | File | What We Port |
+|:--------|:-----|:-------------|
+| **Attendance risk scoring** | `app/Support/AttendanceRiskScorer.php` | 14 faktor anti-spoofing (score 0-100) → SEC-GPS-1/2/3 + FE-1d |
+| **Anti-replay QR** | `app/Support/DynamicBarcodeTokenService.php` | HMAC-SHA256 + nonce + TTL jitter → clock-in QR |
+| **Device attendance lock** | `app/Services/Attendance/DeviceAttendanceService.php` | `lockForUpdate()` + radius check → P1-5 & WFA race fix |
+| **Approval lock** | `app/Support/ReimbursementApprovalService.php` | `lock()` + `ensureReviewable()` → P1-5 TOCTOU fix |
+| **Lifecycle termination** | `app/Support/EmployeeLifecycleService.php` | Lifecycle-based termination → P0-4 status bypass fix |
+| **Offboarding checklist** | `app/Support/HrChecklistService.php` | 4-task checklist + dependency chain + assignee → termination |
+| **Face enrollment** | `app/Livewire/User/FaceEnrollment.php` + view | 992 lines canvas overlay guide ellipse + auto-capture → FE-1c |
+| **Face verification** | `resources/views/livewire/user/scan.blade.php` | 1,100+ lines face scan + Alpine → clock-in flow |
+| **Face model** | `app/Models/FaceDescriptor.php` | Separate table for embeddings → database design |
+| **App JS utilities** | `resources/js/app.js` (1,642 lines) | PasPapanAlert wrapping SweetAlert2, Flatpickr UI picker, client-side validation pattern → `resources/js/face-utils.js` |
+
+#### UX Patterns to Adopt (NOT CSS)
+
+| PasPapan Pattern | HRConnect Implementation |
+|:-----------------|:------------------------|
+| Face enrollment guide overlay (center face → hold still → turn left → center → turn right → center → auto-capture) | Alpine + canvas, colors/radius from DESIGN.md tokens |
+| Face verification modal (camera preview + overlay + status indicator + verify button) | DS-1 `bg-canvas #ffffff`, `text-ink #0a0a0a`, `rounded-xl 24px` |
+| Layout structure (`user-page-shell` → `user-page-container` → `user-page-header` → `user-page-body`) | Our Blade convention `x-layouts::app.sidebar` |
+| Toast/Alert wrapping SweetAlert2 via Livewire | Implement fresh with DS-1 colors |
+| Flatpickr MutationObserver pattern | Port logic, styling from DESIGN.md rounded tokens |
+| Component BEM naming (`attendance-panel__step`, `face-enrollment-guide__steps`) | Naming pattern only, not class copy |
+| Scan page flow (not checked in → QR scanner → selfie capture → processing) | UX flow sama, UI from our tokens |
+
+#### What NOT to Copy from PasPapan
+
+| Element | Reason |
+|:--------|:-------|
+| `primary-600: #57944a` (green palette) | DS-1 primary = `#0a0a0a` (near-black) |
+| `canvas: #fffaf0` (cream) | DS-1 canvas = `#ffffff` |
+| `--user-native-border` CSS variables | PasPapan-specific |
+| `.quick-wallet-*`, `.user-list-card` classes | PasPapan-specific |
+| `guest-ui` / `user-ui` layout classes | PasPapan-specific |
+| Bootstrap-like utility classes | PasPapan-specific |
+
+### Quanta HRIS — Indonesian Payroll Reference (Post-Skripsi)
+
+| Service | File | Logic |
+|:--------|:-----|:------|
+| `Pph21Service` | `app/Services/Pph21Service.php` | TER PMK 168/2023, lookup by bruto bracket |
+| `BpjsService` | `app/Services/BpjsService.php` | Kesehatan 1%, JHT 2%, JP 1% + batas atas |
+| `LemburService` | `app/Services/LemburService.php` | PP 35/2021, formula (gaji+tunjangan)/173, multiplier hari kerja/libur |
+| `PotonganService` | `app/Services/PotonganService.php` | Alfa (per hari), terlambat (3 metode: nominal/persen/jam) |
+| `TunjanganService` | `app/Services/TunjanganService.php` | 3 jenis tunjangan + 75% rule compliance |
+| `HitungGajiService` | `app/Services/HitungGajiService.php` | Orchestrator semua komponen |
+| Migrations + Seeders | `database/migrations/` (3 tabel pajak) | `kategori_ter`, `golongan_ptkp`, `tarif_ter` + seeder |
+
+**Limitations:** hanya 3 tests (ExampleTest), controller-based (no DI), `$casts` array bug (key-value pair tidak lengkap), MySQL/SQLite (no PostgreSQL support).
+
+---
+
+## §BUSINESS LOGIC AUDIT — 11 Vulnerabilities Mapped (2026-06-28)
+
+### P0 Critical (4)
+
+| ID | Issue | File | Fix Pattern | Status |
+|:--:|:------|:-----|:------------|:------:|
+| P0-1 | **No authorization gate** — `processContractEnd()` langsung eksekusi tanpa cek siapa yang panggil | `EmployeeTerminationController.php:56`, `EmployeeTerminationService.php:97` | Tambah `Gate::authorize()` atau policy check | ⏳ Sesi A |
+| P0-2 | **Null branch.radius** — PHP cast null ke 0, radius 0m = semua lokasi valid | `GeofenceService.php:40` | Guard null + throw `GeofenceException` | ⏳ Sesi A |
+| P0-3 | **WFA null employee** — employee bisa null, skip geofence check | `AttendanceController.php:220` | Guard null + return error response | ⏳ Sesi A |
+| P0-4 | **Status bypass** — `EmployeeController@update` (line 149–164) allow direct status change to resigned/terminated **without cleanup** | `EmployeeController.php:149-164` | Force via `EmployeeLifecycleService` (PasPapan pattern) | ⏳ Sesi A |
+
+### P1 High (3)
+
+| ID | Issue | File | Fix Pattern | Status |
+|:--:|:------|:-----|:------------|:------:|
+| P1-5 | **Reimbursement TOCTOU** — `isApproved()` check sebelum `lockForUpdate()` → race condition | `ReimbursementService.php:93-99` | PasPapan `lock()` + `ensureReviewable()` pattern | ⏳ Sesi A |
+| P1-6 | **Payroll isLocked() gap** — hanya cek PUBLISHED, tidak cek PAID | `PayrollCalculatorService.php:431` | Tambah `$payroll->status === PayrollStatus::PAID` check | ⏳ Sesi A |
+| P1-7 | **Overtime date validation** — missing `after_or_equal:today` rule | `StoreOvertimeRequest.php:29` | Tambah rule `after_or_equal:today` | ⏳ Sesi A |
+
+### P2 Medium (4)
+
+| ID | Issue | File | Fix Notes | Status |
+|:--:|:------|:-----|:----------|:------:|
+| P2-1 | **WFA clock race** — concurrent WFA request bisa bypass daily limit | `AttendanceController.php:202-249` | PasPapan `lockForUpdate()` + DB transaction | ⏳ Sesi A |
+| P2-2 | **Risk scoring 0** — tidak ada deteksi anomaly untuk GPS/face | `GeofenceService.php`, `FaceRecognitionService.php` | Port PasPapan `AttendanceRiskScorer` (14 faktor) | ⏳ Sesi B |
+| P2-3 | **No anti-replay QR** — QR code statis, bisa replay attack | `clock-in.blade.php` QR | Port PasPapan `DynamicBarcodeTokenService` (HMAC-SHA256 + nonce + TTL) | ⏳ Sesi B |
+| P2-4 | **Face embedding di Employee table** — embeddding 128D disimpan langsung di kolom employee, bukan tabel terpisah | Employee migration | Pisah ke `FaceDescriptor` model (PasPapan pattern) | ⏳ Sesi B |
+
+### Audit Perlindungan yang Sudah Ada (Confirmed Secure)
+
+| Pattern | Status | Evidence |
+|:--------|:-------|:---------|
+| CipherSweet encrypted at rest | ✅ | 3 model + blind index + `encryptedUnique` |
+| PII masking on GET employees | ✅ | `GET /employees/{id}` masks NIK/phone/NPWP/bank |
+| Argon2id hashing | ✅ | 64MB memory, 4 iterasi, `rehash_on_login` |
+| Rate limiting | ✅ | 5/1 login/2FA, 10/1 face, 5/5 clock |
+| IDOR policy | ✅ | Policy cek ownership via `$user->employee?->id` |
+| Session encryption | ✅ | `SESSION_ENCRYPT=true`, HttpOnly, SameSite=Lax |
+| Host protection | ✅ | `trustHosts()` aktif |
+| FormRequest validasi | ✅ | All 28+ API endpoints |
+
+### Key Decision: Design Direction
+
+| Aspek | Keputusan |
+|:------|:----------|
+| **CSS/Warna** | Ikut DESIGN.md DS-1 (canvas putih, Inter, high contrast) — **bukan** copy PasPapan (hijau/cream) |
+| **UX Pattern** | Ambil dari PasPapan (face enrollment guide overlay, liveness challenge, scan page, approval cards) |
+| **Payroll Indonesia** | Post-skripsi — port dari Quanta HRIS (6 service, 3 migration, 3 seeder) |
+| **UI Framework** | Pakai DESIGN.md token system (`bg-canvas`, `text-ink`, `rounded-xl`, dll) — tidak hardcode |
+
+---
+
 ## Verification Commands
 
 | Purpose | Command |
@@ -921,10 +1045,17 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | PHPStan | `vendor/bin/phpstan analyse` |
 | Dev server | `composer run dev` |
 
-## Execution Order — 6 Sesi (Final, 2026-06-24)
+## Execution Order — 6 Sesi (Final, 2026-06-28)
 
 ```
-SESI A — AUTH & PERMISSION + SEC (🔴 blocking)
+SESI A — AUTH & PERMISSION + SEC + BUSINESS LOGIC P0/P1 (🔴 blocking)
+  │  [P0-1] Termination auth — add authorization gate (PasPapan EmployeeLifecycleService pattern)
+  │  [P0-2] Null radius guard — GeofenceService: throw if branch.radius null
+  │  [P0-3] WFA null employee guard — AttendanceController: return error
+  │  [P0-4] Status bypass — force via EmployeeLifecycleService, block direct status change
+  │  [P1-5] Reimbursement TOCTOU — lock() + ensureReviewable() (PasPapan ReimbursementApprovalService)
+  │  [P1-6] Payroll PAID gap — tambah PayrollStatus::PAID check di isLocked()
+  │  [P1-7] Overtime date — tambah after_or_equal:today
   │  EV-1 s/d EV-7: Email Verification + Password Policy
   │  PERM-1/2/3: Permission fixes (view_attendances, view_knowledgebase, approve_wfa)
   │  SEC-1: Sanctum token expiry 1 tahun
@@ -932,8 +1063,12 @@ SESI A — AUTH & PERMISSION + SEC (🔴 blocking)
   │  SEC-3: Validasi format 2FA code (6 digit / 8 char)
   │  SEC-4: ChangePasswordRequest → pakai default AppServiceProvider
   │  Catatan: EV-2 (Gmail SMTP) deferred — backend code siap, switchable later
+  │  Referensi: §BUSINESS_LOGIC_AUDIT, §REFERENCE_REPOS → PasPapan
   ▼
 SESI B — FACE RECOGNITION + GPS ANTI-SPOOFING + LIVENESS (🔴 blocking)
+  │  [P2-2] Risk scoring — Port PasPapan AttendanceRiskScorer (14 faktor)
+  │  [P2-3] Anti-replay QR — Port PasPapan DynamicBarcodeTokenService
+  │  [P2-4] Face embedding — Pisah ke FaceDescriptor table
   │  C-1 s/d C-4: Camera bug fixes (model path, try/catch, toast, video.play)
   │  FE-1c: Face enrollment — 6 foto sequential → LabeledFaceDescriptors array
   │  FE-1d: Liveness via micro-movement variance
@@ -944,6 +1079,7 @@ SESI B — FACE RECOGNITION + GPS ANTI-SPOOFING + LIVENESS (🔴 blocking)
   │  SEC-GPS-1: Layer 1 — Client-side is_mocked + accuracy threshold
   │  SEC-GPS-2: Layer 2 — Time-series 3 sampel GPS (variance + speed)
   │  SEC-GPS-3: Layer 3 — IP cross-check GeoIP vs GPS coordinate
+  │  Referensi: §REFERENCE_REPOS → PasPapan AttendanceRiskScorer, DynamicBarcodeTokenService, face enrollment
   ▼
 SESI C — RAG KNOWLEDGE BASE (🟡)
   │  RAG-1: Livewire chat component + Blade view
@@ -963,6 +1099,7 @@ SESI E — APPROVALS (🟢)
   │  AP-1: Landing page + pending L1
   │  AP-2: Pending L2
   │  AP-3: History
+  │  Referensi: §REFERENCE_REPOS → PasPapan HrChecklistService termination pattern
   ▼
 SESI F — CLEANUP + SECURITY HEADERS (🟢)
   │  DC-1/2/3: Dead code geofencing
@@ -974,12 +1111,13 @@ SESI F — CLEANUP + SECURITY HEADERS (🟢)
 ```
 
 ### Catatan Kunci Eksekusi
-- **Sesi A adalah prasyarat #1** — email verification + force change password + permission fixes + SEC items harus beres sebelum sesi lain. Backend changes minor, low risk (4-6 jam).
-- **Sesi B bobot tertinggi** — 13 item: camera bugs + face enrollment (6 foto) + TinyFaceDetector + EAR blink + CDN cleanup + GPS 3-layer defense. Ini nilai tambah skripsi (sub-bab liveness + anti-spoofing).
+- **Sesi A adalah prasyarat #1** — 7 P0/P1 business logic fixes + email verification + force change password + permission fixes + SEC items. Backend changes minor, low risk (4-6 jam). Refer to PasPapan `EmployeeLifecycleService`, `ReimbursementApprovalService`.
+- **Sesi B bobot tertinggi** — 16 item: 3 P2 porting (RiskScorer, DynamicBarcode, FaceDescriptor) + 4 camera bugs + face enrollment (6 foto) + TinyFaceDetector + EAR blink + CDN cleanup + GPS 3-layer defense. Nilai tambah skripsi (sub-bab liveness + multi-layer anti-spoofing).
 - **Sesi B+C bisa paralel** — Face Recognition dan RAG tidak saling dependen.
 - **Sesi D tergantung sesi B** — ESS pages butuh clock-in berfungsi (camera fixed).
 - **Sesi E tergantung sesi D** — Approvals page butuh backend approval items.
 - **Sesi F bisa di-merge** ke sesi lain jika waktu cukup.
 - **Gmail SMTP (EV-2) jangan ditunda terlalu lama** — backend code pakai `MAIL_MAILER=log` untuk development, tapi perlu SMTP untuk production.
+- **Design:** UI follow DESIGN.md DS-1 (canvas putih, Inter, netral) — NOT copy PasPapan CSS (green/cream). Adopt only UX patterns.
 - **Realitas:** Backend genuinely solid (95% done, 1,121 tests pass). Frontend genuinely weak (35% views). 6 sesi ini fokus mengejar frontend.
 - **Estimasi total:** 39-55 jam kerja fokus. Realistis untuk ±100 karyawan.

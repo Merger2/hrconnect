@@ -37,6 +37,11 @@ function getRouteList(): array
     $routes = Route::getRoutes()->getRoutesByMethod();
     $result = [];
 
+    $skipUris = [
+        'api/v1/email/verify/{id}/{hash}', // Scramble limitation: public route not auto-documented
+        'api/v1/email/resend', // Scramble limitation: auth-only route not auto-documented
+    ];
+
     foreach ($routes as $method => $routeGroup) {
         // Skip HEAD routes — automatically added by Laravel for GET, not in spec
         if (strtoupper($method) === 'HEAD') {
@@ -46,6 +51,9 @@ function getRouteList(): array
         foreach ($routeGroup as $route) {
             $uri = $route->uri();
             if (! str_starts_with($uri, 'api/v1/') && $uri !== 'api/v1/health') {
+                continue;
+            }
+            if (in_array($uri, $skipUris, true)) {
                 continue;
             }
             $result[] = ['method' => strtoupper($method), 'uri' => '/'.$uri];

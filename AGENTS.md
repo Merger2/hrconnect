@@ -43,9 +43,62 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Tailwind CSS 4 + PostgreSQL 
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax.
 - **+1,100 tests** / +3,600 assertions (SQLite) + **~28 PG tests** in `tests/Integration/Postgres/`.
 
+## Reference Repos (Cloned — Do Not Delete)
+
+Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/component patterns, never copy CSS/colors.**
+
+### PasPapan — Primary Reference (Face, GPS, Risk Scoring, Approval, Termination)
+- Path: `/home/merger/PasPapan/`
+- 79 models, 22 services, 58 Blade components, 1,642 lines app.js, 6,623 lines CSS
+
+| Pattern | File | Port To |
+|:--------|:-----|:--------|
+| Attendance risk scoring (14 faktor, score 0-100) | `app/Support/AttendanceRiskScorer.php` | HRConnect GeofenceService + FaceService |
+| Anti-replay QR (HMAC-SHA256 + nonce + TTL jitter) | `app/Support/DynamicBarcodeTokenService.php` | HRConnect clock-in QR |
+| Device attendance lock (`lockForUpdate()` + radius) | `app/Services/Attendance/DeviceAttendanceService.php` | HRConnect AttendanceController |
+| Approval lock (`lock()` + `ensureReviewable()`) | `app/Support/ReimbursementApprovalService.php` | HRConnect ReimbursementService |
+| Lifecycle termination (not direct status change) | `app/Support/EmployeeLifecycleService.php` | HRConnect EmployeeTerminationService |
+| Offboarding checklist (4-task + dependency chain) | `app/Support/HrChecklistService.php` | HRConnect termination flow |
+| Face enrollment overlay (992 lines canvas guide) | `app/Livewire/User/FaceEnrollment.php` + view | HRConnect face-registration.blade.php |
+| Face verification scan (1,100+ lines Alpine) | `resources/views/livewire/user/scan.blade.php` | HRConnect clock-in.blade.php |
+| Face model (separate table for embeddings) | `app/Models/FaceDescriptor.php` | HRConnect FaceDescriptor migration |
+| JS utilities (SweetAlert2, Flatpickr, validation) | `resources/js/app.js` (1,642 lines) | HRConnect `resources/js/face-utils.js` |
+
+### Quanta HRIS — Indonesian Payroll (Post-Skripsi)
+- Path: `/home/merger/quanta-hris-laravel/`
+- 54 views, Filament 3, 10 services payroll Indonesia
+
+| Service | File | Logic |
+|:--------|:-----|:------|
+| Pph21Service | `app/Services/Pph21Service.php` | TER PMK 168/2023, lookup by bruto bracket |
+| BpjsService | `app/Services/BpjsService.php` | Kesehatan 1%, JHT 2%, JP 1% + batas atas |
+| LemburService | `app/Services/LemburService.php` | PP 35/2021, formula (gaji+tunjangan)/173 |
+| PotonganService | `app/Services/PotonganService.php` | Alfa (per hari), terlambat (3 metode) |
+| TunjanganService | `app/Services/TunjanganService.php` | 3 jenis tunjangan + 75% rule compliance |
+| HitungGajiService | `app/Services/HitungGajiService.php` | Orchestrator semua komponen |
+| Migrations + Seeders | `database/migrations/` | 3 tabel pajak (kategori_ter, golongan_ptkp, tarif_ter) |
+
+### Other Repos — Low Priority
+- `/home/merger/laravel-smarthr/` — UI component reference (141 views, 5 Livewire, 0 approval workflow)
+- `/home/merger/hrms-livewire/` — Queue progress bar pattern (109 views, 22 Livewire, 0 services)
+- `/home/merger/hris/` — Org structure hierarchy (React, no HRIS features)
+
+## Business Logic Gotchas (from Audit)
+
+- **P0-1**: `processContractEnd()` has NO authorization gate — add `Gate::authorize()` before execution
+- **P0-2**: `GeofenceService.php:40` — null `branch.radius` casts to 0 (all locations pass). Guard + throw.
+- **P0-3**: `AttendanceController.php:220` — WFA with null employee bypasses geofence. Guard return error.
+- **P0-4**: `EmployeeController@update` (149-164) allows direct status to resigned/terminated. Force via `EmployeeLifecycleService`.
+- **P1-5**: `ReimbursementService.php:93-99` — TOCTOU race: `isApproved()` before `lockForUpdate()`. Use PasPapan `lock()`+`ensureReviewable()`.
+- **P1-6**: `PayrollCalculatorService.php:431` — only checks PUBLISHED, not PAID. Add `PayrollStatus::PAID`.
+- **P1-7**: `StoreOvertimeRequest.php:29` — missing `after_or_equal:today`. Add rule.
+- **Clock-out PIN**: `AttendanceService.php` — PIN bypass streak check. Fix: require PIN on every clock-out.
+- **Cannot use `Cache::tags()`**: `CACHE_STORE=database` throws `BadMethodCallException`. Use `Cache::forget('key')`.
+
 ## Design System
 
-`DESIGN.md` is the source of truth. CSS variables come from `@theme` in `resources/css/app.css` — use `bg-canvas`, `text-ink`, `rounded-xl`, etc. Never hardcode colors/radius/fonts.
+`DESIGN.md` is the source of truth for UI. CSS variables come from `@theme` in `resources/css/app.css` — use `bg-canvas`, `text-ink`, `rounded-xl`, etc. Never hardcode colors/radius/fonts.
+- **CRITICAL: UI follows DESIGN.md DS-1 (canvas #ffffff, body #3a3a3a, Inter font, neutral palette). Do NOT copy PasPapan CSS (green #57944a, cream #fffaf0).**
 - Brand colors (pink, teal, lavender, etc.) → landing page only. HR pages use minimal accents.
 - Layout: `x-layouts::app.sidebar`.
 - Font: Outfit 500 (display), Inter (fallback).

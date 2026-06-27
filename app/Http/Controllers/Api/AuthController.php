@@ -44,6 +44,13 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email belum diverifikasi. Silakan cek email Anda untuk link verifikasi.',
+            ], 403);
+        }
+
         if ($user->two_factor_secret) {
             $challengeId = Str::random(40);
             cache()->put("2fa_challenge:{$challengeId}", [

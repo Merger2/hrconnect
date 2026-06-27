@@ -15,7 +15,14 @@ class TwoFactorChallengeRequest extends FormRequest
     {
         return [
             'challenge_id' => ['required', 'string'],
-            'code' => ['required', 'string'],
+            'code' => ['required', 'string', 'regex:/^(\d{6}|[a-zA-Z0-9]{8})$/'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'code.regex' => 'Kode 2FA tidak valid. Masukkan 6 digit kode TOTP atau 8 karakter kode recovery.',
         ];
     }
 }
