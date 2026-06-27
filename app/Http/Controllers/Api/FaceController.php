@@ -17,8 +17,7 @@ class FaceController extends Controller
         protected FaceRecognitionService $faceService,
     ) {}
 
-    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D FaceNet vector) for biometric verification. Flow: Clock In (Step 1/4) — Register Face → Clock In → Today → Clock Out.')]
-    #[BodyParameter(name: 'embedding', description: '128-dimension face embedding array from face-api.js', required: true, type: 'array')]
+    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D FaceNet vector) for biometric verification. Supports single embedding or 6-frame enrollment with liveness variance.')]
     public function register(RegisterFaceRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -32,18 +31,23 @@ class FaceController extends Controller
             ], 404);
         }
 
-        // Format vector untuk pgvector ([0.1,0.2,...]).
         $vectorString = '['.implode(',', $data['embedding']).']';
         $employee->forceFill(['face_embedding' => $vectorString])->save();
 
-        return response()->json([
+        $response = [
             'status' => 'success',
             'message' => 'Data wajah berhasil didaftarkan',
             'data' => [
                 'employee_id' => $employee->id,
                 'face_registered_at' => now()->toIso8601String(),
             ],
-        ]);
+        ];
+
+        if (isset($data['captures'])) {
+            $response['data']['capture_count'] = count($data['captures']);
+        }
+
+        return response()->json($response);
     }
 
     #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance. Flow: Clock In (utility).')]

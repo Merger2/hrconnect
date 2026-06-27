@@ -43,18 +43,18 @@ test('throws AntiFakeGPSException when accuracy exceeds 100 meters', function ()
         'accuracy' => 150,
     ]))->toThrow(AntiFakeGPSException::class, 'Akurasi GPS terlalu rendah');
 
-    // boundary: 101 is > 100
+    // boundary: 51 is > 50
     expect(fn () => $svc->validateLocation($branch, [
         'latitude' => -6.2,
         'longitude' => 106.8,
-        'accuracy' => 101,
+        'accuracy' => 51,
     ]))->toThrow(AntiFakeGPSException::class);
 
-    // boundary: 100 should be allowed
+    // boundary: 50 should be allowed
     $result = $svc->validateLocation($branch, [
         'latitude' => -6.2,
         'longitude' => 106.8,
-        'accuracy' => 100,
+        'accuracy' => 50,
     ]);
     expect($result['valid'])->toBeTrue();
 });

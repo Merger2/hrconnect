@@ -20,8 +20,12 @@ class GeofenceService
             throw new AntiFakeGPSException('Peringatan: Aplikasi Fake GPS terdeteksi aktif di perangkat Anda! Pastikan untuk menonaktifkan aplikasi tersebut dan coba lagi.');
         }
 
-        if (isset($gpsData['accuracy']) && $gpsData['accuracy'] > 100) {
+        if (isset($gpsData['accuracy']) && $gpsData['accuracy'] > 50) {
             throw new AntiFakeGPSException('Peringatan: Akurasi GPS terlalu rendah ('.$gpsData['accuracy'].' meter). Pastikan Anda berada di area terbuka untuk hasil terbaik.');
+        }
+
+        if (isset($gpsData['gps_variance']) && is_float($gpsData['gps_variance']) && $gpsData['gps_variance'] < 0.000001) {
+            throw new AntiFakeGPSException('Peringatan: Pergerakan GPS tidak wajar. Nonaktifkan aplikasi Fake GPS dan coba lagi.');
         }
 
         // B3.2 fix: validasi koordinat sebelum hitung Haversine.
@@ -52,7 +56,71 @@ class GeofenceService
         return [
             'valid' => true,
             'distance' => $distance,
+            'accuracy' => $gpsData['accuracy'] ?? null,
         ];
+    }
+
+    public function validateGpsTimeSeries(array $samples): void
+    {
+        if (count($samples) < 2) {
+            return;
+        }
+
+        $lats = array_column($samples, 'latitude');
+        $lngs = array_column($samples, 'longitude');
+        $avgLat = array_sum($lats) / count($lats);
+        $avgLng = array_sum($lngs) / count($lngs);
+        $latVar = array_sum(array_map(fn($v) => ($v - $avgLat) ** 2, $lats)) / count($lats);
+        $lngVar = array_sum(array_map(fn($v) => ($v - $avgLng) ** 2, $lngs)) / count($lngs);
+        $variance = sqrt($latVar + $lngVar);
+
+        if ($variance < 0.000001) {
+            throw new AntiFakeGPSException('Peringatan: Pergerakan GPS tidak wajar (variance: '.$variance.'). Nonaktifkan aplikasi Fake GPS dan coba lagi.');
+        }
+
+        if (count($samples) >= 2) {
+            $speeds = [];
+            for ($i = 1; $i < count($samples); $i++) {
+                $dist = $this->calculateHaversine(
+                    (float) $samples[$i - 1]['latitude'],
+                    (float) $samples[$i - 1]['longitude'],
+                    (float) $samples[$i]['latitude'],
+                    (float) $samples[$i]['longitude']
+                );
+                $timeDiff = ($samples[$i]['timestamp'] ?? $samples[$i - 1]['timestamp'] + 1) - ($samples[$i - 1]['timestamp'] ?? 0);
+                if ($timeDiff > 0) {
+                    $speeds[] = ($dist / $timeDiff) * 3.6;
+                }
+            }
+            $maxSpeed = max($speeds);
+            if ($maxSpeed > 100) {
+                throw new AntiFakeGPSException('Peringatan: Kecepatan pergerakan tidak wajar ('.$maxSpeed.' km/jam). Data GPS mencurigakan.');
+            }
+        }
+    }
+
+    public function crossCheckIpLocation(string $ip, array $gpsData): array
+    {
+        $result = [
+            'ip' => $ip,
+            'geoip_available' => false,
+            'ip_country' => null,
+            'ip_city' => null,
+            'anomaly_score' => 0,
+        ];
+
+        if (class_exists(\Torann\GeoIP\GeoIP::class)) {
+            try {
+                $geoIp = geoip($ip);
+                $result['geoip_available'] = true;
+                $result['ip_country'] = $geoIp->country ?? null;
+                $result['ip_city'] = $geoIp->city ?? null;
+            } catch (\Exception $e) {
+                $result['geoip_available'] = false;
+            }
+        }
+
+        return $result;
     }
 
     /**
