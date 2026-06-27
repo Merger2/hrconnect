@@ -37,6 +37,12 @@ class GeofenceService
             (float) $gpsData['longitude']
         );
 
+        if ($branch->radius === null) {
+            throw new BusinessRuleException(
+                "Cabang '{$branch->name}' belum punya radius geofence. Hubungi HRD untuk konfigurasi."
+            );
+        }
+
         $isWithinRadius = $distance <= $branch->radius;
         if (! $isWithinRadius) {
             $formattedDistance = number_format($distance, 2);

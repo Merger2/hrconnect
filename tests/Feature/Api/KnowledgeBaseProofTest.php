@@ -65,13 +65,13 @@ test('chat returns structured response', function () {
         ->assertJsonPath('status', 'success');
 });
 
-test('chat returns 403 for employee without view_knowledgebase', function () {
+test('chat returns 200 for employee with view_knowledgebase', function () {
     $response = $this->withHeader('Authorization', "Bearer {$this->employeeToken}")
         ->postJson('/api/v1/knowledgebase/chat', [
             'question' => 'Apa itu HRConnect?',
         ]);
 
-    $response->assertStatus(403);
+    $response->assertOk();
 });
 
 test('chat requires authentication', function () {

@@ -50,7 +50,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_EXPIRATION', 525600), // 1 tahun default, override via .env
 
     /*
     |--------------------------------------------------------------------------

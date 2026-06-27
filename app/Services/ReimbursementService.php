@@ -90,13 +90,13 @@ class ReimbursementService
      */
     public function linkToPayroll(Reimbursement $reimbursement, int $payrollId): void
     {
-        if (! $reimbursement->isApproved()) {
-            throw new BusinessRuleException('Hanya reimbursement yang sudah disetujui penuh yang dapat dimasukkan ke payroll.');
-        }
-
         DB::transaction(function () use ($reimbursement, $payrollId) {
             // B-8: Lock reimbursement untuk cegah race condition
             $locked = Reimbursement::lockForUpdate()->findOrFail($reimbursement->id);
+
+            if (! $locked->isApproved()) {
+                throw new BusinessRuleException('Hanya reimbursement yang sudah disetujui penuh yang dapat dimasukkan ke payroll.');
+            }
 
             if ($locked->payroll_id !== null) {
                 throw new BusinessRuleException('Reimbursement sudah terhubung ke payroll lain.');

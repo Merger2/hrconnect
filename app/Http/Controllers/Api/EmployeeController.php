@@ -15,6 +15,7 @@ use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -119,6 +120,7 @@ class EmployeeController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'password_changed_at' => null,
         ]);
 
         $employee = Employee::create(array_merge(
@@ -127,6 +129,8 @@ class EmployeeController extends Controller
         ));
 
         $user->assignRole('employee');
+
+        event(new Registered($user));
 
         return response()->json([
             'status' => 'success',
@@ -151,6 +155,17 @@ class EmployeeController extends Controller
         $this->authorize('update', $employee);
 
         $data = $request->validated();
+
+        if (isset($data['status']) && in_array($data['status'], [
+            EmployeeStatus::RESIGNED->value,
+            EmployeeStatus::TERMINATED->value,
+            EmployeeStatus::DECEASED->value,
+        ])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Status tidak dapat diubah langsung. Gunakan endpoint terminasi untuk mengubah status resign/terminated/deceased.',
+            ], 422);
+        }
 
         $employee->update($data);
 

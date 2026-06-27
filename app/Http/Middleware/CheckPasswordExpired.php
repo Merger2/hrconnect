@@ -60,11 +60,19 @@ class CheckPasswordExpired
             return $next($request);
         }
 
-        // Tier 3: skip kalau user belum punya password_changed_at
-        // (User legacy / akun manual sebelum middleware ada — biarkan dulu, akan
-        // ter-update saat login pertama kali via Fortify)
+        // Tier 3: force redirect kalau user belum punya password_changed_at
+        // (User baru dari EmployeeController@store — harus ganti password dulu)
         if (! $user->password_changed_at) {
-            return $next($request);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Anda harus mengganti password sebelum dapat melanjutkan.',
+                ], 403);
+            }
+
+            return redirect()
+                ->route('security.edit')
+                ->with('warning', 'Ini pertama kali Anda login. Silakan ganti password sekarang.');
         }
 
         // Tier 4: hitung expiry. Default 90 hari, configurable via CompanySetting.

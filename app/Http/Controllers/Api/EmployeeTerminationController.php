@@ -61,6 +61,15 @@ class EmployeeTerminationController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
+        $user = $request->user();
+
+        if (! $user->can('manage_employees')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki akses untuk terminasi massal kontrak.',
+            ], 403);
+        }
+
         $date = $request->filled('date') ? CarbonImmutable::parse($request->input('date')) : null;
         $count = $this->terminationService->processContractEnd($date);
 
