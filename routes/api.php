@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReimbursementController;
+use App\Models\KnowledgeBase;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -198,6 +199,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/chat', [KnowledgeBaseController::class, 'chat'])
             ->middleware('throttle:20,1')
             ->name('chat');
+        Route::post('/chat-stream', [KnowledgeBaseController::class, 'chatStream'])
+            ->middleware('throttle:10,1')
+            ->name('chat.stream');
+        Route::get('/', [KnowledgeBaseController::class, 'index'])
+            ->middleware('can:viewAny,'.KnowledgeBase::class)
+            ->name('index');
         Route::post('/', [KnowledgeBaseController::class, 'upload'])
             ->middleware('permission:manage_knowledgebase')
             ->name('upload');

@@ -78,10 +78,18 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 | HitungGajiService | `app/Services/HitungGajiService.php` | Orchestrator semua komponen |
 | Migrations + Seeders | `database/migrations/` | 3 tabel pajak (kategori_ter, golongan_ptkp, tarif_ter) |
 
+### ship-ai-with-laravel — RAG Chat Reference (Sesi C)
+- Path: `/home/merger/RAG-repo/ship-ai-with-laravel/`
+- Pattern: Livewire minimal (4 public props) + Alpine.js SSE streaming via `fetch()` + `ReadableStream.getReader()`
+- Port: `app/Livewire/KnowledgeBaseChat.php` + `resources/views/livewire/knowledge-base-chat.blade.php`
+- SSE: `POST /api/v1/knowledgebase/chat-stream` → `StreamedResponse` with `TextDelta` events
+
 ### Other Repos — Low Priority
 - `/home/merger/laravel-smarthr/` — UI component reference (141 views, 5 Livewire, 0 approval workflow)
 - `/home/merger/hrms-livewire/` — Queue progress bar pattern (109 views, 22 Livewire, 0 services)
 - `/home/merger/hris/` — Org structure hierarchy (React, no HRIS features)
+- `/home/merger/RAG-repo/laravel-ragkit/` — Reusable Laravel RAG package (multi-provider)
+- `/home/merger/RAG-repo/laravelrag/` — Tutorial demo RAG Laravel
 
 ## Business Logic Gotchas (from Audit)
 
@@ -124,7 +132,56 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 - **Per-page max**: pagination `per_page` capped at 100.
 - **Scramble**: `config/scramble.php` `api_path => 'api'` strips prefix from paths (shows `/v1/...`), but server URL includes `/api`. URLs resolve correctly.
 
+## RAG Knowledge Base (Sesi C)
+
+### Architecture
+- **Backend**: `KnowledgeBaseService` orchestrates RAG — embed question via Gemini `text-embedding-004` (768D), vector search top-5 chunks via pgvector cosine distance, generate answer via `HrKnowledgeBaseAgent` (Gemini 2.5 Flash, structured output `answer` + `confidence`). Fallback: pg_trgm keyword search.
+- **Sync API**: `POST /api/v1/knowledgebase/chat` → synchronous JSON response with `{answer, sources, confidence}`.
+- **Streaming API**: `POST /api/v1/knowledgebase/chat-stream` → SSE `text/event-stream` with `data: {"text":"..."}` events.
+- **Upload**: `POST /api/v1/knowledgebase/upload` → PDF → chunking → async `ProcessKnowledgeBaseEmbedding` job.
+- **Web UI**: Livewire minimal + Alpine.js SSE streaming via `fetch()` + `ReadableStream.getReader()`. Pola dari `ship-ai-with-laravel`.
+
+### Files
+| Path | Purpose |
+|------|---------|
+| `app/Livewire/KnowledgeBaseChat.php` | Livewire component: public `$messages`, `$input`, `$conversationId`, `$isStreaming` |
+| `resources/views/livewire/knowledge-base-chat.blade.php` | Alpine `x-data="knowledgeBaseChat()"` — SSE streaming, typing indicator, suggestion buttons |
+| `resources/views/knowledge-base/index.blade.php` | Layout wrapper → `<livewire:knowledge-base-chat />` |
+| `resources/views/knowledge-base/manage.blade.php` | Upload form + document list table (HR only) |
+| `app/Http/Controllers/Api/KnowledgeBaseController.php` | `chat()`, `chatStream()`, `upload()`, `destroy()` |
+| `app/Services/KnowledgeBaseService.php` | Orchestrator RAG (embed → search → generate) |
+| `app/Http/Requests/Api/ChatStreamRequest.php` | Validation: `question` min:5 max:500 |
+
+### SSE Protocol
+```
+data: {"text":"Cuti"}
+data: {"text":" tahunan"}
+data: {"text":" karyawan..."}
+data: {"conversation_id":"abc123","sources":[{"id":1,"title":"...","snippet":"..."}]}
+data: [DONE]
+```
+
+### Frontend Pattern (Alpine.js x-data)
+```js
+async sendMessage() {
+    // 1. POST /api/v1/knowledgebase/chat-stream
+    // 2. response.body.getReader() → ReadableStream
+    // 3. Parse data: {"text":"..."} events
+    // 4. Append to messages[agentIndex].content
+    // 5. Auto-scroll via scrollToBottom()
+}
+```
+
+### Key Gotchas
+- **`RAG_MOCK_MODE=true`** in `.env` is NOT read by any PHP code — it's dead config. Sistem selalu panggil Gemini API sungguhan.
+- **Sync endpoint** (`POST /chat`) returns full JSON. **Streaming** (`POST /chat-stream`) returns SSE. Keduanya independent — bisa dipanggil sesuai kebutuhan.
+- **pg_trgm fallback** hanya di sync `chat()`, bukan di streaming. Kalau streaming gagal, frontend harus fallback ke sync endpoint.
+- **`GOOGLE_AI_API_KEY`** required di `.env`. Model `gemini-2.5-flash` butuh tier bayar. Alternatif: `gemini-2.0-flash` (free tier).
+- **Conversation memory**: `conversationId` dikirim balik tapi tidak disimpan ke DB. Setiap chat baru = konteks fresh.
+
 ===
+
+
 
 <laravel-boost-guidelines>
 === foundation rules ===

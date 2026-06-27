@@ -2377,7 +2377,7 @@
                                                     "type": "string"
                                                 },
                                                 "face_cleared": {
-                                                    "type": "string"
+                                                    "type": "boolean"
                                                 },
                                                 "financial_summary": {
                                                     "anyOf": [
@@ -2529,7 +2529,7 @@
         "/v1/face/register": {
             "post": {
                 "operationId": "face.register",
-                "description": "Enroll face embedding (128D FaceNet vector) for biometric verification. Flow: Clock In (Step 1/4) \u2014 Register Face \u2192 Clock In \u2192 Today \u2192 Clock Out.",
+                "description": "Enroll face embedding (128D FaceNet vector) for biometric verification. Supports single embedding or 6-frame enrollment with liveness variance.",
                 "summary": "Register Face",
                 "tags": [
                     "Face Recognition"
@@ -2538,24 +2538,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/RegisterFaceRequest"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "embedding": {
-                                                "type": "array",
-                                                "description": "128-dimension face embedding array from face-api.js",
-                                                "items": {}
-                                            }
-                                        },
-                                        "required": [
-                                            "embedding"
-                                        ]
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/RegisterFaceRequest"
                             }
                         }
                     }
@@ -2584,11 +2567,15 @@
                                                 },
                                                 "face_registered_at": {
                                                     "type": "string"
+                                                },
+                                                "capture_count": {
+                                                    "type": "integer"
                                                 }
                                             },
                                             "required": [
                                                 "employee_id",
-                                                "face_registered_at"
+                                                "face_registered_at",
+                                                "capture_count"
                                             ]
                                         }
                                     },
@@ -3009,7 +2996,132 @@
                 }
             }
         },
+        "/v1/knowledgebase/chat-stream": {
+            "post": {
+                "operationId": "knowledgebase.chat.stream",
+                "description": "Streaming RAG answer via Server-Sent Events. Returns text/event-stream with text delta events. Fallback to sync /chat endpoint jika streaming gagal.",
+                "summary": "Chat Stream (SSE)",
+                "tags": [
+                    "Knowledge Base"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChatStreamRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "text/event-stream": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Transfer-Encoding": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "chunked"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/v1/knowledgebase": {
+            "get": {
+                "operationId": "knowledgebase.index",
+                "description": "List all knowledge base documents (grouped by source document).",
+                "summary": "List Documents",
+                "tags": [
+                    "Knowledge Base"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "title": {
+                                                        "type": "string"
+                                                    },
+                                                    "category": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "string"
+                                                    },
+                                                    "source_document": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "title",
+                                                    "category",
+                                                    "status",
+                                                    "source_document",
+                                                    "created_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
             "post": {
                 "operationId": "knowledgebase.upload",
                 "description": "Upload PDF document to knowledge base (max 10MB). Embedding processing is async. Flow: Knowledge Base (Step 1/2) \u2014 Upload \u2192 Chat.",
@@ -5370,6 +5482,27 @@
                 ],
                 "title": "ChatRequest"
             },
+            "ChatStreamRequest": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "minLength": 5,
+                        "maxLength": 500
+                    },
+                    "conversation_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "question"
+                ],
+                "title": "ChatStreamRequest"
+            },
             "ClockInRequest": {
                 "type": "object",
                 "description": "Clock-in request with GPS location, face verification, and WFA support.\n\n- WFO (is_wfa=false): latitude, longitude required; GPS validated against branch geofence.\n- WFA (is_wfa=true): note required (min 20 chars); GPS skipped.\n- Verification: face_embedding (128D), pin (6-digit), or manual fallback.\n- Anti-fake GPS: is_mocked flag + accuracy meter.",
@@ -5626,11 +5759,29 @@
                         },
                         "minItems": 128,
                         "maxItems": 128
+                    },
+                    "embeddings": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "minimum": -1.5,
+                                "maximum": 1.5
+                            },
+                            "minItems": 128,
+                            "maxItems": 128
+                        },
+                        "minItems": 2,
+                        "maxItems": 10
+                    },
+                    "captures": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
-                "required": [
-                    "embedding"
-                ],
                 "title": "RegisterFaceRequest"
             },
             "RejectRequest": {
