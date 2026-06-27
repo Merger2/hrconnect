@@ -6,6 +6,7 @@ use App\Exceptions\FaceNotRecognizedException;
 use App\Exceptions\FaceNotRegisteredException;
 use App\Exceptions\InvalidPinException;
 use App\Models\Employee;
+use App\Services\AttendanceRiskScorer;
 use App\Services\AttendanceService;
 use App\Services\FaceRecognitionService;
 use App\Services\GeofenceService;
@@ -60,6 +61,7 @@ test('Face match → return FACE_VERIFIED dengan similarity score', function () 
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -81,6 +83,7 @@ test('Face tidak match + PIN valid → fallback ke PIN_VERIFIED', function () {
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -105,6 +108,7 @@ test('Face belum register (no embedding) + PIN valid → langsung PIN_VERIFIED',
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -129,6 +133,7 @@ test('Face race (FaceNotRegisteredException saat verify) + PIN → fallback PIN'
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -152,6 +157,7 @@ test('Face belum register + tanpa PIN → throw BusinessRuleException', function
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -170,6 +176,7 @@ test('Face tidak match + PIN salah → throw InvalidPinException', function () {
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -194,6 +201,7 @@ test('Face match tapi PIN ada → tetap pakai face (Face takes priority)', funct
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -216,6 +224,7 @@ test('PIN fallback lebih dari 5 hari berturut-turut ditolak', function () {
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;
@@ -239,6 +248,7 @@ test('Face match reset PIN fallback streak', function () {
     $service = new AttendanceService(
         mock(GeofenceService::class),
         $faceService,
+        new AttendanceRiskScorer,
     );
 
     $employee = new Employee;

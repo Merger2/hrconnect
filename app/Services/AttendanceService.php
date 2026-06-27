@@ -28,6 +28,7 @@ class AttendanceService
     public function __construct(
         protected GeofenceService $geofenceService,
         protected FaceRecognitionService $faceRecognitionService,
+        protected AttendanceRiskScorer $riskScorer,
     ) {}
 
     public function clockIn(Employee $employee, array $data): Attendance
@@ -51,7 +52,8 @@ class AttendanceService
             if (! $employee->branch) {
                 throw new BusinessRuleException('Data lokasi kerja Anda belum diatur. Hubungi HRD.');
             }
-            $this->geofenceService->validateLocation($employee->branch, $data);
+            $geofenceResult = $this->geofenceService->validateLocation($employee->branch, $data);
+            $data['_geofence_distance'] = $geofenceResult['distance'] ?? null;
         }
 
         // B12 fix: tiered verification (Face → PIN → Manual) per error-handling-strategy §1.
@@ -97,6 +99,23 @@ class AttendanceService
                 if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
                     $this->logBypass($employee, $this->pinBypassReason($employee, 'clock_in'));
                 }
+
+                $geofenceRadius = $employee->branch?->radius;
+                $riskResult = $this->riskScorer->score($attendance, $employee->shift, 'check_in', [
+                    'gps_accuracy' => $data['accuracy'] ?? null,
+                    'gps_variance' => $data['gps_variance'] ?? null,
+                    'distance' => $data['_geofence_distance'] ?? null,
+                    'radius' => $geofenceRadius,
+                    'face_confidence' => $faceSimilarityScore,
+                    'face_verification_failed' => $verificationMethod !== VerificationMethod::FACE_VERIFIED->value && ! empty($data['face_embedding']),
+                    'mock_location_detected' => ($data['is_mocked'] ?? false) === true,
+                    'source' => 'web',
+                ]);
+                $attendance->forceFill([
+                    'risk_score' => $riskResult['score'],
+                    'risk_level' => $riskResult['level'],
+                    'risk_factors' => $riskResult['factors'],
+                ])->save();
 
                 return $attendance;
             });
