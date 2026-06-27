@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\TerminateEmployeeRequest;
 use App\Models\Employee;
 use App\Services\EmployeeTerminationService;
+use App\Services\FaceRecognitionService;
 use Carbon\CarbonImmutable;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -47,7 +48,7 @@ class EmployeeTerminationController extends Controller
                 'termination_reason' => $terminated->termination_reason,
                 'resign_date' => $terminated->resign_date?->toDateString(),
                 'deceased_date' => $terminated->deceased_date?->toDateString(),
-                'face_cleared' => empty($terminated->getRawOriginal('face_embedding')),
+                'face_cleared' => ! app(FaceRecognitionService::class)->hasFaceEnrolled($terminated),
                 'financial_summary' => $terminated->financial_summary ?? [],
             ],
         ]);

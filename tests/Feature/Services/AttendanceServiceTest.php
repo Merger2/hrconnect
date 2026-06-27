@@ -75,11 +75,16 @@ describe('clockIn', function () {
     it('throws AntiFakeGPSException when is_mocked is true', function () {
         $employee = createTestEmployee();
 
-    $service = new AttendanceService(
-        mock(GeofenceService::class),
-        mock(FaceRecognitionService::class),
-        new AttendanceRiskScorer,
-    );
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $service = new AttendanceService(
+            mock(GeofenceService::class),
+            $faceService,
+            new AttendanceRiskScorer,
+        );
 
         expect(fn () => $service->clockIn($employee, ['is_mocked' => true]))
             ->toThrow(AntiFakeGPSException::class, 'Fake GPS');
@@ -94,9 +99,14 @@ describe('clockIn', function () {
             ->zeroOrMoreTimes()
             ->andReturn(['valid' => true, 'distance' => 10]);
 
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
         $service = new AttendanceService(
             $geofence,
-            mock(FaceRecognitionService::class),
+            $faceService,
             new AttendanceRiskScorer,
         );
 
@@ -110,11 +120,16 @@ describe('clockIn', function () {
     it('throws BusinessRuleException for WFA with short note (< 20 chars)', function () {
         $employee = createTestEmployee();
 
-    $service = new AttendanceService(
-        mock(GeofenceService::class),
-        mock(FaceRecognitionService::class),
-        new AttendanceRiskScorer,
-    );
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $service = new AttendanceService(
+            mock(GeofenceService::class),
+            $faceService,
+            new AttendanceRiskScorer,
+        );
 
         expect(fn () => $service->clockIn($employee, [
             'is_wfa' => true,
@@ -126,11 +141,16 @@ describe('clockIn', function () {
     it('creates attendance successfully in WFA mode with valid note', function () {
         $employee = createTestEmployee();
 
-    $service = new AttendanceService(
-        mock(GeofenceService::class),
-        mock(FaceRecognitionService::class),
-        new AttendanceRiskScorer,
-    );
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $service = new AttendanceService(
+            mock(GeofenceService::class),
+            $faceService,
+            new AttendanceRiskScorer,
+        );
 
         $result = $service->clockIn($employee, [
             'is_wfa' => true,
@@ -155,11 +175,16 @@ describe('clockIn', function () {
         // Unset the loaded relationship to simulate no branch
         $employee->setRelation('branch', null);
 
-    $service = new AttendanceService(
-        mock(GeofenceService::class),
-        mock(FaceRecognitionService::class),
-        new AttendanceRiskScorer,
-    );
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $service = new AttendanceService(
+            mock(GeofenceService::class),
+            $faceService,
+            new AttendanceRiskScorer,
+        );
 
         expect(fn () => $service->clockIn($employee, [
             'latitude' => -6.2088,
@@ -175,9 +200,14 @@ describe('clockIn', function () {
         $geofence = mock(GeofenceService::class);
         $geofence->shouldNotReceive('validateLocation');
 
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
         $service = new AttendanceService(
             $geofence,
-            mock(FaceRecognitionService::class),
+            $faceService,
             new AttendanceRiskScorer,
         );
 
@@ -208,6 +238,9 @@ describe('clockIn', function () {
             ->andReturn(['valid' => true, 'distance' => 10]);
 
         $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(true);
         $faceService->shouldReceive('verifyFace')
             ->once()
             ->andReturn(['valid' => true, 'similarity_percentage' => 95.0]);
@@ -242,11 +275,16 @@ describe('clockOut', function () {
     it('throws AntiFakeGPSException when is_mocked is true', function () {
         $employee = createTestEmployee();
 
-    $service = new AttendanceService(
-        mock(GeofenceService::class),
-        mock(FaceRecognitionService::class),
-        new AttendanceRiskScorer,
-    );
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $service = new AttendanceService(
+            mock(GeofenceService::class),
+            $faceService,
+            new AttendanceRiskScorer,
+        );
 
         expect(fn () => $service->clockOut($employee, ['is_mocked' => true]))
             ->toThrow(AntiFakeGPSException::class, 'Fake GPS');
@@ -255,11 +293,16 @@ describe('clockOut', function () {
     it('throws NotClockedInException when no active attendance exists', function () {
         $employee = createTestEmployee();
 
-    $service = new AttendanceService(
-        mock(GeofenceService::class),
-        mock(FaceRecognitionService::class),
-        new AttendanceRiskScorer,
-    );
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
+        $service = new AttendanceService(
+            mock(GeofenceService::class),
+            $faceService,
+            new AttendanceRiskScorer,
+        );
 
         expect(fn () => $service->clockOut($employee, [
             'latitude' => -6.2088,
@@ -277,9 +320,14 @@ describe('clockOut', function () {
             ->once()
             ->andReturn(['valid' => true, 'distance' => 10]);
 
+        $faceService = mock(FaceRecognitionService::class);
+        $faceService->shouldReceive('hasFaceEnrolled')
+            ->zeroOrMoreTimes()
+            ->andReturn(false);
+
         $service = new AttendanceService(
             $geofence,
-            mock(FaceRecognitionService::class),
+            $faceService,
             new AttendanceRiskScorer,
         );
 

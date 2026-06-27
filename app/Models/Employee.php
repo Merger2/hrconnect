@@ -120,6 +120,11 @@ class Employee extends Model implements CipherSweetEncrypted
         return $this->belongsTo(Shift::class);
     }
 
+    public function faceDescriptors(): HasMany
+    {
+        return $this->hasMany(FaceDescriptor::class);
+    }
+
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'parent_id');

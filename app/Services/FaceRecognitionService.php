@@ -9,6 +9,7 @@ use App\Exceptions\FaceNotRecognizedException;
 use App\Exceptions\FaceNotRegisteredException;
 use App\Models\CompanySetting;
 use App\Models\Employee;
+use App\Models\FaceDescriptor;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Pgvector\Laravel\Distance;
@@ -49,10 +50,7 @@ class FaceRecognitionService
             throw new BusinessRuleException('Vector embedding tidak valid: semua nilai harus numerik.');
         }
 
-        $hasFace = ! empty($employee->getRawOriginal('face_embedding'))
-            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
-
-        if (! $hasFace) {
+        if (! $this->hasFaceEnrolled($employee)) {
             throw new FaceNotRegisteredException(
                 'Wajah karyawan ini belum terdaftar. Silakan hubungi HRD untuk registrasi wajah.'
             );
@@ -62,9 +60,16 @@ class FaceRecognitionService
         $vector = new Vector($embedding);
 
         try {
-            $result = Employee::where('id', $employee->id)
-                ->nearestNeighbors('face_embedding', $vector, Distance::Cosine)
-                ->first();
+            if ($this->hasFaceEnrolledViaDescriptors($employee)) {
+                $result = FaceDescriptor::where('employee_id', $employee->id)
+                    ->where('is_active', true)
+                    ->nearestNeighbors('embedding', $vector, Distance::Cosine)
+                    ->first();
+            } else {
+                $result = Employee::where('id', $employee->id)
+                    ->nearestNeighbors('face_embedding', $vector, Distance::Cosine)
+                    ->first();
+            }
         } catch (QueryException $e) {
             Log::error('Face recognition vector query failed', [
                 'employee_id' => $employee->id,
@@ -90,5 +95,34 @@ class FaceRecognitionService
             'valid' => true,
             'similarity_percentage' => (1 - $distance) * 100,
         ];
+    }
+
+    private function hasFaceEnrolledViaDescriptors(Employee $employee): bool
+    {
+        try {
+            return FaceDescriptor::where('employee_id', $employee->id)
+                ->where('is_active', true)
+                ->exists();
+        } catch (QueryException) {
+            return false;
+        }
+    }
+
+    public function hasFaceEnrolled(Employee $employee): bool
+    {
+        try {
+            $hasDescriptors = FaceDescriptor::where('employee_id', $employee->id)
+                ->where('is_active', true)
+                ->exists();
+
+            if ($hasDescriptors) {
+                return true;
+            }
+        } catch (QueryException) {
+            // Fallback: check employee's legacy face_embedding column
+        }
+
+        return ! empty($employee->getRawOriginal('face_embedding'))
+            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
     }
 }

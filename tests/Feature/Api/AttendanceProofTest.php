@@ -374,8 +374,11 @@ test('clock-in with face recognition succeeds', function () {
         'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
     ])->save();
 
-    $this->mock(FaceRecognitionService::class)
-        ->shouldReceive('verifyFace')
+    $faceService = $this->mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
+    $faceService->shouldReceive('verifyFace')
         ->andReturn([
             'valid' => true,
             'similarity_percentage' => 95.0,
@@ -396,8 +399,11 @@ test('clock-in falls back to PIN when face not recognized', function () {
         'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
     ])->save();
 
-    $this->mock(FaceRecognitionService::class)
-        ->shouldReceive('verifyFace')
+    $faceService = $this->mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
+    $faceService->shouldReceive('verifyFace')
         ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
 
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
@@ -416,8 +422,11 @@ test('clock-in with face embedding but no fallback PIN returns 422', function ()
         'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
     ])->save();
 
-    $this->mock(FaceRecognitionService::class)
-        ->shouldReceive('verifyFace')
+    $faceService = $this->mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
+    $faceService->shouldReceive('verifyFace')
         ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
 
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
@@ -492,8 +501,11 @@ test('clock-out with face verification succeeds', function () {
             'pin' => '123456',
         ]))->assertStatus(201);
 
-    $this->mock(FaceRecognitionService::class)
-        ->shouldReceive('verifyFace')
+    $faceService = $this->mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
+    $faceService->shouldReceive('verifyFace')
         ->andReturn([
             'valid' => true,
             'similarity_percentage' => 92.3,
@@ -518,8 +530,11 @@ test('clock-out falls back to PIN when face not recognized', function () {
             'pin' => '123456',
         ]))->assertStatus(201);
 
-    $this->mock(FaceRecognitionService::class)
-        ->shouldReceive('verifyFace')
+    $faceService = $this->mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
+    $faceService->shouldReceive('verifyFace')
         ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
 
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
@@ -542,8 +557,11 @@ test('clock-out with face fails when no fallback PIN given', function () {
             'pin' => '123456',
         ]))->assertStatus(201);
 
-    $this->mock(FaceRecognitionService::class)
-        ->shouldReceive('verifyFace')
+    $faceService = $this->mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
+    $faceService->shouldReceive('verifyFace')
         ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali.'));
 
     $response = $this->withHeader('Authorization', "Bearer {$this->token}")
