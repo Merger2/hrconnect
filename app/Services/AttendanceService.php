@@ -138,8 +138,7 @@ class AttendanceService
      */
     private function resolveVerification(Employee $employee, array $data): array
     {
-        $hasFaceEnrolled = ! empty($employee->getRawOriginal('face_embedding'))
-            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
+        $hasFaceEnrolled = $this->faceRecognitionService->hasFaceEnrolled($employee);
         $hasFacePayload = ! empty($data['face_embedding']);
         $hasPinPayload = ! empty($data['pin']);
 
@@ -253,8 +252,7 @@ class AttendanceService
      */
     private function resolveClockOutVerification(Employee $employee, array $data): array
     {
-        $hasFaceEnrolled = ! empty($employee->getRawOriginal('face_embedding'))
-            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
+        $hasFaceEnrolled = $this->faceRecognitionService->hasFaceEnrolled($employee);
         $hasFacePayload = ! empty($data['face_embedding']);
         $hasPinPayload = ! empty($data['pin']);
 
@@ -317,8 +315,7 @@ class AttendanceService
 
     private function pinBypassReason(Employee $employee, string $direction): string
     {
-        $hasFaceEnrolled = ! empty($employee->getRawOriginal('face_embedding'))
-            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
+        $hasFaceEnrolled = $this->faceRecognitionService->hasFaceEnrolled($employee);
 
         return $hasFaceEnrolled
             ? "pin_verified_{$direction}_face_failed"

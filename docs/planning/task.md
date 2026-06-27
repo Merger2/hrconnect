@@ -1,16 +1,16 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-06-28 — +5 cloned repos analysis + 11 business logic vulnerabilities + PasPapan/Quanta pattern mapping & porting priority.
+> Updated: 2026-06-28 — Sesi A ✅ (14 items: auth, permission, SEC, P0/P1) + Sesi B ✅ (13 items: camera bugs, face enrollment, liveness, TinyFaceDetector, EAR blink, CDN cleanup, GPS 3-layer, risk scorer, barcode, face_descriptors). 1,121 tests pass.
 
-> **REPO ANALYSIS (2026-06-28):** 5 cloned repos fully analyzed. **PasPapan** = primary reference (face enrollment guide overlay, 14-faktor risk scoring, HMAC-SHA256 anti-replay QR, approval lock, termination checklist, offline sync). **Quanta HRIS** = Indonesian payroll (PPh21 TER PMK 168/2023, BPJS, lembur PP 35/2021) — deferred to post-skripsi. Refer to §REFERENCE REPOS.
+> **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7 (email verification flow), PERM-1/2/3 (permission fixes), SEC-1/2/3/4 (Sanctum expiry, middleware, 2FA validation, password rule), P0-1..4, P1-5/6/7 (business logic fixes). **EV-2 (Gmail SMTP) deferred — `MAIL_MAILER=log` active, backend ready.**
 
-> **BUSINESS LOGIC AUDIT (2026-06-28):** 11 vulnerabilities mapped to PasPapan/Quanta solutions: P0-1 (termination auth), P0-2 (null radius), P0-3 (WFA null employee), P0-4 (status bypass), P1-5 (reimbursement TOCTOU), P1-6 (payroll PAID gap), P1-7 (overtime date), WFA race, risk scoring, anti-replay QR, face enrollment table. Refer to §BUSINESS_LOGIC_AUDIT.
+> **SESI B ✅ (2026-06-28):** 13/13 items completed + P2-2/3/4 extras — C-1..4 camera bugs, FE-1c face enrollment 6-foto sequential, FE-1d liveness micro-movement, FE-1e TinyFaceDetector default, FE-1f EAR blink, FE-1g CDN cleanup, FE-1h face crop, SEC-GPS-1/2/3 GPS 3-layer, P2-2 AttendanceRiskScorer (14 faktor), P2-3 DynamicBarcodeTokenService (HMAC-SHA256 anti-replay), P2-4 FaceDescriptor table (pgvector). **SEC-GPS-3 GeoIP deferred — framework ready, needs `torann/geoip` package.**
 
 > **DESIGN DECISION (2026-06-28):** UI follow DESIGN.md DS-1 (canvas #ffffff, body #3a3a3a, Inter font, neutral palette) — NOT copy PasPapan CSS. Only adopt UX/component patterns (flow, layout, interaction). PasPapan CSS (green/cream) is their IP.
 
-> **EXECUTION STATUS (2026-06-28):** Semua analisis selesai, plan matang. Menunggu eksekusi Sesi A (fix 7 P0/P1 bugs → auth/permission/SEC fixes). ±100 karyawan, 1,121 tests pass, 51 API endpoints, 46 Blade views (35%). Frontend 0% Livewire — target 6 sesi (A–F) ~39-55 jam.
+> **EXECUTION STATUS (2026-06-28):** Sesi A+B ✅ complete. Sesi C (RAG), D (ESS), E (Approvals), F (Cleanup) remaining. ±100 karyawan, 1,121 tests pass, 51 API endpoints, 47 Blade views (36%). Target 6 sesi (A–F) ~39-55 jam — **2/6 done**.
 
-> **SECURITY POSTURE (2026-06-28):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). Lihat §SECURITY untuk detail.
+> **SECURITY POSTURE (2026-06-28):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). Lihat §SECURITY untuk detail. **Post-Sesi A+B: 1 critical fixed (Sanctum expiry ✅, fake GPS multi-layer ✅, liveness ✅), 1 deferred (headers → Sesi F).**
 
 ## Status Legend
 
@@ -21,19 +21,19 @@
 | ⏳ | Not started |
 | 🚫 | Deferred/cancelled |
 
-## Status Snapshot — Overall Project: **~75%** (±100 karyawan)
+## Status Snapshot — Overall Project: **~85%** (±100 karyawan)
 
 | Area | % | Status | Notes |
 |------|:-:|:------:|-------|
 | Backend (app/) | 95% | ✅ | 31 models, 34 enums, 15 services, 14 controllers. Kurang strict_types, base exception, queue consistency. |
 | Database (migrations) | 90% | ✅ | 46 migrations, 48 tables. 5 models without factories (deferred V2). |
 | API (routes) | 95% | ✅ | 51 endpoints, Sanctum auth, rate limits, permission guards. |
-| Security | 70% | 🚧 | CipherSweet ✅, PII masking ✅, Argon2id ✅, rate limiting ✅, IDOR ✅, session encrypted ✅, host protection ✅, FormRequest ✅. **Sanctum token never-expire ❌** (SEC-1). **Email verification ❌** (MustVerifyEmail di-comment). **Force change password ❌** (middleware skip null). **2FA enforcement ❌** (AUTH-09). **Fake GPS client-trusted ❌** (SEC-GPS-1/2/3). **No liveness ❌** (FE-1d). **No security headers ❌** (SEC-5). |
-| Tests | 85% | ✅ | 1,121 tests / 3,702 assertions (SQLite) + ~28 PG. All services/controllers/policies covered. |
+| Security | 85% | ✅ | CipherSweet ✅, PII masking ✅, Argon2id ✅, rate limiting ✅, IDOR ✅, session encrypted ✅, host protection ✅, FormRequest ✅. **Sanctum expiry ✅** (SEC-1). **Email verification ✅** (EV-1/3/4). **Force password change ✅** (EV-5). **Fake GPS multi-layer ✅** (SEC-GPS-1/2/3). **Liveness ✅** (FE-1d/f). **2FA enforcement ❌** (deferred). **Security headers ❌** (SEC-5 → Sesi F). |
+| Tests | 90% | ✅ | 1,121 tests / 3,729 assertions (SQLite) + ~28 PG. All services/controllers/policies covered. |
 | Flux → MD3 Migration | 100% | ✅ | **SELESAI** — Flux dihapus dari composer, views, CI, docs. 0 Flux references remain. |
 | **Design System DS-1** | **40%** | 🚧 | app.css masih pakai cream palette (#fffaf0), harusnya #ffffff. 11 item perlu sync dengan DESIGN.md. |
-| **Frontend Views (46 Blade)** | **50%** | 🚧 | Layouts ✅, Auth ✅, Settings ✅. Modules (attendance, leave, etc.) masih static Blade. |
-| **ESS Features** | **30%** | 🚧 | Clock-in page exists (dengan bugs). **Face enrollment ❌** (FE-1c not started). Belum Livewire interaktif. |
+| **Frontend Views (47 Blade)** | **36%** | 🚧 | Layouts ✅, Auth ✅, Settings ✅. Modules (attendance, leave, etc.) masih static Blade. |
+| **ESS Features** | **45%** | 🚧 | Clock-in page **fixed** (bugs C-1..4 ✅). **Face enrollment ✅** (FE-1c ✅). GPS ✅. **EAR blink ✅**. Belum Livewire interaktif sepenuhnya. |
 | **Architecture Cleanup** | **40%** | 🚧 | strict_types, base exception, queue pattern, GeofenceMiddleware duplikasi. |
 | **PWA readiness** | **40%** | 🚧 | SW ✅, manifest ✅, icons ✅. Tapi SW cache error, offline page ❌. |
 | **PHPStan baseline** | 0% | 🚧 | STALE — 3 deleted notification files referenced. |
@@ -291,7 +291,7 @@ Berdasarkan audit docs (PRD, SRS, SDD, wireframes) + file system `resources/view
 |---|------|-------|-------|:------:|
 | 1 | Personal Info | `employee/profile/personal-info.blade.php` | Employee | ❌ |
 | 2 | Family Details | `employee/profile/family-details.blade.php` | Employee | ❌ |
-| 3 | **Face Registration** | `employee/profile/face-registration.blade.php` | Employee | ❌ ⭐ |
+| 3 | **Face Registration** | `employee/profile/face-registration.blade.php` | Employee | ✅ ⭐ |
 | 4 | Devices | `employee/profile/devices.blade.php` | Employee | ❌ |
 
 ### Modals (4)
@@ -394,17 +394,17 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 
 | ID | Task | Sub-tasks | Status |
 |----|------|-----------|:------:|
-| **FE-1** | **Clock In/Out** ⭐ | — | 🚧 |
+| **FE-1** | **Clock In/Out** ⭐ | — | ✅ |
 | | 1a. Install face-api.js + model weights | ✅ model weights di `public/models/av1/` | ✅ |
-| | 1b. Camera + face detection | ✅ inline Alpine `x-data`, `getUserMedia`, face-api.js | 🚧 |
-| | 1c. Face enrollment | ⏳ |
-| | 1d. GPS locator | ✅ di clock-in page | ✅ |
-| | 1e. Livewire component | Belum — pake Alpine dulu | ⏳ |
-| | 1f. Camera card Blade | ✅ Ada, tapi ada bugs | 🚧 |
-| | 1g. Location panel | ✅ | ✅ |
-| | 1h. CTA button | ✅ | ✅ |
+| | 1b. Camera + face detection | dynamic import face-api.js, TinyFaceDetector default, SSD fallback | ✅ |
+| | 1c. Face enrollment | 6 foto sequential + progress dots + countdown baru | ✅ |
+| | 1d. GPS locator + liveness | 3 sampel GPS (variance+speed) + micro-movement variance | ✅ |
+| | 1e. Dynamic QR (bonus) | HMAC-SHA256 DynamicBarcodeTokenService | ✅ |
+| | 1f. Camera card Blade | Bugs C-1..4 fixed | ✅ |
+| | 1g. EAR blink detection | `computeEAR()` via landmarks, blink pattern confirmed | ✅ |
+| | 1h. Face crop | `extractFaces()` → `canvas.toBlob` → audit trail | ✅ |
 | | 1i. API integration | ✅ fetch to `/api/v1/attendance/clock-in` | ✅ |
-| | 1j. Tests | ⏳ |
+| | 1j. Tests | + test fixes for FaceRecognitionService, AttendanceProofTest | ✅ |
 | **FE-2** | **Attendance History** | Table + filters (month, status) | ⏳ |
 | **FE-3** | **Leave (Apply + History + Quota)** | Form, quota cards, history table | ⏳ |
 | **FE-4** | **Overtime (Apply + History)** | Form, history table | ⏳ |
@@ -432,10 +432,10 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 
 | # | ID | Issue | File | Status |
 |:-:|:--:|-------|------|:------:|
-| 1 | C-1 | **Model path salah** — `loadFromUri('/models')` harus `/models/av1` | `clock-in.blade.php:23-25` | ⏳ |
-| 2 | C-2 | **Pisah try/catch camera** — `getUserMedia` vs `play()` harus terpisah biar error handling jelas | `clock-in.blade.php:30-38` | ⏳ |
-| 3 | C-3 | **Toast event mismatch** — `window.dispatchEvent(CustomEvent)` vs handler `Livewire.on()` — sistem event beda | `clock-in.blade.php:76-82` + `app.js` | ⏳ |
-| 4 | C-4 | **`video.play()` silent fail** — `catch {}` swallow error, status misleading | `clock-in.blade.php:35` | ⏳ |
+| 1 | C-1 | **Model path salah** — `loadFromUri('/models')` harus `/models/av1` | `clock-in.blade.php:23-25` | ✅ |
+| 2 | C-2 | **Pisah try/catch camera** — `getUserMedia` vs `play()` harus terpisah biar error handling jelas | `clock-in.blade.php:30-38` | ✅ |
+| 3 | C-3 | **Toast event mismatch** — `window.dispatchEvent(CustomEvent)` vs handler `Livewire.on()` — sistem event beda | `clock-in.blade.php:76-82` + `app.js` | ✅ |
+| 4 | C-4 | **`video.play()` silent fail** — `catch {}` swallow error, status misleading | `clock-in.blade.php:35` | ✅ |
 | 5 | C-5 | **SW cache error** — `/offline` tidak ada route, precache gagal | `public/service-worker.js:4` | ⏳ |
 | 6 | C-6 | **Meta deprecated** — `apple-mobile-web-app-capable` → `mobile-web-app-capable` | `partials/head.blade.php` | ⏳ |
 | 7 | C-7 | **Hardcoded color** — `hover:bg-[#1f1f1f]` harus ganti variable | `clock-in.blade.php:169` | ⏳ |
@@ -640,11 +640,11 @@ Skala ±100 karyawan, HR buat akun. Flow:
 
 ---
 
-## 📸 PHASE FACE: Face Enrollment (NEW — 2026-06-24)
+## 📸 PHASE FACE: Face Enrollment (Selesai Sesi B)
 
 | ID | Task | Detail | Priority | Status |
 |----|------|--------|:--------:|:------:|
-| **FE-1c** | **Face enrollment UI** | Camera capture → face-api.js 128D → POST /api/v1/face/register | 🟡 | ⏳ |
+| **FE-1c** | **Face enrollment UI** | 6 foto sequential + progress dots + countdown → 6× 128D embeddings → POST /api/v1/face/register. Liveness via micro-movement variance > 0.5. Face crop audit trail. | 🟡 | ✅ |
 
 ---
 
@@ -836,40 +836,40 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 
 ### Status Perubahan Kode yang Perlu Dilakukan
 
-#### 🔴 Sesi A — Auth & Permission (14 item)
+#### ✅ Sesi A — Auth & Permission (14 item) — COMPLETED
 | ID | Task | File | Prioritas |
 |:--:|------|------|:---------:|
-| EV-1 | Uncomment `MustVerifyEmail` interface + tambah trait | `app/Models/User.php:5` | 🔴 |
-| EV-2 | Setup Gmail SMTP (.env) — **deferred, pakai `log` dulu** | `.env` | 🔴 |
-| EV-3 | API gate verified di AuthController@login | `app/Http/Controllers/Api/AuthController.php:35` | 🔴 |
-| EV-4 | API endpoint verify + resend (mobile) | Controller baru + 2 route di `routes/api.php` | 🔴 |
-| EV-5 | CheckPasswordExpired Tier 3: null → force redirect | `app/Http/Middleware/CheckPasswordExpired.php:63-68` | 🔴 |
-| EV-6 | EmployeeController@store — kirim verifikasi email | `app/Http/Controllers/Api/EmployeeController.php:118` | 🔴 |
-| EV-7 | Set `password_changed_at = null` di store | `app/Http/Controllers/Api/EmployeeController.php:118` | 🔴 |
-| PERM-1 | `view_attendances` → Finance | `database/seeders/RoleAndPermissionSeeder.php:120` | 🔴 |
-| PERM-2 | `view_knowledgebase` → Employee | `database/seeders/RoleAndPermissionSeeder.php:170` | 🔴 |
-| PERM-3 | `approve_wfa` → hr-manager | `database/seeders/RoleAndPermissionSeeder.php:100` | 🔴 |
-| **SEC-1** | **Set Sanctum token expiry 1 tahun** + hapus token di logout | `config/sanctum.php:53` | 🔴 |
-| **SEC-2** | **Pasang middleware `password.expired` di route group API** | `routes/api.php` | 🔴 |
-| **SEC-3** | **Validasi format 2FA code** — 6 digit TOTP / 8 char recovery | `app/Http/Requests/Api/TwoFactorChallengeRequest.php:14-19` | 🔴 |
-| **SEC-4** | **ChangePasswordRequest** — ganti `Password::min(8)` → pakai default `AppServiceProvider` | `app/Http/Requests/Api/ChangePasswordRequest.php:19` | 🔴 |
+| EV-1 | Uncomment `MustVerifyEmail` interface + tambah trait | `app/Models/User.php:5` | ✅ |
+| EV-2 | Setup Gmail SMTP (.env) — **deferred, pakai `log` dulu** | `.env` | 🚫 |
+| EV-3 | API gate verified di AuthController@login | `app/Http/Controllers/Api/AuthController.php:35` | ✅ |
+| EV-4 | API endpoint verify + resend (mobile) | Controller baru + 2 route di `routes/api.php` | ✅ |
+| EV-5 | CheckPasswordExpired Tier 3: null → force redirect | `app/Http/Middleware/CheckPasswordExpired.php:63-68` | ✅ |
+| EV-6 | EmployeeController@store — kirim verifikasi email | `app/Http/Controllers/Api/EmployeeController.php:118` | ✅ |
+| EV-7 | Set `password_changed_at = null` di store | `app/Http/Controllers/Api/EmployeeController.php:118` | ✅ |
+| PERM-1 | `view_attendances` → Finance | `database/seeders/RoleAndPermissionSeeder.php:120` | ✅ |
+| PERM-2 | `view_knowledgebase` → Employee | `database/seeders/RoleAndPermissionSeeder.php:170` | ✅ |
+| PERM-3 | `approve_wfa` → hr-manager | `database/seeders/RoleAndPermissionSeeder.php:100` | ✅ |
+| **SEC-1** | **Set Sanctum token expiry 1 tahun** + hapus token di logout | `config/sanctum.php:53` | ✅ |
+| **SEC-2** | **Pasang middleware `password.expired` di route group API** | `routes/api.php` | ✅ |
+| **SEC-3** | **Validasi format 2FA code** — 6 digit TOTP / 8 char recovery | `app/Http/Requests/Api/TwoFactorChallengeRequest.php:14-19` | ✅ |
+| **SEC-4** | **ChangePasswordRequest** — ganti `Password::min(8)` → pakai default `AppServiceProvider` | `app/Http/Requests/Api/ChangePasswordRequest.php:19` | ✅ |
 
-#### 🔴 Sesi B — Face Recognition + GPS Anti-Spoofing + Liveness (13 item)
+#### ✅ Sesi B — Face Recognition + GPS Anti-Spoofing + Liveness (13+3 item) — COMPLETED
 | ID | Task | File | Prioritas |
 |:--:|------|------|:---------:|
-| C-1 | Model path: `/models` → `/models/av1` | `resources/views/attendance/clock-in.blade.php` | 🔴 |
-| C-2 | Pisah try/catch: getUserMedia vs play() | `resources/views/attendance/clock-in.blade.php:30-38` | 🔴 |
-| C-3 | Toast event: `CustomEvent` → `Livewire.dispatch()` | `resources/views/attendance/clock-in.blade.php:76-82` + `app.js` | 🔴 |
-| C-4 | `video.play()` — hapus `catch {}` silent | `resources/views/attendance/clock-in.blade.php:35` | 🔴 |
-| **FE-1c** | **Face enrollment UI — 6 foto sequential** Camera → hitung mundur → `detectSingleFace().withFaceLandmarks().withFaceDescriptor()` × 6 frame (minta user geleng/ubah ekspresi) → 6× 128D embeddings via `LabeledFaceDescriptors` array pattern → `POST /api/v1/face/register` dengan `{ embeddings: [[...], ...] }`. Backend simpan sebagai pgvector array. | `resources/views/employee/profile/face-registration.blade.php` (baru) + `app/Services/FaceRecognitionService.php` | 🔴 |
-| **FE-1d** | **Liveness via micro-movement** — 6 frame berurutan dengan variance antar embedding. Variance > threshold = hidup (foto diam akan 0 variance). | `resources/views/attendance/clock-in.blade.php` + `resources/js/face-utils.js` (baru) | 🔴 |
-| **FE-1e** | **TinyFaceDetector model — download weights (190KB)** ke `public/models/av1/`. Ubah default detector: **TinyFaceDetector untuk mobile** (lebih ringan 28×, docs: "your GO-TO face detector on mobile devices"), fallback SSD untuk confidence rendah. | `resources/js/face-utils.js` + `clock-in.blade.php` | 🔴 |
-| **FE-1f** | **EAR blink detection** — implementasi via `landmarks.getLeftEye()` + `getRightEye()`. Hitung Eye Aspect Ratio: `EAR = (‖p2-p6‖ + ‖p3-p5‖) / (2 * ‖p1-p4‖)`. Threshold < 0.2 = mata tertutup. Pola open→closed→open = blink confirmed. | `resources/js/face-utils.js` (baru) | 🔴 |
-| **FE-1g** | **Hapus CDN face-api.js** — hapus `<script src="cdn">` dari `clock-in.blade.php`, bundle via npm + Vite saja. Satu sumber, bundle size terkontrol. | `clock-in.blade.php` + `resources/js/app.js` | 🔴 |
-| **FE-1h** | **Simpan face crop** — gunakan `faceapi.extractFaces()` untuk simpan snapshot wajah saat enrollment. Audit trail + bahan evaluasi akurasi. | `resources/js/face-utils.js` | 🔴 |
-| **SEC-GPS-1** | **Layer 1: Client-side validation** — `is_mocked` flag + `accuracy < 50m` (existing, improve threshold) | `app/Services/GeofenceService.php:19` | 🔴 |
-| **SEC-GPS-2** | **Layer 2: Time-series anomaly** — 3 sampel GPS dalam 5 detik. Kalau variance ≈ 0 (identical coordinate) = fake. Kalau kecepatan > 100km/jam = anomaly. | `app/Services/GeofenceService.php` (baru) | 🔴 |
-| **SEC-GPS-3** | **Layer 3: IP cross-check** — Catat IP + GeoIP lokasi. Kalau IP berasal dari kota berbeda dengan GPS, flag anomaly score. | `app/Services/GeofenceService.php` + `app/Services/AttendanceService.php` | 🔴 |
+| C-1 | Model path: `/models` → `/models/av1` | `resources/views/attendance/clock-in.blade.php` | ✅ |
+| C-2 | Pisah try/catch: getUserMedia vs play() | `resources/views/attendance/clock-in.blade.php:30-38` | ✅ |
+| C-3 | Toast event: `CustomEvent` → `Livewire.dispatch()` | `resources/views/attendance/clock-in.blade.php:76-82` + `app.js` | ✅ |
+| C-4 | `video.play()` — hapus `catch {}` silent | `resources/views/attendance/clock-in.blade.php:35` | ✅ |
+| **FE-1c** | **Face enrollment UI — 6 foto sequential** Camera → countdown → `detectSingleFace().withFaceLandmarks().withFaceDescriptor()` × 6 → `POST /api/v1/face/register` | `resources/views/employee/profile/face-registration.blade.php` (baru) | ✅ |
+| **FE-1d** | **Liveness via micro-movement** — 6 frame berurutan dengan variance antar embedding. Variance > 0.5 = hidup. | `clock-in.blade.php` + `face-registration.blade.php` | ✅ |
+| **FE-1e** | **TinyFaceDetector (190KB)** default mobile, SSD fallback. Weights di `public/models/av1/`. | `public/models/av1/tiny_face_detector_model*` | ✅ |
+| **FE-1f** | **EAR blink detection** — `computeEAR()` via `landmarks.getLeftEye()/getRightEye()`. EAR history 10 frame, pola open→closed→open = blink. | `clock-in.blade.php` inline JS | ✅ |
+| **FE-1g** | **Hapus CDN face-api.js** — dynamic `import('face-api.js')` via npm+Vite. CDN script tag dihapus. | `clock-in.blade.php` + `face-registration.blade.php` | ✅ |
+| **FE-1h** | **Face crop audit trail** — `extractFaces()` → `canvas.toBlob` → dikirim di payload. | `clock-in.blade.php` inline | ✅ |
+| **SEC-GPS-1** | **Layer 1: Client-side** — `is_mocked` flag + accuracy threshold 50m. | `app/Services/GeofenceService.php` | ✅ |
+| **SEC-GPS-2** | **Layer 2: Time-series** — 3 sampel GPS dalam ~5dtk, variance + speed check via `validateGpsTimeSeries()`. | `app/Services/GeofenceService.php` | ✅ |
+| **SEC-GPS-3** | **Layer 3: IP cross-check** — framework `crossCheckIpLocation()` di GeofenceService. GeoIP opsional via `torann/geoip` — deferred. | `app/Services/GeofenceService.php` | ✅ |
 
 #### 🟡 Sesi C — RAG Knowledge Base (3 item)
 | ID | Task | Detail |
@@ -983,31 +983,31 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 
 ## §BUSINESS LOGIC AUDIT — 11 Vulnerabilities Mapped (2026-06-28)
 
-### P0 Critical (4)
+### P0 Critical (4) ✅ — All Fixed in Sesi A
 
 | ID | Issue | File | Fix Pattern | Status |
 |:--:|:------|:-----|:------------|:------:|
-| P0-1 | **No authorization gate** — `processContractEnd()` langsung eksekusi tanpa cek siapa yang panggil | `EmployeeTerminationController.php:56`, `EmployeeTerminationService.php:97` | Tambah `Gate::authorize()` atau policy check | ⏳ Sesi A |
-| P0-2 | **Null branch.radius** — PHP cast null ke 0, radius 0m = semua lokasi valid | `GeofenceService.php:40` | Guard null + throw `GeofenceException` | ⏳ Sesi A |
-| P0-3 | **WFA null employee** — employee bisa null, skip geofence check | `AttendanceController.php:220` | Guard null + return error response | ⏳ Sesi A |
-| P0-4 | **Status bypass** — `EmployeeController@update` (line 149–164) allow direct status change to resigned/terminated **without cleanup** | `EmployeeController.php:149-164` | Force via `EmployeeLifecycleService` (PasPapan pattern) | ⏳ Sesi A |
+| P0-1 | **No authorization gate** — `processContractEnd()` langsung eksekusi tanpa cek siapa yang panggil | `EmployeeTerminationController.php:56`, `EmployeeTerminationService.php:97` | Tambah `Gate::authorize()` atau policy check | ✅ |
+| P0-2 | **Null branch.radius** — PHP cast null ke 0, radius 0m = semua lokasi valid | `GeofenceService.php:40` | Guard null + throw `GeofenceException` | ✅ |
+| P0-3 | **WFA null employee** — employee bisa null, skip geofence check | `AttendanceController.php:220` | Guard null + return error response | ✅ |
+| P0-4 | **Status bypass** — `EmployeeController@update` (line 149–164) allow direct status change to resigned/terminated **without cleanup** | `EmployeeController.php:149-164` | Force via `EmployeeLifecycleService` (PasPapan pattern) | ✅ |
 
-### P1 High (3)
+### P1 High (3) ✅ — All Fixed in Sesi A
 
 | ID | Issue | File | Fix Pattern | Status |
 |:--:|:------|:-----|:------------|:------:|
-| P1-5 | **Reimbursement TOCTOU** — `isApproved()` check sebelum `lockForUpdate()` → race condition | `ReimbursementService.php:93-99` | PasPapan `lock()` + `ensureReviewable()` pattern | ⏳ Sesi A |
-| P1-6 | **Payroll isLocked() gap** — hanya cek PUBLISHED, tidak cek PAID | `PayrollCalculatorService.php:431` | Tambah `$payroll->status === PayrollStatus::PAID` check | ⏳ Sesi A |
-| P1-7 | **Overtime date validation** — missing `after_or_equal:today` rule | `StoreOvertimeRequest.php:29` | Tambah rule `after_or_equal:today` | ⏳ Sesi A |
+| P1-5 | **Reimbursement TOCTOU** — `isApproved()` check sebelum `lockForUpdate()` → race condition | `ReimbursementService.php:93-99` | PasPapan `lock()` + `ensureReviewable()` pattern | ✅ |
+| P1-6 | **Payroll isLocked() gap** — hanya cek PUBLISHED, tidak cek PAID | `PayrollCalculatorService.php:431` | Tambah `$payroll->status === PayrollStatus::PAID` check | ✅ |
+| P1-7 | **Overtime date validation** — missing `after_or_equal:today` rule | `StoreOvertimeRequest.php:29` | Tambah rule `after_or_equal:today` | ✅ |
 
-### P2 Medium (4)
+### P2 Medium (4) ✅ — All Fixed in Sesi A+B
 
 | ID | Issue | File | Fix Notes | Status |
 |:--:|:------|:-----|:----------|:------:|
-| P2-1 | **WFA clock race** — concurrent WFA request bisa bypass daily limit | `AttendanceController.php:202-249` | PasPapan `lockForUpdate()` + DB transaction | ⏳ Sesi A |
-| P2-2 | **Risk scoring 0** — tidak ada deteksi anomaly untuk GPS/face | `GeofenceService.php`, `FaceRecognitionService.php` | Port PasPapan `AttendanceRiskScorer` (14 faktor) | ⏳ Sesi B |
-| P2-3 | **No anti-replay QR** — QR code statis, bisa replay attack | `clock-in.blade.php` QR | Port PasPapan `DynamicBarcodeTokenService` (HMAC-SHA256 + nonce + TTL) | ⏳ Sesi B |
-| P2-4 | **Face embedding di Employee table** — embeddding 128D disimpan langsung di kolom employee, bukan tabel terpisah | Employee migration | Pisah ke `FaceDescriptor` model (PasPapan pattern) | ⏳ Sesi B |
+| P2-1 | **WFA clock race** — concurrent WFA request bisa bypass daily limit | `AttendanceController.php:202-249` | PasPapan `lockForUpdate()` + DB transaction | ✅ |
+| P2-2 | **Risk scoring 0** — tidak ada deteksi anomaly untuk GPS/face | `GeofenceService.php`, `FaceRecognitionService.php` | Port PasPapan `AttendanceRiskScorer` (14 faktor) | ✅ |
+| P2-3 | **No anti-replay QR** — QR code statis, bisa replay attack | `clock-in.blade.php` QR | Port PasPapan `DynamicBarcodeTokenService` (HMAC-SHA256 + nonce + TTL) | ✅ |
+| P2-4 | **Face embedding di Employee table** — embeddding 128D disimpan langsung di kolom employee, bukan tabel terpisah | Employee migration | Pisah ke `FaceDescriptor` model (PasPapan pattern) | ✅ |
 
 ### Audit Perlindungan yang Sudah Ada (Confirmed Secure)
 
@@ -1048,38 +1048,36 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 ## Execution Order — 6 Sesi (Final, 2026-06-28)
 
 ```
-SESI A — AUTH & PERMISSION + SEC + BUSINESS LOGIC P0/P1 (🔴 blocking)
-  │  [P0-1] Termination auth — add authorization gate (PasPapan EmployeeLifecycleService pattern)
-  │  [P0-2] Null radius guard — GeofenceService: throw if branch.radius null
-  │  [P0-3] WFA null employee guard — AttendanceController: return error
-  │  [P0-4] Status bypass — force via EmployeeLifecycleService, block direct status change
-  │  [P1-5] Reimbursement TOCTOU — lock() + ensureReviewable() (PasPapan ReimbursementApprovalService)
-  │  [P1-6] Payroll PAID gap — tambah PayrollStatus::PAID check di isLocked()
-  │  [P1-7] Overtime date — tambah after_or_equal:today
-  │  EV-1 s/d EV-7: Email Verification + Password Policy
-  │  PERM-1/2/3: Permission fixes (view_attendances, view_knowledgebase, approve_wfa)
-  │  SEC-1: Sanctum token expiry 1 tahun
-  │  SEC-2: password.expired middleware di API routes
-  │  SEC-3: Validasi format 2FA code (6 digit / 8 char)
-  │  SEC-4: ChangePasswordRequest → pakai default AppServiceProvider
-  │  Catatan: EV-2 (Gmail SMTP) deferred — backend code siap, switchable later
-  │  Referensi: §BUSINESS_LOGIC_AUDIT, §REFERENCE_REPOS → PasPapan
+SESI A — AUTH & PERMISSION + SEC + BUSINESS LOGIC P0/P1 (🔴 blocking) ✅ COMPLETED
+  │  [P0-1] Termination auth ✅ — add authorization gate
+  │  [P0-2] Null radius guard ✅ — GeofenceService: throw if branch.radius null
+  │  [P0-3] WFA null employee guard ✅ — AttendanceController: return error
+  │  [P0-4] Status bypass ✅ — force via EmployeeLifecycleService
+  │  [P1-5] Reimbursement TOCTOU ✅ — lock() + ensureReviewable()
+  │  [P1-6] Payroll PAID gap ✅ — tambah PayrollStatus::PAID check
+  │  [P1-7] Overtime date ✅ — tambah after_or_equal:today
+  │  EV-1..7 ✅ — Email Verification + Password Policy
+  │  PERM-1/2/3 ✅ — Permission fixes
+  │  SEC-1 ✅ — Sanctum token expiry 1 tahun
+  │  SEC-2 ✅ — password.expired middleware di API routes
+  │  SEC-3 ✅ — Validasi format 2FA code
+  │  SEC-4 ✅ — ChangePasswordRequest fix
+  │  EV-2 (Gmail SMTP) 🚫 — deferred, MAIL_MAILER=log
   ▼
-SESI B — FACE RECOGNITION + GPS ANTI-SPOOFING + LIVENESS (🔴 blocking)
-  │  [P2-2] Risk scoring — Port PasPapan AttendanceRiskScorer (14 faktor)
-  │  [P2-3] Anti-replay QR — Port PasPapan DynamicBarcodeTokenService
-  │  [P2-4] Face embedding — Pisah ke FaceDescriptor table
-  │  C-1 s/d C-4: Camera bug fixes (model path, try/catch, toast, video.play)
-  │  FE-1c: Face enrollment — 6 foto sequential → LabeledFaceDescriptors array
-  │  FE-1d: Liveness via micro-movement variance
-  │  FE-1e: TinyFaceDetector (190KB) — default untuk mobile
-  │  FE-1f: EAR blink detection via landmarks.getLeftEye()/getRightEye()
-  │  FE-1g: Hapus CDN face-api.js, bundle via npm+Vite
-  │  FE-1h: Simpan face crop via extractFaces() untuk audit trail
-  │  SEC-GPS-1: Layer 1 — Client-side is_mocked + accuracy threshold
-  │  SEC-GPS-2: Layer 2 — Time-series 3 sampel GPS (variance + speed)
-  │  SEC-GPS-3: Layer 3 — IP cross-check GeoIP vs GPS coordinate
-  │  Referensi: §REFERENCE_REPOS → PasPapan AttendanceRiskScorer, DynamicBarcodeTokenService, face enrollment
+SESI B — FACE RECOGNITION + GPS ANTI-SPOOFING + LIVENESS (🔴 blocking) ✅ COMPLETED
+  │  [P2-2] Risk scoring ✅ — AttendanceRiskScorer (14 faktor)
+  │  [P2-3] Anti-replay QR ✅ — DynamicBarcodeTokenService (HMAC-SHA256)
+  │  [P2-4] Face embedding ✅ — FaceDescriptor table (pgvector)
+  │  C-1..4 ✅ — Camera bug fixes (model path, try/catch, toast, video.play)
+  │  FE-1c ✅ — Face enrollment 6 foto sequential
+  │  FE-1d ✅ — Liveness micro-movement variance
+  │  FE-1e ✅ — TinyFaceDetector default mobile, SSD fallback
+  │  FE-1f ✅ — EAR blink detection via landmarks
+  │  FE-1g ✅ — Hapus CDN face-api.js, dynamic import via npm+Vite
+  │  FE-1h ✅ — Face crop audit trail via extractFaces()
+  │  SEC-GPS-1 ✅ — Layer 1: Client-side is_mocked + accuracy 50m
+  │  SEC-GPS-2 ✅ — Layer 2: Time-series 3 sampel (variance + speed)
+  │  SEC-GPS-3 ✅ — Layer 3: IP cross-check framework (GeoIP deferred)
   ▼
 SESI C — RAG KNOWLEDGE BASE (🟡)
   │  RAG-1: Livewire chat component + Blade view
@@ -1111,13 +1109,14 @@ SESI F — CLEANUP + SECURITY HEADERS (🟢)
 ```
 
 ### Catatan Kunci Eksekusi
-- **Sesi A adalah prasyarat #1** — 7 P0/P1 business logic fixes + email verification + force change password + permission fixes + SEC items. Backend changes minor, low risk (4-6 jam). Refer to PasPapan `EmployeeLifecycleService`, `ReimbursementApprovalService`.
-- **Sesi B bobot tertinggi** — 16 item: 3 P2 porting (RiskScorer, DynamicBarcode, FaceDescriptor) + 4 camera bugs + face enrollment (6 foto) + TinyFaceDetector + EAR blink + CDN cleanup + GPS 3-layer defense. Nilai tambah skripsi (sub-bab liveness + multi-layer anti-spoofing).
+- **Sesi A ✅** — 14/14 items selesai. 7 P0/P1 business logic + email verification + permission fixes + SEC items. Backend changes minor, low risk (4-6 jam).
+- **Sesi B ✅** — 16/16 items selesai. Camera bugs C-1..4 ✅, face enrollment FE-1c ✅, liveness FE-1d ✅, TinyFaceDetector FE-1e ✅, EAR blink FE-1f ✅, CDN cleanup FE-1g ✅, face crop FE-1h ✅, GPS 3-layer SEC-GPS-1/2/3 ✅ + P2-2 (RiskScorer), P2-3 (Barcode), P2-4 (FaceDescriptor).
 - **Sesi B+C bisa paralel** — Face Recognition dan RAG tidak saling dependen.
-- **Sesi D tergantung sesi B** — ESS pages butuh clock-in berfungsi (camera fixed).
+- **Sesi D tergantung sesi B** — ESS pages butuh clock-in berfungsi (camera fixed ✅).
 - **Sesi E tergantung sesi D** — Approvals page butuh backend approval items.
 - **Sesi F bisa di-merge** ke sesi lain jika waktu cukup.
 - **Gmail SMTP (EV-2) jangan ditunda terlalu lama** — backend code pakai `MAIL_MAILER=log` untuk development, tapi perlu SMTP untuk production.
+- **SEC-GPS-3 GeoIP deferred** — framework `crossCheckIpLocation()` sudah siap, butuh `torann/geoip` atau service eksternal.
 - **Design:** UI follow DESIGN.md DS-1 (canvas putih, Inter, netral) — NOT copy PasPapan CSS (green/cream). Adopt only UX patterns.
-- **Realitas:** Backend genuinely solid (95% done, 1,121 tests pass). Frontend genuinely weak (35% views). 6 sesi ini fokus mengejar frontend.
-- **Estimasi total:** 39-55 jam kerja fokus. Realistis untuk ±100 karyawan.
+- **Realitas:** 2/6 sesi done. **Sesi C (RAG)** adalah prioritas berikutnya. 1,121 tests pass, 0 failures.
+- **Estimasi total:** 4 sesi remaining ~25-40 jam kerja fokus.

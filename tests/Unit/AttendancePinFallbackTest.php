@@ -54,6 +54,9 @@ function setRawAttribute(Employee $employee, string $key, mixed $value): void
 
 test('Face match → return FACE_VERIFIED dengan similarity score', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
     $faceService->shouldReceive('verifyFace')
         ->once()
         ->andReturn(['valid' => true, 'similarity_percentage' => 95.5]);
@@ -76,6 +79,9 @@ test('Face match → return FACE_VERIFIED dengan similarity score', function () 
 
 test('Face tidak match + PIN valid → fallback ke PIN_VERIFIED', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
     $faceService->shouldReceive('verifyFace')
         ->once()
         ->andThrow(new FaceNotRecognizedException('Wajah tidak dikenali'));
@@ -102,6 +108,9 @@ test('Face tidak match + PIN valid → fallback ke PIN_VERIFIED', function () {
 
 test('Face belum register (no embedding) + PIN valid → langsung PIN_VERIFIED', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
     // verifyFace tidak boleh dipanggil karena face_embedding null
     $faceService->shouldNotReceive('verifyFace');
 
@@ -126,6 +135,9 @@ test('Face belum register (no embedding) + PIN valid → langsung PIN_VERIFIED',
 
 test('Face race (FaceNotRegisteredException saat verify) + PIN → fallback PIN', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
     $faceService->shouldReceive('verifyFace')
         ->once()
         ->andThrow(new FaceNotRegisteredException('Embedding hilang'));
@@ -152,6 +164,9 @@ test('Face race (FaceNotRegisteredException saat verify) + PIN → fallback PIN'
 
 test('Face belum register + tanpa PIN → throw BusinessRuleException', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
     $faceService->shouldNotReceive('verifyFace');
 
     $service = new AttendanceService(
@@ -169,6 +184,9 @@ test('Face belum register + tanpa PIN → throw BusinessRuleException', function
 
 test('Face tidak match + PIN salah → throw InvalidPinException', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
     $faceService->shouldReceive('verifyFace')
         ->once()
         ->andThrow(new FaceNotRecognizedException('Tidak match'));
@@ -194,6 +212,9 @@ test('Face tidak match + PIN salah → throw InvalidPinException', function () {
 
 test('Face match tapi PIN ada → tetap pakai face (Face takes priority)', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
     $faceService->shouldReceive('verifyFace')
         ->once()
         ->andReturn(['valid' => true, 'similarity_percentage' => 90.0]);
@@ -219,6 +240,9 @@ test('Face match tapi PIN ada → tetap pakai face (Face takes priority)', funct
 
 test('PIN fallback lebih dari 5 hari berturut-turut ditolak', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(false);
     $faceService->shouldNotReceive('verifyFace');
 
     $service = new AttendanceService(
@@ -241,6 +265,9 @@ test('PIN fallback lebih dari 5 hari berturut-turut ditolak', function () {
 
 test('Face match reset PIN fallback streak', function () {
     $faceService = mock(FaceRecognitionService::class);
+    $faceService->shouldReceive('hasFaceEnrolled')
+        ->zeroOrMoreTimes()
+        ->andReturn(true);
     $faceService->shouldReceive('verifyFace')
         ->once()
         ->andReturn(['valid' => true, 'similarity_percentage' => 92.0]);

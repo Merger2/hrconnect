@@ -54,7 +54,8 @@ class EmployeeTerminationService
 
             $lockedEmployee->update($updateData);
 
-            if ($lockedEmployee->face_embedding) {
+            if ($lockedEmployee->face_embedding || $lockedEmployee->faceDescriptors()->exists()) {
+                $lockedEmployee->faceDescriptors()->update(['is_active' => false]);
                 $lockedEmployee->forceFill(['face_embedding' => null])->save();
             }
 

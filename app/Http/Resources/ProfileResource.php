@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\FaceRecognitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,7 +34,7 @@ class ProfileResource extends JsonResource
                 'id' => $this->manager->id,
                 'full_name' => $this->manager->full_name,
             ] : null),
-            'face_registered' => ! empty($this->resource->getRawOriginal('face_embedding')),
+            'face_registered' => app(FaceRecognitionService::class)->hasFaceEnrolled($this->resource),
             'pin_set' => ! empty($this->pin),
             'bank_name' => $this->bank_name,
             'bank_account_number' => $this->maskBankAccount($this->bank_account_number),
