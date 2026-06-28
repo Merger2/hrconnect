@@ -3,6 +3,19 @@ import Swal from 'sweetalert2';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
+window.confirmAction = (options) => {
+    return Swal.fire({
+        icon: options.icon || 'warning',
+        title: options.title || 'Apakah Anda yakin?',
+        text: options.text || '',
+        showCancelButton: true,
+        confirmButtonText: options.confirmText || 'Ya, lanjutkan',
+        cancelButtonText: options.cancelText || 'Batal',
+        confirmButtonColor: options.confirmColor || '#0a0a0a',
+        reverseButtons: true,
+    });
+};
+
 document.addEventListener('livewire:init', () => {
     if (typeof window.Alpine === 'undefined') return;
 
