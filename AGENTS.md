@@ -20,25 +20,26 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Tailwind CSS 4 + PostgreSQL 
 ## Setup & Env Quirks
 
 - PG extensions before `migrate`: `CREATE EXTENSION IF NOT EXISTS vector; pg_trgm; pgcrypto`
-- Design system: Material Design 3 (custom Tailwind, no Flux). Palette in `resources/css/app.css` `@theme`.
+- Design system: Material Design 3 (custom Tailwind, no Flux). Tokens in `resources/css/app.css` `@theme` — uses Rubik 500 (display) + Inter (body).
 - `.npmrc` sets `ignore-scripts=true` — `npm install` won't run build scripts
 - `CIPHERSWEET_KEY` required (64-char hex). `.env.example` has a placeholder; `phpunit.xml` provides a test key.
 - Default env: `QUEUE_CONNECTION=database`, `SESSION_DRIVER=database` (encrypted), `HASH_DRIVER=argon2id`, `CACHE_STORE=database`.
 - `DB_URL` must be **empty** for SQLite tests (set `""` in phpunit.xml).
-- `APP_TIMEZONE=Asia/Jakarta`, `APP_LOCALE=id`.
+- `APP_TIMEZONE=Asia/Jakarta`, `APP_LOCALE=id` — API responses in Indonesian, Faker uses `id_ID`.
 - `pgvector/pgvector` is in `dont-discover` — registered manually via `PgvectorSchema::register()` in `AppServiceProvider`.
 - `post-update-cmd` runs `boost:update` — needs `.env` present.
 - Livewire v4 SFC: `make_command.emoji` set to `false` — no ⚡ prefix in filenames.
+- Dual AI API key: `GEMINI_API_KEY` preferred by laravel/ai SDK; `GOOGLE_AI_API_KEY` legacy fallback in config.
 - `config/livewire.php` published (Livewire v4 defaults).
 
 ## Architecture
 
-- **13 API controllers** at `/api/v1` (single `routes/api.php`). Sanctum bearer auth, token never expires. Public: health, login, 2fa-challenge, forgot-password.
-- **15 services** in `App\Services`. Business logic lives here, not controllers.
+- **14 API controllers** at `/api/v1` (single `routes/api.php`). Sanctum bearer auth, token never expires. Public: health, login, 2fa-challenge, forgot-password.
+- **17 services** in `App\Services`. Business logic lives here, not controllers.
 - **8 observers** (registered manually in `AppServiceProvider`), **8 policies** (auto-discovery), **4 notifications**.
 - **34 enums**: 16 Status/Indicator have `color()` (MD3 semantic: success/warning/error/info); 18 Classification enums must NOT.
 - **5 Spatie roles**: super-admin, hr-manager, finance, manager, employee.
-- **31 models**, **26 factories**, **13 route files**.
+- **33 models**, **27 factories**, **13 route files**.
 - **Web routes** loaded via `bootstrap/app.php` `then` block — reads `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement}.php`. `routes/settings.php` is required from `web.php`.
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax.
 - **+1,100 tests** / +3,600 assertions (SQLite) + **~28 PG tests** in `tests/Integration/Postgres/`.
@@ -49,7 +50,7 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 
 ### PasPapan — Primary Reference (Face, GPS, Risk Scoring, Approval, Termination)
 - Path: `/home/merger/PasPapan/`
-- 79 models, 22 services, 58 Blade components, 1,642 lines app.js, 6,623 lines CSS
+- 80 models, 22 services, 58 Blade components, 1,642 lines app.js, 6,623 lines CSS (251 Blade files total)
 
 | Pattern | File | Port To |
 |:--------|:-----|:--------|
@@ -78,35 +79,54 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 | HitungGajiService | `app/Services/HitungGajiService.php` | Orchestrator semua komponen |
 | Migrations + Seeders | `database/migrations/` | 3 tabel pajak (kategori_ter, golongan_ptkp, tarif_ter) |
 
+### ship-ai-with-laravel — RAG Chat Reference (Sesi C)
+- Path: `/home/merger/RAG-repo/ship-ai-with-laravel/`
+- Pattern: Livewire minimal (4 public props) + Alpine.js SSE streaming via `fetch()` + `ReadableStream.getReader()`
+- Port: `app/Livewire/KnowledgeBaseChat.php` + `resources/views/livewire/knowledge-base-chat.blade.php`
+- SSE: `POST /api/v1/knowledgebase/chat-stream` → `StreamedResponse` with `TextDelta` events
+
 ### Other Repos — Low Priority
 - `/home/merger/laravel-smarthr/` — UI component reference (141 views, 5 Livewire, 0 approval workflow)
 - `/home/merger/hrms-livewire/` — Queue progress bar pattern (109 views, 22 Livewire, 0 services)
 - `/home/merger/hris/` — Org structure hierarchy (React, no HRIS features)
+- `/home/merger/RAG-repo/laravel-ragkit/` — Reusable Laravel RAG package (multi-provider)
+- `/home/merger/RAG-repo/laravelrag/` — Tutorial demo RAG Laravel
 
 ## Business Logic Gotchas (from Audit)
 
-- **P0-1**: `processContractEnd()` has NO authorization gate — add `Gate::authorize()` before execution
-- **P0-2**: `GeofenceService.php:40` — null `branch.radius` casts to 0 (all locations pass). Guard + throw.
-- **P0-3**: `AttendanceController.php:220` — WFA with null employee bypasses geofence. Guard return error.
-- **P0-4**: `EmployeeController@update` (149-164) allows direct status to resigned/terminated. Force via `EmployeeLifecycleService`.
-- **P1-5**: `ReimbursementService.php:93-99` — TOCTOU race: `isApproved()` before `lockForUpdate()`. Use PasPapan `lock()`+`ensureReviewable()`.
-- **P1-6**: `PayrollCalculatorService.php:431` — only checks PUBLISHED, not PAID. Add `PayrollStatus::PAID`.
-- **P1-7**: `StoreOvertimeRequest.php:29` — missing `after_or_equal:today`. Add rule.
+### P0 — Fixed ✅
+- **P0-1**: `processContractEnd()` — guarded by `$user->can('manage_employees')` in `EmployeeTerminationController.php:67`
+- **P0-2**: `GeofenceService.php:45-49` — null `branch.radius` throws `BusinessRuleException`
+- **P0-3**: `AttendanceController.php:219-226` — null employee guard returns 404
+- **P0-4**: `EmployeeController@update` (159-168) — blocks direct status to resigned/terminated/deceased
+
+### P1 — Fixed ✅
+- **P1-5**: `ReimbursementService.php` — `lockForUpdate()` applied in `linkToPayroll()` via `DB::transaction`
+- **P1-6**: `PayrollCalculatorService.php:431` — checks `[PUBLISHED, PAID]`
+- **P1-7**: `StoreOvertimeRequest.php:29` — has `after_or_equal:today`
+- **P1-8**: Notifikasi approver/employee — `ReimbursementRequested` (DB), `ReimbursementRequestedMail` (mail), `ReimbursementStatusUpdated` (DB+mail)
+- **P1-9**: Secure upload — `SecureUploadPolicy` (MIME+double-extension+path traversal), file pindah `public`→`local` disk
+- **P1-10**: `ReimbursementStatus` — tambah `APPROVED_L1` biar gak `ValueError` pas ApprovalService set status L1
+- **P1-11**: Approval matrix company-scoped — `resolveL2Approver()` filter by company → branch → any; policy guard `sameCompany()` di `approveLevel2()` + `view()`
+
+### Active Gotchas (unresolved)
 - **Clock-out PIN**: `AttendanceService.php` — PIN bypass streak check. Fix: require PIN on every clock-out.
 - **Cannot use `Cache::tags()`**: `CACHE_STORE=database` throws `BadMethodCallException`. Use `Cache::forget('key')`.
+- **MailBranding**: Dynamic `from()` + subject prefix dari DB settings (PasPapan `MailBranding` support class). Belum urgent single-company.
+- **Broadcast notif**: PasPapan punya `database,broadcast` channel; HRConnect masih DB+mail aja.
 
 ## Design System
 
 `DESIGN.md` is the source of truth for UI. CSS variables come from `@theme` in `resources/css/app.css` — use `bg-canvas`, `text-ink`, `rounded-xl`, etc. Never hardcode colors/radius/fonts.
-- **CRITICAL: UI follows DESIGN.md DS-1 (canvas #ffffff, body #3a3a3a, Inter font, neutral palette). Do NOT copy PasPapan CSS (green #57944a, cream #fffaf0).**
+- **CRITICAL: UI follows `app.css` `@theme` (canvas #fffaf0, body #1c1b1b, Rubik 500 display + Inter body). Do NOT copy PasPapan CSS (green #57944a, cream #fffaf0).**
 - Brand colors (pink, teal, lavender, etc.) → landing page only. HR pages use minimal accents.
 - Layout: `x-layouts::app.sidebar`.
-- Font: Outfit 500 (display), Inter (fallback).
-- If DESIGN.md changes, update `app.css` first.
+- Font: Rubik 500 (display), Inter (body).
+- DESIGN.md describes an **App Theme vs Landing Page split** (DS-1/DS-2) via CSS variable overrides in `welcome.blade.php`. If DESIGN.md changes, update `app.css` first.
 
 ## CI
 
-`main`/`develop`/`master` pushes + PRs trigger:
+`main`/`develop`/`master`/`workos` pushes + PRs trigger:
 - **lint.yml**: PHP 8.4, runs `composer lint` (Pint).
 - **tests.yml (sqlite)**: PHP 8.5, `npm i` (ignore-scripts), `composer install --optimize-autoloader`, `./vendor/bin/pest`.
 - **tests.yml (postgres)**: PHP 8.5, `pgvector/pgvector:pg16` service, `./vendor/bin/pest --configuration=phpunit.pgsql.xml`.
@@ -124,7 +144,56 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 - **Per-page max**: pagination `per_page` capped at 100.
 - **Scramble**: `config/scramble.php` `api_path => 'api'` strips prefix from paths (shows `/v1/...`), but server URL includes `/api`. URLs resolve correctly.
 
+## RAG Knowledge Base (Sesi C)
+
+### Architecture
+- **Backend**: `KnowledgeBaseService` orchestrates RAG — embed question via Gemini `text-embedding-004` (768D), vector search top-5 chunks via pgvector cosine distance, generate answer via `HrKnowledgeBaseAgent` (Gemini 2.5 Flash, structured output `answer` + `confidence`). Fallback: pg_trgm keyword search.
+- **Sync API**: `POST /api/v1/knowledgebase/chat` → synchronous JSON response with `{answer, sources, confidence}`.
+- **Streaming API**: `POST /api/v1/knowledgebase/chat-stream` → SSE `text/event-stream` with `data: {"text":"..."}` events.
+- **Upload**: `POST /api/v1/knowledgebase/upload` → PDF → chunking → async `ProcessKnowledgeBaseEmbedding` job.
+- **Web UI**: Livewire minimal + Alpine.js SSE streaming via `fetch()` + `ReadableStream.getReader()`. Pola dari `ship-ai-with-laravel`.
+
+### Files
+| Path | Purpose |
+|------|---------|
+| `app/Livewire/KnowledgeBaseChat.php` | Livewire component: public `$messages`, `$input`, `$conversationId`, `$isStreaming` |
+| `resources/views/livewire/knowledge-base-chat.blade.php` | Alpine `x-data="knowledgeBaseChat()"` — SSE streaming, typing indicator, suggestion buttons |
+| `resources/views/knowledge-base/index.blade.php` | Layout wrapper → `<livewire:knowledge-base-chat />` |
+| `resources/views/knowledge-base/manage.blade.php` | Upload form + document list table (HR only) |
+| `app/Http/Controllers/Api/KnowledgeBaseController.php` | `chat()`, `chatStream()`, `upload()`, `destroy()` |
+| `app/Services/KnowledgeBaseService.php` | Orchestrator RAG (embed → search → generate) |
+| `app/Http/Requests/Api/ChatStreamRequest.php` | Validation: `question` min:5 max:500 |
+
+### SSE Protocol
+```
+data: {"text":"Cuti"}
+data: {"text":" tahunan"}
+data: {"text":" karyawan..."}
+data: {"conversation_id":"abc123","sources":[{"id":1,"title":"...","snippet":"..."}]}
+data: [DONE]
+```
+
+### Frontend Pattern (Alpine.js x-data)
+```js
+async sendMessage() {
+    // 1. POST /api/v1/knowledgebase/chat-stream
+    // 2. response.body.getReader() → ReadableStream
+    // 3. Parse data: {"text":"..."} events
+    // 4. Append to messages[agentIndex].content
+    // 5. Auto-scroll via scrollToBottom()
+}
+```
+
+### Key Gotchas
+- **`RAG_MOCK_MODE=true`** in `.env` is NOT read by any PHP code — it's dead config. Sistem selalu panggil Gemini API sungguhan.
+- **Sync endpoint** (`POST /chat`) returns full JSON. **Streaming** (`POST /chat-stream`) returns SSE. Keduanya independent — bisa dipanggil sesuai kebutuhan.
+- **pg_trgm fallback** hanya di sync `chat()`, bukan di streaming. Kalau streaming gagal, frontend harus fallback ke sync endpoint.
+- **`GOOGLE_AI_API_KEY`** required di `.env`. Model `gemini-2.5-flash` butuh tier bayar. Alternatif: `gemini-2.0-flash` (free tier).
+- **Conversation memory**: `conversationId` dikirim balik tapi tidak disimpan ke DB. Setiap chat baru = konteks fresh.
+
 ===
+
+
 
 <laravel-boost-guidelines>
 === foundation rules ===

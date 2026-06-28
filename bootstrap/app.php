@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api/v1',
         then: function () {
             $modules = [
-                'attendance', 'leave', 'overtime', 'payroll', 'approval',
+                'attendance', 'employee', 'leave', 'overtime', 'payroll', 'approval',
                 'knowledge-base', 'asset', 'loan', 'reimbursement',
             ];
             foreach ($modules as $module) {

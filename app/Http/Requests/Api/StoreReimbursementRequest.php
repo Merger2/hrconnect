@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Support\SecureUploadPolicy;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreReimbursementRequest extends FormRequest
@@ -18,7 +19,10 @@ class StoreReimbursementRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:1000'],
             'description' => ['required', 'string', 'min:10', 'max:1000'],
             'expense_date' => ['required', 'date', 'before_or_equal:today'],
-            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'receipt' => array_merge(
+                ['required'],
+                (new SecureUploadPolicy)->rules('receipt'),
+            ),
         ];
     }
 }
