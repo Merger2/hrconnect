@@ -3,6 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
+use App\Services\Payroll\BpjsService;
+use App\Services\Payroll\PotonganService;
+use App\Services\Payroll\Pph21Service;
 use Livewire\Component;
 
 class SalaryCalculator extends Component
@@ -41,9 +44,14 @@ class SalaryCalculator extends Component
     {
         $bruto = $this->gajiPokok + $this->tunjanganJabatan + $this->tunjanganMakan + $this->tunjanganTransport + $this->lemburPay;
 
-        $deductionAlfa = $this->calculateAlfa();
-        $deductionPph21 = $this->calculatePph21($bruto);
-        $deductionBpjs = $this->calculateBpjs();
+        $deductionAlfa = app(PotonganService::class)->calculateAlfa(
+            $this->gajiPokok, $this->tunjanganJabatan,
+            $this->tunjanganMakan, $this->tunjanganTransport,
+            $this->hariAlfa,
+        );
+
+        $deductionPph21 = app(Pph21Service::class)->calculateMonthly($bruto * 12);
+        $deductionBpjs = app(BpjsService::class)->calculate($this->gajiPokok, $this->tunjanganJabatan)['total'];
 
         $totalDeductions = $deductionAlfa + $deductionPph21 + $deductionBpjs;
 
@@ -65,59 +73,5 @@ class SalaryCalculator extends Component
     public function render()
     {
         return view('livewire.salary-calculator');
-    }
-
-    private function calculateAlfa(): float
-    {
-        if ($this->hariAlfa <= 0) {
-            return 0;
-        }
-
-        $upahTetap = $this->gajiPokok + $this->tunjanganJabatan;
-        $perHari = $upahTetap / 22;
-
-        return round($perHari * $this->hariAlfa);
-    }
-
-    private function calculatePph21(float $bruto): float
-    {
-        if ($bruto <= 0) {
-            return 0;
-        }
-
-        $pkp = $bruto * 12 - 54_000_000;
-
-        if ($pkp <= 0) {
-            return 0;
-        }
-
-        $pph21Setahun = 0;
-        if ($pkp <= 60_000_000) {
-            $pph21Setahun = $pkp * 0.05;
-        } elseif ($pkp <= 250_000_000) {
-            $pph21Setahun = 60_000_000 * 0.05 + ($pkp - 60_000_000) * 0.15;
-        } elseif ($pkp <= 500_000_000) {
-            $pph21Setahun = 60_000_000 * 0.05 + 190_000_000 * 0.15 + ($pkp - 250_000_000) * 0.25;
-        } else {
-            $pph21Setahun = 60_000_000 * 0.05 + 190_000_000 * 0.15 + 250_000_000 * 0.25 + ($pkp - 500_000_000) * 0.3;
-        }
-
-        return round($pph21Setahun / 12);
-    }
-
-    private function calculateBpjs(): float
-    {
-        $dasar = $this->gajiPokok + $this->tunjanganJabatan;
-
-        // BPJS Kesehatan: 1% dari gaji (kap 12jt)
-        $kesehatan = round(min($dasar, 12_000_000) * 0.01);
-
-        // BPJS JHT: 2% dari gaji pokok
-        $jht = round($this->gajiPokok * 0.02);
-
-        // BPJS JP: 1% dari gaji (kap ~10.5jt)
-        $jp = round(min($dasar, 10_547_400) * 0.01);
-
-        return $kesehatan + $jht + $jp;
     }
 }

@@ -46,6 +46,22 @@ window.HRConnectAlert = {
 
         return result.isConfirmed;
     },
+
+    modal(options) {
+        return Swal.fire({
+            icon: options.icon || 'info',
+            title: options.title || '',
+            text: options.text || '',
+            html: options.html || undefined,
+            showConfirmButton: true,
+            confirmButtonText: options.confirmButtonText || 'Tutup',
+            showCancelButton: options.showCancelButton || false,
+            cancelButtonText: options.cancelButtonText || 'Batal',
+            buttonsStyling: false,
+            customClass: swalClasses,
+            didRender: options.didRender || undefined,
+        });
+    },
 };
 
 function installSweetAlertConfirmations(root = document) {
