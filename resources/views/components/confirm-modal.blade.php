@@ -67,16 +67,20 @@ $buttonClass = match ($variant) {
         </div>
 
         <div class="mt-6 flex items-center justify-center gap-3">
-            <button @click="open = false"
-                class="rounded-xl border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-surface-dim">
-                {{ $cancelLabel }}
-            </button>
-            <button @click="$wire.{{ $name }}(); open = false"
-                x-bind:disabled="loading"
-                class="{{ $buttonClass }} rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-40">
-                <span x-show="!loading">{{ $confirmLabel }}</span>
-                <span x-show="loading" x-cloak>{{ __('Processing...') }}</span>
-            </button>
+            @if (isset($actions))
+                {{ $actions }}
+            @else
+                <button @click="open = false"
+                    class="rounded-xl border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-surface-dim">
+                    {{ $cancelLabel }}
+                </button>
+                <button @click="$wire.{{ $name }}(); open = false"
+                    x-bind:disabled="loading"
+                    class="{{ $buttonClass }} rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-40">
+                    <span x-show="!loading">{{ $confirmLabel }}</span>
+                    <span x-show="loading" x-cloak>{{ __('Processing...') }}</span>
+                </button>
+            @endif
         </div>
     </div>
 </div>

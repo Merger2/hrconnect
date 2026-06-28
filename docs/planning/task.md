@@ -270,7 +270,7 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 
 | Day | Baru | Pages | Modal | Modul |
 |:---:|:----:|:-----:|:-----:|-------|
-| **1** | 9 | — | 9 | **Component Library** — page-shell, toolbar, table, card-grid, form-modal, confirm-modal, filter-bar, skeleton, pagination, empty-state |
+| **1** | 9 | — | 9 | **Component Library** ✅ — page-shell, toolbar, table, card-grid, form-modal, confirm-modal, filter-bar, skeleton, pagination, empty-state |
 | **2** | 4 | 2 | 2 | **Employee** — list (grid+table), detail+tabs, create/edit modal, terminate/import modal |
 | **3** | 9 | 6 | 3 | **Organization (2 + 2 modal) + Attendance Admin (4 + 1 modal)** — dept, position, company, org-chart, shift, holiday, matrix, balance |
 | **4** | 10 | 5 | 5 | **Leave (2+1) + Overtime (1+1) + Reimburse (1+1) + Asset (1+2)** — admin views + CRUD |
