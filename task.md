@@ -109,25 +109,13 @@ Varian: `dialog-modal` (form), `confirmation-modal` (warning icon + confirm/canc
 ---
 
 ## P3 — Selesai ✅
-### 10. Queue Progress Bar
-
-**Sumber**: HRMS Livewire — `wire:poll.1s` + model Import
-**Pola**: Dispatch ke Navbar → 1s polling → progress bar dari `Import` model.
-```blade
-<div wire:poll.1s="updateProgressBar" class="progress h-5">
-  <div class="progress-bar" style="width: {{ $percentage }}%">{{ $percentage }}%</div>
-</div>
-```
-⏳ **Pending** — butuh backend Import model + Livewire component.
+### 10. Queue Progress Bar ✅ (`ImportProgress` model + migration)
 
 ### 11. Payroll Status Workflow ✅ (udah ada — DRAFT→PUBLISHED→PAID + badge)
 **Sumber**: Quanta HRIS — Draf→Diajukan→Diverifikasi→Disetujui→Ditolak
 **Pola**: Badge + icon per status dengan warna berbeda.
 
-### 12. Client-side Salary Calculator
-⏳ **Pending** — butuh port formula dari Quanta HRIS (server-side, bukan murni UI)
-**Sumber**: Quanta HRIS `EditGajiKaryawanAction.php`
-**Pola**: `data-field` attribute pada input + `recalculateClientSide()` JS → update total real-time.
+### 12. Salary Calculator ✅ (`SalaryCalculator` Livewire + formula PPh21/BPJS/Alfa port dari Quanta)
 
 ### 13. Dashboard Stat Cards ✅
 **Sumber**: Laravel SmartHR `dash-widget` + HRConnect existing patterns
