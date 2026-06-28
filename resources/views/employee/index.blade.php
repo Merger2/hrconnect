@@ -6,9 +6,6 @@
                     <x-button variant="primary" icon="add" @click="openCreateModal()">
                         {{ __('Add Employee') }}
                     </x-button>
-                    <x-button variant="secondary" icon="upload" @click="importModalOpen = true">
-                        {{ __('Import') }}
-                    </x-button>
                     <x-button variant="secondary" icon="download" @click="exportCSV">
                         {{ __('Export') }}
                     </x-button>
@@ -429,11 +426,10 @@
                                 <label class="mb-1 block text-sm font-medium text-ink">{{ __('Termination Type') }} *</label>
                                 <select x-model="terminateForm.type"
                                     class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                    <option value="phk">{{ __('PHK (Layoff)') }}</option>
-                                    <option value="disciplinary">{{ __('Disciplinary Termination') }}</option>
-                                    <option value="mutual">{{ __('Mutual Agreement') }}</option>
-                                    <option value="contract_end">{{ __('Contract End') }}</option>
-                                    <option value="other">{{ __('Other') }}</option>
+<option value="dismissed">{{ __('PHK (Dismissed)') }}</option>
+<option value="resign">{{ __('Resignation') }}</option>
+<option value="contract_end">{{ __('Contract End') }}</option>
+<option value="deceased">{{ __('Deceased') }}</option>
                                 </select>
                             </div>
 
@@ -471,56 +467,7 @@
             </div>
         </template>
 
-        {{-- Import Modal --}}
-        <template x-teleport="body">
-            <div x-show="importModalOpen" x-cloak @keydown.escape.window="importModalOpen = false"
-                class="fixed inset-0 z-50 flex items-center justify-center">
-                <div class="fixed inset-0 bg-black/40" @click="importModalOpen = false"></div>
-                <div class="relative z-10 w-full max-w-lg rounded-2xl bg-canvas p-6 shadow-xl">
-                    <div class="mb-5 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-ink">{{ __('Import Employees') }}</h2>
-                        <button @click="importModalOpen = false" class="rounded-lg p-1 text-on-surface-variant hover:bg-surface-dim hover:text-ink">
-                            <span class="material-symbols-outlined text-xl">close</span>
-                        </button>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="rounded-lg bg-info/10 p-3 text-sm text-info">
-                            <p class="font-medium">{{ __('Format') }}</p>
-                            <p class="mt-1 text-xs">{{ __('Upload a CSV file with headers: Employee Number, Full Name, Email, NIK, Phone, Gender (L/P), Marital Status, Birth Date (Y-m-d), Join Date (Y-m-d), Department, Position, Employment Type, Salary Type, Education Level.') }}</p>
-                        </div>
-
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-ink">{{ __('CSV File') }} *</label>
-                            <div class="flex items-center gap-3">
-                                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-outline-variant bg-canvas px-4 py-3 text-sm text-ink transition-colors hover:bg-surface-dim">
-                                    <span class="material-symbols-outlined text-lg">upload_file</span>
-                                    <span x-text="importFile ? importFile.name : '{{ __('Choose file...') }}'"></span>
-                                    <input type="file" accept=".csv" class="hidden" @change="importFile = $event.target.files[0]">
-                                </label>
-                                <button @click="downloadTemplate" class="text-sm font-medium text-info hover:underline">{{ __('Download template') }}</button>
-                            </div>
-                        </div>
-
-                        <div x-show="importError" x-cloak class="rounded-xl bg-error/10 p-3 text-sm text-error">
-                            <p x-text="importError"></p>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex items-center justify-end gap-3 border-t border-outline-variant/50 pt-4">
-                        <button type="button" @click="importModalOpen = false"
-                            class="rounded-xl border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-surface-dim">
-                            {{ __('Cancel') }}
-                        </button>
-                        <button @click="submitImport()" x-bind:disabled="importLoading || !importFile"
-                            class="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-40">
-                            <span x-show="!importLoading">{{ __('Import') }}</span>
-                            <span x-show="importLoading" x-cloak>{{ __('Importing...') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </template>
+        {{-- Import — placeholder untuk V2 --}}
     </div>
 
     <script>
@@ -557,15 +504,9 @@
                 // ─── Terminate State ───
                 terminateModalOpen: false,
                 selectedEmployee: null,
-                terminateForm: { type: 'phk', reason: '', date: '' },
+                terminateForm: { type: 'dismissed', reason: '', date: '' },
                 terminateError: '',
                 terminateLoading: false,
-
-                // ─── Import State ───
-                importModalOpen: false,
-                importFile: null,
-                importError: '',
-                importLoading: false,
 
                 // ─── Init ───
                 init() {
@@ -756,7 +697,7 @@
                 openTerminateModal(employee) {
                     this.selectedEmployee = employee;
                     this.terminateForm = {
-                        type: 'phk',
+                        type: 'dismissed',
                         reason: '',
                         date: new Date().toISOString().slice(0, 10),
                     };
@@ -769,14 +710,13 @@
                     this.terminateError = '';
                     this.terminateLoading = true;
                     try {
-                        const res = await fetch(`/api/v1/employees/${this.selectedEmployee.id}`, {
-                            method: 'PUT',
+                        const res = await fetch(`/api/v1/employees/${this.selectedEmployee.id}/terminate`, {
+                            method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                             body: JSON.stringify({
-                                status: 'terminated',
-                                termination_type: this.terminateForm.type,
-                                termination_reason: this.terminateForm.reason,
-                                resign_date: this.terminateForm.date,
+                                type: this.terminateForm.type,
+                                reason: this.terminateForm.reason,
+                                date: this.terminateForm.date,
                             }),
                         });
 
@@ -796,48 +736,7 @@
                     }
                 },
 
-                // ─── Import ───
-                downloadTemplate() {
-                    const headers = ['Employee Number', 'Full Name', 'Email', 'NIK', 'Phone', 'Gender', 'Marital Status', 'Birth Date', 'Join Date', 'Department', 'Position', 'Employment Type', 'Salary Type', 'Education Level'];
-                    const csv = headers.join(',');
-                    const blob = new Blob([csv], { type: 'text/csv' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'employee_import_template.csv';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                },
-
-                async submitImport() {
-                    if (!this.importFile) return;
-                    this.importError = '';
-                    this.importLoading = true;
-                    try {
-                        const formData = new FormData();
-                        formData.append('file', this.importFile);
-
-                        const res = await fetch('/api/v1/employees/import', {
-                            method: 'POST',
-                            headers: { 'Accept': 'application/json' },
-                            body: formData,
-                        });
-
-                        if (!res.ok) {
-                            const err = await res.json();
-                            this.importError = err.message || '{{ __('Import failed') }}';
-                            return;
-                        }
-
-                        this.importModalOpen = false;
-                        this.importFile = null;
-                        this.fetchEmployees();
-                    } catch (e) {
-                        this.importError = '{{ __('An error occurred') }}';
-                    } finally {
-                        this.importLoading = false;
-                    }
-                },
+                // ─── Import (V2) ───
             }));
         });
     </script>

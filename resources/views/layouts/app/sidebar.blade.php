@@ -30,14 +30,16 @@
                     <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('HR') }}</p>
                 </div>
 
-                <a href="{{ route('admin.employees.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('admin.employees.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">group</span>
-                    <span>{{ __('Employees') }}</span>
-                </a>
+                @can('viewAny', App\Models\Employee::class)
+                    <a href="{{ route('admin.employees.index') }}"
+                       @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                               'bg-ink/5 text-ink' => request()->routeIs('admin.employees.*'),
+                               'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
+                       wire:navigate>
+                        <span class="material-symbols-outlined text-2xl">group</span>
+                        <span>{{ __('Employees') }}</span>
+                    </a>
+                @endcan
 
                 <a href="{{ route('attendance.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',

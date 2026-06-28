@@ -6,7 +6,7 @@
                     {{ __('Back') }}
                 </x-button>
                 @can('manage_employees')
-                    <x-button variant="primary" icon="edit" @click="$dispatch('open-modal', 'create-employee'); Alpine.$data(document.querySelector('[x-data=\"employeesIndex()\"]'))?.editEmployee(employeeData)">
+                    <x-button variant="primary" icon="edit" href="{{ route('admin.employees.index') }}" wire:navigate>
                         {{ __('Edit') }}
                     </x-button>
                 @endcan
@@ -35,10 +35,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div x-show="loading" class="py-16">
-                <x-loading-skeleton mode="card" />
             </div>
 
             {{-- Tabs --}}
