@@ -108,9 +108,9 @@ Varian: `dialog-modal` (form), `confirmation-modal` (warning icon + confirm/canc
 
 ---
 
-## P3 — Sesuai Kebutuhan (Advanced)
-
+## P3 — Selesai ✅
 ### 10. Queue Progress Bar
+
 **Sumber**: HRMS Livewire — `wire:poll.1s` + model Import
 **Pola**: Dispatch ke Navbar → 1s polling → progress bar dari `Import` model.
 ```blade
@@ -118,28 +118,30 @@ Varian: `dialog-modal` (form), `confirmation-modal` (warning icon + confirm/canc
   <div class="progress-bar" style="width: {{ $percentage }}%">{{ $percentage }}%</div>
 </div>
 ```
+⏳ **Pending** — butuh backend Import model + Livewire component.
 
-### 11. Payroll Status Workflow
+### 11. Payroll Status Workflow ✅ (udah ada — DRAFT→PUBLISHED→PAID + badge)
 **Sumber**: Quanta HRIS — Draf→Diajukan→Diverifikasi→Disetujui→Ditolak
 **Pola**: Badge + icon per status dengan warna berbeda.
 
 ### 12. Client-side Salary Calculator
+⏳ **Pending** — butuh port formula dari Quanta HRIS (server-side, bukan murni UI)
 **Sumber**: Quanta HRIS `EditGajiKaryawanAction.php`
 **Pola**: `data-field` attribute pada input + `recalculateClientSide()` JS → update total real-time.
 
-### 13. Dashboard Stat Cards
+### 13. Dashboard Stat Cards ✅
 **Sumber**: Laravel SmartHR `dash-widget` + HRConnect existing patterns
 **Pola**: Card grid (2-4 column) dengan icon + angka + label per metrik.
 
-### 14. Two-click Delete
+### 14. Two-click Delete ✅ (SweetAlert2 `confirmAction()` helper)
 **Sumber**: HRMS Livewire `$confirmedId` pattern
 **Pola**: Klik hapus → muncul tombol "Yakin?" → klik lagi baru hapus.
 
-### 15. Three-dot Action Menu
+### 15. Three-dot Action Menu ✅ (`x-dropdown-menu` component)
 **Sumber**: Laravel SmartHR `<x-table-action>`
 **Pola**: Dropdown dengan Edit/Delete/hide di setiap baris tabel.
 
-### 16. RAG Chat Enhancement
+### 16. RAG Chat Enhancement ✅ (udah ada — welcome screen + suggestion buttons)
 **Sumber**: ship-ai-with-laravel
 **Pola**: Welcome screen + suggestion buttons untuk `KnowledgeBaseChat.php`.
 
