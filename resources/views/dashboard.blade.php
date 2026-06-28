@@ -24,6 +24,8 @@
             </div>
         </div>
 
+        <livewire:quick-actions />
+
         <div class="flex flex-1 items-center justify-center rounded-xl border border-dashed border-outline-variant bg-canvas">
             <div class="text-center">
                 <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">monitoring</span>
