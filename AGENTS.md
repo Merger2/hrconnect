@@ -104,12 +104,16 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 - **P1-5**: `ReimbursementService.php` — `lockForUpdate()` applied in `linkToPayroll()` via `DB::transaction`
 - **P1-6**: `PayrollCalculatorService.php:431` — checks `[PUBLISHED, PAID]`
 - **P1-7**: `StoreOvertimeRequest.php:29` — has `after_or_equal:today`
+- **P1-8**: Notifikasi approver/employee — `ReimbursementRequested` (DB), `ReimbursementRequestedMail` (mail), `ReimbursementStatusUpdated` (DB+mail)
+- **P1-9**: Secure upload — `SecureUploadPolicy` (MIME+double-extension+path traversal), file pindah `public`→`local` disk
+- **P1-10**: `ReimbursementStatus` — tambah `APPROVED_L1` biar gak `ValueError` pas ApprovalService set status L1
+- **P1-11**: Approval matrix company-scoped — `resolveL2Approver()` filter by company → branch → any; policy guard `sameCompany()` di `approveLevel2()` + `view()`
 
 ### Active Gotchas (unresolved)
-- **Approval matrix company-scoped** — `resolveL2Approver()` returns first finance user anywhere; should filter by company + branch fallback.
-- **Approval matrix company-scoped** — `resolveL2Approver()` returns first finance user anywhere; should filter by company + branch fallback.
 - **Clock-out PIN**: `AttendanceService.php` — PIN bypass streak check. Fix: require PIN on every clock-out.
 - **Cannot use `Cache::tags()`**: `CACHE_STORE=database` throws `BadMethodCallException`. Use `Cache::forget('key')`.
+- **MailBranding**: Dynamic `from()` + subject prefix dari DB settings (PasPapan `MailBranding` support class). Belum urgent single-company.
+- **Broadcast notif**: PasPapan punya `database,broadcast` channel; HRConnect masih DB+mail aja.
 
 ## Design System
 
