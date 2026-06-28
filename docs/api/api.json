@@ -5750,6 +5750,47 @@
                 }
             }
         },
+        "/v1/reimbursement/categories": {
+            "get": {
+                "operationId": "reimbursement.categories",
+                "description": "Get active reimbursement categories.",
+                "summary": "List Reimbursement Categories",
+                "tags": [
+                    "Reimbursement"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ReimbursementCategoryResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/reimbursement/{reimbursement}": {
             "get": {
                 "operationId": "reimbursement.show",
@@ -5793,6 +5834,77 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "reimbursement.update",
+                "description": "Update pending reimbursement request. Flow: Reimbursement (edit).",
+                "summary": "Update Reimbursement",
+                "tags": [
+                    "Reimbursement"
+                ],
+                "parameters": [
+                    {
+                        "name": "reimbursement",
+                        "in": "path",
+                        "required": true,
+                        "description": "The reimbursement ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateReimbursementRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Pengajuan reimbursement berhasil diperbarui"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
@@ -5853,6 +5965,38 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/reimbursement/{reimbursement}/receipt": {
+            "get": {
+                "operationId": "reimbursement.receipt",
+                "description": "Download reimbursement receipt file.",
+                "summary": "Download Receipt",
+                "tags": [
+                    "Reimbursement"
+                ],
+                "parameters": [
+                    {
+                        "name": "reimbursement",
+                        "in": "path",
+                        "required": true,
+                        "description": "The reimbursement ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -6237,6 +6381,30 @@
                 },
                 "title": "RegisterFaceRequest"
             },
+            "ReimbursementCategoryResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "code",
+                    "is_active"
+                ],
+                "title": "ReimbursementCategoryResource"
+            },
             "RejectRequest": {
                 "type": "object",
                 "properties": {
@@ -6487,8 +6655,7 @@
                     "receipt": {
                         "type": "string",
                         "format": "binary",
-                        "contentMediaType": "application/octet-stream",
-                        "maxLength": 5120
+                        "contentMediaType": "application/octet-stream"
                     }
                 },
                 "required": [
@@ -6657,6 +6824,37 @@
                     }
                 },
                 "title": "UpdateProfileRequest"
+            },
+            "UpdateReimbursementRequest": {
+                "type": "object",
+                "properties": {
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "amount": {
+                        "type": "number",
+                        "minimum": 1000
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 1000
+                    },
+                    "expense_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "receipt": {
+                        "type": "string",
+                        "format": "binary",
+                        "contentMediaType": "application/octet-stream"
+                    }
+                },
+                "title": "UpdateReimbursementRequest"
             },
             "UploadDocumentRequest": {
                 "type": "object",

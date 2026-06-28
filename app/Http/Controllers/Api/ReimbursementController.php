@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\ReimbursementStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ListReimbursementRequest;
 use App\Http\Requests\Api\StoreReimbursementRequest;
+use App\Http\Requests\Api\UpdateReimbursementRequest;
+use App\Http\Resources\ReimbursementCategoryResource;
 use App\Http\Resources\ReimbursementResource;
 use App\Models\Reimbursement;
-use App\Services\ApprovalService;
+use App\Models\ReimbursementCategory;
+use App\Services\ReimbursementService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -16,13 +18,13 @@ use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Group('Reimbursement')]
 class ReimbursementController extends Controller
 {
     public function __construct(
-        protected ApprovalService $approvalService,
+        protected ReimbursementService $reimbursementService,
     ) {}
 
     #[Endpoint(title: 'Create Reimbursement', description: 'Submit reimbursement request with receipt and expense details. Flow: Reimbursement (Step 1/2) → Approval.')]
@@ -47,42 +49,51 @@ class ReimbursementController extends Controller
             ], 404);
         }
 
-        $receiptPath = null;
-
-        try {
-            $receiptPath = $request->file('receipt')->store('reimbursements', 'public');
-        } catch (Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal menyimpan bukti pembayaran: '.$e->getMessage(),
-            ], 500);
+        if ($request->hasFile('receipt')) {
+            $data['receipt'] = $request->file('receipt');
         }
 
         try {
-            $reimbursement = Reimbursement::create([
-                'employee_id' => $employee->id,
-                'category_id' => $data['category_id'],
-                'title' => $data['title'] ?? mb_substr($data['description'], 0, 100),
-                'amount' => $data['amount'],
-                'description' => $data['description'],
-                'expense_date' => $data['expense_date'],
-                'receipt_file' => $receiptPath,
-                'status' => ReimbursementStatus::PENDING,
-            ]);
-
-            $this->approvalService->createApprovalWorkflow($reimbursement);
-        } catch (Throwable $e) {
-            if ($receiptPath !== null) {
-                Storage::disk('public')->delete($receiptPath);
-            }
-            throw $e;
+            $reimbursement = $this->reimbursementService->createReimbursement($employee, $data);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Pengajuan reimbursement berhasil dikirim',
-            'data' => ReimbursementResource::make($reimbursement->fresh(['approvals']))->resolve($request),
+            'data' => ReimbursementResource::make($reimbursement->fresh(['approvals.approver:id,full_name', 'category:id,name']))->resolve($request),
         ], 201);
+    }
+
+    #[Endpoint(title: 'Update Reimbursement', description: 'Update pending reimbursement request. Flow: Reimbursement (edit).')]
+    public function update(UpdateReimbursementRequest $request, Reimbursement $reimbursement): JsonResponse
+    {
+        $this->authorize('update', $reimbursement);
+
+        $data = $request->validated();
+
+        if ($request->hasFile('receipt')) {
+            $data['receipt'] = $request->file('receipt');
+        }
+
+        try {
+            $reimbursement = $this->reimbursementService->updateReimbursement($reimbursement, $data);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Pengajuan reimbursement berhasil diperbarui',
+            'data' => ReimbursementResource::make($reimbursement->load(['approvals.approver:id,full_name', 'category:id,name']))->resolve($request),
+        ]);
     }
 
     #[Endpoint(title: 'List Reimbursements', description: 'Paginated reimbursement list with status/period filters. Flow: Reimbursement (history).')]
@@ -97,7 +108,6 @@ class ReimbursementController extends Controller
         $user = $request->user();
         $perPage = (int) $request->input('per_page', 20);
 
-        // A-6: Eager load employee + category to prevent N+1
         $query = Reimbursement::with('employee:id,employee_number,full_name', 'category:id,name')
             ->orderBy('created_at', 'desc');
 
@@ -157,6 +167,34 @@ class ReimbursementController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Pengajuan reimbursement berhasil dibatalkan',
+        ]);
+    }
+
+    #[Endpoint(title: 'Download Receipt', description: 'Download reimbursement receipt file.')]
+    public function receipt(Request $request, Reimbursement $reimbursement): StreamedResponse|JsonResponse
+    {
+        $this->authorize('view', $reimbursement);
+
+        if (! $reimbursement->receipt_file || ! Storage::disk('local')->exists($reimbursement->receipt_file)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'File bukti tidak ditemukan.',
+            ], 404);
+        }
+
+        return Storage::disk('local')->download($reimbursement->receipt_file);
+    }
+
+    #[Endpoint(title: 'List Reimbursement Categories', description: 'Get active reimbursement categories.')]
+    public function categories(): JsonResponse
+    {
+        $categories = ReimbursementCategory::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => ReimbursementCategoryResource::collection($categories),
         ]);
     }
 }

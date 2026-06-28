@@ -1,0 +1,163 @@
+# UI Adaptation Plan — HRConnect
+
+Berdasarkan analisis 5 repositori referensi. Prioritas P1→P3.
+
+---
+
+## P1 — Segera (Komponen Dasar)
+
+### 1. Page Shell Component
+**Sumber**: PasPapan `admin/page-shell.blade.php`
+**Pola**: Container halaman dengan slot title, actions, toolbar, content.
+```blade
+<x-page-shell title="Daftar Karyawan" description="...">
+  <x-slot name="actions">
+    <x-button>Tambah</x-button>
+  </x-slot>
+  <x-slot name="toolbar">
+    <!-- search + filter -->
+  </x-slot>
+  <!-- konten utama -->
+</x-page-shell>
+```
+
+### 2. Form Components
+**Sumber**: PasPapan `forms/` (input, select, textarea, label, input-error, checkbox, radio, switch)
+**Pola**: Blade component per tipe input dengan dukungan `wire:model`, validasi otomatis via `$errors`.
+```blade
+<x-forms.input wire:model="name" label="Nama" required />
+<x-forms.select wire:model="department" label="Departemen" :options="$departments" />
+<x-forms.input-error name="name" />
+```
+
+### 3. Status Badge
+**Sumber**: PasPapan `admin/status-badge.blade.php`
+**Pola**: Badge pill/rectangle dengan tone: neutral, info, success, warning, danger.
+```blade
+<x-badge tone="success">Disetujui</x-badge>
+<x-badge tone="warning">Menunggu</x-badge>
+```
+
+### 4. Empty State
+**Sumber**: PasPapan `admin/empty-state.blade.php`
+**Pola**: Halaman kosong dengan ikon + title + deskripsi + aksi.
+```blade
+<x-empty-state icon="o-inbox" title="Belum ada data" description="...">
+  <x-button>Tambah Data</x-button>
+</x-empty-state>
+```
+
+### 5. SweetAlert2 Toast
+**Sumber**: PasPapan `app.js` → `PasPapanAlert.toast()`
+**Pola**: Livewire event listener → SweetAlert2 toast (bottom-right, 3.2s).
+```
+PHP:  $this->dispatch('notify', type: 'success', message: '...')
+JS:   Livewire.on('notify', ...) → Swal.fire({ toast: true, ... })
+```
+
+---
+
+## P2 — Minggu Ini (UX Enhancement)
+
+### 6. Modal System
+**Sumber**: PasPapan `overlays/modal.blade.php`
+**Pola**: `x-teleport="body"` + `x-trap.inert.noscroll` + backdrop + transisi.
+```blade
+<x-modal wire:model="showModal" max-width="lg">
+  <x-slot name="title">Judul</x-slot>
+  <x-slot name="content">...</x-slot>
+  <x-slot name="footer">
+    <x-button wire:click="save">Simpan</x-button>
+  </x-slot>
+</x-modal>
+```
+Varian: `dialog-modal` (form), `confirmation-modal` (warning icon + confirm/cancel).
+
+### 7. Flatpickr Date Picker
+**Sumber**: PasPapan `app.js` — `data-ui-picker` attribute + `initUiPickers()`
+**Pola**: Attribut `data-ui-picker="date|time|datetime|date-range"` pada input → auto-init Flatpickr via MutationObserver.
+```blade
+<x-forms.input data-ui-picker="date" wire:model="tanggal" label="Tanggal" />
+```
+
+### 8. Responsive Table
+**Sumber**: PasPapan admin views (inline)
+**Pola**: Desktop `<table>` (hidden on mobile) + Mobile card grid (hidden on desktop).
+```blade
+<!-- Desktop -->
+<table class="hidden md:table">
+  <thead>...</thead>
+  <tbody>...</tbody>
+</table>
+
+<!-- Mobile -->
+<div class="md:hidden space-y-3">
+  @foreach($items as $item)
+    <div class="card">...</div>
+  @endforeach
+</div>
+```
+
+### 9. Rp Formatting + Color-coded Financial
+**Sumber**: Quanta HRIS
+**Pola**: Helper `Rp` formatting hijau (income), merah (deductions), amber (adjustments).
+```blade
+<span class="text-success">{{ Number::currency($gaji, 'IDR') }}</span>
+<span class="text-error">{{ Number::currency($potongan, 'IDR') }}</span>
+```
+
+---
+
+## P3 — Sesuai Kebutuhan (Advanced)
+
+### 10. Queue Progress Bar
+**Sumber**: HRMS Livewire — `wire:poll.1s` + model Import
+**Pola**: Dispatch ke Navbar → 1s polling → progress bar dari `Import` model.
+```blade
+<div wire:poll.1s="updateProgressBar" class="progress h-5">
+  <div class="progress-bar" style="width: {{ $percentage }}%">{{ $percentage }}%</div>
+</div>
+```
+
+### 11. Payroll Status Workflow
+**Sumber**: Quanta HRIS — Draf→Diajukan→Diverifikasi→Disetujui→Ditolak
+**Pola**: Badge + icon per status dengan warna berbeda.
+
+### 12. Client-side Salary Calculator
+**Sumber**: Quanta HRIS `EditGajiKaryawanAction.php`
+**Pola**: `data-field` attribute pada input + `recalculateClientSide()` JS → update total real-time.
+
+### 13. Dashboard Stat Cards
+**Sumber**: Laravel SmartHR `dash-widget` + HRConnect existing patterns
+**Pola**: Card grid (2-4 column) dengan icon + angka + label per metrik.
+
+### 14. Two-click Delete
+**Sumber**: HRMS Livewire `$confirmedId` pattern
+**Pola**: Klik hapus → muncul tombol "Yakin?" → klik lagi baru hapus.
+
+### 15. Three-dot Action Menu
+**Sumber**: Laravel SmartHR `<x-table-action>`
+**Pola**: Dropdown dengan Edit/Delete/hide di setiap baris tabel.
+
+### 16. RAG Chat Enhancement
+**Sumber**: ship-ai-with-laravel
+**Pola**: Welcome screen + suggestion buttons untuk `KnowledgeBaseChat.php`.
+
+---
+
+## Konvensi Naming
+
+| Jenis | Prefix | Contoh |
+|-------|--------|--------|
+| Blade component | `x-` prefix | `x-page-shell`, `x-badge`, `x-empty-state` |
+| Form component | `x-forms.*` | `x-forms.input`, `x-forms.select` |
+| Modal component | `x-modal` (with slot variants) | `x-modal`, `x-modal.confirmation` |
+| Livewire event | `notify`, `close-modal` | `$this->dispatch('notify', ...)` |
+| CSS classes | MD3 tokens from `app.css` `@theme` | `bg-canvas`, `text-ink`, `rounded-xl` |
+
+## Design Constraint (from AGENTS.md)
+- **Warna**: Hanya pakai `bg-canvas`/`text-ink`/`rounded-xl` dari `@theme` di `app.css`
+- **Font**: Rubik 500 (display) + Inter (body) — jangan pakai font lain
+- **Layout**: `x-layouts::app.sidebar`
+- **Larangan**: jangan copy CSS PasPapan (green #57944a, cream #fffaf0)
+- **Status enum**: 16 enum Status/Indicator punya metode `color()` → MD3 semantic (success/warning/error/info)

@@ -1,16 +1,12 @@
 <x-layouts::app.sidebar>
     <div x-data="attendanceIndex()">
-        {{-- Header --}}
         <div class="mb-5">
             <h1 class="text-xl font-semibold tracking-tight text-ink sm:text-2xl">{{ __('Attendance') }}</h1>
             <p class="mt-0.5 text-sm text-on-surface-variant">{{ __('Your attendance records') }}</p>
         </div>
 
-        {{-- ═══════════════════════════════════════════
-             Today's Status Card (PasPapan pattern)
-             ═══════════════════════════════════════════ --}}
         <div x-show="!loading" class="mb-6 overflow-hidden rounded-xl border border-outline-variant/60 bg-canvas shadow-sm">
-            {{-- Header: eyebrow + title + badge --}}
+
             <div class="relative flex items-start justify-between gap-3 p-4 pb-0">
                 <div class="min-w-0">
                     <p class="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-primary">{{ __('Attendance') }}</p>
@@ -18,7 +14,6 @@
                     <p class="mt-0.5 text-xs text-on-surface-variant sm:text-sm" x-text="todayFormatted"></p>
                 </div>
 
-                {{-- Live / Done badge --}}
                 <div x-show="todayStatus === 'complete'"
                      class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
                     <span class="flex h-2 w-2 rounded-full bg-success"></span>

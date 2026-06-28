@@ -20,25 +20,26 @@ Enterprise HRIS (thesis). Laravel 13 + Livewire 4 + Tailwind CSS 4 + PostgreSQL 
 ## Setup & Env Quirks
 
 - PG extensions before `migrate`: `CREATE EXTENSION IF NOT EXISTS vector; pg_trgm; pgcrypto`
-- Design system: Material Design 3 (custom Tailwind, no Flux). Palette in `resources/css/app.css` `@theme`.
+- Design system: Material Design 3 (custom Tailwind, no Flux). Tokens in `resources/css/app.css` `@theme` — uses Rubik 500 (display) + Inter (body).
 - `.npmrc` sets `ignore-scripts=true` — `npm install` won't run build scripts
 - `CIPHERSWEET_KEY` required (64-char hex). `.env.example` has a placeholder; `phpunit.xml` provides a test key.
 - Default env: `QUEUE_CONNECTION=database`, `SESSION_DRIVER=database` (encrypted), `HASH_DRIVER=argon2id`, `CACHE_STORE=database`.
 - `DB_URL` must be **empty** for SQLite tests (set `""` in phpunit.xml).
-- `APP_TIMEZONE=Asia/Jakarta`, `APP_LOCALE=id`.
+- `APP_TIMEZONE=Asia/Jakarta`, `APP_LOCALE=id` — API responses in Indonesian, Faker uses `id_ID`.
 - `pgvector/pgvector` is in `dont-discover` — registered manually via `PgvectorSchema::register()` in `AppServiceProvider`.
 - `post-update-cmd` runs `boost:update` — needs `.env` present.
 - Livewire v4 SFC: `make_command.emoji` set to `false` — no ⚡ prefix in filenames.
+- Dual AI API key: `GEMINI_API_KEY` preferred by laravel/ai SDK; `GOOGLE_AI_API_KEY` legacy fallback in config.
 - `config/livewire.php` published (Livewire v4 defaults).
 
 ## Architecture
 
-- **13 API controllers** at `/api/v1` (single `routes/api.php`). Sanctum bearer auth, token never expires. Public: health, login, 2fa-challenge, forgot-password.
-- **15 services** in `App\Services`. Business logic lives here, not controllers.
+- **14 API controllers** at `/api/v1` (single `routes/api.php`). Sanctum bearer auth, token never expires. Public: health, login, 2fa-challenge, forgot-password.
+- **17 services** in `App\Services`. Business logic lives here, not controllers.
 - **8 observers** (registered manually in `AppServiceProvider`), **8 policies** (auto-discovery), **4 notifications**.
 - **34 enums**: 16 Status/Indicator have `color()` (MD3 semantic: success/warning/error/info); 18 Classification enums must NOT.
 - **5 Spatie roles**: super-admin, hr-manager, finance, manager, employee.
-- **31 models**, **26 factories**, **13 route files**.
+- **33 models**, **27 factories**, **13 route files**.
 - **Web routes** loaded via `bootstrap/app.php` `then` block — reads `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement}.php`. `routes/settings.php` is required from `web.php`.
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax.
 - **+1,100 tests** / +3,600 assertions (SQLite) + **~28 PG tests** in `tests/Integration/Postgres/`.
@@ -93,28 +94,35 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 
 ## Business Logic Gotchas (from Audit)
 
-- **P0-1**: `processContractEnd()` has NO authorization gate — add `Gate::authorize()` before execution
-- **P0-2**: `GeofenceService.php:40` — null `branch.radius` casts to 0 (all locations pass). Guard + throw.
-- **P0-3**: `AttendanceController.php:220` — WFA with null employee bypasses geofence. Guard return error.
-- **P0-4**: `EmployeeController@update` (149-164) allows direct status to resigned/terminated. Force via `EmployeeLifecycleService`.
-- **P1-5**: `ReimbursementService.php:93-99` — TOCTOU race: `isApproved()` before `lockForUpdate()`. Use PasPapan `lock()`+`ensureReviewable()`.
-- **P1-6**: `PayrollCalculatorService.php:431` — only checks PUBLISHED, not PAID. Add `PayrollStatus::PAID`.
-- **P1-7**: `StoreOvertimeRequest.php:29` — missing `after_or_equal:today`. Add rule.
+### P0 — Fixed ✅
+- **P0-1**: `processContractEnd()` — guarded by `$user->can('manage_employees')` in `EmployeeTerminationController.php:67`
+- **P0-2**: `GeofenceService.php:45-49` — null `branch.radius` throws `BusinessRuleException`
+- **P0-3**: `AttendanceController.php:219-226` — null employee guard returns 404
+- **P0-4**: `EmployeeController@update` (159-168) — blocks direct status to resigned/terminated/deceased
+
+### P1 — Fixed ✅
+- **P1-5**: `ReimbursementService.php` — `lockForUpdate()` applied in `linkToPayroll()` via `DB::transaction`
+- **P1-6**: `PayrollCalculatorService.php:431` — checks `[PUBLISHED, PAID]`
+- **P1-7**: `StoreOvertimeRequest.php:29` — has `after_or_equal:today`
+
+### Active Gotchas (unresolved)
+- **Approval matrix company-scoped** — `resolveL2Approver()` returns first finance user anywhere; should filter by company + branch fallback.
+- **Approval matrix company-scoped** — `resolveL2Approver()` returns first finance user anywhere; should filter by company + branch fallback.
 - **Clock-out PIN**: `AttendanceService.php` — PIN bypass streak check. Fix: require PIN on every clock-out.
 - **Cannot use `Cache::tags()`**: `CACHE_STORE=database` throws `BadMethodCallException`. Use `Cache::forget('key')`.
 
 ## Design System
 
 `DESIGN.md` is the source of truth for UI. CSS variables come from `@theme` in `resources/css/app.css` — use `bg-canvas`, `text-ink`, `rounded-xl`, etc. Never hardcode colors/radius/fonts.
-- **CRITICAL: UI follows DESIGN.md DS-1 (canvas #ffffff, body #3a3a3a, Inter font, neutral palette). Do NOT copy PasPapan CSS (green #57944a, cream #fffaf0).**
+- **CRITICAL: UI follows `app.css` `@theme` (canvas #fffaf0, body #1c1b1b, Rubik 500 display + Inter body). Do NOT copy PasPapan CSS (green #57944a, cream #fffaf0).**
 - Brand colors (pink, teal, lavender, etc.) → landing page only. HR pages use minimal accents.
 - Layout: `x-layouts::app.sidebar`.
-- Font: Outfit 500 (display), Inter (fallback).
-- If DESIGN.md changes, update `app.css` first.
+- Font: Rubik 500 (display), Inter (body).
+- DESIGN.md describes an **App Theme vs Landing Page split** (DS-1/DS-2) via CSS variable overrides in `welcome.blade.php`. If DESIGN.md changes, update `app.css` first.
 
 ## CI
 
-`main`/`develop`/`master` pushes + PRs trigger:
+`main`/`develop`/`master`/`workos` pushes + PRs trigger:
 - **lint.yml**: PHP 8.4, runs `composer lint` (Pint).
 - **tests.yml (sqlite)**: PHP 8.5, `npm i` (ignore-scripts), `composer install --optimize-autoloader`, `./vendor/bin/pest`.
 - **tests.yml (postgres)**: PHP 8.5, `pgvector/pgvector:pg16` service, `./vendor/bin/pest --configuration=phpunit.pgsql.xml`.

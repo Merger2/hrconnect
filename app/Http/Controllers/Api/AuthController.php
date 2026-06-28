@@ -10,6 +10,7 @@ use App\Models\User;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -44,7 +45,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail()) {
+        if ($user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Email belum diverifikasi. Silakan cek email Anda untuk link verifikasi.',

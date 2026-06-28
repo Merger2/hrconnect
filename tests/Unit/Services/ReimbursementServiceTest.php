@@ -61,7 +61,7 @@ test('creates reimbursement without attachment', function () {
     expect($result)
         ->title->toBe('Biaya Transportasi')
         ->description->toBe('Perjalanan dinas ke client')
-        ->attachment_path->toBeNull()
+        ->receipt_file->toBeNull()
         ->status->toBe(ReimbursementStatus::PENDING)
         ->employee_id->toBe($this->employee->id);
     expect((float) $result->amount)->toBe(150_000.0);
@@ -69,7 +69,7 @@ test('creates reimbursement without attachment', function () {
 });
 
 test('creates reimbursement with attachment', function () {
-    Storage::fake('public');
+    Storage::fake('local');
 
     $approvalService = $this->createMock(ApprovalService::class);
     $service = new ReimbursementService($approvalService);
@@ -79,13 +79,13 @@ test('creates reimbursement with attachment', function () {
         'title' => 'Biaya Konsumsi',
         'expense_date' => '2026-06-10',
         'amount' => 250_000,
-        'attachment' => $file,
+        'receipt' => $file,
     ];
 
     $result = $service->createReimbursement($this->employee, $data);
 
-    expect($result->attachment_path)->not->toBeNull();
-    Storage::disk('public')->assertExists($result->attachment_path);
+    expect($result->receipt_file)->not->toBeNull();
+    Storage::disk('local')->assertExists($result->receipt_file);
 });
 
 test('creates approval workflow via ApprovalService', function () {

@@ -23,10 +23,23 @@ class Reimbursement extends Model
     {
         static::updating(function (Reimbursement $reimbursement) {
             $originalRaw = $reimbursement->getRawOriginal('status');
+            $newStatus = $reimbursement->status;
 
             // Allow APPROVED → PAID (forward transition via linkToPayroll)
             if ($originalRaw === ReimbursementStatus::APPROVED->value
-                && $reimbursement->status === ReimbursementStatus::PAID) {
+                && $newStatus === ReimbursementStatus::PAID) {
+                return;
+            }
+
+            // Allow APPROVED_L1 → APPROVED (via L2 approval)
+            if ($originalRaw === ReimbursementStatus::APPROVED_L1->value
+                && $newStatus === ReimbursementStatus::APPROVED) {
+                return;
+            }
+
+            // Allow APPROVED_L1 → REJECTED (via rejection after L1 approved)
+            if ($originalRaw === ReimbursementStatus::APPROVED_L1->value
+                && $newStatus === ReimbursementStatus::REJECTED) {
                 return;
             }
 

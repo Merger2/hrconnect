@@ -135,7 +135,13 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('throttle:10,1')
             ->name('store');
         Route::get('/', [ReimbursementController::class, 'index'])->name('index');
+        Route::get('/categories', [ReimbursementController::class, 'categories'])
+            ->name('categories');
         Route::get('/{reimbursement}', [ReimbursementController::class, 'show'])->name('show');
+        Route::patch('/{reimbursement}', [ReimbursementController::class, 'update'])
+            ->name('update');
+        Route::get('/{reimbursement}/receipt', [ReimbursementController::class, 'receipt'])
+            ->name('receipt');
         Route::delete('/{reimbursement}', [ReimbursementController::class, 'destroy'])
             ->name('destroy');
     });
