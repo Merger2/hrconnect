@@ -121,13 +121,13 @@ Varian: `dialog-modal` (form), `confirmation-modal` (warning icon + confirm/canc
 **Sumber**: Laravel SmartHR `dash-widget` + HRConnect existing patterns
 **Pola**: Card grid (2-4 column) dengan icon + angka + label per metrik.
 
-### 14. Two-click Delete ✅ (SweetAlert2 `confirmAction()` helper)
-**Sumber**: HRMS Livewire `$confirmedId` pattern
-**Pola**: Klik hapus → muncul tombol "Yakin?" → klik lagi baru hapus.
+### 14. SweetAlert2 Delete Confirmation ✅ (`wire:confirm` + `HRConnectAlert.confirm()` interceptor)
+**Sumber**: PasPapan `installSweetAlertConfirmations()` — intercept `wire:confirm` → SweetAlert2
+**Pola**: `wire:confirm="Hapus items ini?"` → otomatis intercept + SweetAlert2 modal via `installSweetAlertConfirmations()` + MutationObserver.
 
-### 15. Three-dot Action Menu ✅ (`x-dropdown-menu` component)
-**Sumber**: Laravel SmartHR `<x-table-action>`
-**Pola**: Dropdown dengan Edit/Delete/hide di setiap baris tabel.
+### 15. Three-dot Action Menu ✅ (`x-dropdown-menu` component, inline Alpine per row)
+**Sumber**: PasPapan `x-data="{ openOptions: false }"` + `@click.stop` + `@click.away`
+**Pola**: `x-data="{ open: false }"` + `@click.stop="open = !open"` + `@click.away="open = false"` + `x-transition` dropdown panel. Reusable `x-dropdown-menu` component wrapping this pattern.
 
 ### 16. RAG Chat Enhancement ✅ (udah ada — welcome screen + suggestion buttons)
 **Sumber**: ship-ai-with-laravel

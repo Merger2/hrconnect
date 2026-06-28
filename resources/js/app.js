@@ -3,23 +3,16 @@ import Swal from 'sweetalert2';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-window.confirmAction = (options) => {
-    return Swal.fire({
-        icon: options.icon || 'warning',
-        title: options.title || 'Apakah Anda yakin?',
-        text: options.text || '',
-        showCancelButton: true,
-        confirmButtonText: options.confirmText || 'Ya, lanjutkan',
-        cancelButtonText: options.cancelText || 'Batal',
-        confirmButtonColor: options.confirmColor || '#0a0a0a',
-        reverseButtons: true,
-    });
+const swalClasses = {
+    confirmButton: 'inline-flex items-center justify-center rounded-xl bg-danger px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2 ml-2',
+    cancelButton: 'inline-flex items-center justify-center rounded-xl border border-outline-variant bg-canvas px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+    popup: 'rounded-xl border border-outline-variant bg-canvas p-6 shadow-lg',
+    title: 'text-lg font-semibold text-ink',
+    htmlContainer: 'text-sm text-on-surface-variant',
 };
 
-document.addEventListener('livewire:init', () => {
-    if (typeof window.Alpine === 'undefined') return;
-
-    Livewire.on('notify', (data) => {
+window.HRConnectAlert = {
+    toast(data) {
         const config = {
             toast: true,
             position: 'bottom-right',
@@ -35,13 +28,69 @@ document.addEventListener('livewire:init', () => {
         };
 
         Swal.fire(config);
+    },
+
+    async confirm(message, options = {}) {
+        const result = await Swal.fire({
+            icon: options.icon || 'question',
+            title: options.title || 'Apakah Anda yakin?',
+            text: message || options.text || '',
+            showCancelButton: true,
+            confirmButtonText: options.confirmButtonText || 'Ya, lanjutkan',
+            cancelButtonText: options.cancelButtonText || 'Batal',
+            reverseButtons: true,
+            focusCancel: true,
+            buttonsStyling: false,
+            customClass: swalClasses,
+        });
+
+        return result.isConfirmed;
+    },
+};
+
+function installSweetAlertConfirmations(root = document) {
+    root.querySelectorAll?.('[wire\\:confirm], [wire\\:confirm\\.prompt]').forEach((element) => {
+        element.__livewire_confirm = (onConfirm, onCancel) => {
+            const message = element.getAttribute('wire:confirm')
+                || element.getAttribute('wire:confirm.prompt')
+                || 'Apakah Anda yakin?';
+
+            window.HRConnectAlert.confirm(message).then((confirmed) => {
+                if (confirmed) {
+                    onConfirm();
+                    return;
+                }
+                onCancel();
+            });
+        };
+    });
+}
+
+document.addEventListener('livewire:init', () => {
+    if (typeof window.Alpine === 'undefined') return;
+
+    Livewire.on('notify', (data) => {
+        window.HRConnectAlert.toast(data);
     });
 
     initUiPickers();
+    installSweetAlertConfirmations();
 });
 
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+                installSweetAlertConfirmations(node);
+            }
+        });
+    });
+});
+
+observer.observe(document.body, { childList: true, subtree: true });
+
 function initUiPickers() {
-    const observer = new MutationObserver(() => {
+    const pickerObserver = new MutationObserver(() => {
         document.querySelectorAll('[data-ui-picker]:not([data-ui-picker-initialized])').forEach((el) => {
             el.setAttribute('data-ui-picker-initialized', '');
             const mode = el.getAttribute('data-ui-picker');
@@ -64,5 +113,5 @@ function initUiPickers() {
         });
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    pickerObserver.observe(document.body, { childList: true, subtree: true });
 }

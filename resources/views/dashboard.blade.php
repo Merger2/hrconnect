@@ -1,6 +1,5 @@
-<x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
-        {{-- Stat Cards --}}
+<x-layouts::app.sidebar :title="__('Dashboard')">
+    <div class="flex h-full w-full flex-1 flex-col gap-6">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
                 <div class="flex items-center justify-between">
@@ -25,7 +24,6 @@
             </div>
         </div>
 
-        {{-- Recent Activity Placeholder --}}
         <div class="flex flex-1 items-center justify-center rounded-xl border border-dashed border-outline-variant bg-canvas">
             <div class="text-center">
                 <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">monitoring</span>
@@ -33,4 +31,4 @@
             </div>
         </div>
     </div>
-</x-layouts::app>
+</x-layouts::app.sidebar>
