@@ -165,15 +165,38 @@ class ApprovalService
     }
 
     /**
-     * Resolve approver Level 2 berdasarkan tipe pengajuan.
-     * Reimbursement → Finance. Cuti/Lembur → HR Manager.
+     * Resolve approver Level 2 berdasarkan tipe pengajuan, discope company.
+     * Reimbursement → Finance (same company → same branch → any).
+     * Cuti/Lembur → HR Manager (same company → same branch → any).
+     *
+     * B-14: Cegah cross-company approval assignment.
      */
     protected function resolveL2Approver(Model $approvable): ?Employee
     {
-        if ($approvable instanceof Reimbursement) {
-            return User::role('finance')->first()?->employee;
+        $role = $approvable instanceof Reimbursement ? 'finance' : 'hr-manager';
+        $employee = $approvable->employee;
+
+        $query = User::role($role)->whereHas('employee');
+
+        // 1. Same company
+        $user = (clone $query)
+            ->whereHas('employee', fn ($q) => $q->where('company_id', $employee->company_id))
+            ->first();
+
+        if ($user) {
+            return $user->employee;
         }
 
-        return User::role('hr-manager')->first()?->employee;
+        // 2. Fallback: same branch
+        $user = (clone $query)
+            ->whereHas('employee', fn ($q) => $q->where('branch_id', $employee->branch_id))
+            ->first();
+
+        if ($user) {
+            return $user->employee;
+        }
+
+        // 3. Final fallback: any user with role
+        return $query->first()?->employee;
     }
 }
