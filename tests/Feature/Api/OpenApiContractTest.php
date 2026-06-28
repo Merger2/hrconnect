@@ -155,17 +155,17 @@ test('all 4 reusable error responses are defined', function () {
     ]);
 });
 
-test('27 component schemas are defined', function () {
+test('28 component schemas are defined', function () {
     $spec = openApiSpec();
 
-    expect(count($spec['components']['schemas'] ?? []))->toBe(27);
+    expect(count($spec['components']['schemas'] ?? []))->toBe(28);
 });
 
-test('42 path templates with 53 operations are documented', function () {
+test('44 path templates with 55 operations are documented', function () {
     $spec = openApiSpec();
     $paths = $spec['paths'];
 
-    expect(count($paths))->toBe(42);
+    expect(count($paths))->toBe(44);
 
     $ops = 0;
     foreach ($paths as $methods) {
@@ -176,7 +176,7 @@ test('42 path templates with 53 operations are documented', function () {
         }
     }
 
-    expect($ops)->toBe(53);
+    expect($ops)->toBe(55);
 });
 
 // ─── Route Completeness ──────────────────────────────────────────────

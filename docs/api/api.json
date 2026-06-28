@@ -244,6 +244,450 @@
                 }
             }
         },
+        "/v1/approvals/history": {
+            "get": {
+                "operationId": "approvals.history",
+                "description": "List previously processed (approved/rejected) approvals for the current user as approver.",
+                "summary": "Approval History",
+                "tags": [
+                    "Approvals"
+                ],
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "leave",
+                                "overtime",
+                                "reimbursement",
+                                "wfa"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "approval_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "level": {
+                                                        "anyOf": [
+                                                            {
+                                                                "type": "integer"
+                                                            },
+                                                            {
+                                                                "$ref": "#/components/schemas/ApprovalLevel"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "level_label": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "enum": [
+                                                            "Supervisor Langsung",
+                                                            "Manager Departemen",
+                                                            "HRD Manager",
+                                                            "Direktur",
+                                                            null
+                                                        ]
+                                                    },
+                                                    "approvable_type": {
+                                                        "type": "string"
+                                                    },
+                                                    "approvable_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "submitter": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "full_name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "full_name"
+                                                        ]
+                                                    },
+                                                    "submitted_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "anyOf": [
+                                                            {
+                                                                "type": "string"
+                                                            },
+                                                            {
+                                                                "$ref": "#/components/schemas/ApprovalStatus"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "notes": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "approved_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "approval_id",
+                                                    "level",
+                                                    "level_label",
+                                                    "approvable_type",
+                                                    "approvable_id",
+                                                    "submitter",
+                                                    "submitted_at",
+                                                    "status",
+                                                    "notes",
+                                                    "approved_at",
+                                                    "updated_at"
+                                                ]
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "last_page",
+                                                "per_page",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Akun Anda belum terhubung dengan data karyawan."
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "/v1/approvals/{approval}": {
+            "get": {
+                "operationId": "approvals.show",
+                "description": "Get full detail of an approval including the request data and approval chain.",
+                "summary": "Approval Detail",
+                "tags": [
+                    "Approvals"
+                ],
+                "parameters": [
+                    {
+                        "name": "approval",
+                        "in": "path",
+                        "required": true,
+                        "description": "The approval ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "approval_id": {
+                                                    "type": "integer"
+                                                },
+                                                "level": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "integer"
+                                                        },
+                                                        {
+                                                            "$ref": "#/components/schemas/ApprovalLevel"
+                                                        }
+                                                    ]
+                                                },
+                                                "level_label": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "enum": [
+                                                        "Supervisor Langsung",
+                                                        "Manager Departemen",
+                                                        "HRD Manager",
+                                                        "Direktur",
+                                                        null
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "$ref": "#/components/schemas/ApprovalStatus"
+                                                        }
+                                                    ]
+                                                },
+                                                "notes": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "approved_at": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "submitter": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "full_name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "full_name"
+                                                    ]
+                                                },
+                                                "approvable": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string",
+                                                            "const": "reimbursement"
+                                                        },
+                                                        "id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "category": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name"
+                                                            ]
+                                                        },
+                                                        "title": {
+                                                            "type": "string"
+                                                        },
+                                                        "amount": {
+                                                            "type": "number"
+                                                        },
+                                                        "expense_date": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": {
+                                                            "type": "string"
+                                                        },
+                                                        "receipt_file": {
+                                                            "type": "string"
+                                                        },
+                                                        "status": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type",
+                                                        "id",
+                                                        "category",
+                                                        "title",
+                                                        "amount",
+                                                        "expense_date",
+                                                        "description",
+                                                        "receipt_file",
+                                                        "status"
+                                                    ]
+                                                },
+                                                "approval_chain": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "approval_id",
+                                                "level",
+                                                "level_label",
+                                                "status",
+                                                "notes",
+                                                "approved_at",
+                                                "created_at",
+                                                "submitter",
+                                                "approvable",
+                                                "approval_chain"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Anda bukan approver untuk request ini."
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/approvals/{approval}/approve": {
             "post": {
                 "operationId": "approvals.approve",
@@ -5434,6 +5878,15 @@
                     4
                 ],
                 "title": "ApprovalLevel"
+            },
+            "ApprovalStatus": {
+                "type": "string",
+                "enum": [
+                    "pending",
+                    "approved",
+                    "rejected"
+                ],
+                "title": "ApprovalStatus"
             },
             "ApproveRequest": {
                 "type": "object",

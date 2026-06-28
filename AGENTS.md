@@ -49,7 +49,7 @@ Two repos serve as pattern source-of-truth for business logic. **Only adopt UX/c
 
 ### PasPapan — Primary Reference (Face, GPS, Risk Scoring, Approval, Termination)
 - Path: `/home/merger/PasPapan/`
-- 79 models, 22 services, 58 Blade components, 1,642 lines app.js, 6,623 lines CSS
+- 80 models, 22 services, 58 Blade components, 1,642 lines app.js, 6,623 lines CSS (251 Blade files total)
 
 | Pattern | File | Port To |
 |:--------|:-----|:--------|

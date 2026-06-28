@@ -65,6 +65,24 @@
                     <span class="material-symbols-outlined text-2xl">wallet</span>
                     <span>{{ __('Reimbursement') }}</span>
                 </a>
+
+                <a href="{{ route('payroll.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('payroll.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('payroll.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">payments</span>
+                    <span>{{ __('Payroll') }}</span>
+                </a>
+
+                <a href="{{ route('approvals.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('approvals.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('approvals.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">approval</span>
+                    <span>{{ __('Approvals') }}</span>
+                </a>
             </nav>
 
             {{-- User --}}

@@ -143,6 +143,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // ── Approval Workflow ────────────────────────────────────────────
     Route::prefix('approvals')->name('api.approvals.')->group(function () {
         Route::get('/pending', [ApprovalController::class, 'pending'])->name('pending');
+        Route::get('/history', [ApprovalController::class, 'history'])->name('history');
+        Route::get('/{approval}', [ApprovalController::class, 'show'])->name('show');
         Route::post('/{approval}/approve', [ApprovalController::class, 'approve'])
             ->name('approve');
         Route::post('/{approval}/reject', [ApprovalController::class, 'reject'])

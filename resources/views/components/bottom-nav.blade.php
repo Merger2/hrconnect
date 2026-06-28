@@ -13,11 +13,10 @@
             'patterns' => ['attendance.*'],
         ],
         [
-            'name' => __('Inbox'),
-            'icon' => 'inbox',
-            'route' => '#',
-            'patterns' => [],
-            'disabled' => true,
+            'name' => __('Payroll'),
+            'icon' => 'payments',
+            'route' => 'payroll.index',
+            'patterns' => ['payroll.*'],
         ],
         [
             'name' => __('Profil'),
