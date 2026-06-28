@@ -88,3 +88,13 @@
         border-color: var(--color-outline-variant, currentColor);
     }
 }
+
+@layer components {
+    .user-list-card {
+        @apply relative rounded-xl border border-outline-variant/60 bg-canvas shadow-sm transition;
+    }
+
+    .user-list-card:hover {
+        @apply border-outline-variant;
+    }
+}

@@ -9,7 +9,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-512.svg">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#1a3a3a">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">

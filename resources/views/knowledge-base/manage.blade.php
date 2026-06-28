@@ -55,7 +55,16 @@
         <div class="rounded-2xl border border-outline-variant bg-surface-container-low p-6">
             <h2 class="font-display text-lg font-semibold text-ink mb-4">Dokumen Tersimpan</h2>
 
-            <div id="doc-list" class="overflow-x-auto">
+            {{-- desktop table --}}
+            <div id="doc-list-table" class="hidden overflow-x-auto lg:block">
+                <div class="flex items-center justify-center py-12 text-muted-soft">
+                    <span class="material-symbols-outlined mr-2 text-base">hourglass_empty</span>
+                    <span class="text-sm">Memuat daftar dokumen...</span>
+                </div>
+            </div>
+
+            {{-- mobile cards --}}
+            <div id="doc-list-cards" class="space-y-3 lg:hidden">
                 <div class="flex items-center justify-center py-12 text-muted-soft">
                     <span class="material-symbols-outlined mr-2 text-base">hourglass_empty</span>
                     <span class="text-sm">Memuat daftar dokumen...</span>
@@ -114,7 +123,10 @@
     });
 
     async function loadDocuments() {
-        const container = document.getElementById('doc-list');
+        const tableContainer = document.getElementById('doc-list-table');
+        const cardsContainer = document.getElementById('doc-list-cards');
+        const emptyHtml = '<div class="flex items-center justify-center py-12 text-muted-soft"><span class="material-symbols-outlined mr-2 text-base">description</span><span class="text-sm">Belum ada dokumen. Upload PDF pertama Anda.</span></div>';
+        const errorHtml = '<div class="flex items-center justify-center py-12 text-muted-soft"><span class="text-sm">Gagal memuat daftar dokumen.</span></div>';
 
         try {
             const token = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -127,7 +139,8 @@
             });
 
             if (!resp.ok) {
-                container.innerHTML = '<div class="flex items-center justify-center py-12 text-muted-soft"><span class="text-sm">Gagal memuat daftar dokumen.</span></div>';
+                tableContainer.innerHTML = errorHtml;
+                cardsContainer.innerHTML = errorHtml;
                 return;
             }
 
@@ -135,31 +148,54 @@
             const items = json.data || [];
 
             if (items.length === 0) {
-                container.innerHTML = '<div class="flex items-center justify-center py-12 text-muted-soft"><span class="material-symbols-outlined mr-2 text-base">description</span><span class="text-sm">Belum ada dokumen. Upload PDF pertama Anda.</span></div>';
+                tableContainer.innerHTML = emptyHtml;
+                cardsContainer.innerHTML = emptyHtml;
                 return;
             }
 
-            let html = '<table class="w-full text-sm"><thead><tr class="border-b border-outline-variant text-left text-xs font-semibold text-muted-soft uppercase tracking-wider">';
-            html += '<th class="pb-3 pr-4">Judul</th><th class="pb-3 pr-4">Kategori</th><th class="pb-3 pr-4">Status</th><th class="pb-3 pr-4">Tanggal</th><th class="pb-3 text-right">Aksi</th>';
-            html += '</tr></thead><tbody>';
+            // ── desktop table ──
+            let tableHtml = '<table class="w-full text-sm"><thead><tr class="border-b border-outline-variant text-left text-xs font-semibold text-muted-soft uppercase tracking-wider">';
+            tableHtml += '<th class="pb-3 pr-4">Judul</th><th class="pb-3 pr-4">Kategori</th><th class="pb-3 pr-4">Status</th><th class="pb-3 pr-4">Tanggal</th><th class="pb-3 text-right">Aksi</th>';
+            tableHtml += '</tr></thead><tbody>';
+
+            // ── mobile cards ──
+            let cardsHtml = '';
 
             for (const doc of items) {
                 const statusClass = doc.status === 'ready' ? 'bg-success/10 text-success' : doc.status === 'error' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning';
                 const statusLabel = doc.status === 'ready' ? 'READY' : doc.status === 'error' ? 'ERROR' : 'PROCESSING';
 
-                html += '<tr class="border-b border-outline-variant/50">';
-                html += '<td class="py-3 pr-4 font-medium text-body">' + escapeHtml(doc.title || '-') + '</td>';
-                html += '<td class="py-3 pr-4 text-muted-soft">' + escapeHtml(doc.category || 'general') + '</td>';
-                html += '<td class="py-3 pr-4"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ' + statusClass + '">' + statusLabel + '</span></td>';
-                html += '<td class="py-3 pr-4 text-muted-soft">' + (doc.created_at ? new Date(doc.created_at).toLocaleDateString('id-ID') : '-') + '</td>';
-                html += '<td class="py-3 text-right"><button onclick="deleteDoc(' + doc.id + ')" class="text-xs font-medium text-error hover:underline">Hapus</button></td>';
-                html += '</tr>';
+                // table row
+                tableHtml += '<tr class="border-b border-outline-variant/50">';
+                tableHtml += '<td class="py-3 pr-4 font-medium text-body">' + escapeHtml(doc.title || '-') + '</td>';
+                tableHtml += '<td class="py-3 pr-4 text-muted-soft">' + escapeHtml(doc.category || 'general') + '</td>';
+                tableHtml += '<td class="py-3 pr-4"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ' + statusClass + '">' + statusLabel + '</span></td>';
+                tableHtml += '<td class="py-3 pr-4 text-muted-soft">' + (doc.created_at ? new Date(doc.created_at).toLocaleDateString('id-ID') : '-') + '</td>';
+                tableHtml += '<td class="py-3 text-right"><button onclick="deleteDoc(' + doc.id + ')" class="text-xs font-medium text-error hover:underline">Hapus</button></td>';
+                tableHtml += '</tr>';
+
+                // card
+                cardsHtml += '<div class="user-list-card p-4">';
+                cardsHtml += '  <div class="flex items-start justify-between gap-2">';
+                cardsHtml += '    <div class="min-w-0 flex-1">';
+                cardsHtml += '      <p class="truncate text-sm font-medium text-body">' + escapeHtml(doc.title || '-') + '</p>';
+                cardsHtml += '      <p class="mt-0.5 text-xs text-muted-soft">' + escapeHtml(doc.category || 'general') + '</p>';
+                cardsHtml += '    </div>';
+                cardsHtml += '    <span class="inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ' + statusClass + '">' + statusLabel + '</span>';
+                cardsHtml += '  </div>';
+                cardsHtml += '  <div class="mt-3 flex items-center justify-between border-t border-outline-variant/40 pt-3">';
+                cardsHtml += '    <span class="text-xs text-muted-soft">' + (doc.created_at ? new Date(doc.created_at).toLocaleDateString('id-ID') : '-') + '</span>';
+                cardsHtml += '    <button onclick="deleteDoc(' + doc.id + ')" class="text-xs font-medium text-error hover:underline">Hapus</button>';
+                cardsHtml += '  </div>';
+                cardsHtml += '</div>';
             }
 
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            tableHtml += '</tbody></table>';
+            tableContainer.innerHTML = tableHtml;
+            cardsContainer.innerHTML = cardsHtml;
         } catch (e) {
-            container.innerHTML = '<div class="flex items-center justify-center py-12 text-muted-soft"><span class="text-sm">Gagal memuat daftar dokumen.</span></div>';
+            tableContainer.innerHTML = errorHtml;
+            cardsContainer.innerHTML = errorHtml;
         }
     }
 

@@ -96,9 +96,9 @@
             </div>
 
             {{-- Mobile Cards --}}
-            <div class="divide-y divide-outline-variant/10 lg:hidden">
+            <div class="space-y-3 lg:hidden">
                 <template x-for="p in payrolls" :key="p.id">
-                    <article class="p-4 space-y-3">
+                    <article class="user-list-card p-4 space-y-3">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm font-medium text-ink" x-text="p.period"></p>

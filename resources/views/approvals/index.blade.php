@@ -131,9 +131,9 @@
             </div>
 
             {{-- Mobile Cards --}}
-            <div class="divide-y divide-outline-variant/10 lg:hidden">
+            <div class="space-y-3 lg:hidden">
                 <template x-for="a in approvals" :key="a.approval_id">
-                    <article class="space-y-3 p-4">
+                    <article class="user-list-card p-4 space-y-3">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm font-medium text-ink" x-text="typeLabel(a.approvable_type) + ' #' + a.approvable_id"></p>

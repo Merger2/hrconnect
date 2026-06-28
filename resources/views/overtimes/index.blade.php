@@ -102,9 +102,9 @@
             </div>
 
             {{-- Mobile Cards --}}
-            <div x-show="!loading" class="grid grid-cols-1 divide-y divide-outline-variant/10 lg:hidden">
+            <div x-show="!loading" class="space-y-3 lg:hidden">
                 <template x-for="o in records" :key="o.id">
-                    <div class="p-4">
+                    <div class="user-list-card p-4">
                         <div class="mb-1 flex items-start justify-between">
                             <div>
                                 <p class="text-sm font-semibold text-ink" x-text="formatDate(o.date)"></p>

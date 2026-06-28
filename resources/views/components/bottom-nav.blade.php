@@ -13,6 +13,12 @@
             'patterns' => ['attendance.*'],
         ],
         [
+            'name' => __('Pengajuan'),
+            'icon' => 'description',
+            'route' => 'leaves.index',
+            'patterns' => ['leaves.*', 'overtimes.*', 'reimbursements.*', 'approvals.*'],
+        ],
+        [
             'name' => __('Payroll'),
             'icon' => 'payments',
             'route' => 'payroll.index',
@@ -27,7 +33,7 @@
     ];
 @endphp
 
-<nav class="fixed inset-x-0 bottom-0 z-40 flex h-20 items-center justify-around border-t border-outline-variant bg-canvas lg:hidden">
+<nav class="fixed inset-x-0 bottom-0 z-40 flex h-20 items-center justify-around border-t border-outline-variant bg-canvas pb-[env(safe-area-inset-bottom)] lg:hidden">
     @foreach ($tabs as $tab)
         @php
             $isActive = !empty($tab['patterns']) && request()->routeIs(...$tab['patterns']);
