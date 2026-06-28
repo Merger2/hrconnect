@@ -8,6 +8,7 @@ use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\GeofenceViolationException;
 use App\Models\Branch;
+use Torann\GeoIP\GeoIP;
 
 class GeofenceService
 {
@@ -70,8 +71,8 @@ class GeofenceService
         $lngs = array_column($samples, 'longitude');
         $avgLat = array_sum($lats) / count($lats);
         $avgLng = array_sum($lngs) / count($lngs);
-        $latVar = array_sum(array_map(fn($v) => ($v - $avgLat) ** 2, $lats)) / count($lats);
-        $lngVar = array_sum(array_map(fn($v) => ($v - $avgLng) ** 2, $lngs)) / count($lngs);
+        $latVar = array_sum(array_map(fn ($v) => ($v - $avgLat) ** 2, $lats)) / count($lats);
+        $lngVar = array_sum(array_map(fn ($v) => ($v - $avgLng) ** 2, $lngs)) / count($lngs);
         $variance = sqrt($latVar + $lngVar);
 
         if ($variance < 0.000001) {
@@ -109,7 +110,7 @@ class GeofenceService
             'anomaly_score' => 0,
         ];
 
-        if (class_exists(\Torann\GeoIP\GeoIP::class)) {
+        if (class_exists(GeoIP::class)) {
             try {
                 $geoIp = geoip($ip);
                 $result['geoip_available'] = true;

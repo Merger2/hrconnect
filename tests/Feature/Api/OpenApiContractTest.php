@@ -40,6 +40,7 @@ function getRouteList(): array
     $skipUris = [
         'api/v1/email/verify/{id}/{hash}', // Scramble limitation: public route not auto-documented
         'api/v1/email/resend', // Scramble limitation: auth-only route not auto-documented
+
     ];
 
     foreach ($routes as $method => $routeGroup) {
@@ -154,17 +155,17 @@ test('all 4 reusable error responses are defined', function () {
     ]);
 });
 
-test('26 component schemas are defined', function () {
+test('30 component schemas are defined', function () {
     $spec = openApiSpec();
 
-    expect(count($spec['components']['schemas'] ?? []))->toBe(26);
+    expect(count($spec['components']['schemas'] ?? []))->toBe(30);
 });
 
-test('41 path templates with 51 operations are documented', function () {
+test('46 path templates with 58 operations are documented', function () {
     $spec = openApiSpec();
     $paths = $spec['paths'];
 
-    expect(count($paths))->toBe(41);
+    expect(count($paths))->toBe(46);
 
     $ops = 0;
     foreach ($paths as $methods) {
@@ -175,7 +176,7 @@ test('41 path templates with 51 operations are documented', function () {
         }
     }
 
-    expect($ops)->toBe(51);
+    expect($ops)->toBe(58);
 });
 
 // ─── Route Completeness ──────────────────────────────────────────────

@@ -30,6 +30,17 @@
                     <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('HR') }}</p>
                 </div>
 
+                @can('viewAny', App\Models\Employee::class)
+                    <a href="{{ route('admin.employees.index') }}"
+                       @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                               'bg-ink/5 text-ink' => request()->routeIs('admin.employees.*'),
+                               'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
+                       wire:navigate>
+                        <span class="material-symbols-outlined text-2xl">group</span>
+                        <span>{{ __('Employees') }}</span>
+                    </a>
+                @endcan
+
                 <a href="{{ route('attendance.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                            'bg-ink/5 text-ink' => request()->routeIs('attendance.*'),
@@ -64,6 +75,24 @@
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">wallet</span>
                     <span>{{ __('Reimbursement') }}</span>
+                </a>
+
+                <a href="{{ route('payroll.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('payroll.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('payroll.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">payments</span>
+                    <span>{{ __('Payroll') }}</span>
+                </a>
+
+                <a href="{{ route('approvals.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('approvals.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('approvals.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">approval</span>
+                    <span>{{ __('Approvals') }}</span>
                 </a>
             </nav>
 

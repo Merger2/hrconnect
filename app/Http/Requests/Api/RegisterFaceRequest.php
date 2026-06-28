@@ -37,7 +37,7 @@ class RegisterFaceRequest extends FormRequest
                     $avg[$i] += $v;
                 }
             }
-            $data['embedding'] = array_map(fn($v) => $v / count($embeddings), $avg);
+            $data['embedding'] = array_map(fn ($v) => $v / count($embeddings), $avg);
             $this->merge($data);
         }
     }

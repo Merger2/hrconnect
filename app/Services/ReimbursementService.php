@@ -9,8 +9,14 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Reimbursement;
+use App\Notifications\ReimbursementRequested;
+use App\Notifications\ReimbursementRequestedMail;
+use App\Notifications\ReimbursementStatusUpdated;
+use App\Support\SecureUploadPolicy;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class ReimbursementService
 {
@@ -22,29 +28,33 @@ class ReimbursementService
      * Buat pengajuan reimbursement baru + rantai approval.
      *
      * B-27: File upload wrapped in try-catch for storage failures.
+     * Upload ke local disk (private), akses via controller.
      */
     public function createReimbursement(Employee $employee, array $data): Reimbursement
     {
         $attachmentPath = null;
 
-        if (isset($data['attachment']) && $data['attachment'] instanceof UploadedFile) {
+        if (isset($data['receipt']) && $data['receipt'] instanceof UploadedFile) {
+            $policy = new SecureUploadPolicy;
+            $filename = $policy->randomFilename($data['receipt'], 'reimbursement');
+
             try {
-                $attachmentPath = $data['attachment']->store('reimbursements', 'public');
+                $attachmentPath = $data['receipt']->storeAs('reimbursements', $filename, 'local');
             } catch (\Throwable $e) {
                 throw new BusinessRuleException('Gagal menyimpan lampiran: '.$e->getMessage());
             }
         }
 
-        return DB::transaction(function () use ($employee, $data, $attachmentPath) {
+        $reimbursement = DB::transaction(function () use ($employee, $data, $attachmentPath) {
             $reimbursement = Reimbursement::create([
                 'employee_id' => $employee->id,
                 'category_id' => $data['category_id'] ?? null,
                 'payroll_id' => null,
-                'title' => $data['title'],
+                'title' => $data['title'] ?? mb_substr($data['description'] ?? '', 0, 100),
                 'expense_date' => $data['expense_date'],
                 'amount' => $data['amount'],
                 'description' => $data['description'] ?? null,
-                'attachment_path' => $attachmentPath,
+                'receipt_file' => $attachmentPath,
                 'status' => ReimbursementStatus::PENDING,
             ]);
 
@@ -52,6 +62,10 @@ class ReimbursementService
 
             return $reimbursement;
         });
+
+        $this->notifyApprovers($reimbursement);
+
+        return $reimbursement;
     }
 
     /**
@@ -87,11 +101,11 @@ class ReimbursementService
      *
      * B-8 fix: tambah DB::transaction + lockForUpdate() cegah race condition
      * di mana reimbursement yang sama bisa di-link ke 2 payroll berbeda.
+     * Kirim notifikasi ke employee setelah berhasil di-link.
      */
     public function linkToPayroll(Reimbursement $reimbursement, int $payrollId): void
     {
         DB::transaction(function () use ($reimbursement, $payrollId) {
-            // B-8: Lock reimbursement untuk cegah race condition
             $locked = Reimbursement::lockForUpdate()->findOrFail($reimbursement->id);
 
             if (! $locked->isApproved()) {
@@ -111,6 +125,67 @@ class ReimbursementService
                 'payroll_id' => $payrollId,
                 'status' => ReimbursementStatus::PAID,
             ]);
+
+            $this->notifyStatusChange($locked);
         });
+    }
+
+    /**
+     * Update reimbursement yang masih PENDING.
+     * B-12: Guard — hanya PENDING yang bisa diubah.
+     */
+    public function updateReimbursement(Reimbursement $reimbursement, array $data): Reimbursement
+    {
+        if ($reimbursement->status !== ReimbursementStatus::PENDING) {
+            throw new BusinessRuleException('Hanya reimbursement dengan status PENDING yang dapat diubah.');
+        }
+
+        if (isset($data['receipt']) && $data['receipt'] instanceof UploadedFile) {
+            if ($reimbursement->receipt_file) {
+                try {
+                    Storage::disk('local')->delete($reimbursement->receipt_file);
+                } catch (\Throwable) {
+                    // Ignore delete failure
+                }
+            }
+
+            $policy = new SecureUploadPolicy;
+            $filename = $policy->randomFilename($data['receipt'], 'reimbursement');
+
+            try {
+                $data['receipt_file'] = $data['receipt']->storeAs('reimbursements', $filename, 'local');
+            } catch (\Throwable $e) {
+                throw new BusinessRuleException('Gagal menyimpan lampiran: '.$e->getMessage());
+            }
+
+            unset($data['receipt']);
+        }
+
+        $reimbursement->update($data);
+
+        return $reimbursement->fresh();
+    }
+
+    protected function notifyApprovers(Reimbursement $reimbursement): void
+    {
+        $approvals = $reimbursement->approvals()->with('approver.user')->get();
+
+        foreach ($approvals as $approval) {
+            $user = $approval->approver?->user;
+
+            if ($user) {
+                $user->notify(new ReimbursementRequested($reimbursement));
+                Notification::send($user, new ReimbursementRequestedMail($reimbursement));
+            }
+        }
+    }
+
+    protected function notifyStatusChange(Reimbursement $reimbursement): void
+    {
+        $user = $reimbursement->employee?->user;
+
+        if ($user) {
+            $user->notify(new ReimbursementStatusUpdated($reimbursement));
+        }
     }
 }

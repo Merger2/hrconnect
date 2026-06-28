@@ -26,7 +26,11 @@ class ReimbursementPolicy
 
     public function view(User $user, Reimbursement $reimbursement): bool
     {
-        if ($user->hasRole(['super-admin', 'hr-manager', 'finance'])) {
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        if ($user->hasRole(['hr-manager', 'finance']) && $this->sameCompany($user, $reimbursement)) {
             return true;
         }
 
@@ -78,9 +82,23 @@ class ReimbursementPolicy
 
     /**
      * L2 untuk reimbursement adalah FINANCE, bukan HR Manager.
+     * B-14: Cegah cross-company approval — finance hanya bisa approve
+     * reimbursement dari company yang sama.
      */
     public function approveLevel2(User $user, Reimbursement $reimbursement): bool
     {
-        return $user->can(Permission::APPROVE_REIMBURSEMENTS_L2->value);
+        if (! $user->can(Permission::APPROVE_REIMBURSEMENTS_L2->value)) {
+            return false;
+        }
+
+        return $this->sameCompany($user, $reimbursement);
+    }
+
+    /**
+     * Pastikan user dan employee reimbursement berada di company yang sama.
+     */
+    private function sameCompany(User $user, Reimbursement $reimbursement): bool
+    {
+        return $user->employee?->company_id === $reimbursement->employee?->company_id;
     }
 }

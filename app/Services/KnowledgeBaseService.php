@@ -15,7 +15,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Ai\Streaming\Events\TextDelta;
 use Throwable;
 
 /**
@@ -39,6 +41,73 @@ class KnowledgeBaseService
         protected GeminiClient $gemini,
         protected EmbeddingService $embedding,
     ) {}
+
+    /**
+     * Chat AI RAG — SSE streaming version.
+     *
+     * Yields SSE-compatible arrays for StreamedResponse.
+     * Flow: embed question → vector search top-5 → stream via agent.
+     * No pg_trgm fallback in streaming mode.
+     *
+     * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array}, void, void>
+     */
+    public function chatStream(string $question, ?string $conversationId = null): \Generator
+    {
+        $question = trim($question);
+
+        try {
+            $queryEmbedding = $this->gemini->embed($question);
+            $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
+
+            $context = $chunks->map(fn (KnowledgeBase $kb) => [
+                'content' => $kb->content,
+                'source' => $kb->title.($kb->page_number !== null ? " (chunk #{$kb->page_number})" : ''),
+            ])->all();
+
+            $contextText = $this->buildContextSection($context);
+            $agentPrompt = <<<PROMPT
+KONTEKS:
+{$contextText}
+
+PERTANYAAN: {$question}
+
+JAWABAN:
+PROMPT;
+
+            $agent = new HrKnowledgeBaseAgent;
+            $streamable = $agent->stream($agentPrompt);
+
+            $responseConversationId = $conversationId ?? (string) Str::uuid();
+            $sources = $chunks->map(fn (KnowledgeBase $kb) => [
+                'id' => $kb->id,
+                'title' => $kb->title,
+                'snippet' => mb_substr($kb->content, 0, 200),
+            ])->all();
+
+            $currentResponse = null;
+            $streamable->then(function ($response) use (&$currentResponse) {
+                $currentResponse = $response;
+            });
+
+            foreach ($streamable as $event) {
+                if ($event instanceof TextDelta) {
+                    yield ['text' => $event->delta];
+                }
+            }
+
+            yield [
+                'conversation_id' => $responseConversationId,
+                'sources' => $sources,
+            ];
+        } catch (Throwable $e) {
+            Log::warning('Gemini RAG streaming gagal', [
+                'error' => $e->getMessage(),
+            ]);
+
+            yield ['text' => 'Maaf, layanan AI sedang tidak tersedia. Silakan coba lagi nanti.'];
+            yield ['conversation_id' => $conversationId ?? (string) Str::uuid()];
+        }
+    }
 
     /**
      * Chat AI RAG flow.
