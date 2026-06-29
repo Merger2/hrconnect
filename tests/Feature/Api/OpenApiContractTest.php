@@ -103,7 +103,7 @@ test('server URL uses /api prefix', function () {
     expect($spec['servers'][0]['url'])->toEndWith('/api');
 });
 
-test('all 14 API tags are defined', function () {
+test('all 18 API tags are defined', function () {
     $spec = openApiSpec();
     $tags = array_column($spec['tags'], 'name');
     sort($tags);
@@ -113,6 +113,9 @@ test('all 14 API tags are defined', function () {
         'Asset',
         'Attendance',
         'Auth',
+        'Branch',
+        'Company',
+        'Department',
         'Employees',
         'Face Recognition',
         'Health',
@@ -121,6 +124,7 @@ test('all 14 API tags are defined', function () {
         'Loan',
         'Overtime',
         'Payroll',
+        'Position',
         'Profile',
         'Reimbursement',
     ]);
@@ -159,11 +163,11 @@ test('36 component schemas are defined', function () {
     expect(count($spec['components']['schemas'] ?? []))->toBe(36);
 });
 
-test('54 path templates with 72 operations are documented', function () {
+test('62 path templates with 80 operations are documented', function () {
     $spec = openApiSpec();
     $paths = $spec['paths'];
 
-    expect(count($paths))->toBe(54);
+    expect(count($paths))->toBe(62);
 
     $ops = 0;
     foreach ($paths as $methods) {
@@ -174,7 +178,7 @@ test('54 path templates with 72 operations are documented', function () {
         }
     }
 
-    expect($ops)->toBe(72);
+    expect($ops)->toBe(80);
 });
 
 // ─── Route Completeness ──────────────────────────────────────────────
