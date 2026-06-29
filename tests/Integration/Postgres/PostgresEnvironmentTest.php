@@ -612,3 +612,186 @@ test('pgcrypto gen_salt produces a valid bcrypt salt string', function () {
     expect($salt)->not->toBeNull();
     expect($salt->salt)->toMatch('/^\$2a\$\d{2}\$/');
 });
+
+test('pgcrypto crypt produces a valid bcrypt hash', function () {
+    $hash = DB::selectOne("SELECT crypt('password123', gen_salt('bf')) AS hash");
+
+    expect($hash)->not->toBeNull();
+    expect($hash->hash)->toMatch('/^\$2a\$\d{2}\$.{53}$/');
+});
+
+test('pgcrypto crypt verification matches known password', function () {
+    $result = DB::selectOne(<<<'SQL'
+        SELECT crypt('testpass', '$2a$08$00000000000000000000000000000000000000000') = '$2a$08$00000000000000000000000000000000000000000' AS matches
+    SQL);
+
+    expect($result)->not->toBeNull();
+    expect((bool) $result->matches)->toBeTrue();
+});
+
+test('pgcrypto digest returns a SHA256 hex string', function () {
+    $digest = DB::selectOne("SELECT encode(digest('hello', 'sha256'), 'hex') AS hash");
+
+    expect($digest)->not->toBeNull();
+    expect(strlen($digest->hash))->toBe(64);
+    expect($digest->hash)->toMatch('/^[0-9a-f]{64}$/');
+});
+
+test('pgcrypto hmac produces keyed hash different from plain digest', function () {
+    $hmac = DB::selectOne("SELECT encode(hmac('message', 'secretkey', 'sha256'), 'hex') AS hash");
+    $plain = DB::selectOne("SELECT encode(digest('message', 'sha256'), 'hex') AS hash");
+
+    expect($hmac)->not->toBeNull();
+    expect(strlen($hmac->hash))->toBe(64);
+    expect($hmac->hash)->not->toBe($plain->hash);
+});
+
+// ─── PgVector Cast ──────────────────────────────
+
+test('PgVector cast formatVector returns empty brackets for empty array', function () {
+    $service = app(EmbeddingService::class);
+
+    $result = $service->formatVector([]);
+
+    expect($result)->toBe('[]');
+});
+
+test('PgVector cast formatVector returns properly formatted vector string', function () {
+    $service = app(EmbeddingService::class);
+
+    $result = $service->formatVector([0.1, 0.2, 0.3]);
+
+    expect($result)->toBe('[0.1,0.2,0.3]');
+});
+
+test('PgVector cast formatVector handles floats without integer coercion', function () {
+    $service = app(EmbeddingService::class);
+
+    $result = $service->formatVector([1.0, 0.0, -0.5]);
+
+    expect($result)->toBe('[1,0,-0.5]');
+});
+
+// ─── EmbeddingService with pgvector ─────────────
+
+test('EmbeddingService searchSimilar returns correct ordering via pgvector cosine distance', function () {
+    $targetId = DB::table('knowledge_bases')->insertGetId([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'Kebijakan Cuti Tahunan',
+        'content' => 'Setiap karyawan berhak atas 12 hari cuti tahunan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'embedding' => new Vector(array_fill(0, 768, 0.1)),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 2,
+        'title' => 'Kebijakan BPJS',
+        'content' => 'BPJS Kesehatan dan BPJS Ketenagakerjaan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'embedding' => new Vector(array_fill(0, 768, 0.9)),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $queryVector = array_fill(0, 768, 0.11);
+    $service = app(EmbeddingService::class);
+
+    $results = $service->searchSimilar($queryVector, topK: 5);
+
+    expect($results)->toHaveCount(2);
+    expect($results->first()->id)->toBe($targetId);
+});
+
+test('EmbeddingService searchSimilar returns empty when no matching status', function () {
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'Draft Document',
+        'content' => 'This is still processing.',
+        'category' => 'hr_policy',
+        'status' => 'processing',
+        'embedding' => new Vector(array_fill(0, 768, 0.1)),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $service = app(EmbeddingService::class);
+    $results = $service->searchSimilar(array_fill(0, 768, 0.5), topK: 5);
+
+    expect($results)->toHaveCount(0);
+});
+
+// ─── EmbeddingService with pg_trgm ──────────────
+
+test('EmbeddingService searchByKeyword returns matching results via pg_trgm similarity', function () {
+    $targetId = DB::table('knowledge_bases')->insertGetId([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'Kebijakan Cuti Tahunan',
+        'content' => 'Setiap karyawan berhak atas 12 hari cuti tahunan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 2,
+        'title' => 'Kebijakan BPJS',
+        'content' => 'BPJS Kesehatan dan BPJS Ketenagakerjaan.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $service = app(EmbeddingService::class);
+    $results = $service->searchByKeyword('cuti tahunan', topK: 5);
+
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($targetId);
+});
+
+test('EmbeddingService searchByKeyword returns empty for completely unrelated query', function () {
+    DB::table('knowledge_bases')->insert([
+        'knowledgeable_type' => Employee::class,
+        'knowledgeable_id' => 1,
+        'title' => 'English Policy',
+        'content' => 'This is an English document with no Indonesian words.',
+        'category' => 'hr_policy',
+        'status' => 'ready',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $service = app(EmbeddingService::class);
+    $results = $service->searchByKeyword('xyzzy_nonexistent');
+
+    expect($results)->toHaveCount(0);
+});
+
+// ─── Additional pg_trgm ─────────────────────────
+
+test('pg_trgm show_trgm returns array of trigrams', function () {
+    $trgm = DB::selectOne("SELECT show_trgm('cuti') AS trigrams");
+
+    expect($trgm)->not->toBeNull();
+    $raw = is_string($trgm->trigrams) ? json_decode($trgm->trigrams) : $trgm->trigrams;
+    expect($raw)->toBeArray();
+    expect(count($raw))->toBeGreaterThanOrEqual(3);
+});
+
+test('pg_trgm word_similarity returns higher score for similar words', function () {
+    $high = DB::selectOne("SELECT word_similarity('cuti', 'cuti') AS score");
+    $low = DB::selectOne("SELECT word_similarity('cuti', 'makan') AS score");
+
+    expect((float) $high->score)->toBe(1.0);
+    expect((float) $low->score)->toBeLessThan(1.0);
+});
