@@ -37,11 +37,7 @@ function getRouteList(): array
     $routes = Route::getRoutes()->getRoutesByMethod();
     $result = [];
 
-    $skipUris = [
-        'api/v1/email/verify/{id}/{hash}', // Scramble limitation: public route not auto-documented
-        'api/v1/email/resend', // Scramble limitation: auth-only route not auto-documented
-
-    ];
+    $skipUris = [];
 
     foreach ($routes as $method => $routeGroup) {
         // Skip HEAD routes — automatically added by Laravel for GET, not in spec
@@ -107,13 +103,14 @@ test('server URL uses /api prefix', function () {
     expect($spec['servers'][0]['url'])->toEndWith('/api');
 });
 
-test('all 12 API tags are defined', function () {
+test('all 14 API tags are defined', function () {
     $spec = openApiSpec();
     $tags = array_column($spec['tags'], 'name');
     sort($tags);
 
     expect($tags)->toBe([
         'Approvals',
+        'Asset',
         'Attendance',
         'Auth',
         'Employees',
@@ -121,6 +118,7 @@ test('all 12 API tags are defined', function () {
         'Health',
         'Knowledge Base',
         'Leave',
+        'Loan',
         'Overtime',
         'Payroll',
         'Profile',
@@ -155,17 +153,17 @@ test('all 4 reusable error responses are defined', function () {
     ]);
 });
 
-test('30 component schemas are defined', function () {
+test('36 component schemas are defined', function () {
     $spec = openApiSpec();
 
-    expect(count($spec['components']['schemas'] ?? []))->toBe(30);
+    expect(count($spec['components']['schemas'] ?? []))->toBe(36);
 });
 
-test('46 path templates with 58 operations are documented', function () {
+test('54 path templates with 72 operations are documented', function () {
     $spec = openApiSpec();
     $paths = $spec['paths'];
 
-    expect(count($paths))->toBe(46);
+    expect(count($paths))->toBe(54);
 
     $ops = 0;
     foreach ($paths as $methods) {
@@ -176,7 +174,7 @@ test('46 path templates with 58 operations are documented', function () {
         }
     }
 
-    expect($ops)->toBe(58);
+    expect($ops)->toBe(72);
 });
 
 // ─── Route Completeness ──────────────────────────────────────────────
@@ -223,10 +221,10 @@ test('no undocumented routes exist in the spec', function () {
 
 // ─── Security Contract ──────────────────────────────────────────────
 
-test('4 public routes have empty security array', function () {
+test('5 public routes have empty security array', function () {
     $spec = openApiSpec();
 
-    $publicPaths = ['/v1/health', '/v1/auth/login', '/v1/auth/2fa/challenge', '/v1/auth/forgot-password'];
+    $publicPaths = ['/v1/health', '/v1/auth/login', '/v1/auth/2fa/challenge', '/v1/auth/forgot-password', '/v1/email/verify/{id}/{hash}'];
 
     foreach ($publicPaths as $path) {
         foreach ($spec['paths'][$path] ?? [] as $method => $def) {
@@ -245,7 +243,7 @@ test('4 public routes have empty security array', function () {
 test('all protected routes document 401 response via ref', function () {
     $spec = openApiSpec();
 
-    $publicPaths = ['/v1/health', '/v1/auth/login', '/v1/auth/2fa/challenge', '/v1/auth/forgot-password'];
+    $publicPaths = ['/v1/health', '/v1/auth/login', '/v1/auth/2fa/challenge', '/v1/auth/forgot-password', '/v1/email/verify/{id}/{hash}'];
 
     foreach ($spec['paths'] as $path => $methods) {
         if (in_array($path, $publicPaths)) {
