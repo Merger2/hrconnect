@@ -1,4 +1,4 @@
-op<x-layouts::app.sidebar>
+<x-layouts::app.sidebar>
     <div class="mx-auto flex max-w-[480px] flex-col gap-4 md:max-w-3xl md:gap-6"
          x-data="{
             faceDetected: false,

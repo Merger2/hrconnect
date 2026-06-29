@@ -3,7 +3,10 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-canvas pb-20 lg:pb-0">
+    <body class="min-h-screen bg-canvas pb-20 lg:pb-0"
+        x-data
+        x-init="$store.darkMode.init()"
+    >
         <!-- ─── Desktop Sidebar ─── -->
         <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-e border-outline-variant bg-canvas lg:flex">
             {{-- Logo --}}
@@ -97,15 +100,19 @@
             </nav>
 
             {{-- User --}}
-            <div class="border-t border-outline-variant p-3">
+            <div class="flex items-center justify-between border-t border-outline-variant p-3">
                 <x-desktop-user-menu />
+                <x-navigation.theme-toggle size="sm" />
             </div>
         </aside>
 
         <!-- ─── Mobile Header ─── -->
         <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-outline-variant bg-canvas px-4 lg:hidden">
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
-            <x-desktop-user-menu />
+            <div class="flex items-center gap-1">
+                <x-navigation.theme-toggle size="sm" />
+                <x-desktop-user-menu />
+            </div>
         </header>
 
         <!-- ─── Main Content ─── -->

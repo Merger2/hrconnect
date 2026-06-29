@@ -13,7 +13,6 @@ uses(RefreshDatabase::class);
 function createOvertime(array $overrides = []): Overtime
 {
     return Overtime::create(array_merge([
-        'employee_id' => 1,
         'date' => now()->addDay()->toDateString(),
         'start_time' => '17:00:00',
         'end_time' => '20:00:00',
