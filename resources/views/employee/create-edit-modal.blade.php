@@ -3,108 +3,53 @@
         <span x-text="editing ? '{{ __('Edit Employee') }}' : '{{ __('Add Employee') }}'"></span>
     </x-slot:title>
 
-    <div class="space-y-4">
+    <div class="space-y-5">
         {{-- Personal Information --}}
         <div>
-            <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Account') }}</p>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Account') }}</p>
             <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Name') }} *</label>
-                    <input type="text" x-model="form.name"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Email') }} *</label>
-                    <input type="email" x-model="form.email"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
+                <x-forms.input name="name" label="{{ __('Name') }}" x-model="form.name" required />
+                <x-forms.input name="email" label="{{ __('Email') }}" type="email" x-model="form.email" required />
             </div>
             <div x-show="!editing" class="mt-4">
-                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Password') }} *</label>
-                <input type="password" x-model="form.password"
-                    class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                <x-forms.input name="password" label="{{ __('Password') }}" type="password" x-model="form.password" required />
             </div>
         </div>
 
-        <hr class="border-outline-variant/50">
+        <x-sections.section-border />
 
         {{-- Employee Details --}}
         <div>
-            <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Employee Details') }}</p>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Employee Details') }}</p>
             <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Employee Number') }} *</label>
-                    <input type="text" x-model="form.employee_number"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Full Name') }} *</label>
-                    <input type="text" x-model="form.full_name"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('NIK') }} *</label>
-                    <input type="text" x-model="form.nik" maxlength="16"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Phone') }} *</label>
-                    <input type="text" x-model="form.phone"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Gender') }} *</label>
-                    <select x-model="form.gender"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                        <option value="">{{ __('Select...') }}</option>
-                        <option value="L">{{ __('Male') }}</option>
-                        <option value="P">{{ __('Female') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Marital Status') }} *</label>
-                    <select x-model="form.marital_status"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                        <option value="">{{ __('Select...') }}</option>
-                        <option value="single">{{ __('Single') }}</option>
-                        <option value="married">{{ __('Married') }}</option>
-                        <option value="divorced">{{ __('Divorced') }}</option>
-                        <option value="widowed">{{ __('Widowed') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Blood Type') }}</label>
-                    <select x-model="form.blood_type"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                        <option value="">{{ __('Select...') }}</option>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Birth Date') }} *</label>
-                    <input type="date" x-model="form.birth_date"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
+                <x-forms.input name="employee_number" label="{{ __('Employee Number') }}" x-model="form.employee_number" required />
+                <x-forms.input name="full_name" label="{{ __('Full Name') }}" x-model="form.full_name" required />
+                <x-forms.input name="nik" label="{{ __('NIK') }}" x-model="form.nik" maxlength="16" required />
+                <x-forms.input name="phone" label="{{ __('Phone') }}" x-model="form.phone" required />
+
+                <x-forms.select name="gender" x-model="form.gender" required
+                    :options="['' => __('Select...'), 'L' => __('Male'), 'P' => __('Female')]" />
+
+                <x-forms.select name="marital_status" x-model="form.marital_status" required
+                    :options="['' => __('Select...'), 'single' => __('Single'), 'married' => __('Married'), 'divorced' => __('Divorced'), 'widowed' => __('Widowed')]" />
+
+                <x-forms.select name="blood_type" x-model="form.blood_type"
+                    :options="['' => __('Select...'), 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-', 'O+' => 'O+', 'O-' => 'O-']" />
+
+                <x-forms.input name="birth_date" label="{{ __('Birth Date') }}" type="date" x-model="form.birth_date" required />
             </div>
         </div>
 
-        <hr class="border-outline-variant/50">
+        <x-sections.section-border />
 
         {{-- Employment --}}
         <div>
-            <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Employment') }}</p>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Employment') }}</p>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Company') }} *</label>
-                    <select x-model="form.company_id"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                    <x-forms.label for="company_id" required>{{ __('Company') }}</x-forms.label>
+                    <select x-model="form.company_id" id="company_id" name="company_id" required
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:ring-0">
                         <option value="">{{ __('Select...') }}</option>
                         <template x-for="c in companies" :key="c.id">
                             <option :value="c.id" x-text="c.name"></option>
@@ -112,9 +57,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Branch') }} *</label>
-                    <select x-model="form.branch_id"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                    <x-forms.label for="branch_id" required>{{ __('Branch') }}</x-forms.label>
+                    <select x-model="form.branch_id" id="branch_id" name="branch_id" required
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:ring-0">
                         <option value="">{{ __('Select...') }}</option>
                         <template x-for="b in branches" :key="b.id">
                             <option :value="b.id" x-text="b.name"></option>
@@ -122,9 +67,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Department') }} *</label>
-                    <select x-model="form.department_id"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                    <x-forms.label for="department_id" required>{{ __('Department') }}</x-forms.label>
+                    <select x-model="form.department_id" id="department_id" name="department_id" required
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:ring-0">
                         <option value="">{{ __('Select...') }}</option>
                         <template x-for="d in departments" :key="d.id">
                             <option :value="d.id" x-text="d.name"></option>
@@ -132,9 +77,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Position') }} *</label>
-                    <select x-model="form.position_id"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                    <x-forms.label for="position_id" required>{{ __('Position') }}</x-forms.label>
+                    <select x-model="form.position_id" id="position_id" name="position_id" required
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:ring-0">
                         <option value="">{{ __('Select...') }}</option>
                         <template x-for="p in positions" :key="p.id">
                             <option :value="p.id" x-text="p.name"></option>
@@ -142,76 +87,38 @@
                     </select>
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Manager / Supervisor') }}</label>
-                    <select x-model="form.parent_id"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                    <x-forms.label for="parent_id">{{ __('Manager / Supervisor') }}</x-forms.label>
+                    <select x-model="form.parent_id" id="parent_id" name="parent_id"
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:ring-0">
                         <option value="">{{ __('None') }}</option>
                         <template x-for="m in managers" :key="m.id">
                             <option :value="m.id" x-text="m.full_name"></option>
                         </template>
                     </select>
                 </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Employment Type') }} *</label>
-                    <select x-model="form.employment_type"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                        <option value="">{{ __('Select...') }}</option>
-                        <option value="permanent">{{ __('Permanent') }}</option>
-                        <option value="contract">{{ __('Contract') }}</option>
-                        <option value="probation">{{ __('Probation') }}</option>
-                        <option value="intern">{{ __('Intern') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Salary Type') }} *</label>
-                    <select x-model="form.salary_type"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                        <option value="">{{ __('Select...') }}</option>
-                        <option value="monthly">{{ __('Monthly') }}</option>
-                        <option value="daily">{{ __('Daily') }}</option>
-                        <option value="hourly">{{ __('Hourly') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Join Date') }} *</label>
-                    <input type="date" x-model="form.join_date"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
+
+                <x-forms.select name="employment_type" x-model="form.employment_type" required
+                    :options="['' => __('Select...'), 'permanent' => __('Permanent'), 'contract' => __('Contract'), 'probation' => __('Probation'), 'intern' => __('Intern')]" />
+
+                <x-forms.select name="salary_type" x-model="form.salary_type" required
+                    :options="['' => __('Select...'), 'monthly' => __('Monthly'), 'daily' => __('Daily'), 'hourly' => __('Hourly')]" />
+
+                <x-forms.input name="join_date" label="{{ __('Join Date') }}" type="date" x-model="form.join_date" required />
             </div>
         </div>
 
-        <hr class="border-outline-variant/50">
+        <x-sections.section-border />
 
         {{-- Education --}}
         <div>
-            <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Education') }}</p>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Education') }}</p>
             <div class="grid gap-4 sm:grid-cols-3">
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Education Level') }} *</label>
-                    <select x-model="form.education_level"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                        <option value="">{{ __('Select...') }}</option>
-                        <option value="sd">{{ __('SD / Sederajat') }}</option>
-                        <option value="smp">{{ __('SMP / Sederajat') }}</option>
-                        <option value="sma">{{ __('SMA / Sederajat') }}</option>
-                        <option value="smk">{{ __('SMK / Sederajat') }}</option>
-                        <option value="diploma">{{ __('Diploma (D1-D4)') }}</option>
-                        <option value="bachelor">{{ __('Sarjana (S1)') }}</option>
-                        <option value="master">{{ __('Magister (S2)') }}</option>
-                        <option value="doctorate">{{ __('Doktor (S3)') }}</option>
-                        <option value="other">{{ __('Lainnya') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Institution') }} *</label>
-                    <input type="text" x-model="form.institution_name"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Graduation Year') }} *</label>
-                    <input type="number" x-model="form.graduation_year" min="1950" :max="new Date().getFullYear()"
-                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                </div>
+                <x-forms.select name="education_level" x-model="form.education_level" required
+                    :options="['' => __('Select...'), 'sd' => __('SD / Sederajat'), 'smp' => __('SMP / Sederajat'), 'sma' => __('SMA / Sederajat'), 'smk' => __('SMK / Sederajat'), 'diploma' => __('Diploma (D1-D4)'), 'bachelor' => __('Sarjana (S1)'), 'master' => __('Magister (S2)'), 'doctorate' => __('Doktor (S3)'), 'other' => __('Lainnya')]" />
+
+                <x-forms.input name="institution_name" label="{{ __('Institution') }}" x-model="form.institution_name" required />
+
+                <x-forms.input name="graduation_year" label="{{ __('Graduation Year') }}" type="number" x-model="form.graduation_year" min="1950" required />
             </div>
         </div>
 

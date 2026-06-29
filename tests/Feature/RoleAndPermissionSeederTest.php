@@ -125,7 +125,7 @@ function permissionMatrix(): Generator
         'view_dashboard', 'view_branches', 'view_departments', 'view_positions',
         'view_employees', 'manage_employees', 'view_attendances', 'manage_attendances',
         'view_leaves', 'approve_leaves_l2', 'view_overtimes', 'approve_overtimes_l2',
-        'view_reimbursements', 'view_loans', 'view_assets', 'manage_assets',
+        'view_reimbursements', 'view_loans', 'manage_loans', 'view_assets', 'manage_assets',
         'view_activity_logs', 'view_audit_logs',
         'manage_knowledgebase', 'view_knowledgebase', 'view_wfa_pending',
         'approve_wfa',
@@ -134,7 +134,7 @@ function permissionMatrix(): Generator
         'view_companies', 'manage_companies', 'manage_branches', 'manage_departments',
         'manage_positions', 'approve_leaves_l1', 'approve_overtimes_l1',
         'manage_reimbursements', 'approve_reimbursements_l1', 'approve_reimbursements_l2',
-        'manage_loans', 'process_payroll', 'view_payslip', 'download_payslip', 'view_payrolls',
+        'process_payroll', 'view_payslip', 'download_payslip', 'view_payrolls',
         'manage_tax_configs', 'manage_bpjs_configs', 'manage_settings',
         'manage_company_settings', 'manage_roles', 'manage_holidays', 'manage_shifts',
     ];

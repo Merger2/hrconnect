@@ -101,8 +101,9 @@ class RoleAndPermissionSeeder extends Seeder
             // WFA
             PermissionEnum::APPROVE_WFA,
             PermissionEnum::VIEW_WFA_PENDING,
-            // Loan/Asset (view + manage assets)
+            // Loan/Asset (view + manage)
             PermissionEnum::VIEW_LOANS,
+            PermissionEnum::MANAGE_LOANS,
             PermissionEnum::VIEW_ASSETS,
             PermissionEnum::MANAGE_ASSETS,
             // Audit

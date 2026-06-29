@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApprovalController;
+use App\Http\Controllers\Api\AssetController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmailVerificationController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Api\FaceController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\LeaveController;
+use App\Http\Controllers\Api\LoanController;
 use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\ProfileController;
@@ -201,6 +203,44 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/terminate/contract-end', [EmployeeTerminationController::class, 'processContractEnd'])
                 ->middleware('permission:manage_employees')
                 ->name('terminate.contract-end');
+        });
+
+    // ── Loan Management ───────────────────────────────────────────
+    Route::prefix('loans')->name('api.loans.')
+        ->middleware('permission:view_loans')
+        ->group(function () {
+            Route::get('/', [LoanController::class, 'index'])->name('index');
+            Route::post('/', [LoanController::class, 'store'])
+                ->middleware('permission:manage_loans')
+                ->name('store');
+            Route::get('/{loan}', [LoanController::class, 'show'])->name('show');
+            Route::patch('/{loan}', [LoanController::class, 'update'])
+                ->middleware('permission:manage_loans')
+                ->name('update');
+            Route::delete('/{loan}', [LoanController::class, 'destroy'])->name('destroy');
+        });
+
+    // ── Asset Management ──────────────────────────────────────────
+    Route::prefix('assets')->name('api.assets.')
+        ->middleware('permission:view_assets')
+        ->group(function () {
+            Route::get('/', [AssetController::class, 'index'])->name('index');
+            Route::post('/', [AssetController::class, 'store'])
+                ->middleware('permission:manage_assets')
+                ->name('store');
+            Route::get('/{asset}', [AssetController::class, 'show'])->name('show');
+            Route::patch('/{asset}', [AssetController::class, 'update'])
+                ->middleware('permission:manage_assets')
+                ->name('update');
+            Route::delete('/{asset}', [AssetController::class, 'destroy'])
+                ->middleware('permission:manage_assets')
+                ->name('destroy');
+            Route::post('/{asset}/handover', [AssetController::class, 'handover'])
+                ->middleware('permission:manage_assets')
+                ->name('handover');
+            Route::post('/handover/{handover}/return', [AssetController::class, 'return'])
+                ->middleware('permission:manage_assets')
+                ->name('return');
         });
 
     // ── KnowledgeBase RAG (Sesi 11) ─────────────────────────────────

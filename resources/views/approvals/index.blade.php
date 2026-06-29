@@ -28,13 +28,8 @@
             <div class="p-4">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
                     <div class="xl:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Type') }}</label>
-                        <select x-model="typeFilter" @change="fetchApprovals()" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink">
-                            <option value="">{{ __('All Types') }}</option>
-                            <option value="leave">{{ __('Leave') }}</option>
-                            <option value="overtime">{{ __('Overtime') }}</option>
-                            <option value="reimbursement">{{ __('Reimbursement') }}</option>
-                        </select>
+                        <x-forms.select name="type" x-model="typeFilter" @change="fetchApprovals()"
+                            :options="['' => __('All Types'), 'leave' => __('Leave'), 'overtime' => __('Overtime'), 'reimbursement' => __('Reimbursement')]" />
                     </div>
                 </div>
             </div>
