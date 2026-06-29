@@ -19,7 +19,7 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-3">
                             <h2 class="text-xl font-semibold text-ink" x-text="employee.full_name"></h2>
-                            <x-status-badge :tone="employee.status === 'active' ? 'success' : (employee.status === 'resigned' ? 'warning' : (employee.status === 'terminated' ? 'error' : 'neutral'))" pill x-show="true">
+                            <x-status-badge :tone="$employee->status === 'active' ? 'success' : ($employee->status === 'resigned' ? 'warning' : ($employee->status === 'terminated' ? 'error' : 'neutral'))" pill x-show="true">
                                 <span x-text="statusLabel(employee.status)"></span>
                             </x-status-badge>
                         </div>
@@ -147,7 +147,7 @@
                 pii: {},
                 families: @json($employee->families ?? []),
                 loading: false,
-                hasPiiAccess: @json(auth()->user()?.can('viewPii', $employee) ?? false),
+                hasPiiAccess: @json(auth()->user()?->can('viewPii', $employee) ?? false),
                 tab: 'personal',
 
                 init() {
