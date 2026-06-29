@@ -13,19 +13,19 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-ink">{{ $item['label'] }}</p>
-                        <p class="mt-0.5 text-[11px] leading-tight text-on-surface-variant">{{ $item['description'] }}</p>
+                        <p class="mt-0.5 text-xs leading-tight text-on-surface-variant">{{ $item['description'] }}</p>
                     </div>
                 </a>
             @endforeach
 
             <button type="button" @click="showMore = !showMore"
                     class="group flex flex-col items-center gap-2 rounded-xl border border-dashed border-outline-variant/60 bg-canvas p-4 text-center transition hover:border-outline-variant hover:shadow-sm">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10 text-info">
                     <span class="material-symbols-outlined text-lg">more_horiz</span>
                 </div>
                 <div>
                     <p class="text-sm font-medium text-ink">{{ __('Lainnya') }}</p>
-                    <p class="mt-0.5 text-[11px] leading-tight text-on-surface-variant">{{ __('Buka menu lengkap') }}</p>
+                    <p class="mt-0.5 text-xs leading-tight text-on-surface-variant">{{ __('Buka menu lengkap') }}</p>
                 </div>
             </button>
         </div>

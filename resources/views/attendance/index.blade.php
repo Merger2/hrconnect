@@ -9,7 +9,7 @@
 
             <div class="relative flex items-start justify-between gap-3 p-4 pb-0">
                 <div class="min-w-0">
-                    <p class="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-primary">{{ __('Attendance') }}</p>
+                    <p class="text-xs font-bold uppercase tracking-widest text-primary">{{ __('Attendance') }}</p>
                     <h2 class="mt-1 text-lg font-semibold leading-tight tracking-tight text-ink sm:text-xl">{{ __('Today') }}</h2>
                     <p class="mt-0.5 text-xs text-on-surface-variant sm:text-sm" x-text="todayFormatted"></p>
                 </div>
@@ -103,7 +103,7 @@
                 </template>
                 <template x-if="today.has_clocked_in && !today.has_clocked_out">
                     <a href="{{ route('attendance.clock-in') }}" wire:navigate
-                       class="flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-full bg-warning px-4 py-3 text-center text-white shadow-sm transition-all hover:bg-[#d48a0a] active:scale-[0.99]">
+                       class="flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-full bg-warning px-4 py-3 text-center text-white shadow-sm transition-all hover:brightness-90 active:scale-[0.99]">
                         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/16 ring-1 ring-white/20">
                             <span class="material-symbols-outlined text-lg">logout</span>
                         </span>
@@ -146,17 +146,17 @@
             <div class="flex flex-col items-center gap-1.5 rounded-xl border border-outline-variant/60 bg-canvas p-3 shadow-sm">
                 <span class="material-symbols-outlined text-xl text-success">check_circle</span>
                 <dd class="text-lg font-bold text-ink" x-text="summary.days_worked">0</dd>
-                <dt class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Present') }}</dt>
+                <dt class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Present') }}</dt>
             </div>
             <div class="flex flex-col items-center gap-1.5 rounded-xl border border-warning/30 bg-canvas p-3 shadow-sm">
                 <span class="material-symbols-outlined text-xl text-warning">error_outline</span>
                 <dd class="text-lg font-bold text-ink" x-text="summary.late_count">0</dd>
-                <dt class="text-[11px] font-semibold uppercase tracking-wider text-warning">{{ __('Late') }}</dt>
+                <dt class="text-xs font-semibold uppercase tracking-wider text-warning">{{ __('Late') }}</dt>
             </div>
             <div class="flex flex-col items-center gap-1.5 rounded-xl border border-error/30 bg-canvas p-3 shadow-sm">
                 <span class="material-symbols-outlined text-xl text-error">cancel</span>
                 <dd class="text-lg font-bold text-ink" x-text="summary.absent_count">0</dd>
-                <dt class="text-[11px] font-semibold uppercase tracking-wider text-error">{{ __('Absent') }}</dt>
+                <dt class="text-xs font-semibold uppercase tracking-wider text-error">{{ __('Absent') }}</dt>
             </div>
         </div>
 
@@ -231,14 +231,14 @@
                                 <div class="flex items-center gap-2.5 rounded-lg bg-surface-container-low px-3 py-2.5">
                                     <span class="material-symbols-outlined text-lg text-success">login</span>
                                     <div>
-                                        <p class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('In') }}</p>
+                                        <p class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('In') }}</p>
                                         <p class="text-sm font-medium text-ink" x-text="formatTime(r.clock_in) || '--:--'"></p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2.5 rounded-lg bg-surface-container-low px-3 py-2.5">
                                     <span class="material-symbols-outlined text-lg text-error">logout</span>
                                     <div>
-                                        <p class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Out') }}</p>
+                                        <p class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Out') }}</p>
                                         <p class="text-sm font-medium text-ink" x-text="formatTime(r.clock_out) || '--:--'"></p>
                                     </div>
                                 </div>

@@ -42,7 +42,7 @@
         @if (!empty($tab['disabled']))
             <button disabled class="flex h-full flex-1 flex-col items-center justify-center gap-0.5 text-on-surface-variant opacity-40">
                 <span class="material-symbols-outlined text-2xl">{{ $tab['icon'] }}</span>
-                <span class="text-[11px] font-medium leading-tight">{{ $tab['name'] }}</span>
+                <span class="text-xs font-medium leading-tight">{{ $tab['name'] }}</span>
             </button>
         @else
             <a href="{{ route($tab['route']) }}"
@@ -55,7 +55,7 @@
                 <span class="material-symbols-outlined {{ $isActive ? 'text-2xl' : 'text-2xl' }}">
                     {{ $tab['icon'] }}
                 </span>
-                <span class="text-[11px] font-medium leading-tight">{{ $tab['name'] }}</span>
+                <span class="text-xs font-medium leading-tight">{{ $tab['name'] }}</span>
                 @if ($isActive)
                     <span class="absolute bottom-0 h-1 w-6 rounded-full bg-ink"></span>
                 @endif

@@ -195,7 +195,7 @@
                 </p>
             </div>
             <button @click="startCamera()"
-                    class="flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1f1f1f] active:scale-[0.98]">
+                    class="flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-container active:scale-[0.98]">
                 <span class="material-symbols-outlined">camera_alt</span>
                 {{ __('Mulai Kamera') }}
             </button>
@@ -253,7 +253,7 @@
         <button x-show="step === 'capture' && videoReady && !modelsLoading"
                 @click="captureFrame()"
                 :disabled="isCapturing"
-                class="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#1f1f1f] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
+                class="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
             <span class="material-symbols-outlined" x-show="!isCapturing">camera</span>
             <span x-show="isCapturing" class="inline-block size-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
             <span x-text="isCapturing ? '{{ __('Memproses...') }}' : (captureCount >= maxCaptures ? '{{ __('Selesai') }}' : '{{ __('Ambil Foto ') }}' + (captureCount + 1) + '/' + maxCaptures)"></span>
@@ -278,7 +278,7 @@
                     {{ __('Ulang') }}
                 </button>
                 <button @click="registerFace()"
-                        class="flex-1 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1f1f1f] active:scale-[0.98]">
+                        class="flex-1 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-container active:scale-[0.98]">
                     {{ __('Simpan Wajah') }}
                 </button>
             </div>
