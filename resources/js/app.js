@@ -3,6 +3,22 @@ import './tom-select';
 import { watchPickerMounts } from './datepicker';
 import { installValidation } from './validation';
 import profilePhotoEditor from './profile-photo-editor';
+import payrollIndex from './payroll-index';
+import loansIndex from './loans-index';
+import overtimesIndex from './overtimes-index';
+import overtimeApply from './overtime-apply';
+import leavesIndex from './leaves-index';
+import leaveApply from './leave-apply';
+import reimbursementsIndex from './reimbursements-index';
+import reimbursementApply from './reimbursement-apply';
+import attendanceIndex from './attendance-index';
+import approvalsIndex from './approvals-index';
+import employeesIndex from './employees-index';
+import createEmployeeForm from './create-employee-form';
+import terminateEmployeeForm from './terminate-employee-form';
+import importEmployeesForm from './import-employees-form';
+import assetsIndex from './assets-index';
+import knowledgeBaseChat from './knowledge-base-chat';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
@@ -102,6 +118,37 @@ window.profilePhotoEditor = profilePhotoEditor;
 
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('profilePhotoEditor', profilePhotoEditor);
+    window.Alpine.data('payrollIndex', payrollIndex);
+    window.Alpine.data('loansIndex', loansIndex);
+    window.Alpine.data('overtimesIndex', overtimesIndex);
+    window.Alpine.data('overtimeApply', overtimeApply);
+    window.Alpine.data('leavesIndex', leavesIndex);
+    window.Alpine.data('leaveApply', leaveApply);
+    window.Alpine.data('reimbursementsIndex', reimbursementsIndex);
+    window.Alpine.data('reimbursementApply', reimbursementApply);
+    window.Alpine.data('attendanceIndex', attendanceIndex);
+    window.Alpine.data('approvalsIndex', approvalsIndex);
+    window.Alpine.data('employeesIndex', employeesIndex);
+    window.Alpine.data('createEmployeeForm', createEmployeeForm);
+    window.Alpine.data('terminateEmployeeForm', terminateEmployeeForm);
+    window.Alpine.data('importEmployeesForm', importEmployeesForm);
+    window.Alpine.data('assetsIndex', assetsIndex);
+    window.Alpine.data('knowledgeBaseChat', knowledgeBaseChat);
+    window.Alpine.data('toast', () => ({
+        show: false,
+        message: '',
+        variant: 'success',
+        timer: null,
+        init() {
+            Livewire.on('toast', (data) => {
+                this.message = data.text || '';
+                this.variant = data.variant || 'success';
+                this.show = true;
+                clearTimeout(this.timer);
+                this.timer = setTimeout(() => { this.show = false; }, 3200);
+            });
+        },
+    }));
     window.Alpine.store('darkMode', {
         on: false,
         mode: localStorage.getItem('theme') || 'system',

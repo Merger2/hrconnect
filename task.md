@@ -534,23 +534,27 @@ Berdasarkan analisis kode PasPapan (58 Blade components, 1.642 baris app.js, 2.7
 
 ## 🔴 Design System Compliance (D1-D4)
 
-### Task D1 — TomSelect hardcoded colors
+### Task D1 ✅ — TomSelect hardcoded colors
 - **File:** `resources/views/components/forms/tom-select.blade.php`
 - **Issue:** 20 hardcoded hex colors di `<style>` block
 - **Jadi:** Ganti semua dengan CSS variables (`var(--color-canvas)`, `var(--color-outline-variant)`, `var(--color-ink)`, `var(--color-on-background)`, dll)
+- **Status:** ✅ Selesai
 
-### Task D2 — Hover arbitrary colors
+### Task D2 ✅ — Hover arbitrary colors
 - **Files:** `resources/views/attendance/clock-in.blade.php:272`, `resources/views/attendance/index.blade.php:94,106`, `resources/views/employee/profile/face-registration.blade.php:198,256,281`
 - **Issue:** `hover:bg-[#1f1f1f]`, `hover:bg-[#d48a0a]` — hardcoded hex
 - **Jadi:** Ganti dengan MD3 tokens (`hover:bg-surface-container`, `hover:bg-warning-container`)
+- **Status:** ✅ Selesai (1 remnant di attendance/index.blade.php:94 — lihat J2)
 
-### Task D3 — Legacy Tailwind color classes
+### Task D3 ✅ — Legacy Tailwind color classes
 - **Files:** `resources/views/components/status-badge.blade.php:14` (`bg-purple-500/10 text-purple-700`), `resources/views/livewire/quick-actions.blade.php:23` (`bg-blue-100 text-blue-700`)
 - **Jadi:** Ganti dengan MD3 semantic tokens (`bg-surface-dim text-on-surface-variant`, `bg-info/10 text-info`)
+- **Status:** ✅ Selesai
 
-### Task D4 — Arbitrary size values
+### Task D4 ✅ — Arbitrary size values
 - **Files:** Multiple views (`text-[11px]`, `text-[0.68rem]`, `tracking-[0.24em]`)
 - **Jadi:** Ganti dengan Tailwind utility (`text-xs`, `text-sm`, `tracking-wide`)
+- **Status:** ✅ Selesai
 
 ## 🔴 Test Coverage Gap (T1-T6)
 
@@ -564,20 +568,22 @@ Berdasarkan analisis kode PasPapan (58 Blade components, 1.642 baris app.js, 2.7
 - **Buat:** `tests/Unit/Services/LoanServiceTest.php` + `tests/Feature/Api/LoanProofTest.php`
 - **Cakupan:** CRUD, approval workflow, cicilan kalkulasi
 
-### Task T3 — Test BpjsService
+### Task T3 ✅ — Test BpjsService
 - **File:** `app/Services/Payroll/BpjsService.php`
 - **Buat:** `tests/Unit/Services/Payroll/BpjsServiceTest.php`
 - **Cakupan:** Kesehatan 1%, JHT 2%, JP 1%, batas atas, edge cases
+- **Status:** ✅ 7 test, 39 assertions — Selesai
 
 ### Task T4 — Test DynamicBarcodeTokenService
 - **File:** `app/Services/DynamicBarcodeTokenService.php`
 - **Buat:** `tests/Unit/Services/DynamicBarcodeTokenServiceTest.php`
 - **Cakupan:** HMAC-SHA256, nonce, TTL jitter, anti-replay
 
-### Task T5 — Test AttendanceRiskScorer
+### Task T5 ✅ — Test AttendanceRiskScorer
 - **File:** `app/Services/AttendanceRiskScorer.php`
 - **Buat:** `tests/Unit/Services/AttendanceRiskScorerTest.php`
 - **Cakupan:** 14 faktor risk scoring, score range 0-100, threshold
+- **Status:** ✅ 31 test, 46 assertions — Selesai
 
 ### Task T6 — Test master data controllers
 - **Files:** `DepartmentController`, `PositionController`, `CompanyController`, `BranchController`
@@ -619,13 +625,214 @@ Berdasarkan analisis kode PasPapan (58 Blade components, 1.642 baris app.js, 2.7
 ### Task P1 ✅ — Tambah PG test coverage
 ### Task P2 ✅ — CI PG test stabilkan
 
+## 🟢 Payroll Alpine Fix (Selesai)
+
+### Task J-Payroll ✅ — Ekstrak payrollIndex ke JS file
+- **File:** `resources/views/payroll/index.blade.php` → `resources/js/payroll-index.js`
+- **Issue:** `loading`, `formatCurrency`, `payrolls` undefined karena inline script tidak jalan dengan `wire:navigate`
+- **Fix:** Ekstrak ke file JS terpisah, register via `app.js` di `alpine:init`
+- **Status:** ✅ Build + lint pass
+
 ---
 
 # Prioritaskan Sesuai Role
 
 | Prioritas | Role | Fokus |
 |-----------|------|-------|
-| **P1** | **HR-Manager** | Test BpjsService (T3), RiskScorer (T5), Design system D1-D4 |
+| **P1** | **HR-Manager** | Alpine inline migration J1, Hover remnant J2 |
 | **P2** | **Finance** | Test Asset (T1), Loan (T2), ApprovalPolicy (A1), API Resources (A2) |
-| **P3** | **Manager** | Master data tests (T6), PHPStan baseline (S1), Broadcast (B1-B3) |
+| **P3** | **Manager** | Master data tests (T6), PHPStan baseline S1, Broadcast (B1-B3) |
 | **P4** | **Employee** | DynamicBarcodeToken tests (T4), Clock-out streak (C1), Docs update (S2) |
+
+---
+
+# 🔴 Temuan Audit — Sesi 2 (30 Juni 2026)
+
+## 🔴 JS Alpine wire:navigate (J1-J2)
+
+### Task J1 — Ekstrak 14 inline Alpine.data ke JS files
+- **Files:** 14 Blade views menggunakan `document.addEventListener('alpine:init', () => { Alpine.data('...', ...) })`
+- **Issue:** Semua akan broken dengan `wire:navigate` — fix sama seperti payroll
+- **Files affected:**
+  - `resources/views/loans/index.blade.php` — `loansIndex`
+  - `resources/views/overtimes/apply.blade.php` — `overtimeApply`
+  - `resources/views/overtimes/index.blade.php` — `overtimesIndex`
+  - `resources/views/leaves/apply.blade.php` — `leaveApply`
+  - `resources/views/leaves/index.blade.php` — `leavesIndex`
+  - `resources/views/reimbursements/apply.blade.php` — `reimbursementApply`
+  - `resources/views/reimbursements/index.blade.php` — `reimbursementsIndex`
+  - `resources/views/attendance/index.blade.php` — `attendanceIndex`
+  - `resources/views/approvals/index.blade.php` — `approvalsIndex`
+  - `resources/views/employee/terminate-modal.blade.php` — `terminateEmployeeForm`
+  - `resources/views/employee/index.blade.php` — `employeesIndex`
+  - `resources/views/employee/create-edit-modal.blade.php` — `createEmployeeForm`
+  - `resources/views/employee/import-export-modal.blade.php` — `importEmployeesForm`
+  - `resources/views/assets/index.blade.php` — `assetsIndex`
+- **Fix:** Ekstrak masing-masing ke `resources/js/{nama}.js`, register via `alpine:init` di `app.js`
+
+### Task J2 — Hover remnant di attendance/index
+- **File:** `resources/views/attendance/index.blade.php:94`
+- **Issue:** `hover:bg-[#1f1f1f]` masih ada
+- **Fix:** Ganti `hover:bg-[#1f1f1f]` → `hover:bg-primary-container`
+
+## 🟠 Stale PHPStan baseline (P1)
+
+### Task P1 — Hapus 7 stale entries phpstan-baseline
+- **File:** `phpstan-baseline.neon` lines 745, 751, 757, 763, 769, 775, 781
+- **Issue:** Mereferensi `app/Notifications/LeaveApproved.php`, `LeaveRejected.php`, `LeaveRequestSubmitted.php` yang sudah dihapus
+- **Fix:** Hapus 7 entry atau set `reportUnmatchedIgnoredErrors: false`
+
+---
+
+# 🔴 Temuan End-to-End Testing — 30 Juni 2026
+
+Hasil test manual sebagai end user di semua role. Server `http://127.0.0.1:8000` (PostgreSQL, PHP 8.5, Laravel 13.4).
+
+## Login Flow
+
+| Akun | Email | Password | Hasil |
+|------|-------|----------|-------|
+| Super Admin | `admin@hrconnect.local` | `ChangeMe!2026` | ✅ Login → dashboard, semua page 200 |
+| Finance | `finance@hrconnect.local` | `password` | ✅ Login → dashboard |
+| Manager | `manager@hrconnect.local` | `password` | ✅ Login → dashboard |
+| Employee | `staff@hrconnect.local` | `password` | ✅ Login → dashboard |
+| Employee (real) | `gilda18@example.com` (Salwa) | `password` | ✅ Login → ⚠️ redirect `/settings/security` (password change) |
+
+## 🔴 E1 — API Leaves & Reimbursements endpoint TIDAK ADA
+
+**Severity:** Critical
+**Issue:** Tidak ada route `/api/v1/leaves` atau `/api/v1/reimbursements`. Semua URL ini return 404 "Resource tidak ditemukan".
+**CURL Test:**
+```
+GET /api/v1/leaves        → 404 Resource tidak ditemukan
+GET /api/v1/reimbursements → 404 Resource tidak ditemukan
+```
+**Akar masalah:** `routes/api.php` tidak mendaftarkan API resource untuk Leaves dan Reimbursements. Web routes (`/leaves`, `/reimbursements`) via Blade/Livewire berfungsi normal (200).
+**Dampak:** Mobile/third-party integrations tidak bisa akses data leave dan reimbursement.
+**Fix:** Tambah route group di `routes/api.php`:
+```php
+Route::apiResource('leaves', LeaveController::class)->middleware('auth:sanctum');
+Route::apiResource('reimbursements', ReimbursementController::class)->middleware('auth:sanctum');
+```
+
+## 🟠 E2 — Demo users tidak punya employee record
+
+**Severity:** High
+**Issue:** 4 user demo tidak punya baris di tabel `employees`:
+| User | ID | Role | Employee ID |
+|------|:--:|------|:-----------:|
+| Super Admin | 1 | super-admin + hr-manager | `null` |
+| Andi Manager | 50 | manager | `null` |
+| Budi Staff | 51 | employee | `null` |
+| Citra Finance | 52 | finance | `null` |
+
+**Akar masalah:** Seed data `DatabaseSeeder.php` bikin user tapi `EmployeeSeeder.php` bikin user terpisah (2-47). Demo user di `UserFactory` tidak punya relasi Employee.
+**Dampak:**
+- `GET /api/v1/attendance/today` → `"Akun Anda belum terhubung dengan data karyawan."`
+- `GET /api/v1/approvals/pending` → `"Akun Anda belum terhubung dengan data karyawan."`
+- Semua endpoint employee-specific tidak bisa diakses oleh akun demo
+- Manager tidak bisa lihat team approvals
+
+**Fix:** Tambah seeder untuk bikin Employee record untuk user id 1, 50, 51, 52.
+
+## 🟠 E3 — password_changed_at null → redirect loop
+
+**Severity:** High
+**Issue:** Semua seeded employee (`password_changed_at` = null) redirect ke `/settings/security` setelah login.
+**Yang tidak kena redirect:**
+- Super Admin (id=1): `password_changed_at = 2026-06-27 22:53:16`
+- Demo users (50, 51, 52): tidak redirect (password factory set `password_changed_at`)
+**Yang kena redirect (tidak bisa akses fitur):**
+- Semua employee real (id 2-47) via `EmployeeSeeder` — tidak set `password_changed_at`
+
+**Akar masalah:** Middleware ForceChangePassword mengecek `password_changed_at === null`. EmployeeSeeder panggil `UserFactory` tanpa set `password_changed_at`.
+**Fix:** Tambah `'password_changed_at' => now()` di `EmployeeSeeder` atau middleware skip untuk user dengan role employee (opsional).
+
+## 🟡 E4 — API route naming inconsistent
+
+**Severity:** Medium
+**Files:** `routes/api.php`
+**Issue:** Naming convention tidak konsisten:
+| Endpoint | Convention | Seharusnya |
+|----------|:----------:|:----------:|
+| `/api/v1/payroll` | singular | `/api/v1/payrolls` (plural) |
+| `/api/v1/overtime` | singular | `/api/v1/overtimes` (plural) |
+| `/api/v1/attendance` | singular | `/api/v1/attendances` (plural) |
+
+**Dampak:** Developer confusion, REST convention violation.
+**Fix:** Rename routes atau set `Route::apiResource` dengan parameter name yang plural.
+
+## 🟡 E5 — RAG Gemini offline (fallback pg_trgm)
+
+**Severity:** Medium
+**Issue:** `POST /api/v1/knowledgebase/chat` return `answer: "Sistem AI sedang offline."`, `confidence: "low"`, `model: "pg_trgm"`.
+**Akar masalah:** Gemini API key tidak terkonfigurasi atau rate limited. `RAG_MOCK_MODE=true` di `.env` adalah dead config (kode PHP tidak membacanya).
+**CURL Test:**
+```json
+POST /api/v1/knowledgebase/chat {"question":"Apa itu cuti tahunan?"}
+→ {"answer":"Maaf, tidak ada informasi yang cocok... Sistem AI sedang offline.","confidence":"low","fallback":true,"model":"pg_trgm"}
+```
+**Fix:** Set `GEMINI_API_KEY` valid di `.env`, atau implementasi mock yang benar.
+
+## 🟡 E6 — Seed data coverage tidak merata
+
+**Severity:** Medium
+**Data di DB:**
+| Tabel | Jumlah | Bisa diakses? |
+|-------|:------:|:-------------:|
+| `employees` | 46 | ✅ Ya (via API) |
+| `branches` | 11 | ✅ Ya |
+| `departments` | 9 | ✅ Ya |
+| `positions` | 11 | ✅ Ya |
+| `leaves` | 6 | ✅ Ya (via web) |
+| `payrolls` | 4 | ✅ Ya |
+| `assets` | 0 | ❌ 0 record |
+| `loans` | 0 | ❌ 0 record |
+| `overtimes` | 0 | ❌ 0 record |
+| `knowledge_base` | ✅ Ada | ✅ Ya |
+
+**Dampak:** Asset, loan, dan overtime features tidak bisa di-test secara end-to-end.
+
+## 🟡 E7 — Database cache lock error
+
+**Severity:** Medium
+**Log:** `SQLSTATE[42601]: Syntax error: 7 ERROR: zero-length delimited identifier at or near """" LINE 1: update "" set ...`
+**Akar masalah:** `CACHE_STORE=database` — error pada cache lock query dengan table name kosong. Terjadi saat multiple request mengakses cache lock bersamaan.
+**Fix:** Override lock driver atau tambah table name prefix di config cache.
+
+## 🟢 API Endpoints — Working (untuk referensi)
+
+**Master Data (semua via SA token):**
+```
+GET /api/v1/branches      → 11 records ✅
+GET /api/v1/employees     → 46 records ✅ (paginated)
+GET /api/v1/departments   → 9 records ✅
+GET /api/v1/positions     → 11 records ✅
+GET /api/v1/companies     → data ✅
+```
+
+**HR Features:**
+```
+GET /api/v1/payroll       → 4 records ✅
+GET /api/v1/overtime      → 0 records ✅
+GET /api/v1/assets        → 0 records ✅
+GET /api/v1/loans         → 0 records ✅
+GET /api/v1/knowledgebase → data ✅
+GET /api/v1/attendance    → 0 records ✅
+```
+
+**Auth:**
+```
+POST /api/v1/auth/login    → Sanctum token ✅
+POST /api/v1/auth/logout   → ✅
+GET  /api/v1/health        → all services up ✅
+```
+
+## Prioritaskan Sesuai Role (Update)
+
+| Prioritas | Role | Fokus |
+|-----------|------|-------|
+| **P1** | **HR-Manager** | E2 (employee records), E6 (seed data), J1 ✅, J2 ✅ |
+| **P2** | **Finance** | E1 (leaves/reimbursements API), T1, T2, A1, A2 |
+| **P3** | **Manager** | E3 (password redirect), T6, S1, B1-B3 |
+| **P4** | **Employee** | E4 (route naming), T4, C1, S2 |
