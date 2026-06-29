@@ -18,10 +18,10 @@ $alpineModelAttributes = $attributes->whereStartsWith('x-model');
     @push('styles')
         <style>
             .ts-control {
-                background-color: rgba(248, 250, 252, 0.82);
+                background-color: var(--color-surface-container-low);
                 border: 0 !important;
-                box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.8);
-                color: #0f172a;
+                box-shadow: inset 0 0 0 1px var(--color-outline-variant);
+                color: var(--color-ink);
                 border-radius: 1rem;
                 padding: 0 2.5rem 0 1rem;
                 font-size: 0.9rem;
@@ -52,7 +52,7 @@ $alpineModelAttributes = $attributes->whereStartsWith('x-model');
                 max-width: 100% !important;
                 min-width: 1ch !important;
                 height: auto !important;
-                color: #0f172a !important;
+                color: var(--color-ink) !important;
                 font-size: 0.9rem !important;
                 line-height: 1.5rem !important;
                 min-height: 0 !important;
@@ -74,21 +74,21 @@ $alpineModelAttributes = $attributes->whereStartsWith('x-model');
             .ts-wrapper.focus .ts-control,
             .ts-wrapper.input-active .ts-control,
             .ts-wrapper.dropdown-active .ts-control {
-                background-color: #ffffff !important;
+                background-color: var(--color-canvas) !important;
                 box-shadow: inset 0 0 0 2px var(--color-primary), 0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent) !important;
             }
 
             .ts-dropdown {
-                background-color: #ffffff !important;
-                border-color: #e5e7eb;
-                color: #111827;
+                background-color: var(--color-canvas) !important;
+                border-color: var(--color-hairline-soft);
+                color: var(--color-body);
                 border-radius: 1rem;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+                box-shadow: 0 10px 15px -3px var(--color-outline-variant), 0 4px 6px -2px var(--color-hairline-soft) !important;
                 z-index: 99999 !important;
             }
 
             .ts-dropdown .ts-dropdown-content {
-                background-color: #ffffff !important;
+                background-color: var(--color-canvas) !important;
             }
 
             .ts-dropdown .option {
@@ -98,44 +98,44 @@ $alpineModelAttributes = $attributes->whereStartsWith('x-model');
             }
 
             .ts-dropdown .active {
-                background-color: #f3f4f6;
-                color: #111827;
+                background-color: var(--color-surface-soft);
+                color: var(--color-body);
             }
 
             .dark .ts-control {
-                background-color: rgba(2, 6, 23, 0.45) !important;
-                box-shadow: inset 0 0 0 1px #1e293b !important;
-                color: #f8fafc !important;
+                background-color: color-mix(in srgb, var(--color-ink) 45%, transparent) !important;
+                box-shadow: inset 0 0 0 1px var(--color-body) !important;
+                color: var(--color-surface-container-low) !important;
             }
 
             .dark .ts-control input {
-                color: #f8fafc !important;
+                color: var(--color-surface-container-low) !important;
             }
 
             .dark .ts-wrapper.focus .ts-control,
             .dark .ts-wrapper.input-active .ts-control,
             .dark .ts-wrapper.dropdown-active .ts-control {
-                background-color: #020617 !important;
+                background-color: var(--color-ink) !important;
                 box-shadow: inset 0 0 0 2px var(--color-primary), 0 0 0 4px color-mix(in srgb, var(--color-primary) 24%, transparent) !important;
             }
 
             .dark .ts-dropdown {
-                background-color: #0f172a !important;
-                border-color: #1e293b !important;
-                color: #e2e8f0 !important;
+                background-color: var(--color-body) !important;
+                border-color: var(--color-outline-variant) !important;
+                color: var(--color-hairline-soft) !important;
             }
 
             .dark .ts-dropdown .ts-dropdown-content {
-                background-color: #0f172a !important;
+                background-color: var(--color-body) !important;
             }
 
             .dark .ts-dropdown .option {
-                color: #e2e8f0 !important;
+                color: var(--color-hairline-soft) !important;
             }
 
             .dark .ts-dropdown .active {
-                background-color: #374151 !important;
-                color: #ffffff !important;
+                background-color: var(--color-on-surface-variant) !important;
+                color: var(--color-canvas) !important;
             }
 
             .ts-wrapper {

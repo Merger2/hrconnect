@@ -269,7 +269,7 @@
         {{-- Clock In Button --}}
         <button @click="clockIn()"
                 :disabled="clockingIn || !faceDetected"
-                class="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#1f1f1f] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
+                class="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
             <span class="material-symbols-outlined" x-show="!clockingIn">fingerprint</span>
             <span x-show="clockingIn" class="inline-block size-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
             <span x-text="clockingIn ? '{{ __('Memproses...') }}' : '{{ __('Clock In Sekarang') }}'"></span>

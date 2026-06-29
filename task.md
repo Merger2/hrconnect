@@ -510,16 +510,15 @@ Berdasarkan analisis kode PasPapan (58 Blade components, 1.642 baris app.js, 2.7
 - **Tambah:** `laravel-echo` + Pusher connector
 - **Integrasi:** Livewire presence channel listener
 
-## 🟠 PostgreSQL Tests
+## ✅ PostgreSQL Tests (Selesai)
 
-### Task P1 — Tambah PG test coverage
-- **File:** `tests/Feature/Database/PgvectorTest.php` atau serupa
-- **Tambah:** 5-10 test untuk pgvector, pg_trgm, pgcrypto
-- **Guard:** `if (DB::getDriverName() === 'pgsql')` untuk skip di SQLite
+### Task P1 ✅ — Tambah PG test coverage
+- **File:** `tests/Integration/Postgres/PostgresEnvironmentTest.php`
+- **Hasil:** 41 test (pgvector 768D/128D, pg_trgm, pgcrypto, EmbeddingService, PgVector cast, CipherSweet, jsonb, HNSW index, check constraints, payroll upsert)
 
-### Task P2 — CI PG test stabilkan
+### Task P2 ✅ — CI PG test stabilkan
 - **File:** `.github/workflows/tests.yml`
-- **Pastikan:** `pgvector/pgvector:pg16` service, env benar
+- **Hasil:** `composer install` → create extensions → `pest --configuration=phpunit.pgsql.xml`. Hapus `.env.testing.pgsql.example`, `APP_KEY` langsung di `phpunit.pgsql.xml`.
 
 ## 🟠 Clock-out PIN — Streak Check
 
@@ -531,11 +530,102 @@ Berdasarkan analisis kode PasPapan (58 Blade components, 1.642 baris app.js, 2.7
 
 ---
 
+# 🔴 Temuan Audit — Juni 2026
+
+## 🔴 Design System Compliance (D1-D4)
+
+### Task D1 — TomSelect hardcoded colors
+- **File:** `resources/views/components/forms/tom-select.blade.php`
+- **Issue:** 20 hardcoded hex colors di `<style>` block
+- **Jadi:** Ganti semua dengan CSS variables (`var(--color-canvas)`, `var(--color-outline-variant)`, `var(--color-ink)`, `var(--color-on-background)`, dll)
+
+### Task D2 — Hover arbitrary colors
+- **Files:** `resources/views/attendance/clock-in.blade.php:272`, `resources/views/attendance/index.blade.php:94,106`, `resources/views/employee/profile/face-registration.blade.php:198,256,281`
+- **Issue:** `hover:bg-[#1f1f1f]`, `hover:bg-[#d48a0a]` — hardcoded hex
+- **Jadi:** Ganti dengan MD3 tokens (`hover:bg-surface-container`, `hover:bg-warning-container`)
+
+### Task D3 — Legacy Tailwind color classes
+- **Files:** `resources/views/components/status-badge.blade.php:14` (`bg-purple-500/10 text-purple-700`), `resources/views/livewire/quick-actions.blade.php:23` (`bg-blue-100 text-blue-700`)
+- **Jadi:** Ganti dengan MD3 semantic tokens (`bg-surface-dim text-on-surface-variant`, `bg-info/10 text-info`)
+
+### Task D4 — Arbitrary size values
+- **Files:** Multiple views (`text-[11px]`, `text-[0.68rem]`, `tracking-[0.24em]`)
+- **Jadi:** Ganti dengan Tailwind utility (`text-xs`, `text-sm`, `tracking-wide`)
+
+## 🔴 Test Coverage Gap (T1-T6)
+
+### Task T1 — Test AssetService + AssetController
+- **Files:** `app/Services/AssetService.php`, `app/Http/Controllers/Api/AssetController.php`
+- **Buat:** `tests/Unit/Services/AssetServiceTest.php` + `tests/Feature/Api/AssetProofTest.php`
+- **Cakupan:** CRUD, handover, return, authorization
+
+### Task T2 — Test LoanService + LoanController
+- **Files:** `app/Services/LoanService.php`, `app/Http/Controllers/Api/LoanController.php`
+- **Buat:** `tests/Unit/Services/LoanServiceTest.php` + `tests/Feature/Api/LoanProofTest.php`
+- **Cakupan:** CRUD, approval workflow, cicilan kalkulasi
+
+### Task T3 — Test BpjsService
+- **File:** `app/Services/Payroll/BpjsService.php`
+- **Buat:** `tests/Unit/Services/Payroll/BpjsServiceTest.php`
+- **Cakupan:** Kesehatan 1%, JHT 2%, JP 1%, batas atas, edge cases
+
+### Task T4 — Test DynamicBarcodeTokenService
+- **File:** `app/Services/DynamicBarcodeTokenService.php`
+- **Buat:** `tests/Unit/Services/DynamicBarcodeTokenServiceTest.php`
+- **Cakupan:** HMAC-SHA256, nonce, TTL jitter, anti-replay
+
+### Task T5 — Test AttendanceRiskScorer
+- **File:** `app/Services/AttendanceRiskScorer.php`
+- **Buat:** `tests/Unit/Services/AttendanceRiskScorerTest.php`
+- **Cakupan:** 14 faktor risk scoring, score range 0-100, threshold
+
+### Task T6 — Test master data controllers
+- **Files:** `DepartmentController`, `PositionController`, `CompanyController`, `BranchController`
+- **Buat:** `tests/Feature/Api/MasterDataProofTest.php`
+- **Cakupan:** index, show, authorization, 404 handling
+
+## 🟠 PHPStan & Code Quality (S1-S2)
+
+### Task S1 — Bersihkan stale phpstan-baseline
+- **File:** `phpstan-baseline.neon`
+- **Issue:** 7 entries referencing deleted `app/Notifications/Leave*` files
+- **Jadi:** Hapus 7 entry atau set `reportUnmatchedIgnoredErrors: false`
+
+### Task S2 — update api-contracts.md
+- **File:** `docs/api/api-contracts.md`
+- **Issue:** Bilang 47 endpoint, realitanya 80
+- **Jadi:** Update jumlah endpoint atau ganti ke referensi `docs/api/api.json` saja
+
+## 🟠 API Consistency (A1-A2)
+
+### Task A1 — Buat ApprovalPolicy
+- **File:** `app/Http/Controllers/Api/ApprovalController.php`
+- **Issue:** Satu-satunya controller tanpa Policy (manual `approver_id` check)
+- **Buat:** `app/Policies/ApprovalPolicy.php`
+- **Jadi:** Extract `view`, `approve`, `reject` ke Policy, pakai `$this->authorize()` di controller
+
+### Task A2 — Pakai orphaned API Resources
+- **Files:** `ApprovalController`, `AttendanceController`, `PayrollController`, `KnowledgeBaseController`
+- **Issue:** `ApprovalResource`, `AttendanceResource`, `PayrollResource`, `KnowledgeBaseResource` exist tapi controller pake inline JSON
+- **Jadi:** Refactor endpoint return value pake Resource classes
+
+## 🟢 Theme Split — App vs Landing (Selesai)
+
+### Task T1 ✅ — Finalisasi canvas split
+### Task T2 ✅ — Verifikasi landing
+
+## 🟢 PostgreSQL Tests (Selesai)
+
+### Task P1 ✅ — Tambah PG test coverage
+### Task P2 ✅ — CI PG test stabilkan
+
+---
+
 # Prioritaskan Sesuai Role
 
 | Prioritas | Role | Fokus |
 |-----------|------|-------|
-| **P1** | **HR-Manager** | Theme split (T1), Master data pages |
-| **P2** | **Finance** | PG Tests (P1), Test fixes (3.1-3.2) |
-| **P3** | **Manager** | Broadcast (B1-B3) |
-| **P4** | **Employee** | Clock-out streak fix (C1) |
+| **P1** | **HR-Manager** | Test BpjsService (T3), RiskScorer (T5), Design system D1-D4 |
+| **P2** | **Finance** | Test Asset (T1), Loan (T2), ApprovalPolicy (A1), API Resources (A2) |
+| **P3** | **Manager** | Master data tests (T6), PHPStan baseline (S1), Broadcast (B1-B3) |
+| **P4** | **Employee** | DynamicBarcodeToken tests (T4), Clock-out streak (C1), Docs update (S2) |
