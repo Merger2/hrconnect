@@ -2,14 +2,18 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AssetStatus;
 use App\Enums\EmployeeStatus;
+use App\Enums\LoanStatus;
 use App\Enums\SalaryType;
+use App\Models\Asset;
 use App\Models\Attendance;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
+use App\Models\Loan;
 use App\Models\Overtime;
 use App\Models\Position;
 use App\Models\Reimbursement;
@@ -119,10 +123,11 @@ class DemoDataSeeder extends Seeder
 
         $demoEmployees = Employee::all();
         foreach ($demoEmployees as $emp) {
-            if (rand(0, 1)) {
+            $pastDate = $now->copy()->subDays(rand(1, 5))->toDateString();
+            if (rand(0, 1) && ! Attendance::where(['employee_id' => $emp->id, 'date' => $pastDate])->exists()) {
                 Attendance::factory()->create([
                     'employee_id' => $emp->id,
-                    'date' => $now->copy()->subDays(rand(1, 5))->toDateString(),
+                    'date' => $pastDate,
                 ]);
             }
 
@@ -154,6 +159,61 @@ class DemoDataSeeder extends Seeder
             }
         }
 
-        $this->command?->info('DemoDataSeeder: '.Employee::count().' karyawan demo siap.');
+        $assetData = [
+            ['name' => 'Laptop Dell Latitude 5430', 'code' => 'AST-001', 'status' => AssetStatus::ASSIGNED, 'is_available' => false],
+            ['name' => 'Monitor Samsung 24 inch', 'code' => 'AST-002', 'status' => AssetStatus::ASSIGNED, 'is_available' => false],
+            ['name' => 'Meja Kerja Ergonomic', 'code' => 'AST-003', 'status' => AssetStatus::AVAILABLE, 'is_available' => true],
+            ['name' => 'Kursi Kantor Herman Miller', 'code' => 'AST-004', 'status' => AssetStatus::AVAILABLE, 'is_available' => true],
+            ['name' => 'Printer Epson L3210', 'code' => 'AST-005', 'status' => AssetStatus::AVAILABLE, 'is_available' => true],
+            ['name' => 'Mouse Logitech MX Master 3', 'code' => 'AST-006', 'status' => AssetStatus::ASSIGNED, 'is_available' => false],
+            ['name' => 'Keyboard Mechanical Keychron', 'code' => 'AST-007', 'status' => AssetStatus::ASSIGNED, 'is_available' => false],
+            ['name' => 'Proyektor Epson EB-X51', 'code' => 'AST-008', 'status' => AssetStatus::DISPOSED, 'is_available' => false],
+            ['name' => 'AC Panasonic 1.5 PK', 'code' => 'AST-009', 'status' => AssetStatus::DISPOSED, 'is_available' => false],
+            ['name' => 'iPhone 15 Pro (Company)', 'code' => 'AST-010', 'status' => AssetStatus::ASSIGNED, 'is_available' => false],
+        ];
+
+        foreach ($assetData as $i => $a) {
+            Asset::withoutEvents(function () use ($company, $a, $i) {
+                Asset::firstOrCreate(
+                    ['code' => $a['code']],
+                    [
+                        'company_id' => $company->id,
+                        'name' => $a['name'],
+                        'serial_number' => 'SN-'.str_pad((string) ($i + 1), 6, '0', STR_PAD_LEFT),
+                        'category' => match (true) {
+                            str_contains($a['name'], 'Laptop') || str_contains($a['name'], 'Mouse') || str_contains($a['name'], 'Keyboard') || str_contains($a['name'], 'Monitor') || str_contains($a['name'], 'Printer') || str_contains($a['name'], 'Proyektor') || str_contains($a['name'], 'iPhone') => 'elektronik',
+                            str_contains($a['name'], 'Meja') || str_contains($a['name'], 'Kursi') => 'furniture',
+                            default => 'peralatan',
+                        },
+                        'status' => $a['status'],
+                        'is_available' => $a['is_available'],
+                    ]
+                );
+            });
+        }
+
+        $hrUser = User::where('email', 'admin@hrconnect.local')->first();
+        foreach ($demoEmployees->take(3) as $emp) {
+            if (rand(0, 1)) {
+                Loan::factory()->create([
+                    'employee_id' => $emp->id,
+                    'created_by' => $hrUser?->id ?? 1,
+                    'amount' => rand(500000, 3000000),
+                    'tenor_months' => rand(3, 12),
+                    'monthly_installment' => round(rand(500000, 3000000) / rand(3, 12), 2),
+                    'status' => LoanStatus::ACTIVE,
+                    'is_settled' => false,
+                ]);
+            }
+        }
+
+        if ($demoEmployees->first() && rand(0, 1)) {
+            Loan::factory()->paidOff()->create([
+                'employee_id' => $demoEmployees->first()->id,
+                'created_by' => $hrUser?->id ?? 1,
+            ]);
+        }
+
+        $this->command?->info('DemoDataSeeder: '.Employee::count().' karyawan demo, '.Asset::count().' aset, '.Loan::count().' pinjaman siap.');
     }
 }
