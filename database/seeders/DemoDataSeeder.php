@@ -30,11 +30,7 @@ class DemoDataSeeder extends Seeder
             return;
         }
 
-        if (Employee::count() > 5) {
-            $this->command?->info('Demo data sudah ada ('.Employee::count().' karyawan). Skip.');
-
-            return;
-        }
+        $this->command?->info('DemoDataSeeder: memastikan demo users & employees...');
 
         $itStaffPos = Position::where('code', 'IT-STAFF')->first();
         $hrStaffPos = Position::where('code', 'HR-STAFF')->first();
@@ -62,6 +58,7 @@ class DemoDataSeeder extends Seeder
                     'name' => $u['name'],
                     'password' => Hash::make('password'),
                     'email_verified_at' => $now,
+                    'password_changed_at' => $now,
                 ]
             );
             $user->assignRole($u['role']);
@@ -73,7 +70,8 @@ class DemoDataSeeder extends Seeder
                 default => $itStaffPos,
             };
 
-            $employee = Employee::firstOrCreate(
+            $suffix = $i + 1;
+            $employee = Employee::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'company_id' => $company->id,
@@ -81,12 +79,24 @@ class DemoDataSeeder extends Seeder
                     'department_id' => $dept?->id,
                     'position_id' => $pos?->id,
                     'shift_id' => $shiftId,
-                    'employee_number' => 'DEMO-'.str_pad((string) ($i + 1), 3, '0', STR_PAD_LEFT),
+                    'employee_number' => 'DEMO-'.str_pad((string) $suffix, 3, '0', STR_PAD_LEFT),
                     'full_name' => $u['name'],
                     'gender' => 'L',
                     'status' => EmployeeStatus::ACTIVE,
                     'join_date' => $now->subMonths(12)->toDateString(),
                     'salary_type' => SalaryType::MONTHLY,
+                    'birth_date' => $now->subYears(rand(22, 40))->toDateString(),
+                    'marital_status' => 'single',
+                    'blood_type' => fake()->randomElement(['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-']),
+                    'phone' => '0812'.str_pad((string) (1000 + $suffix), 8, '0', STR_PAD_LEFT),
+                    'nik' => '3276'.str_pad((string) $suffix, 12, '0', STR_PAD_LEFT),
+                    'npwp' => $suffix.'.'.$suffix.'.'.$suffix.'.'.($suffix * 111).'.000',
+                    'bank_account_number' => '12345'.str_pad((string) $suffix, 10, '0', STR_PAD_LEFT),
+                    'bank_name' => 'Bank Central Asia (BCA)',
+                    'education_level' => fake()->randomElement(['sd', 'smp', 'sma', 'smk', 'diploma', 'bachelor', 'master']),
+                    'institution_name' => 'Universitas Indonesia',
+                    'major' => 'Manajemen',
+                    'graduation_year' => $now->subYears(rand(5, 15))->year,
                 ]
             );
 
@@ -95,7 +105,7 @@ class DemoDataSeeder extends Seeder
                 if ($lt->deducts_from_quota && $lt->quota > 0) {
                     LeaveBalance::firstOrCreate(
                         ['employee_id' => $employee->id, 'leave_type_id' => $lt->id, 'year' => $now->year],
-                        ['total_quota' => $lt->quota, 'used_quota' => 0]
+                        ['quota' => $lt->quota, 'used' => 0]
                     );
                 }
             }

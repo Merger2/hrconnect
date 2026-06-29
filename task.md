@@ -698,55 +698,25 @@ Hasil test manual sebagai end user di semua role. Server `http://127.0.0.1:8000`
 | Employee | `staff@hrconnect.local` | `password` | ✅ Login → dashboard |
 | Employee (real) | `gilda18@example.com` (Salwa) | `password` | ✅ Login → ⚠️ redirect `/settings/security` (password change) |
 
-## 🔴 E1 — API Leaves & Reimbursements endpoint TIDAK ADA
+## 🟢 E1 — API Leaves & Reimbursements (Sudah Ada ✅)
 
-**Severity:** Critical
-**Issue:** Tidak ada route `/api/v1/leaves` atau `/api/v1/reimbursements`. Semua URL ini return 404 "Resource tidak ditemukan".
-**CURL Test:**
-```
-GET /api/v1/leaves        → 404 Resource tidak ditemukan
-GET /api/v1/reimbursements → 404 Resource tidak ditemukan
-```
-**Akar masalah:** `routes/api.php` tidak mendaftarkan API resource untuk Leaves dan Reimbursements. Web routes (`/leaves`, `/reimbursements`) via Blade/Livewire berfungsi normal (200).
-**Dampak:** Mobile/third-party integrations tidak bisa akses data leave dan reimbursement.
-**Fix:** Tambah route group di `routes/api.php`:
-```php
-Route::apiResource('leaves', LeaveController::class)->middleware('auth:sanctum');
-Route::apiResource('reimbursements', ReimbursementController::class)->middleware('auth:sanctum');
-```
+**Severity:** ~~Critical~~ → **Bukan issue.** Routes sudah ada di `routes/api.php:119-154`, tapi pakai **singular** naming:
+- `/api/v1/leave` → 6 records ✅ (bukan `/api/v1/leaves`)
+- `/api/v1/reimbursement` → 7 records ✅ (bukan `/api/v1/reimbursements`)
 
-## 🟠 E2 — Demo users tidak punya employee record
+Temuan di sesi testing adalah **false alarm** — URL yang dites salah (plural). Masalah naming inkonsisten diliput di E4.
 
-**Severity:** High
-**Issue:** 4 user demo tidak punya baris di tabel `employees`:
-| User | ID | Role | Employee ID |
-|------|:--:|------|:-----------:|
-| Super Admin | 1 | super-admin + hr-manager | `null` |
-| Andi Manager | 50 | manager | `null` |
-| Budi Staff | 51 | employee | `null` |
-| Citra Finance | 52 | finance | `null` |
+## 🟢 E2 — Demo users tidak punya employee record (Selesai ✅)
 
-**Akar masalah:** Seed data `DatabaseSeeder.php` bikin user tapi `EmployeeSeeder.php` bikin user terpisah (2-47). Demo user di `UserFactory` tidak punya relasi Employee.
-**Dampak:**
-- `GET /api/v1/attendance/today` → `"Akun Anda belum terhubung dengan data karyawan."`
-- `GET /api/v1/approvals/pending` → `"Akun Anda belum terhubung dengan data karyawan."`
-- Semua endpoint employee-specific tidak bisa diakses oleh akun demo
-- Manager tidak bisa lihat team approvals
+**Fix:** Hapus guard `Employee::count() > 5` di `DemoDataSeeder.php` (ganti ke `updateOrCreate`), tambah field NOT NULL yang kurang (`phone`, `nik`, `npwp`, `bank_account_number`, `birth_date`, `marital_status`, `blood_type`, `education_level`, `institution_name`, `major`, `graduation_year`, `bank_name`). Semua demo user (id 1, 50, 51, 52) sekarang punya `employees` record.
+- ✅ `GET /api/v1/attendance/today` → `success`
+- ✅ `GET /api/v1/approvals/pending` → `success`
+- ✅ `GET /api/v1/leave/quota` → `success`
 
-**Fix:** Tambah seeder untuk bikin Employee record untuk user id 1, 50, 51, 52.
+## 🟢 E3 — password_changed_at null → redirect loop (Selesai ✅)
 
-## 🟠 E3 — password_changed_at null → redirect loop
-
-**Severity:** High
-**Issue:** Semua seeded employee (`password_changed_at` = null) redirect ke `/settings/security` setelah login.
-**Yang tidak kena redirect:**
-- Super Admin (id=1): `password_changed_at = 2026-06-27 22:53:16`
-- Demo users (50, 51, 52): tidak redirect (password factory set `password_changed_at`)
-**Yang kena redirect (tidak bisa akses fitur):**
-- Semua employee real (id 2-47) via `EmployeeSeeder` — tidak set `password_changed_at`
-
-**Akar masalah:** Middleware ForceChangePassword mengecek `password_changed_at === null`. EmployeeSeeder panggil `UserFactory` tanpa set `password_changed_at`.
-**Fix:** Tambah `'password_changed_at' => now()` di `EmployeeSeeder` atau middleware skip untuk user dengan role employee (opsional).
+**Fix:** Tambah `'password_changed_at' => $now` di `DemoDataSeeder` User creation (line 65). Update massal 49 user dengan `password_changed_at = null` via query `User::whereNull('password_changed_at')->update(['password_changed_at' => now()])`.
+- ✅ Semua 55 users sekarang punya `password_changed_at`
 
 ## 🟡 E4 — API route naming inconsistent
 
@@ -793,12 +763,9 @@ POST /api/v1/knowledgebase/chat {"question":"Apa itu cuti tahunan?"}
 
 **Dampak:** Asset, loan, dan overtime features tidak bisa di-test secara end-to-end.
 
-## 🟡 E7 — Database cache lock error
+## 🟢 E7 — Database cache lock error (Selesai ✅)
 
-**Severity:** Medium
-**Log:** `SQLSTATE[42601]: Syntax error: 7 ERROR: zero-length delimited identifier at or near """" LINE 1: update "" set ...`
-**Akar masalah:** `CACHE_STORE=database` — error pada cache lock query dengan table name kosong. Terjadi saat multiple request mengakses cache lock bersamaan.
-**Fix:** Override lock driver atau tambah table name prefix di config cache.
+**Fix:** `config/cache.php:47` — tambah default `'cache'` untuk `lock_table`: `env('DB_CACHE_LOCK_TABLE', 'cache')`. Sebelumnya `env('DB_CACHE_LOCK_TABLE')` return null → SQL `update "" set ...`.
 
 ## 🟢 API Endpoints — Working (untuk referensi)
 
@@ -832,7 +799,7 @@ GET  /api/v1/health        → all services up ✅
 
 | Prioritas | Role | Fokus |
 |-----------|------|-------|
-| **P1** | **HR-Manager** | E2 (employee records), E6 (seed data), J1 ✅, J2 ✅ |
-| **P2** | **Finance** | E1 (leaves/reimbursements API), T1, T2, A1, A2 |
-| **P3** | **Manager** | E3 (password redirect), T6, S1, B1-B3 |
+| **P1** | **HR-Manager** | E6 (seed data), J1 ✅, J2 ✅, E2 ✅, E3 ✅, E7 ✅ |
+| **P2** | **Finance** | T1, T2, A1, A2 |
+| **P3** | **Manager** | T6, S1, B1-B3 |
 | **P4** | **Employee** | E4 (route naming), T4, C1, S2 |
