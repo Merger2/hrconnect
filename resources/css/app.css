@@ -13,18 +13,19 @@
     --font-display: 'Rubik', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
     /* ═══════════════════════════════════════
-       MD3 Color Palette — Cream-Warm
+       MD3 Color Palette — App (neutral putih)
+       Landing page override via .landing-theme
        ═══════════════════════════════════════ */
 
     /* Canvas & Text */
-    --color-canvas: #fffaf0;
+    --color-canvas: #ffffff;
     --color-ink: #0a0a0a;
 
-    /* MD3 Surface Layer Tokens */
-    --color-surface-container-low: #f7f3f2;
-    --color-surface-container: #f1edec;
-    --color-surface-container-high: #ebe7e6;
-    --color-surface-container-highest: #e5e2e1;
+    /* MD3 Surface Layer Tokens — neutral untuk app */
+    --color-surface-container-low: #f5f5f5;
+    --color-surface-container: #eeeeee;
+    --color-surface-container-high: #e5e5e5;
+    --color-surface-container-highest: #d9d9d9;
 
     /* MD3 On-Surface Tokens */
     --color-on-background: #1c1b1b;
@@ -44,7 +45,7 @@
     --color-error-container: #ffdad6;
     --color-on-error: #ffffff;
 
-    /* Brand Colors — Landing Page Only */
+    /* Brand Colors — Landing page `.landing-theme` */
     --color-brand-pink: #ff4d8b;
     --color-brand-teal: #1a3a3a;
     --color-brand-lavender: #b8a4ed;
@@ -61,13 +62,13 @@
     /* ─── Legacy tokens (backward compat — remove after migration) ─── */
     --color-body: #1c1b1b;
     --color-body-strong: #0a0a0a;
-    --color-muted: #444748;
-    --color-muted-soft: #747878;
-    --color-hairline: #c4c7c7;
-    --color-hairline-soft: #e5e2e1;
-    --color-surface-soft: #f7f3f2;
-    --color-surface-card: #f1edec;
-    --color-surface-strong: #ebe7e6;
+    --color-muted: #6b7280;
+    --color-muted-soft: #9ca3af;
+    --color-hairline: #d1d5db;
+    --color-hairline-soft: #e5e7eb;
+    --color-surface-soft: #f5f5f5;
+    --color-surface-card: #eeeeee;
+    --color-surface-strong: #e5e5e5;
 
     /* Dark mode — landing page only */
     --color-surface-dark: #0a1a1a;
