@@ -97,4 +97,9 @@
     .user-list-card:hover {
         @apply border-outline-variant;
     }
+
+    .wcag-touch-target {
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+    }
 }

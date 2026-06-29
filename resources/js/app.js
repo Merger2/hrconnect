@@ -1,4 +1,10 @@
 import './pwa-install';
+import './tom-select';
+import { watchPickerMounts } from './datepicker';
+import { installValidation } from './validation';
+import profilePhotoEditor from './profile-photo-editor';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -13,6 +19,7 @@ const swalClasses = {
 
 window.HRConnectAlert = {
     toast(data) {
+        const isDark = document.documentElement.classList.contains('dark');
         const config = {
             toast: true,
             position: 'bottom-right',
@@ -21,6 +28,14 @@ window.HRConnectAlert = {
             timerProgressBar: true,
             icon: data.type || 'success',
             title: data.message || '',
+            background: isDark ? '#1c1b1b' : '#ffffff',
+            color: isDark ? '#f8fafc' : '#0a0a0a',
+            iconColor: data.type === 'error' ? '#ba1a1a' : data.type === 'warning' ? '#f59e0b' : '#22c55e',
+            customClass: {
+                popup: 'rounded-xl border border-outline-variant/50 shadow-lg px-4 py-3 font-sans',
+                title: 'text-sm font-semibold text-ink',
+                timerProgressBar: 'bg-primary h-1',
+            },
             didOpen: (toast) => {
                 toast.addEventListener('mouseenter', Swal.stopTimer);
                 toast.addEventListener('mouseleave', Swal.resumeTimer);
@@ -82,14 +97,63 @@ function installSweetAlertConfirmations(root = document) {
     });
 }
 
+window.L = L;
+window.profilePhotoEditor = profilePhotoEditor;
+
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('profilePhotoEditor', profilePhotoEditor);
+    window.Alpine.store('darkMode', {
+        on: false,
+        mode: localStorage.getItem('theme') || 'system',
+
+        init() {
+            this.mode = localStorage.getItem('theme') || 'system';
+            this.sync();
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (this.mode === 'system') this.sync();
+            });
+        },
+
+        toggle() {
+            if (this.mode === 'system') {
+                this.mode = this.on ? 'light' : 'dark';
+            } else {
+                this.mode = this.mode === 'dark' ? 'light' : 'dark';
+            }
+            localStorage.setItem('theme', this.mode);
+            this.sync();
+        },
+
+        set(mode) {
+            this.mode = mode;
+            localStorage.setItem('theme', mode);
+            this.sync();
+        },
+
+        sync() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.on = this.mode === 'dark' || (this.mode === 'system' && prefersDark);
+            document.documentElement.classList.toggle('dark', this.on);
+        },
+    });
+});
+
 document.addEventListener('livewire:init', () => {
     if (typeof window.Alpine === 'undefined') return;
 
-    Livewire.on('notify', (data) => {
-        window.HRConnectAlert.toast(data);
+    if (window.tomSelectInput) {
+        window.Alpine.data('tomSelectInput', window.tomSelectInput);
+    }
+
+    Livewire.on('toast', (data) => {
+        window.HRConnectAlert.toast({
+            type: data.variant || 'success',
+            message: data.text || '',
+        });
     });
 
-    initUiPickers();
+    watchPickerMounts();
+    installValidation();
     installSweetAlertConfirmations();
 });
 
@@ -105,29 +169,3 @@ const observer = new MutationObserver((mutations) => {
 
 observer.observe(document.body, { childList: true, subtree: true });
 
-function initUiPickers() {
-    const pickerObserver = new MutationObserver(() => {
-        document.querySelectorAll('[data-ui-picker]:not([data-ui-picker-initialized])').forEach((el) => {
-            el.setAttribute('data-ui-picker-initialized', '');
-            const mode = el.getAttribute('data-ui-picker');
-
-            const config = {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-            };
-
-            if (mode === 'datetime') {
-                config.enableTime = true;
-                config.dateFormat = 'Y-m-d H:i';
-            } else if (mode === 'time') {
-                config.noCalendar = true;
-                config.enableTime = true;
-                config.dateFormat = 'H:i';
-            }
-
-            flatpickr(el, config);
-        });
-    });
-
-    pickerObserver.observe(document.body, { childList: true, subtree: true });
-}

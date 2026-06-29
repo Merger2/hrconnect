@@ -14,8 +14,10 @@
         "face-api.js": "^0.22.2",
         "flatpickr": "^4.6.13",
         "laravel-vite-plugin": "^3.0.0",
+        "leaflet": "^1.9.4",
         "sweetalert2": "^11.26.25",
         "tailwindcss": "^4.0.7",
+        "tom-select": "^2.6.1",
         "vite": "^8.0.0"
     },
     "optionalDependencies": {

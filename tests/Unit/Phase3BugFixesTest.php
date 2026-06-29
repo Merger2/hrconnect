@@ -19,16 +19,18 @@ use App\Services\GeofenceService;
 
 // ─── B3.2 GeofenceService null guard ──────────────────────────────────
 
-function makeBranch(?float $lat = -6.2, ?float $lng = 106.8, int $radius = 100): Branch
-{
-    $branch = new Branch;
-    $branch->id = 1;
-    $branch->name = 'Test HQ';
-    $branch->latitude = $lat;
-    $branch->longitude = $lng;
-    $branch->radius = $radius;
+if (! function_exists('makeBranch')) {
+    function makeBranch(?float $lat = -6.2, ?float $lng = 106.8, int $radius = 100): Branch
+    {
+        $branch = new Branch;
+        $branch->id = 1;
+        $branch->name = 'Test HQ';
+        $branch->latitude = $lat;
+        $branch->longitude = $lng;
+        $branch->radius = $radius;
 
-    return $branch;
+        return $branch;
+    }
 }
 
 test('B3.2: GeofenceService throw kalau koordinat tidak dikirim', function () {

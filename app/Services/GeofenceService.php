@@ -8,7 +8,6 @@ use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\GeofenceViolationException;
 use App\Models\Branch;
-use Torann\GeoIP\GeoIP;
 
 class GeofenceService
 {

@@ -61,7 +61,7 @@ class QuickActions extends Component
             ],
             __('Settings') => [
                 ['href' => route('profile.edit'), 'label' => __('Profil'), 'icon' => 'person', 'tone' => 'bg-blue-100 text-blue-700'],
-                ['href' => route('settings.security'), 'label' => __('Keamanan'), 'icon' => 'security', 'tone' => 'bg-gray-100 text-gray-700'],
+                ['href' => route('security.edit'), 'label' => __('Keamanan'), 'icon' => 'security', 'tone' => 'bg-gray-100 text-gray-700'],
             ],
         ];
 
