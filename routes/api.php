@@ -4,6 +4,9 @@ use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AssetController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\EmployeeTerminationController;
@@ -14,6 +17,7 @@ use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\LoanController;
 use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\PayrollController;
+use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReimbursementController;
 use App\Models\KnowledgeBase;
@@ -178,6 +182,38 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
         Route::get('/{payroll}/payslip', [PayrollController::class, 'payslip'])->name('payslip');
     });
+
+    // ── Master Data — Company ─────────────────────────────────────
+    Route::prefix('companies')->name('api.companies.')
+        ->middleware('permission:view_companies')
+        ->group(function () {
+            Route::get('/', [CompanyController::class, 'index'])->name('index');
+            Route::get('/{company}', [CompanyController::class, 'show'])->name('show');
+        });
+
+    // ── Master Data — Branch ──────────────────────────────────────
+    Route::prefix('branches')->name('api.branches.')
+        ->middleware('permission:view_branches')
+        ->group(function () {
+            Route::get('/', [BranchController::class, 'index'])->name('index');
+            Route::get('/{branch}', [BranchController::class, 'show'])->name('show');
+        });
+
+    // ── Master Data — Department ──────────────────────────────────
+    Route::prefix('departments')->name('api.departments.')
+        ->middleware('permission:view_departments')
+        ->group(function () {
+            Route::get('/', [DepartmentController::class, 'index'])->name('index');
+            Route::get('/{department}', [DepartmentController::class, 'show'])->name('show');
+        });
+
+    // ── Master Data — Position ────────────────────────────────────
+    Route::prefix('positions')->name('api.positions.')
+        ->middleware('permission:view_positions')
+        ->group(function () {
+            Route::get('/', [PositionController::class, 'index'])->name('index');
+            Route::get('/{position}', [PositionController::class, 'show'])->name('show');
+        });
 
     // ── Employee Directory (HR Manager + Super Admin) ────────────────
     Route::prefix('employees')->name('api.employees.')
