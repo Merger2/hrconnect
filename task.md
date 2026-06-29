@@ -458,3 +458,84 @@ Berdasarkan analisis kode PasPapan (58 Blade components, 1.642 baris app.js, 2.7
 | U4.5 | Buka modal di mobile | Focus trap, teleport, safe-area berfungsi |
 | U4.6 | Test TomSelect di form | Select dengan search berfungsi |
 | U4.7 | Test dark mode toggle | Class `.dark` bertambah/hilang di `<html>` |
+
+---
+
+# 🔮 Pekerjaan Tersisa — Dari AGENTS.md
+
+## 🔴 Phase 3 — Test Warning (opsional)
+
+### Task 3.1 — Ganti hardcoded ID
+- **File:** `tests/Feature/Services/PayslipPdfServiceTest.php`
+- **Baris:** 24-60
+- **Sekarang:** `'company_id' => 1` hardcode
+- **Jadi:** Pakai `DB::table(...)->insertGetId(...)` atau factory
+
+### Task 3.2 — Restore cache singleton
+- **File:** `tests/Feature/Cache/CacheIntegrationTest.php`
+- **Baris:** 13-18
+- **Sekarang:** Overwrite `cache` singleton global
+- **Jadi:** Restore ke instance original di `afterEach()`
+
+## 🟠 Theme Split — App vs Landing
+
+**app.css masih cream (#fffaf0), harus putih (#ffffff) untuk halaman HR.**
+
+### Task T1 — Finalisasi canvas split
+- **File:** `resources/css/app.css`
+- **Baris:** 21 (`--color-canvas: #fffaf0`)
+- **Sekarang:** `#fffaf0` (cream)
+- **Jadi:** `#ffffff` (putih) untuk halaman HR
+- **Catatan:** `welcome.blade.php` sudah punya `.landing-theme` class — pastikan landing tetap cream via class override
+
+### Task T2 — Verifikasi landing
+- Buka halaman welcome → masih cream
+- Buka halaman HR (dashboard, employees) → putih
+- Cek dark mode tidak broken
+
+## 🟠 Broadcast Notifications — Channel Setup
+
+### Task B1 — Install Pusher/laravel-websockets
+- **File:** `composer.json` + `.env`
+- **Tambah:** `pusher/pusher-php-server` atau `beyondcode/laravel-websockets`
+- **Config:** `config/broadcasting.php`, `config/websockets.php`
+
+### Task B2 — Pasang event broadcasting
+- **File:** 7 notification classes
+- **Tambah:** `ShouldBroadcast` interface + `broadcastOn()` / `broadcastAs()`
+- **Channel:** Private channel per user (`App.Models.User.{id}`)
+
+### Task B3 — Echo + Laravel Echo setup
+- **File:** `resources/js/app.js`
+- **Tambah:** `laravel-echo` + Pusher connector
+- **Integrasi:** Livewire presence channel listener
+
+## 🟠 PostgreSQL Tests
+
+### Task P1 — Tambah PG test coverage
+- **File:** `tests/Feature/Database/PgvectorTest.php` atau serupa
+- **Tambah:** 5-10 test untuk pgvector, pg_trgm, pgcrypto
+- **Guard:** `if (DB::getDriverName() === 'pgsql')` untuk skip di SQLite
+
+### Task P2 — CI PG test stabilkan
+- **File:** `.github/workflows/tests.yml`
+- **Pastikan:** `pgvector/pgvector:pg16` service, env benar
+
+## 🟠 Clock-out PIN — Streak Check
+
+### Task C1 — Fix streak validation bypass
+- **File:** `app/Http/Controllers/Api/AttendanceController.php` (clock-out method)
+- **Sekarang:** PIN clock-out bypass streak check
+- **Jadi:** Tambah validasi streak sebelum PIN verification
+- **Test:** Tambah test case streak → clock-out ditolak
+
+---
+
+# Prioritaskan Sesuai Role
+
+| Prioritas | Role | Fokus |
+|-----------|------|-------|
+| **P1** | **HR-Manager** | Theme split (T1), Master data pages |
+| **P2** | **Finance** | PG Tests (P1), Test fixes (3.1-3.2) |
+| **P3** | **Manager** | Broadcast (B1-B3) |
+| **P4** | **Employee** | Clock-out streak fix (C1) |

@@ -15,7 +15,7 @@ Enterprise HRIS (skripsi). Laravel 13 + Livewire 4 + Tailwind CSS 4 + PostgreSQL
 
 **Sumber referensi UI (wajib):** Semua Blade/Livewire component harus merujuk ke repo yang sudah di-clone di `/home/merger/`. Jangan buat dari nol — ambil pola dari PasPapan (components, layout, Alpine patterns) lalu konversi ke Tailwind CSS 4 + Material Symbols + MD3 tokens HRConnect. Lihat `task.md` §UX Porting Plan untuk detail per komponen.
 
-## Status Penyelesaian ~80%
+## Status Penyelesaian ~85%
 
 - ✅ Database: 57 tabel, 50 migration — semua entitas inti HRIS
 - ✅ API: 14 controller, 47+ endpoint `/api/v1`, Sanctum + 2FA + RBAC
@@ -23,10 +23,7 @@ Enterprise HRIS (skripsi). Laravel 13 + Livewire 4 + Tailwind CSS 4 + PostgreSQL
 - ✅ Keamanan: CipherSweet field encryption, device verification, password expiry, rate limiting
 - ✅ Frontend: Livewire 4, Alpine.js, PWA, Tailwind CSS 4 + MD3 tokens
 - ✅ Tests: 78 file, 1.052 fungsi test (SQLite), 1 integrasi PG
-- ⏳ Theme split app/landing belum final (`app.css` masih cream, belum putih)
-- ⏳ Broadcast notification masih DB+mail (channel broadcast belum dipasang)
-- ⏳ Clock-out PIN masih bypass streak check
-- ⏳ PG tests minim (1 file)
+- ⏳ Lihat `task.md` §Pekerjaan Tersisa untuk item yang belum selesai
 
 ## Perintah Kunci
 
