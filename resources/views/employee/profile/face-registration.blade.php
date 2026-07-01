@@ -20,6 +20,52 @@
             </video>
             <canvas x-ref="overlay" class="absolute inset-0 h-full w-full"></canvas>
 
+            {{-- Countdown overlay --}}
+            <div x-show="countdown > 0 && stream"
+                 x-cloak
+                 class="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <span class="text-7xl font-bold text-white drop-shadow-lg" x-text="countdown"></span>
+            </div>
+
+            {{-- Liveness direction arrows --}}
+            <div x-show="stream && livenessPassed === false && (challengeStep === 'turn-first-side' || challengeStep === 'turn-opposite-side')"
+                 x-cloak
+                 class="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+                <template x-if="challengeStep === 'turn-first-side'">
+                    <div class="flex gap-6">
+                        <span class="material-symbols-outlined animate-pulse text-5xl text-white drop-shadow-lg">arrow_back</span>
+                        <span class="material-symbols-outlined animate-pulse text-5xl text-white drop-shadow-lg">arrow_forward</span>
+                    </div>
+                </template>
+                <template x-if="challengeStep === 'turn-opposite-side'">
+                    <div>
+                        <span x-show="firstTurnDirection === 'left'"
+                              class="material-symbols-outlined animate-pulse text-5xl text-white drop-shadow-lg">arrow_forward</span>
+                        <span x-show="firstTurnDirection === 'right'"
+                              class="material-symbols-outlined animate-pulse text-5xl text-white drop-shadow-lg">arrow_back</span>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Recenter indicator --}}
+            <div x-show="stream && (challengeStep === 'recenter-after-first-turn' || challengeStep === 'recenter-final')"
+                 x-cloak
+                 class="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+                <span class="material-symbols-outlined text-5xl text-white drop-shadow-lg">unfold_less</span>
+            </div>
+
+            {{-- Liveness progress bar --}}
+            <div x-show="stream && livenessPassed === false && status !== 'loading-models' && status !== 'opening-camera'"
+                 class="absolute left-3 right-3 top-3 z-10">
+                <div class="flex items-center gap-1.5">
+                    <div class="flex-1 h-1.5 rounded-full bg-white/30 overflow-hidden">
+                        <div class="h-full rounded-full bg-white transition-all duration-500"
+                             :style="'width: ' + livenessProgress + '%'"></div>
+                    </div>
+                    <span class="text-xs font-medium text-white/80 drop-shadow-sm" x-text="livenessLabel"></span>
+                </div>
+            </div>
+
             <template x-if="!stream">
                 <div class="absolute inset-0 z-[1] flex items-center justify-center bg-secondary-fixed/50">
                     <span class="material-symbols-outlined text-6xl text-brand-teal/30">face</span>
@@ -91,6 +137,17 @@
             <span class="material-symbols-outlined text-6xl text-brand-mint">check_circle</span>
             <h3 class="text-xl font-semibold text-ink">{{ __('Registrasi Berhasil') }}</h3>
             <p class="text-sm text-on-surface-variant">{{ __('Wajah Anda telah terdaftar untuk absensi Face ID.') }}</p>
+            <div class="mt-2 flex gap-3">
+                <a href="{{ route('attendance.index') }}"
+                   class="flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-container">
+                    <span class="material-symbols-outlined text-lg">fact_check</span>
+                    {{ __('Absen Sekarang') }}
+                </a>
+                <button @click="resetCapture()"
+                        class="rounded-xl border border-outline-variant px-6 py-3 text-sm font-semibold text-ink hover:bg-surface-variant">
+                    {{ __('Ulang') }}
+                </button>
+            </div>
         </div>
     </div>
 
@@ -119,6 +176,12 @@
                 recenterFrames: 0,
                 requiredRecenterFrames: 1,
                 descriptorVersion: 2,
+
+                countdown: 0,
+                countdownTimer: null,
+
+                livenessProgress: 0,
+                livenessLabel: '',
 
                 messages: {
                     loadingModels: '{{ __('Memuat model wajah...') }}',
@@ -226,6 +289,15 @@
                     }, delay);
                 },
 
+                updateLivenessProgress() {
+                    const steps = ['turn-first-side', 'recenter-after-first-turn', 'turn-opposite-side', 'recenter-final'];
+                    const idx = steps.indexOf(this.challengeStep);
+                    if (idx < 0) { this.livenessProgress = 0; this.livenessLabel = ''; return; }
+                    this.livenessProgress = Math.round(((idx + 1) / steps.length) * 100);
+                    const labels = ['Langkah 1/4', 'Langkah 2/4', 'Langkah 3/4', 'Langkah 4/4'];
+                    this.livenessLabel = labels[idx];
+                },
+
                 resetLiveness(message, stage = 'align-face') {
                     this.stableFrames = 0;
                     this.baselineYaw = null;
@@ -236,6 +308,7 @@
                     this.leftTurnDetected = false;
                     this.rightTurnDetected = false;
                     this.recenterFrames = 0;
+                    this.updateLivenessProgress();
                     this.setStage(stage, message, this.messages.livenessHint);
                 },
 
@@ -445,6 +518,7 @@
                                 this.leftTurnDetected = this.leftTurnDetected || dir === 'left';
                                 this.rightTurnDetected = this.rightTurnDetected || dir === 'right';
                                 this.challengeStep = 'recenter-after-first-turn';
+                                this.updateLivenessProgress();
                                 this.recenterFrames = 0;
                                 this.setStage('recenter-face', this.messages.holdStill, this.messages.recenterHint);
                                 return;
@@ -459,6 +533,7 @@
 
                             if (this.recenterFrames >= this.requiredRecenterFrames && this.firstTurnDirection) {
                                 this.challengeStep = 'turn-opposite-side';
+                                this.updateLivenessProgress();
                                 this.setStage('turn-opposite-face', this.messages.passChallenge, this.messages.turnOppositeHint);
                                 return;
                             }
@@ -471,6 +546,7 @@
                                 this.leftTurnDetected = this.leftTurnDetected || dir === 'left';
                                 this.rightTurnDetected = this.rightTurnDetected || dir === 'right';
                                 this.challengeStep = 'recenter-final';
+                                this.updateLivenessProgress();
                                 this.recenterFrames = 0;
                                 this.setStage('recenter-face', this.messages.holdStill, this.messages.finalCenterHint);
                                 return;
@@ -485,6 +561,8 @@
 
                             if (this.recenterFrames >= this.requiredRecenterFrames && this.leftTurnDetected && this.rightTurnDetected) {
                                 this.livenessPassed = true;
+                                this.livenessProgress = 100;
+                                this.livenessLabel = '{{ __('Selesai') }}';
                                 this.canCapture = true;
                                 this.stopDetection();
                                 this.setStage('ready-to-capture', this.messages.liveConfirmed, this.messages.readyHint);
@@ -509,17 +587,31 @@
                 scheduleAutoCapture() {
                     if (this.autoCaptureQueued || this.captureBusy || !this.canCapture) return;
                     this.autoCaptureQueued = true;
-                    this.autoCaptureTimer = setTimeout(() => {
-                        this.autoCaptureTimer = null;
-                        this.capture();
+                    this.countdown = 3;
+                    this.countdownTimer = setInterval(() => {
+                        this.countdown -= 1;
+                        if (this.countdown <= 0) {
+                            clearInterval(this.countdownTimer);
+                            this.countdownTimer = null;
+                            this.countdown = 0;
+                            this.autoCaptureTimer = setTimeout(() => {
+                                this.autoCaptureTimer = null;
+                                this.capture();
+                            }, 100);
+                        }
                     }, 620);
                 },
 
                 clearAutoCapture() {
+                    if (this.countdownTimer) {
+                        clearInterval(this.countdownTimer);
+                        this.countdownTimer = null;
+                    }
                     if (this.autoCaptureTimer) {
                         clearTimeout(this.autoCaptureTimer);
                         this.autoCaptureTimer = null;
                     }
+                    this.countdown = 0;
                     this.autoCaptureQueued = false;
                 },
 

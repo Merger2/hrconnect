@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'password.expired'])->prefix('attendance')->name('attendance.')->group(function () {
-    Route::get('/', fn () => view('attendance.index'))->name('index');
-    Route::get('/clock-in', fn () => view('attendance.clock-in'))->name('clock-in');
-    Route::get('/face-registration', fn () => view('employee.profile.face-registration'))->name('face-registration');
+    Route::get('/', fn () => view('attendance.index'))->middleware('can:view_attendances')->name('index');
+    Route::get('/clock-in', fn () => view('attendance.clock-in'))->middleware('can:view_attendances')->name('clock-in');
+    Route::get('/face-registration', fn () => view('employee.profile.face-registration'))->middleware('can:view_attendances')->name('face-registration');
 });

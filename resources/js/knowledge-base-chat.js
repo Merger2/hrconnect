@@ -24,6 +24,7 @@ export default function () {
                 const response = await fetch('/api/v1/knowledgebase/chat-stream', {
                     method: 'POST',
                     headers: {
+                        ...window.apiHeaders(),
                         'Content-Type': 'application/json',
                         'Accept': 'text/event-stream',
                         'X-CSRF-TOKEN': token,
@@ -88,6 +89,7 @@ export default function () {
                     const syncResp = await fetch('/api/v1/knowledgebase/chat', {
                         method: 'POST',
                         headers: {
+                            ...window.apiHeaders(),
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': token,
                         },

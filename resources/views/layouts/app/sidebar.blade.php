@@ -16,6 +16,7 @@
 
             {{-- Navigation --}}
             <nav class="flex-1 overflow-y-auto py-2">
+                @can('view_dashboard')
                 <div class="px-4 pb-2 pt-5">
                     <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Utama') }}</p>
                 </div>
@@ -28,10 +29,25 @@
                     <span class="material-symbols-outlined text-2xl">home</span>
                     <span>{{ __('Dashboard') }}</span>
                 </a>
+                @endcan
 
+                @php
+                    $hasSdmAccess = auth()->user()->can('viewAny', App\Models\Employee::class)
+                        || auth()->user()->can('view_attendances')
+                        || auth()->user()->can('view_leaves')
+                        || auth()->user()->can('view_overtimes')
+                        || auth()->user()->can('view_reimbursements')
+                        || auth()->user()->can('view_loans')
+                        || auth()->user()->can('view_assets')
+                        || auth()->user()->can('view_payrolls')
+                        || auth()->user()->can('view_knowledgebase');
+                @endphp
+
+                @if($hasSdmAccess)
                 <div class="px-4 pb-2 pt-5">
                     <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('SDM') }}</p>
                 </div>
+                @endif
 
                 @can('viewAny', App\Models\Employee::class)
                     <a href="{{ route('admin.employees.index') }}"
@@ -40,10 +56,11 @@
                                'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
                        wire:navigate>
                         <span class="material-symbols-outlined text-2xl">group</span>
-                        <span>{{ __('Karyawan') }}</span>
+                        <span>{{ __('Direktori Karyawan') }}</span>
                     </a>
                 @endcan
 
+                @can('view_attendances')
                 <a href="{{ route('attendance.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                            'bg-ink/5 text-ink' => request()->routeIs('attendance.*'),
@@ -52,7 +69,9 @@
                     <span class="material-symbols-outlined text-2xl">schedule</span>
                     <span>{{ __('Absensi') }}</span>
                 </a>
+                @endcan
 
+                @can('view_leaves')
                 <a href="{{ route('leaves.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                            'bg-ink/5 text-ink' => request()->routeIs('leaves.*'),
@@ -61,7 +80,9 @@
                     <span class="material-symbols-outlined text-2xl">calendar_month</span>
                     <span>{{ __('Cuti') }}</span>
                 </a>
+                @endcan
 
+                @can('view_overtimes')
                 <a href="{{ route('overtimes.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                            'bg-ink/5 text-ink' => request()->routeIs('overtimes.*'),
@@ -70,7 +91,9 @@
                     <span class="material-symbols-outlined text-2xl">bolt</span>
                     <span>{{ __('Lembur') }}</span>
                 </a>
+                @endcan
 
+                @can('view_reimbursements')
                 <a href="{{ route('reimbursements.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                            'bg-ink/5 text-ink' => request()->routeIs('reimbursements.*'),
@@ -79,7 +102,31 @@
                     <span class="material-symbols-outlined text-2xl">wallet</span>
                     <span>{{ __('Klaim') }}</span>
                 </a>
+                @endcan
 
+                @can('view_loans')
+                <a href="{{ route('loans.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('loans.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('loans.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">account_balance</span>
+                    <span>{{ __('Pinjaman') }}</span>
+                </a>
+                @endcan
+
+                @can('view_assets')
+                <a href="{{ route('assets.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('assets.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('assets.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">inventory_2</span>
+                    <span>{{ __('Aset') }}</span>
+                </a>
+                @endcan
+
+                @can('view_payrolls')
                 <a href="{{ route('payroll.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                            'bg-ink/5 text-ink' => request()->routeIs('payroll.*'),
@@ -88,6 +135,31 @@
                     <span class="material-symbols-outlined text-2xl">payments</span>
                     <span>{{ __('Penggajian') }}</span>
                 </a>
+                @endcan
+
+                @can('view_knowledgebase')
+                <a href="{{ route('knowledge-base.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('knowledge-base.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('knowledge-base.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">menu_book</span>
+                    <span>{{ __('Basis Pengetahuan') }}</span>
+                </a>
+                @endcan
+
+                @php
+                    $canApprove = auth()->user()->hasAnyPermission([
+                        'approve_leaves_l1', 'approve_leaves_l2',
+                        'approve_overtimes_l1', 'approve_overtimes_l2',
+                        'approve_reimbursements_l1', 'approve_reimbursements_l2',
+                        'approve_wfa',
+                    ]);
+                @endphp
+                @if($canApprove)
+                <div class="px-4 pb-2 pt-5">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Persetujuan') }}</p>
+                </div>
 
                 <a href="{{ route('approvals.index') }}"
                    @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
@@ -95,8 +167,9 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('approvals.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">approval</span>
-                    <span>{{ __('Persetujuan') }}</span>
+                    <span>{{ __('Semua Persetujuan') }}</span>
                 </a>
+                @endif
             </nav>
 
             {{-- User --}}

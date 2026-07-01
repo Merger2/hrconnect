@@ -27,7 +27,7 @@ export default function () {
             try {
                 const res = await fetch(`/api/v1/employees/${this.selectedEmployee.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         status: 'terminated',
                         termination_type: this.terminateForm.type,

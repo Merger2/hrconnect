@@ -33,6 +33,12 @@ const swalClasses = {
     htmlContainer: 'text-sm text-on-surface-variant',
 };
 
+window.apiHeaders = () => {
+    const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+    if (window.Laravel?.sanctumToken) headers['Authorization'] = 'Bearer ' + window.Laravel.sanctumToken;
+    return headers;
+};
+
 window.HRConnectAlert = {
     toast(data) {
         const isDark = document.documentElement.classList.contains('dark');

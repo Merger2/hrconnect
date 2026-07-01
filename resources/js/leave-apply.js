@@ -68,7 +68,7 @@ export default function (props = {}) {
 
                 const res = await fetch('/api/v1/leave', {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                     body: payload,
                 });
                 const json = await res.json();

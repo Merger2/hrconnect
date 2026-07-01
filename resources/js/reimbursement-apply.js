@@ -24,9 +24,7 @@ export default function () {
 
         async fetchCategories() {
             try {
-                const res = await fetch('/api/v1/reimbursement/categories', {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch('/api/v1/reimbursement/categories', { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') this.categories = json.data;
             } catch {
@@ -67,7 +65,7 @@ export default function () {
 
                 const res = await fetch('/api/v1/reimbursement', {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                     body: fd,
                 });
                 const json = await res.json();

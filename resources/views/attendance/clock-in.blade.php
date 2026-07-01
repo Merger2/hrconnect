@@ -1,4 +1,4 @@
-<x-layouts::app.sidebar>
+<x-layouts::app.sidebar :title="__('Absen')">
     <div class="mx-auto flex max-w-[480px] flex-col gap-4 md:max-w-3xl md:gap-6"
          x-data="{
             faceDetected: false,
@@ -15,6 +15,11 @@
             gpsSamples: [],
             gpsVariance: null,
             earHistory: [],
+            blinkState: 'lookingForOpen',
+            livenessConfirmed: false,
+            blinkCount: 0,
+            earOpenThreshold: 0.25,
+            earClosedThreshold: 0.2,
 
             async init() {
                 await Promise.all([
@@ -96,15 +101,16 @@
                         const d = await api.detectAllFaces(video, detOptions).withFaceLandmarks().withFaceDescriptors();
                         if (d.length > 0) {
                             this.faceDetected = true;
-                            this.faceStatus = '{{ __('Wajah Terdeteksi') }}';
                             this.lastDescriptor = Array.from(d[0].descriptor);
                             const ear = this.computeEAR(d[0].landmarks);
+                            this.trackBlink(ear);
                             this.earHistory.push(ear);
                             if (this.earHistory.length > 10) this.earHistory.shift();
                         } else {
                             this.faceDetected = false;
                             this.faceStatus = '{{ __('Arahkan wajah ke kamera') }}';
                             this.lastDescriptor = null;
+                            this.resetBlink();
                         }
                     } catch { this.faceStatus = '{{ __('Gagal deteksi') }}'; }
                     this.detectionTimer = setTimeout(detect, 300);
@@ -119,6 +125,41 @@
                 const earLeft = (d(leftEye[1], leftEye[5]) + d(leftEye[2], leftEye[4])) / (2 * d(leftEye[0], leftEye[3]));
                 const earRight = (d(rightEye[1], rightEye[5]) + d(rightEye[2], rightEye[4])) / (2 * d(rightEye[0], rightEye[3]));
                 return (earLeft + earRight) / 2;
+            },
+
+            trackBlink(ear) {
+                if (this.blinkState === 'lookingForOpen') {
+                    if (ear > this.earOpenThreshold) {
+                        this.blinkState = 'lookingForClosed';
+                    }
+                    this.faceStatus = '{{ __('Kedipkan mata untuk verifikasi') }}';
+                    return;
+                }
+                if (this.blinkState === 'lookingForClosed') {
+                    if (ear < this.earClosedThreshold) {
+                        this.blinkState = 'lookingForOpenAfterBlink';
+                    }
+                    return;
+                }
+                if (this.blinkState === 'lookingForOpenAfterBlink') {
+                    if (ear > this.earOpenThreshold) {
+                        this.blinkCount += 1;
+                        if (this.blinkCount >= 1) {
+                            this.livenessConfirmed = true;
+                            this.faceStatus = '{{ __('Wajah Terverifikasi') }}';
+                        } else {
+                            this.blinkState = 'lookingForClosed';
+                        }
+                    }
+                    return;
+                }
+            },
+
+            resetBlink() {
+                this.blinkState = 'lookingForOpen';
+                this.livenessConfirmed = false;
+                this.blinkCount = 0;
+                this.earHistory = [];
             },
 
             async captureFaceCrop(video) {
@@ -152,14 +193,13 @@
                         accuracy: this.gps.accuracy,
                         gps_variance: this.gpsVariance,
                         is_wfa: this.wfaMode,
-                        is_mocked: false,
                     };
                     if (this.wfaMode) { payload.wfa_note = '{{ __('Absen WFA via aplikasi') }}'; }
 
                     const cropBlob = await this.captureFaceCrop(video);
                     if (cropBlob) {
                         const reader = new FileReader();
-                        payload.face_crop = await new Promise(resolve => {
+                        payload.photo_selfie = await new Promise(resolve => {
                             reader.onload = () => resolve(reader.result.split(',')[1]);
                             reader.readAsDataURL(cropBlob);
                         });
@@ -213,7 +253,8 @@
                     <p class="text-xs font-semibold uppercase tracking-widest text-outline">{{ __('Status Face-ID') }}</p>
                     <p class="text-lg font-semibold text-ink" x-text="faceStatus"></p>
                 </div>
-                <span class="material-symbols-outlined text-3xl text-brand-mint" data-weight="fill" x-show="faceDetected">check_circle</span>
+                <span class="material-symbols-outlined text-3xl text-brand-mint" data-weight="fill" x-show="livenessConfirmed">check_circle</span>
+                <span class="material-symbols-outlined text-3xl text-warning" data-weight="fill" x-show="faceDetected && !livenessConfirmed">visibility</span>
                 <span class="material-symbols-outlined text-3xl text-error" data-weight="fill" x-show="!faceDetected" x-cloak>cancel</span>
             </div>
 
@@ -262,13 +303,20 @@
             </div>
         </section>
 
+        {{-- Liveness indicator --}}
+        <div x-show="faceDetected && !livenessConfirmed"
+             class="flex items-center justify-center gap-2 rounded-xl bg-warning/10 px-4 py-2 text-sm text-warning">
+            <span class="material-symbols-outlined text-lg">visibility</span>
+            <span>{{ __('Kedipkan mata untuk verifikasi') }}</span>
+        </div>
+
         {{-- Clock In Button --}}
         <button @click="clockIn()"
-                :disabled="clockingIn || !faceDetected"
+                :disabled="clockingIn || !faceDetected || !livenessConfirmed"
                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
             <span class="material-symbols-outlined" x-show="!clockingIn">fingerprint</span>
             <span x-show="clockingIn" class="inline-block size-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-            <span x-text="clockingIn ? '{{ __('Memproses...') }}' : '{{ __('Absen Sekarang') }}'"></span>
+            <span x-text="clockingIn ? '{{ __('Memproses...') }}' : (livenessConfirmed ? '{{ __('Absen Sekarang') }}' : '{{ __('Verifikasi wajah...') }}')"></span>
         </button>
     </div>
 </x-layouts::app.sidebar>

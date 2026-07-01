@@ -1,4 +1,4 @@
-<x-layouts::app.sidebar>
+<x-layouts::app.sidebar :title="__('Persetujuan')">
     <div x-data="approvalsIndex()">
         {{-- Header --}}
         <div class="mb-6 flex flex-wrap items-start justify-between gap-4">

@@ -12,9 +12,7 @@ export default function () {
 
         async fetchQuota() {
             try {
-                const res = await fetch('/api/v1/leave/quota', {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch('/api/v1/leave/quota', { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') this.quota = json.data;
             } catch {
@@ -26,9 +24,7 @@ export default function () {
         async fetchLeaves() {
             this.loading = true;
             try {
-                const res = await fetch('/api/v1/leave?per_page=50', {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch('/api/v1/leave?per_page=50', { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') this.leaves = json.data;
             } catch {
@@ -43,7 +39,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/leave/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                 });
                 const json = await res.json();
                 if (json.status === 'success') {

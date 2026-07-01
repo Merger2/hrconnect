@@ -26,7 +26,7 @@ export default function () {
 
                 const res = await fetch('/api/v1/employees/import', {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json' },
+                    headers: { ...window.apiHeaders() },
                     body: formData,
                 });
 

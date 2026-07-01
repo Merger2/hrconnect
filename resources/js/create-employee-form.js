@@ -67,11 +67,11 @@ export default function () {
         async fetchLookups() {
             try {
                 const [cRes, bRes, dRes, pRes, mRes] = await Promise.all([
-                    fetch('/api/v1/companies?per_page=200'),
-                    fetch('/api/v1/branches?per_page=200'),
-                    fetch('/api/v1/departments?per_page=200'),
-                    fetch('/api/v1/positions?per_page=200'),
-                    fetch('/api/v1/employees?per_page=200'),
+                    fetch('/api/v1/companies?per_page=200', { headers: window.apiHeaders() }),
+                    fetch('/api/v1/branches?per_page=200', { headers: window.apiHeaders() }),
+                    fetch('/api/v1/departments?per_page=200', { headers: window.apiHeaders() }),
+                    fetch('/api/v1/positions?per_page=200', { headers: window.apiHeaders() }),
+                    fetch('/api/v1/employees?per_page=200', { headers: window.apiHeaders() }),
                 ]);
                 this.companies = (await cRes.json()).data || [];
                 this.branches = (await bRes.json()).data || [];
@@ -93,7 +93,7 @@ export default function () {
 
                 const res = await fetch(url, {
                     method,
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
                     body: JSON.stringify(this.form),
                 });
 

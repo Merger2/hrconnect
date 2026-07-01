@@ -28,9 +28,7 @@ export default function () {
             try {
                 const endpoint = this.tab === 'pending' ? '/api/v1/approvals/pending' : '/api/v1/approvals/history';
                 const url = endpoint + '?per_page=50' + (this.typeFilter ? `&type=${this.typeFilter}` : '');
-                const res = await fetch(url, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(url, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.approvals = json.data;
@@ -50,7 +48,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/approvals/${id}/approve`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify({}),
                 });
                 const json = await res.json();
@@ -72,9 +70,7 @@ export default function () {
             this.detailModalOpen = true;
             this.detailData = null;
             try {
-                const res = await fetch(`/api/v1/approvals/${id}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/approvals/${id}`, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.detailData = json.data;
@@ -105,7 +101,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/approvals/${id}/reject`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify({ rejection_reason: this.rejectReason }),
                 });
                 const json = await res.json();

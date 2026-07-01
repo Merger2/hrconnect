@@ -15,9 +15,7 @@ export default function () {
         async fetchPayrolls() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/payroll?year=${this.year}&per_page=50`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/payroll?year=${this.year}&per_page=50`, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.payrolls = json.data;

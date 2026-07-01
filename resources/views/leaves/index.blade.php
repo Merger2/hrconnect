@@ -97,14 +97,14 @@
                                     <span x-text="l.total_days + ' {{ __('hari') }}'"></span>
                                 </div>
                             </div>
-                            <x-status-badge x-show="l.status === 'pending'" tone="warning" pill>{{ __('Pending') }}</x-status-badge>
-                            <x-status-badge x-show="l.status === 'approved'" tone="success" pill>{{ __('Approved') }}</x-status-badge>
-                            <x-status-badge x-show="l.status === 'rejected'" tone="error" pill>{{ __('Rejected') }}</x-status-badge>
-                            <x-status-badge x-show="l.status === 'cancelled'" tone="neutral" pill>{{ __('Cancelled') }}</x-status-badge>
+                            <x-status-badge x-show="l.status === 'pending'" tone="warning" pill>{{ __('Menunggu') }}</x-status-badge>
+                            <x-status-badge x-show="l.status === 'approved'" tone="success" pill>{{ __('Disetujui') }}</x-status-badge>
+                            <x-status-badge x-show="l.status === 'rejected'" tone="error" pill>{{ __('Ditolak') }}</x-status-badge>
+                            <x-status-badge x-show="l.status === 'cancelled'" tone="neutral" pill>{{ __('Dibatalkan') }}</x-status-badge>
                         </div>
                         <button x-show="l.status === 'pending'" @click="cancelLeave(l.id)"
                                 class="mt-2 rounded-lg px-2 py-1 text-xs font-medium text-error transition-colors hover:bg-error/5">
-                            {{ __('Cancel') }}
+                            {{ __('Batalkan') }}
                         </button>
                     </div>
                 </template>

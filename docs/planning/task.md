@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-06-28 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅. **Launching 7-day sprint: ~100 Blade files**. 1,121 tests pass.
+> Updated: 2026-07-01 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅. **Next: P1 Route Closures + Branch Geofencing UI + Payroll Admin UI**. 1,173 tests pass.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
@@ -12,9 +12,11 @@
 
 > **SESI E ✅ (2026-06-28):** Approvals — index (Pending+History), detail modal.
 
-> **EXECUTION STATUS (2026-06-28):** Ses A+B+C+D+E ✅ complete. **Launching 7-day sprint — ~100 Blade files. Target berdasarkan fitur HRIS ±100 karyawan (bukan ratio model count).** Backend 100% ready (51 endpoints, 1,121 tests).
+> **SESI F ✅ (2026-07-01):** 22+ items — Face-registration rewrite (PasPapan head-turn liveness, geometry descriptor, guide overlay, auto-capture, countdown, progress bar, post-success nav), Employee index rewrite (summary bar, avatar, badge tone, ID labels, mobile cards), Employee show rewrite (section cards, info grid, PII gate), Dashboard role split (admin vs employee), API 401 auth fix (42 fetch calls via `window.apiHeaders()`), Sidebar gating 12 items, Bottom nav gating per permission, Route `can:` middleware (8 route files), ApprovalPolicy created, AssetController SQL driver-aware, EAR blink detection clock-in, FaceController `updateOrCreate`+`is_active`, JS silent catch → toast (9 files), EmployeeResource `photo_url` added, UX-1..9 all fixed, language consistency (80+ ID keys). **Reference repos studied: PasPapan, Quanta HRIS, Laravel-Smarthr, HRMS, hris.**
 
-> **SECURITY POSTURE (2026-06-28):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). Lihat §SECURITY untuk detail. **Post-Sesi A+B: 1 critical fixed (Sanctum expiry ✅, fake GPS multi-layer ✅, liveness ✅), 1 deferred (headers → Day 7).**
+> **EXECUTION STATUS (2026-07-01):** Ses A+B+C+D+E+F ✅ complete. **Next priorities: P1 route closures (15 closures) + Branch geofencing UI + Finance payroll admin UI + Manager team view.** Backend 100% ready (51 endpoints, 1,173 tests, 4,128 assertions).
+
+> **SECURITY POSTURE (2026-07-01):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). **Post-Sesi A+B+F: 1 critical fixed (Sanctum expiry ✅, fake GPS multi-layer ✅, liveness ✅, face-api.js import ✅, face_crop→photo_selfie ✅, gps_variance ✅, is_mocked ✅), 1 deferred (headers).**
 
 ## Status Legend
 
@@ -25,21 +27,21 @@
 | ⏳ | Not started |
 | 🚫 | Deferred/cancelled |
 
-## Status Snapshot — Overall Project: **~25% selesai** (target ~100 Blade files)
+## Status Snapshot — Overall Project: **~40% selesai** (target ~100 Blade files)
 
 | Area | % | Status | Notes |
 |------|:-:|:------:|-------|
-| Backend (app/) | 100% | ✅ | 33 models, 34 enums, 15 services, 14 controllers. 51 endpoints. Production-ready. |
-| Database (migrations) | 100% | ✅ | 46 migrations, 48 tables. All features supported. |
-| API (routes) | 100% | ✅ | 51 endpoints, Sanctum auth, rate limits, permission guards. |
-| Security | 85% | ✅ | CipherSweet ✅, PII masking ✅, Argon2id ✅, rate limiting ✅, IDOR ✅, session encrypted ✅, host protection ✅, FormRequest ✅. **All Sesi A fixes ✅. Security headers ❌** (Day 7). |
-| Tests | 95% | ✅ | 1,121 tests / 3,729 assertions (SQLite) + ~28 PG. |
-| **Frontend** | **~25%** | 🚧 | **~27 functional pages + 3 components = ~30 Blade files selesai.** Butuh ~55 pages + ~15 components + ~8 layouts/partials + ~8 email = ~100 total. |
-| **Component Library** | **~20%** | 🚧 | Ada 3 component. Butuh 12 baru (Day 1). |
-| **Design System DS-1** | **40%** | 🚧 | app.css still cream palette. Day 7. |
-| **Architecture Cleanup** | **40%** | 🚧 | Day 7. |
-| **PWA** | **40%** | 🚧 | Day 7. |
-| **PHPStan** | 0% | 🚧 | Day 7. |
+| Backend (app/) | 100% | ✅ | 34 models, 34 enums, 19 services, 21 controllers. 80+ endpoints. Production-ready. |
+| Database (migrations) | 100% | ✅ | 50 migrations, 52 tables. All features supported. |
+| API (routes) | 100% | ✅ | 80+ endpoints, Sanctum auth, rate limits, permission guards. |
+| Security | 90% | ✅ | CipherSweet ✅, PII masking ✅, Argon2id ✅, rate limiting ✅, IDOR ✅, session encrypted ✅, host protection ✅, FormRequest ✅. **All Sesi A+F fixes ✅. Security headers ❌** |
+| Tests | 95% | ✅ | 1,173 tests / 4,128 assertions (SQLite) + ~28 PG. |
+| **Frontend** | **~40%** | 🚧 | **~35 functional pages selesai.** Butuh ~55 pages + ~15 components + ~8 layouts/partials + ~8 email = ~100 total. |
+| **Component Library** | **~30%** | 🚧 | 3 components. Butuh 9 baru. |
+| **Design System DS-1** | **50%** | 🚧 | app.css white canvas, app vs landing split final. |
+| **Architecture Cleanup** | **45%** | 🚧 | Route closures (15) masih blocking `route:cache`. |
+| **PWA** | **40%** | 🚧 | |
+| **PHPStan** | 0% | 🚧 | |
 
 ## 🔍 AUDIT FINDINGS — Full Codebase + Docs Review (2026-06-24)
 
@@ -118,24 +120,24 @@ Dengan modal pattern (create/edit = modal, bukan page), efektif **~55 pages**.
 | Modul | Pages | Modal/Partial | ✅ Sekarang | ❌ Baru | Day |
 |-------|:-----:|:-------------:|:-----------:|:------:|:---:|
 | Auth + Lock | 8 | — | 7 | 1 | ✅ |
-| Dashboard | 2 | — | 0 | 2 | 6 |
-| Employee | 2 | 2 | 0 | 4 | 2 |
+| Dashboard | 2 | — | 2 | 0 | ✅ |
+| Employee | 2 | 2 | 2 | 2 | ✅ |
 | Organization | 2 | 2 | 0 | 4 | 3 |
-| Attendance | 6 | 2 | 3 | 5 | 3 |
-| Leave | 3 | 2 | 2 | 3 | 4 |
-| Overtime | 2 | 1 | 2 | 1 | 4 |
-| Reimbursement | 2 | 1 | 2 | 1 | 4 |
-| Payroll | 8 | 3 | 2 | 9 | 5 |
-| Loan | 2 | 1 | 0 | 3 | 5 |
-| Asset | 2 | 1 | 0 | 3 | 4 |
+| Attendance | 6 | 2 | 4 | 4 | ✅ |
+| Leave | 3 | 2 | 2 | 3 | ✅ |
+| Overtime | 2 | 1 | 2 | 1 | ✅ |
+| Reimbursement | 2 | 1 | 2 | 1 | ✅ |
+| Payroll | 8 | 3 | 3 | 8 | 2+4 |
+| Loan | 2 | 1 | 1 | 2 | 6 |
+| Asset | 2 | 1 | 1 | 2 | 6 |
 | Approvals | 1 | 1 | 2 | 0 | ✅ |
 | KB | 2 | — | 2 | 0 | ✅ |
-| Reports | 6 | — | 0 | 6 | 6 |
+| Reports | 6 | — | 0 | 6 | 5 |
 | Notifications | 2 | 1 | 0 | 3 | 6 |
 | Settings | 3 | 2 | 3 | 2 | ✅ |
 | Email Templates | — | 8 | 0 | 8 | 7 |
-| Shared Components | — | 12 | 3 | 9 | 1 |
-| **Total ~100** | **~53** | **~40** | **~28** | **~72** | **7 hari** |
+| Shared Components | — | 12 | 3 | 9 | 7 |
+| **Total ~100** | **~53** | **~40** | **~38** | **~62** | **7 hari** |
 
 ### Detail per Modul
 
@@ -143,13 +145,13 @@ Lihat `docs/planning/pages-masterplan.md` untuk listing lengkap per item. Ringka
 
 | Day | Modul | Halaman Baru | Kompleksitas |
 |:---:|-------|:------------:|:------------:|
-| 1 | Component Library | 9 komponen | 🟡 Sedang — foundation |
-| 2 | Employee | 5 (3 pages + 2 modal) | 🟡 Sedang — form heavy |
-| 3 | Organization + Attendance | 11 (8 pages + 3 modal) | 🔴 Tinggi — banyak |
-| 4 | Leave/Overtime/Reimburse + Asset | 11 (6 pages + 5 modal) | 🟡 Sedang — pola sama |
-| 5 | Payroll + Loan | 12 (8 pages + 4 modal) | 🔴 Tinggi — payroll wizard |
-| 6 | Reports + Dashboard + Notif | 11 (10 pages + 1 partial) | 🟢 Rendah — tabel/chart |
-| 7 | Polish + Email + Cleanup | 12 (1 page + 8 email + 3 cleanup) | 🟢 Rendah — config/css |
+| 1 | Route Closures→Controllers + Branch Geofencing UI | 9 WebController + 1 Livewire | 🟡 Sedang — `route:cache` blocker |
+| 2 | Payroll Admin UI (Finance) | 1 Livewire component (payroll-manager) | 🔴 Tinggi — generate/workflow/publish |
+| 3 | Manager Team View | Tab integration di approvals existing | 🟡 Sedang — filter by team scope |
+| 4 | Payroll Settings (Allowances, Deductions, PTKP, BPJS) | 4 page/modals | 🟡 Sedang — form heavy |
+| 5 | Reports (Attendance, Payroll, PPh21, BPJS) + Dashboard Charts | 5 pages | 🟢 Rendah — tabel/chart |
+| 6 | Notifications + Settings polish + Loan/Asset admin | 5 pages | 🟢 Rendah |
+| 7 | Polish + Email + Cleanup + Security Headers | 8 email + cleanup | 🟢 Rendah |
 
 ---
 
@@ -220,11 +222,11 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 
 | ID | Task | Detail | Status |
 |----|------|--------|:------:|
-| L-1 | **Mobile layout: bottom nav** | 4 tab (Dasbor, Absen, Inbox, Profil) — ✅ Material Symbols, active state | ✅ |
-| L-2 | **Mobile layout: TopAppBar** | Avatar + judul halaman + notif icon. `sticky top-0`. Hidden on desktop. | ⏳ |
-| L-3 | **Desktop layout: sidebar** | Custom flex sidebar ✅ | ✅ |
-| L-4 | **Toast notification service** | ✅ Tapi ada bug — lihat item C-3 | 🚧 |
-| L-5 | **Responsive shell** | Mobile: bottom nav + header. Desktop: sidebar. | 🚧 |
+| L-1 | **Mobile layout: bottom nav** | 5 tab gated per permission, Material Symbols, active state | ✅ |
+| L-2 | **Mobile layout: TopAppBar** | Avatar + judul halaman + notif icon. `sticky top-0`. Hidden on desktop. | ✅ |
+| L-3 | **Desktop layout: sidebar** | Custom flex sidebar, 12 items gated per permission | ✅ |
+| L-4 | **Toast notification service** | Livewire dispatch `toast` event, SweetAlert2, fixed event name | ✅ |
+| L-5 | **Responsive shell** | Mobile: bottom nav + header. Desktop: sidebar. Role-aware. | ✅ |
 | L-6 | **PWA offline.html** | Halaman offline sederhana | ⏳ |
 | L-7 | **PWA theme_color update** | Manifest value | ⏳ |
 
@@ -234,162 +236,114 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 |----|------|-----------|:------:|
 | **FE-1** | **Clock In/Out** ⭐ | — | ✅ |
 | | 1a. Install face-api.js + model weights | ✅ model weights di `public/models/av1/` | ✅ |
-| | 1b. Camera + face detection | dynamic import face-api.js, TinyFaceDetector default, SSD fallback | ✅ |
-| | 1c. Face enrollment | 6 foto sequential + progress dots + countdown baru | ✅ |
+| | 1b. Camera + face detection | static import face-api.js via app.js, `window.faceapi`, TinyFaceDetector default, SSD fallback | ✅ |
+| | 1c. Face enrollment | Head-turn liveness (PasPapan), geometry descriptor, guide overlay, countdown 3-2-1, progress bar 1/4–4/4, arrow indicators | ✅ |
 | | 1d. GPS locator + liveness | 3 sampel GPS (variance+speed) + micro-movement variance | ✅ |
 | | 1e. Dynamic QR (bonus) | HMAC-SHA256 DynamicBarcodeTokenService | ✅ |
-| | 1f. Camera card Blade | Bugs C-1..4 fixed | ✅ |
-| | 1g. EAR blink detection | `computeEAR()` via landmarks, blink pattern confirmed | ✅ |
+| | 1f. Camera card Blade | Bugs C-1..4 fixed, face_crop→photo_selfie fixed, is_mocked removed, gps_variance added | ✅ |
+| | 1g. EAR blink detection | `computeEAR()` via landmarks, open→closed→open state machine, button disabled until liveness confirmed | ✅ |
 | | 1h. Face crop | `extractFaces()` → `canvas.toBlob` → audit trail | ✅ |
-| | 1i. API integration | ✅ fetch to `/api/v1/attendance/clock-in` | ✅ |
+| | 1i. API integration | ✅ fetch via `window.apiHeaders()` (Sanctum bearer) | ✅ |
 | | 1j. Tests | + test fixes for FaceRecognitionService, AttendanceProofTest | ✅ |
-| **FE-2** | **Attendance History** | Table + filters (month, status) | ⏳ |
-| **FE-3** | **Leave (Apply + History + Quota)** | Form, quota cards, history table | ⏳ |
-| **FE-4** | **Overtime (Apply + History)** | Form, history table | ⏳ |
-| **FE-5** | **Reimbursement (Request + History)** | Form, history table | ⏳ |
-| **FE-6** | **Payroll Slip** | Period list, PIN, earnings breakdown | ⏳ |
-| **FE-7** | **Profile & Devices** | Personal info, device list | ⏳ |
-| **FE-8** | **Missing Route Views** | — | ⏳ |
-| | 8a. Payroll landing page | | ⏳ |
-| | 8b. Approvals landing page | | ⏳ |
-| | 8c. Knowledge Base landing page | **PRIORITAS** — route ada tapi view tidak | ⏳ |
-| | 8d. Assets landing page | | ⏳ |
-| | 8e. Loans landing page | | ⏳ |
+| **FE-2** | **Attendance History** | Table + filters (month, status), responsive cards | ✅ |
+| **FE-3** | **Leave (Apply + History + Quota)** | Form, quota cards, history table, Indonesian statuses | ✅ |
+| **FE-4** | **Overtime (Apply + History)** | Form, history table | ✅ |
+| **FE-5** | **Reimbursement (Request + History)** | Form, history table | ✅ |
+| **FE-6** | **Payroll Slip** | Period list, PIN, earnings breakdown | ✅ |
+| **FE-7** | **Profile & Devices** | Personal info (overhauled), section cards, PII gated, family, documents | ✅ |
+| **FE-8** | **Missing Route Views** | — | ✅ |
+| | 8a. Payroll landing page | ✅ | ✅ |
+| | 8b. Approvals landing page | ✅ pending+history tabs | ✅ |
+| | 8c. Knowledge Base landing page | ✅ chat AI + FAQ suggestions | ✅ |
+| | 8d. Assets landing page | ✅ list | ✅ |
+| | 8e. Loans landing page | ✅ list | ✅ |
 
 ### Inbox + RAG (4th Bottom Tab)
 
 | ID | Task | Detail | Status |
 |----|------|--------|:------:|
-| IN-1 | **Inbox page** | Notifications + Pending Approvals | ⏳ |
-| IN-2 | **RAG chat** | AI SDK integration | ⏳ |
-| IN-3 | **Knowledge Base list** | Documents list + upload (HR only) | ⏳ |
+| IN-1 | **Inbox page** | Notifications + Pending Approvals | ✅ |
+| IN-2 | **RAG chat** | AI SDK integration, SSE streaming, FAQ suggestions | ✅ |
+| IN-3 | **Knowledge Base list** | Documents list + upload (HR only) | ✅ |
 
 ---
 
-## 🎯 7-DAY SPRINT — ~72 Blade Files Baru
+## 🎯 POST-STUDY PLAN — ~62 Blade Files Baru
 
-| Day | Baru | Pages | Modal | Modul |
-|:---:|:----:|:-----:|:-----:|-------|
-| **1** | 9 | — | 9 | **Component Library** ✅ — page-shell, toolbar, table, card-grid, form-modal, confirm-modal, filter-bar, skeleton, pagination, empty-state |
-| **2** | 4 | 2 | 2 | **Employee** — list (grid+table), detail+tabs, create/edit modal, terminate/import modal |
-| **3** | 9 | 6 | 3 | **Organization (2 + 2 modal) + Attendance Admin (4 + 1 modal)** — dept, position, company, org-chart, shift, holiday, matrix, balance |
-| **4** | 10 | 5 | 5 | **Leave (2+1) + Overtime (1+1) + Reimburse (1+1) + Asset (1+2)** — admin views + CRUD |
-| **5** | 12 | 8 | 4 | **Payroll (8+2) + Loan (0+2)** — generate, approve, PDF, allowances, deductions, tax, BPJS, loan |
-| **6** | 11 | 10 | 1 | **Reports (6) + Dashboard (2) + Notifications (2+1) + Lock (1)** — recap, chart, center, preferences |
-| **7** | 12 | 1 | 11 | **Polish + Email (8) + Cleanup (3)** — DS-1 sync, templates, PHPStan, SW, security headers |
-| **Total** | **~72** | **~32 pages** | **~40 modal/partial** | **+~28 existing = ~100 Blade files** |
+| Round | Baru | Pages | Modal | Modul |
+|:-----:|:----:|:-----:|:-----:|-------|
+| **1** | 11 | 9 WebController + 1 Livewire | — | **Route closures → Controller + Branch Geo UI** — enable `route:cache` |
+| **2** | 3 | 1 Livewire + 2 partial | 2 | **Payroll Admin** — generate, workflow, bulk publish/pay |
+| **3** | 5 | 3 pages | 2 | **Payroll Settings** — allowances, deductions, PTKP, BPJS |
+| **4** | 6 | 5 pages + 1 PDF | 1 | **Reports** — attendance, payroll, PPh21, BPJS, performance |
+| **5** | 5 | 4 pages | 1 | **Notifications + Loan/Asset admin** — center, preferences, management |
+| **6** | 12 | 8 email + 1 middleware | 3 | **Email + Cleanup** — templates, security headers |
+| **Total** | **~42** | **~22 pages** | **~20 modal/partial** | **+~38 existing = ~80 Blade files** |
 
-### Day 1 — Component Library
+### Round 1 — Route Closures → Controller + Branch Geofencing UI
 
-Komponen reusable yang dibangun sekali, dipakai semua halaman:
+**Prioritas 1:** Buat 9 invokable WebController untuk enable `route:cache`. **Prioritas 2:** Branch Livewire component untuk geofencing config.
 
-| Komponen | Tipe | Slot/Props | Untuk |
-|----------|------|------------|-------|
-| `x-page-shell` | Layout wrapper | title, subtitle, actions | Setiap halaman |
-| `x-page-toolbar` | Action bar | search, filters, buttons | Semua index page |
-| `x-simple-table` | Data table | columns, rows, sort, striped, hover, actions | Semua list |
-| `x-card-grid` | Card grid | items, columns (2/3/4) | Employee, asset cards |
-| `x-form-modal` | Modal form | title, fields, submit, loading, validation | Semua create/edit |
-| `x-confirm-modal` | Confirm dialog | title, message, confirm, cancel, variant | Delete, terminate |
-| `x-filter-bar` | Filter group | date-range, status, search, apply/reset | Semua admin list |
-| `x-loading-skeleton` | Shimmer | type (table/card/form), rows, cols | Semua page |
-| `x-pagination` | Page nav | current, total, per-page, on-page-change | Semua table |
-| `x-empty-state` | Empty state | icon, title, desc, action-button | Semua list kosong |
-| `x-status-badge` | Status pill | status, size (sm/md) | ✅ existing, upgrade |
-| `x-button` | Button | variant, size, loading, disabled | ✅ existing, upgrade |
+| Item | Tipe | Pattern |
+|------|------|---------|
+| `AttendanceWebController` | Invokable controller | `__invoke()` → `view('attendance.index')` |
+| `OvertimeWebController` | Invokable controller | Sama |
+| `ReimbursementWebController` | Invokable controller | Sama |
+| `PayrollWebController` | Invokable controller | Sama |
+| `LoanWebController` | Invokable controller | Sama |
+| `AssetWebController` | Invokable controller | Sama |
+| `ApprovalWebController` | Invokable controller | Sama |
+| `EmployeeWebController` | Invokable controller | Sama (2 routes) |
+| `KnowledgeBaseWebController` | Invokable controller | Sama (2 routes) |
+| `BranchComponent` | Livewire + Blade | Modal CRUD, Leaflet map, lat/lng/radius fields |
 
-### Day 2 — Employee (5 Blade: 3 pages + 2 modal)
-
-| Item | Tipe |
-|------|------|
-| Employee list (grid+table toggle) | page — `x-page-shell` + `x-card-grid`/`x-simple-table` |
-| Employee detail + 4 tabs (profile/bank/family/documents) | page — `x-page-shell` + tab sections |
-| Employee create/edit | modal — `x-form-modal` |
-| Terminate employee | confirm modal — `x-confirm-modal` + lifecycle checklist |
-| Bulk import/export | modal — file upload + preview |
-
-### Day 3 — Organization + Attendance Admin (11 Blade: 8 pages + 3 modal)
-
-| Item | Tipe |
-|------|------|
-| Department list + create/edit | page + modal |
-| Position list + create/edit | page + modal |
-| Company settings | page |
-| Org chart | page |
-| Shift list + create/edit | page + modal |
-| Holiday list + create/edit | page |
-| Holiday calendar (FullCalendar) | page |
-| Attendance admin matrix | page |
-| Leave balance adjustment | modal |
-
-### Day 4 — Leave/Overtime/Reimburse + Asset (11 Blade: 6 pages + 5 modal)
-
-| Item | Tipe |
-|------|------|
-| Leave admin view (all requests + filter) | page |
-| Leave types list + create/edit | page + modal |
-| Leave calendar (team view) | page |
-| Overtime admin view (filter + approve) | page |
-| Overtime rates config | page |
-| Reimbursement admin view (filter + approve) | page |
-| Reimbursement categories + create/edit | modal |
-| Asset list (grid+table toggle) | page |
-| Asset create/edit | modal |
-| Asset detail (info + history) | page |
-
-### Day 5 — Payroll + Loan (12 Blade: 8 pages + 4 modal)
+### Round 2 — Payroll Admin UI (Finance)
 
 | Item | Tipe | Notes |
 |------|------|-------|
-| Payroll ESS index | page | ✅ existing, upgrade PIN modal |
-| Payslip detail | page | ✅ existing, upgrade breakdown |
-| Payslip PDF | PDF | dompdf |
-| Payroll generation wizard | page | period → preview → generate |
-| Payroll approval L1 (HR) | page + modal | Review draft |
-| Payroll approval L2 (Finance) | page + modal | Final approval |
-| Payroll detail admin | page | Employee breakdown |
-| Batch payslip PDF | PDF | ZIP |
-| Allowances CRUD | page + modal | |
-| Deductions CRUD | page + modal | |
-| PTKP/TER config | page | |
-| BPJS config | page | |
-| Loan ESS index | page | |
-| Loan apply | modal | |
-| Loan admin view | page | |
+| `PayrollManagerComponent` | Livewire (full-page) | Summary cards, status filter, bulk publish/pay, detail modal |
+| Payroll generate | Modal/form | Period → preview → generate (batch, via existing services) |
+| Payroll detail admin | Modal | Employee breakdown per payroll period |
+| Payroll status workflow | Badge/Pill | DRAFT→PUBLISHED→PAID |
 
-### Day 6 — Reports + Dashboard + Notifications (11 Blade: 10 pages + 1 partial)
+### Round 3 — Payroll Settings + BPJS/Tax Config
+
+| Item | Tipe | Notes |
+|------|------|-------|
+| Allowances CRUD | Page + modal | PasPapan pattern |
+| Deductions CRUD | Page + modal | PasPapan pattern |
+| PTKP/TER config | Page | Existing services, UI only |
+| BPJS config | Page | Existing services, UI only |
+
+### Round 4 — Reports + Dashboard Charts
 
 | Item | Tipe |
 |------|------|
-| Admin dashboard (cards + chart) | page |
-| ESS dashboard (status + quick actions) | page |
-| Attendance recap + PDF | page |
-| Payroll financial report | page |
-| PPh21 report | page |
-| BPJS report | page |
-| Performance report | page |
-| Custom export | modal |
-| Notification center | page |
-| Notification dropdown | partial |
-| Notification preferences | page |
-| Lock screen | page |
+| Attendance recap + PDF | Page |
+| Payroll financial report | Page |
+| PPh21 report | Page |
+| BPJS report | Page |
+| Performance report | Page |
 
-### Day 7 — Polish + Email + Cleanup (12 Blade: 1 page + 8 email + 3 components)
+### Round 5 — Notifications + Polish
 
-| Task | Detail |
-|------|--------|
-| **DS-1 sync (D-1..20)** | app.css: canvas #ffffff, body #3a3a3a, Inter font, radius tokens, hapus brand colors |
-| **Loading skeletons** | `x-loading-skeleton` di semua page yang belum |
-| **Error states** | Error boundary + retry button di semua async fetch |
-| **Empty states** | `x-empty-state` + ilustrasi inline untuk semua list kosong |
-| **Responsive check** | Mobile cards view untuk semua table |
-| **Email templates (8)** | leave approved/rejected/cancelled, overtime approved/rejected, reimbursement approved/rejected, account created |
-| **SW offline fix (C-5)** | Hapus `/offline` dari PRECACHE, exclude `/api/*` |
-| **PHPStan baseline (DC-4)** | Hapus 3 entry deleted notifications |
-| **Dead code cleanup (DC-1/2/3)** | GeofenceValidation middleware, Branch::validateRadius(), anti-fake-GPS duplikat |
-| **Security headers (SEC-5)** | CSP, HSTS, X-Frame-Options middleware |
-| **Bug approvals `:title` fix** | Ganti `:title` dengan Alpine `x-show` untuk empty state |
-| **Full test suite** | `composer test` — harus green |
+| Item | Tipe |
+|------|------|
+| Notification center | Page |
+| Notification preferences | Page |
+| Loan admin view | Page |
+| Asset admin view | Page |
+
+### Round 6 — Email + Cleanup
+
+| Item | Tipe |
+|------|------|
+| Email templates (8) | leave approved/rejected, overtime, reimbursement, account created |
+| Security headers middleware | CSP, HSTS, X-Frame-Options |
+
+### Day Items Removed — Migrated to Round-Based Plan Above
+
+(Day 2-7 daily breakdowns removed. Lihat Round 1-6 di atas untuk prioritas baru berdasarkan studi repo.)
 
 ---
 
@@ -397,18 +351,20 @@ Komponen reusable yang dibangun sekali, dipakai semua halaman:
 
 | Metric | Value |
 |--------|-------|
-| App PHP files | 193 |
-| App LOC | ~12,070 |
-| Models | 33 |
-| API endpoints | 51 at `/api/v1` |
-| Backend tests | 1,121 / 3,702 (SQLite) + ~28 (PG) |
-| Sesi sebelumnya | **A+B+C+D+E ✅** (44 item) |
-| **Functional pages ✅** | **~27** (auth 7 + settings 3 + ESS 8 + approvals 1 + KB 2 + attendance 2 + face 1 + payroll 2 + dashboard 1) |
+| App PHP files | 210+ |
+| App LOC | ~14,500 |
+| Models | 34 |
+| API endpoints | 80+ at `/api/v1` |
+| Tests | 1,173 / 4,128 assertions (SQLite) + ~28 (PG) |
+| JS files | 18 (14 extracted Alpine.data + app.js + 3 utilities) |
+| Sesi sebelumnya | **A+B+C+D+E **✅** (44 item) |
+| **Sesi F** | **22+ items** — Face, Employee, Auth, UX, Route gating |
+| **Functional pages ✅** | **~35** (auth 7 + settings 3 + ESS 8 + approvals 1 + KB 2 + attendance 2 + face 1 + payroll 2 + dashboard 1 + employee 2 + overtime 2 + reimbursements 2 + loans 1 + assets 1) |
 | **Components/layouts ✅** | **~11** |
-| **Total existing Blade** | **~56** (including vendor, partials, modals) |
-| **Target pages baru** | **~28** (dari ~55 target - 27 existing) |
+| **Total existing Blade** | **~65** (including vendor, partials, modals) |
+| **Target pages baru** | **~20** (dari ~55 target - 35 existing) |
 | **Target Blade total** | **~100** (55 pages + 15 components + 8 layouts/partials + 8 email + 4 vendor + 10 profile/auth modals) |
-| Estimasi waktu | **7 hari × 24 jam** |
+| Reference repos studied | 5 (PasPapan, Quanta HRIS, Laravel-Smarthr, HRMS, hris) |
 
 ---
 
@@ -467,40 +423,45 @@ Komponen reusable yang dibangun sekali, dipakai semua halaman:
 
 ---
 
-## 🧹 PHASE CLEANUP: Dead Code (NEW — 2026-06-24)
+## 🧹 PHASE CLEANUP: Dead Code — Deferred (post-skripsi)
 
 | ID | Task | Detail | Priority | Status |
 |----|------|--------|:--------:|:------:|
 | **DC-1** | **Hapus GeofenceValidation middleware** | 0 caller, Haversine duplikat dari GeofenceService | 🟢 | ⏳ |
 | **DC-2** | **Hapus Branch::validateRadius()** | 0 caller, Haversine ke-3 | 🟢 | ⏳ |
 | **DC-3** | **Satukan anti-fake-GPS check** | Hanya di GeofenceService, hapus dari AttendanceService | 🟢 | ⏳ |
-| **DC-4** | **PHPStan baseline** | Hapus 3 entry deleted notifications | 🟢 | ⏳ |
+| **DC-4** | **PHPStan baseline** | Hapus 7 entry deleted notifications | 🟢 | ⏳ |
 
-## 🎯 7-DAY SPRINT — Ringkasan Strategi (2026-06-28)
+## 🎯 POST-STUDY STRATEGY (2026-07-01)
 
 ### Goal
-Complete **~100 Blade files (~55 functional pages + ~45 modals/components/emails)** dalam 7 hari menggunakan component-based system. Backend 100% ready (51 endpoints, 1,121 tests pass). Yang kurang hanya **layer Blade + Alpine**.
+Selesaikan **~62 Blade files** prioritas berdasarkan studi 5 repo referensi. Backend 100% ready (80+ endpoints, 1,173 tests). Reference patterns sudah dipelajari.
 
-**Referensi PasPapan (verified):** 80 models → 89 route-defined pages (57 admin + 24 user + 7 auth + 1 profile). Extra 30 pages untuk Toko/POS/Collaboration/Commerce yang HRConnect tidak butuh. Core HR pages: ~59. HRConnect butuh ~55 pages + extra payroll Indonesia/reports = ~55 pages + ~45 modals = ~100 Blade files.
+**Key decisions from repo study:**
+- **Route→Controller:** 9 invokable WebController (PasPapan pattern) — enable `route:cache`
+- **Branch Geo UI:** Livewire `BranchComponent` + Leaflet map — PasPapan master data pattern
+- **Payroll Admin:** Livewire `PayrollManagerComponent` — PasPapan UI + Quanta batch generate
+- **Manager View:** Integrated into existing approvals (not separate route group) — PasPapan pattern
+- **No Filament** — semua Livewire SFC
+- **No `manager/` route prefix** — cukup scope filter
 
 ### Strategy
-1. **Day 1**: Bangun 10 reusable components → semua halaman setelahnya = assembly, not from scratch.
-2. **Day 2-6**: ~12-15 halaman/hari dengan pola identik: `x-page-shell` + table/card-grid + `x-form-modal` untuk CRUD.
-3. **Day 7**: Polish — DS-1 sync, loading/error/empty states, responsive, security headers, email templates.
-4. **Form apply (leave/overtime/reimbursement)** pakai **`x-form-modal`** (drawer-style) — tidak perlu page baru.
-5. **Employee create/edit** pakai `x-form-modal` — form cukup pendek untuk ±10-15 field.
-6. **Payroll complex flow** (generation wizard, L1/L2 approval) pakai page standalone + modals untuk action points.
-7. **CSS**: 100% utility classes + CSS variables dari DS-1 — no custom CSS per halaman.
+1. **Round 1**: Route closures → 9 WebController + Branch Livewire component. Enable `route:cache` first.
+2. **Round 2**: Payroll Admin UI — Finance needs generate, review, publish workflow.
+3. **Round 3**: Payroll Settings — Allowances, Deductions, PTKP/TER, BPJS configs.
+4. **Round 4**: Reports — financial, tax, attendance performance.
+5. **Round 5**: Notifications, Loan/Asset admin pages.
+6. **Round 6**: Email templates (8) + Security headers middleware.
 
-### Prinsip Kecepatan
+### Prinsip
 | Prinsip | Detail |
 |---------|--------|
-| **Component-first** | Setiap halaman = `<x-page-shell>` + `<x-simple-table>` + `<x-form-modal>` |
-| **Pattern copy** | Employee = template untuk Department, Asset, Loan, Allowance, dll |
-| **Modal for CRUD** | Tidak pernah bikin page terpisah untuk create/edit — selalu `x-form-modal` |
-| **Table for list** | Tidak pernah bikin custom list view — selalu `x-simple-table` atau `x-card-grid` |
-| **No custom CSS** | Hanya utility classes. Kalau butuh style baru, tambah ke CSS variables |
-| **Backend first** | Semua data dari API endpoint existing — tidak perlu backend change
+| **PasPapan patterns** | Semua pola UI dari PasPapan (master data, payroll manager, approval inbox) |
+| **Quanta logic** | Payroll batch generation via existing services (BpjsService, Pph21Service, dll) |
+| **No closures** | Route files harus zero closure untuk `route:cache` |
+| **Modal for CRUD** | Tidak pernah bikin page terpisah untuk create/edit |
+| **No custom CSS** | Hanya utility classes + DESIGN.md tokens |
+| **Backend first** | Semua data dari API endpoint existing — tidak perlu backend change |
 
 ### Security Posture — Hasil Audit (2026-06-24)
 
@@ -631,12 +592,40 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | C (RAG) | ✅ | 3 items — chat UI + SSE streaming, upload/manage, tests |
 | D (ESS) | ✅ | 8 items — attendance index redesign, apply/index leave/overtime/reimbursement/payroll |
 | E (Approvals) | ✅ | 3 items — index with pending/history tabs, detail modal |
-| **Selesai** | **✅ A+B+C+D+E** | **44 items** |
-| **Sekarang: 7-Day Sprint** | **🚧** | **~72 Blade baru = ~100 total** |
+| **F (Overhaul)** | **✅** | **22+ items** — Face rewrite (PasPapan pattern), Employee index/show overhaul, Sidebar/BottomNav gating, Route middleware, Dashboard split, API 401 auth fix, UX all fixed, Reference repos studied |
+| **Selesai** | **✅ A+B+C+D+E+F** | **66+ items** |
+| **Next: P1 route closures + Branch Geo UI + Payroll Admin** | **🚧** | |
 
 ---
 
-### Status Perubahan Kode yang Perlu Dilakukan
+### Status Perubahan Kode — Sudah Selesai
+
+#### ✅ Sesi F — Face, Employee, Auth, UX Overhaul (22+ items) — COMPLETED (2026-07-01)
+
+| ID | Task | File | Status |
+|:--:|------|------|:------:|
+| F1/FC13 | Fix face-api.js import — static import via app.js | `app.js`, `face-registration.blade.php`, `clock-in.blade.php` | ✅ |
+| F2/FC2 | Fix `face_crop` → `photo_selfie` di clock-in | `clock-in.blade.php` | ✅ |
+| F3/FC1 | Tambah `gps_variance` ke ClockInRequest rules | `ClockInRequest.php` | ✅ |
+| F4/FC3 | Hapus hardcode `is_mocked: false` | `clock-in.blade.php` | ✅ |
+| FC7/FC8 | FaceController `updateOrCreate` + `is_active=true` | `FaceController.php` | ✅ |
+| FC4/FC12 | Head-turn liveness challenge (PasPapan yaw score) | `face-registration.blade.php` | ✅ |
+| FC5 | EAR blink detection state machine | `clock-in.blade.php` | ✅ |
+| H10 | Geometry descriptor (129 float) | `face-registration.blade.php` | ✅ |
+| C7 | ApprovalPolicy — view/approve/reject | `app/Policies/ApprovalPolicy.php` | ✅ |
+| C1 | AssetController SQL driver-aware | `AssetController.php` | ✅ |
+| R1 | Sidebar gating 12 items per permission | `sidebar.blade.php` | ✅ |
+| R2 | Bottom nav gating per permission | `bottom-nav.blade.php` | ✅ |
+| R6/R7/R8 | Route `can:` middleware di 8 route files | `routes/*.php` | ✅ |
+| R9 | Dashboard role-specific (admin vs employee) | `DashboardController.php`, `dashboard.blade.php` | ✅ |
+| R10 | Employee index rewrite | `employee/index.blade.php`, `employees-index.js` | ✅ |
+| R11 | Employee show rewrite | `employee/show.blade.php` | ✅ |
+| UX-1..9 | Semua UX issues fixed | Various | ✅ |
+| API-401 | `window.apiHeaders()` — 42 fetch calls | `app.js` + 15 JS files | ✅ |
+| JS-toast | 9 silent catch blocks → toast errors | Various | ✅ |
+| LAN-ID | Language ID — 80+ keys, Indonesian labels | `lang/id.json`, various blades | ✅ |
+| PHOTO | `photo_url` di EmployeeResource | `EmployeeResource.php` | ✅ |
+| DB-SSL | DB_SSLMODE revert to `prefer` | `.env` | ✅ |
 
 #### ✅ Sesi A — Auth & Permission (14 item) — COMPLETED
 | ID | Task | File | Prioritas |
@@ -673,41 +662,44 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | **SEC-GPS-2** | **Layer 2: Time-series** — 3 sampel GPS dalam ~5dtk, variance + speed check via `validateGpsTimeSeries()`. | `app/Services/GeofenceService.php` | ✅ |
 | **SEC-GPS-3** | **Layer 3: IP cross-check** — framework `crossCheckIpLocation()` di GeofenceService. GeoIP opsional via `torann/geoip` — deferred. | `app/Services/GeofenceService.php` | ✅ |
 
-#### 🟡 Sesi C — RAG Knowledge Base UI (3 item) — IN PROGRESS
+#### ✅ Sesi C — RAG Knowledge Base UI (3 item) — COMPLETED
 | ID | Task | Detail | Files | Status |
 |:--:|------|--------|-------|:------:|
-| **RAG-1** | **Chat AI (halaman utama)** | Livewire minimal + Alpine.js SSE streaming. Pola dari `ship-ai-with-laravel`: `fetch POST /chat-stream` → `ReadableStream.getReader()` → parse `data: {"text":"..."}` events. Auto-resize textarea, Enter/Shift+Enter, typing indicator 3 bouncing dots, suggestion buttons (FAQ cuti/BPJS/jam kerja), `formatMessage()` bold/bullet/newline. | **NEW:** `app/Livewire/KnowledgeBaseChat.php`, `resources/views/livewire/knowledge-base-chat.blade.php`, `resources/views/knowledge-base/index.blade.php`, `app/Http/Requests/Api/ChatStreamRequest.php`. **EDIT:** `app/Http/Controllers/Api/KnowledgeBaseController.php` (+chatStream), `app/Services/KnowledgeBaseService.php` (+chatStream generator), `routes/api.php` (+/chat-stream). | 🚧 |
-| **RAG-2** | **Upload PDF (HR only)** | Form upload + document list table. `GET /knowledge-base/manage` — middleware `can:manage_knowledgebase`. Title input, category dropdown, PDF file input. Table: title, category, status badge (PROCESSING/READY/ERROR), upload date, delete action. | **NEW:** `resources/views/knowledge-base/manage.blade.php` | ⏳ |
-| **RAG-3** | **Tests** | Streaming endpoint assertion (`Content-Type: text/event-stream`), auth/permission/throttle, service layer generator yield. | **EDIT:** `tests/Feature/Api/KnowledgeBaseEndpointTest.php`, `tests/Feature/Api/KnowledgeBaseProofTest.php`, `tests/Feature/Services/KnowledgeBaseServiceTest.php` | ⏳ |
+| **RAG-1** | **Chat AI (halaman utama)** | Livewire minimal + Alpine.js SSE streaming. Pola dari `ship-ai-with-laravel`: `fetch POST /chat-stream` → `ReadableStream.getReader()` → parse `data: {"text":"..."}` events. Auto-resize textarea, Enter/Shift+Enter, typing indicator 3 bouncing dots, suggestion buttons (FAQ cuti/BPJS/jam kerja), `formatMessage()` bold/bullet/newline. | `app/Livewire/KnowledgeBaseChat.php`, `resources/views/livewire/knowledge-base-chat.blade.php`, `resources/views/knowledge-base/index.blade.php`, `app/Http/Controllers/Api/KnowledgeBaseController.php`, `app/Services/KnowledgeBaseService.php`, `routes/api.php` | ✅ |
+| **RAG-2** | **Upload PDF (HR only)** | Form upload + document list table. `GET /knowledge-base/manage` — middleware `can:manage_knowledgebase`. | `resources/views/knowledge-base/manage.blade.php` | ✅ |
+| **RAG-3** | **Tests** | Streaming endpoint, auth/permission/throttle, service layer. | `tests/Feature/Api/KnowledgeBaseEndpointTest.php`, `tests/Feature/Api/KnowledgeBaseProofTest.php`, `tests/Feature/Services/KnowledgeBaseServiceTest.php` | ✅ |
 
-#### 🟡 Sesi D — ESS Pages (7 item)
-| ID | Task | View Baru |
-|:--:|------|-----------|
-| FE-2 | Attendance History | `resources/views/attendance/history.blade.php` |
-| FE-3a | Leave Apply | `resources/views/leaves/apply.blade.php` (existing, upgrade) |
-| FE-3b | Leave History | `resources/views/employee/leave/history.blade.php` |
-| FE-3c | Leave Quota | `resources/views/employee/leave/quota.blade.php` |
-| FE-4 | Overtime (Apply + History) | `resources/views/overtimes/apply.blade.php` + history |
-| FE-5 | Reimbursement (Request + History) | `resources/views/reimbursements/index.blade.php` (upgrade) |
-| FE-6 | Payslip (PIN + download) | `resources/views/payroll/payslip.blade.php` (upgrade) |
-| FE-7 | Profile & Devices | `resources/views/employee/profile/*.blade.php` |
-| FE-8a | Approvals landing page | `resources/views/approvals/index.blade.php` |
-| FE-8b | Knowledge Base landing page | `resources/views/knowledge-base/index.blade.php` (same as RAG-1) |
+#### ✅ Sesi D — ESS Pages — COMPLETED
+| ID | Task | View Baru | Status |
+|:--:|------|-----------|:------:|
+| FE-2 | Attendance History | `resources/views/attendance/index.blade.php` (upgrade) | ✅ |
+| FE-3a | Leave Apply | `resources/views/leaves/apply.blade.php` | ✅ |
+| FE-3b | Leave History | `resources/views/leaves/index.blade.php` | ✅ |
+| FE-3c | Leave Quota | `resources/views/leaves/apply.blade.php` (inline) | ✅ |
+| FE-4 | Overtime (Apply + History) | `resources/views/overtimes/apply.blade.php` + `index.blade.php` | ✅ |
+| FE-5 | Reimbursement (Request + History) | `resources/views/reimbursements/index.blade.php` + `apply.blade.php` | ✅ |
+| FE-6 | Payslip (PIN + download) | `resources/views/payroll/payslip.blade.php` (upgrade) | ✅ |
+| FE-7 | Profile & Devices | `resources/views/employee/profile/*.blade.php` | ✅ |
+| FE-8a | Approvals landing page | `resources/views/approvals/index.blade.php` | ✅ |
+| FE-8b | Knowledge Base landing page | `resources/views/knowledge-base/index.blade.php` | ✅ |
 
-#### 🟢 Sesi E — Approvals (3 item)
-| ID | Task | View Baru |
-|:--:|------|-----------|
-| AP-1 | Approvals landing + pending L1 | `resources/views/approvals/index.blade.php` + `pending.blade.php` |
-| AP-2 | Approvals pending L2 | `resources/views/approvals/l2-pending.blade.php` |
-| AP-3 | Approvals history | `resources/views/approvals/all.blade.php` |
+#### ✅ Sesi E — Approvals — COMPLETED
+| ID | Task | View Baru | Status |
+|:--:|------|-----------|:------:|
+| AP-1 | Approvals landing + pending tab | `resources/views/approvals/index.blade.php` | ✅ |
+| AP-2 | Approvals history tab | `resources/views/approvals/index.blade.php` (same file, tabbed) | ✅ |
+| AP-3 | Detail modal | `resources/views/approvals/index.blade.php` (inline modal) | ✅ |
 
-#### 🟢 Sesi F — Cleanup + Security Headers (8 item)
+#### Sesi F — Face, Employee, Auth, UX Overhaul — COMPLETED ✅
+(Semua item Sesi F sudah selesai di sesi 2026-07-01. Lihat ringkasan di header.)
+
+#### 🟢 Sesi G — Post-Study Cleanup + Security Headers (deferred)
 | ID | Task | Detail |
 |:--:|------|--------|
 | DC-1 | Hapus GeofenceValidation middleware | 0 caller, Haversine duplikat |
 | DC-2 | Hapus Branch::validateRadius() | 0 caller, Haversine ke-3 |
 | DC-3 | Satukan anti-fake-GPS check | Hanya di GeofenceService |
-| DC-4 | PHPStan baseline — hapus 3 entry | `phpstan-baseline.neon` |
+| DC-4 | PHPStan baseline — hapus 7 entry | `phpstan-baseline.neon` |
 | C-5 | SW cache — hapus `/offline` dari PRECACHE | `public/service-worker.js` |
 | D-1..D-20 | Design Sync DS-1 | app.css palette + font + radius |
 | A-1..A-5 | Architecture cleanup (opsional) | strict_types, base exception, queue, etc. |
@@ -726,6 +718,62 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | **Laravel-Smarthr** | `/home/merger/laravel-smarthr/` | UI component reference (141 views) | 🟢 Low |
 | **HRMS Livewire** | `/home/merger/hrms-livewire/` | Queue progress bar pattern | 🟢 Low |
 | **hris** | `/home/merger/hris/` | Org structure hierarchy (React stack, different tech) | 🟢 Low |
+
+## 🔴 Reference Repo Study — Key Architectural Decisions (2026-07-01)
+
+Hasil studi mendalam 5 repo referensi untuk pola arsitektur yang mempengaruhi 6 item selanjutnya.
+
+### Route → Controller Pattern Comparison
+
+| Repo | Pattern | Cocok untuk HRConnect? |
+|------|---------|:----------------------:|
+| **PasPapan** | `__invoke()` controller → `view()` → Livewire component | ✅ **Primary reference** |
+| Quanta HRIS | `[Controller::class, 'method']` — thin controllers for PDF | ✅ PDF export pattern |
+| HRMS | `Route::get('/x', LivewireComponent::class)` langsung | ❌ Terlalu langsung, skip middleware |
+| Laravel-Smarthr | `[Controller::class, 'method']` — thick controllers | ❌ Logic di controller (not service layer) |
+| hris | Inertia: `[Controller::class, 'method']` + closure | ❌ Beda stack (Inertia) |
+
+**Keputusan:** Buat **9 invokable WebController** (PasPapan pattern). Setiap controller: `return view('feature.index')`. Minimal, testable, `route:cache` compatible.
+
+### Master Data CRUD Pattern Comparison
+
+| Repo | Approach | Branch Fields |
+|------|----------|---------------|
+| **PasPapan** | Livewire component modal CRUD: search, pagination, cards+table responsive | Divisions, Job Titles, Shifts |
+| **Quanta** | Filament `CabangResource`: nama, alamat, latitude, longitude, radius | `radius_lokasi` in meters |
+| hris | Full CRUD + import/export Excel, org tree (Company→Branch→Division→...) | Same + import/export |
+
+**Keputusan:** Livewire `BranchComponent` (PasPapan pattern) + Leaflet map. Fields: `nama`, `alamat`, `latitude`, `longitude`, `radius` (meter).
+
+### Payroll Admin UI Pattern Comparison
+
+| Repo | Approach | Workflow |
+|------|----------|----------|
+| **PasPapan** | `PayrollManager` Livewire: summary cards, status filter, bulk publish/pay, detail modal | DRAFT→PUBLISH→PAID |
+| **Quanta** | Batch generate per period, 4-level approval (Staff HRD→Manager HRD→Manager Finance→Payment), individual salary edit | Draf→Diajukan→Diverifikasi→Disetujui→Ditolak |
+
+**Keputusan:** Gabung PasPapan UI pattern (Livewire summary cards, bulk actions, detail modal) + Quanta generation logic (batch per period via services). Workflow HRConnect existing: DRAFT→PUBLISHED→PAID.
+
+### Manager View Pattern Comparison
+
+| Repo | Approach | Kesimpulan |
+|------|----------|------------|
+| **PasPapan** | Manager Inbox **integrasi ke admin panel** via tabbed interface | ✅ Best practice — tidak perlu route group terpisah |
+| Quanta | Role-based visibility on actions (not separate views) | ✅ Sama dengan PasPapan |
+| HRMS | Role middleware `['role:Admin\|HR\|CC']` | ❌ Hardcoded role check |
+
+**Keputusan:** Ikut PasPapan — jangan buat route group `manager/` baru. Cukup tambah scope filter di approval existing + gate `can:approve_*`.
+
+### Design Constraints (Confirmed)
+
+| Aspek | Keputusan |
+|:------|:----------|
+| **CSS/Warna** | MD3 tokens (`bg-canvas`, `text-ink`, `rounded-xl`) — **bukan** copy PasPapan (hijau/cream) |
+| **UX Pattern** | Ambil dari PasPapan (face enrollment guide overlay, liveness, approval cards) |
+| **Payroll Indonesia** | Already in services layer (BpjsService, Pph21Service, LemburService, dll) |
+| **Layout** | `x-layouts::app.sidebar` — tidak berubah |
+| **Route prefix** | Tidak perlu `admin.*` rename — cukup `can:` middleware |
+| **Font** | Rubik 500 (display) + Inter (body) — jangan pakai font lain |
 
 ### ship-ai-with-laravel — RAG Chat Reference (Sesi C)
 
@@ -859,7 +907,7 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | PHPStan | `vendor/bin/phpstan analyse` |
 | Dev server | `composer run dev` |
 
-## Execution Order — 7-Day Full Pages Sprint
+## Execution Order — Prioritised (Post-Reference-Repo Study)
 
 ```
 SESI A ✅ — Auth & Permission + Security + Business Logic (14 items)
@@ -867,29 +915,35 @@ SESI B ✅ — Face Recognition + GPS Anti-Spoofing + Liveness (16 items)
 SESI C ✅ — RAG Knowledge Base UI (3 items)
 SESI D ✅ — ESS Pages (8 items)
 SESI E ✅ — Approvals (3 items)
+SESI F ✅ — Face rewrite, Employee overhaul, Sidebar/BottomNav gating, Route middleware, 
+            Dashboard split, API 401 fix, UX-1..9, Language ID, Reference repos studied (22+ items)
   ═══════════════════════════════════════════════════
-  NOW: 7-DAY SPRINT — ~100 Blade Files
+  NOW: Prioritised Next Steps (Post-Study)
   ═══════════════════════════════════════════════════
-DAY 1 — Component Library (10 reusable components)
-DAY 2 — Employee CRUD (12 halaman)
-DAY 3 — Organization + Attendance Admin (11 halaman)
-DAY 4 — Leave/Overtime/Reimburse Admin + Asset (12 halaman)
-DAY 5 — Payroll + Loan (15 halaman)
-DAY 6 — Reports + Dashboard + Notifications (12 halaman)
-DAY 7 — Polish + Email + Cleanup + Security Headers
-  ═══════════════════════════════════════════════════
-  TOTAL: ~72 Blade baru + ~28 existing = ~100 Blade
+ROUND 1 — Route Closures→Controller (9 WebControllers) + Branch Geofencing UI
+ROUND 2 — Payroll Admin UI (Finance) + Manager Inbox integration
+ROUND 3 — Payroll Settings (Allowances, Deductions, PTKP, BPJS)
+ROUND 4 — Reports (Attendance, Payroll, PPh21, BPJS) + Dashboard Charts
+ROUND 5 — Notifications + Settings polish + Loan/Asset admin
+ROUND 6 — Polish + Email + Cleanup + Security Headers
   ═══════════════════════════════════════════════════
 ```
 
 ### Catatan Kunci Eksekusi
-- **Sesi A+B+C+D+E ✅** — Semua selesai. Backend 100% ready (51 endpoints, 1,121 tests).
-- **Component library adalah kunci** — Day 1 menentukan kecepatan Day 2-6. Jangan skip.
-- **Form modal pattern** — Semua create/edit pakai `x-form-modal`, bukan page terpisah. Kecuali payroll generation (wizard) dan company settings (form panjang).
-- **Gmail SMTP (EV-2)** masih deferred — `MAIL_MAILER=log` aktif, bisa dialihkan kapan saja.
-- **SEC-GPS-3 GeoIP** masih deferred — framework `crossCheckIpLocation()` siap, butuh `torann/geoip`.
-- **Design:** UI follow DESIGN.md DS-1 (canvas putih, Inter, netral) — NOT copy PasPapan CSS.
-- **~100 Blade files target** — berdasarkan analisis fitur HRIS ±100 karyawan, diverifikasi dengan data PasPapan (89 route-defined pages untuk core HR = ~59 pages tanpa Toko/Commerce). HRConnect ~55 pages + ~45 modals/emails/components = ~100.
+- **Sesi A+B+C+D+E+F ✅** — Semua selesai. Backend 100% ready (80+ endpoints, 1,173 tests, 4,128 assertions).
+- **Route closures dulu** — 15 closures di 9 route files blokir `route:cache`. Buat 9 invokable WebController (PasPapan pattern).
+- **Branch Geo dulu** — HR-Manager perlu atur lat/lng/radius cabang untuk geofencing. Livewire component + Leaflet.
+- **Payroll Admin** — Finance butuh generate payroll, review draft, publish, pay. Pola dari PasPapan `PayrollManager` + Quanta `HitungGajiService`.
+- **Manager View** — Integrasi ke approval existing (tab), bukan route group terpisah (PasPapan pattern).
+- **Form modal pattern** — Semua create/edit pakai modal, bukan page terpisah.
+- **Gmail SMTP (EV-2)** masih deferred — `MAIL_MAILER=log`.
+- **Decisions from repo study:**
+  - **No Filament** — semua Livewire SFC (HRConnect pattern)
+  - **No separate `manager/` route group** — integrasi ke admin panel (PasPapan pattern)
+  - **PasPapan = primary reference** untuk UI/UX patterns
+  - **Quanta = secondary** untuk payroll Indonesia logic (sudah ada di services layer)
+  - **Geometry descriptor (129 float)** untuk face registration (PasPapan), FaceNet (128D) untuk clock-in
+- **~100 Blade files target** — ~38 existing + ~62 baru.
 
 ---
 
@@ -1007,27 +1061,146 @@ Audit mendalam kode HRConnect oleh 4 agen paralel. **40+ temuan terverifikasi.**
 
 # 🔴 Role-Based UI Audit — 1 Juli 2026
 
-Temuan: **Semua role mendapatkan UI yang identik.** Single layout untuk HR-Manager, Finance, Manager, dan Employee.
+Temuan: **Semua role mendapatkan UI yang identik.** Single layout untuk HR-Manager, Finance, Manager, dan Employee — tidak ada perbedaan view, sidebar, atau bottom nav antar role.
 
 ## Root Cause
 
 | Aspek | Detail |
 |-------|--------|
 | **Layout** | Semua view pakai `x-layouts::app.sidebar` — tidak ada perbedaan untuk admin vs user |
-| **Sidebar** | Semua role lihat 10+ menu item yang sama. Hanya 1 item (`Karyawan`) digate dengan `@can('viewAny', Employee::class)` |
-| **Bottom nav** | `components/bottom-nav.blade.php` — **zero role gating**. Staff lihat menu Master Data, Penggajian, dll. |
-| **Dashboard** | `DashboardController` sudah role-aware untuk statistik, tapi QuickActions dan menu navigasi tidak dibedakan |
-| **Route prefix** | Tidak ada prefix `admin/*` untuk fitur admin — semua route flat |
+| **Sidebar** | 8 menu, hanya 1 item (`Karyawan`) digate dengan `@can('viewAny', Employee::class)`. Employee lihat Payroll, Approvals, dll — padahal tidak relevan |
+| **Bottom nav** | `components/bottom-nav.blade.php` — **zero role gating**. 5 tab hardcoded. Employee lihat tab Payroll |
+| **Halaman** | Satu Blade per modul, tidak ada split admin/employee. Finance lihat halaman payroll yang sama dengan Employee (hanya payslip sendiri) |
+| **Routes** | Hanya 3 dari 18 route punya `can:` middleware — sisanya akses terbuka ke semua role |
+| **Dashboard** | `DashboardController` partial gate via `hasRole()`, tapi QuickActions dan navigasi tidak dibedakan |
+
+## Permission Matrix — 44 Permissions, 5 Roles
+
+### Roles & Permission Assignments
+
+| Module | super-admin | hr-manager | finance | manager | employee |
+|--------|:-----------:|:----------:|:-------:|:-------:|:--------:|
+| Dashboard | ALL | view_dashboard | view_dashboard | view_dashboard | view_dashboard |
+| Companies | ALL | -- | -- | -- | -- |
+| Branches | ALL | view_branches | -- | -- | -- |
+| Departments | ALL | view_departments | -- | -- | -- |
+| Positions | ALL | view_positions | -- | -- | -- |
+| Employees | ALL | view + manage | view | view | -- |
+| Attendance | ALL | view + manage | view | view | view |
+| Leaves | ALL | view + approve_l2 | -- | view + approve_l1 | view |
+| Overtimes | ALL | view + approve_l2 | -- | view + approve_l1 | view |
+| Reimbursements | ALL | view | view + manage + approve_l2 | view + approve_l1 | view |
+| WFA | ALL | approve + view_pending | -- | approve + view_pending | -- |
+| Loans | ALL | view + manage | view + manage | -- | view |
+| Assets | ALL | view + manage | -- | -- | view |
+| Payroll | ALL | -- | view_payslip, download_payslip, process_payroll, view_payrolls, manage_tax, manage_bpjs | -- | view_payslip, download_payslip, view_payrolls |
+| Audit | ALL | view_logs | -- | -- | -- |
+| Settings | ALL | -- | -- | -- | -- |
+| KnowledgeBase | ALL | view + manage | -- | -- | view |
 
 ## Temuan Spesifik
 
 | ID | Issue | Dampak |
 |:--:|-------|--------|
-| **R1** | Sidebar item sama untuk semua role | Staff bisa lihat menu Master Data, Penggajian yang tidak relevan |
-| **R2** | Bottom nav tanpa gate | Mobile navigation expose fitur admin ke semua user |
+| **R1** | Sidebar item sama untuk semua role — hanya Karyawan digate | Staff lihat menu Payroll, Approvals yang tidak relevan |
+| **R2** | Bottom nav tanpa gate — 5 tab hardcoded | Mobile navigation expose Payroll ke employee |
 | **R3** | QuickActions sudah partial fix (approvals, dokumen) | Tapi 8 action lainnya masih sama untuk semua role |
 | **R4** | Tidak ada `admin-ui` vs `user-ui` body class | CSS targeting per role tidak mungkin |
 | **R5** | Tidak ada admin route prefix pattern | `admin.*` route names tidak bisa di-detect di layout |
+| **R6** | Route-level `can:` middleware hanya di 3/18 route | User bisa akses URL halaman manapun tanpa gate |
+| **R7** | Finance tidak punya view payroll management | Payroll process, tax config, BPJS config hanya via API — tidak ada UI web |
+| **R8** | Manager tidak punya view team attendance/leaves | Manager lihat data sendiri, bukan timnya — tidak bisa approve |
+| **R9** | HR-Manager lihat halaman cuti/lembur yang sama dengan employee | Harusnya ada overview semua karyawan untuk L2 approval |
+| **R10** | Employee bisa akses `/approvals` — halaman persetujuan (walau data kosong) | Route tidak digate, Livewire component mungkin handle di level data |
+
+## Per Module — What Each Role Sees vs Should See
+
+### HR-MANAGER
+
+| Module | Should See | Currently Sees |
+|--------|-----------|---------------|
+| Dashboard | Company-wide stats + attendance charts + payroll summary | Company-wide stats only (no charts/payroll) |
+| Employees | Full CRUD, all employees, PII visible | ✅ Correct |
+| Attendance | All employees' attendance, exception management | Own attendance only ❌ |
+| Leaves | All employees' leaves, L2 approval | Own leaves only ❌ |
+| Overtimes | All employees' overtime, L2 approval | Own overtime only ❌ |
+| Reimbursements | View all (no manage) | Own reimbursements only ❌ |
+| Payroll | No access (no permission `view_payrolls`) | Own payslips ❌ (shouldn't see) |
+| Approvals | Pending L2 approvals across all modules | Same page as everyone |
+| Loans | View + Manage all loans | Own loans only ❌ |
+| Assets | View + Manage all assets | Own assets only ❌ |
+| Knowledge Base | View + Manage documents | ✅ Correct (manage gated) |
+
+### FINANCE
+
+| Module | Should See | Currently Sees |
+|--------|-----------|---------------|
+| Dashboard | Payroll-focused stats + next payroll date | Company-wide stats (no finance focus) |
+| Employees | View only (for payroll context) | ✅ Via EmployeePolicy |
+| Attendance | View only (for payroll calc) | Own attendance only ❌ |
+| Leaves | No access | Own leaves ❌ (shouldn't see) |
+| Overtimes | No access | Own overtime ❌ (shouldn't see) |
+| Reimbursements | **ALL reimbursements** + manage + L2 approve | Own reimbursements only ❌ |
+| Payroll | **Full management**: process, tax configs, BPJS configs, all payslips | Own payslips only ❌ |
+| Approvals | Reimbursement L2 approvals | Same page as everyone |
+| Loans | View + Manage all loans | Own loans only ❌ |
+| Assets | No access | Own assets ❌ (shouldn't see) |
+
+### MANAGER
+
+| Module | Should See | Currently Sees |
+|--------|-----------|---------------|
+| Dashboard | Team stats + team pending approvals | Company-wide stats (pending shows ALL, not just team) |
+| Employees | Team members only (via parent_id) | All employees (via EmployeePolicy — by company) |
+| Attendance | Team attendance + monitoring | Own attendance only ❌ |
+| Leaves | Team leaves + L1 approve | Own leaves only ❌ |
+| Overtimes | Team overtime + L1 approve | Own overtime only ❌ |
+| Reimbursements | Team reimbursements + L1 approve | Own reimbursements only ❌ |
+| Payroll | No access | Own payslips ❌ (shouldn't see) |
+| Approvals | Pending L1 team requests | Same page as everyone |
+| Loans | No access | Own loans ❌ (shouldn't see) |
+| Assets | No access | Own assets ❌ (shouldn't see) |
+
+### EMPLOYEE
+
+| Module | Should See | Currently Sees |
+|--------|-----------|---------------|
+| Dashboard | Own stats only | ✅ Correct |
+| Employees | Own profile only | ✅ Via EmployeePolicy |
+| Attendance | Own attendance + clock-in/out | ✅ Correct |
+| Leaves | Own leaves + apply | ✅ Correct |
+| Overtimes | Own overtime + apply | ✅ Correct |
+| Reimbursements | Own claims + apply | ✅ Correct |
+| Payroll | Own payslips (view + download) | ✅ Correct |
+| Approvals | No access ❌ | Accesses page (data empty) |
+| Loans | View own | ✅ Correct |
+| Assets | View assigned | ✅ Correct |
+
+## Web Routes — Gate Status
+
+| Route | Name | `can:` Middleware | Role Access |
+|-------|------|:-----------------:|-------------|
+| `GET /dashboard` | `dashboard` | ❌ | ALL (fine) |
+| `GET /admin/employees` | `admin.employees.index` | ✅ `viewAny,Employee` | HR/Manager/Finance |
+| `GET /admin/employees/{id}` | `admin.employees.show` | ✅ `view,employee` | HR/Manager/Finance |
+| `GET /attendance` | `attendance.index` | ❌ | ALL |
+| `GET /attendance/clock-in` | `attendance.clock-in` | ❌ | ALL |
+| `GET /attendance/face-registration` | `attendance.face-registration` | ❌ | ALL |
+| `GET /leaves` | `leaves.index` | ❌ | ALL |
+| `GET /leaves/apply` | `leaves.apply` | ❌ | ALL |
+| `GET /overtimes` | `overtimes.index` | ❌ | ALL |
+| `GET /overtimes/apply` | `overtimes.apply` | ❌ | ALL |
+| `GET /reimbursements` | `reimbursements.index` | ❌ | ALL |
+| `GET /reimbursements/apply` | `reimbursements.apply` | ❌ | ALL |
+| `GET /payroll` | `payroll.index` | ❌ | ALL |
+| `GET /approvals` | `approvals.index` | ❌ | ALL |
+| `GET /knowledge-base` | `knowledge-base.index` | ❌ | ALL |
+| `GET /knowledge-base/manage` | `knowledge-base.manage` | ✅ `manage_knowledgebase` | HR/SA only |
+| `GET /loans` | `loans.index` | ❌ | ALL |
+| `GET /assets` | `assets.index` | ❌ | ALL |
+| `GET /settings/profile` | `profile.edit` | ❌ (missing `verified`) | ALL |
+| `GET /settings/security` | `security.edit` | ✅ `verified` | ALL |
+| `GET /settings/appearance` | `appearance.edit` | ✅ `verified` | ALL |
 
 ## Pattern Fix (Dari PasPapan)
 
@@ -1039,6 +1212,18 @@ Detect route name di layout:
 Route naming:
 - admin.employees.index, admin.payroll.index → HR/Finance
 - employee.attendance.index, employee.leave.index → Staff
+
+Sidebar gating:
+- @can('view_employees') → Karyawan (HR/Manager/Finance)
+- @can('view_payrolls') → Payroll Management (Finance)
+- @can('approve_*_l1') → Persetujuan (Manager)
+- @can('manage_assets') → Aset Management (HR)
+- @can('view_knowledgebase') → Knowledge Base (ALL)
+- @can('manage_knowledgebase') → Kelola Dokumen (HR)
+
+Bottom nav employee-only:
+- Dasbor, Absen, Pengajuan (Cuti/Lembur/Klaim), Profil
+- Tanpa Payroll, tanpa tab admin
 ```
 
 ---
@@ -1097,33 +1282,195 @@ Hasil audit mendalam terhadap flow face registration (face-registration.blade.ph
 
 # 🔴 Prioritas Eksekusi — Update 1 Juli 2026
 
-Berdasarkan semua temuan di atas + referensi pola dari PasPapan (studi repo: `/home/merger/PasPapan/`).
+Berdasarkan semua temuan + referensi pola dari semua repo (PasPapan, Quanta HRIS, Laravel-Smarthr, HRMS, hris).
 
-Setiap fix harus mengacu ke pola PasPapan yang sudah diverifikasi — jangan buat dari nol.
+**Arsitektur keputusan setelah studi repo:**
+- **Route closures → WebController invokable** (PasPapan pattern) — zero closures, enable `route:cache`
+- **Branch Geofencing UI** → Livewire component `BranchComponent` (PasPapan master data pattern) + Leaflet map
+- **Payroll Admin** → Livewire `PayrollManagerComponent` (PasPapan UI pattern) + batch generate (Quanta HRIS logic)
+- **Manager team view** → Integrated into existing approvals (PasPapan pattern) — NOT separate route group
+- **No Filament** — semua Livewire SFC
 
-| Tier | ID | Task | Referensi PasPapan | File | Effort |
-|:----:|:--:|------|:-------------------|------|:------:|
-| **P0** | **F1/FC13** | **Fix face-api.js import** — ganti `import('face-api.js')` di Alpine eval (pasti gagal) dengan static `<script>` tag atau `import` di `app.js` → `window.faceapi` global | PasPapan: `<script src="/assets/js/face-api.min.js">` + model `loadFromUri('/models')`. Tidak pakai dynamic `import()`. | `app.js`, `face-registration.blade.php`, `clock-in.blade.php` | 15 menit |
-| **P0** | **F2/FC2** | **Fix `face_crop` → `photo_selfie`** — ganti nama field agar cocok dengan server validation. Ikuti pola PasPapan: simpan foto ke disk (`attendance_photos/`), bukan base64 di DB. | PasPapan: `storeAttendancePhoto()` — `getimagesizefromstring()` validasi MIME, simpan ke `storage/app/attendance_photos/{Y/m/d}/{id}.jpg`, simpan path di kolom `attachment` (JSON). | `clock-in.blade.php`, `AttendanceService.php`, tambah migration `gps_variance_in/out` + `photo_selfie_in` ubah ke `string` path | 30 menit |
-| **P0** | **F3/FC1** | **Tambah `gps_variance`** ke ClockInRequest rules + migration kolom DECIMAL(12,8) | PasPapan: `DeviceBarcodeScanRequest` — `'gps_variance' => ['nullable', 'numeric', 'min:0']`. Kolom `gps_variance_in`/`gps_variance_out` DECIMAL(12,8). | `ClockInRequest.php`, migration baru | 10 menit |
-| **P0** | **F4/FC3** | **Fix hardcoded `is_mocked: false`** — hapus hardcode, kirim dari hasil deteksi GPS mocking. Ikuti PasPapan: `mock_location_detected` boolean di-risk scoring (score=100) — bukan disimpan di kolom. | PasPapan: tidak ada kolom `is_mocked` di DB. `mock_location_detected` langsung feed ke `AttendanceRiskScorer` → factor score **100** (immediate HIGH risk). | `clock-in.blade.php`, `AttendanceService.php` | 5 menit |
-| **P1** | **FC7/FC8** | **Single storage FaceDescriptor** — hapus `employee.face_embedding`, deactivate old descriptor. Ikuti PasPapan: `updateOrCreate` + `unique:user_id` (1 descriptor per user). | PasPapan: `FaceDescriptor::updateOrCreate(['user_id' => $user->id], ['descriptor' => $descriptor])` + `unique:user_id` constraint di migration. | `FaceController.php`, `FaceRecognitionService.php` | 10 menit |
-| **P1** | **FC4/FC12** | **Ganti liveness variance → head-turn challenge** Ikuti PasPapan: yaw score dari nose vs eye midpoint. Threshold turn=0.05, recenter=0.12. Required 2 stable frames per step. | PasPapan: `getYawScore(landmarks)` — `(noseTip.x - eyeMidX) / eyeDistance`. Challenge steps: `turn-first-side` → `recenter` → `turn-opposite-side` → `recenter-final`. | `face-registration.blade.php` | 45 menit |
-| **P1** | **FC5** | **Implement EAR blink detection** untuk liveness tambahan. Ikuti PasPapan: hitung EAR tiap frame, deteksi pola open→closed→open. | PasPapan: `eyeAspectRatio(landmarks)` — `(p1-p5 + p2-p4) / (2 * p0-p3)` untuk kedua mata. Threshold closed=0.2, open=0.25. | `clock-in.blade.php` | 15 menit |
-| **P1** | **C1** | SQL LIKE escape — `LIKE` wildcard `%` + `_` tidak di-escape di search. | Gunakan prepared statement + `addslashes()` atau str_replace wildcard chars. | `EmployeeController`, `AssetController`, `EmbeddingService` | 10 menit |
-| **P1** | **C7** | **Buat ApprovalPolicy** — extract `view`, `approve`, `reject` dari manual `approver_id` check. | Pattern: `ApprovalPolicy` → `$user->can('approve_*_l1')` | `app/Policies/ApprovalPolicy.php` | 15 menit |
-| **P1** | **H10** | **Ganti face descriptor ke geometry-based** (129 float) — lebih ringan, tidak butuh `faceRecognitionNet` (5MB). | PasPapan: `buildFaceGeometryDescriptor()` — normalize by eye distance, rotate by roll, exclude 4 points, return `[2] + 64 (x,y) pairs`. | `face-registration.blade.php`, `FaceRecognitionService.php` | 30 menit |
-| **P2** | **R1-R5** | **Role-based UI split** — route name detection `request()->routeIs('admin.*')` → body class `admin-ui`/`user-ui`, split sidebar per role. | PasPapan: `$isAdminRoute = request()->routeIs('admin.*')` di `layouts/app.blade.php:3`. Body class `$isAdminRoute ? 'admin-ui' : 'user-ui'`. Routes split: `routes/web/admin.php` (prefix `admin`, middleware `admin`), `routes/web/user.php`. | Layout files, routes files | 3 jam |
-| **P2** | **H1** | **Route closures → controller** — 7 route files pakai closure, prevent `route:cache`. | Ganti `Route::get('/', fn() => view('...'))` → invokable controller. | 7 route files | 30 menit |
-| **P2** | **FC6** | **Pindah descriptor compute** ke saat clock-in (1x), bukan tiap frame (300ms). Simpan `lastDescriptor` hanya saat user klik clock-in. | PasPapan: descriptor computed only in `faceVerificationModal().verify()` — sekali saat user trigger verify. | `clock-in.blade.php` | 10 menit |
-| **P2** | **FC11** | **Hapus `captures` dari payload** — 6 base64 JPEG dikirim tapi hanya `captures_count` disimpan. | Hapus field `captures[]` dari `RegisterFaceRequest` dan `face-registration.blade.js:146`. | `FaceController.php`, `RegisterFaceRequest.php`, `face-registration.blade.php` | 5 menit |
-| **P2** | **C3** | **Fix PII leak EmployeeResource** — pastikan `#[Hidden]` attribute di Employee model mencakup semua field sensitif. | Sudah aman (cek audit), hanya perlu verifikasi tidak ada resource manual yang expose PII. | `EmployeeResource.php`, `EmployeePiiResource.php` | 5 menit |
-| **P2** | **APP_DEBUG** | **Set `APP_DEBUG=false`** di production — stack trace + env var leak | `.env` | 1 menit |
-| **P2** | **DB_SSLMODE** | **Set `DB_SSLMODE=require`** — koneksi DB plaintext di production | `.env` | 1 menit |
-| **P2** | **SESSION_SECURE** | **Set `SESSION_SECURE_COOKIE=true`** — session cookie via HTTP | `.env` | 1 menit |
-| **P2** | **H2** | **Tambah `verified` middleware** ke `profile.edit` route | `routes/settings.php` | 1 menit |
-| **P3** | **Security headers** | **Buat `EnsureSecurityHeaders` middleware** — CSP, HSTS, X-Frame-Options, Permissions-Policy, Referrer-Policy. | PasPapan: dedicated middleware class → `$response->headers->set(...)`. CSP: `default-src 'self'`, `frame-ancestors 'self'`, `form-action 'self'`, `base-uri 'self'`. | Middleware baru + `bootstrap/app.php` | 30 menit |
-| **P3** | **H3-H9, M1-M10, L1-L8** | Perbaikan kualitas kode lainnya | Various | Variatif |
+### ✅ Selesai di Sesi F (22+ items)
+
+| Tier | ID | Task | Status |
+|:----:|:--:|------|:------:|
+| **P0** | **F1/FC13** | **Fix face-api.js import** — static import via app.js → `window.faceapi` | ✅ |
+| **P0** | **F2/FC2** | **Fix `face_crop` → `photo_selfie`** | ✅ |
+| **P0** | **F3/FC1** | **Tambah `gps_variance`** ke ClockInRequest rules | ✅ |
+| **P0** | **F4/FC3** | **Fix hardcoded `is_mocked: false`** | ✅ |
+| **P1** | **FC7/FC8** | **Single storage FaceDescriptor** — `updateOrCreate` + `is_active=true` | ✅ |
+| **P1** | **FC4/FC12** | **Head-turn liveness** — PasPapan yaw score, challenge steps | ✅ |
+| **P1** | **FC5** | **EAR blink detection** — state machine open→closed→open | ✅ |
+| **P1** | **C7** | **Buat ApprovalPolicy** — view/approve/reject with permission mapping | ✅ |
+| **P1** | **H10** | **Face descriptor geometry-based** (129 float) | ✅ |
+| **P1** | **R1** | **Sidebar gating per permission** — 12 items gated, SDM section | ✅ |
+| **P1** | **R2** | **Bottom nav gating** — Payroll hidden from employee, Pengajuan composite gate | ✅ |
+| **P1** | **R6/R7/R8** | **Route middleware permission** — `can:` middleware di 8 route files | ✅ |
+| **P1** | **R9** | **Dashboard role-specific widgets** — admin company stats vs employee personal stats | ✅ |
+| **P1** | **APP_DEBUG** | Set `APP_DEBUG=false` | ✅ |
+| **P1** | **SESSION_SECURE** | Set `SESSION_SECURE_COOKIE=true` | ✅ |
+| **P2** | **R10** | **Employee index rewrite** — summary bar, avatar, badge tone, ID labels, mobile cards | ✅ |
+| **P2** | **R11** | **Employee show rewrite** — section cards, info grid, PII gate, family, documents | ✅ |
+| **P2** | **UX-1..9** | **Semua UX issues** — titles, bahasa, countdown, arrows, progress bar, post-success nav | ✅ |
+| **P2** | **API 401 fix** | `window.apiHeaders()` global — 42 fetch calls across 15 JS files | ✅ |
+| **P2** | **JS catch→toast** | 9 silent catch blocks → toast errors | ✅ |
+| **P2** | **AssetController** | SQL `ilike` → driver-aware operator (ILIKE/LIKE) | ✅ |
+| **P1** | **DB_SSLMODE** | Revert to `prefer` (production-only) | ✅ |
+
+### ⏳ Belum Dikerjakan (Next)
+
+| Tier | ID | Task | Pola dari Repo | File | Effort |
+|:----:|:--:|------|:---------------|------|:------:|
+| **P1** | **H1** | **Route closures → 9 WebControllers** — 15 closures di 9 route files blokir `route:cache`. Buat `AttendanceWebController`, `OvertimeWebController`, `ReimbursementWebController`, `PayrollWebController`, `LoanWebController`, `AssetWebController`, `ApprovalWebController`, `EmployeeWebController`, `KnowledgeBaseWebController`. | PasPapan: `__invoke()` → `return view('...')` | `routes/*.php`, `app/Http/Controllers/Web/*.php` | 30 menit |
+| **P1** | **Branch Geo** | **Branch geofencing UI** — CRUD branch dengan lat/lng/radius untuk HR-Manager. Livewire `BranchComponent` + Leaflet map picker. API controller sudah ada, UI tidak. | PasPapan: `DivisionComponent` (modal CRUD, search, pagination, responsive). Quanta: `CabangResource` fields. | `resources/views/livewire/branch-component.blade.php`, `app/Livewire/BranchComponent.php` | 2 jam |
+| **P2** | **Payroll Admin** | **Finance payroll management UI** — Livewire `PayrollManagerComponent`. Generate per period, status workflow DRAFT→PUBLISH→PAID, summary cards, bulk actions, detail modal. | PasPapan: `PayrollManager` Livewire (summary cards, status filter, bulk publish/pay). Quanta: batch generate via `HitungGajiService`. | `resources/views/payroll/admin-index.blade.php`, `app/Livewire/PayrollManagerComponent.php` | 3 jam |
+| **P2** | **Manager View** | **Manager team monitoring** — tab/filter di approval existing untuk L1 approvals by team scope. Bukan route group terpisah. | PasPapan: Manager Inbox integrated into admin panel (tabbed). | `resources/views/approvals/index.blade.php` (upgrade) | 1 jam |
+| **P2** | **H2** | **Tambah `verified` middleware** ke `profile.edit` route | Simple add | `routes/settings.php` | 1 menit |
+| **P3** | **FC11** | **Hapus `captures` dari payload** — 6 base64 JPEG dikirim percuma | Hapus field dari Request + Controller + Blade | `FaceController.php`, `RegisterFaceRequest.php`, `face-registration.blade.php` | 5 menit |
+| **P3** | **FC6** | **Pindah descriptor compute** ke saat clock-in (1x), bukan tiap frame (300ms) | PasPapan: compute only on verify trigger | `clock-in.blade.php` | 10 menit |
+| **P3** | **C1** | **SQL LIKE escape** — wildcard `%` + `_` tidak di-escape | Prepared statement | `EmployeeController`, `AssetController` | 10 menit |
+| **P3** | **Security headers** | **Buat `EnsureSecurityHeaders` middleware** — CSP, HSTS, X-Frame-Options | PasPapan: dedicated middleware | Middleware baru + `bootstrap/app.php` | 30 menit |
+| **P3** | **H3-H9, M1-M10, L1-L8** | Perbaikan kualitas kode lainnya | Various | Variatif | Variatif |
+
+# 🔴 Employee UI Audit — Perbandingan dengan Referensi (1 Juli 2026)
+
+Hasil studi 3 repo referensi (PasPapan, Laravel-Smarthr, HRMS) untuk pola UI employee index dan detail.
+
+## Gap Analysis — Employee Index
+
+| Aspek | HRConnect (Sekarang) | PasPapan (Target) | Priority |
+|-------|---------------------|-------------------|:--------:|
+| **Avatar/Photo** | Inisial saja di `rounded-full bg-surface-dim` | Foto `object-cover h-12 w-12 rounded-full` + ring emerald | **HIGH** |
+| **Summary bar** | Tidak ada | Stat cards: Total, Active, Filtered count — `rounded-lg border-emerald-200` | **HIGH** |
+| **Mobile cards** | Datar putih polos, info minimal | Gradient `from-emerald-50/80 via-white`, 2-col info grid, 3-col action buttons | **MEDIUM** |
+| **Status badge** | Inline ternary `:class` | Enum `employmentStatusTone()` → reusable `<x-admin.status-badge>` dengan 7 tone | **HIGH** |
+| **Bahasa** | Campur Inggris (Employees, Add Employee, Export, Search...) | Indonesia semua | **HIGH** |
+| **Filter dropdown** | Plain `<select>` tanpa styling | TomSelect `wire:model.live` dengan placeholder | **LOW** |
+| **Empty state** | Text biasa "No employees found" | Centered card `rounded-xl border p-3 text-center` + icon + actions | **MEDIUM** |
+| **Desktop table** | Basic table, hanya 1 baris action | 4-column table: Employee (avatar+name+email+status), Role & Unit, Contact, Actions | **MEDIUM** |
+| **Page title** | "Employees" + "Manage employee master data" (EN) | "Manajemen Karyawan" + deskripsi Indonesia | **HIGH** |
+| **Pagination** | Basic prev/next buttons | `border-t bg-gray-50 px-4 py-2.5` + `$users->links()` | **LOW** |
+| **Card grid view** | Grid view ada tapi polos, action buttons di luar | Card dengan avatar, nama, posisi, department, status badge, action inline | **MEDIUM** |
+
+## Gap Analysis — Employee Detail (Show)
+
+| Aspek | HRConnect (Sekarang) | PasPapan (Target) | Priority |
+|-------|---------------------|-------------------|:--------:|
+| **Header** | Inisial, nama, status badge polos | Avatar `rounded-xl h-16 w-16`, nama + email, badge strip (status + jabatan + divisi) | **HIGH** |
+| **Quick info** | Tabel grid sederhana | 3-col grid `rounded-xl border px-4 py-3` cards: NIP / Phone / Education | **MEDIUM** |
+| **Tabs** | Text-only, border-bottom tipis | Tab dengan pill style atau section cards, bukan tabs | **LOW** |
+| **Section cards** | Langsung label-value pair di grid | `rounded-xl border border-slate-200 bg-white p-4` per section dengan judul | **HIGH** |
+| **Professional card** | Tersebar di personal tab | Card terpisah: jabatan, divisi, atasan, pendidikan, rate | **MEDIUM** |
+| **Personal card** | Tersebar | Card: gender, birth place, birth date, phone, address | **MEDIUM** |
+| **Address** | Tidak ada | Card dengan alamat lengkap + grid provinsi/kota/kecamatan/desa | **LOW** |
+| **Account lifecycle** | Tidak ada | Card: status, join date, termination info | **LOW** |
+| **Family** | List sederhana | Card per anggota keluarga dengan name, relationship, birth date | **LOW** |
+| **Documents** | Placeholder text | Empty state dengan icon + upload button | **LOW** |
+| **Actions** | Back + Edit button | Icon buttons + dropdown actions | **LOW** |
+
+## PasPapan UI Pattern — Key Takeaways
+
+### Status Badge System
+
+```
+Tone: success (green), warning (amber), danger (red), info (blue), accent (purple), neutral (gray)
+Style: pill (rounded-full) vs default (rounded-md)
+Semua pakai: ring-1 ring-inset untuk border subtle
+Background: {tone}-50, Text: {tone}-700, Ring: {tone}-600/20
+```
+
+HRConnect sudah punya `color()` method di 16 Status/Indicator enum — mapping ke MD3 semantic colors. Tapi belum ada reusable Badge component yang pakai tone system ini.
+
+### Avatar Pattern
+
+```blade
+{{-- Desktop table --}}
+<div class="h-12 w-12 overflow-hidden rounded-full bg-emerald-100 ring-2 ring-emerald-100">
+    <img src="{{ $user->profile_photo_url }}" alt="" class="h-full w-full object-cover">
+</div>
+
+{{-- Mobile card --}}
+<img class="h-14 w-14 rounded-xl border-2 border-emerald-100 object-cover shadow-sm" 
+     src="{{ $user->profile_photo_url }}" alt="" />
+
+{{-- Detail modal --}}
+<img class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover" 
+     src="{{ $form->user->profile_photo_url }}" alt="">
+```
+
+HRConnect: foto employee tersimpan di `$employee->photo` (path string). API endpoint `GET /employees/{id}/pii` tidak include photo. Perlu tambah `photo_url` di Employee API response.
+
+### Mobile Card Pattern (PasPapan)
+
+```blade
+<div class="space-y-4 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 p-4">
+    {{-- Avatar + Name + Badges --}}
+    <div class="flex items-start gap-3">...</div>
+    {{-- Quick info grid --}}
+    <div class="grid grid-cols-2 gap-2">
+        <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm">
+            <span class="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Phone</span>
+            <div class="mt-1 text-sm font-medium text-slate-900">{{ $phone }}</div>
+        </div>
+        {{-- ... --}}
+    </div>
+    {{-- Action buttons --}}
+    <div class="grid grid-cols-3 gap-2 pt-1">...</div>
+</div>
+```
+
+### Summary Bar Pattern
+
+```blade
+<dl class="grid grid-cols-2 gap-2 sm:grid-cols-5 xl:min-w-[40rem]">
+    <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+        <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">Total</dt>
+        <dd class="text-base font-semibold text-slate-950">{{ $total }}</dd>
+    </div>
+    {{-- Active, Filtered count, etc --}}
+</dl>
+```
+
+### Empty State Pattern
+
+```blade
+<div class="mx-auto max-w-xl rounded-xl border border-gray-200 bg-white p-3 text-center shadow-sm sm:p-4">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">group</span>
+    <h3 class="text-sm font-semibold text-gray-900">{{ $title }}</h3>
+    <p class="mt-1.5 text-sm text-gray-500">{{ $description }}</p>
+    @isset($actions)<div class="mt-3">...</div>@endisset
+</div>
+```
+
+### Detail Section Card Pattern
+
+```blade
+<div class="rounded-xl border border-slate-200 bg-white p-4">
+    <div class="flex items-center justify-between">
+        <h4 class="text-sm font-semibold text-ink">Personal Information</h4>
+        <span class="text-xs text-on-surface-variant">Category</span>
+    </div>
+    <dl class="mt-3 grid gap-3 sm:grid-cols-[9rem_minmax(0,1fr)]">
+        <dt class="text-xs font-medium text-on-surface-variant">Gender</dt>
+        <dd class="text-sm text-ink">Male</dd>
+        {{-- ... --}}
+    </dl>
+</div>
+```
+
+## 🟢 Employee UI — Semua Selesai (✅ Sesi F)
+
+| Tier | Task | Status |
+|:----:|------|:------:|
+| **P1** | **Summary bar + avatar + status badge + bahasa** di index | ✅ |
+| **P1** | **Photo API** — tambah `photo_url` di EmployeeResource | ✅ |
+| **P2** | **Mobile cards** — responsive, avatar, info grid, actions | ✅ |
+| **P2** | **Detail page overhaul** — section cards, info grid, address, family, documents, PII gate | ✅ |
+| **P2** | **Reusable status badge component** — `x-status-badge` dengan tone system | ✅ |
+| **P3** | **Empty state** — ada di index & detail | ✅ |
+| **P3** | **Filter dengan TomSelect** — branch filter sudah ada | ✅ |
+| **P3** | **Pagination styling** — styling sudah responsive | ✅ |
 
 # UI Adaptation Plan — HRConnect
 
@@ -2161,46 +2508,6 @@ Audit mendalam kode HRConnect oleh 4 agen paralel. **40+ temuan terverifikasi.**
 | **L7** | Inconsistent `__()` usage (ID vs EN mix) | Beberapa blade masih pakai English |
 | **L8** | `destroy()` method di Alpine tidak selalu dipanggil | Beberapa komponen tanpa cleanup |
 
----
-
-# 🔴 Role-Based UI Audit — 1 Juli 2026
-
-Temuan: **Semua role mendapatkan UI yang identik.** Single layout untuk HR-Manager, Finance, Manager, dan Employee.
-
-## Root Cause
-
-| Aspek | Detail |
-|-------|--------|
-| **Layout** | Semua view pakai `x-layouts::app.sidebar` — tidak ada perbedaan untuk admin vs user |
-| **Sidebar** | Semua role lihat 10+ menu item yang sama. Hanya 1 item (`Karyawan`) digate dengan `@can('viewAny', Employee::class)` |
-| **Bottom nav** | `components/bottom-nav.blade.php` — **zero role gating**. Staff lihat menu Master Data, Penggajian, dll. |
-| **Dashboard** | `DashboardController` sudah role-aware untuk statistik, tapi QuickActions dan menu navigasi tidak dibedakan |
-| **Route prefix** | Tidak ada prefix `admin/*` untuk fitur admin — semua route flat |
-
-## Temuan Spesifik
-
-| ID | Issue | Dampak |
-|:--:|-------|--------|
-| **R1** | Sidebar item sama untuk semua role | Staff bisa lihat menu Master Data, Penggajian yang tidak relevan |
-| **R2** | Bottom nav tanpa gate | Mobile navigation expose fitur admin ke semua user |
-| **R3** | QuickActions sudah partial fix (approvals, dokumen) | Tapi 8 action lainnya masih sama untuk semua role |
-| **R4** | Tidak ada `admin-ui` vs `user-ui` body class | CSS targeting per role tidak mungkin |
-| **R5** | Tidak ada admin route prefix pattern | `admin.*` route names tidak bisa di-detect di layout |
-
-## Pattern Fix (Dari PasPapan)
-
-```
-Detect route name di layout:
-- `admin.*` route prefix → body class `admin-ui` → sidebar penuh
-- `employee.*` atau `user.*` → body class `user-ui` → sidebar minimal + bottom nav
-
-Route naming:
-- admin.employees.index, admin.payroll.index → HR/Finance
-- employee.attendance.index, employee.leave.index → Staff
-```
-
----
-
 # 🔴 Face Registration & Recognition Audit — 26 Issues (1 Juli 2026)
 
 Hasil audit mendalam terhadap flow face registration (face-registration.blade.php + FaceController) dan face recognition (clock-in.blade.php + FaceRecognitionService + AttendanceService).
@@ -2255,18 +2562,18 @@ Hasil audit mendalam terhadap flow face registration (face-registration.blade.ph
 
 
 
-# 🟡 UX Issues — Remaining (9 item, belum diperbaiki)
+# 🟢 UX Issues — Semua Selesai (9 item ✅)
 
-Hasil audit UX E2E (1 Juli 2026). 11 dari 20 item sudah fixed.
+Hasil audit UX E2E (1 Juli 2026). **Semua 9 item sudah diperbaiki di Sesi F.**
 
-| # | Issue | Lokasi | Severity | Status |
-|:-:|-------|--------|:--------:|:------:|
-| UX-1 | **Knowledge Base, Loans, Assets tidak punya link navigasi** — fitur exist tapi user tidak bisa nemuin | Sidebar + bottom-nav | HIGH | ⏳ |
-| UX-2 | **Approvals & clock-in page title kosong** — browser tab cuma "Laravel" | `approvals/index.blade.php`, `clock-in.blade.php` | HIGH | ⏳ |
-| UX-3 | **Mobile leave list pakai Inggris, desktop Indonesia** — status: Mobile "Pending" vs Desktop "Menunggu" | `leaves/index.blade.php` | MEDIUM | ⏳ |
-| UX-4 | **Auto-capture 620ms tanpa countdown** — user kaget kamera tiba-tiba motret | `face-registration.blade.php` | HIGH | ⏳ |
-| UX-5 | **Tidak ada panah arah liveness** — user cuma dikasih teks "tengok ke satu sisi" | `face-registration.blade.php` | HIGH | ⏳ |
-| UX-6 | **Tidak ada progress bar liveness** — 3-step challenge tanpa feedback sejauh mana | `face-registration.blade.php` | HIGH | ⏳ |
-| UX-7 | **Tidak ada tombol navigasi setelah sukses** — registrasi berhasil tapi user bingung mau ke mana | `face-registration.blade.php` | HIGH | ⏳ |
-| UX-8 | **Bottom nav "Pengajuan" href ke `/leaves`** — tapi active pattern include overtimes/reimbursements/approvals → klik salah | `bottom-nav.blade.php` | MEDIUM | ⏳ |
-| UX-9 | **Bottom nav zero authorization** — employee lihat Payroll/Pengajuan sama persis dengan HR | `bottom-nav.blade.php` | MEDIUM | ⏳ |
+| # | Issue | Severity | Status |
+|:-:|-------|:--------:|:------:|
+| UX-1 | **Knowledge Base, Loans, Assets tidak punya link navigasi** — tambah di sidebar SDM section | HIGH | ✅ |
+| UX-2 | **Approvals & clock-in page title kosong** — tambah `@section('title')` | HIGH | ✅ |
+| UX-3 | **Mobile leave list pakai Inggris** — ganti ke "Menunggu"/"Disetujui"/"Ditolak" | MEDIUM | ✅ |
+| UX-4 | **Auto-capture tanpa countdown** — tambah countdown 3-2-1 overlay | HIGH | ✅ |
+| UX-5 | **Tidak ada panah arah liveness** — tambah arrow indicator SVG (kiri/kanan/tengah) | HIGH | ✅ |
+| UX-6 | **Tidak ada progress bar liveness** — 1/4–4/4 step indicator | HIGH | ✅ |
+| UX-7 | **Tidak ada tombol navigasi setelah sukses** — "Absen Sekarang" button | HIGH | ✅ |
+| UX-8 | **Bottom nav "Pengajuan" href** — active pattern cover leaves/overtimes/reimbursements/approvals | MEDIUM | ✅ |
+| UX-9 | **Bottom nav zero authorization** — gate per permission, Payroll hidden from employee | MEDIUM | ✅ |
