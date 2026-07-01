@@ -5,7 +5,7 @@ export default function () {
         importLoading: false,
 
         downloadTemplate() {
-            const headers = ['Employee Number', 'Full Name', 'Email', 'NIK', 'Phone', 'Gender', 'Marital Status', 'Birth Date', 'Join Date', 'Department', 'Position', 'Employment Type', 'Salary Type', 'Education Level'];
+            const headers = ['No. Karyawan', 'Nama Lengkap', 'Email', 'NIK', 'Telepon', 'Jenis Kelamin', 'Status Perkawinan', 'Tanggal Lahir', 'Tanggal Masuk', 'Departemen', 'Jabatan', 'Jenis Pegawai', 'Jenis Gaji', 'Pendidikan'];
             const csv = headers.join(',');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -32,7 +32,7 @@ export default function () {
 
                 if (!res.ok) {
                     const err = await res.json();
-                    this.importError = err.message || 'Import failed';
+                    this.importError = err.message || 'Gagal import';
                     return;
                 }
 
@@ -42,7 +42,7 @@ export default function () {
                     window.employeesIndexInstance.fetchEmployees();
                 }
             } catch (e) {
-                this.importError = 'An error occurred';
+                this.importError = 'Terjadi kesalahan';
             } finally {
                 this.importLoading = false;
             }

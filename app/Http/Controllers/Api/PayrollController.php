@@ -10,6 +10,7 @@ use App\Http\Requests\Api\ExportMonthlyRequest;
 use App\Http\Requests\Api\ExportPeriodRequest;
 use App\Http\Requests\Api\GeneratePayrollRequest;
 use App\Http\Requests\Api\ListPayrollRequest;
+use App\Http\Resources\PayrollResource;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Employee;
 use App\Models\Payroll;
@@ -85,24 +86,7 @@ class PayrollController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'id' => $payroll->id,
-                'employee_id' => $payroll->employee_id,
-                'period' => $payroll->period,
-                'status' => $payroll->status?->value,
-                'basic_salary' => (int) $payroll->basic_salary,
-                'total_allowance' => (int) $payroll->total_allowance,
-                'gross_salary' => (int) $payroll->gross_salary,
-                'overtime_pay' => (int) $payroll->overtime_pay,
-                'pph21' => (int) $payroll->pph21,
-                'bpjs_health' => (int) $payroll->bpjs_health,
-                'bpjs_employment' => (int) $payroll->bpjs_employment,
-                'loan_deduction' => (int) $payroll->loan_deduction,
-                'attendance_penalty' => (int) $payroll->attendance_penalty,
-                'total_deduction' => (int) $payroll->total_deduction,
-                'net_salary' => (int) $payroll->net_salary,
-                'created_at' => $payroll->created_at?->toIso8601String(),
-            ],
+            'data' => PayrollResource::make($payroll->load('employee', 'items'))->resolve($request),
         ]);
     }
 

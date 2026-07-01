@@ -38,7 +38,7 @@ $buttonClass = match ($variant) {
     aria-modal="true"
 >
     <div class="fixed inset-0 bg-black/40" @click="open = false"></div>
-    <div class="relative z-10 w-full max-w-sm rounded-2xl bg-canvas p-6 shadow-xl">
+    <div class="relative z-10 w-full max-w-sm rounded-lg bg-canvas p-6 shadow-xl">
         <div class="flex flex-col items-center text-center">
             <div @class([
                 'mb-4 flex h-12 w-12 items-center justify-center rounded-full',

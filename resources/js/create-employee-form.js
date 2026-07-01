@@ -79,7 +79,7 @@ export default function () {
                 this.positions = (await pRes.json()).data || [];
                 this.managers = (await mRes.json()).data || [];
             } catch (e) {
-                console.error('Failed to load lookup data', e);
+                console.error('Gagal memuat data referensi', e);
             }
         },
 
@@ -110,7 +110,7 @@ export default function () {
                     window.employeesIndexInstance.fetchEmployees();
                 }
             } catch (e) {
-                this.formError = 'An error occurred';
+                this.formError = 'Terjadi kesalahan';
             } finally {
                 this.formLoading = false;
             }

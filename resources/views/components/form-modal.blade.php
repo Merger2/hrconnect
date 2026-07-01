@@ -30,7 +30,7 @@ $maxWidth = match ($size) {
     aria-modal="true"
 >
     <div class="fixed inset-0 bg-black/40" @click="open = false"></div>
-    <div class="relative z-10 w-full {{ $maxWidth }} rounded-2xl bg-canvas p-6 shadow-xl">
+    <div class="relative z-10 w-full {{ $maxWidth }} rounded-lg bg-canvas p-6 shadow-xl">
         <div class="mb-5 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-ink">{{ $title }}</h2>
             <button @click="open = false" class="rounded-lg p-1 text-on-surface-variant hover:bg-surface-dim hover:text-ink">

@@ -140,7 +140,7 @@ new class extends Component {
     aria-modal="true"
 >
     <div class="fixed inset-0 bg-black/40" @click="$wire.closeModal(); open = false"></div>
-    <div class="relative z-10 w-full max-w-md rounded-2xl bg-canvas p-6 shadow-xl md:min-w-md">
+    <div class="relative z-10 w-full max-w-md rounded-lg bg-canvas p-6 shadow-xl md:min-w-md">
         <div class="space-y-6">
             <div class="flex flex-col items-center space-y-4">
                 <div class="w-auto rounded-full border border-outline-variant bg-canvas p-0.5 shadow-sm dark:border-hairline dark:bg-surface-dark-elevated">

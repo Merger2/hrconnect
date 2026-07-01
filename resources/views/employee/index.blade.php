@@ -167,7 +167,7 @@
             <div x-show="createModalOpen" x-cloak @keydown.escape.window="createModalOpen = false"
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <div class="fixed inset-0 bg-black/40" @click="createModalOpen = false"></div>
-                <div class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-canvas p-6 shadow-xl">
+                <div class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-canvas p-6 shadow-xl">
                     <div class="mb-5 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-ink" x-text="editing ? '{{ __('Edit Employee') }}' : '{{ __('Add Employee') }}'"></h2>
                         <button @click="createModalOpen = false" class="rounded-lg p-1 text-on-surface-variant hover:bg-surface-dim hover:text-ink">
@@ -408,7 +408,7 @@
             <div x-show="terminateModalOpen" x-cloak @keydown.escape.window="terminateModalOpen = false"
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <div class="fixed inset-0 bg-black/40" @click="terminateModalOpen = false"></div>
-                <div class="relative z-10 w-full max-w-sm rounded-2xl bg-canvas p-6 shadow-xl">
+                <div class="relative z-10 w-full max-w-sm rounded-lg bg-canvas p-6 shadow-xl">
                     <div class="flex flex-col items-center text-center">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-error/10">
                             <span class="material-symbols-outlined text-2xl text-error">warning</span>
@@ -426,10 +426,10 @@
                                 <label class="mb-1 block text-sm font-medium text-ink">{{ __('Termination Type') }} *</label>
                                 <select x-model="terminateForm.type"
                                     class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-<option value="dismissed">{{ __('PHK (Dismissed)') }}</option>
-<option value="resign">{{ __('Resignation') }}</option>
-<option value="contract_end">{{ __('Contract End') }}</option>
-<option value="deceased">{{ __('Deceased') }}</option>
+<option value="dismissed">{{ __('PHK') }}</option>
+<option value="resign">{{ __('Mengundurkan Diri') }}</option>
+<option value="contract_end">{{ __('Kontrak Berakhir') }}</option>
+<option value="deceased">{{ __('Meninggal Dunia') }}</option>
                                 </select>
                             </div>
 

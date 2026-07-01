@@ -17,7 +17,7 @@
             </div>
             <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Pending Approvals') }}</p>
+                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Persetujuan Tertunda') }}</p>
                     <span class="material-symbols-outlined text-xl text-warning">pending_actions</span>
                 </div>
                 <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($pending_approvals) }}</p>

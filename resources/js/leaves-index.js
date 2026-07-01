@@ -17,7 +17,9 @@ export default function () {
                 });
                 const json = await res.json();
                 if (json.status === 'success') this.quota = json.data;
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat kuota cuti' });
+            }
             finally { this.loadingQuota = false; }
         },
 
@@ -29,7 +31,9 @@ export default function () {
                 });
                 const json = await res.json();
                 if (json.status === 'success') this.leaves = json.data;
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data cuti' });
+            }
             finally { this.loading = false; }
         },
 

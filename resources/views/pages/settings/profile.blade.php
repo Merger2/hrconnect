@@ -9,7 +9,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-new #[Title('Profile settings')] class extends Component {
+new #[Title('Pengaturan Profil')] class extends Component {
     use ProfileValidationRules, WithFileUploads;
 
     public string $name = '';
@@ -108,7 +108,7 @@ new #[Title('Profile settings')] class extends Component {
     @include('partials.settings-heading')
 
     {{-- Avatar Card --}}
-    <div class="mb-6 rounded-2xl border border-outline-variant bg-surface-container-low p-6">
+    <div class="mb-6 rounded-lg border border-outline-variant bg-surface-container-low p-6">
         <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <div class="relative shrink-0">
                 <div class="flex size-24 items-center justify-center overflow-hidden rounded-full bg-surface-container text-2xl font-semibold text-ink ring-2 ring-outline-variant">
@@ -145,7 +145,7 @@ new #[Title('Profile settings')] class extends Component {
     </div>
 
     {{-- Profile Form Card --}}
-    <div class="mb-6 rounded-2xl border border-outline-variant bg-surface-container-low p-6">
+    <div class="mb-6 rounded-lg border border-outline-variant bg-surface-container-low p-6">
         <h3 class="text-lg font-semibold text-ink">{{ __('Profile') }}</h3>
         <p class="text-sm text-on-surface-variant">{{ __('Update your name and email address') }}</p>
 
@@ -186,18 +186,26 @@ new #[Title('Profile settings')] class extends Component {
         </form>
     </div>
 
-    {{-- Mobile: Other Settings Links --}}
-    <div class="mb-6 rounded-2xl border border-outline-variant bg-surface-container-low p-6 md:hidden">
-        <h3 class="text-sm font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Other Settings') }}</h3>
+    {{-- Quick Links --}}
+    <div class="mb-6 rounded-lg border border-outline-variant bg-surface-container-low p-6">
+        <h3 class="text-sm font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Pengaturan Lainnya') }}</h3>
         <div class="mt-3 space-y-1">
+            <a href="{{ route('attendance.face-registration') }}" wire:navigate class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-surface-container-high">
+                <span class="material-symbols-outlined text-xl">face</span>
+                <span>{{ __('Wajah') }}</span>
+                <span class="text-xs text-on-surface-variant">{{ __('Daftarkan wajah untuk absensi') }}</span>
+                <span class="material-symbols-outlined ml-auto text-base text-on-surface-variant">chevron_right</span>
+            </a>
             <a href="{{ route('security.edit') }}" wire:navigate class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-surface-container-high">
                 <span class="material-symbols-outlined text-xl">lock</span>
-                <span>{{ __('Security') }}</span>
+                <span>{{ __('Keamanan') }}</span>
+                <span class="text-xs text-on-surface-variant">{{ __('Kata sandi & verifikasi dua langkah') }}</span>
                 <span class="material-symbols-outlined ml-auto text-base text-on-surface-variant">chevron_right</span>
             </a>
             <a href="{{ route('appearance.edit') }}" wire:navigate class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-surface-container-high">
                 <span class="material-symbols-outlined text-xl">palette</span>
-                <span>{{ __('Appearance') }}</span>
+                <span>{{ __('Tampilan') }}</span>
+                <span class="text-xs text-on-surface-variant">{{ __('Mode terang/gelap') }}</span>
                 <span class="material-symbols-outlined ml-auto text-base text-on-surface-variant">chevron_right</span>
             </a>
         </div>
@@ -205,7 +213,7 @@ new #[Title('Profile settings')] class extends Component {
 
     {{-- Delete Account Card --}}
     @if ($this->showDeleteUser)
-        <div class="rounded-2xl border border-error/20 bg-error/5 p-6">
+        <div class="rounded-lg border border-error/20 bg-error/5 p-6">
             <h3 class="text-lg font-semibold text-error">{{ __('Delete account') }}</h3>
             <p class="text-sm text-on-surface-variant">{{ __('Permanently delete your account and all of its resources. This action cannot be undone.') }}</p>
             <div class="mt-4">

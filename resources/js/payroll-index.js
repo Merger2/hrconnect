@@ -23,7 +23,9 @@ export default function () {
                     this.payrolls = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data payroll' });
+            }
             finally { this.loading = false; }
         },
 

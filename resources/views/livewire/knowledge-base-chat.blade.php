@@ -1,6 +1,6 @@
 <div
     x-data="knowledgeBaseChat()"
-    class="mx-auto flex max-w-3xl flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low shadow-sm"
+    class="mx-auto flex max-w-3xl flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-low shadow-sm"
     style="height: min(70vh, 640px);"
 >
     {{-- header --}}
@@ -17,7 +17,7 @@
                 <span x-show="isStreaming" class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60"></span>
                 <span :class="isStreaming ? 'bg-success' : 'bg-muted-soft'" class="relative inline-flex h-1.5 w-1.5 rounded-full"></span>
             </span>
-            <span x-text="isStreaming ? 'Menulis...' : 'Online'" class="text-xs font-medium" :class="isStreaming ? 'text-success' : 'text-muted-soft'"></span>
+            <span x-text="isStreaming ? 'Menulis...' : '{{ __('Online') }}'" class="text-xs font-medium" :class="isStreaming ? 'text-success' : 'text-muted-soft'"></span>
         </div>
     </div>
 
@@ -53,8 +53,8 @@
                 </div>
                 <div
                     :class="msg.role === 'user'
-                        ? 'bg-ink text-canvas rounded-2xl rounded-br-sm'
-                        : 'bg-surface-container border border-outline-variant rounded-2xl rounded-bl-sm'"
+                        ? 'bg-ink text-canvas rounded-lg rounded-br-sm'
+                        : 'bg-surface-container border border-outline-variant rounded-lg rounded-bl-sm'"
                     class="max-w-[80%] px-4 py-2.5 text-sm leading-relaxed"
                 >
                     <p x-html="formatMessage(msg.content)" class="whitespace-pre-wrap break-words" :class="msg.role === 'user' ? 'text-canvas' : 'text-body'"></p>
@@ -69,7 +69,7 @@
                     <span class="material-symbols-outlined text-ink/60 text-sm">smart_toy</span>
                 </div>
             </div>
-            <div class="rounded-2xl rounded-bl-sm border border-outline-variant bg-surface-container px-4 py-3">
+            <div class="rounded-lg rounded-bl-sm border border-outline-variant bg-surface-container px-4 py-3">
                 <div class="flex items-center gap-1.5">
                     <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-soft"></span>
                     <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-soft" style="animation-delay: 0.2s"></span>

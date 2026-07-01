@@ -3,12 +3,12 @@
         {{-- Header --}}
         <div class="mb-3 flex flex-col gap-2.5 border-b border-outline-variant/50 pb-3 xl:flex-row xl:items-center xl:justify-between">
             <div class="min-w-0">
-                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Leave Requests') }}</h1>
-                <p class="text-sm text-on-surface-variant">{{ __('View and manage your leave applications') }}</p>
+                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Pengajuan Cuti') }}</h1>
+                <p class="text-sm text-on-surface-variant">{{ __('Lihat dan kelola pengajuan cuti Anda') }}</p>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <x-button variant="primary" href="{{ route('leaves.apply') }}" wire:navigate icon="add">
-                    {{ __('Apply Leave') }}
+                    {{ __('Ajukan Cuti') }}
                 </x-button>
             </div>
         </div>
@@ -36,12 +36,12 @@
                 <table class="w-full whitespace-nowrap text-left text-sm">
                     <thead class="bg-surface-dim text-on-surface-variant">
                         <tr>
-                            <th scope="col" class="px-4 py-3 font-medium">{{ __('Type') }}</th>
-                            <th scope="col" class="px-4 py-3 font-medium">{{ __('From') }}</th>
-                            <th scope="col" class="px-4 py-3 font-medium">{{ __('To') }}</th>
-                            <th scope="col" class="px-4 py-3 font-medium">{{ __('Days') }}</th>
+                            <th scope="col" class="px-4 py-3 font-medium">{{ __('Jenis') }}</th>
+                            <th scope="col" class="px-4 py-3 font-medium">{{ __('Mulai') }}</th>
+                            <th scope="col" class="px-4 py-3 font-medium">{{ __('Selesai') }}</th>
+                            <th scope="col" class="px-4 py-3 font-medium">{{ __('Hari') }}</th>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Status') }}</th>
-                            <th scope="col" class="px-4 py-3 font-medium text-right">{{ __('Actions') }}</th>
+                            <th scope="col" class="px-4 py-3 font-medium text-right">{{ __('Aksi') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant/10">
@@ -52,15 +52,15 @@
                                 <td class="px-4 py-3 text-ink" x-text="formatDate(l.end_date)"></td>
                                 <td class="px-4 py-3 text-ink" x-text="l.total_days"></td>
                                 <td class="px-4 py-3">
-                                    <x-status-badge x-show="l.status === 'pending'" tone="warning" pill>{{ __('Pending') }}</x-status-badge>
-                                    <x-status-badge x-show="l.status === 'approved'" tone="success" pill>{{ __('Approved') }}</x-status-badge>
-                                    <x-status-badge x-show="l.status === 'rejected'" tone="error" pill>{{ __('Rejected') }}</x-status-badge>
-                                    <x-status-badge x-show="l.status === 'cancelled'" tone="neutral" pill>{{ __('Cancelled') }}</x-status-badge>
+                                    <x-status-badge x-show="l.status === 'pending'" tone="warning" pill>{{ __('Menunggu') }}</x-status-badge>
+                                    <x-status-badge x-show="l.status === 'approved'" tone="success" pill>{{ __('Disetujui') }}</x-status-badge>
+                                    <x-status-badge x-show="l.status === 'rejected'" tone="error" pill>{{ __('Ditolak') }}</x-status-badge>
+                                    <x-status-badge x-show="l.status === 'cancelled'" tone="neutral" pill>{{ __('Dibatalkan') }}</x-status-badge>
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <button x-show="l.status === 'pending'" @click="cancelLeave(l.id)"
                                             class="rounded-lg px-2 py-1 text-xs font-medium text-error transition-colors hover:bg-error/5">
-                                        {{ __('Cancel') }}
+                                        {{ __('Batalkan') }}
                                     </button>
                                 </td>
                             </tr>
@@ -73,7 +73,7 @@
                                         <p class="text-sm font-medium text-ink">{{ __('Belum ada pengajuan cuti') }}</p>
                                         <p class="text-xs text-on-surface-variant">{{ __('Ajukan cuti untuk mulai') }}</p>
                                         <div class="mt-2">
-                                            <x-button variant="primary" href="{{ route('leaves.apply') }}" wire:navigate icon="add" size="sm">{{ __('Apply Leave') }}</x-button>
+                                            <x-button variant="primary" href="{{ route('leaves.apply') }}" wire:navigate icon="add" size="sm">{{ __('Ajukan Cuti') }}</x-button>
                                         </div>
                                     </div>
                                 </td>

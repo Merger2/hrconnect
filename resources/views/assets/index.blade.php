@@ -173,7 +173,7 @@
             <div x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center"
                  x-cloak x-trap.noscroll="showCreateModal">
                 <div class="fixed inset-0 bg-black/40" @click="showCreateModal = false"></div>
-                <div class="relative z-10 w-full max-w-lg rounded-2xl bg-canvas p-6 shadow-xl">
+                <div class="relative z-10 w-full max-w-lg rounded-lg bg-canvas p-6 shadow-xl">
                     <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('New Asset') }}</h2>
 
                     <div class="space-y-5">
@@ -211,7 +211,7 @@
             <div x-show="showHandoverModal" class="fixed inset-0 z-50 flex items-center justify-center"
                  x-cloak x-trap.noscroll="showHandoverModal">
                 <div class="fixed inset-0 bg-black/40" @click="showHandoverModal = false"></div>
-                <div class="relative z-10 w-full max-w-lg rounded-2xl bg-canvas p-6 shadow-xl">
+                <div class="relative z-10 w-full max-w-lg rounded-lg bg-canvas p-6 shadow-xl">
                     <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Handover Asset') }}: <span x-text="handoverAsset?.name"></span></h2>
 
                     <div class="space-y-5">

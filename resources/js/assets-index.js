@@ -50,7 +50,9 @@ export default function () {
                     this.records = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data aset' });
+            }
             finally { this.loading = false; }
         },
 

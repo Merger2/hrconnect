@@ -18,7 +18,7 @@ class FaceController extends Controller
         protected FaceRecognitionService $faceService,
     ) {}
 
-    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D FaceNet vector) for biometric verification. Supports single embedding or 6-frame enrollment with liveness variance.')]
+    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D) or geometry descriptor (129D) for biometric verification.')]
     public function register(RegisterFaceRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -34,13 +34,23 @@ class FaceController extends Controller
 
         $vectorString = '['.implode(',', $data['embedding']).']';
 
+        $metadata = [
+            'source' => 'web',
+        ];
+
+        if (isset($data['_descriptor_version'])) {
+            $metadata['descriptor_type'] = 'geometry';
+            $metadata['descriptor_version'] = $data['_descriptor_version'];
+        }
+
+        if (isset($data['captures'])) {
+            $metadata['captures_count'] = count($data['captures']);
+        }
+
         FaceDescriptor::create([
             'employee_id' => $employee->id,
             'embedding' => $vectorString,
-            'metadata' => [
-                'source' => 'web',
-                'captures_count' => count($data['captures'] ?? []),
-            ],
+            'metadata' => $metadata,
         ]);
 
         $employee->forceFill(['face_embedding' => $vectorString])->save();
@@ -54,6 +64,10 @@ class FaceController extends Controller
             ],
         ];
 
+        if (isset($metadata['descriptor_type'])) {
+            $response['data']['descriptor_type'] = 'geometry';
+        }
+
         if (isset($data['captures'])) {
             $response['data']['capture_count'] = count($data['captures']);
         }
@@ -61,7 +75,7 @@ class FaceController extends Controller
         return response()->json($response);
     }
 
-    #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance. Flow: Clock In (utility).')]
+    #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance.')]
     #[BodyParameter(name: 'embedding', description: '128-dimension face embedding array to verify', required: true, type: 'array')]
     public function verify(RegisterFaceRequest $request): JsonResponse
     {

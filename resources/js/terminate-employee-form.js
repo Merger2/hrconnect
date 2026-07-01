@@ -38,7 +38,7 @@ export default function () {
 
                 if (!res.ok) {
                     const err = await res.json();
-                    this.terminateError = err.message || 'Failed to terminate';
+                    this.terminateError = err.message || 'Gagal melakukan PHK';
                     return;
                 }
 
@@ -48,7 +48,7 @@ export default function () {
                     window.employeesIndexInstance.fetchEmployees();
                 }
             } catch (e) {
-                this.terminateError = 'An error occurred';
+                this.terminateError = 'Terjadi kesalahan';
             } finally {
                 this.terminateLoading = false;
             }
