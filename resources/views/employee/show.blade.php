@@ -1,143 +1,226 @@
-<x-layouts::app.sidebar>
-    <div x-data="employeeShow()">
-        <x-page-shell :title="__('Employee Detail')">
-            <x-slot:actions>
-                <x-button variant="secondary" icon="arrow_back" href="{{ route('admin.employees.index') }}" wire:navigate>
-                    {{ __('Back') }}
+<x-layouts::app.sidebar :title="__('Detail Karyawan')">
+    <div x-data="employeeShow()" class="space-y-6">
+        {{-- Employee Header Card --}}
+        <div x-show="!loading" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+                <template x-if="employee.photo_url">
+                    <img :src="employee.photo_url" alt=""
+                         class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover shadow-sm">
+                </template>
+                <template x-if="!employee.photo_url">
+                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-surface-dim text-xl font-semibold text-on-surface-variant shadow-sm"
+                         x-text="employee.full_name?.charAt(0)?.toUpperCase()">
+                    </div>
+                </template>
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-xl font-semibold text-ink" x-text="employee.full_name"></h2>
+                        <x-status-badge :tone="$employee->status === 'active' ? 'success' : ($employee->status === 'resigned' ? 'warning' : ($employee->status === 'terminated' ? 'error' : 'neutral'))" pill>
+                            <span x-text="statusLabel(employee.status)"></span>
+                        </x-status-badge>
+                        <x-status-badge tone="info" pill x-show="!!employee.employment_type">
+                            <span x-text="employmentLabel(employee.employment_type)"></span>
+                        </x-status-badge>
+                        <x-status-badge tone="accent" pill x-show="!!employee.position?.name">
+                            <span x-text="employee.position.name"></span>
+                        </x-status-badge>
+                    </div>
+                    <p class="mt-1 text-sm text-on-surface-variant" x-text="`#${employee.employee_number}`"></p>
+                    <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        <div class="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ __('Departemen') }}</p>
+                            <p class="mt-0.5 text-sm font-medium text-ink" x-text="employee.department?.name || '-'"></p>
+                        </div>
+                        <div class="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ __('Cabang') }}</p>
+                            <p class="mt-0.5 text-sm font-medium text-ink" x-text="employee.branch?.name || '-'"></p>
+                        </div>
+                        <div class="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ __('Bergabung') }}</p>
+                            <p class="mt-0.5 text-sm font-medium text-ink" x-text="employee.join_date || '-'"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Quick Actions Bar --}}
+        <div x-show="!loading" class="flex flex-wrap gap-2">
+            <x-button variant="secondary" icon="arrow_back" href="{{ route('admin.employees.index') }}" wire:navigate>
+                {{ __('Kembali') }}
+            </x-button>
+            @can('manage_employees')
+                <x-button variant="primary" icon="edit" href="{{ route('admin.employees.edit', $employee) }}" wire:navigate>
+                    {{ __('Edit') }}
                 </x-button>
-                @can('manage_employees')
-                    <x-button variant="primary" icon="edit" href="{{ route('admin.employees.index') }}" wire:navigate>
-                        {{ __('Edit') }}
-                    </x-button>
-                @endcan
-            </x-slot:actions>
+            @endcan
+        </div>
 
-            {{-- Employee Header --}}
-            <div x-show="!loading" class="rounded-xl border border-outline-variant bg-canvas p-6 shadow-sm">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-surface-dim text-2xl font-semibold text-on-surface-variant" x-text="employee.full_name?.charAt(0)?.toUpperCase()"></div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-3">
-                            <h2 class="text-xl font-semibold text-ink" x-text="employee.full_name"></h2>
-                            <x-status-badge :tone="$employee->status === 'active' ? 'success' : ($employee->status === 'resigned' ? 'warning' : ($employee->status === 'terminated' ? 'error' : 'neutral'))" pill x-show="true">
-                                <span x-text="statusLabel(employee.status)"></span>
-                            </x-status-badge>
-                        </div>
-                        <p class="mt-1 text-sm text-on-surface-variant" x-text="`#${employee.employee_number}`"></p>
-                        <div class="mt-2 flex flex-wrap gap-4 text-sm text-on-surface-variant">
-                            <span x-text="employee.position?.name || '-'"></span>
-                            <span class="text-outline-variant">|</span>
-                            <span x-text="employee.department?.name || '-'"></span>
-                            <span class="text-outline-variant">|</span>
-                            <span x-text="employee.branch?.name || '-'"></span>
-                            <span class="text-outline-variant">|</span>
-                            <span>{{ __('Join') }}: <span x-text="employee.join_date || '-'"></span></span>
-                        </div>
-                    </div>
+        {{-- Section Cards --}}
+        <div x-show="!loading" class="space-y-4">
+            {{-- Personal Information --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-ink">{{ __('Informasi Pribadi') }}</h4>
+                    <span class="text-xs text-on-surface-variant">{{ __('Personal') }}</span>
                 </div>
+                <dl class="mt-3 grid gap-3 sm:grid-cols-[9rem_minmax(0,1fr)] sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Jenis Kelamin') }}</dt>
+                        <dd class="text-sm text-ink" x-text="genderLabel(employee.gender)"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Tanggal Lahir') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.birth_date || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Status Pernikahan') }}</dt>
+                        <dd class="text-sm text-ink" x-text="maritalLabel(employee.marital_status)"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Golongan Darah') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.blood_type || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Pendidikan') }}</dt>
+                        <dd class="text-sm text-ink" x-text="educationLabel(employee.education_level)"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Shift') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.shift?.name || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Atasan') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.manager?.full_name || '-'"></dd>
+                    </div>
+                </dl>
             </div>
 
-            {{-- Tabs --}}
-            <div x-show="!loading" class="mt-6">
-                <div class="flex border-b border-outline-variant/50">
-                    <button @click="tab = 'personal'" :class="tab === 'personal' ? 'border-b-2 border-ink text-ink' : 'text-on-surface-variant hover:text-ink'" class="px-4 py-3 text-sm font-medium transition-colors">{{ __('Personal') }}</button>
-                    <button @click="tab = 'bank'" :class="tab === 'bank' ? 'border-b-2 border-ink text-ink' : 'text-on-surface-variant hover:text-ink'" class="px-4 py-3 text-sm font-medium transition-colors">{{ __('Bank & Tax') }}</button>
-                    <button @click="tab = 'family'" :class="tab === 'family' ? 'border-b-2 border-ink text-ink' : 'text-on-surface-variant hover:text-ink'" class="px-4 py-3 text-sm font-medium transition-colors">{{ __('Family') }}</button>
-                    <button @click="tab = 'documents'" :class="tab === 'documents' ? 'border-b-2 border-ink text-ink' : 'text-on-surface-variant hover:text-ink'" class="px-4 py-3 text-sm font-medium transition-colors">{{ __('Documents') }}</button>
+            {{-- Employment Info --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-ink">{{ __('Informasi Kepegawaian') }}</h4>
+                    <span class="text-xs text-on-surface-variant">{{ __('Employment') }}</span>
                 </div>
+                <dl class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Tipe Karyawan') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employmentLabel(employee.employment_type)"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Tanggal Bergabung') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.join_date || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Status') }}</dt>
+                        <dd class="text-sm text-ink" x-text="statusLabel(employee.status)"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Tanggal Berakhir') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.end_date || '-'"></dd>
+                    </div>
+                </dl>
+            </div>
 
-                {{-- Personal Tab --}}
-                <div x-show="tab === 'personal'" class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Gender') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="genderLabel(employee.gender)"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Birth Date') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="employee.birth_date || '-'"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Marital Status') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="maritalLabel(employee.marital_status)"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Blood Type') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="employee.blood_type || '-'"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Education') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="educationLabel(employee.education_level)"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Employment Type') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="employmentLabel(employee.employment_type)"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Shift') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="employee.shift?.name || '-'"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Manager') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="employee.manager?.full_name || '-'"></p>
-                    </div>
+            {{-- Bank & Tax --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-ink">{{ __('Bank & Pajak') }}</h4>
+                    <span class="text-xs text-on-surface-variant">{{ __('Bank & Tax') }}</span>
                 </div>
+                <dl class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Bank') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.bank_name || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Tipe Gaji') }}</dt>
+                        <dd class="text-sm text-ink" x-text="salaryLabel(employee.salary_type)"></dd>
+                    </div>
+                    <div x-show="hasPiiAccess">
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('NIK') }}</dt>
+                        <dd class="text-sm text-ink" x-text="pii.nik || '-'"></dd>
+                    </div>
+                    <div x-show="hasPiiAccess">
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('NPWP') }}</dt>
+                        <dd class="text-sm text-ink" x-text="pii.npwp || '-'"></dd>
+                    </div>
+                    <div x-show="hasPiiAccess">
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Telepon') }}</dt>
+                        <dd class="text-sm text-ink" x-text="pii.phone || '-'"></dd>
+                    </div>
+                    <div x-show="hasPiiAccess">
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('No. Rekening') }}</dt>
+                        <dd class="text-sm text-ink" x-text="pii.bank_account_number || '-'"></dd>
+                    </div>
+                </dl>
+            </div>
 
-                {{-- Bank & Tax Tab --}}
-                <div x-show="tab === 'bank'" class="mt-4 grid gap-6 sm:grid-cols-2">
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Bank Name') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="employee.bank_name || '-'"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Salary Type') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="salaryLabel(employee.salary_type)"></p>
-                    </div>
-                    <div x-show="hasPiiAccess">
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('NIK') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="pii.nik || '-'"></p>
-                    </div>
-                    <div x-show="hasPiiAccess">
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('NPWP') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="pii.npwp || '-'"></p>
-                    </div>
-                    <div x-show="hasPiiAccess">
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Phone') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="pii.phone || '-'"></p>
-                    </div>
-                    <div x-show="hasPiiAccess">
-                        <p class="text-xs font-medium text-on-surface-variant">{{ __('Bank Account') }}</p>
-                        <p class="mt-1 text-sm text-ink" x-text="pii.bank_account_number || '-'"></p>
-                    </div>
+            {{-- Address --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-4" x-show="hasAddress">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-ink">{{ __('Alamat') }}</h4>
+                    <span class="text-xs text-on-surface-variant">{{ __('Address') }}</span>
                 </div>
-
-                {{-- Family Tab --}}
-                <div x-show="tab === 'family'" class="mt-4">
-                    <div x-show="families.length === 0" class="rounded-xl border border-dashed border-outline-variant p-8 text-center text-sm text-on-surface-variant">
-                        {{ __('No family data recorded') }}
+                <dl class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Alamat') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.address || '-'"></dd>
                     </div>
-                    <div x-show="families.length > 0" class="space-y-3">
-                        <template x-for="f in families" :key="f.id">
-                            <div class="rounded-xl border border-outline-variant bg-canvas p-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-ink" x-text="f.full_name"></p>
-                                        <p class="text-xs text-on-surface-variant" x-text="relationshipLabel(f.relationship)"></p>
-                                    </div>
-                                    <span class="text-xs text-on-surface-variant" x-text="f.birth_date || ''"></span>
-                                </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Provinsi') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.province || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Kota') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.city || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Kecamatan') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.district || '-'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-on-surface-variant">{{ __('Kelurahan') }}</dt>
+                        <dd class="text-sm text-ink" x-text="employee.village || '-'"></dd>
+                    </div>
+                </dl>
+            </div>
+
+            {{-- Family --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-ink">{{ __('Keluarga') }}</h4>
+                    <span class="text-xs text-on-surface-variant">{{ __('Family') }}</span>
+                </div>
+                <div x-show="families.length === 0" class="mt-3 rounded-xl border border-dashed border-slate-200 p-6 text-center">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/40">family_history</span>
+                    <p class="mt-2 text-sm text-on-surface-variant">{{ __('Belum ada data keluarga') }}</p>
+                </div>
+                <div x-show="families.length > 0" class="mt-3 space-y-2">
+                    <template x-for="f in families" :key="f.id">
+                        <div class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3">
+                            <div>
+                                <p class="text-sm font-medium text-ink" x-text="f.full_name"></p>
+                                <p class="text-xs text-on-surface-variant" x-text="relationshipLabel(f.relationship)"></p>
                             </div>
-                        </template>
-                    </div>
-                </div>
-
-                {{-- Documents Tab --}}
-                <div x-show="tab === 'documents'" class="mt-4">
-                    <div class="rounded-xl border border-dashed border-outline-variant p-8 text-center text-sm text-on-surface-variant">
-                        {{ __('No documents uploaded') }}
-                    </div>
+                            <span class="text-xs text-on-surface-variant" x-text="f.birth_date || ''"></span>
+                        </div>
+                    </template>
                 </div>
             </div>
-        </x-page-shell>
+
+            {{-- Documents --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-ink">{{ __('Dokumen') }}</h4>
+                    <span class="text-xs text-on-surface-variant">{{ __('Documents') }}</span>
+                </div>
+                <div class="mt-3 rounded-xl border border-dashed border-slate-200 p-6 text-center">
+                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/40">description</span>
+                    <p class="mt-2 text-sm text-on-surface-variant">{{ __('Belum ada dokumen diunggah') }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -148,12 +231,16 @@
                 families: @json($employee->families ?? []),
                 loading: false,
                 hasPiiAccess: @json(auth()->user()?->can('viewPii', $employee) ?? false),
-                tab: 'personal',
 
                 init() {
                     if (this.hasPiiAccess) {
                         this.fetchPii();
                     }
+                },
+
+                get hasAddress() {
+                    return !!(this.employee.address || this.employee.province || this.employee.city
+                        || this.employee.district || this.employee.village);
                 },
 
                 async fetchPii() {
@@ -168,25 +255,25 @@
 
                 statusLabel(status) {
                     const labels = {
-                        active: '{{ __('Active') }}',
-                        inactive: '{{ __('Inactive') }}',
-                        resigned: '{{ __('Resigned') }}',
-                        terminated: '{{ __('Terminated') }}',
-                        deceased: '{{ __('Deceased') }}',
+                        active: '{{ __('Aktif') }}',
+                        inactive: '{{ __('Nonaktif') }}',
+                        resigned: '{{ __('Resign') }}',
+                        terminated: '{{ __('PHK') }}',
+                        deceased: '{{ __('Meninggal') }}',
                     };
                     return labels[status] || status;
                 },
 
                 genderLabel(g) {
-                    return g === 'L' ? '{{ __('Male') }}' : g === 'P' ? '{{ __('Female') }}' : '-';
+                    return g === 'L' ? '{{ __('Laki-laki') }}' : g === 'P' ? '{{ __('Perempuan') }}' : '-';
                 },
 
                 maritalLabel(m) {
                     const labels = {
-                        single: '{{ __('Single') }}',
-                        married: '{{ __('Married') }}',
-                        divorced: '{{ __('Divorced') }}',
-                        widowed: '{{ __('Widowed') }}',
+                        single: '{{ __('Lajang') }}',
+                        married: '{{ __('Menikah') }}',
+                        divorced: '{{ __('Cerai') }}',
+                        widowed: '{{ __('Duda/Janda') }}',
                     };
                     return labels[m] || m || '-';
                 },
@@ -194,38 +281,38 @@
                 educationLabel(e) {
                     const labels = {
                         sd: 'SD', smp: 'SMP', sma: 'SMA', smk: 'SMK',
-                        diploma: '{{ __('Diploma') }}', bachelor: '{{ __('Bachelor') }}',
-                        master: '{{ __('Master') }}', doctorate: '{{ __('Doctorate') }}',
-                        other: '{{ __('Other') }}',
+                        diploma: '{{ __('Diploma') }}', bachelor: '{{ __('S1') }}',
+                        master: '{{ __('S2') }}', doctorate: '{{ __('S3') }}',
+                        other: '{{ __('Lainnya') }}',
                     };
                     return labels[e] || e || '-';
                 },
 
                 employmentLabel(e) {
                     const labels = {
-                        permanent: '{{ __('Permanent') }}',
-                        contract: '{{ __('Contract') }}',
-                        probation: '{{ __('Probation') }}',
-                        intern: '{{ __('Intern') }}',
+                        permanent: '{{ __('Tetap') }}',
+                        contract: '{{ __('Kontrak') }}',
+                        probation: '{{ __('Percobaan') }}',
+                        intern: '{{ __('Magang') }}',
                     };
                     return labels[e] || e || '-';
                 },
 
                 salaryLabel(s) {
                     const labels = {
-                        monthly: '{{ __('Monthly') }}',
-                        daily: '{{ __('Daily') }}',
-                        hourly: '{{ __('Hourly') }}',
+                        monthly: '{{ __('Bulanan') }}',
+                        daily: '{{ __('Harian') }}',
+                        hourly: '{{ __('Per Jam') }}',
                     };
                     return labels[s] || s || '-';
                 },
 
                 relationshipLabel(r) {
                     const labels = {
-                        spouse: '{{ __('Spouse') }}',
-                        child: '{{ __('Child') }}',
-                        parent: '{{ __('Parent') }}',
-                        sibling: '{{ __('Sibling') }}',
+                        spouse: '{{ __('Pasangan') }}',
+                        child: '{{ __('Anak') }}',
+                        parent: '{{ __('Orang Tua') }}',
+                        sibling: '{{ __('Saudara') }}',
                     };
                     return labels[r] || r || '-';
                 },

@@ -47,11 +47,14 @@ class FaceController extends Controller
             $metadata['captures_count'] = count($data['captures']);
         }
 
-        FaceDescriptor::create([
-            'employee_id' => $employee->id,
-            'embedding' => $vectorString,
-            'metadata' => $metadata,
-        ]);
+        FaceDescriptor::updateOrCreate(
+            ['employee_id' => $employee->id],
+            [
+                'embedding' => $vectorString,
+                'is_active' => true,
+                'metadata' => $metadata,
+            ]
+        );
 
         $employee->forceFill(['face_embedding' => $vectorString])->save();
 

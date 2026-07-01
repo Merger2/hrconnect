@@ -24,9 +24,7 @@ export default function () {
             try {
                 const params = new URLSearchParams({ per_page: 50 });
                 if (this.statusFilter) params.set('status', this.statusFilter);
-                const res = await fetch(`/api/v1/loans?${params}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/loans?${params}`, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
@@ -61,7 +59,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch('/api/v1/loans', {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.form),
                 });
                 const json = await res.json();
@@ -84,7 +82,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/loans/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                 });
                 const json = await res.json();
                 if (json.status === 'success') {

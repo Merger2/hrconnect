@@ -42,9 +42,7 @@ export default function () {
                 if (this.statusFilter) params.set('status', this.statusFilter);
                 if (this.categoryFilter) params.set('category', this.categoryFilter);
                 if (this.search) params.set('search', this.search);
-                const res = await fetch(`/api/v1/assets?${params}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/assets?${params}`, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
@@ -74,7 +72,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch('/api/v1/assets', {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.form),
                 });
                 const json = await res.json();
@@ -102,7 +100,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/assets/${this.handoverAsset.id}/handover`, {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.handoverForm),
                 });
                 const json = await res.json();
@@ -125,7 +123,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/assets/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                 });
                 const json = await res.json();
                 if (json.status === 'success') {

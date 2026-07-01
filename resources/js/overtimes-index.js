@@ -24,9 +24,7 @@ export default function () {
         async fetchOvertimes() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/overtime?period=${this.period}&per_page=50`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/overtime?period=${this.period}&per_page=50`, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
@@ -51,7 +49,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/overtime/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
