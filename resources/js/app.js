@@ -134,21 +134,6 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('importEmployeesForm', importEmployeesForm);
     window.Alpine.data('assetsIndex', assetsIndex);
     window.Alpine.data('knowledgeBaseChat', knowledgeBaseChat);
-    window.Alpine.data('toast', () => ({
-        show: false,
-        message: '',
-        variant: 'success',
-        timer: null,
-        init() {
-            Livewire.on('toast', (data) => {
-                this.message = data.text || '';
-                this.variant = data.variant || 'success';
-                this.show = true;
-                clearTimeout(this.timer);
-                this.timer = setTimeout(() => { this.show = false; }, 3200);
-            });
-        },
-    }));
     window.Alpine.store('darkMode', {
         on: false,
         mode: localStorage.getItem('theme') || 'system',
@@ -185,6 +170,12 @@ document.addEventListener('alpine:init', () => {
     });
 });
 
+const reinitLivewireComponents = () => {
+    initUiPickers();
+    installValidation();
+    installSweetAlertConfirmations();
+};
+
 document.addEventListener('livewire:init', () => {
     if (typeof window.Alpine === 'undefined') return;
 
@@ -202,6 +193,10 @@ document.addEventListener('livewire:init', () => {
     watchPickerMounts();
     installValidation();
     installSweetAlertConfirmations();
+});
+
+document.addEventListener('livewire:navigated', () => {
+    reinitLivewireComponents();
 });
 
 const observer = new MutationObserver((mutations) => {

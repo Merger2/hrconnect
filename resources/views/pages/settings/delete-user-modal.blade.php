@@ -33,7 +33,7 @@ new class extends Component {
     aria-modal="true"
 >
     <div class="fixed inset-0 bg-black/40" @click="open = false"></div>
-    <div class="relative z-10 w-full max-w-lg rounded-2xl bg-canvas p-6 shadow-xl">
+    <div class="relative z-10 w-full max-w-lg rounded-lg bg-canvas p-6 shadow-xl">
         <form method="POST" wire:submit="deleteUser" class="space-y-6">
             <div>
                 <h2 class="text-lg font-semibold text-ink">{{ __('Are you sure you want to delete your account?') }}</h2>

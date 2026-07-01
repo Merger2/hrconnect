@@ -17,7 +17,7 @@
             {{-- Navigation --}}
             <nav class="flex-1 overflow-y-auto py-2">
                 <div class="px-4 pb-2 pt-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Main') }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Utama') }}</p>
                 </div>
 
                 <a href="{{ route('dashboard') }}"
@@ -30,7 +30,7 @@
                 </a>
 
                 <div class="px-4 pb-2 pt-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('HR') }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('SDM') }}</p>
                 </div>
 
                 @can('viewAny', App\Models\Employee::class)
@@ -40,7 +40,7 @@
                                'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
                        wire:navigate>
                         <span class="material-symbols-outlined text-2xl">group</span>
-                        <span>{{ __('Employees') }}</span>
+                        <span>{{ __('Karyawan') }}</span>
                     </a>
                 @endcan
 
@@ -50,7 +50,7 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('attendance.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">schedule</span>
-                    <span>{{ __('Attendance') }}</span>
+                    <span>{{ __('Absensi') }}</span>
                 </a>
 
                 <a href="{{ route('leaves.index') }}"
@@ -59,7 +59,7 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('leaves.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">calendar_month</span>
-                    <span>{{ __('Leave') }}</span>
+                    <span>{{ __('Cuti') }}</span>
                 </a>
 
                 <a href="{{ route('overtimes.index') }}"
@@ -68,7 +68,7 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('overtimes.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">bolt</span>
-                    <span>{{ __('Overtime') }}</span>
+                    <span>{{ __('Lembur') }}</span>
                 </a>
 
                 <a href="{{ route('reimbursements.index') }}"
@@ -77,7 +77,7 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('reimbursements.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">wallet</span>
-                    <span>{{ __('Reimbursement') }}</span>
+                    <span>{{ __('Klaim') }}</span>
                 </a>
 
                 <a href="{{ route('payroll.index') }}"
@@ -86,7 +86,7 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('payroll.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">payments</span>
-                    <span>{{ __('Payroll') }}</span>
+                    <span>{{ __('Penggajian') }}</span>
                 </a>
 
                 <a href="{{ route('approvals.index') }}"
@@ -95,7 +95,7 @@
                            'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('approvals.*')])
                    wire:navigate>
                     <span class="material-symbols-outlined text-2xl">approval</span>
-                    <span>{{ __('Approvals') }}</span>
+                    <span>{{ __('Persetujuan') }}</span>
                 </a>
             </nav>
 
@@ -124,17 +124,22 @@
         <x-bottom-nav />
 
         @persist('toast')
-            <div
-                x-data="toast"
-                x-show="show"
-                x-cloak
-                x-transition
-                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
-            >
-                <p x-text="message"></p>
-            </div>
+            <div id="toast-container"></div>
         @endpersist
 
+        @auth
+            @php
+                if (!session()->has('web_sanctum_token')) {
+                    $token = auth()->user()->createToken('web-frontend');
+                    session()->put('web_sanctum_token', $token->plainTextToken);
+                }
+            @endphp
+            <script>
+                window.Laravel = { sanctumToken: '{{ session('web_sanctum_token') }}' };
+            </script>
+        @endauth
+
         @vite(['resources/js/app.js'])
+        @stack('scripts')
     </body>
 </html>

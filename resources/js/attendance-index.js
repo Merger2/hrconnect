@@ -35,7 +35,9 @@ export default function () {
                     this.today = json.data;
                     this.todayStatus = (this.today.has_clocked_in && this.today.has_clocked_out) ? 'complete' : 'incomplete';
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data hari ini' });
+            }
         },
 
         async fetchAttendance() {
@@ -49,7 +51,9 @@ export default function () {
                     this.records = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat riwayat absensi' });
+            }
             finally { this.loading = false; }
         },
 
@@ -81,7 +85,7 @@ export default function () {
         },
 
         statusLabel(status) {
-            const labels = { present: 'Present', late: 'Late', absent: 'Absent', wfa: 'WFA' };
+            const labels = { present: 'Hadir', late: 'Terlambat', absent: 'Absen', wfa: 'WFA' };
             return labels[status] || status;
         },
 

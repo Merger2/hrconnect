@@ -466,21 +466,21 @@ test('RegisterFaceRequest rejects wrong-size embedding', function () {
     expect($v2->fails())->toBeTrue();
 });
 
-test('RegisterFaceRequest rejects values outside -1.5 to 1.5 range', function () {
+test('RegisterFaceRequest rejects values outside -3 to 3 range', function () {
     $embedding = array_fill(0, 128, 0.01);
-    $embedding[0] = 2.0;
+    $embedding[0] = 4.0;
     $v = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
     expect($v->fails())->toBeTrue();
 
-    $embedding[0] = -2.0;
+    $embedding[0] = -4.0;
     $v2 = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
     expect($v2->fails())->toBeTrue();
 });
 
 test('RegisterFaceRequest accepts values exactly at boundaries', function () {
     $embedding = array_fill(0, 128, 0.01);
-    $embedding[0] = -1.5;
-    $embedding[1] = 1.5;
+    $embedding[0] = -3.0;
+    $embedding[1] = 3.0;
     $v = validate(new RegisterFaceRequest, ['embedding' => $embedding]);
     expect($v->passes())->toBeTrue();
 });

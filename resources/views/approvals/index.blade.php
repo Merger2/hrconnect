@@ -70,15 +70,15 @@
                                 <td class="px-4 py-3">
                                     <span class="font-medium text-ink" x-text="typeLabel(a.approvable_type)"></span>
                                 </td>
-                                <td class="px-4 py-3 text-ink" x-text="a.submitter?.full_name || 'Unknown'"></td>
+                                <td class="px-4 py-3 text-ink" x-text="a.submitter?.full_name || '{{ __('Tidak Diketahui') }}'"></td>
                                 <td class="px-4 py-3">
                                     <span x-show="tab === 'pending'"
                                           class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
                                           :class="a.level === 1 ? 'bg-info/10 text-info ring-1 ring-inset ring-info/30' : 'bg-primary/10 text-primary ring-1 ring-inset ring-primary/30'"
-                                          x-text="a.level_label || (a.level === 1 ? 'L1 Supervisor' : 'L2 Manager')"></span>
+                                          x-text="a.level_label || (a.level === 1 ? 'L1 {{ __('Supervisor') }}' : 'L2 {{ __('Manager') }}')"></span>
                                     <span x-show="tab === 'history'"
                                           class="text-sm text-on-surface-variant"
-                                          x-text="a.level_label || (a.level === 1 ? 'L1 Supervisor' : 'L2 Manager')"></span>
+                                          x-text="a.level_label || (a.level === 1 ? 'L1 {{ __('Supervisor') }}' : 'L2 {{ __('Manager') }}')"></span>
                                 </td>
                                 <td class="px-4 py-3 text-ink" x-text="formatDate(a.submitted_at || a.created_at)"></td>
                                 <td class="px-4 py-3">
@@ -132,7 +132,7 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm font-medium text-ink" x-text="typeLabel(a.approvable_type) + ' #' + a.approvable_id"></p>
-                                <p class="mt-0.5 text-xs text-on-surface-variant" x-text="a.submitter?.full_name || 'Unknown'"></p>
+                                <p class="mt-0.5 text-xs text-on-surface-variant" x-text="a.submitter?.full_name || '{{ __('Tidak Diketahui') }}'"></p>
                             </div>
                             <template x-if="tab === 'pending'">
                                 <x-status-badge tone="warning">{{ __('Pending') }}</x-status-badge>
@@ -171,7 +171,7 @@
 
         {{-- Detail Modal --}}
         <div x-show="detailModalOpen" x-cloak class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 pt-12" @keydown.escape.window="detailModalOpen = false" @click.outside="detailModalOpen = false">
-            <div class="w-full max-w-2xl rounded-2xl bg-canvas p-6 shadow-xl">
+            <div class="w-full max-w-2xl rounded-lg bg-canvas p-6 shadow-xl">
                 {{-- Modal header --}}
                 <div class="flex items-start justify-between">
                     <div>
@@ -309,7 +309,7 @@
 
         {{-- Reject Modal --}}
         <div x-show="rejectModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" @keydown.escape.window="rejectModalOpen = false">
-            <div class="w-full max-w-md rounded-2xl bg-canvas p-6 shadow-xl" @click.outside="rejectModalOpen = false">
+            <div class="w-full max-w-md rounded-lg bg-canvas p-6 shadow-xl" @click.outside="rejectModalOpen = false">
                 <h3 class="text-lg font-semibold text-ink">{{ __('Reject Request') }}</h3>
                 <p class="mt-1 text-sm text-on-surface-variant" x-text="'{{ __('Reason for') }}: ' + (rejectTargetName || '')"></p>
                 <textarea x-model="rejectReason" class="mt-4 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-3 text-sm text-ink placeholder:text-on-surface-variant/50" rows="3" placeholder="{{ __('Alasan penolakan...') }}"></textarea>

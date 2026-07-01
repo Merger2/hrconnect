@@ -54,9 +54,9 @@ class ImportProgressBar extends Component
             $this->dispatch('import-completed', status: $progress->status, errors: $progress->errors);
 
             if ($progress->isFailed()) {
-                $this->dispatch('notify', type: 'error', message: 'Import gagal: '.($progress->errors ?? 'Unknown error'));
+                $this->dispatch('toast', variant: 'error', text: __('Import gagal: :error', ['error' => $progress->errors ?? __('Kesalahan tidak diketahui')]));
             } else {
-                $this->dispatch('notify', type: 'success', message: 'Import selesai!');
+                $this->dispatch('toast', variant: 'success', text: 'Import selesai!');
             }
         }
     }

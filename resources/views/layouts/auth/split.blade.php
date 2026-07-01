@@ -39,15 +39,7 @@
             </div>
         </div>
         @persist('toast')
-            <div
-                x-data="toast"
-                x-show="show"
-                x-cloak
-                x-transition
-                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
-            >
-                <p x-text="message"></p>
-            </div>
+            <div id="toast-container"></div>
         @endpersist
 
         <script>

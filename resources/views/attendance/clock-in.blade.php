@@ -14,17 +14,13 @@
             gps: { latitude: null, longitude: null, accuracy: null },
             gpsSamples: [],
             gpsVariance: null,
-            faceapi: null,
             earHistory: [],
 
             async init() {
-                const mod = await import('face-api.js');
-                this.faceapi = mod.default || mod;
-
                 await Promise.all([
-                    this.faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
-                    this.faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
-                    this.faceapi.nets.faceRecognitionNet.loadFromUri('/models/av1'),
+                    faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('/models/av1'),
                 ]);
                 this.modelsLoading = false;
                 this.faceStatus = '{{ __('Memindai wajah...') }}';
@@ -95,7 +91,7 @@
                 const detect = async () => {
                     if (!video.videoWidth) { this.detectionTimer = setTimeout(detect, 200); return; }
                     try {
-                        const api = this.faceapi;
+                        const api = faceapi;
                         const detOptions = new api.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
                         const d = await api.detectAllFaces(video, detOptions).withFaceLandmarks().withFaceDescriptors();
                         if (d.length > 0) {
@@ -126,7 +122,7 @@
             },
 
             async captureFaceCrop(video) {
-                const api = this.faceapi;
+                const api = faceapi;
                 const det = await api.detectSingleFace(video, new api.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withFaceLandmarks();
                 if (!det) return null;
                 const canvas = document.createElement('canvas');
@@ -193,7 +189,7 @@
         }">
 
         {{-- Camera Preview Area --}}
-        <section class="relative flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-[2rem] bg-brand-lavender p-3 shadow-sm">
+        <section class="relative flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-xl bg-brand-lavender p-3 shadow-sm">
             {{-- Video feed — always visible, never {display:none} for iOS --}}
             <video x-ref="video" autoplay muted playsinline
                    class="absolute inset-0 h-full w-full object-cover">
@@ -223,7 +219,7 @@
 
             {{-- Loading overlay while models load --}}
             <div x-show="modelsLoading" class="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div class="flex flex-col items-center gap-3 rounded-2xl bg-canvas px-8 py-6 shadow-lg">
+                <div class="flex flex-col items-center gap-3 rounded-lg bg-canvas px-8 py-6 shadow-lg">
                     <div class="size-8 animate-spin rounded-full border-4 border-outline-variant border-t-ink"></div>
                     <p class="text-sm font-medium text-ink">{{ __('Memuat model wajah...') }}</p>
                 </div>
@@ -231,7 +227,7 @@
         </section>
 
         {{-- Location & WFA Panel --}}
-        <section class="relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+        <section class="relative flex flex-col gap-4 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-low p-4">
             <div class="pointer-events-none absolute -bottom-8 -right-8 opacity-20">
                 <span class="material-symbols-outlined text-8xl text-brand-teal">map</span>
             </div>
@@ -272,7 +268,7 @@
                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
             <span class="material-symbols-outlined" x-show="!clockingIn">fingerprint</span>
             <span x-show="clockingIn" class="inline-block size-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-            <span x-text="clockingIn ? '{{ __('Memproses...') }}' : '{{ __('Clock In Sekarang') }}'"></span>
+            <span x-text="clockingIn ? '{{ __('Memproses...') }}' : '{{ __('Absen Sekarang') }}'"></span>
         </button>
     </div>
 </x-layouts::app.sidebar>

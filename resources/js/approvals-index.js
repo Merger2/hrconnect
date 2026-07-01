@@ -19,7 +19,7 @@ export default function () {
         },
 
         typeLabel(type) {
-            const map = { Leave: 'Cuti', Overtime: 'Lembur', Reimbursement: 'Reimbursement' };
+            const map = { leave: 'Cuti', overtime: 'Lembur', reimbursement: 'Klaim', Leave: 'Cuti', Overtime: 'Lembur', Reimbursement: 'Klaim' };
             return map[type] || type;
         },
 
@@ -38,7 +38,9 @@ export default function () {
                         this.pendingCount = json.meta?.total || json.data.length;
                     }
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat approvals' });
+            }
             finally { this.loading = false; }
         },
 
@@ -53,11 +55,11 @@ export default function () {
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Approved' });
+                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Disetujui' });
                     this.approvals = this.approvals.filter(a => a.approval_id !== id);
                     this.pendingCount = this.approvals.length;
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Failed' });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });
@@ -77,7 +79,7 @@ export default function () {
                 if (json.status === 'success') {
                     this.detailData = json.data;
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Failed to load detail' });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal memuat detail' });
                     this.detailModalOpen = false;
                 }
             } catch {
@@ -108,11 +110,11 @@ export default function () {
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Rejected' });
+                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Ditolak' });
                     this.approvals = this.approvals.filter(a => a.approval_id !== id);
                     this.pendingCount = this.approvals.length;
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Failed' });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });

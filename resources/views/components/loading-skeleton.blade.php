@@ -1,6 +1,6 @@
 @props(['type' => 'table', 'rows' => 5, 'cols' => 4])
 
-<div {{ $attributes->merge(['class' => 'animate-pulse']) }} role="status" aria-label="Loading">
+<div {{ $attributes->merge(['class' => 'animate-pulse']) }} role="status" aria-label="{{ __('Memuat') }}">
     @if ($type === 'table')
         <div class="space-y-3">
             <div class="flex gap-4">

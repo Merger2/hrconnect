@@ -1,65 +1,65 @@
-<x-layouts::app.sidebar :title="__('Manage Knowledge Base')">
+<x-layouts::app.sidebar :title="__('Kelola Basis Pengetahuan')">
     <div class="px-4 py-6 lg:px-6">
         <div class="mb-6">
-            <h1 class="font-display text-2xl font-semibold text-ink">Manage Knowledge Base</h1>
-            <p class="mt-1 text-sm text-muted-soft">Upload dokumen PDF untuk memperkaya basis pengetahuan AI.</p>
+            <h1 class="font-display text-2xl font-semibold text-ink">{{ __('Kelola Basis Pengetahuan') }}</h1>
+            <p class="mt-1 text-sm text-muted-soft">{{ __('Upload dokumen PDF untuk memperkaya basis pengetahuan AI.') }}</p>
         </div>
 
         {{-- upload form --}}
-        <div class="mb-8 rounded-2xl border border-outline-variant bg-surface-container-low p-6">
-            <h2 class="font-display text-lg font-semibold text-ink mb-4">Upload Dokumen Baru</h2>
+        <div class="mb-8 rounded-lg border border-outline-variant bg-surface-container-low p-6">
+            <h2 class="font-display text-lg font-semibold text-ink mb-4">{{ __('Upload Dokumen Baru') }}</h2>
 
             <form id="upload-form" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-body">Judul Dokumen</label>
+                    <label class="mb-1.5 block text-sm font-medium text-body">{{ __('Judul Dokumen') }}</label>
                     <input type="text" id="doc-title" required
                         class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-body outline-none focus:border-ink focus:ring-1 focus:ring-ink/20 transition-colors"
-                        placeholder="Contoh: Kebijakan Cuti Tahunan 2026">
+                        placeholder="{{ __('Contoh: Kebijakan Cuti Tahunan 2026') }}">
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-body">Kategori</label>
+                    <label class="mb-1.5 block text-sm font-medium text-body">{{ __('Kategori') }}</label>
                     <select id="doc-category"
                         class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-body outline-none focus:border-ink focus:ring-1 focus:ring-ink/20 transition-colors">
-                        <option value="general">General</option>
-                        <option value="hr_policy">HR Policy</option>
-                        <option value="finance">Finance</option>
-                        <option value="payroll">Payroll</option>
-                        <option value="attendance">Attendance</option>
-                        <option value="leave">Leave</option>
-                        <option value="it">IT</option>
+                        <option value="general">{{ __('Umum') }}</option>
+                        <option value="hr_policy">{{ __('Kebijakan HR') }}</option>
+                        <option value="finance">{{ __('Keuangan') }}</option>
+                        <option value="payroll">{{ __('Penggajian') }}</option>
+                        <option value="attendance">{{ __('Absensi') }}</option>
+                        <option value="leave">{{ __('Cuti') }}</option>
+                        <option value="it">{{ __('IT') }}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-body">File PDF (maks 10MB)</label>
+                    <label class="mb-1.5 block text-sm font-medium text-body">{{ __('File PDF (maks 10MB)') }}</label>
                     <input type="file" id="doc-file" accept="application/pdf" required
                         class="w-full text-sm text-body file:mr-4 file:rounded-xl file:border-0 file:bg-ink file:px-4 file:py-2 file:text-sm file:font-medium file:text-canvas hover:file:opacity-90 transition-colors">
                 </div>
 
                 <button type="submit"
                     class="rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-canvas hover:opacity-90 transition-opacity">
-                    Upload & Proses
+                    {{ __('Upload & Proses') }}
                 </button>
             </form>
 
             <div id="upload-status" class="mt-4 hidden">
                 <div class="rounded-xl border border-success/30 bg-success/5 px-4 py-3 text-sm text-body">
-                    <span class="font-medium text-success">✓</span> Dokumen berhasil diupload. Embedding sedang diproses...
+                    <span class="font-medium text-success">✓</span> {{ __('Dokumen berhasil diupload. Embedding sedang diproses...') }}
                 </div>
             </div>
         </div>
 
         {{-- document list --}}
-        <div class="rounded-2xl border border-outline-variant bg-surface-container-low p-6">
-            <h2 class="font-display text-lg font-semibold text-ink mb-4">Dokumen Tersimpan</h2>
+        <div class="rounded-lg border border-outline-variant bg-surface-container-low p-6">
+            <h2 class="font-display text-lg font-semibold text-ink mb-4">{{ __('Dokumen Tersimpan') }}</h2>
 
             {{-- desktop table --}}
             <div id="doc-list-table" class="hidden overflow-x-auto lg:block">
                 <div class="flex items-center justify-center py-12 text-muted-soft">
                     <span class="material-symbols-outlined mr-2 text-base">hourglass_empty</span>
-                    <span class="text-sm">Memuat daftar dokumen...</span>
+                    <span class="text-sm">{{ __('Memuat daftar dokumen...') }}</span>
                 </div>
             </div>
 
@@ -117,7 +117,7 @@
 
                 setTimeout(() => status.classList.add('hidden'), 5000);
             } catch (e) {
-                alert('Gagal terhubung ke server.');
+                alert('{{ __('Gagal terhubung ke server.') }}');
             }
         });
     });
@@ -163,7 +163,7 @@
 
             for (const doc of items) {
                 const statusClass = doc.status === 'ready' ? 'bg-success/10 text-success' : doc.status === 'error' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning';
-                const statusLabel = doc.status === 'ready' ? 'READY' : doc.status === 'error' ? 'ERROR' : 'PROCESSING';
+                const statusLabel = doc.status === 'ready' ? 'SIAP' : doc.status === 'error' ? 'GAGAL' : 'DIPROSES';
 
                 // table row
                 tableHtml += '<tr class="border-b border-outline-variant/50">';
@@ -200,7 +200,7 @@
     }
 
     async function deleteDoc(id) {
-        if (!confirm('Hapus dokumen ini?')) return;
+        if (!confirm('{{ __('Hapus dokumen ini?') }}')) return;
 
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
@@ -217,7 +217,7 @@
                 loadDocuments();
             }
         } catch (e) {
-            alert('Gagal menghapus dokumen.');
+            alert('{{ __('Gagal menghapus dokumen.') }}');
         }
     }
 

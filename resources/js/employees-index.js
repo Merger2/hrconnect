@@ -44,7 +44,7 @@ export default function () {
                 const json = await res.json();
                 this.departments = json.data || [];
             } catch (e) {
-                console.error('Failed to load departments', e);
+                console.error('Gagal memuat departemen', e);
             }
         },
 
@@ -64,7 +64,7 @@ export default function () {
                 this.total = json.meta?.total || 0;
                 this.lastPage = json.meta?.last_page || 1;
             } catch (e) {
-                console.error('Failed to load employees', e);
+                console.error('Gagal memuat karyawan', e);
                 this.employees = [];
                 this.total = 0;
             } finally {
@@ -78,7 +78,7 @@ export default function () {
         },
 
         statusLabel(status) {
-            const labels = { active: 'Active', inactive: 'Inactive', resigned: 'Resigned', terminated: 'Terminated', deceased: 'Deceased' };
+            const labels = { active: 'Aktif', inactive: 'Tidak Aktif', resigned: 'Resign', terminated: 'PHK', deceased: 'Meninggal' };
             return labels[status] || status;
         },
 
@@ -91,7 +91,7 @@ export default function () {
                 const json = await res.json();
                 const data = json.data || [];
                 if (data.length === 0) return;
-                const headers = ['Employee Number', 'Full Name', 'Department', 'Position', 'Status', 'Join Date'];
+                const headers = ['No. Karyawan', 'Nama Lengkap', 'Departemen', 'Jabatan', 'Status', 'Tanggal Masuk'];
                 const rows = data.map(e => [
                     e.employee_number, e.full_name,
                     e.department?.name || '', e.position?.name || '',
@@ -106,7 +106,7 @@ export default function () {
                 a.click();
                 URL.revokeObjectURL(url);
             } catch (e) {
-                console.error('Export failed', e);
+                console.error('Gagal mengexport', e);
             }
         },
 
@@ -174,7 +174,7 @@ export default function () {
                 this.lookup.positions = (await pRes.json()).data || [];
                 this.lookup.managers = (await mRes.json()).data || [];
             } catch (e) {
-                console.error('Failed to load lookup data', e);
+                console.error('Gagal memuat data referensi', e);
             }
         },
 
@@ -202,7 +202,7 @@ export default function () {
                 this.editing = null;
                 this.fetchEmployees();
             } catch (e) {
-                this.formError = 'An error occurred';
+                this.formError = 'Terjadi kesalahan';
             } finally {
                 this.formLoading = false;
             }
@@ -236,7 +236,7 @@ export default function () {
 
                 if (!res.ok) {
                     const err = await res.json();
-                    this.terminateError = err.message || 'Failed to terminate';
+                    this.terminateError = err.message || 'Gagal melakukan PHK';
                     return;
                 }
 
@@ -244,7 +244,7 @@ export default function () {
                 this.selectedEmployee = null;
                 this.fetchEmployees();
             } catch (e) {
-                this.terminateError = 'An error occurred';
+                this.terminateError = 'Terjadi kesalahan';
             } finally {
                 this.terminateLoading = false;
             }

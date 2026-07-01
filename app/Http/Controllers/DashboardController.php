@@ -14,21 +14,30 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        $employee = $user->employee;
+        $stats = Cache::flexible('dashboard.stats.'.$user->id, [60, 120], function () use ($user) {
+            $data = [];
 
-        $stats = Cache::flexible('dashboard.stats', [60, 120], function () use ($employee) {
-            $base = Employee::query();
+            if ($user->hasRole(['super-admin', 'hr-manager', 'manager', 'finance'])) {
+                $base = Employee::query();
 
-            if ($employee && ! $user->hasRole(['super-admin', 'hr-manager'])) {
-                $base = $base->where('company_id', $employee->company_id);
+                if ($user->employee && ! $user->hasRole(['super-admin', 'hr-manager'])) {
+                    $base = $base->where('company_id', $user->employee->company_id);
+                }
+
+                $data['total_employees'] = (clone $base)->count();
+                $data['active_employees'] = (clone $base)->where('status', 'active')->count();
+                $data['pending_approvals'] = Reimbursement::where('status', ReimbursementStatus::PENDING)->count()
+                    + Leave::where('status', 'pending')->count();
+            } else {
+                $employee = $user->employee;
+                $data['total_employees'] = 1;
+                $data['active_employees'] = $employee?->status === 'active' ? 1 : 0;
+                $data['pending_approvals'] = $employee
+                    ? Leave::where('employee_id', $employee->id)->where('status', 'pending')->count()
+                    : 0;
             }
 
-            return [
-                'total_employees' => (clone $base)->count(),
-                'active_employees' => (clone $base)->where('status', 'active')->count(),
-                'pending_approvals' => Reimbursement::where('status', ReimbursementStatus::PENDING)->count()
-                    + Leave::where('status', 'pending')->count(),
-            ];
+            return $data;
         });
 
         return view('dashboard', $stats);

@@ -29,7 +29,9 @@ export default function () {
                 });
                 const json = await res.json();
                 if (json.status === 'success') this.categories = json.data;
-            } catch { /* silent */ }
+            } catch {
+                this.error = 'Gagal memuat kategori';
+            }
         },
 
         handleFile(event) {

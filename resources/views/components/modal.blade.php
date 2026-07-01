@@ -35,7 +35,7 @@ $maxWidthClasses = [
             <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true"></div>
 
             <div x-show="open"
-                class="relative z-10 mx-auto w-full {{ $maxWidthClasses }} transform overflow-y-auto rounded-2xl bg-canvas shadow-xl"
+                class="relative z-10 mx-auto w-full {{ $maxWidthClasses }} transform overflow-y-auto rounded-lg bg-canvas shadow-xl"
                 style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
                 x-on:click.stop
                 x-trap.inert.noscroll="open"
