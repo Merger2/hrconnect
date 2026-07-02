@@ -64,7 +64,8 @@ export default function () {
         },
 
         formatCurrency(val) {
-            return 'Rp ' + (val || 0).toLocaleString('id-ID');
+            if (val === null || val === undefined) return '-';
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
         },
 
         formatDate(dateStr) {
