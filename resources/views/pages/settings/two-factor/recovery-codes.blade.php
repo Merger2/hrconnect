@@ -44,10 +44,10 @@ new class extends Component {
     <div class="space-y-2 px-6">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-lg text-ink">lock</span>
-            <h3 class="text-lg font-semibold text-ink">{{ __('2FA recovery codes') }}</h3>
+            <h3 class="text-lg font-semibold text-ink">{{ __('Kode pemulihan 2FA') }}</h3>
         </div>
         <p class="text-sm text-on-surface-variant">
-            {{ __('Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.') }}
+            {{ __('Kode pemulihan digunakan jika Anda kehilangan akses ke perangkat 2FA. Simpan di tempat yang aman.') }}
         </p>
     </div>
 
@@ -61,7 +61,7 @@ new class extends Component {
                 aria-controls="recovery-codes-section"
             >
                 <span class="material-symbols-outlined text-base">visibility</span>
-                {{ __('View recovery codes') }}
+                {{ __('Lihat kode pemulihan') }}
             </button>
 
             <button
@@ -72,7 +72,7 @@ new class extends Component {
                 aria-controls="recovery-codes-section"
             >
                 <span class="material-symbols-outlined text-base">visibility_off</span>
-                {{ __('Hide recovery codes') }}
+                {{ __('Sembunyikan kode') }}
             </button>
 
             @if (filled($recoveryCodes))
@@ -82,7 +82,7 @@ new class extends Component {
                     wire:click="regenerateRecoveryCodes"
                 >
                     <span class="material-symbols-outlined text-base">autorenew</span>
-                    {{ __('Regenerate codes') }}
+                    {{ __('Buat kode baru') }}
                 </button>
             @endif
         </div>
@@ -118,7 +118,7 @@ new class extends Component {
                         @endforeach
                     </div>
                     <p class="text-xs text-on-surface-variant">
-                        {{ __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click Regenerate codes above.') }}
+                        {{ __('Setiap kode hanya bisa digunakan sekali. Jika habis, klik Buat kode baru.') }}
                     </p>
                 @endif
             </div>

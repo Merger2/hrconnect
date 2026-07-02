@@ -107,24 +107,24 @@ new class extends Component {
     {
         if ($this->setupComplete) {
             return [
-                'title' => __('Two-factor authentication enabled'),
-                'description' => __('Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.'),
-                'buttonText' => __('Close'),
+                'title' => __('Verifikasi dua langkah diaktifkan'),
+                'description' => __('Verifikasi dua langkah telah diaktifkan. Simpan kode pemulihan di tempat yang aman.'),
+                'buttonText' => __('Tutup'),
             ];
         }
 
         if ($this->showVerificationStep) {
             return [
-                'title' => __('Verify authentication code'),
-                'description' => __('Enter the 6-digit code from your authenticator app.'),
-                'buttonText' => __('Continue'),
+                'title' => __('Verifikasi kode'),
+                'description' => __('Masukkan 6 digit kode dari aplikasi authenticator Anda.'),
+                'buttonText' => __('Lanjutkan'),
             ];
         }
 
         return [
-            'title' => __('Enable two-factor authentication'),
-            'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app.'),
-            'buttonText' => __('Continue'),
+            'title' => __('Aktifkan verifikasi dua langkah'),
+            'description' => __('Pindai kode QR atau masukkan kunci setup di aplikasi authenticator Anda.'),
+            'buttonText' => __('Lanjutkan'),
         ];
     }
 }; ?>
@@ -191,7 +191,7 @@ new class extends Component {
                             class="flex-1 rounded-xl border border-outline-variant bg-canvas px-6 py-2.5 text-sm font-semibold text-ink"
                             wire:click="resetVerification"
                         >
-                            {{ __('Back') }}
+                            {{ __('Kembali') }}
                         </button>
 
                         <button
@@ -199,7 +199,7 @@ new class extends Component {
                             wire:click="confirmTwoFactor"
                             x-bind:disabled="$wire.code.length < 6"
                         >
-                            {{ __('Confirm') }}
+                            {{ __('Konfirmasi') }}
                         </button>
                     </div>
                 </div>
@@ -242,7 +242,7 @@ new class extends Component {
                     <div class="relative flex w-full items-center justify-center">
                         <div class="absolute inset-0 top-1/2 h-px w-full bg-outline-variant dark:bg-hairline"></div>
                         <span class="relative bg-canvas px-2 text-sm text-muted dark:text-muted-soft">
-                            {{ __('or, enter the code manually') }}
+                            {{ __('atau, masukkan kode manual') }}
                         </span>
                     </div>
 

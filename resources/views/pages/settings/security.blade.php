@@ -129,14 +129,14 @@ new #[Title('Pengaturan Keamanan')] class extends Component {
 
         @if ($canManageTwoFactor)
             <section class="mt-12">
-                <h2 class="text-lg font-semibold text-ink">{{ __('Two-factor authentication') }}</h2>
-                <p class="text-sm text-on-surface-variant">{{ __('Manage your two-factor authentication settings') }}</p>
+                <h2 class="text-lg font-semibold text-ink">{{ __('Verifikasi dua langkah') }}</h2>
+                <p class="text-sm text-on-surface-variant">{{ __('Kelola pengaturan verifikasi dua langkah Anda') }}</p>
 
                 <div class="mx-auto flex w-full flex-col space-y-6 text-sm" wire:cloak>
                     @if ($twoFactorEnabled)
                         <div class="space-y-4">
                             <p class="text-sm text-on-surface-variant">
-                                {{ __('You will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
+                                {{ __('Anda akan diminta kode acak saat login yang dapat diambil dari aplikasi authenticator.') }}
                             </p>
 
                             <div class="flex justify-start">
@@ -144,7 +144,7 @@ new #[Title('Pengaturan Keamanan')] class extends Component {
                                     class="rounded-xl bg-error px-6 py-2.5 text-sm font-semibold text-white"
                                     wire:click="disable"
                                 >
-                                    {{ __('Disable 2FA') }}
+                                    {{ __('Nonaktifkan 2FA') }}
                                 </button>
                             </div>
 
@@ -153,7 +153,7 @@ new #[Title('Pengaturan Keamanan')] class extends Component {
                     @else
                         <div class="space-y-4">
                             <p class="text-sm text-on-surface-variant">
-                                {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
+                                {{ __('Saat verifikasi dua langkah diaktifkan, Anda akan diminta kode acak saat login.') }}
                             </p>
 
                             <button
@@ -161,7 +161,7 @@ new #[Title('Pengaturan Keamanan')] class extends Component {
                                 x-data
                                 @click="$dispatch('open-modal', 'two-factor-setup-modal'); $wire.dispatch('start-two-factor-setup')"
                             >
-                                {{ __('Enable 2FA') }}
+                                {{ __('Aktifkan 2FA') }}
                             </button>
 
                             <livewire:pages::settings.two-factor-setup-modal :requires-confirmation="$requiresConfirmation" />
