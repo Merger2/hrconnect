@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-02 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅ G ✅ H0 ✅. **2 regression fixed + sidebar navigation terpusat**. Test: 1.172 passed, 1 failed (pre-existing). Backend 87% | Frontend 60% | Production 73/100. **Progres keseluruhan: ~65-70%.** Audit lengkap selesai.
+> Updated: 2026-07-03 — Audit 3-agen paralel selesai. **Temuan: 3 CRITICAL + 7 HIGH + 7 MEDIUM + 5 LOW**. Test: 1.171 passed, 2 failed, 2 skipped. **Progres: ~65-70%.**
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
@@ -31,13 +31,13 @@
 
 | Area | % | Status | Notes |
 |------|:-:|:------:|-------|
-| Backend (app/) | 87% | ✅ | 34 models, 33 enums, 24 services (4 orphaned), 21 API controllers. 80 endpoints. Production-ready. |
+| Backend (app/) | 85% | ⚠️ | 34 models, 33 enums, 24 services. **2 CRITICAL bugs: FK relation broken, enum comparison**. |
 | Database (migrations) | 100% | ✅ | 50 migrations, 0 pending. PG guarded. |
-| API (routes) | 95% | ✅ | 80 endpoints, Sanctum, rate limits, permission guards. 2 manual validate gap. |
-| Security | 90% | ✅ | CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted. **Security headers ❌** |
-| Tests | 95% | ✅ | 1,173 tests / 4,128 assertions. |
-| **Frontend** | **~60%** | 🚧 | 30 domain pages selesai. ~27 pages baru needed. 0/49 dark mode. CSS 106 baris. |
-| **Production** | **73/100** | ⚠️ | 3 fix P0 sebelum production (headers, env, logging). |
+| API (routes) | 95% | ✅ | 80 endpoints, Sanctum, rate limits, permission guards. |
+| Security | 80% | ⚠️ | **8 composer vulnerabilities (1 HIGH)**. Security headers disabled. |
+| Tests | 93% | ⚠️ | 1.171 passed, **2 failed**, 2 skipped. |
+| **Frontend** | **~55%** | 🚧 | 30 domain pages. **8 tanpa x-page-shell. 6 campur EN/ID. 7 console.log. 24 component unused.** |
+| **Production** | **70/100** | ⚠️ | 3 fix P0 + 8 composer audit. |
 | PHPStan | 0% | 🚧 | |
 
 ## 🔍 AUDIT FINDINGS — Full Codebase + Docs Review (2026-06-24)
@@ -3223,3 +3223,101 @@ Setelah implementasi NavigationService + sidebar terpusat, ditemukan **2 regress
 | Notifications | ⚠️ Partial | ❌ UI | ⚠️ | ❌ |
 | Email Templates | ❌ | ❌ | ❌ | ❌ |
 | Security | ✅ | N/A | ✅ | ⚠️ Headers P0 |
+
+---
+
+# 🔴 Audit 3-Agen Paralel — 3 Juli 2026
+
+Hasil audit 3 agen: **Backend PHP**, **Frontend Blade/JS**, **Tests/Security/Misc**. Semua file diperiksa.
+
+---
+
+## CRITICAL (3)
+
+| ID | File | Masalah | Dampak |
+|:--:|------|---------|--------|
+| **AC-1** | `app/Models/User.php:71` | `BelongsTo(Company::class)` tapi tabel `users` tidak punya kolom `company_id` — migration tidak create FK | Runtime error saat `User::with('company')` |
+| **AC-2** | `app/Services/AttendanceRiskScorer.php:191` | `$attendance->status === 'late'` — bandingkan enum `AttendanceStatus` vs string. Selalu `false` | Risk scoring keterlambatan tidak pernah trigger |
+| **AC-3** | `resources/views/employee/show.blade.php:2` | `x-data="employeeShow()"` — Alpine.data `employeeShow` tidak terdaftar di `app.js` | **Page crash** — JS runtime error |
+
+---
+
+## HIGH (7)
+
+| ID | File | Masalah | Fix |
+|:--:|------|---------|-----|
+| **AH-1** | `.env.example:121` | `SUPER_ADMIN_PASSWORD=ChangeMe!2026` hardcoded plaintext | Hapus atau komentar sebagai contoh |
+| **AH-2** | `approvals/index.blade.php:107,159,210,217` | `bg-danger/10 text-danger ring-danger/30` — "danger" bukan token MD3 (`--color-error`) | Ganti ke `bg-error/10 text-error ring-error/30` |
+| **AH-3** | `bootstrap/app.php:59-60` | `GeofenceValidation` + `DeviceDetection` middleware terdaftar tapi **tidak pernah dipakai** di route manapun | Hapus alias + import |
+| **AH-4** | `app/Http/Middleware/GeofenceValidation.php` | Haversine duplikat dari `GeofenceService` — 0 caller, dead code | Hapus file + alias |
+| **AH-5** | `tests/Feature/Settings/SecurityTest.php:25,47` | 2 test gagal — label render pakai `value=""` attribute, bukan inner text. `assertSeeText('Kata sandi')` fail | Fix: `assertSee('Kata sandi', false)` atau perbaiki label component |
+| **AH-6** | `composer audit` | **8 vulnerabilities** (1 HIGH: Laravel CRLF injection, 7 MEDIUM: guzzle) | `composer update` |
+| **AH-7** | `loans/index.blade.php:81,83` | `<x-status-badge tone="zinc">` — "zinc" bukan tone valid | Ganti ke `tone="neutral"` |
+
+---
+
+## MEDIUM (7)
+
+| ID | Masalah | Detail |
+|:--:|---------|--------|
+| **AM-1** | 8 halaman tidak pakai `x-page-shell` | clock-in, leaves/apply, overtimes/apply, reimbursements/apply, payroll/index, approvals/index, KB/index, KB/manage |
+| **AM-2** | 6 halaman campur English/Indonesia | overtimes/apply **100% English**, reimbursements/apply 100% English, payroll/index mixed, loans/index mixed |
+| **AM-3** | 7 `console.error/log` di production JS | `employees-index.js` (4x), `create-employee-form.js` (1x), `two-factor-setup-modal.blade.php` (1x `console.warn`) |
+| **AM-4** | 24 Blade component tidak dipakai | `x-alert`, `x-card-grid`, `x-card-table`, `x-page-tools`, `x-filter-bar`, `x-placeholder-pattern`, `x-forms.tom-select`, `x-forms.datepicker`, `x-forms.file-input`, `x-forms.validation-errors`, `x-forms.checkbox`, `x-forms.radio`, `x-forms.switch`, `x-sections.action-section`, `x-sections.form-section`, `x-user.native-text-field`, `x-user.native-date-field`, `x-user.native-textarea-field`, `x-user.location-card`, `x-user.page-header`, `x-actions.icon-button`, `x-overlays.confirms-password`, `x-navigation.theme-toggle`, `x-dropdown-menu` |
+| **AM-5** | 2 Livewire component mati | `SalaryCalculator` + `ImportProgressBar` — code complete, tidak ada view yang render |
+| **AM-6** | 11 controller + 4 service 0 test coverage | AssetController, DeptController, PositionController, CompanyController, LoanController, BranchController, HealthController, ProfileController, EmailVerificationController, DashboardController, Web\\LeaveController. Service: NavigationService, LoanService, AssetService, DynamicBarcodeTokenService |
+| **AM-7** | 3 model tanpa factory | `ImportProgress`, `FaceDescriptor`, `PerformanceReview` |
+
+---
+
+## LOW (5)
+
+| ID | Masalah | Detail |
+|:--:|---------|--------|
+| **AL-1** | `.env.example` duplicate locale | `APP_LOCALE=id` lalu ditimpa `APP_LOCALE=en` — efektif English, bukan Indonesian |
+| **AL-2** | `browser.log` 17MB | `storage/logs/browser.log` tidak dirotasi |
+| **AL-3** | `terminate-modal.blade.php:44` | Akses Alpine internal `$el.closest('[x-data]').__x.$data` — fragile |
+| **AL-4** | `payroll/index.blade.php:107` | Escape quote `\'(take home)\'` — output literal backslash |
+| **AL-5** | `AttendanceRiskScorer.php:130` | Bare `catch (\Throwable)` tanpa logging |
+
+---
+
+## Task Prioritas — Sesi I (Audit Fix)
+
+### 🔴 P0 — CRITICAL (estimasi 30 menit)
+
+| ID | Task | File | Estimasi |
+|:--:|------|------|:--------:|
+| **I1** | Hapus `User::company()` + `Company::users()` relation (kolom tidak ada) | `User.php`, `Company.php` | 5 menit |
+| **I2** | Fix `$attendance->status === 'late'` → `AttendanceStatus::LATE` | `AttendanceRiskScorer.php:191` | 5 menit |
+| **I3** | Daftarkan `Alpine.data('employeeShow', ...)` atau ganti `x-data` | `employee/show.blade.php`, `app.js` | 20 menit |
+
+### 🟠 P1 — HIGH (estimasi 30 menit)
+
+| ID | Task | File | Estimasi |
+|:--:|------|------|:--------:|
+| **I4** | Hapus `SUPER_ADMIN_PASSWORD` value hardcoded | `.env.example:121` | 1 menit |
+| **I5** | Ganti `bg-danger` → `bg-error` (4 tempat) | `approvals/index.blade.php` | 5 menit |
+| **I6** | Hapus `GeofenceValidation` + `DeviceDetection` middleware + alias | `bootstrap/app.php`, 2 file middleware | 5 menit |
+| **I7** | Fix 2 test gagal SecurityTest | `tests/Feature/Settings/SecurityTest.php` | 5 menit |
+| **I8** | `composer update` untuk fix 8 vulnerabilities | CLI | 5 menit |
+| **I9** | Ganti `tone="zinc"` → `tone="neutral"` | `loans/index.blade.php` | 2 menit |
+
+### 🟡 P2 — MEDIUM (estimasi 3 jam)
+
+| ID | Task | Estimasi |
+|:--:|------|:--------:|
+| **I10** | Standarisasi 8 halaman ke `x-page-shell` | 1 jam |
+| **I11** | Perbaiki 6 halaman campur English/Indonesia | 30 menit |
+| **I12** | Hapus 7 `console.error/log` di production JS | 10 menit |
+| **I13** | Hapus 24 unused Blade components | 10 menit |
+| **I14** | Embed `SalaryCalculator` + `ImportProgressBar` atau hapus | 30 menit |
+
+### 🟢 P3 — LOW (estimasi 30 menit)
+
+| ID | Task | Estimasi |
+|:--:|------|:--------:|
+| **I15** | Hapus duplicate locale di `.env.example` | 1 menit |
+| **I16** | Log rotation setup | 5 menit |
+| **I17** | Fix `__x.$data` Alpine internal → `$dispatch` | 10 menit |
+| **I18** | Fix escape quote `\'(take home)\'` → `(take home)` | 1 menit |
