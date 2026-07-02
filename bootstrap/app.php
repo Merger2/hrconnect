@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             $modules = [
                 'attendance', 'employee', 'leave', 'overtime', 'payroll', 'approval',
-                'knowledge-base', 'asset', 'loan', 'reimbursement',
+                'knowledge-base', 'asset', 'loan', 'reimbursement', 'master-data',
             ];
             foreach ($modules as $module) {
                 $path = base_path("routes/{$module}.php");
