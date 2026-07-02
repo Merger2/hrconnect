@@ -49,5 +49,14 @@ return [
                 ['label' => 'Basis Pengetahuan', 'route' => 'knowledge-base.index', 'icon' => 'menu_book', 'can' => 'view_knowledgebase'],
             ],
         ],
+        [
+            'title' => 'Master Data',
+            'roles' => ['super-admin'],
+            'items' => [
+                ['label' => 'Cabang', 'route' => 'master-data.branches', 'icon' => 'location_on', 'can' => 'manage_branches'],
+                ['label' => 'Departemen', 'route' => 'master-data.departments', 'icon' => 'account_tree', 'can' => 'manage_departments'],
+                ['label' => 'Jabatan', 'route' => 'master-data.positions', 'icon' => 'work', 'can' => 'manage_positions'],
+            ],
+        ],
     ],
 ];
