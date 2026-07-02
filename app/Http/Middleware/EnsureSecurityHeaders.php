@@ -68,26 +68,22 @@ class EnsureSecurityHeaders
      */
     private function buildCsp(Request $request): string
     {
-        $csp = [
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "font-src 'self' https://fonts.gstatic.com data:",
-            "img-src 'self' data: blob: https:",
-            "connect-src 'self' https://tile.openstreetmap.org ws: wss:",
+        $local = '';
+
+        if (! app()->isProduction()) {
+            $local = ' http://localhost:* ws://localhost:*';
+        }
+
+        return implode('; ', [
+            "default-src 'self'{$local}",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:{$local}",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com{$local}",
+            "font-src 'self' https://fonts.gstatic.com data:{$local}",
+            "img-src 'self' data: blob: https:{$local}",
+            "connect-src 'self' https://tile.openstreetmap.org ws: wss:{$local}",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self'",
-        ];
-
-        if (! app()->isProduction()) {
-            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: http://localhost:*";
-            $csp[] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:*";
-            $csp[] = "font-src 'self' https://fonts.gstatic.com data: http://localhost:*";
-            $csp[] = "img-src 'self' data: blob: https: http://localhost:*";
-            $csp[] = "connect-src 'self' https://tile.openstreetmap.org ws: wss: http://localhost:* ws://localhost:*";
-        }
-
-        return implode('; ', array_unique($csp));
+        ]);
     }
 }
