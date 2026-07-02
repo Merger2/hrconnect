@@ -1,17 +1,11 @@
 <x-layouts::app.sidebar>
     <div x-data="leavesIndex()">
-        {{-- Header --}}
-        <div class="mb-3 flex flex-col gap-2.5 border-b border-outline-variant/50 pb-3 xl:flex-row xl:items-center xl:justify-between">
-            <div class="min-w-0">
-                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Pengajuan Cuti') }}</h1>
-                <p class="text-sm text-on-surface-variant">{{ __('Lihat dan kelola pengajuan cuti Anda') }}</p>
-            </div>
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <x-page-shell title="{{ __('Pengajuan Cuti') }}" subtitle="{{ __('Lihat dan kelola pengajuan cuti Anda') }}">
+            <x-slot:actions>
                 <x-button variant="primary" href="{{ route('leaves.apply') }}" wire:navigate icon="add">
                     {{ __('Ajukan Cuti') }}
                 </x-button>
-            </div>
-        </div>
+            </x-slot:actions>
 
         {{-- Quota --}}
         <div x-show="!loadingQuota" class="mb-4 flex flex-wrap gap-2">
@@ -117,6 +111,5 @@
             </div>
         </x-app.panel>
     </div>
-
-
+</x-page-shell>
 </x-layouts::app.sidebar>

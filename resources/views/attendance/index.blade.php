@@ -1,11 +1,7 @@
 <x-layouts::app.sidebar>
     <div x-data="attendanceIndex()">
-        <div class="mb-5">
-            <h1 class="text-xl font-semibold tracking-tight text-ink sm:text-2xl">{{ __('Attendance') }}</h1>
-            <p class="mt-0.5 text-sm text-on-surface-variant">{{ __('Your attendance records') }}</p>
-        </div>
-
-        <div x-show="!loading" class="mb-6 overflow-hidden rounded-xl border border-outline-variant/60 bg-canvas shadow-sm">
+        <x-page-shell title="{{ __('Absensi') }}" subtitle="{{ __('Riwayat kehadiran Anda') }}">
+        <div x-show="!loading" class="overflow-hidden rounded-xl border border-outline-variant/60 bg-canvas shadow-sm">
 
             <div class="relative flex items-start justify-between gap-3 p-4 pb-0">
                 <div class="min-w-0">
@@ -260,6 +256,5 @@
             </div>
         </div>
     </div>
-
-
+</x-page-shell>
 </x-layouts::app.sidebar>

@@ -1,124 +1,54 @@
 <x-layouts::app.sidebar :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6">
-        {{-- HR / Superadmin stats --}}
-        @if($role === 'hr')
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Total Karyawan') }}</p>
-                    <span class="material-symbols-outlined text-xl text-primary">group</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($total_employees) }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Karyawan Aktif') }}</p>
-                    <span class="material-symbols-outlined text-xl text-success">badge</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($active_employees) }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Persetujuan Tertunda') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">pending_actions</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($pending_approvals) }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Absen Hari Ini') }}</p>
-                    <span class="material-symbols-outlined text-xl text-info">today</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($hadir_hari_ini) }}</p>
-            </div>
-        </div>
+    <x-page-shell title="{{ __('Dashboard') }}" subtitle="{{ __('Ringkasan aktivitas hari ini') }}">
+        @php
+            $role = $role ?? 'employee';
+            $stats = match($role) {
+                'hr' => [
+                    ['label' => __('Total Karyawan'), 'value' => number_format($total_employees ?? 0), 'icon' => 'group', 'tone' => 'primary'],
+                    ['label' => __('Aktif'), 'value' => number_format($active_employees ?? 0), 'icon' => 'badge', 'tone' => 'success'],
+                    ['label' => __('Persetujuan Tertunda'), 'value' => number_format($pending_approvals ?? 0), 'icon' => 'pending_actions', 'tone' => 'warning'],
+                    ['label' => __('Absen Hari Ini'), 'value' => number_format($hadir_hari_ini ?? 0), 'icon' => 'today', 'tone' => 'info'],
+                ],
+                'manager' => [
+                    ['label' => __('Anggota Tim'), 'value' => number_format($team_size ?? 0).' '.__('orang'), 'icon' => 'group', 'tone' => 'primary'],
+                    ['label' => __('Persetujuan Tim'), 'value' => number_format($team_pending ?? 0), 'icon' => 'pending_actions', 'tone' => 'warning'],
+                    ['label' => __('Cuti Saya'), 'value' => $cuti_anda ?? 0, 'icon' => 'calendar_month', 'tone' => 'warning'],
+                ],
+                'finance' => [
+                    ['label' => __('Klaim Tertunda'), 'value' => number_format($pending_reimbursements ?? 0), 'icon' => 'receipt_long', 'tone' => 'warning'],
+                    ['label' => __('Payroll Tertunda'), 'value' => number_format($pending_payrolls ?? 0), 'icon' => 'payments', 'tone' => 'warning'],
+                    ['label' => __('Absen Hari Ini'), 'value' => ($hadir_hari_ini ?? false) ? __('Hadir') : __('Belum Absen'), 'icon' => 'fact_check', 'tone' => ($hadir_hari_ini ?? false) ? 'success' : 'neutral'],
+                ],
+                default => [
+                    ['label' => __('Absen Hari Ini'), 'value' => ($hadir_hari_ini ?? false) ? __('Hadir') : __('Belum Absen'), 'icon' => 'fact_check', 'tone' => ($hadir_hari_ini ?? false) ? 'success' : 'neutral'],
+                    ['label' => __('Cuti Menunggu'), 'value' => $cuti_anda ?? 0, 'icon' => 'calendar_month', 'tone' => 'warning'],
+                    ['label' => __('Klaim Menunggu'), 'value' => $pengajuan_anda ?? 0, 'icon' => 'wallet', 'tone' => 'warning'],
+                ],
+            };
+        @endphp
 
-        {{-- Manager stats --}}
-        @elseif($role === 'manager')
-        <div class="grid gap-4 sm:grid-cols-3">
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Tim Saya') }}</p>
-                    <span class="material-symbols-outlined text-xl text-primary">group</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($team_size) }} {{ __('orang') }}</p>
+        {{-- Stat Cards --}}
+        <x-app.panel>
+            <div class="border-b border-outline-variant/50 px-4 py-3">
+                <x-status-badge tone="primary" :pill="true">{{ __('Ikhtisar') }}</x-status-badge>
             </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Persetujuan Tim Tertunda') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">pending_actions</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($team_pending) }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Cuti Saya Menunggu') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">calendar_month</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ $cuti_anda }}</p>
-            </div>
-        </div>
-
-        {{-- Finance stats --}}
-        @elseif($role === 'finance')
-        <div class="grid gap-4 sm:grid-cols-3">
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Klaim Tertunda') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">receipt_long</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($pending_reimbursements) }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Payroll Tertunda') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">payments</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ number_format($pending_payrolls) }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Absen Hari Ini') }}</p>
-                    <span class="material-symbols-outlined text-xl {{ $hadir_hari_ini ? 'text-success' : 'text-on-surface-variant/50' }}">fact_check</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ $hadir_hari_ini ? __('Hadir') : __('Belum Absen') }}</p>
-            </div>
-        </div>
-
-        {{-- Employee stats --}}
-        @else
-        <div class="grid gap-4 sm:grid-cols-3">
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Absen Hari Ini') }}</p>
-                    <span class="material-symbols-outlined text-xl {{ $hadir_hari_ini ? 'text-success' : 'text-on-surface-variant/50' }}">fact_check</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ $hadir_hari_ini ? __('Hadir') : __('Belum Absen') }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Cuti Menunggu') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">calendar_month</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ $cuti_anda }}</p>
-            </div>
-            <div class="rounded-xl border border-outline-variant bg-canvas p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-on-surface-variant">{{ __('Klaim Menunggu') }}</p>
-                    <span class="material-symbols-outlined text-xl text-warning">wallet</span>
-                </div>
-                <p class="mt-2 text-2xl font-bold text-ink">{{ $pengajuan_anda }}</p>
-            </div>
-        </div>
-        @endif
+            <dl class="grid grid-cols-2 gap-2 p-4 sm:grid-cols-{{ min(count($stats), 4) }}">
+                @foreach($stats as $stat)
+                <div @class([
+                    'rounded-xl border px-4 py-3 shadow-sm transition-colors',
+                    'border-outline-variant/60 bg-canvas' => $stat['tone'] === 'neutral',
+                    'border-outline-variant/60 bg-canvas hover:bg-surface-dim/30' => $stat['tone'] === 'primary',
+                    'border-success/20 bg-success/5' => $stat['tone'] === 'success',
+                    'border-warning/20 bg-warning/5' => $stat['tone'] === 'warning',
+                    'border-info/20 bg-info/5' => $stat['tone'] === 'info',
+                ])>
+                    <dt class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-on-surface-variant">{{ $stat['label'] }}</dt>
+                    <dd class="mt-1.5 text-xl font-bold text-ink">{{ $stat['value'] }}</dd>
+                </dl>
+                @endforeach
+            </dl>
+        </x-app.panel>
 
         <livewire:quick-actions />
-
-        <div class="flex flex-1 items-center justify-center rounded-xl border border-dashed border-outline-variant bg-canvas">
-            <div class="text-center">
-                <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">monitoring</span>
-                <p class="mt-2 text-sm text-on-surface-variant">{{ __('Aktivitas dan grafik akan tampil di sini') }}</p>
-            </div>
-        </div>
-    </div>
+    </x-page-shell>
 </x-layouts::app.sidebar>
