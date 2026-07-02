@@ -29,9 +29,6 @@
 
         {{-- Stat Cards --}}
         <x-app.panel>
-            <div class="border-b border-outline-variant/50 px-4 py-3">
-                <x-status-badge tone="primary" :pill="true">{{ __('Ikhtisar') }}</x-status-badge>
-            </div>
             <dl class="grid grid-cols-2 gap-2 p-4 sm:grid-cols-{{ min(count($stats), 4) }}">
                 @foreach($stats as $stat)
                 <div @class([
