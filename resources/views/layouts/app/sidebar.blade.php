@@ -39,8 +39,7 @@
                         || auth()->user()->can('view_reimbursements')
                         || auth()->user()->can('view_loans')
                         || auth()->user()->can('view_assets')
-                        || auth()->user()->can('view_payrolls')
-                        || auth()->user()->can('view_knowledgebase');
+                        || auth()->user()->can('view_payrolls');
                 @endphp
 
                 @if($hasSdmAccess)
@@ -50,14 +49,19 @@
                 @endif
 
                 @can('viewAny', App\Models\Employee::class)
+                    @php $empLabel = auth()->user()->hasRole('manager') ? __('Anggota Tim') : __('Direktori Karyawan') @endphp
                     <a href="{{ route('admin.employees.index') }}"
                        @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
                                'bg-ink/5 text-ink' => request()->routeIs('admin.employees.*'),
                                'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
                        wire:navigate>
                         <span class="material-symbols-outlined text-2xl">group</span>
-                        <span>{{ __('Direktori Karyawan') }}</span>
+                        <span>{{ $empLabel }}</span>
                     </a>
+                @endcan
+
+                @can('manage_attendances')
+                {{-- TODO: Implement admin attendance management page --}}
                 @endcan
 
                 @can('view_attendances')
@@ -137,17 +141,7 @@
                 </a>
                 @endcan
 
-                @can('view_knowledgebase')
-                <a href="{{ route('knowledge-base.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('knowledge-base.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('knowledge-base.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">menu_book</span>
-                    <span>{{ __('Basis Pengetahuan') }}</span>
-                </a>
-                @endcan
-
+                {{-- Persetujuan --}}
                 @php
                     $canApprove = auth()->user()->hasAnyPermission([
                         'approve_leaves_l1', 'approve_leaves_l2',
@@ -170,6 +164,26 @@
                     <span>{{ __('Semua Persetujuan') }}</span>
                 </a>
                 @endif
+
+                {{-- Other modules --}}
+                @can('view_knowledgebase')
+                <div class="px-4 pb-2 pt-5">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Lainnya') }}</p>
+                </div>
+
+                <a href="{{ route('knowledge-base.index') }}"
+                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
+                           'bg-ink/5 text-ink' => request()->routeIs('knowledge-base.*'),
+                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('knowledge-base.*')])
+                   wire:navigate>
+                    <span class="material-symbols-outlined text-2xl">menu_book</span>
+                    <span>{{ __('Basis Pengetahuan') }}</span>
+                </a>
+                @endcan
+
+                {{-- Master Data (HR only) — TODO: implement routes for company structure --}}
+                @canany(['manage_companies', 'manage_branches', 'manage_departments', 'manage_positions', 'manage_holidays', 'manage_shifts'])
+                @endcanany
             </nav>
 
             {{-- User --}}

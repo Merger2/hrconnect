@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
-use App\Enums\WfaStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ClockInRequest;
@@ -236,7 +236,7 @@ class AttendanceController extends Controller
             throw new BusinessRuleException('Attendance ini bukan record WFA.');
         }
 
-        $newStatusWfa = $data['decision'] === 'approve' ? WfaStatus::APPROVED : WfaStatus::REJECTED;
+        $newStatusWfa = $data['decision'] === 'approve' ? ApprovalStatus::APPROVED : ApprovalStatus::REJECTED;
         $newStatus = $data['decision'] === 'approve' ? $attendance->status : AttendanceStatus::ABSENT;
 
         $attendance->update([

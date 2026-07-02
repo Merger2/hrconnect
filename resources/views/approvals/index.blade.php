@@ -1,14 +1,29 @@
 <x-layouts::app.sidebar :title="__('Persetujuan')">
-    <div x-data="approvalsIndex()">
+    <div x-data="approvalsIndex('{{ auth()->user()->roles->first()?->name ?? 'employee' }}')">
         {{-- Header --}}
         <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold text-ink">{{ __('Approvals') }}</h1>
-                <p class="mt-1 text-sm text-on-surface-variant">{{ __('Review and approve pending requests from your team') }}</p>
+                <h1 class="text-2xl font-semibold text-ink">
+                    @php $role = auth()->user()->roles->first()?->name @endphp
+                    {{ $role === 'employee' ? __('Pengajuan Saya') : __('Persetujuan') }}
+                </h1>
+                <p class="mt-1 text-sm text-on-surface-variant">
+                    @php
+                        $subtitle = match ($role) {
+                            'super-admin', 'hr-manager' => __('Semua pengajuan yang menunggu persetujuan'),
+                            'manager' => __('Pengajuan tim yang menunggu persetujuan Anda'),
+                            'finance' => __('Klaim reimbursement yang menunggu persetujuan'),
+                            default => __('Riwayat pengajuan Anda'),
+                        };
+                    @endphp
+                    {{ $subtitle }}
+                </p>
             </div>
         </div>
 
-        {{-- Tabs --}}
+        {{-- Tabs (hidden for employee) --}}
+        @php $canApprove = in_array($role, ['manager', 'hr-manager', 'super-admin', 'finance']) @endphp
+        @if($canApprove)
         <div class="mb-6 flex gap-1 rounded-xl bg-surface-container-low p-1">
             <button @click="tab = 'pending'; fetchApprovals()"
                     :class="tab === 'pending' ? 'bg-canvas text-ink shadow-sm' : 'text-on-surface-variant hover:text-ink'"
@@ -22,6 +37,7 @@
                 {{ __('History') }}
             </button>
         </div>
+        @endif
 
         {{-- Toolbar --}}
         <x-app.panel class="mb-6">
@@ -29,14 +45,15 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
                     <div class="xl:col-span-2">
                         <x-forms.select name="type" x-model="typeFilter" @change="fetchApprovals()"
-                            :options="['' => __('All Types'), 'leave' => __('Leave'), 'overtime' => __('Overtime'), 'reimbursement' => __('Reimbursement')]" />
+                            :options="['' => __('All Types'), 'leave' => __('Leave'), 'overtime' => __('Overtime'), 'reimbursement' => __('Reimbursement')]"
+                            x-bind:disabled="role === 'finance'" />
                     </div>
                 </div>
             </div>
         </x-app.panel>
 
         {{-- Summary stats --}}
-        <dl class="mb-4 flex flex-wrap gap-2" x-show="!loading && tab === 'pending'">
+        <dl class="mb-4 flex flex-wrap gap-2" x-show="!loading && tab === 'pending' && canApprove()">
             <div class="rounded-xl border border-warning/30 bg-warning/10 px-4 py-2">
                 <dt class="text-xs font-semibold uppercase text-warning">{{ __('Pending') }}</dt>
                 <dd class="text-lg font-bold text-warning" x-text="approvals.length">0</dd>
@@ -96,7 +113,7 @@
                                         <x-button variant="ghost" size="sm" icon="open_in_new" @click="openDetail(a.approval_id)">
                                             {{ __('Detail') }}
                                         </x-button>
-                                        <template x-if="tab === 'pending'">
+                                        <template x-if="tab === 'pending' && canApprove()">
                                             <>
                                                 <x-button variant="secondary" size="sm" icon="close" @click="openRejectModal(a.approval_id, a.submitter?.full_name)">
                                                     {{ __('Reject') }}
@@ -151,7 +168,7 @@
                         </div>
                         <div class="flex gap-2">
                             <x-button variant="ghost" size="sm" @click="openDetail(a.approval_id)" icon="open_in_new" class="flex-1">{{ __('Detail') }}</x-button>
-                            <template x-if="tab === 'pending'">
+                            <template x-if="tab === 'pending' && canApprove()">
                                 <>
                                     <x-button variant="secondary" size="sm" @click="openRejectModal(a.approval_id, a.submitter?.full_name)" icon="close" class="flex-1">{{ __('Reject') }}</x-button>
                                     <x-button variant="primary" size="sm" @click="approve(a.approval_id)" x-bind:disabled="processing === a.approval_id" class="flex-1">

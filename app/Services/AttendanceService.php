@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\VerificationMethod;
-use App\Enums\WfaStatus;
 use App\Exceptions\AlreadyClockedInException;
 use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
@@ -86,7 +86,7 @@ class AttendanceService
                     'clock_in_is_mocked' => $data['is_mocked'] ?? false,
                     'clock_in_accuracy' => $data['accuracy'] ?? null,
                     'is_wfa' => $isWfa,
-                    'status_wfa' => $isWfa ? WfaStatus::PENDING->value : null,
+                    'status_wfa' => $isWfa ? ApprovalStatus::PENDING->value : null,
                     'wfa_note' => $data['wfa_note'] ?? null,
                     // B-34: WFA attendance should not be penalized with late_minutes
                     'late_minutes' => $isWfa ? 0 : $lateMinutes,
