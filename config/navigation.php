@@ -11,7 +11,7 @@ return [
         ],
         [
             'title' => 'SDM',
-            'roles' => ['super-admin', 'hr-manager', 'manager'],
+            'roles' => ['super-admin', 'hr-manager', 'manager', 'employee'],
             'items' => [
                 [
                     'label' => 'Direktori Karyawan',
@@ -28,7 +28,7 @@ return [
         ],
         [
             'title' => 'Keuangan',
-            'roles' => ['super-admin', 'hr-manager', 'finance'],
+            'roles' => ['super-admin', 'hr-manager', 'finance', 'employee'],
             'items' => [
                 ['label' => 'Pinjaman', 'route' => 'loans.index', 'icon' => 'account_balance', 'can' => 'view_loans'],
                 ['label' => 'Aset', 'route' => 'assets.index', 'icon' => 'inventory_2', 'can' => 'view_assets'],
@@ -44,7 +44,7 @@ return [
         ],
         [
             'title' => 'Lainnya',
-            'roles' => ['super-admin', 'hr-manager'],
+            'roles' => ['super-admin', 'hr-manager', 'employee'],
             'items' => [
                 ['label' => 'Basis Pengetahuan', 'route' => 'knowledge-base.index', 'icon' => 'menu_book', 'can' => 'view_knowledgebase'],
             ],
