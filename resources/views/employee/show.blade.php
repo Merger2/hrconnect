@@ -1,11 +1,15 @@
 <x-layouts::app.sidebar :title="__('Detail Karyawan')">
+    @php
+        $isSelf = auth()->user()->employee?->id === $employee->id;
+        $canManage = auth()->user()?->can('manage_employees');
+    @endphp
     <div x-data="employeeShow()" class="space-y-6">
         {{-- Employee Header Card --}}
-        <div x-show="!loading" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div x-show="!loading" class="rounded-xl border border-outline-variant bg-canvas p-6 shadow-sm">
             <div class="flex items-start gap-4">
                 <template x-if="employee.photo_url">
                     <img :src="employee.photo_url" alt=""
-                         class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover shadow-sm">
+                         class="h-16 w-16 shrink-0 rounded-xl border border-outline-variant bg-surface-dim object-cover shadow-sm">
                 </template>
                 <template x-if="!employee.photo_url">
                     <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-surface-dim text-xl font-semibold text-on-surface-variant shadow-sm"
@@ -27,16 +31,16 @@
                     </div>
                     <p class="mt-1 text-sm text-on-surface-variant" x-text="`#${employee.employee_number}`"></p>
                     <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        <div class="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ __('Departemen') }}</p>
+                        <div class="rounded-lg border border-outline-variant/40 bg-surface-dim/30 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Departemen') }}</p>
                             <p class="mt-0.5 text-sm font-medium text-ink" x-text="employee.department?.name || '-'"></p>
                         </div>
-                        <div class="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ __('Cabang') }}</p>
+                        <div class="rounded-lg border border-outline-variant/40 bg-surface-dim/30 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Cabang') }}</p>
                             <p class="mt-0.5 text-sm font-medium text-ink" x-text="employee.branch?.name || '-'"></p>
                         </div>
-                        <div class="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ __('Bergabung') }}</p>
+                        <div class="rounded-lg border border-outline-variant/40 bg-surface-dim/30 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Bergabung') }}</p>
                             <p class="mt-0.5 text-sm font-medium text-ink" x-text="employee.join_date || '-'"></p>
                         </div>
                     </div>
@@ -46,9 +50,15 @@
 
         {{-- Quick Actions Bar --}}
         <div x-show="!loading" class="flex flex-wrap gap-2">
+            @if($canManage)
             <x-button variant="secondary" icon="arrow_back" href="{{ route('admin.employees.index') }}" wire:navigate>
                 {{ __('Kembali') }}
             </x-button>
+            @else
+            <x-button variant="secondary" icon="arrow_back" href="{{ route('dashboard') }}" wire:navigate>
+                {{ __('Dashboard') }}
+            </x-button>
+            @endif
             @can('manage_employees')
                 <x-button variant="primary" icon="edit" href="{{ route('admin.employees.edit', $employee) }}" wire:navigate>
                     {{ __('Edit') }}
@@ -59,7 +69,7 @@
         {{-- Section Cards --}}
         <div x-show="!loading" class="space-y-4">
             {{-- Personal Information --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="rounded-xl border border-outline-variant bg-canvas p-4">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold text-ink">{{ __('Informasi Pribadi') }}</h4>
                     <span class="text-xs text-on-surface-variant">{{ __('Personal') }}</span>
@@ -97,7 +107,7 @@
             </div>
 
             {{-- Employment Info --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="rounded-xl border border-outline-variant bg-canvas p-4">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold text-ink">{{ __('Informasi Kepegawaian') }}</h4>
                     <span class="text-xs text-on-surface-variant">{{ __('Employment') }}</span>
@@ -123,7 +133,7 @@
             </div>
 
             {{-- Bank & Tax --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="rounded-xl border border-outline-variant bg-canvas p-4">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold text-ink">{{ __('Bank & Pajak') }}</h4>
                     <span class="text-xs text-on-surface-variant">{{ __('Bank & Tax') }}</span>
@@ -157,7 +167,7 @@
             </div>
 
             {{-- Address --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4" x-show="hasAddress">
+            <div class="rounded-xl border border-outline-variant bg-canvas p-4" x-show="hasAddress">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold text-ink">{{ __('Alamat') }}</h4>
                     <span class="text-xs text-on-surface-variant">{{ __('Address') }}</span>
@@ -187,18 +197,18 @@
             </div>
 
             {{-- Family --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="rounded-xl border border-outline-variant bg-canvas p-4">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold text-ink">{{ __('Keluarga') }}</h4>
                     <span class="text-xs text-on-surface-variant">{{ __('Family') }}</span>
                 </div>
-                <div x-show="families.length === 0" class="mt-3 rounded-xl border border-dashed border-slate-200 p-6 text-center">
+                <div x-show="families.length === 0" class="mt-3 rounded-xl border border-dashed border-outline-variant/50 p-6 text-center">
                     <span class="material-symbols-outlined text-3xl text-on-surface-variant/40">family_history</span>
                     <p class="mt-2 text-sm text-on-surface-variant">{{ __('Belum ada data keluarga') }}</p>
                 </div>
                 <div x-show="families.length > 0" class="mt-3 space-y-2">
                     <template x-for="f in families" :key="f.id">
-                        <div class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3">
+                        <div class="flex items-center justify-between rounded-lg border border-outline-variant/30 bg-surface-dim/30 px-4 py-3">
                             <div>
                                 <p class="text-sm font-medium text-ink" x-text="f.full_name"></p>
                                 <p class="text-xs text-on-surface-variant" x-text="relationshipLabel(f.relationship)"></p>
@@ -210,12 +220,12 @@
             </div>
 
             {{-- Documents --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="rounded-xl border border-outline-variant bg-canvas p-4">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold text-ink">{{ __('Dokumen') }}</h4>
                     <span class="text-xs text-on-surface-variant">{{ __('Documents') }}</span>
                 </div>
-                <div class="mt-3 rounded-xl border border-dashed border-slate-200 p-6 text-center">
+                <div class="mt-3 rounded-xl border border-dashed border-outline-variant/50 p-6 text-center">
                     <span class="material-symbols-outlined text-3xl text-on-surface-variant/40">description</span>
                     <p class="mt-2 text-sm text-on-surface-variant">{{ __('Belum ada dokumen diunggah') }}</p>
                 </div>

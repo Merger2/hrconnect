@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\VerificationMethod;
-use App\Enums\WfaStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -49,7 +48,7 @@ class Attendance extends Model
             'face_similarity_score' => 'decimal:2',
             'clock_out_face_similarity_score' => 'decimal:2',
             'is_wfa' => 'boolean',
-            'status_wfa' => WfaStatus::class,
+            'status_wfa' => ApprovalStatus::class,
             'verification_method' => VerificationMethod::class,
             'clock_out_verification_method' => VerificationMethod::class,
             'late_minutes' => 'integer',

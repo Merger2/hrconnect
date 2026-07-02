@@ -1,4 +1,4 @@
-export default function () {
+export default function (role = 'employee') {
     return {
         approvals: [],
         tab: 'pending',
@@ -13,8 +13,19 @@ export default function () {
         detailModalOpen: false,
         detailData: null,
         detailLoading: false,
+        role: role,
+
+        get normalizedRole() {
+            return { 'super-admin': 'hr', 'hr-manager': 'hr' }[this.role] ?? this.role;
+        },
 
         init() {
+            if (this.normalizedRole === 'employee') {
+                this.tab = 'history';
+            }
+            if (this.normalizedRole === 'finance') {
+                this.typeFilter = 'reimbursement';
+            }
             this.fetchApprovals();
         },
 
@@ -26,13 +37,26 @@ export default function () {
         async fetchApprovals() {
             this.loading = true;
             try {
-                const endpoint = this.tab === 'pending' ? '/api/v1/approvals/pending' : '/api/v1/approvals/history';
-                const url = endpoint + '?per_page=50' + (this.typeFilter ? `&type=${this.typeFilter}` : '');
+                let endpoint, params = new URLSearchParams({ per_page: '50' });
+                const nr = this.normalizedRole;
+                if (nr === 'employee') {
+                    endpoint = '/api/v1/approvals/pending';
+                    params.set('scope', 'own');
+                } else if (nr === 'hr') {
+                    endpoint = '/api/v1/approvals/pending';
+                    params.set('all', '1');
+                } else {
+                    endpoint = this.tab === 'pending' ? '/api/v1/approvals/pending' : '/api/v1/approvals/history';
+                }
+                if (this.typeFilter && nr !== 'employee') {
+                    params.set('type', this.typeFilter);
+                }
+                const url = endpoint + '?' + params.toString();
                 const res = await fetch(url, { headers: window.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.approvals = json.data;
-                    if (this.tab === 'pending') {
+                    if (this.tab === 'pending' && nr !== 'employee') {
                         this.pendingCount = json.meta?.total || json.data.length;
                     }
                 }
@@ -40,6 +64,10 @@ export default function () {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat approvals' });
             }
             finally { this.loading = false; }
+        },
+
+        canApprove() {
+            return ['manager', 'hr', 'finance'].includes(this.normalizedRole);
         },
 
         async approve(id) {

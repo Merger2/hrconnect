@@ -1,6 +1,19 @@
 <x-layouts::app.sidebar :title="__('Direktori Karyawan')">
     <div x-data="employeesIndex()">
-        <x-page-shell title="{{ __('Direktori Karyawan') }}" subtitle="{{ __('Lihat dan kelola data karyawan') }}">
+        @php $role = auth()->user()->roles->first()?->name @endphp
+        @php
+            $empTitle = match ($role) {
+                'manager' => __('Anggota Tim'),
+                'finance' => __('Data Karyawan'),
+                default => __('Direktori Karyawan'),
+            };
+            $empSubtitle = match ($role) {
+                'manager' => __('Lihat anggota tim Anda'),
+                'finance' => __('Data karyawan untuk keperluan finance'),
+                default => __('Lihat dan kelola data karyawan'),
+            };
+        @endphp
+        <x-page-shell :title="$empTitle" :subtitle="$empSubtitle">
             <x-slot:actions>
                 @can('manage_employees')
                     <x-button variant="primary" icon="add" @click="openCreateModal()">
@@ -12,7 +25,8 @@
                 @endcan
             </x-slot:actions>
 
-            {{-- Summary Bar --}}
+            {{-- Summary Bar (HR/Admin only) --}}
+            @can('manage_employees')
             <div x-show="!loading && total > 0" class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <div class="rounded-lg border border-outline-variant/40 bg-surface-dim/30 px-3 py-2.5">
                     <dt class="text-[0.68rem] font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Total') }}</dt>
@@ -31,6 +45,7 @@
                     <dd class="mt-0.5 text-base font-semibold text-ink" x-text="employees.filter(e => e.status === 'terminated').length"></dd>
                 </div>
             </div>
+            @endcan
 
             <x-slot:toolbar>
                 <x-page-toolbar search search-placeholder="{{ __('Cari nama atau nomor karyawan...') }}">

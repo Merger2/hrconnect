@@ -53,9 +53,19 @@ class ApprovalController extends Controller
                 Reimbursement::class => ['employee:id,full_name'],
             ]),
         ])
-            ->where('approver_id', $employee->id)
-            ->where('status', ApprovalStatus::PENDING)
-            ->orderBy('created_at', 'desc');
+            ->where('status', ApprovalStatus::PENDING);
+
+        if ($request->boolean('all')) {
+            // HR/Admin: show all pending across org
+        } elseif ($request->input('scope') === 'own') {
+            // Employee: show their own submitted requests
+            $query->whereHasMorph('approvable', ['*'], fn ($q) => $q->where('employee_id', $employee->id));
+        } else {
+            // Manager: only approvals where user is the approver
+            $query->where('approver_id', $employee->id);
+        }
+
+        $query->orderBy('created_at', 'desc');
 
         if ($request->filled('type')) {
             $morphMap = [
