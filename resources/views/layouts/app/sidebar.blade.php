@@ -43,7 +43,7 @@
             </nav>
 
             {{-- User --}}
-            <div class="flex items-center justify-between border-t border-outline-variant p-3">
+            <div class="flex items-center border-t border-outline-variant p-3">
                 <x-desktop-user-menu />
             </div>
         </aside>
