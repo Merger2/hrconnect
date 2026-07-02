@@ -36,11 +36,6 @@ class Company extends Model implements CipherSweetEncrypted
             ->addBlindIndex('npwp', new BlindIndex('npwp_hash'));
     }
 
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
-
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class);

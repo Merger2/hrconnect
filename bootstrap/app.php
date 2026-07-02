@@ -1,9 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckPasswordExpired;
-use App\Http\Middleware\DeviceDetection;
 use App\Http\Middleware\EnsureSecurityHeaders;
-use App\Http\Middleware\GeofenceValidation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -56,8 +54,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'password.expired' => CheckPasswordExpired::class,
-            'device.detection' => DeviceDetection::class,
-            'geofence' => GeofenceValidation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

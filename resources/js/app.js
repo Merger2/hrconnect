@@ -16,6 +16,7 @@ import reimbursementApply from './reimbursement-apply';
 import attendanceIndex from './attendance-index';
 import approvalsIndex from './approvals-index';
 import employeesIndex from './employees-index';
+import employeeShow from './employee-show';
 import createEmployeeForm from './create-employee-form';
 import terminateEmployeeForm from './terminate-employee-form';
 import importEmployeesForm from './import-employees-form';
@@ -139,6 +140,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('attendanceIndex', attendanceIndex);
     window.Alpine.data('approvalsIndex', approvalsIndex);
     window.Alpine.data('employeesIndex', employeesIndex);
+    window.Alpine.data('employeeShow', employeeShow);
     window.Alpine.data('createEmployeeForm', createEmployeeForm);
     window.Alpine.data('terminateEmployeeForm', terminateEmployeeForm);
     window.Alpine.data('importEmployeesForm', importEmployeesForm);

@@ -22,7 +22,7 @@ test('security settings page can be rendered', function () {
         ->get(route('security.edit'))
         ->assertOk()
         ->assertSeeText('Keamanan')
-        ->assertSeeText('Kata sandi'); // "Update password" rendered in Indonesian
+        ->assertSee('Kata sandi', false);
 });
 
 test('security settings page requires password confirmation when enabled', function () {
@@ -44,7 +44,7 @@ test('security settings page renders without two factor when feature is disabled
         ->get(route('security.edit'))
         ->assertOk()
         ->assertSeeText('Keamanan')
-        ->assertSeeText('Kata sandi');
+        ->assertSee('Kata sandi', false);
 });
 
 test('two factor authentication disabled when confirmation abandoned between requests', function () {

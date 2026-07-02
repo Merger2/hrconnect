@@ -78,9 +78,9 @@
                                     <x-status-badge x-show="loan.status === 'pending'" tone="warning" pill>{{ __('Pending') }}</x-status-badge>
                                     <x-status-badge x-show="loan.status === 'approved'" tone="info" pill>{{ __('Approved') }}</x-status-badge>
                                     <x-status-badge x-show="loan.status === 'active'" tone="success" pill>{{ __('Active') }}</x-status-badge>
-                                    <x-status-badge x-show="loan.status === 'paid_off'" tone="zinc" pill>{{ __('Paid Off') }}</x-status-badge>
+                                    <x-status-badge x-show="loan.status === 'paid_off'" tone="neutral" pill>{{ __('Paid Off') }}</x-status-badge>
                                     <x-status-badge x-show="loan.status === 'rejected'" tone="error" pill>{{ __('Rejected') }}</x-status-badge>
-                                    <x-status-badge x-show="loan.status === 'cancelled'" tone="zinc" pill>{{ __('Cancelled') }}</x-status-badge>
+                                    <x-status-badge x-show="loan.status === 'cancelled'" tone="neutral" pill>{{ __('Cancelled') }}</x-status-badge>
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <button x-show="loan.status === 'pending' || loan.status === 'approved'" @click="cancelLoan(loan.id)"
@@ -126,9 +126,9 @@
                             <x-status-badge x-show="loan.status === 'pending'" tone="warning" pill>{{ __('Pending') }}</x-status-badge>
                             <x-status-badge x-show="loan.status === 'approved'" tone="info" pill>{{ __('Approved') }}</x-status-badge>
                             <x-status-badge x-show="loan.status === 'active'" tone="success" pill>{{ __('Active') }}</x-status-badge>
-                            <x-status-badge x-show="loan.status === 'paid_off'" tone="zinc" pill>{{ __('Paid Off') }}</x-status-badge>
+                            <x-status-badge x-show="loan.status === 'paid_off'" tone="neutral" pill>{{ __('Paid Off') }}</x-status-badge>
                             <x-status-badge x-show="loan.status === 'rejected'" tone="error" pill>{{ __('Rejected') }}</x-status-badge>
-                            <x-status-badge x-show="loan.status === 'cancelled'" tone="zinc" pill>{{ __('Cancelled') }}</x-status-badge>
+                            <x-status-badge x-show="loan.status === 'cancelled'" tone="neutral" pill>{{ __('Cancelled') }}</x-status-badge>
                         </div>
                         <button x-show="loan.status === 'pending' || loan.status === 'approved'" @click="cancelLoan(loan.id)"
                                 class="mt-2 rounded-lg px-2 py-1 text-xs font-medium text-error transition-colors hover:bg-error/5">
