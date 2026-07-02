@@ -144,30 +144,19 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('knowledgeBaseChat', knowledgeBaseChat);
     window.Alpine.store('darkMode', {
         on: false,
-        mode: localStorage.getItem('theme') || 'system',
 
         init() {
-            this.mode = localStorage.getItem('theme') || 'system';
-            this.sync();
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                if (this.mode === 'system') this.sync();
-            });
+            // Dark mode temporarily disabled — CSS not ready for dark variant
+            // Remove 'dark' class if set from previous localStorage
+            document.documentElement.classList.remove('dark');
         },
 
         toggle() {
-            if (this.mode === 'system') {
-                this.mode = this.on ? 'light' : 'dark';
-            } else {
-                this.mode = this.mode === 'dark' ? 'light' : 'dark';
-            }
-            localStorage.setItem('theme', this.mode);
-            this.sync();
+            // Disabled — no-op until dark mode CSS is implemented
         },
 
         set(mode) {
-            this.mode = mode;
-            localStorage.setItem('theme', mode);
-            this.sync();
+            // Disabled
         },
 
         sync() {
