@@ -22,11 +22,14 @@
             earClosedThreshold: 0.2,
 
             async init() {
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
-                    faceapi.nets.faceRecognitionNet.loadFromUri('/models/av1'),
-                ]);
+                if (!window.__faceApiLoaded) {
+                    await Promise.all([
+                        faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
+                        faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
+                        faceapi.nets.faceRecognitionNet.loadFromUri('/models/av1'),
+                    ]);
+                    window.__faceApiLoaded = true;
+                }
                 this.modelsLoading = false;
                 this.faceStatus = '{{ __('Memindai wajah...') }}';
 
