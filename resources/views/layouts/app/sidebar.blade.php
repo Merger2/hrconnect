@@ -20,11 +20,11 @@
                     $menu = $user ? (new \App\Services\NavigationService)->build($user) : [];
                 @endphp
                 @if (empty($menu))
-                <div class="px-4 py-8 text-center text-sm text-on-surface-variant/50">No menu items</div>
+                <div class="px-4 py-8 text-center text-xs text-on-surface-variant/40">{{ __('Tidak ada menu') }}</div>
                 @endif
                 @foreach($menu as $group)
-                <div class="px-4 pb-2 pt-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __($group['title']) }}</p>
+                <div class="px-4 pb-2 pt-5 first:pt-2">
+                    <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-on-surface-variant/60">{{ __($group['title']) }}</p>
                 </div>
 
                 @foreach($group['items'] as $item)
@@ -33,12 +33,14 @@
                     $isActive = request()->routeIs($pattern . '*') || request()->routeIs($item['route']);
                 @endphp
                 <a href="{{ route($item['route']) }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => $isActive,
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !$isActive])
+                   @class(['group flex h-11 items-center gap-3 rounded-r-xl border-l-[3px] px-4 text-sm transition duration-150',
+                           'border-l-ink bg-ink/5 font-semibold text-ink' => $isActive,
+                           'border-l-transparent font-medium text-on-surface-variant hover:border-l-outline hover:bg-surface-dim/30 hover:text-ink' => !$isActive])
                    wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">{{ $item['icon'] }}</span>
-                    <span>{{ __($item['label']) }}</span>
+                    <span @class(['material-symbols-outlined text-xl transition duration-150',
+                                 'text-ink' => $isActive,
+                                 'text-on-surface-variant group-hover:text-ink' => !$isActive])>{{ $item['icon'] }}</span>
+                    <span class="leading-5">{{ __($item['label']) }}</span>
                 </a>
                 @endforeach
                 @endforeach
