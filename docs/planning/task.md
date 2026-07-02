@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-02 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅ G ✅. **P0 bugs fixed + sidebar navigation terpusat**. Backend 87% | Frontend 60% | Production 73/100. **Progres keseluruhan: ~65-70%.** Audit lengkap (back+front+prod) selesai.
+> Updated: 2026-07-02 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅ G ✅ H0 ✅. **2 regression fixed + sidebar navigation terpusat**. Test: 1.172 passed, 1 failed (pre-existing). Backend 87% | Frontend 60% | Production 73/100. **Progres keseluruhan: ~65-70%.** Audit lengkap selesai.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
@@ -3125,6 +3125,42 @@ Semua 17 Alpine.data registrasi punya file JS. 0 orphan.
 | PG extensions guarded ✅ | 11 instance `getDriverName()` di migration |
 | No CD pipeline | Deployment manual via SSH |
 | `CACHE_STORE=database` | Known constraint — `Cache::tags()` disabled |
+
+---
+
+## 🔴 Regression Fix — Sesi H (2 Juli 2026)
+
+Setelah implementasi NavigationService + sidebar terpusat, ditemukan **2 regression bugs** + **1 pre-existing bug** dari test suite:
+
+### H-0.1: NavigationService missing `declare(strict_types=1)` ✅ Fixed
+
+| Aspek | Detail |
+|--------|--------|
+| **Test** | `tests/Unit/ArchitectureTest.php:13` — `ArchExpectationFailedException` |
+| **Akar** | File baru `app/Services/NavigationService.php` tidak punya `declare(strict_types=1)` — 19 service lainnya semua punya |
+| **Pola dari referensi** | Semua 19 service di HRConnect + semua service di PasPapan + laravel-smarthr menggunakan `declare(strict_types=1)` |
+| **Fix** | Tambah `declare(strict_types=1)` setelah `<?php` |
+| **Status** | ✅ Fixed |
+
+### H-0.2: WebRouteSmokeTest — 8 test gagal (403 instead of 200) ✅ Fixed
+
+| Aspek | Detail |
+|--------|--------|
+| **Test** | 8 test di `tests/Feature/WebRouteSmokeTest.php` — attendance, leaves, overtimes, reimbursements (index + apply) |
+| **Akar** | User test dibuat via `User::factory()->create()` tanpa assign role. Route sekarang punya `can:` middleware (`can:view_attendances`, `can:view_leaves`, `can:view_overtimes`, `can:view_reimbursements`) → user tanpa permission dapat 403 |
+| **Pola dari referensi** | **HRMS**: `$user->assignRole('Employee')` di test setup. **laravel-smarthr**: `User::factory()->create()->assignRole('Employee')`. **PasPapan**: semua test user punya permission via factory state |
+| **Fix** | Tambah `$this->user->assignRole('employee')` di `beforeEach()` |
+| **Status** | ✅ Fixed |
+
+### H-0.3: PayrollCalculatorCoreTest > leave cash out — calculation mismatch ⚠️ Pre-existing
+
+| Aspek | Detail |
+|--------|--------|
+| **Test** | `tests/Unit/PayrollCalculatorCoreTest.php:888` |
+| **Sekarang** | Expected 2,272,727.27 but got 2,173,913.04 (selisih ~5%) |
+| **Akar** | `PayrollCalculatorService::calculateLeaveCashOut()` menggunakan rumus yang berbeda dari ekspektasi test — diduga formula daily rate pakai `countWorkingDays()` yang menghasilkan 23 hari di Juni 2026, bukan 22 seperti asumsi test |
+| **Pola dari referensi** | **Quanta HRIS**: `GajiPokok / countWorkingDays(start, end)` — dynamic working days count. **PasPapan**: Payroll always uses calendar-aware working days |
+| **Status** | ⚠️ Pre-existing bug — bukan regression dari Sesi G/H. Butuh audit kalkulasi payroll menyeluruh |
 
 ---
 

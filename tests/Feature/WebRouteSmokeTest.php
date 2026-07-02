@@ -9,6 +9,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
     $this->user = User::factory()->create(['email_verified_at' => now()]);
+    $this->user->assignRole('employee');
 });
 
 // ─── Public Auth Pages ─────────────────────────────────────────────
