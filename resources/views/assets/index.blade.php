@@ -1,17 +1,13 @@
 <x-layouts::app.sidebar>
     <div x-data="assetsIndex()">
-        {{-- Header --}}
-        <div class="mb-3 flex flex-col gap-2.5 border-b border-outline-variant/50 pb-3 xl:flex-row xl:items-center xl:justify-between">
-            <div class="min-w-0">
-                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Asset Management') }}</h1>
-                <p class="text-sm text-on-surface-variant">{{ __('Manage company assets and equipment') }}</p>
-            </div>
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <x-page-shell title="{{ __('Aset') }}" subtitle="{{ __('Kelola aset dan inventaris perusahaan') }}">
+            <x-slot:actions>
+                @can('manage_assets')
                 <x-button variant="primary" @click="openCreateModal" icon="add">
-                    {{ __('Add Asset') }}
+                    {{ __('Tambah Aset') }}
                 </x-button>
-            </div>
-        </div>
+                @endcan
+            </x-slot:actions>
 
         {{-- Toolbar --}}
         <div class="mb-3 rounded-xl border border-outline-variant bg-canvas p-2.5 shadow-sm">
@@ -241,6 +237,6 @@
             </div>
         </template>
     </div>
-
+</x-page-shell>
 
 </x-layouts::app.sidebar>
