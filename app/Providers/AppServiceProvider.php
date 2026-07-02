@@ -22,9 +22,11 @@ use App\Services\EmbeddingService;
 use App\Services\FaceRecognitionService;
 use App\Services\GeminiClient;
 use App\Services\GeofenceService;
+use App\Services\NavigationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Pgvector\Laravel\Schema as PgvectorSchema;
@@ -41,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GeofenceService::class);
         $this->app->singleton(GeminiClient::class);
         $this->app->singleton(EmbeddingService::class);
+        $this->app->singleton(NavigationService::class);
     }
 
     /**
@@ -51,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         PgvectorSchema::register();
         $this->registerObservers();
+        $this->registerViewComposers();
     }
 
     /**
@@ -93,5 +97,20 @@ class AppServiceProvider extends ServiceProvider
         CompanySetting::observe(CompanySettingObserver::class);
         Leave::observe(LeaveObserver::class);
         Payroll::observe(PayrollObserver::class);
+    }
+
+    /**
+     * Register View Composers for shared data injection.
+     *
+     * Pattern from laravel-smarthr: View::composer injects menu items
+     * built by a service that filters config/menu.php by user permissions.
+     */
+    protected function registerViewComposers(): void
+    {
+        View::composer('layouts.app.sidebar', function ($view) {
+            $user = auth()->user();
+            $menu = $user ? app(NavigationService::class)->build($user) : [];
+            $view->with('sidebarMenu', $menu);
+        });
     }
 }
