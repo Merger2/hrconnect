@@ -3,7 +3,7 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-canvas pb-20 lg:pb-0"
+    <body class="min-h-screen bg-canvas pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0"
         x-data
         x-init="$store.darkMode.init()"
     >
