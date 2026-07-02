@@ -46,8 +46,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Proteksi Host header poisoning.
         $middleware->trustHosts(at: fn () => [config('app.url')]);
 
-        // Security headers: CSP, HSTS, X-Frame-Options, Referrer-Policy (PasPapan pattern).
-        $middleware->web(append: [EnsureSecurityHeaders::class]);
+        // Security headers: CSP, HSTS, X-Frame-Options (PasPapan pattern).
+        // Temporarily disabled — needs per-page CSP testing before activation.
+        // $middleware->web(append: [EnsureSecurityHeaders::class]);
 
         // Aliases shortcut untuk middleware Spatie & Sanctum (digunakan di routes).
         $middleware->alias([
