@@ -32,7 +32,7 @@ $maxWidthClasses = [
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
 
-            <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true"></div>
+            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
 
             <div x-show="open"
                 class="relative z-10 mx-auto w-full {{ $maxWidthClasses }} transform overflow-y-auto rounded-lg bg-canvas shadow-xl"

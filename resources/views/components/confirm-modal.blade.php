@@ -33,15 +33,29 @@ $buttonClass = match ($variant) {
     @open-modal.window="if ($event.detail === '{{ $name }}') open = true"
     @close-modal.window="if ($event.detail === '{{ $name }}') open = false"
     @keydown.escape.window="open = false"
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
     role="dialog"
     aria-modal="true"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
 >
-    <div class="fixed inset-0 bg-black/40" @click="open = false"></div>
-    <div class="relative z-10 w-full max-w-sm rounded-lg bg-canvas p-6 shadow-xl">
-        <div class="flex flex-col items-center text-center">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="open = false" aria-hidden="true"></div>
+    <div class="relative z-10 mx-auto w-full max-w-sm transform overflow-hidden rounded-xl bg-canvas shadow-xl"
+        x-on:click.stop
+        x-trap.inert.noscroll="open"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+        <div class="px-6 py-5">
             <div @class([
-                'mb-4 flex h-12 w-12 items-center justify-center rounded-full',
+                'mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full',
                 'bg-error/10' => $variant === 'danger',
                 'bg-warning/10' => $variant === 'warning',
                 'bg-success/10' => $variant === 'success',
@@ -49,7 +63,7 @@ $buttonClass = match ($variant) {
                 'bg-surface-dim' => $variant === 'neutral',
             ])>
                 <span @class([
-                    'material-symbols-outlined text-2xl',
+                    'material-symbols-outlined text-3xl',
                     'text-error' => $variant === 'danger',
                     'text-warning' => $variant === 'warning',
                     'text-success' => $variant === 'success',
@@ -58,15 +72,20 @@ $buttonClass = match ($variant) {
                 ])>{{ $icon ?? $iconDefault }}</span>
             </div>
 
-            <h3 class="text-lg font-semibold text-ink">{{ $title }}</h3>
-            <p class="mt-1 text-sm text-on-surface-variant">{{ $message }}</p>
+            <h3 class="text-center text-lg font-semibold text-ink">{{ $title }}</h3>
 
-            @if (isset($slot) && $slot->isNotEmpty())
-                <div class="mt-4 w-full">{{ $slot }}</div>
+            @if ((isset($slot) && $slot->isNotEmpty()) || $message !== __('Are you sure?'))
+                <div class="mt-2 text-center text-sm text-on-surface-variant">
+                    @if (isset($slot) && $slot->isNotEmpty())
+                        {{ $slot }}
+                    @else
+                        <p>{{ $message }}</p>
+                    @endif
+                </div>
             @endif
         </div>
 
-        <div class="mt-6 flex items-center justify-center gap-3">
+        <div class="flex items-center justify-center gap-3 border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">
             @if (isset($actions))
                 {{ $actions }}
             @else
@@ -78,7 +97,7 @@ $buttonClass = match ($variant) {
                     x-bind:disabled="loading"
                     class="{{ $buttonClass }} rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-40">
                     <span x-show="!loading">{{ $confirmLabel }}</span>
-                    <span x-show="loading" x-cloak>{{ __('Processing...') }}</span>
+                    <span x-show="loading" x-cloak>{{ __('Memproses...') }}</span>
                 </button>
             @endif
         </div>
