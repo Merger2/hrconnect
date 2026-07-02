@@ -16,10 +16,12 @@
             {{-- Navigation --}}
             <nav class="flex-1 overflow-y-auto py-2">
                 @php
-                    $menu = auth()->user()
-                        ? app(\App\Services\NavigationService::class)->build(auth()->user())
-                        : [];
+                    $user = auth()->user();
+                    $menu = $user ? (new \App\Services\NavigationService)->build($user) : [];
                 @endphp
+                @if (empty($menu))
+                <div class="px-4 py-8 text-center text-sm text-on-surface-variant/50">No menu items</div>
+                @endif
                 @foreach($menu as $group)
                 <div class="px-4 pb-2 pt-5">
                     <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __($group['title']) }}</p>
