@@ -301,12 +301,12 @@ class PayrollCalculatorService
         }
 
         $monthlySalary = $this->getMonthlySalary($employee);
-        $workingDays = $this->countWorkingDays(
-            now()->startOfMonth(),
-            now()->endOfMonth()
-        );
 
-        $dailyRate = $workingDays > 0 ? $monthlySalary / $workingDays : 0;
+        // PP 35/2021 Pasal 40 Ayat 4: upah sehari = upah sebulan / divisor tetap
+        // 21 for 5-day work week, 25 for 6-day work week
+        // Pattern from Quanta HRIS: fixed divisor, not dynamic countWorkingDays()
+        $dailyDivisor = (int) config('hrconnect.leave_cash_out_daily_divisor', 21);
+        $dailyRate = $dailyDivisor > 0 ? $monthlySalary / $dailyDivisor : 0;
 
         return round($remaining * $dailyRate, 2);
     }
