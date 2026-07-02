@@ -1,5 +1,8 @@
 import './pwa-install';
 import './tom-select';
+import * as faceapi from 'face-api.js';
+window.faceapi = faceapi;
+window.__faceApiLoaded = true;
 import { watchPickerMounts } from './datepicker';
 import { installValidation } from './validation';
 import profilePhotoEditor from './profile-photo-editor';
