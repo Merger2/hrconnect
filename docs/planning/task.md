@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-01 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅. **Next: P1 Route Closures + Branch Geofencing UI + Payroll Admin UI**. 1,173 tests pass.
+> Updated: 2026-07-02 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅. **Next: Approvals JS Bug Fix + Konsolidasi Role-Based UI + CSS Component Layer**. Audit multi-repo (5 repos) + role-based UI selesai.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
@@ -431,6 +431,7 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 | **DC-2** | **Hapus Branch::validateRadius()** | 0 caller, Haversine ke-3 | 🟢 | ⏳ |
 | **DC-3** | **Satukan anti-fake-GPS check** | Hanya di GeofenceService, hapus dari AttendanceService | 🟢 | ⏳ |
 | **DC-4** | **PHPStan baseline** | Hapus 7 entry deleted notifications | 🟢 | ⏳ |
+| **DC-5** | **Merge WfaStatus → ApprovalStatus** | WfaStatus isinya identik (PENDING/APPROVED/REJECTED). Hapus enum, ganti semua import. 9 file. | 🟢 | ✅ |
 
 ## 🎯 POST-STUDY STRATEGY (2026-07-01)
 
@@ -2577,3 +2578,286 @@ Hasil audit UX E2E (1 Juli 2026). **Semua 9 item sudah diperbaiki di Sesi F.**
 | UX-7 | **Tidak ada tombol navigasi setelah sukses** — "Absen Sekarang" button | HIGH | ✅ |
 | UX-8 | **Bottom nav "Pengajuan" href** — active pattern cover leaves/overtimes/reimbursements/approvals | MEDIUM | ✅ |
 | UX-9 | **Bottom nav zero authorization** — gate per permission, Payroll hidden from employee | MEDIUM | ✅ |
+
+---
+
+# 🔴 Audit Multi-Repo: Role-Based UI + CSS Component Layer (2 Juli 2026)
+
+Hasil audit mendalam 5 repo referensi: **PasPapan**, **Quanta HRIS**, **laravel-smarthr**, **HRMS**, **ship-ai-with-laravel**. Fokus: role-based UI inconsistencies + CSS component layer gap.
+
+## Sintesis Pola Terbaik per Domain
+
+| Domain | Repo Sumber | Pola Terbaik | Untuk Problem HRConnect |
+|--------|------------|-------------|------------------------|
+| **Role authorization di view** | PasPapan | `@can` eksklusif, 0 `hasRole()`, `Gate::authorize()` di Livewire | Konsistensi authorization |
+| **Sidebar navigation** | laravel-smarthr | `config/menu.php` + `MenuService` pipeline + `View::composer` | Solusi sidebar terpusat |
+| **Dashboard per-role** | HRMS | Single component + role-branched `mount()` + `render()` | Hapus 4 blok `@if` terpisah |
+| **Status badge color map** | Quanta HRIS | `match()` pattern + semantic Tailwind colors | Reusable status chip system |
+| **Indonesian helpers** | Quanta HRIS | `MonthHelper::formatPeriod()` + `getMonthOptions()` | Nama bulan + format ID |
+| **Notification batch** | Quanta HRIS | Bulk insert ke semua user per role | Hindari N queries untuk N recipients |
+| **Gate::before Admin bypass** | laravel-smarthr, HRMS | `Gate::before(fn($u) => $u->hasRole('Admin') ? true : null)` | Super-admin lewati semua cek |
+| **Admin vs User route split** | PasPapan | `admin` middleware vs `user` middleware — dua route group terpisah | Clean route separation |
+| **CSS @layer components** | PasPapan | 6623-line `app.css` dengan `@layer components` per domain | Attendance, payslip, profile styling |
+| **Glass-morphism surfaces** | PasPapan | `.user-page-surface` dengan `bg-white/72 backdrop-blur-sm` | Kedalaman visual untuk mobile |
+| **SSE streaming chat** | ship-ai | `fetch()` + `ReadableStream.getReader()` + `currentStream` accumulator | RAG chat real-time |
+| **Typing indicator** | ship-ai | 3 bouncing dots staggered `animation-delay` + `x-show="isStreaming && !currentStream"` | UX saat menunggu AI |
+
+---
+
+## 🔴 CRITICAL: Bug Role-Based UI (2 item)
+
+### BUG-1: Approvals — 3 Role Tidak Bisa Approve
+
+**Lokasi:** `resources/js/approvals-index.js:65` + `resources/views/approvals/index.blade.php:2`
+
+**Akar masalah:** Blade kirim raw Spatie role name (`'super-admin'`, `'hr-manager'`, `'finance'`), tapi JS mengharapkan nama yang di-normalisasi (`'hr'`).
+
+```js
+// Line 65 — HANYA mengecek 2 nilai:
+canApprove() {
+    return this.role === 'manager' || this.role === 'hr';  
+    // ✗ 'super-admin', 'hr-manager', 'finance' → FALSE
+}
+
+// Line 40 — fetchApprovals juga salah:
+else if (this.role === 'hr') { ... }  // ✗ 'hr-manager', 'super-admin' fall ke generic
+```
+
+| Role | `this.role` | `canApprove()` | Bisa Approve? | Endpoint API |
+|------|------------|----------------|:---:|--------------|
+| Super Admin | `super-admin` | false | **TIDAK** | Salah |
+| HR Manager | `hr-manager` | false | **TIDAK** | Salah |
+| Finance | `finance` | false | **TIDAK** | Salah |
+| Manager | `manager` | true | Ya | Salah (generic) |
+| Employee | `employee` | false | N/A | Benar |
+
+**Fix (sumber: HRMS pola normalisasi role):**
+```js
+// Di init() — normalisasi role name
+this.normalizedRole = {
+    'super-admin': 'hr',
+    'hr-manager': 'hr',
+}[this.role] ?? this.role;
+
+// Perbaiki canApprove()
+canApprove() {
+    return ['manager', 'hr', 'finance'].includes(this.normalizedRole);
+}
+
+// Perbaiki fetchApprovals()
+if (this.normalizedRole === 'hr') { ... }
+else if (this.normalizedRole === 'finance') { ... }
+```
+
+**Task file:**
+- `resources/js/approvals-index.js` — normalisasi role + perbaiki `canApprove()` + `fetchApprovals()`
+- `resources/views/approvals/index.blade.php:25` — `$canApprove` di Blade sudah benar, tapi perlu sinkronisasi dengan JS
+
+---
+
+### BUG-2: Finance Dashboard — `pending_payrolls` Hardcoded 0
+
+**Lokasi:** `app/Http/Controllers/DashboardController.php:73`
+
+```php
+// Sekarang
+$pending_payrolls = 0;
+
+// Seharusnya (sumber: Quanta HRIS status-based filter)
+$pending_payrolls = Payroll::whereIn('status', ['draft', 'submitted'])->count();
+```
+
+**Task file:**
+- `app/Http/Controllers/DashboardController.php` — implementasi query `$pending_payrolls`
+
+---
+
+## 🔴 HIGH: Inkosistensi Role-Based UI (5 item)
+
+### H-1: Dead Nav Items di Sidebar
+
+**Lokasi:** `resources/views/layouts/app/sidebar.blade.php`
+
+| Baris | Item | Masalah |
+|-------|------|---------|
+| 63-69 | "Admin Absensi" | `href="#"`, tooltip "segera hadir" — dead link |
+| 190-199 | "Perusahaan & Struktur" | Teks mati tanpa `href` — tidak bisa diklik |
+
+**Fix (sumber: laravel-smarthr `config/menu.php`):**
+- Hapus dead stubs atau tambah `route` + permission check
+- Jika belum diimplementasi: sembunyikan dengan `@can` guard
+
+**Task file:**
+- `resources/views/layouts/app/sidebar.blade.php` — hapus atau implementasikan 2 dead nav items
+
+---
+
+### H-2: Dua Sistem Authorization Paralel (Role vs Permission)
+
+**Masalah:** Dashboard pakai **role-based** (`$role === 'hr'`), sidebar pakai **permission-based** (`@can(...)`), approvals JS pakai **string matching** — tiga strategi berbeda dalam satu aplikasi.
+
+**Pola dari referensi:**
+- **PasPapan:** `@can` eksklusif di semua view — tidak ada `hasRole()` di Blade
+- **HRMS:** `Gate::before` Admin bypass — sisanya `@can`/`hasAnyRole()`
+- **laravel-smarthr:** Custom Blade directives (`@superadmin`, `@employee`) + `@can` untuk fine-grained
+- **Quanta HRIS:** Filament `shouldRegisterNavigation()` + `canViewAny()` — konsep sama dengan `@can`
+
+**Rekomendasi (adopsi PasPapan + laravel-smarthr):**
+1. Buat View Composer `currentRole()` — satu sumber kebenaran
+2. Ganti semua `$role === '...'` di Blade dengan `@can` / `@canany`
+3. Tambah `Gate::before` untuk super-admin bypass
+4. Hapus `roles->first()?->name` dari semua view
+
+**Task file:**
+- `app/Providers/AppServiceProvider.php` — tambah View Composer `currentRole()`
+- `resources/views/dashboard.blade.php` — refactor `@if($role === '...')` → `@can`
+- `resources/views/employee/index.blade.php:3` — refactor `$role` → `@can`
+- `resources/views/approvals/index.blade.php:7` — refactor `$role` → `@can`
+- `resources/views/layouts/app/sidebar.blade.php:52` — refactor `hasRole()` → `@can`
+
+---
+
+### H-3: Sidebar Nav — Tidak Ada Konfigurasi Terpusat
+
+**Masalah:** Setiap item sidebar di-hardcode dengan `@can` inline. Pattern rapuh — tidak ada single source of truth untuk struktur navigasi.
+
+**Pola dari laravel-smarthr (PALING BERSIH):**
+```php
+// config/navigation.php — satu file untuk SEMUA nav item
+return [
+    ['title' => 'Utama'],
+    ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'dashboard', 'can' => 'view_dashboard'],
+    
+    ['title' => 'SDM', 'visible' => fn($u) => $u->canAny(['view_employees', 'view_attendances', ...])],
+    ['label' => 'Karyawan', 'route' => 'admin.employees.index', 'icon' => 'group', 'can' => 'viewAny:App\\Models\\Employee', 'roles' => ['super-admin', 'hr-manager', 'manager', 'finance']],
+    // ... dst
+];
+```
+
+Kemudian `MenuService::build()` → filter by permission + role → hasil dikirim ke sidebar via `View::composer`.
+
+**Pola dari HRMS (JSON-based):**
+```json
+// resources/menu/verticalMenu.json
+[
+  {"label": "Dashboard", "url": "/dashboard", "icon": "home", "role": ["Admin", "HR", "CC"]},
+  {"label": "Employees", "url": "/structure/employees", "icon": "users", "role": ["Admin", "HR"]}
+]
+```
+
+**Rekomendasi:** Buat `config/navigation.php` dengan struktur array, filter by `Gate::allows()`, inject ke sidebar via View Composer. Ini menggantikan ~100 baris inline `@can` di sidebar.
+
+**Task file:**
+- `config/navigation.php` — file baru: definisi nav terpusat
+- `app/Services/NavigationService.php` — file baru: filter + build menu
+- `app/Providers/AppServiceProvider.php` — tambah View Composer
+- `resources/views/layouts/app/sidebar.blade.php` — refactor: render dari array, bukan inline
+
+---
+
+### H-4: Variabel `$isSelf` Tidak Dipakai
+
+**Lokasi:** `resources/views/employee/show.blade.php:3`
+
+```php
+$isSelf = auth()->user()->employee?->id === $employee->id;
+// ... tidak pernah dipakai di template manapun
+```
+
+**Fix:** Hapus baris 3.
+
+---
+
+### H-5: Tidak Ada CSS Component Layer per Domain
+
+**Masalah:** `resources/css/app.css` — 106 baris (hanya `@theme` tokens). PasPapan: **6.623 baris** dengan 30+ section `@layer components` per domain.
+
+| Domain CSS PasPapan | Baris | HRConnect? |
+|---------------------|-------|:----------:|
+| flatpickr theming | 632 | ❌ |
+| card utilities | 27 | ❌ |
+| attendance panels | 243 | ❌ |
+| user page shell | 135 | ❌ |
+| profile page | 258 | ❌ |
+| payslip panels | 93 | ❌ |
+| auth pages | 493 | ❌ |
+| bottom nav dock | 77 | ❌ |
+| face enrollment | 228 | ❌ |
+| glass-morphism | 1948 | ❌ |
+
+**Dampak:** Setiap elemen di-style inline dengan utility class. Tidak ada abstraksi — duplikasi kode di setiap halaman.
+
+**Fix (sumber: PasPapan):** Tambah `@layer components` minimal untuk: attendance-card, payslip-card, profile-section, auth-card, glass-surface.
+
+**Task file:**
+- `resources/css/app.css` — tambah `@layer components` untuk domain utama
+
+---
+
+## 🟡 Perbandingan Arsitektur: Sebelum vs Sesudah
+
+| Area | Sebelum | Sesudah |
+|------|---------|---------|
+| Role detection | `roles->first()?->name` diulang 4x | `$currentRole` via View Composer |
+| Sidebar | Inline `@can` + 2 dead stubs | `config/navigation.php` terpusat |
+| Dashboard | 4 blok `@if` terpisah per role | Single view + permission-filtered sections |
+| Approval JS | 3 role tidak bisa approve | Normalized role + semua role bisa approve |
+| CSS | 106 baris, no component layers | `@layer components` per domain |
+| UI surfaces | Flat MD3 (`bg-canvas`) | Flat MD3 + optional glass-morphism |
+| Authorization | 3 sistem berbeda parallel | `@can` + `Gate::before` seragam |
+
+---
+
+## 📋 Task List: Perbaikan Role-Based UI
+
+### Fase 1 — Bug Kritis (estimasi 2 jam)
+
+| ID | Task | File | Estimasi | Sumber Pola |
+|:--:|------|------|:--------:|-------------|
+| **B1** | Fix approval JS — normalisasi role + `canApprove()` + `fetchApprovals()` | `resources/js/approvals-index.js`, `resources/views/approvals/index.blade.php` | 30 menit | HRMS normalisasi, PasPapan `can()` |
+| **B2** | Implement `pending_payrolls` query di DashboardController | `app/Http/Controllers/DashboardController.php` | 10 menit | Quanta HRIS `whereIn('status', [])` |
+| **B3** | Hapus dead nav items (Admin Absensi, Perusahaan & Struktur) | `resources/views/layouts/app/sidebar.blade.php` | 5 menit | laravel-smarthr `visible` key |
+
+### Fase 2 — Konsolidasi Authorization (estimasi 4 jam)
+
+| ID | Task | File | Estimasi | Sumber Pola |
+|:--:|------|------|:--------:|-------------|
+| **C1** | Buat View Composer `currentRole()` di AppServiceProvider | `app/Providers/AppServiceProvider.php` | 15 menit | laravel-smarthr `View::composer` |
+| **C2** | Refactor dashboard — ganti `@if($role === '...')` → `@can` | `resources/views/dashboard.blade.php` | 30 menit | PasPapan `@can` exclusive |
+| **C3** | Refactor employee/index role-based titles → `@can` | `resources/views/employee/index.blade.php` | 15 menit | PasPapan pattern |
+| **C4** | Refactor approvals/index → ganti `@php $role` dengan `@can` | `resources/views/approvals/index.blade.php` | 15 menit | PasPapan pattern |
+| **C5** | Hapus `$isSelf` unused variable | `resources/views/employee/show.blade.php:3` | 1 menit | — |
+| **C6** | Konversi sidebar inline `@can` → render dari array config | `config/navigation.php` (baru), `resources/views/layouts/app/sidebar.blade.php` | 2 jam | laravel-smarthr `config/menu.php` |
+
+### Fase 3 — CSS Component Layer (estimasi 4 jam)
+
+| ID | Task | File | Estimasi | Sumber Pola |
+|:--:|------|------|:--------:|-------------|
+| **D1** | Tambah `@layer components` attendance (card, status, timeline) | `resources/css/app.css` | 45 menit | PasPapan lines 1025-1267 |
+| **D2** | Tambah `@layer components` payslip (card, earnings, deductions) | `resources/css/app.css` | 30 menit | PasPapan lines 1794-1886 |
+| **D3** | Tambah `@layer components` profile (section card, info grid, family) | `resources/css/app.css` | 30 menit | PasPapan lines 1405-1662 |
+| **D4** | Tambah `@layer components` glass-morphism surfaces | `resources/css/app.css` | 15 menit | PasPapan lines 4676-6623 |
+| **D5** | Refactor halaman attendance pakai CSS component classes | `resources/views/attendance/*.blade.php` | 1 jam | PasPapan |
+| **D6** | Refactor halaman payslip pakai CSS component classes | `resources/views/payroll/*.blade.php` | 30 menit | PasPapan |
+
+### Fase 4 — Polish & Utility (estimasi 2 jam)
+
+| ID | Task | File | Estimasi | Sumber Pola |
+|:--:|------|------|:--------:|-------------|
+| **E1** | Tambah `StatusColor::register()` — centralized status→tone mapping | `app/Providers/AppServiceProvider.php` | 30 menit | Quanta HRIS |
+| **E2** | Tambah `MonthHelper` utility (Indonesia month names) | `app/Utils/MonthHelper.php` (baru) | 30 menit | Quanta HRIS |
+| **E3** | Upgrade `x-bottom-nav` ke floating glass dock | `resources/views/components/bottom-nav.blade.php` | 45 menit | PasPapan |
+| **E4** | Tambah `@layer components` untuk `.wcag-touch-target` | `resources/css/app.css` | 5 menit | PasPapan |
+
+---
+
+## 📊 Prioritas Eksekusi (Update 2 Juli 2026)
+
+| Prioritas | Task | Role Terdampak | Dampak |
+|:---------:|------|:--------------:|--------|
+| **P0** | B1 — Fix approval JS (3 role tidak bisa approve) | Super Admin, HR Manager, Finance | **Blocker** — UI tidak berfungsi |
+| **P0** | B2 — Implement `pending_payrolls` di dashboard | Finance | Data palsu di dashboard |
+| **P0** | B3 — Hapus dead nav items | Semua role | Placeholder mati di sidebar |
+| **P1** | C1-C6 — Konsolidasi authorization system | Semua role | Bersihkan 3 sistem parallel |
+| **P2** | D1-D6 — CSS component layer + refactor | Semua role | Kurangi duplikasi CSS inline |
+| **P3** | E1-E4 — Polish utilities | Semua role | Reusable helpers |
