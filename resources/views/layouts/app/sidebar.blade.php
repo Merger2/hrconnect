@@ -5,7 +5,6 @@
     </head>
     <body class="min-h-screen bg-canvas pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0"
         x-data
-        x-init="$store.darkMode.init()"
     >
         <!-- ─── Desktop Sidebar ─── -->
         <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-e border-outline-variant bg-canvas lg:flex">
@@ -16,8 +15,12 @@
 
             {{-- Navigation --}}
             <nav class="flex-1 overflow-y-auto py-2">
-                @php $sidebarMenu = $sidebarMenu ?? [] @endphp
-                @foreach($sidebarMenu as $group)
+                @php
+                    $menu = auth()->user()
+                        ? app(\App\Services\NavigationService::class)->build(auth()->user())
+                        : [];
+                @endphp
+                @foreach($menu as $group)
                 <div class="px-4 pb-2 pt-5">
                     <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __($group['title']) }}</p>
                 </div>
@@ -42,7 +45,6 @@
             {{-- User --}}
             <div class="flex items-center justify-between border-t border-outline-variant p-3">
                 <x-desktop-user-menu />
-                <x-navigation.theme-toggle size="sm" />
             </div>
         </aside>
 
@@ -50,7 +52,6 @@
         <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-outline-variant bg-canvas px-4 lg:hidden">
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
             <div class="flex items-center gap-1">
-                <x-navigation.theme-toggle size="sm" />
                 <x-desktop-user-menu />
             </div>
         </header>
