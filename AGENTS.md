@@ -8,11 +8,16 @@ Enterprise HRIS (skripsi). Laravel 13 + Livewire 4 + Tailwind CSS 4 + PostgreSQL
 |------|-----|
 | `CLAUDE.md` / `GEMINI.md` | Laravel Boost guidelines — skills activation, Boost MCP tools, search-docs, coding conventions, lint auto-fix |
 | `DESIGN.md` | MD3 design tokens, app vs landing theme split, utility classes |
-| `task.md` | Pekerjaan tersisa, audit findings, UX porting plan |
+| `docs/planning/task.md` | Pekerjaan tersisa, audit findings, UX porting plan |
+
+## OpenCode Configuration
+
+- **`opencode.json`** sudah dikonfigurasi — MCP `laravel-boost` auto-started via `php artisan boost:mcp`. Tidak perlu setup manual.
+- Boost MCP tools tersedia: `database-query`, `database-schema`, `search-docs`, `browser-logs`, `get-absolute-url`, `last-error`, `read-log-entries`.
 
 ## Skills Tersedia (`.agents/skills/`)
 
-Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-development`, `laravel-best-practices`, `livewire-development`, `pest-testing`, `tailwindcss-development`.
+Auto-discovery oleh OpenCode. Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-development`, `laravel-best-practices`, `livewire-development`, `pest-testing`, `tailwindcss-development`.
 
 ## Prioritas Development
 
@@ -25,7 +30,7 @@ Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-developm
 
 **Pembuatan akun & semua data master** ada di HR-Manager + Finance — bukan employee.
 
-**Sumber referensi UI (wajib):** Semua Blade/Livewire component harus merujuk ke repo clone di `/home/merger/`. Jangan buat dari nol — ambil pola dari PasPapan (components, layout, Alpine patterns) lalu konversi ke Tailwind CSS 4 + Material Symbols + MD3 tokens HRConnect. Lihat `task.md` §UX Porting Plan untuk detail per komponen.
+**Sumber referensi UI (wajib):** Semua Blade/Livewire component harus merujuk ke repo clone di `/home/merger/`. Jangan buat dari nol — ambil pola dari PasPapan (components, layout, Alpine patterns) lalu konversi ke Tailwind CSS 4 + Material Symbols + MD3 tokens HRConnect. Lihat `docs/planning/task.md` §UX Porting Plan untuk detail per komponen.
 
 ## Status ~95%
 
@@ -35,7 +40,7 @@ Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-developm
 - ✅ Keamanan: CipherSweet, device verification, password expiry, rate limiting
 - ✅ Frontend: Livewire 4 SFC, Alpine.js, PWA, Tailwind CSS 4 + MD3 tokens
 - ✅ Tests: **78 file — 1.173 passed, 2 skipped, 4.128 assertions** (SQLite)
-- ⏳ Lihat `task.md` untuk item tersisa
+- ⏳ Lihat `docs/planning/task.md` untuk item tersisa
 
 ## Perintah Kunci
 
@@ -53,6 +58,7 @@ Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-developm
 | Queue worker | `php artisan queue:work --queue=default,payroll_high,notifications` |
 
 **Catatan:** `composer test` jalanin `config:clear` + `lint:check` dulu — untuk fast feedback pakai `php artisan test --compact --filter=X`.
+`--format agent` pada Pint menghasilkan output yang dioptimalkan untuk AI (concise, structured), bukan format human-readable default. Gunakan selalu saat auto-fix.
 
 ## Setup & Lingkungan
 
@@ -63,7 +69,6 @@ Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-developm
 - `pgvector/pgvector` di `dont-discover` — register manual via `PgvectorSchema::register()` di AppServiceProvider.
 - `post-update-cmd` runs `boost:update` — butuh `.env` ada.
 - Livewire v4 SFC: `make_command.emoji` set `false`.
-- Boost MCP tools tersedia: `database-query`, `database-schema`, `search-docs`, `browser-logs`.
 
 ## Arsitektur
 
@@ -73,7 +78,7 @@ Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-developm
 - **34 enums** — 16 Status/Indicator punya `color()` (MD3 semantic); 18 Classification jangan.
 - **8 observers** (register manual di AppServiceProvider), **13 policies** (auto-discovery), **8 notifications**
 - **5 Spatie roles**: super-admin, hr-manager, finance, manager, employee.
-- **Web routes** via `bootstrap/app.php` `then` block — membaca `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement}.php`.
+- **Web routes** via `bootstrap/app.php` `then` block — membaca `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement,employee,settings}.php`. `routes/web.php` hanya untuk dashboard + settings include.
 - **Model attributes**: Laravel 13 `#[Fillable]`/`#[Hidden]` syntax.
 
 ## Frontend & JS
@@ -106,7 +111,7 @@ Aktifkan via `skill` tool sesuai domain: `ai-sdk-development`, `fortify-developm
 - **PII split**: `GET /employees/{id}` masking NIK/phone/NPWP/bank. `GET /employees/{id}/pii` reveal (butuh `manage_employees` + audit log).
 - **Per-page max**: pagination `per_page` capped 100.
 - **Scramble**: `api_path => 'api'` strips prefix (tampil `/v1/...`) tapi server URL include `/api`. URLs resolve benar.
-- **`RAG_MOCK_MODE=true`** — **dead config.** PHP tidak membaca ini. Selalu panggil Gemini sungguhan.
+- **`RAG_MOCK_MODE=true`** — **dead config.** Variabel ini ada di `.env.example` dan `phpunit.pgsql.xml` tapi tidak dibaca oleh kode PHP manapun. Selalu panggil Gemini sungguhan.
 - **pg_trgm fallback** hanya di sync `chat()`, bukan streaming.
 
 ## Reference Repos (Cloned — Jangan Hapus)
