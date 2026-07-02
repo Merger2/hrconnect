@@ -12,6 +12,7 @@
 <meta name="theme-color" content="#0a0a0a">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <script defer src="/assets/js/face-api.min.js"></script>
