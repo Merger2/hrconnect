@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-02 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅. **Next: Approvals JS Bug Fix + Konsolidasi Role-Based UI + CSS Component Layer**. Audit multi-repo (5 repos) + role-based UI selesai.
+> Updated: 2026-07-02 — Sesi A ✅ B ✅ C ✅ D ✅ E ✅ F ✅ G ✅. **P0 bugs fixed: Approval JS + Finance dashboard + Dead sidebar**. Audit multi-repo (PRD + 5 repos) selesai. 1,173 tests pass.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
@@ -2604,9 +2604,9 @@ Hasil audit mendalam 5 repo referensi: **PasPapan**, **Quanta HRIS**, **laravel-
 
 ---
 
-## 🔴 CRITICAL: Bug Role-Based UI (2 item)
+## 🔴 CRITICAL: Bug Role-Based UI (2 item) ✅ Selesai Sesi G
 
-### BUG-1: Approvals — 3 Role Tidak Bisa Approve
+### BUG-1: Approvals — 3 Role Tidak Bisa Approve ✅ Fixed
 
 **Lokasi:** `resources/js/approvals-index.js:65` + `resources/views/approvals/index.blade.php:2`
 
@@ -2655,7 +2655,7 @@ else if (this.normalizedRole === 'finance') { ... }
 
 ---
 
-### BUG-2: Finance Dashboard — `pending_payrolls` Hardcoded 0
+### BUG-2: Finance Dashboard — `pending_payrolls` Hardcoded 0 ✅ Fixed
 
 **Lokasi:** `app/Http/Controllers/DashboardController.php:73`
 
@@ -2814,9 +2814,9 @@ $isSelf = auth()->user()->employee?->id === $employee->id;
 
 | ID | Task | File | Estimasi | Sumber Pola |
 |:--:|------|------|:--------:|-------------|
-| **B1** | Fix approval JS — normalisasi role + `canApprove()` + `fetchApprovals()` | `resources/js/approvals-index.js`, `resources/views/approvals/index.blade.php` | 30 menit | HRMS normalisasi, PasPapan `can()` |
-| **B2** | Implement `pending_payrolls` query di DashboardController | `app/Http/Controllers/DashboardController.php` | 10 menit | Quanta HRIS `whereIn('status', [])` |
-| **B3** | Hapus dead nav items (Admin Absensi, Perusahaan & Struktur) | `resources/views/layouts/app/sidebar.blade.php` | 5 menit | laravel-smarthr `visible` key |
+| **B1** | Fix approval JS — normalisasi role + `canApprove()` + `fetchApprovals()` | `resources/js/approvals-index.js`, `resources/views/approvals/index.blade.php` | 30 menit | HRMS normalisasi, PasPapan `can()` | ✅ |
+| **B2** | Implement `pending_payrolls` query di DashboardController | `app/Http/Controllers/DashboardController.php` | 10 menit | Quanta HRIS `whereIn('status', [])` | ✅ |
+| **B3** | Hapus dead nav items (Admin Absensi, Perusahaan & Struktur) | `resources/views/layouts/app/sidebar.blade.php` | 5 menit | laravel-smarthr `visible` key | ✅ |
 
 ### Fase 2 — Konsolidasi Authorization (estimasi 4 jam)
 
@@ -2855,9 +2855,9 @@ $isSelf = auth()->user()->employee?->id === $employee->id;
 
 | Prioritas | Task | Role Terdampak | Dampak |
 |:---------:|------|:--------------:|--------|
-| **P0** | B1 — Fix approval JS (3 role tidak bisa approve) | Super Admin, HR Manager, Finance | **Blocker** — UI tidak berfungsi |
-| **P0** | B2 — Implement `pending_payrolls` di dashboard | Finance | Data palsu di dashboard |
-| **P0** | B3 — Hapus dead nav items | Semua role | Placeholder mati di sidebar |
+| **P0** | B1 — Fix approval JS (3 role tidak bisa approve) | Super Admin, HR Manager, Finance | ✅ Fixed Sesi G |
+| **P0** | B2 — Implement `pending_payrolls` di dashboard | Finance | ✅ Fixed Sesi G |
+| **P0** | B3 — Hapus dead nav items | Semua role | ✅ Fixed Sesi G |
 | **P1** | C1-C6 — Konsolidasi authorization system | Semua role | Bersihkan 3 sistem parallel |
 | **P2** | D1-D6 — CSS component layer + refactor | Semua role | Kurangi duplikasi CSS inline |
 | **P3** | E1-E4 — Polish utilities | Semua role | Reusable helpers |
