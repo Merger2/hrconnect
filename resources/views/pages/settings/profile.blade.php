@@ -96,9 +96,6 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
         {{-- Avatar Card --}}
         <div class="mb-6 overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
-            <div class="border-b border-outline-variant/50 px-6 py-4">
-                <x-status-badge tone="neutral" :pill="true">{{ __('Foto Profil') }}</x-status-badge>
-            </div>
             <div class="p-6">
                 <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
                     <div class="relative shrink-0">
