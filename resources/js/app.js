@@ -25,12 +25,16 @@ import Swal from 'sweetalert2';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
+const normalizeIcon = (icon) => ({ danger: 'error', failed: 'error', failure: 'error', warn: 'warning' }[icon] || icon);
+
 const swalClasses = {
-    confirmButton: 'inline-flex items-center justify-center rounded-xl bg-danger px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2 ml-2',
-    cancelButton: 'inline-flex items-center justify-center rounded-xl border border-outline-variant bg-canvas px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-    popup: 'rounded-xl border border-outline-variant bg-canvas p-6 shadow-lg',
-    title: 'text-lg font-semibold text-ink',
-    htmlContainer: 'text-sm text-on-surface-variant',
+    popup: '!rounded-[1.35rem] !border !border-outline-variant/50 !bg-canvas !px-5 !py-6 !shadow-[0_28px_80px_-42px_rgba(10,10,10,0.55)]',
+    icon: '!my-2 !h-16 !w-16 !border-[0.28rem]',
+    title: '!mt-4 !text-lg !font-bold !tracking-tight !text-ink',
+    htmlContainer: '!mx-0 !mt-3 !text-sm !leading-6 !text-on-surface-variant',
+    actions: '!mt-6 !grid !w-full !grid-cols-2 !gap-3',
+    confirmButton: '!m-0 !inline-flex !min-h-[3rem] !w-full !items-center !justify-center !rounded-xl !bg-ink !px-5 !py-3 !text-sm !font-bold !text-white focus:!ring-2 focus:!ring-ink/20',
+    cancelButton: '!m-0 !inline-flex !min-h-[3rem] !w-full !items-center !justify-center !rounded-xl !border !border-outline-variant !bg-canvas !px-5 !py-3 !text-sm !font-bold !text-ink',
 };
 
 window.apiHeaders = () => {
@@ -44,19 +48,17 @@ window.HRConnectAlert = {
         const isDark = document.documentElement.classList.contains('dark');
         const config = {
             toast: true,
-            position: 'bottom-right',
+            position: 'bottom-end',
             showConfirmButton: false,
             timer: 3200,
             timerProgressBar: true,
-            icon: data.type || 'success',
-            title: data.message || '',
-            background: isDark ? '#1c1b1b' : '#ffffff',
-            color: isDark ? '#f8fafc' : '#0a0a0a',
-            iconColor: data.type === 'error' ? '#ba1a1a' : data.type === 'warning' ? '#f59e0b' : '#22c55e',
+            icon: normalizeIcon(data.type || 'success'),
+            title: data.message || data.text || '',
+            background: 'transparent',
             customClass: {
-                popup: 'rounded-xl border border-outline-variant/50 shadow-lg px-4 py-3 font-sans',
-                title: 'text-sm font-semibold text-ink',
-                timerProgressBar: 'bg-primary h-1',
+                popup: '!bg-canvas !text-ink !rounded-2xl !shadow-[0_18px_48px_-28px_rgba(10,10,10,0.55)] !border !border-outline-variant/50 !px-4 !py-3 !w-auto !max-w-[92vw]',
+                title: '!text-sm !font-semibold !leading-5',
+                timerProgressBar: '!bg-ink !h-1',
             },
             didOpen: (toast) => {
                 toast.addEventListener('mouseenter', Swal.stopTimer);
