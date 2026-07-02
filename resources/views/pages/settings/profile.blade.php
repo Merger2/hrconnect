@@ -90,9 +90,8 @@ new #[Title('Pengaturan Profil')] class extends Component {
     }
 }; ?>
 
-<x-layouts::app.sidebar :title="__('Pengaturan Profil')">
-    <div class="mx-auto max-w-2xl">
-        @include('partials.settings-heading')
+<div class="mx-auto max-w-2xl">
+    @include('partials.settings-heading')
 
         {{-- Avatar Card --}}
         <div class="mb-6 overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
@@ -200,4 +199,3 @@ new #[Title('Pengaturan Profil')] class extends Component {
             </div>
         @endif
     </div>
-</x-layouts::app.sidebar>
