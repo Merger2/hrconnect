@@ -68,7 +68,7 @@ Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'v
 
 // ─── AUTHENTICATED (Sanctum) ──────────────────────────────────────────
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // ── Auth (logout) ────────────────────────────────────────────────
     Route::prefix('auth')->name('api.auth.')->group(function () {

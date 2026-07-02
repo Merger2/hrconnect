@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CheckPasswordExpired;
 use App\Http\Middleware\DeviceDetection;
+use App\Http\Middleware\EnsureSecurityHeaders;
 use App\Http\Middleware\GeofenceValidation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -44,6 +45,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Proteksi Host header poisoning.
         $middleware->trustHosts(at: fn () => [config('app.url')]);
+
+        // Security headers: CSP, HSTS, X-Frame-Options, Referrer-Policy (PasPapan pattern).
+        $middleware->web(append: [EnsureSecurityHeaders::class]);
 
         // Aliases shortcut untuk middleware Spatie & Sanctum (digunakan di routes).
         $middleware->alias([
