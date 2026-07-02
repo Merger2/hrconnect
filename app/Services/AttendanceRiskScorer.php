@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\AttendanceStatus;
 use App\Models\Attendance;
 use App\Models\Shift;
 use Carbon\Carbon;
@@ -188,7 +189,7 @@ class AttendanceRiskScorer
             ])];
         }
 
-        if ($attendance->status === 'late') {
+        if ($attendance->status === AttendanceStatus::LATE) {
             return [$this->factor('check_in_late', 10, $event, [
                 'shift_start' => $shiftStart->toDateTimeString(),
                 'clock_in' => $clockIn->toDateTimeString(),

@@ -104,7 +104,7 @@
                                     </template>
                                     <template x-if="tab === 'history'">
                                         <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset"
-                                              :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-danger/10 text-danger ring-danger/30'"
+                                              :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-error/10 text-error ring-error/30'"
                                               x-text="a.status === 'approved' ? '{{ __('Approved') }}' : '{{ __('Rejected') }}'"></span>
                                     </template>
                                 </td>
@@ -156,7 +156,7 @@
                             </template>
                             <template x-if="tab === 'history'">
                                 <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset"
-                                      :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-danger/10 text-danger ring-danger/30'"
+                                      :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-error/10 text-error ring-error/30'"
                                       x-text="a.status === 'approved' ? '{{ __('Approved') }}' : '{{ __('Rejected') }}'"></span>
                             </template>
                         </div>
@@ -207,14 +207,14 @@
                         <div class="flex items-start gap-3">
                             <div class="flex flex-col items-center">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
-                                     :class="step.status === 'approved' ? 'bg-success/10 text-success' : step.status === 'rejected' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'"
+                                     :class="step.status === 'approved' ? 'bg-success/10 text-success' : step.status === 'rejected' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'"
                                      x-text="step.status === 'approved' ? '✓' : step.status === 'rejected' ? '✗' : '○'"></div>
                                 <div x-show="i < (detailData?.approval_chain?.length || 1) - 1" class="mt-1 h-6 w-0.5 bg-outline-variant/30"></div>
                             </div>
                             <div class="flex-1 pb-4">
                                 <p class="text-sm font-medium text-ink" x-text="step.level_label || 'L' + step.level"></p>
                                 <p class="text-xs text-on-surface-variant" x-text="step.approver?.full_name || '{{ __('Unknown') }}'"></p>
-                                <p class="mt-0.5 text-xs" :class="step.status === 'approved' ? 'text-success' : step.status === 'rejected' ? 'text-danger' : 'text-warning'"
+                                <p class="mt-0.5 text-xs" :class="step.status === 'approved' ? 'text-success' : step.status === 'rejected' ? 'text-error' : 'text-warning'"
                                    x-text="step.status === 'approved' ? '{{ __('Approved') }}' : step.status === 'rejected' ? '{{ __('Rejected') }}' : '{{ __('Pending') }}'"></p>
                                 <p x-show="step.notes" class="mt-1 rounded-lg bg-surface-container-low px-2.5 py-1.5 text-xs text-on-surface-variant" x-text="'{{ __('Notes') }}: ' + step.notes"></p>
                                 <p x-show="step.approved_at" class="mt-0.5 text-xs text-on-surface-variant" x-text="formatDateTime(step.approved_at)"></p>

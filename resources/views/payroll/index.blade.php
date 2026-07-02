@@ -104,7 +104,7 @@
                                 <p class="text-sm font-medium text-ink" x-text="p.period"></p>
                                 <p class="mt-0.5 text-xs text-on-surface-variant">
                                     <span x-text="formatCurrency(p.net_salary)"></span>
-                                    <span class="text-success/70">{{ __('\'(take home)\'') }}</span>
+                                    <span class="text-success/70">{{ __('(take home)') }}</span>
                                 </p>
                             </div>
                             <x-status-badge x-show="p.status === 'published'" tone="success">{{ __('Published') }}</x-status-badge>

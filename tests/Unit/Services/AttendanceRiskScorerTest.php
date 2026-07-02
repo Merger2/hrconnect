@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AttendanceStatus;
 use App\Models\Attendance;
 use App\Models\Shift;
 use App\Services\AttendanceRiskScorer;
@@ -270,7 +271,7 @@ describe('AttendanceRiskScorer', function () {
     it('flags late check-in', function () {
         $attendance = mockAttendance([
             'clock_in' => now()->setTime(9, 0)->toDateTimeString(),
-            'status' => 'late',
+            'status' => AttendanceStatus::LATE,
         ]);
         $shift = mockShift('08:00');
 
