@@ -16,7 +16,7 @@ new class extends Component {}; ?>
         @click="$dispatch('open-modal', 'confirm-user-deletion')"
         data-test="delete-user-button"
     >
-        {{ __('Delete account') }}
+        {{ __('Hapus Akun') }}
     </button>
 
     <livewire:pages::settings.delete-user-modal />
