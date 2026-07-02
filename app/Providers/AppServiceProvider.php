@@ -24,8 +24,11 @@ use App\Services\GeminiClient;
 use App\Services\GeofenceService;
 use App\Services\NavigationService;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -77,6 +80,24 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Configure API rate limiting.
+     *
+     * Global API throttle: 60 requests per minute per user (or IP for guests).
+     * Per-endpoint throttles (login 5/min, clock-in 5/5min, etc.) override this
+     * via more specific middleware declarations on individual routes.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
     }
 
     /**
