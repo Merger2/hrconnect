@@ -228,10 +228,13 @@
                     this.setStage('loading-models', this.messages.loadingModels, this.messages.loadingHint);
 
                     try {
-                        await Promise.all([
-                            faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
-                            faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
-                        ]);
+                        if (!window.__faceApiLoaded) {
+                            await Promise.all([
+                                faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
+                                faceapi.nets.faceLandmark68Net.loadFromUri('/models/av1'),
+                            ]);
+                            window.__faceApiLoaded = true;
+                        }
                     } catch (e) {
                         this.setStage('error', this.messages.cameraError, '');
                         this.registerError = '{{ __('Gagal memuat model wajah') }}';
