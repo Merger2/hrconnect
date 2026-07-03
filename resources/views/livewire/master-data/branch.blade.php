@@ -114,7 +114,9 @@
                         </button>
                     </div>
                     <div class="px-6 py-4 space-y-4">
-                        <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Nama Cabang') }}</label><input x-model="form.name" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" required /></div>
+                        <div x-show="error" class="rounded-xl bg-error/10 px-4 py-3 text-sm text-error" x-text="error"></div>
+
+                        <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Nama Cabang') }} *</label><input x-model="form.name" class="w-full rounded-xl border bg-canvas px-3 py-2 text-sm text-ink" :class="!form.name.trim() && error ? 'border-error' : 'border-outline-variant'" required /></div>
                         <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Alamat') }}</label><input x-model="form.address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" /></div>
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
@@ -137,8 +139,11 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-end gap-3 border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">
-                        <x-button variant="secondary" @click="creating = false">{{ __('Batal') }}</x-button>
-                        <x-button variant="primary" @click="save()">{{ __('Simpan') }}</x-button>
+                        <x-button variant="secondary" @click="creating = false; error = ''">{{ __('Batal') }}</x-button>
+                        <x-button variant="primary" @click="save()" x-bind:disabled="saving">
+                            <span x-show="!saving">{{ __('Simpan') }}</span>
+                            <span x-show="saving" class="material-symbols-outlined animate-spin">progress_activity</span>
+                        </x-button>
                     </div>
                 </div>
             </div>
@@ -161,7 +166,9 @@
                         </button>
                     </div>
                     <div class="px-6 py-4 space-y-4">
-                        <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Nama Cabang') }}</label><input x-model="form.name" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" required /></div>
+                        <div x-show="error" class="rounded-xl bg-error/10 px-4 py-3 text-sm text-error" x-text="error"></div>
+
+                        <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Nama Cabang') }} *</label><input x-model="form.name" class="w-full rounded-xl border bg-canvas px-3 py-2 text-sm text-ink" :class="!form.name.trim() && error ? 'border-error' : 'border-outline-variant'" required /></div>
                         <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Alamat') }}</label><input x-model="form.address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" /></div>
                         <div>
                             <div class="flex items-center justify-between mb-1.5">

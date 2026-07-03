@@ -8,6 +8,8 @@ export default function () {
         total: 0,
         creating: false,
         editing: false,
+        saving: false,
+        error: '',
         selectedId: null,
         form: { name: '', address: '', latitude: '', longitude: '', radius: '' },
         deleteTarget: null,
@@ -58,12 +60,19 @@ export default function () {
         },
 
         async save() {
+            this.error = '';
+            if (!this.form.name.trim()) {
+                this.error = 'Nama cabang wajib diisi';
+                return;
+            }
+
             const method = this.selectedId ? 'PUT' : 'POST';
             const url = this.selectedId ? `/api/v1/branches/${this.selectedId}` : '/api/v1/branches';
             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const body = {};
             Object.keys(this.form).forEach(k => { if (this.form[k] !== '' && this.form[k] !== null) body[k] = this.form[k]; });
 
+            this.saving = true;
             try {
                 const res = await fetch(url, {
                     method,
@@ -76,10 +85,12 @@ export default function () {
                     this.editing = false;
                     this.fetchBranches();
                     this.$dispatch('toast', { variant: 'success', text: json.message });
+                } else {
+                    this.error = json.message || 'Gagal menyimpan';
                 }
             } catch {
                 this.$dispatch('toast', { variant: 'error', text: 'Gagal menyimpan' });
-            }
+            } finally { this.saving = false; }
         },
 
         async confirmDelete(branch) {
