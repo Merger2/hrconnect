@@ -1,12 +1,11 @@
 <?php
 
-use App\Livewire\MasterData\BranchComponent;
 use App\Livewire\MasterData\DepartmentComponent;
 use App\Livewire\MasterData\PositionComponent;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'password.expired'])->group(function () {
-    Route::get('/master-data/branches', BranchComponent::class)
+    Route::get('/master-data/branches', fn () => view('livewire.master-data.branch'))
         ->middleware('can:view_branches')
         ->name('master-data.branches');
 
