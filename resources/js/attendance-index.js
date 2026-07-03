@@ -26,9 +26,7 @@ export default function () {
         },
 
         apiHeaders() {
-            const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-            if (window.Laravel?.sanctumToken) headers['Authorization'] = 'Bearer ' + window.Laravel.sanctumToken;
-            return headers;
+            return window.apiHeaders();
         },
 
         async fetchToday() {

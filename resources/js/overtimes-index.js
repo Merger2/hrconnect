@@ -24,7 +24,7 @@ export default function () {
         async fetchOvertimes() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/overtime?period=${this.period}&per_page=50`, { headers: window.apiHeaders() });
+                const res = await fetch(`/api/v1/overtime?period=${this.period}&per_page=50`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;

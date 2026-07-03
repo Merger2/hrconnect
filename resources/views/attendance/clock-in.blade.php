@@ -211,7 +211,8 @@
 
                     const res = await fetch('/api/v1/attendance/clock-in', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
                         body: JSON.stringify(payload),
                     });
                     const json = await res.json();

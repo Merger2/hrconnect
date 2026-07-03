@@ -19,7 +19,6 @@ export default function () {
             this.scrollToBottom();
 
             try {
-                const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
                 const response = await fetch('/api/v1/knowledgebase/chat-stream', {
                     method: 'POST',
@@ -27,8 +26,8 @@ export default function () {
                         ...window.apiHeaders(),
                         'Content-Type': 'application/json',
                         'Accept': 'text/event-stream',
-                        'X-CSRF-TOKEN': token,
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         question: message,
                         conversation_id: this.conversationId,
@@ -85,14 +84,13 @@ export default function () {
                 const agentIndex = this.messages.length - 1;
 
                 try {
-                    const token = document.querySelector('meta[name="csrf-token"]')?.content;
                     const syncResp = await fetch('/api/v1/knowledgebase/chat', {
                         method: 'POST',
                         headers: {
                             ...window.apiHeaders(),
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': token,
                         },
+                        credentials: 'same-origin',
                         body: JSON.stringify({ question: message }),
                     });
 

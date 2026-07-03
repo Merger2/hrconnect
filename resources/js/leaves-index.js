@@ -12,7 +12,7 @@ export default function () {
 
         async fetchQuota() {
             try {
-                const res = await fetch('/api/v1/leave/quota', { headers: window.apiHeaders() });
+                const res = await fetch('/api/v1/leave/quota', { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') this.quota = json.data;
             } catch {
@@ -24,7 +24,7 @@ export default function () {
         async fetchLeaves() {
             this.loading = true;
             try {
-                const res = await fetch('/api/v1/leave?per_page=50', { headers: window.apiHeaders() });
+                const res = await fetch('/api/v1/leave?per_page=50', { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') this.leaves = json.data;
             } catch {

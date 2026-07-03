@@ -40,7 +40,7 @@ export default function () {
 
         async fetchDepartments() {
             try {
-                const res = await fetch('/api/v1/departments?per_page=200', { headers: window.apiHeaders() });
+                const res = await fetch('/api/v1/departments?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 this.departments = json.data || [];
             } catch (e) {
@@ -58,7 +58,7 @@ export default function () {
                 if (this.filters.status) params.set('status', this.filters.status);
                 if (this.filters.department_id) params.set('department_id', this.filters.department_id);
 
-                const res = await fetch(`/api/v1/employees?${params}`, { headers: window.apiHeaders() });
+                const res = await fetch(`/api/v1/employees?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 this.employees = json.data || [];
                 this.total = json.meta?.total || 0;
@@ -98,7 +98,7 @@ export default function () {
                 const params = new URLSearchParams();
                 if (this.filters.status) params.set('status', this.filters.status);
                 if (this.filters.department_id) params.set('department_id', this.filters.department_id);
-                const res = await fetch(`/api/v1/employees?per_page=1000&${params}`, { headers: window.apiHeaders() });
+                const res = await fetch(`/api/v1/employees?per_page=1000&${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 const data = json.data || [];
                 if (data.length === 0) return;
@@ -173,11 +173,11 @@ export default function () {
         async fetchLookups() {
             try {
                 const [cRes, bRes, dRes, pRes, mRes] = await Promise.all([
-                    fetch('/api/v1/companies?per_page=200', { headers: window.apiHeaders() }),
-                    fetch('/api/v1/branches?per_page=200', { headers: window.apiHeaders() }),
-                    fetch('/api/v1/departments?per_page=200', { headers: window.apiHeaders() }),
-                    fetch('/api/v1/positions?per_page=200', { headers: window.apiHeaders() }),
-                    fetch('/api/v1/employees?per_page=200', { headers: window.apiHeaders() }),
+                    fetch('/api/v1/companies?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/branches?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/departments?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/positions?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/employees?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
                 ]);
                 this.lookup.companies = (await cRes.json()).data || [];
                 this.lookup.branches = (await bRes.json()).data || [];
