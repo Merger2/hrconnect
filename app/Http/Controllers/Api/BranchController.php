@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BranchResource;
 use App\Models\Branch;
+use App\Models\Company;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -62,7 +63,9 @@ class BranchController extends Controller
             'radius' => 'nullable|integer|min:10|max:5000',
         ]);
 
-        $branch = Branch::create($validated + ['company_id' => $request->input('company_id')]);
+        $branch = Branch::create($validated + [
+            'company_id' => $request->input('company_id') ?? Company::first()?->id,
+        ]);
 
         return response()->json([
             'status' => 'success',

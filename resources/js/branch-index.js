@@ -61,10 +61,8 @@ export default function () {
             const method = this.selectedId ? 'PUT' : 'POST';
             const url = this.selectedId ? `/api/v1/branches/${this.selectedId}` : '/api/v1/branches';
             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const body = JSON.parse(JSON.stringify(this.form));
-            if (!body.latitude) delete body.latitude;
-            if (!body.longitude) delete body.longitude;
-            if (!body.radius) body.radius = null;
+            const body = {};
+            Object.keys(this.form).forEach(k => { if (this.form[k] !== '' && this.form[k] !== null) body[k] = this.form[k]; });
 
             try {
                 const res = await fetch(url, {
