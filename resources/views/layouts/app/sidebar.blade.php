@@ -56,7 +56,7 @@
         <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-outline-variant bg-canvas px-4 lg:hidden">
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
             <div class="flex items-center gap-1">
-                <x-desktop-user-menu />
+                <x-desktop-user-menu :dropUp="false" />
             </div>
         </header>
 
