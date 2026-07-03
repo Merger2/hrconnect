@@ -92,92 +92,108 @@
     </x-page-shell>
 
     {{-- Create Modal --}}
-    <x-modal :show="$creating" :title="__('Tambah Cabang')" max-width="lg">
-        <div>
-            @if($creating)
-            <div x-data="branchMapPicker({
-                lat: @js($latitude ?? -2.5),
-                lng: @js($longitude ?? 118),
-                radius: @js((int) ($radius ?? 100)),
-            })" x-init="initMap()">
+    @if($creating)
+    <div x-data="branchMapPicker({
+        lat: @js($latitude ?? -2.5),
+        lng: @js($longitude ?? 118),
+        radius: @js((int) ($radius ?? 100)),
+    })" x-init="initMap()"
+        x-show="$wire.creating"
+        x-cloak
+        x-on:keydown.escape.window="$wire.set('creating', false)"
+        class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6"
+        role="dialog" aria-modal="true"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="$wire.set('creating', false)" aria-hidden="true"></div>
+        <div class="relative z-10 mx-auto w-full max-w-lg transform overflow-hidden rounded-xl bg-canvas shadow-xl"
+            style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
+            x-on:click.stop
+            x-trap.inert.noscroll="$wire.creating"
+            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
+                <h2 class="text-lg font-semibold text-ink">{{ __('Tambah Cabang') }}</h2>
+                <button @click="$wire.set('creating', false)" class="rounded-xl p-1.5 text-on-surface-variant hover:text-ink hover:bg-surface-container-high transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+            <div class="px-6 py-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="sm:col-span-2">
-                        <x-forms.input label="{{ __('Nama Cabang') }}" wire:model="name" required />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <x-forms.input label="{{ __('Alamat') }}" wire:model="address" />
-                    </div>
+                    <div class="sm:col-span-2"><x-forms.input label="{{ __('Nama Cabang') }}" wire:model="name" required /></div>
+                    <div class="sm:col-span-2"><x-forms.input label="{{ __('Alamat') }}" wire:model="address" /></div>
                     <div class="sm:col-span-2">
                         <label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Lokasi (klik peta)') }}</label>
                         <div x-ref="map" class="h-[280px] w-full rounded-xl border border-outline-variant bg-surface-dim/30"></div>
-                        <p class="mt-1 text-xs text-on-surface-variant">
-                            <span x-text="'Lat: ' + lat.toFixed(6)"></span> ·
-                            <span x-text="'Lng: ' + lng.toFixed(6)"></span>
-                        </p>
+                        <p class="mt-1 text-xs text-on-surface-variant"><span x-text="'Lat: ' + lat.toFixed(6)"></span> · <span x-text="'Lng: ' + lng.toFixed(6)"></span></p>
                     </div>
-                    <div>
-                        <x-forms.input label="{{ __('Latitude') }}" wire:model="latitude" type="number" step="any" />
-                    </div>
-                    <div>
-                        <x-forms.input label="{{ __('Longitude') }}" wire:model="longitude" type="number" step="any" />
-                    </div>
+                    <div><x-forms.input label="{{ __('Latitude') }}" wire:model="latitude" type="number" step="any" /></div>
+                    <div><x-forms.input label="{{ __('Longitude') }}" wire:model="longitude" type="number" step="any" /></div>
                     <div class="sm:col-span-2">
                         <x-forms.input label="{{ __('Radius (meter)') }}" wire:model="radius" type="number" min="10" max="5000" placeholder="100" />
-                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Radius geofence untuk validasi absensi. Default 100m.') }}</p>
+                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Radius geofence. Default 100m.') }}</p>
                     </div>
                 </div>
             </div>
-            @endif
+            <div class="flex items-center justify-end gap-3 border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">
+                <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
+            </div>
         </div>
-        <x-slot:footer>
-            <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
-        </x-slot:footer>
-    </x-modal>
+    </div>
+    @endif
 
     {{-- Edit Modal --}}
-    <x-modal :show="$editing" :title="__('Edit Cabang')" max-width="lg">
-        <div>
-            @if($editing)
-            <div x-data="branchMapPicker({
-                lat: @js($latitude ?? -2.5),
-                lng: @js($longitude ?? 118),
-                radius: @js((int) ($radius ?? 100)),
-            })" x-init="initMap()">
+    @if($editing)
+    <div x-data="branchMapPicker({
+        lat: @js($latitude ?? -2.5),
+        lng: @js($longitude ?? 118),
+        radius: @js((int) ($radius ?? 100)),
+    })" x-init="initMap()"
+        x-show="$wire.editing"
+        x-cloak
+        x-on:keydown.escape.window="$wire.set('editing', false)"
+        class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6"
+        role="dialog" aria-modal="true"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="$wire.set('editing', false)" aria-hidden="true"></div>
+        <div class="relative z-10 mx-auto w-full max-w-lg transform overflow-hidden rounded-xl bg-canvas shadow-xl"
+            style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
+            x-on:click.stop
+            x-trap.inert.noscroll="$wire.editing"
+            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
+                <h2 class="text-lg font-semibold text-ink">{{ __('Edit Cabang') }}</h2>
+                <button @click="$wire.set('editing', false)" class="rounded-xl p-1.5 text-on-surface-variant hover:text-ink hover:bg-surface-container-high transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+            <div class="px-6 py-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="sm:col-span-2">
-                        <x-forms.input label="{{ __('Nama Cabang') }}" wire:model="name" required />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <x-forms.input label="{{ __('Alamat') }}" wire:model="address" />
-                    </div>
+                    <div class="sm:col-span-2"><x-forms.input label="{{ __('Nama Cabang') }}" wire:model="name" required /></div>
+                    <div class="sm:col-span-2"><x-forms.input label="{{ __('Alamat') }}" wire:model="address" /></div>
                     <div class="sm:col-span-2">
                         <label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Lokasi (klik peta)') }}</label>
                         <div x-ref="map" class="h-[280px] w-full rounded-xl border border-outline-variant bg-surface-dim/30"></div>
-                        <p class="mt-1 text-xs text-on-surface-variant">
-                            <span x-text="'Lat: ' + lat.toFixed(6)"></span> ·
-                            <span x-text="'Lng: ' + lng.toFixed(6)"></span>
-                        </p>
+                        <p class="mt-1 text-xs text-on-surface-variant"><span x-text="'Lat: ' + lat.toFixed(6)"></span> · <span x-text="'Lng: ' + lng.toFixed(6)"></span></p>
                     </div>
-                    <div>
-                        <x-forms.input label="{{ __('Latitude') }}" wire:model="latitude" type="number" step="any" />
-                    </div>
-                    <div>
-                        <x-forms.input label="{{ __('Longitude') }}" wire:model="longitude" type="number" step="any" />
-                    </div>
+                    <div><x-forms.input label="{{ __('Latitude') }}" wire:model="latitude" type="number" step="any" /></div>
+                    <div><x-forms.input label="{{ __('Longitude') }}" wire:model="longitude" type="number" step="any" /></div>
                     <div class="sm:col-span-2">
                         <x-forms.input label="{{ __('Radius (meter)') }}" wire:model="radius" type="number" min="10" max="5000" placeholder="100" />
-                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Radius geofence untuk validasi absensi. Default 100m.') }}</p>
+                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Radius geofence. Default 100m.') }}</p>
                     </div>
                 </div>
             </div>
-            @endif
+            <div class="flex items-center justify-end gap-3 border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">
+                <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
+            </div>
         </div>
-        <x-slot:footer>
-            <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
-        </x-slot:footer>
-    </x-modal>
+    </div>
+    @endif
 
     {{-- Delete --}}
     <x-confirm-modal name="delete-branch" :title="__('Hapus Cabang')" variant="danger" wire:model="confirmingDeletion">
