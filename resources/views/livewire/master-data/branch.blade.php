@@ -116,10 +116,10 @@
                         </p>
                     </div>
                     <div>
-                        <x-forms.input label="{{ __('Latitude') }}" x-model="lat" @change.debounce="updateMarker()" type="number" step="any" />
+                        <x-forms.input label="{{ __('Latitude') }}" wire:model="latitude" type="number" step="any" />
                     </div>
                     <div>
-                        <x-forms.input label="{{ __('Longitude') }}" x-model="lng" @change.debounce="updateMarker()" type="number" step="any" />
+                        <x-forms.input label="{{ __('Longitude') }}" wire:model="longitude" type="number" step="any" />
                     </div>
                     <div class="sm:col-span-2">
                         <x-forms.input label="{{ __('Radius (meter)') }}" wire:model="radius" type="number" min="10" max="5000" placeholder="100" />
@@ -160,10 +160,10 @@
                         </p>
                     </div>
                     <div>
-                        <x-forms.input label="{{ __('Latitude') }}" x-model="lat" @change.debounce="updateMarker()" type="number" step="any" />
+                        <x-forms.input label="{{ __('Latitude') }}" wire:model="latitude" type="number" step="any" />
                     </div>
                     <div>
-                        <x-forms.input label="{{ __('Longitude') }}" x-model="lng" @change.debounce="updateMarker()" type="number" step="any" />
+                        <x-forms.input label="{{ __('Longitude') }}" wire:model="longitude" type="number" step="any" />
                     </div>
                     <div class="sm:col-span-2">
                         <x-forms.input label="{{ __('Radius (meter)') }}" wire:model="radius" type="number" min="10" max="5000" placeholder="100" />
@@ -233,6 +233,8 @@
                     });
 
                     this.$watch('radius', () => this.updateCircle());
+                    this.$watch('$wire.latitude', v => { if (v != null) { this.lat = parseFloat(v); this.updateMarker(); } });
+                    this.$watch('$wire.longitude', v => { if (v != null) { this.lng = parseFloat(v); this.updateMarker(); } });
                 });
             },
 
