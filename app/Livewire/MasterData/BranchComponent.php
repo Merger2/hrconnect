@@ -18,6 +18,12 @@ class BranchComponent extends Component
 
     public ?string $address = null;
 
+    public ?string $latitude = null;
+
+    public ?string $longitude = null;
+
+    public ?string $radius = null;
+
     public ?string $deleteName = null;
 
     public ?string $deleteAddress = null;
@@ -41,6 +47,9 @@ class BranchComponent extends Component
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('branches')->ignore($this->selectedId)],
             'address' => ['nullable', 'string', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'min:-90', 'max:90'],
+            'longitude' => ['nullable', 'numeric', 'min:-180', 'max:180'],
+            'radius' => ['nullable', 'integer', 'min:10', 'max:5000'],
         ];
     }
 
@@ -60,7 +69,13 @@ class BranchComponent extends Component
     {
         Gate::authorize('manage_branches');
         $this->validate();
-        Branch::create(['name' => trim($this->name), 'address' => $this->address ? trim($this->address) : null]);
+        Branch::create([
+            'name' => trim($this->name),
+            'address' => $this->address ? trim($this->address) : null,
+            'latitude' => $this->latitude !== null ? (float) $this->latitude : null,
+            'longitude' => $this->longitude !== null ? (float) $this->longitude : null,
+            'radius' => $this->radius !== null ? (int) $this->radius : null,
+        ]);
         $this->creating = false;
         $this->resetForm();
         $this->dispatch('toast', variant: 'success', text: __('Cabang berhasil ditambahkan.'));
@@ -72,6 +87,9 @@ class BranchComponent extends Component
         $branch = Branch::findOrFail($id);
         $this->name = $branch->name;
         $this->address = $branch->address;
+        $this->latitude = $branch->latitude;
+        $this->longitude = $branch->longitude;
+        $this->radius = $branch->radius;
         $this->selectedId = $id;
         $this->editing = true;
     }
@@ -81,7 +99,13 @@ class BranchComponent extends Component
         Gate::authorize('manage_branches');
         $this->validate();
         $branch = Branch::findOrFail($this->selectedId);
-        $branch->update(['name' => trim($this->name), 'address' => $this->address ? trim($this->address) : null]);
+        $branch->update([
+            'name' => trim($this->name),
+            'address' => $this->address ? trim($this->address) : null,
+            'latitude' => $this->latitude !== null ? (float) $this->latitude : null,
+            'longitude' => $this->longitude !== null ? (float) $this->longitude : null,
+            'radius' => $this->radius !== null ? (int) $this->radius : null,
+        ]);
         $this->editing = false;
         $this->resetForm();
         $this->dispatch('toast', variant: 'success', text: __('Cabang berhasil diperbarui.'));
@@ -122,6 +146,9 @@ class BranchComponent extends Component
     {
         $this->name = null;
         $this->address = null;
+        $this->latitude = null;
+        $this->longitude = null;
+        $this->radius = null;
         $this->selectedId = null;
         $this->creating = false;
         $this->editing = false;
