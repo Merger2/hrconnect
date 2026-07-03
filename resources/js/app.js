@@ -46,8 +46,8 @@ const swalClasses = {
 
 window.apiHeaders = () => {
     const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-    const xsrf = document.cookie.match('(^|; )XSRF-TOKEN=([^;]*)')?.pop();
-    if (xsrf) headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
+    const token = sessionStorage.getItem('sanctum_token');
+    if (token) headers['Authorization'] = 'Bearer ' + token;
     return headers;
 };
 
