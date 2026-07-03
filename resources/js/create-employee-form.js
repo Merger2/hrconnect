@@ -67,11 +67,11 @@ export default function () {
         async fetchLookups() {
             try {
                 const [cRes, bRes, dRes, pRes, mRes] = await Promise.all([
-                    fetch('/api/v1/companies?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/branches?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/departments?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/positions?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/employees?per_page=200', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/companies?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/branches?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/departments?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/positions?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                    fetch('/api/v1/employees?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
                 ]);
                 this.companies = (await cRes.json()).data || [];
                 this.branches = (await bRes.json()).data || [];
