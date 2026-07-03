@@ -1,4 +1,5 @@
 <x-layouts::app.sidebar>
+    <script src="/assets/js/face-api.min.js"></script>
     <div class="mx-auto flex max-w-[480px] flex-col gap-4 md:max-w-3xl md:gap-6"
          x-data="faceRegistration()" x-init="init()">
 
@@ -228,9 +229,6 @@
                     this.setStage('loading-models', this.messages.loadingModels, this.messages.loadingHint);
 
                     try {
-                        if (!window.faceapi) {
-                            await new Promise(r => { const i = setInterval(() => { if (window.faceapi) { clearInterval(i); r(); } }, 50); });
-                        }
                         if (!window.__faceApiLoaded) {
                             await Promise.all([
                                 faceapi.nets.tinyFaceDetector.loadFromUri('/models/av1'),
