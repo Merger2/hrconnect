@@ -9,7 +9,15 @@
         @endif
 
         <x-slot:toolbar>
-            <x-page-toolbar search search-placeholder="{{ __('Cari departemen...') }}" wire:model.live.debounce.300ms="search" />
+            <div class="flex items-center gap-3">
+                <div class="relative flex-1">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/40">
+                        <span class="material-symbols-outlined text-lg">search</span>
+                    </span>
+                    <input type="search" placeholder="{{ __('Cari departemen...') }}" wire:model.live.debounce.300ms="search"
+                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas pl-10 pr-4 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink" />
+                </div>
+            </div>
         </x-slot:toolbar>
 
         @if($departments->count())
