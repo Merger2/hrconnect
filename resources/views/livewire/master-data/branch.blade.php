@@ -117,7 +117,12 @@
                         <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Nama Cabang') }}</label><input x-model="form.name" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" required /></div>
                         <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Alamat') }}</label><input x-model="form.address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" /></div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Lokasi (klik peta)') }}</label>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-sm font-medium text-ink">{{ __('Lokasi (klik peta)') }}</span>
+                                <button @click="locateMe()" class="rounded-lg px-2 py-1 text-xs font-medium text-ink hover:bg-surface-dim">
+                                    <span class="material-symbols-outlined align-middle text-sm">my_location</span> {{ __('Lokasi Saya') }}
+                                </button>
+                            </div>
                             <div x-ref="map" class="h-[280px] w-full rounded-xl border border-outline-variant bg-surface-dim/30"></div>
                             <p class="mt-1 text-xs text-on-surface-variant"><span x-text="'Lat: ' + lat.toFixed(6)"></span> · <span x-text="'Lng: ' + lng.toFixed(6)"></span></p>
                         </div>
@@ -159,7 +164,12 @@
                         <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Nama Cabang') }}</label><input x-model="form.name" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" required /></div>
                         <div><label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Alamat') }}</label><input x-model="form.address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink" /></div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-ink">{{ __('Lokasi (klik peta)') }}</label>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-sm font-medium text-ink">{{ __('Lokasi (klik peta)') }}</span>
+                                <button @click="locateMe()" class="rounded-lg px-2 py-1 text-xs font-medium text-ink hover:bg-surface-dim">
+                                    <span class="material-symbols-outlined align-middle text-sm">my_location</span> {{ __('Lokasi Saya') }}
+                                </button>
+                            </div>
                             <div x-ref="map" class="h-[280px] w-full rounded-xl border border-outline-variant bg-surface-dim/30"></div>
                             <p class="mt-1 text-xs text-on-surface-variant"><span x-text="'Lat: ' + lat.toFixed(6)"></span> · <span x-text="'Lng: ' + lng.toFixed(6)"></span></p>
                         </div>
@@ -186,16 +196,28 @@
     <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('branchMap', ({ lat, lng, radius }) => ({
-            lat, lng, radius, marker: null, circle: null,
+            lat, lng, radius, map: null, marker: null, circle: null,
             initMap() {
                 if (!window.L || !this.$refs.map) return;
                 const map = window.L.map(this.$refs.map).setView([this.lat, this.lng], 15);
                 window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OSM' }).addTo(map);
+                this.map = map;
                 this.marker = window.L.marker([this.lat, this.lng], { draggable: true }).addTo(map);
                 this.circle = window.L.circle([this.lat, this.lng], { radius: this.radius, color: '#0a0a0a', fillColor: '#0a0a0a', fillOpacity: 0.08, weight: 1 }).addTo(map);
                 map.on('click', e => { this.lat = e.latlng.lat; this.lng = e.latlng.lng; this.sync(); });
                 this.marker.on('dragend', () => { const p = this.marker.getLatLng(); this.lat = p.lat; this.lng = p.lng; this.sync(); });
                 this.$watch('radius', () => { if (this.circle && this.marker) { this.circle.setLatLng(this.marker.getLatLng()); this.circle.setRadius(parseInt(this.radius) || 100); } });
+            },
+            locateMe() {
+                if (!navigator.geolocation) return;
+                navigator.geolocation.getCurrentPosition(pos => {
+                    this.lat = pos.coords.latitude;
+                    this.lng = pos.coords.longitude;
+                    if (this.map) this.map.setView([this.lat, this.lng], 17);
+                    if (this.marker) this.marker.setLatLng([this.lat, this.lng]);
+                    if (this.circle) { this.circle.setLatLng([this.lat, this.lng]); this.circle.setRadius(parseInt(this.radius) || 100); }
+                    this.sync();
+                }, null, { enableHighAccuracy: true });
             },
             sync() {
                 const el = this.$el.closest('[x-data="branchIndex()"]')?.__x?.$data;
