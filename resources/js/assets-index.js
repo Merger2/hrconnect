@@ -42,7 +42,7 @@ export default function () {
                 if (this.statusFilter) params.set('status', this.statusFilter);
                 if (this.categoryFilter) params.set('category', this.categoryFilter);
                 if (this.search) params.set('search', this.search);
-                const res = await fetch(`/api/v1/assets?${params}`, { headers: window.apiHeaders() });
+                const res = await fetch(`/api/v1/assets?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;

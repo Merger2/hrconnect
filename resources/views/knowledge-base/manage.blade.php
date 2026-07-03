@@ -91,10 +91,8 @@
             try {
                 const resp = await fetch('/api/v1/knowledgebase', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + (window.Laravel?.sanctumToken || ''),
-                        'X-CSRF-TOKEN': token,
-                    },
+                    headers: { ...window.apiHeaders() },
+                    credentials: 'same-origin',
                     body: formData,
                 });
 
@@ -131,11 +129,8 @@
         try {
             const token = document.querySelector('meta[name="csrf-token"]')?.content;
             const resp = await fetch('/api/v1/knowledgebase', {
-                headers: {
-                    'Authorization': 'Bearer ' + (window.Laravel?.sanctumToken || ''),
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json',
-                },
+                headers: { ...window.apiHeaders() },
+                credentials: 'same-origin',
             });
 
             if (!resp.ok) {
@@ -207,10 +202,8 @@
         try {
             const resp = await fetch('/api/v1/knowledgebase/' + id, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + (window.Laravel?.sanctumToken || ''),
-                    'X-CSRF-TOKEN': token,
-                },
+                headers: { ...window.apiHeaders() },
+                credentials: 'same-origin',
             });
 
             if (resp.ok) {

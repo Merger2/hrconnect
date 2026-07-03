@@ -40,7 +40,8 @@ const swalClasses = {
 
 window.apiHeaders = () => {
     const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-    if (window.Laravel?.sanctumToken) headers['Authorization'] = 'Bearer ' + window.Laravel.sanctumToken;
+    const xsrf = document.cookie.match('(^|; )XSRF-TOKEN=([^;]*)')?.pop();
+    if (xsrf) headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
     return headers;
 };
 

@@ -688,12 +688,8 @@
 
                         const res = await fetch('/api/v1/face/register', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Authorization': 'Bearer ' + (window.Laravel?.sanctumToken || ''),
-                            },
+                            headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
                             body: JSON.stringify({ descriptor }),
                         });
 

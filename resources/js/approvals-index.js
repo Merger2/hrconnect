@@ -52,7 +52,7 @@ export default function (role = 'employee') {
                     params.set('type', this.typeFilter);
                 }
                 const url = endpoint + '?' + params.toString();
-                const res = await fetch(url, { headers: window.apiHeaders() });
+                const res = await fetch(url, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.approvals = json.data;
@@ -98,7 +98,7 @@ export default function (role = 'employee') {
             this.detailModalOpen = true;
             this.detailData = null;
             try {
-                const res = await fetch(`/api/v1/approvals/${id}`, { headers: window.apiHeaders() });
+                const res = await fetch(`/api/v1/approvals/${id}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.detailData = json.data;

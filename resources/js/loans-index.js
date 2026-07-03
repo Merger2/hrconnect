@@ -24,7 +24,7 @@ export default function () {
             try {
                 const params = new URLSearchParams({ per_page: 50 });
                 if (this.statusFilter) params.set('status', this.statusFilter);
-                const res = await fetch(`/api/v1/loans?${params}`, { headers: window.apiHeaders() });
+                const res = await fetch(`/api/v1/loans?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;

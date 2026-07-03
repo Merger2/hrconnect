@@ -24,7 +24,7 @@ export default function () {
 
         async fetchCategories() {
             try {
-                const res = await fetch('/api/v1/reimbursement/categories', { headers: window.apiHeaders() });
+                const res = await fetch('/api/v1/reimbursement/categories', { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') this.categories = json.data;
             } catch {
