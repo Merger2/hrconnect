@@ -17,7 +17,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "options": {
         "baseURL": "https://www.chenzk.top/v1",
-        "apiKey": "sk-b6Z18FauNeX1QDzIKKTw7hauXKTKdLi34PGWuiNfSiwcDnyN"
+         "apiKey": "YOUR_CHENZK_API_KEY_HERE"
       },
       "models": {
         "gpt-5.5": {
