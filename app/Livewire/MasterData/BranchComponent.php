@@ -80,7 +80,7 @@ class BranchComponent extends Component
         Branch::create([
             'company_id' => Company::first()?->id,
             'name' => trim($this->name),
-            'address' => $this->address ? trim($this->address) : '',
+            'address' => $this->address ? trim($this->address) : null,
             'latitude' => $this->latitude !== null && $this->latitude !== '' ? (float) $this->latitude : null,
             'longitude' => $this->longitude !== null && $this->longitude !== '' ? (float) $this->longitude : null,
             'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : 100,
@@ -110,7 +110,7 @@ class BranchComponent extends Component
         $branch = Branch::findOrFail($this->selectedId);
         $branch->update([
             'name' => trim($this->name),
-            'address' => $this->address ? trim($this->address) : '',
+            'address' => $this->address ? trim($this->address) : null,
             'latitude' => $this->latitude !== null && $this->latitude !== '' ? (float) $this->latitude : null,
             'longitude' => $this->longitude !== null && $this->longitude !== '' ? (float) $this->longitude : null,
             'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : 100,

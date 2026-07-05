@@ -90,8 +90,8 @@ test('can delete a position', function () {
 });
 
 test('search filters positions', function () {
-    Position::factory()->create(['name' => 'Alpha Position', 'code' => 'AP']);
-    Position::factory()->create(['name' => 'Beta Position', 'code' => 'BP']);
+    Position::factory()->for(Department::factory()->create(['code' => 'DEPA']))->create(['name' => 'Alpha Position', 'code' => 'AP']);
+    Position::factory()->for(Department::factory()->create(['code' => 'DEPB']))->create(['name' => 'Beta Position', 'code' => 'BP']);
 
     Livewire::actingAs($this->user)
         ->test(PositionComponent::class)
