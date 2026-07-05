@@ -38,16 +38,22 @@
         </x-simple-table>
         <x-pagination :paginator="$branches" />
         @else
-        <x-empty-state :title="$search ? __('Tidak ada cabang ditemukan') : __('Belum ada cabang')" :description="$search ? __('Coba ubah kata kunci pencarian.') : __('Tambahkan cabang perusahaan untuk memulai.')">
+        @if(filled($search))
+        <x-empty-state title="{{ __('Tidak ada cabang ditemukan') }}" description="{{ __('Coba ubah kata kunci pencarian.') }}">
             @if($this->canManage())<x-slot:actions><x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Cabang') }}</x-button></x-slot:actions>@endif
         </x-empty-state>
+        @else
+        <x-empty-state title="{{ __('Belum ada cabang') }}" description="{{ __('Tambahkan cabang perusahaan untuk memulai.') }}">
+            @if($this->canManage())<x-slot:actions><x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Cabang') }}</x-button></x-slot:actions>@endif
+        </x-empty-state>
+        @endif
         @endif
     </x-page-shell>
 
     @if($creating)
     <div class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('creating', false)" aria-hidden="true"></div>
-        <div class="relative z-10 mx-auto w-full max-w-lg overflow-hidden rounded-xl bg-canvas shadow-xl" style="max-height: calc(100dvh - 2rem)" @click.stop>
+        <div class="relative z-10 mx-auto w-full max-w-lg overflow-hidden rounded-xl bg-canvas shadow-xl" style="max-height: calc(100dvh - 2rem)" wire:click.prevent>
             <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
                 <h2 class="text-lg font-semibold text-ink">{{ __('Tambah Cabang') }}</h2>
                 <x-button variant="ghost" size="sm" icon="close" wire:click="$set('creating', false)" />
@@ -70,7 +76,7 @@
     @if($editing)
     <div class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('editing', false)" aria-hidden="true"></div>
-        <div class="relative z-10 mx-auto w-full max-w-lg overflow-hidden rounded-xl bg-canvas shadow-xl" style="max-height: calc(100dvh - 2rem)" @click.stop>
+        <div class="relative z-10 mx-auto w-full max-w-lg overflow-hidden rounded-xl bg-canvas shadow-xl" style="max-height: calc(100dvh - 2rem)" wire:click.prevent>
             <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
                 <h2 class="text-lg font-semibold text-ink">{{ __('Edit Cabang') }}</h2>
                 <x-button variant="ghost" size="sm" icon="close" wire:click="$set('editing', false)" />
@@ -93,7 +99,7 @@
     @if($confirmingDeletion)
     <div class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('confirmingDeletion', false)" aria-hidden="true"></div>
-        <div class="relative z-10 mx-auto w-full max-w-sm overflow-hidden rounded-xl bg-canvas shadow-xl" @click.stop>
+        <div class="relative z-10 mx-auto w-full max-w-sm overflow-hidden rounded-xl bg-canvas shadow-xl" wire:click.prevent>
             <div class="px-6 py-5 text-center">
                 <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error/10"><span class="material-symbols-outlined text-3xl text-error">warning</span></div>
                 <h3 class="text-lg font-semibold text-ink">{{ __('Hapus Cabang') }}</h3>
