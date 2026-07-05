@@ -41,7 +41,7 @@
                 ])>
                     <dt class="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-on-surface-variant">{{ $stat['label'] }}</dt>
                     <dd class="mt-1.5 text-xl font-bold text-ink">{{ $stat['value'] }}</dd>
-                </dl>
+                </div>
                 @endforeach
             </dl>
         </x-app.panel>
