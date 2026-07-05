@@ -19,7 +19,6 @@ import createEmployeeForm from './create-employee-form';
 import terminateEmployeeForm from './terminate-employee-form';
 import importEmployeesForm from './import-employees-form';
 import assetsIndex from './assets-index';
-import branchIndex from './branch-index';
 import knowledgeBaseChat from './knowledge-base-chat';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -151,7 +150,6 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('terminateEmployeeForm', terminateEmployeeForm);
     window.Alpine.data('importEmployeesForm', importEmployeesForm);
     window.Alpine.data('assetsIndex', assetsIndex);
-    window.Alpine.data('branchIndex', branchIndex);
     window.Alpine.data('knowledgeBaseChat', knowledgeBaseChat);
     window.Alpine.store('darkMode', {
         on: false,
