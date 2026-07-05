@@ -7,18 +7,16 @@
         </x-slot:actions>
 
         <x-slot:toolbar>
-            <div class="flex items-end gap-4">
-                <div class="flex-1">
-                    <x-forms.label for="branch-search" value="{{ __('Cari cabang') }}" class="mb-1.5 block" />
-                    <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/40">
-                            <span class="material-symbols-outlined text-lg">search</span>
-                        </span>
-                        <input id="branch-search" type="search" wire:model.live.debounce.300ms="search"
-                            placeholder="{{ __('Cari nama cabang...') }}" class="w-full pl-10 h-10 rounded-xl border border-outline-variant bg-canvas text-sm text-ink outline-none" />
-                    </div>
+            <form wire:submit.prevent class="flex gap-2">
+                <div class="relative flex-1">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/40">
+                        <span class="material-symbols-outlined text-lg">search</span>
+                    </span>
+                    <input type="search" wire:model="search" placeholder="{{ __('Cari cabang...') }}"
+                        class="h-10 w-full rounded-xl border border-outline-variant bg-canvas pl-10 pr-16 text-sm text-ink outline-none" />
+                    <button type="submit" class="absolute right-1 top-1 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white">Cari</button>
                 </div>
-            </div>
+            </form>
         </x-slot:toolbar>
 
         @if($branches->count())
