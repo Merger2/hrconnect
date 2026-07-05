@@ -121,6 +121,7 @@ class PositionComponent extends Component
         $pos = Position::findOrFail($id);
         $this->deleteName = $pos->name;
         $this->confirmingDeletion = true;
+        $this->dispatch('open-modal', 'delete-pos');
         $this->selectedId = $id;
     }
 
