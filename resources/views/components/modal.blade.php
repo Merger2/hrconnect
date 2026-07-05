@@ -15,7 +15,7 @@ $maxWidthClasses = [
     'full' => 'sm:max-w-full',
 ][$maxWidth] ?? 'sm:max-w-lg';
 
-$hasModel = $attributes->hasStartsWith('wire:model');
+$hasModel = $attributes->whereStartsWith('wire:model')->isNotEmpty();
 @endphp
 
 <div @if($hasModel) x-data="{ show: @entangle($attributes->wire('model')) }" @else x-data="{ open: @js($show) }" @endif
