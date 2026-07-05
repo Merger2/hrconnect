@@ -1,25 +1,18 @@
 <div>
     <x-page-shell title="{{ __('Jabatan') }}" subtitle="{{ __('Kelola data jabatan dan gaji pokok.') }}">
-        @if($this->canManage())
-        <x-slot:actions>
+        <div class="flex flex-wrap items-center gap-3">
+            @if($this->canManage())
             <x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Jabatan') }}</x-button>
-        </x-slot:actions>
-        @endif
-
-        <x-slot:toolbar>
-            <div class="relative">
-                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/40">
-                    <span class="material-symbols-outlined text-lg">search</span>
-                </span>
-                <input type="search" placeholder="{{ __('Cari jabatan...') }}" wire:model.blur="search"
-                    class="h-10 w-full rounded-xl border border-outline-variant bg-canvas pl-10 pr-4 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink" />
+            @endif
+            <div class="min-w-[200px] flex-1">
+                <input type="search" wire:model.live.debounce.250ms="search" placeholder="{{ __('Cari jabatan...') }}" class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-4 text-sm text-ink outline-none" />
             </div>
-        </x-slot:toolbar>
+        </div>
 
         @if($positions->count())
-        <x-simple-table :headers="[__('Kode'), __('Jabatan'), __('Departemen'), __('Grade'), __('Gaji Pokok'), __('Aksi')]" class="hidden lg:block">
+        <x-simple-table :headers="[__('Kode'), __('Jabatan'), __('Departemen'), __('Grade'), __('Gaji Pokok'), __('Aksi')]">
             @foreach($positions as $pos)
-            <tr class="transition-colors hover:bg-surface-dim/30">
+            <tr>
                 <td class="px-4 py-3"><x-status-badge tone="neutral" :pill="true">{{ $pos->code }}</x-status-badge></td>
                 <td class="px-4 py-3 font-medium text-ink">{{ $pos->name }}</td>
                 <td class="px-4 py-3 text-sm text-on-surface-variant">{{ $pos->department?->name ?? '-' }}</td>
@@ -28,86 +21,87 @@
                 <td class="px-4 py-3">
                     @if($this->canManage())
                     <div class="flex gap-1">
-                        <x-button variant="ghost" size="sm" icon="edit" wire:click="edit({{ $pos->id }})">{{ __('Edit') }}</x-button>
-                        <x-button variant="ghost" size="sm" icon="delete" wire:click="confirmDeletion({{ $pos->id }})" class="text-error">{{ __('Hapus') }}</x-button>
+                        <x-button variant="ghost" size="sm" wire:click="edit({{ $pos->id }})">{{ __('Edit') }}</x-button>
+                        <x-button variant="ghost" size="sm" wire:click="confirmDeletion({{ $pos->id }})">{{ __('Hapus') }}</x-button>
                     </div>
                     @endif
                 </td>
             </tr>
             @endforeach
         </x-simple-table>
-
-        <div class="space-y-3 lg:hidden">
-            @foreach($positions as $pos)
-            <div class="rounded-xl border border-outline-variant bg-canvas p-4 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div><h3 class="font-medium text-ink">{{ $pos->name }}</h3><p class="mt-0.5 text-sm text-on-surface-variant">{{ $pos->department?->name ?? '-' }}</p></div>
-                    <x-status-badge tone="neutral" :pill="true">{{ $pos->code }}</x-status-badge>
-                </div>
-                <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-                    <div><span class="text-on-surface-variant">{{ __('Grade') }}</span><p class="font-medium text-ink">{{ $pos->grade ? 'G' . $pos->grade : '-' }}</p></div>
-                    <div><span class="text-on-surface-variant">{{ __('Gaji Pokok') }}</span><p class="font-medium text-success">{{ $pos->basic_salary ? Number::currency($pos->basic_salary, 'IDR', app()->getLocale()) : '-' }}</p></div>
-                </div>
-                @if($this->canManage())
-                <div class="mt-3 flex justify-end gap-2 border-t border-outline-variant/50 pt-3">
-                    <x-button variant="secondary" size="sm" icon="edit" wire:click="edit({{ $pos->id }})">{{ __('Edit') }}</x-button>
-                    <x-button variant="secondary" size="sm" icon="delete" wire:click="confirmDeletion({{ $pos->id }})" class="text-error">{{ __('Hapus') }}</x-button>
-                </div>
-                @endif
-            </div>
-            @endforeach
-        </div>
-
         <x-pagination :paginator="$positions" />
         @else
-        <x-empty-state :title="filled($search) ? __('Tidak ada jabatan ditemukan') : __('Belum ada jabatan')" :description="filled($search) ? __('Coba ubah kata kunci pencarian.') : __('Tambahkan jabatan untuk memulai.')">
-            @if($this->canManage())
-            <x-slot:actions><x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Jabatan') }}</x-button></x-slot:actions>
-            @endif
-        </x-empty-state>
+        <x-empty-state :title="filled($search) ? __('Tidak ada jabatan ditemukan') : __('Belum ada jabatan')" :description="filled($search) ? __('Coba ubah kata kunci.') : __('Tambahkan jabatan untuk memulai.')" />
         @endif
     </x-page-shell>
 
-    {{-- Create Modal --}}
-    <x-modal wire:model="creating" max-width="lg">
-        <x-slot:title>{{ __('Tambah Jabatan') }}</x-slot:title>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-forms.input label="{{ __('Kode') }}" wire:model="code" required placeholder="MGR" />
-            <x-forms.input label="{{ __('Nama Jabatan') }}" wire:model="name" required placeholder="Manager" />
-            <x-forms.select label="{{ __('Departemen') }}" wire:model="department_id" :options="$departments->pluck('name', 'id')" placeholder="{{ __('Pilih departemen...') }}" />
-            <x-forms.input label="{{ __('Grade') }}" wire:model="grade" type="number" min="1" />
-            <x-forms.input label="{{ __('Gaji Pokok (Rp)') }}" wire:model="basic_salary" type="number" min="0" />
-            <x-forms.input label="{{ __('Tunjangan Jabatan (Rp)') }}" wire:model="allowance_jabatan" type="number" min="0" />
-        </div>
-        <x-slot:actions>
-            <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
-        </x-slot:actions>
-    </x-modal>
+    @if($creating)
+    <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+        <form wire:submit="create" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+            <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Tambah Jabatan') }}</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Kode') }} *</label><input wire:model="code" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Jabatan') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium">{{ __('Departemen') }}</label>
+                    <select wire:model="department_id" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm">
+                        <option value="">{{ __('Pilih departemen...') }}</option>
+                        @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Grade') }}</label><input wire:model="grade" type="number" min="1" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Gaji Pokok (Rp)') }}</label><input wire:model="basic_salary" type="number" min="0" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Tunjangan Jabatan (Rp)') }}</label><input wire:model="allowance_jabatan" type="number" min="0" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Simpan') }}</x-button>
+            </div>
+        </form>
+    </div>
+    @endif
 
-    {{-- Edit Modal --}}
-    <x-modal wire:model="editing" max-width="lg">
-        <x-slot:title>{{ __('Edit Jabatan') }}</x-slot:title>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-forms.input label="{{ __('Kode') }}" wire:model="code" required />
-            <x-forms.input label="{{ __('Nama Jabatan') }}" wire:model="name" required />
-            <x-forms.select label="{{ __('Departemen') }}" wire:model="department_id" :options="$departments->pluck('name', 'id')" placeholder="{{ __('Pilih departemen...') }}" />
-            <x-forms.input label="{{ __('Grade') }}" wire:model="grade" type="number" min="1" />
-            <x-forms.input label="{{ __('Gaji Pokok (Rp)') }}" wire:model="basic_salary" type="number" min="0" />
-            <x-forms.input label="{{ __('Tunjangan Jabatan (Rp)') }}" wire:model="allowance_jabatan" type="number" min="0" />
-        </div>
-        <x-slot:actions>
-            <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
-        </x-slot:actions>
-    </x-modal>
+    @if($editing)
+    <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+        <form wire:submit="update" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+            <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Edit Jabatan') }}</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Kode') }} *</label><input wire:model="code" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Jabatan') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium">{{ __('Departemen') }}</label>
+                    <select wire:model="department_id" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm">
+                        <option value="">{{ __('Pilih departemen...') }}</option>
+                        @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Grade') }}</label><input wire:model="grade" type="number" min="1" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Gaji Pokok (Rp)') }}</label><input wire:model="basic_salary" type="number" min="0" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Tunjangan Jabatan (Rp)') }}</label><input wire:model="allowance_jabatan" type="number" min="0" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Perbarui') }}</x-button>
+            </div>
+        </form>
+    </div>
+    @endif
 
-    {{-- Delete Modal --}}
-    <x-confirm-modal name="delete-pos" :title="__('Hapus Jabatan')" variant="danger" wire:model="confirmingDeletion">
-        <p>{{ __('Hapus jabatan') }} <strong>{{ $deleteName }}</strong>?</p>
-        <x-slot:actions>
-            <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="danger" wire:click="delete">{{ __('Hapus') }}</x-button>
-        </x-slot:actions>
-    </x-confirm-modal>
+    @if($confirmingDeletion)
+    <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+        <form wire:submit="delete" class="w-full max-w-sm rounded-xl bg-canvas p-6 shadow-xl text-center">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error/10"><span class="material-symbols-outlined text-3xl text-error">warning</span></div>
+            <h3 class="text-lg font-semibold text-ink">{{ __('Hapus Jabatan') }}</h3>
+            <p class="mt-2 text-sm text-on-surface-variant">Hapus <strong>{{ $deleteName }}</strong>?</p>
+            <div class="mt-6 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="danger" type="submit">{{ __('Hapus') }}</x-button>
+            </div>
+        </form>
+    </div>
+    @endif
 </div>

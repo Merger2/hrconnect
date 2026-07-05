@@ -1,101 +1,99 @@
 <div>
     <x-page-shell title="{{ __('Departemen') }}" subtitle="{{ __('Kelola data departemen.') }}">
-        @if($this->canManage())
-        <x-slot:actions>
+        <div class="flex flex-wrap items-center gap-3">
+            @if($this->canManage())
             <x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Departemen') }}</x-button>
-        </x-slot:actions>
-        @endif
-
-        <x-slot:toolbar>
-            <div class="relative">
-                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/40">
-                    <span class="material-symbols-outlined text-lg">search</span>
-                </span>
-                <input type="search" placeholder="{{ __('Cari departemen...') }}" wire:model.blur="search"
-                    class="h-10 w-full rounded-xl border border-outline-variant bg-canvas pl-10 pr-4 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink" />
+            @endif
+            <div class="min-w-[200px] flex-1">
+                <input type="search" wire:model.live.debounce.250ms="search" placeholder="{{ __('Cari departemen...') }}" class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-4 text-sm text-ink outline-none" />
             </div>
-        </x-slot:toolbar>
+        </div>
 
         @if($departments->count())
-        <x-simple-table :headers="[__('Kode'), __('Nama'), __('Cabang'), __('Aksi')]" class="hidden lg:block">
+        <x-simple-table :headers="[__('Kode'), __('Nama'), __('Cabang'), __('Aksi')]">
             @foreach($departments as $dept)
-            <tr class="transition-colors hover:bg-surface-dim/30">
+            <tr>
                 <td class="px-4 py-3"><x-status-badge tone="neutral" :pill="true">{{ $dept->code }}</x-status-badge></td>
-                <td class="px-4 py-3"><span class="font-medium text-ink">{{ $dept->name }}</span></td>
-                <td class="px-4 py-3"><span class="text-sm text-on-surface-variant">{{ $dept->branch?->name ?? '-' }}</span></td>
+                <td class="px-4 py-3 font-medium text-ink">{{ $dept->name }}</td>
+                <td class="px-4 py-3 text-sm text-on-surface-variant">{{ $dept->branch?->name ?? '-' }}</td>
                 <td class="px-4 py-3">
                     @if($this->canManage())
                     <div class="flex gap-1">
-                        <x-button variant="ghost" size="sm" icon="edit" wire:click="edit({{ $dept->id }})">{{ __('Edit') }}</x-button>
-                        <x-button variant="ghost" size="sm" icon="delete" wire:click="confirmDeletion({{ $dept->id }})" class="text-error">{{ __('Hapus') }}</x-button>
+                        <x-button variant="ghost" size="sm" wire:click="edit({{ $dept->id }})">{{ __('Edit') }}</x-button>
+                        <x-button variant="ghost" size="sm" wire:click="confirmDeletion({{ $dept->id }})">{{ __('Hapus') }}</x-button>
                     </div>
                     @endif
                 </td>
             </tr>
             @endforeach
         </x-simple-table>
-
-        <div class="space-y-3 lg:hidden">
-            @foreach($departments as $dept)
-            <div class="rounded-xl border border-outline-variant bg-canvas p-4 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div><h3 class="font-medium text-ink">{{ $dept->name }}</h3><p class="mt-0.5 text-sm text-on-surface-variant">{{ $dept->branch?->name ?? '-' }}</p></div>
-                    <x-status-badge tone="neutral" :pill="true">{{ $dept->code }}</x-status-badge>
-                </div>
-                @if($this->canManage())
-                <div class="mt-3 flex justify-end gap-2 border-t border-outline-variant/50 pt-3">
-                    <x-button variant="secondary" size="sm" icon="edit" wire:click="edit({{ $dept->id }})">{{ __('Edit') }}</x-button>
-                    <x-button variant="secondary" size="sm" icon="delete" wire:click="confirmDeletion({{ $dept->id }})" class="text-error">{{ __('Hapus') }}</x-button>
-                </div>
-                @endif
-            </div>
-            @endforeach
-        </div>
-
         <x-pagination :paginator="$departments" />
         @else
-        <x-empty-state :title="filled($search) ? __('Tidak ada departemen ditemukan') : __('Belum ada departemen')" :description="filled($search) ? __('Coba ubah kata kunci pencarian.') : __('Tambahkan departemen untuk memulai.')">
-            @if($this->canManage())
-            <x-slot:actions><x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Departemen') }}</x-button></x-slot:actions>
-            @endif
-        </x-empty-state>
+        <x-empty-state :title="filled($search) ? __('Tidak ada departemen ditemukan') : __('Belum ada departemen')" :description="filled($search) ? __('Coba ubah kata kunci.') : __('Tambahkan departemen untuk memulai.')" />
         @endif
     </x-page-shell>
 
-    {{-- Create Modal --}}
-    <x-modal wire:model="creating" max-width="lg">
-        <x-slot:title>{{ __('Tambah Departemen') }}</x-slot:title>
-        <div class="space-y-4">
-            <x-forms.input label="{{ __('Kode') }}" wire:model="code" required placeholder="HR" />
-            <x-forms.input label="{{ __('Nama Departemen') }}" wire:model="name" required placeholder="Human Resources" />
-            <x-forms.select label="{{ __('Cabang') }}" wire:model="branch_id" :options="$branches->pluck('name', 'id')" placeholder="{{ __('Pilih cabang...') }}" />
-        </div>
-        <x-slot:actions>
-            <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
-        </x-slot:actions>
-    </x-modal>
+    @if($creating)
+    <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+        <form wire:submit="create" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+            <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Tambah Departemen') }}</h2>
+            <div class="space-y-4">
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Kode') }} *</label><input wire:model="code" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Departemen') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium">{{ __('Cabang') }}</label>
+                    <select wire:model="branch_id" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm">
+                        <option value="">{{ __('Pilih cabang...') }}</option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Simpan') }}</x-button>
+            </div>
+        </form>
+    </div>
+    @endif
 
-    {{-- Edit Modal --}}
-    <x-modal wire:model="editing" max-width="lg">
-        <x-slot:title>{{ __('Edit Departemen') }}</x-slot:title>
-        <div class="space-y-4">
-            <x-forms.input label="{{ __('Kode') }}" wire:model="code" required />
-            <x-forms.input label="{{ __('Nama Departemen') }}" wire:model="name" required />
-            <x-forms.select label="{{ __('Cabang') }}" wire:model="branch_id" :options="$branches->pluck('name', 'id')" placeholder="{{ __('Pilih cabang...') }}" />
-        </div>
-        <x-slot:actions>
-            <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
-        </x-slot:actions>
-    </x-modal>
+    @if($editing)
+    <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+        <form wire:submit="update" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+            <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Edit Departemen') }}</h2>
+            <div class="space-y-4">
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Kode') }} *</label><input wire:model="code" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Departemen') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium">{{ __('Cabang') }}</label>
+                    <select wire:model="branch_id" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm">
+                        <option value="">{{ __('Pilih cabang...') }}</option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Perbarui') }}</x-button>
+            </div>
+        </form>
+    </div>
+    @endif
 
-    {{-- Delete Modal --}}
-    <x-confirm-modal name="delete-dept" :title="__('Hapus Departemen')" variant="danger" wire:model="confirmingDeletion">
-        <p>{{ __('Hapus departemen') }} <strong>{{ $deleteName }}</strong>?</p>
-        <x-slot:actions>
-            <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
-            <x-button variant="danger" wire:click="delete">{{ __('Hapus') }}</x-button>
-        </x-slot:actions>
-    </x-confirm-modal>
+    @if($confirmingDeletion)
+    <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+        <form wire:submit="delete" class="w-full max-w-sm rounded-xl bg-canvas p-6 shadow-xl text-center">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error/10"><span class="material-symbols-outlined text-3xl text-error">warning</span></div>
+            <h3 class="text-lg font-semibold text-ink">{{ __('Hapus Departemen') }}</h3>
+            <p class="mt-2 text-sm text-on-surface-variant">Hapus <strong>{{ $deleteName }}</strong>?</p>
+            <div class="mt-6 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
+                <x-button variant="danger" type="submit">{{ __('Hapus') }}</x-button>
+            </div>
+        </form>
+    </div>
+    @endif
 </div>
