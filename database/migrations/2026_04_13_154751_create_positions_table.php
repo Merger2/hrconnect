@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
             // Foreign Key ke tabel departements
-            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->restrictOnDelete();
             $table->string('name');
             $table->string('code')->unique();
-            $table->integer('grade');
-            $table->decimal('basic_salary', 15, 2);
+            $table->integer('grade')->nullable();
+            $table->decimal('basic_salary', 15, 2)->nullable();
             $table->decimal('allowance_jabatan', 15, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
