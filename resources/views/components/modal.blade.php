@@ -1,4 +1,4 @@
-@props(['show' => false, 'maxWidth' => 'lg', 'closeable' => true])
+@props(['show' => false, 'maxWidth' => 'lg', 'closeable' => true, 'wireModel' => null])
 
 @php
 $maxWidthClasses = [
@@ -15,16 +15,16 @@ $maxWidthClasses = [
     'full' => 'sm:max-w-full',
 ][$maxWidth] ?? 'sm:max-w-lg';
 
-$hasModel = $attributes->whereStartsWith('wire:model')->isNotEmpty();
+$wireModel = $wireModel ?? $attributes->get('wire:model');
 @endphp
 
-<div @if($hasModel) x-data="{ show: @entangle($attributes->wire('model')) }" @else x-data="{ open: @js($show) }" @endif
-    x-on:keydown.escape.window="if ({{ $hasModel ? 'show' : 'open' }}) { {{ $hasModel ? 'show' : 'open' }} = false }">
+<div @if($wireModel !== null) x-data="{ show: @entangle($wireModel) }" @else x-data="{ open: @js($show) }" @endif
+    x-on:keydown.escape.window="if ({{ $wireModel !== null ? 'show' : 'open' }}) { {{ $wireModel !== null ? 'show' : 'open' }} = false }">
     <template x-teleport="body">
-        <div x-show="{{ $hasModel ? 'show' : 'open' }}"
+        <div x-show="{{ $wireModel !== null ? 'show' : 'open' }}"
             x-cloak
-            x-effect="if ({{ $hasModel ? 'show' : 'open' }}) { $nextTick(() => window.initUiPickers?.($el)) }"
-            @if ($closeable) x-on:click.self="{{ $hasModel ? 'show' : 'open' }} = false" @endif
+            x-effect="if ({{ $wireModel !== null ? 'show' : 'open' }}) { $nextTick(() => window.initUiPickers?.($el)) }"
+            @if ($closeable) x-on:click.self="{{ $wireModel !== null ? 'show' : 'open' }} = false" @endif
             class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
             role="dialog"
             aria-modal="true"
@@ -37,11 +37,11 @@ $hasModel = $attributes->whereStartsWith('wire:model')->isNotEmpty();
 
             <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
 
-            <div x-show="{{ $hasModel ? 'show' : 'open' }}"
+            <div x-show="{{ $wireModel !== null ? 'show' : 'open' }}"
                 class="relative z-10 mx-auto w-full {{ $maxWidthClasses }} transform overflow-y-auto rounded-lg bg-canvas shadow-xl"
                 style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
                 x-on:click.stop
-                x-trap.inert.noscroll="{{ $hasModel ? 'show' : 'open' }}"
+                x-trap.inert.noscroll="{{ $wireModel !== null ? 'show' : 'open' }}"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -53,11 +53,26 @@ $hasModel = $attributes->whereStartsWith('wire:model')->isNotEmpty();
                     <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
                         <h2 class="text-lg font-semibold text-ink">{{ $title ?? '' }}</h2>
                         @if ($closeable)
-                            <button @click="{{ $hasModel ? 'show' : 'open' }} = false" class="rounded-xl p-1 text-on-surface-variant hover:text-ink hover:bg-surface-container-high">
+                            <button @click="{{ $wireModel !== null ? 'show' : 'open' }} = false" class="rounded-xl p-1 text-on-surface-variant hover:text-ink hover:bg-surface-container-high">
                                 <span class="material-symbols-outlined text-lg">close</span>
                             </button>
                         @endif
                     </div>
+                @endif
+
+                <div class="px-6 py-4">
+                    {{ $slot }}
+                </div>
+
+                @if (isset($footer))
+                    <div class="flex items-center justify-end gap-3 border-t border-outline-variant/50 px-6 py-4">
+                        {{ $footer }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </template>
+</div>
                 @endif
 
                 <div class="px-6 py-4">
