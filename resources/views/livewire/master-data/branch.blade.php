@@ -46,14 +46,18 @@
 
     @if($creating)
     <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-        <form wire:submit="create" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+        <form wire:submit="create" class="w-full max-w-xl rounded-xl bg-canvas p-6 shadow-xl">
             <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Tambah Cabang') }}</h2>
             <div class="space-y-4">
                 <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Cabang') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 <div><label class="mb-1 block text-sm font-medium">{{ __('Alamat') }}</label><input wire:model="address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input wire:model="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input wire:model="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+
+                <div wire:ignore class="h-56 w-full overflow-hidden rounded-xl border border-outline-variant"><div id="branch-map" class="h-full w-full"></div></div>
+                <button type="button" onclick="detectLocation()" class="text-sm text-primary underline">{{ __('Deteksi lokasi saya') }}</button>
+
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="col-span-2"><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input id="lat-input" wire:model="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                    <div class="col-span-2"><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input id="lng-input" wire:model="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 </div>
                 <div><label class="mb-1 block text-sm font-medium">{{ __('Radius (meter)') }}</label><input wire:model="radius" type="number" min="10" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 <div class="flex items-center gap-3">
@@ -68,18 +72,42 @@
             </div>
         </form>
     </div>
+    <script>
+    (function() {
+        const latEl = document.getElementById('lat-input');
+        const lngEl = document.getElementById('lng-input');
+        if (!latEl || !lngEl) return;
+        window.initializeMap({
+            onUpdate: (lat, lng) => {
+                latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true }));
+                lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true }));
+            },
+        });
+        [latEl, lngEl].forEach(el => {
+            el.addEventListener('input', () => {
+                const lat = parseFloat(latEl.value);
+                const lng = parseFloat(lngEl.value);
+                if (!isNaN(lat) && !isNaN(lng)) window.setMapLocation({ location: [lat, lng] });
+            });
+        });
+    })();
+    </script>
     @endif
 
     @if($editing)
     <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-        <form wire:submit="update" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+        <form wire:submit="update" class="w-full max-w-xl rounded-xl bg-canvas p-6 shadow-xl">
             <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Edit Cabang') }}</h2>
             <div class="space-y-4">
                 <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Cabang') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 <div><label class="mb-1 block text-sm font-medium">{{ __('Alamat') }}</label><input wire:model="address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input wire:model="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input wire:model="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+
+                <div wire:ignore class="h-56 w-full overflow-hidden rounded-xl border border-outline-variant"><div id="branch-map" class="h-full w-full"></div></div>
+                <button type="button" onclick="detectLocation()" class="text-sm text-primary underline">{{ __('Deteksi lokasi saya') }}</button>
+
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="col-span-2"><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input id="lat-input" wire:model="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                    <div class="col-span-2"><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input id="lng-input" wire:model="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 </div>
                 <div><label class="mb-1 block text-sm font-medium">{{ __('Radius (meter)') }}</label><input wire:model="radius" type="number" min="10" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 <div class="flex items-center gap-3">
@@ -94,6 +122,29 @@
             </div>
         </form>
     </div>
+    <script>
+    (function() {
+        const latEl = document.getElementById('lat-input');
+        const lngEl = document.getElementById('lng-input');
+        if (!latEl || !lngEl) return;
+
+        const hasCoords = latEl.value && lngEl.value;
+        window.initializeMap({
+            location: hasCoords ? [parseFloat(latEl.value), parseFloat(lngEl.value)] : undefined,
+            onUpdate: (lat, lng) => {
+                latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true }));
+                lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true }));
+            },
+        });
+        [latEl, lngEl].forEach(el => {
+            el.addEventListener('input', () => {
+                const lat = parseFloat(latEl.value);
+                const lng = parseFloat(lngEl.value);
+                if (!isNaN(lat) && !isNaN(lng)) window.setMapLocation({ location: [lat, lng] });
+            });
+        });
+    })();
+    </script>
     @endif
 
     @if($confirmingDeletion)
