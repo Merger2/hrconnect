@@ -127,13 +127,17 @@ class PositionComponent extends Component
     public function delete(): void
     {
         Gate::authorize('manage_positions');
+
         $pos = Position::findOrFail($this->selectedId);
-        try {
-            $pos->delete();
-            $this->dispatch('toast', variant: 'success', text: __('Jabatan berhasil dihapus.'));
-        } catch (\Illuminate\Database\QueryException $e) {
-            $this->dispatch('toast', variant: 'error', text: __('Jabatan tidak bisa dihapus karena masih digunakan.'));
+
+        if ($pos->employees()->count() > 0) {
+            $this->dispatch('toast', variant: 'error', text: __('Jabatan tidak bisa dihapus karena masih digunakan oleh pegawai.'));
+            $this->confirmingDeletion = false;
+            return;
         }
+
+        $pos->delete();
+        $this->dispatch('toast', variant: 'success', text: __('Jabatan berhasil dihapus.'));
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;

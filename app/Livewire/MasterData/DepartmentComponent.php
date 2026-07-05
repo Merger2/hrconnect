@@ -109,13 +109,17 @@ class DepartmentComponent extends Component
     public function delete(): void
     {
         Gate::authorize('manage_departments');
+
         $dept = Department::findOrFail($this->selectedId);
-        try {
-            $dept->delete();
-            $this->dispatch('toast', variant: 'success', text: __('Departemen berhasil dihapus.'));
-        } catch (\Illuminate\Database\QueryException $e) {
-            $this->dispatch('toast', variant: 'error', text: __('Departemen tidak bisa dihapus karena masih digunakan.'));
+
+        if ($dept->positions()->count() > 0) {
+            $this->dispatch('toast', variant: 'error', text: __('Departemen tidak bisa dihapus karena masih memiliki jabatan.'));
+            $this->confirmingDeletion = false;
+            return;
         }
+
+        $dept->delete();
+        $this->dispatch('toast', variant: 'success', text: __('Departemen berhasil dihapus.'));
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;
