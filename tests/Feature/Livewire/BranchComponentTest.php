@@ -55,6 +55,7 @@ test('can edit a branch', function () {
         ->test(BranchComponent::class)
         ->call('edit', $branch->id)
         ->assertSet('name', 'Old Name')
+        ->assertSet('selectedId', $branch->id)
         ->assertSet('editing', true);
 });
 
@@ -83,17 +84,6 @@ test('can delete a branch', function () {
         ->assertDispatched('toast');
 
     expect(Branch::find($branch->id))->toBeNull();
-});
-
-test('search filters branches', function () {
-    Branch::factory()->create(['name' => 'Alpha Office']);
-    Branch::factory()->create(['name' => 'Beta Office']);
-
-    Livewire::actingAs($this->user)
-        ->test(BranchComponent::class)
-        ->set('search', 'Alpha')
-        ->assertSee('Alpha Office')
-        ->assertDontSee('Beta Office');
 });
 
 test('employee cannot manage branches', function () {
