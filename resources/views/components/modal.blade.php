@@ -14,14 +14,17 @@ $maxWidthClasses = [
     '7xl' => 'sm:max-w-7xl',
     'full' => 'sm:max-w-full',
 ][$maxWidth] ?? 'sm:max-w-lg';
+
+$hasModel = $attributes->hasStartsWith('wire:model');
 @endphp
 
-<div x-data="{ open: @js($show) }" x-on:keydown.escape.window="if (open) { open = false }">
+<div @if($hasModel) x-data="{ show: @entangle($attributes->wire('model')) }" @else x-data="{ open: @js($show) }" @endif
+    x-on:keydown.escape.window="if ({{ $hasModel ? 'show' : 'open' }}) { {{ $hasModel ? 'show' : 'open' }} = false }">
     <template x-teleport="body">
-        <div x-show="open"
+        <div x-show="{{ $hasModel ? 'show' : 'open' }}"
             x-cloak
-            x-effect="if (open) { $nextTick(() => window.initUiPickers?.($el)) }"
-            @if ($closeable) x-on:click.self="open = false" @endif
+            x-effect="if ({{ $hasModel ? 'show' : 'open' }}) { $nextTick(() => window.initUiPickers?.($el)) }"
+            @if ($closeable) x-on:click.self="{{ $hasModel ? 'show' : 'open' }} = false" @endif
             class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
             role="dialog"
             aria-modal="true"
@@ -34,11 +37,11 @@ $maxWidthClasses = [
 
             <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
 
-            <div x-show="open"
+            <div x-show="{{ $hasModel ? 'show' : 'open' }}"
                 class="relative z-10 mx-auto w-full {{ $maxWidthClasses }} transform overflow-y-auto rounded-lg bg-canvas shadow-xl"
                 style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
                 x-on:click.stop
-                x-trap.inert.noscroll="open"
+                x-trap.inert.noscroll="{{ $hasModel ? 'show' : 'open' }}"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -50,7 +53,7 @@ $maxWidthClasses = [
                     <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
                         <h2 class="text-lg font-semibold text-ink">{{ $title ?? '' }}</h2>
                         @if ($closeable)
-                            <button @@click="open = false" class="rounded-xl p-1 text-on-surface-variant hover:text-ink hover:bg-surface-container-high">
+                            <button @click="{{ $hasModel ? 'show' : 'open' }} = false" class="rounded-xl p-1 text-on-surface-variant hover:text-ink hover:bg-surface-container-high">
                                 <span class="material-symbols-outlined text-lg">close</span>
                             </button>
                         @endif

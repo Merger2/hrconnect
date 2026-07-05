@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\MasterData;
 
 use App\Models\Branch;
+use App\Models\Company;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -24,10 +25,6 @@ class BranchComponent extends Component
 
     public ?string $radius = null;
 
-    public ?string $deleteName = null;
-
-    public ?string $deleteAddress = null;
-
     public bool $creating = false;
 
     public bool $editing = false;
@@ -35,6 +32,8 @@ class BranchComponent extends Component
     public bool $confirmingDeletion = false;
 
     public ?int $selectedId = null;
+
+    public ?string $deleteName = null;
 
     public string $search = '';
 
@@ -70,11 +69,12 @@ class BranchComponent extends Component
         Gate::authorize('manage_branches');
         $this->validate();
         Branch::create([
+            'company_id' => Company::first()?->id,
             'name' => trim($this->name),
             'address' => $this->address ? trim($this->address) : null,
-            'latitude' => $this->latitude !== null ? (float) $this->latitude : null,
-            'longitude' => $this->longitude !== null ? (float) $this->longitude : null,
-            'radius' => $this->radius !== null ? (int) $this->radius : null,
+            'latitude' => $this->latitude !== null && $this->latitude !== '' ? (float) $this->latitude : null,
+            'longitude' => $this->longitude !== null && $this->longitude !== '' ? (float) $this->longitude : null,
+            'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : null,
         ]);
         $this->creating = false;
         $this->resetForm();
@@ -102,9 +102,9 @@ class BranchComponent extends Component
         $branch->update([
             'name' => trim($this->name),
             'address' => $this->address ? trim($this->address) : null,
-            'latitude' => $this->latitude !== null ? (float) $this->latitude : null,
-            'longitude' => $this->longitude !== null ? (float) $this->longitude : null,
-            'radius' => $this->radius !== null ? (int) $this->radius : null,
+            'latitude' => $this->latitude !== null && $this->latitude !== '' ? (float) $this->latitude : null,
+            'longitude' => $this->longitude !== null && $this->longitude !== '' ? (float) $this->longitude : null,
+            'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : null,
         ]);
         $this->editing = false;
         $this->resetForm();
@@ -115,7 +115,6 @@ class BranchComponent extends Component
     {
         $branch = Branch::findOrFail($id);
         $this->deleteName = $branch->name;
-        $this->deleteAddress = $branch->address;
         $this->confirmingDeletion = true;
         $this->selectedId = $id;
     }
@@ -123,8 +122,7 @@ class BranchComponent extends Component
     public function delete(): void
     {
         Gate::authorize('manage_branches');
-        $branch = Branch::findOrFail($this->selectedId);
-        $branch->delete();
+        Branch::findOrFail($this->selectedId)->delete();
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;
