@@ -25,6 +25,8 @@ class BranchComponent extends Component
 
     public ?string $radius = null;
 
+    public bool $isActive = true;
+
     public bool $creating = false;
 
     public bool $editing = false;
@@ -35,11 +37,7 @@ class BranchComponent extends Component
 
     public ?string $deleteName = null;
 
-    public string $search = '';
-
     public int $perPage = 10;
-
-    protected $queryString = ['search' => ['except' => '']];
 
     protected function rules(): array
     {
@@ -49,6 +47,7 @@ class BranchComponent extends Component
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
             'radius' => ['nullable', 'integer', 'min:10', 'max:5000'],
+            'isActive' => ['boolean'],
         ];
     }
 
@@ -65,6 +64,7 @@ class BranchComponent extends Component
         $this->latitude = null;
         $this->longitude = null;
         $this->radius = null;
+        $this->isActive = true;
         $this->selectedId = null;
         $this->creating = true;
     }
@@ -76,10 +76,11 @@ class BranchComponent extends Component
         Branch::create([
             'company_id' => Company::first()?->id,
             'name' => trim($this->name),
-            'address' => $this->address ? trim($this->address) : null,
+            'address' => $this->address ? trim($this->address) : '',
             'latitude' => $this->latitude !== null && $this->latitude !== '' ? (float) $this->latitude : null,
             'longitude' => $this->longitude !== null && $this->longitude !== '' ? (float) $this->longitude : null,
-            'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : null,
+            'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : 100,
+            'is_active' => (bool) $this->isActive,
         ]);
         $this->creating = false;
         $this->dispatch('toast', variant: 'success', text: __('Cabang berhasil ditambahkan.'));
@@ -87,13 +88,13 @@ class BranchComponent extends Component
 
     public function edit(int $id): void
     {
-        $this->resetErrorBag();
         $branch = Branch::findOrFail($id);
         $this->name = $branch->name;
         $this->address = $branch->address;
         $this->latitude = $branch->latitude;
         $this->longitude = $branch->longitude;
-        $this->radius = $branch->radius;
+        $this->radius = (string) $branch->radius;
+        $this->isActive = (bool) $branch->is_active;
         $this->selectedId = $id;
         $this->editing = true;
     }
@@ -105,10 +106,11 @@ class BranchComponent extends Component
         $branch = Branch::findOrFail($this->selectedId);
         $branch->update([
             'name' => trim($this->name),
-            'address' => $this->address ? trim($this->address) : null,
+            'address' => $this->address ? trim($this->address) : '',
             'latitude' => $this->latitude !== null && $this->latitude !== '' ? (float) $this->latitude : null,
             'longitude' => $this->longitude !== null && $this->longitude !== '' ? (float) $this->longitude : null,
-            'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : null,
+            'radius' => $this->radius !== null && $this->radius !== '' ? (int) $this->radius : 100,
+            'is_active' => (bool) $this->isActive,
         ]);
         $this->editing = false;
         $this->dispatch('toast', variant: 'success', text: __('Cabang berhasil diperbarui.'));
@@ -133,11 +135,6 @@ class BranchComponent extends Component
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;
-        $this->resetPage();
-    }
-
-    public function updatedSearch(): void
-    {
         $this->resetPage();
     }
 

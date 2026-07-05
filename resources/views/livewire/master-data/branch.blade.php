@@ -7,10 +7,15 @@
         </div>
 
         @if($branches->count())
-        <x-simple-table :headers="[__('Nama'), __('Alamat'), __('Geofence'), __('Aksi')]">
+        <x-simple-table :headers="[__('Nama'), __('Status'), __('Alamat'), __('Geofence'), __('Aksi')]">
             @foreach($branches as $b)
             <tr>
                 <td class="px-4 py-3 font-medium text-ink">{{ $b->name }}</td>
+                <td class="px-4 py-3">
+                    <span class="rounded-full px-2 py-0.5 text-xs {{ $b->is_active ? 'bg-success/10 text-success' : 'bg-error/10 text-error' }}">
+                        {{ $b->is_active ? __('Aktif') : __('Nonaktif') }}
+                    </span>
+                </td>
                 <td class="px-4 py-3 text-sm text-on-surface-variant">{{ \Illuminate\Support\Str::limit($b->address, 40) ?: '-' }}</td>
                 <td class="px-4 py-3">
                     @if($b->latitude && $b->longitude)
@@ -32,63 +37,73 @@
         </x-simple-table>
         <x-pagination :paginator="$branches" />
         @else
-        <x-empty-state title="{{ filled($search) ? __('Tidak ada cabang ditemukan') : __('Belum ada cabang') }}" description="{{ filled($search) ? __('Coba ubah kata kunci.') : __('Tambahkan cabang perusahaan.') }}" />
+        <x-empty-state title="{{ __('Belum ada cabang') }}" description="{{ __('Tambahkan cabang perusahaan.') }}" />
         @endif
     </x-page-shell>
 
     @if($creating)
     <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-        <div class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+        <form wire:submit="create" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
             <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Tambah Cabang') }}</h2>
             <div class="space-y-4">
-                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Cabang') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                <div><label class="mb-1 block text-sm font-medium">{{ __('Alamat') }}</label><input wire:model="address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Cabang') }} *</label><input name="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Alamat') }}</label><input name="address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input wire:model="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input wire:model="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                    <div><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input name="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                    <div><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input name="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 </div>
-                <div><label class="mb-1 block text-sm font-medium">{{ __('Radius (meter)') }}</label><input wire:model="radius" type="number" min="10" placeholder="100" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Radius (meter)') }}</label><input name="radius" type="number" min="10" value="100" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div class="flex items-center gap-3">
+                    <input type="hidden" name="isActive" value="0" />
+                    <input type="checkbox" name="isActive" value="1" id="create-active" class="rounded border-outline-variant" />
+                    <label for="create-active" class="text-sm text-on-surface-variant">{{ __('Cabang Aktif') }}</label>
+                </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
-                <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Simpan') }}</x-button>
             </div>
-        </div>
+        </form>
     </div>
     @endif
 
     @if($editing)
     <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-        <div class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
+        <form wire:submit="update" class="w-full max-w-lg rounded-xl bg-canvas p-6 shadow-xl">
             <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('Edit Cabang') }}</h2>
             <div class="space-y-4">
-                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Cabang') }} *</label><input wire:model="name" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                <div><label class="mb-1 block text-sm font-medium">{{ __('Alamat') }}</label><input wire:model="address" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Nama Cabang') }} *</label><input name="name" value="{{ $name }}" required class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Alamat') }}</label><input name="address" value="{{ $address }}" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input wire:model="latitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
-                    <div><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input wire:model="longitude" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                    <div><label class="mb-1 block text-sm font-medium">{{ __('Latitude') }}</label><input name="latitude" value="{{ $latitude }}" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                    <div><label class="mb-1 block text-sm font-medium">{{ __('Longitude') }}</label><input name="longitude" value="{{ $longitude }}" type="number" step="any" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
                 </div>
-                <div><label class="mb-1 block text-sm font-medium">{{ __('Radius (meter)') }}</label><input wire:model="radius" type="number" min="10" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div><label class="mb-1 block text-sm font-medium">{{ __('Radius (meter)') }}</label><input name="radius" value="{{ $radius }}" type="number" min="10" class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm" /></div>
+                <div class="flex items-center gap-3">
+                    <input type="hidden" name="isActive" value="0" />
+                    <input type="checkbox" name="isActive" value="1" id="edit-active" {{ $isActive ? 'checked' : '' }} class="rounded border-outline-variant" />
+                    <label for="edit-active" class="text-sm text-on-surface-variant">{{ __('Cabang Aktif') }}</label>
+                </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
-                <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Perbarui') }}</x-button>
             </div>
-        </div>
+        </form>
     </div>
     @endif
 
     @if($confirmingDeletion)
     <div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-        <div class="w-full max-w-sm rounded-xl bg-canvas p-6 shadow-xl text-center">
+        <form wire:submit="delete" class="w-full max-w-sm rounded-xl bg-canvas p-6 shadow-xl text-center">
             <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error/10"><span class="material-symbols-outlined text-3xl text-error">warning</span></div>
             <h3 class="text-lg font-semibold text-ink">{{ __('Hapus Cabang') }}</h3>
             <p class="mt-2 text-sm text-on-surface-variant">Hapus <strong>{{ $deleteName }}</strong>?</p>
             <div class="mt-6 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
-                <x-button variant="danger" wire:click="delete">{{ __('Hapus') }}</x-button>
+                <x-button variant="danger" type="submit">{{ __('Hapus') }}</x-button>
             </div>
-        </div>
+        </form>
     </div>
     @endif
 </div>
