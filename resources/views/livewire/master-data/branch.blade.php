@@ -4,9 +4,6 @@
             @if($this->canManage())
             <x-button variant="primary" icon="add" wire:click="showCreating">{{ __('Tambah Cabang') }}</x-button>
             @endif
-            <div class="min-w-[200px] flex-1">
-                <input type="search" wire:model="search" wire:change="$refresh" placeholder="{{ __('Cari cabang...') }}" class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-4 text-sm text-ink outline-none" />
-            </div>
         </div>
 
         @if($branches->count())

@@ -145,7 +145,6 @@ class BranchComponent extends Component
     {
         return view('livewire.master-data.branch', [
             'branches' => Branch::query()
-                ->when(filled($this->search), fn ($q) => $q->where('name', 'ilike', '%'.trim($this->search).'%'))
                 ->orderBy('name')
                 ->paginate($this->perPage),
         ]);
