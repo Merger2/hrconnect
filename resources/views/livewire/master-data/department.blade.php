@@ -70,10 +70,10 @@
             <x-forms.input label="{{ __('Nama Departemen') }}" wire:model="name" required placeholder="Human Resources" />
             <x-forms.select label="{{ __('Cabang') }}" wire:model="branch_id" :options="$branches->pluck('name', 'id')" placeholder="{{ __('Pilih cabang...') }}" />
         </div>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
             <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-modal>
 
     {{-- Edit Modal --}}
@@ -84,18 +84,18 @@
             <x-forms.input label="{{ __('Nama Departemen') }}" wire:model="name" required />
             <x-forms.select label="{{ __('Cabang') }}" wire:model="branch_id" :options="$branches->pluck('name', 'id')" placeholder="{{ __('Pilih cabang...') }}" />
         </div>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
             <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-modal>
 
     {{-- Delete Modal --}}
     <x-confirm-modal name="delete-dept" :title="__('Hapus Departemen')" variant="danger" wire:model="confirmingDeletion">
         <p>{{ __('Hapus departemen') }} <strong>{{ $deleteName }}</strong>?</p>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
             <x-button variant="danger" wire:click="delete">{{ __('Hapus') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-confirm-modal>
 </div>
