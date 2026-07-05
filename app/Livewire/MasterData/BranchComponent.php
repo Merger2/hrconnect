@@ -124,12 +124,16 @@ class BranchComponent extends Component
     public function delete(): void
     {
         Gate::authorize('manage_branches');
-        Branch::findOrFail($this->selectedId)->delete();
+        try {
+            Branch::findOrFail($this->selectedId)->delete();
+            $this->dispatch('toast', variant: 'success', text: __('Cabang berhasil dihapus.'));
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->dispatch('toast', variant: 'error', text: __('Cabang tidak bisa dihapus karena masih digunakan.'));
+        }
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;
         $this->resetPage();
-        $this->dispatch('toast', variant: 'success', text: __('Cabang berhasil dihapus.'));
     }
 
     public function updatedSearch(): void
