@@ -110,9 +110,9 @@
     {{-- Delete Modal --}}
     <x-confirm-modal name="delete-branch" :title="__('Hapus Cabang')" variant="danger" wire:model="confirmingDeletion">
         <p>{{ __('Anda yakin ingin menghapus cabang') }} <strong>{{ $deleteName }}</strong>?</p>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
             <x-button variant="danger" wire:click="delete">{{ __('Hapus') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-confirm-modal>
 </div>

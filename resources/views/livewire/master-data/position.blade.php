@@ -79,10 +79,10 @@
             <x-forms.input label="{{ __('Gaji Pokok (Rp)') }}" wire:model="basic_salary" type="number" min="0" />
             <x-forms.input label="{{ __('Tunjangan Jabatan (Rp)') }}" wire:model="allowance_jabatan" type="number" min="0" />
         </div>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
             <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-modal>
 
     {{-- Edit Modal --}}
@@ -96,18 +96,18 @@
             <x-forms.input label="{{ __('Gaji Pokok (Rp)') }}" wire:model="basic_salary" type="number" min="0" />
             <x-forms.input label="{{ __('Tunjangan Jabatan (Rp)') }}" wire:model="allowance_jabatan" type="number" min="0" />
         </div>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
             <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-modal>
 
     {{-- Delete Modal --}}
     <x-confirm-modal name="delete-pos" :title="__('Hapus Jabatan')" variant="danger" wire:model="confirmingDeletion">
         <p>{{ __('Hapus jabatan') }} <strong>{{ $deleteName }}</strong>?</p>
-        <x-slot:footer>
+        <x-slot:actions>
             <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)">{{ __('Batal') }}</x-button>
             <x-button variant="danger" wire:click="delete">{{ __('Hapus') }}</x-button>
-        </x-slot:footer>
+        </x-slot:actions>
     </x-confirm-modal>
 </div>
