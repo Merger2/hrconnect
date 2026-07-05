@@ -70,8 +70,8 @@
     <x-confirm-modal wire:model="confirmingDeletion" :title="__('Hapus Cabang')" variant="danger">
         <p>{{ __('Yakin ingin menghapus cabang') }} <strong>{{ $deleteName }}</strong>?</p>
         <x-slot:footer>
-            <x-button variant="secondary" @click="$wire.set('confirmingDeletion', false)" wire:loading.attr="disabled">{{ __('Batal') }}</x-button>
-            <x-button variant="danger" @click="$wire.call('delete')" wire:loading.attr="disabled">{{ __('Hapus') }}</x-button>
+            <x-button variant="secondary" wire:click="$set('confirmingDeletion', false)" wire:loading.attr="disabled">{{ __('Batal') }}</x-button>
+            <x-button variant="danger" wire:click="delete" wire:loading.attr="disabled">{{ __('Hapus') }}</x-button>
         </x-slot:footer>
     </x-confirm-modal>
 
@@ -87,8 +87,8 @@
             </div>
         </div>
         <div class="flex flex-row justify-end border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">
-            <x-button variant="secondary" @click="$wire.set('creating', false)" wire:loading.attr="disabled">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" class="ml-2" @click="$wire.call('create')" wire:loading.attr="disabled">{{ __('Simpan') }}</x-button>
+            <x-button variant="secondary" wire:click="$set('creating', false)" wire:loading.attr="disabled">{{ __('Batal') }}</x-button>
+            <x-button variant="primary" class="ml-2" wire:click="create" wire:loading.attr="disabled">{{ __('Simpan') }}</x-button>
         </div>
     </x-modal>
 
@@ -104,8 +104,8 @@
             </div>
         </div>
         <div class="flex flex-row justify-end border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">
-            <x-button variant="secondary" @click="$wire.set('editing', false)" wire:loading.attr="disabled">{{ __('Batal') }}</x-button>
-            <x-button variant="primary" class="ml-2" @click="$wire.call('update')" wire:loading.attr="disabled">{{ __('Perbarui') }}</x-button>
+            <x-button variant="secondary" wire:click="$set('editing', false)" wire:loading.attr="disabled">{{ __('Batal') }}</x-button>
+            <x-button variant="primary" class="ml-2" wire:click="update" wire:loading.attr="disabled">{{ __('Perbarui') }}</x-button>
         </div>
     </x-modal>
 </div>
