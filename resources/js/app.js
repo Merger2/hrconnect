@@ -132,6 +132,62 @@ function installSweetAlertConfirmations(root = document) {
 window.L = L;
 window.profilePhotoEditor = profilePhotoEditor;
 
+let branchMap;
+
+window.initializeMap = function ({ onUpdate, location }) {
+    const defaultLoc = location ?? [-6.2088, 106.8456];
+
+    branchMap = L.map('branch-map').setView(defaultLoc, 13);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 21,
+    }).addTo(branchMap);
+
+    const marker = L.marker(defaultLoc, { draggable: true }).addTo(branchMap);
+    marker.bindPopup('Geser marker atau geser peta untuk memilih lokasi').openPopup();
+
+    const updateCoords = (lat, lng) => onUpdate(Number(lat).toFixed(6), Number(lng).toFixed(6));
+
+    marker.on('dragend', (e) => {
+        const pos = marker.getLatLng();
+        updateCoords(pos.lat, pos.lng);
+    });
+
+    branchMap.on('move', () => {
+        const center = branchMap.getCenter();
+        marker.setLatLng(center);
+        updateCoords(center.lat, center.lng);
+    });
+
+    updateCoords(defaultLoc[0], defaultLoc[1]);
+
+    setTimeout(() => branchMap?.invalidateSize(), 300);
+};
+
+window.setMapLocation = function ({ location }) {
+    if (!location || !branchMap) return;
+    branchMap.setView(location, 13);
+};
+
+window.detectLocation = function () {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lng = pos.coords.longitude.toFixed(6);
+            const latEl = document.getElementById('lat-input');
+            const lngEl = document.getElementById('lng-input');
+            if (latEl) { latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (lngEl) { lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (branchMap) { branchMap.setView([lat, lng], 16); }
+            window.HRConnectAlert?.toast({ type: 'success', message: 'Lokasi terdeteksi' });
+        },
+        () => window.HRConnectAlert?.toast({ type: 'error', message: 'Gagal mendeteksi lokasi' }),
+    );
+};
+
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('profilePhotoEditor', profilePhotoEditor);
     window.Alpine.data('payrollIndex', payrollIndex);
