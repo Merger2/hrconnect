@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-03 — Sesi J: Branch refactor ke **PasPapan DivisionComponent pattern (full Livewire)**. Root cause: `x-modal` `@js($show)` → ganti `@entangle`. Progres: ~72%.
+> Updated: 2026-07-03 — Sesi J ✅. **Branch, Department, Position full Livewire (PasPapan DivisionComponent pattern)**. Root cause fixed: `x-modal @js` → `@entangle`. Progres: ~75%.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
