@@ -1,5 +1,7 @@
 @props(['id', 'maxWidth', 'onclose' => null])
 
+@aware(['title' => null])
+
 @php
 $id = $id ?? md5($attributes->wire('model'));
 
@@ -50,7 +52,15 @@ $maxWidth = [
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                {{ $slot }}
+                @if (isset($title))
+                <div class="border-b border-outline-variant/50 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-ink">{{ $title }}</h2>
+                </div>
+                @endif
+                <div class="p-6">{{ $slot }}</div>
+                @if (isset($footer))
+                <div class="flex justify-end gap-3 border-t border-outline-variant/50 px-6 py-4">{{ $footer }}</div>
+                @endif
             </div>
         </div>
     </template>

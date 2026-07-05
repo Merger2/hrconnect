@@ -103,7 +103,6 @@ class DepartmentComponent extends Component
         $dept = Department::findOrFail($id);
         $this->deleteName = $dept->name;
         $this->confirmingDeletion = true;
-        $this->dispatch('open-modal', 'delete-dept');
         $this->selectedId = $id;
     }
 
@@ -111,12 +110,16 @@ class DepartmentComponent extends Component
     {
         Gate::authorize('manage_departments');
         $dept = Department::findOrFail($this->selectedId);
-        $dept->delete();
+        try {
+            $dept->delete();
+            $this->dispatch('toast', variant: 'success', text: __('Departemen berhasil dihapus.'));
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->dispatch('toast', variant: 'error', text: __('Departemen tidak bisa dihapus karena masih digunakan.'));
+        }
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;
         $this->resetPage();
-        $this->dispatch('toast', variant: 'success', text: __('Departemen berhasil dihapus.'));
     }
 
     public function updatedSearch(): void
@@ -143,7 +146,10 @@ class DepartmentComponent extends Component
     {
         $departments = Department::query()
             ->with('branch')
-            ->when(filled($this->search), fn ($q) => $q->where('name', 'ilike', '%'.trim($this->search).'%'))
+            ->when(filled($this->search), function ($q) {
+                $search = '%'.trim($this->search).'%';
+                $q->where('name', \Illuminate\Support\Facades\DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
+            })
             ->orderBy('name')
             ->paginate($this->perPage);
 

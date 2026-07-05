@@ -86,6 +86,17 @@ test('can delete a branch', function () {
     expect(Branch::find($branch->id))->toBeNull();
 });
 
+test('search filters branches', function () {
+    Branch::factory()->create(['name' => 'Alpha Office']);
+    Branch::factory()->create(['name' => 'Beta Office']);
+
+    Livewire::actingAs($this->user)
+        ->test(BranchComponent::class)
+        ->set('search', 'Alpha')
+        ->assertSee('Alpha Office')
+        ->assertDontSee('Beta Office');
+});
+
 test('employee cannot manage branches', function () {
     $this->user->removeRole('super-admin');
     $this->user->assignRole('employee');

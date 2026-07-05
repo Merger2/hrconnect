@@ -37,7 +37,11 @@ class BranchComponent extends Component
 
     public ?string $deleteName = null;
 
+    public string $search = '';
+
     public int $perPage = 10;
+
+    protected $queryString = ['search' => ['except' => '']];
 
     protected function rules(): array
     {
@@ -138,10 +142,19 @@ class BranchComponent extends Component
         $this->resetPage();
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         return view('livewire.master-data.branch', [
             'branches' => Branch::query()
+                ->when(filled($this->search), function ($q) {
+                    $search = '%'.trim($this->search).'%';
+                    $q->where('name', \Illuminate\Support\Facades\DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
+                })
                 ->orderBy('name')
                 ->paginate($this->perPage),
         ]);

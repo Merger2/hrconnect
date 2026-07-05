@@ -92,8 +92,8 @@ class PositionComponent extends Component
         $this->code = $pos->code;
         $this->department_id = $pos->department_id;
         $this->grade = $pos->grade;
-        $this->basic_salary = $pos->basic_salary;
-        $this->allowance_jabatan = $pos->allowance_jabatan;
+        $this->basic_salary = $pos->basic_salary !== null ? (float) $pos->basic_salary : null;
+        $this->allowance_jabatan = $pos->allowance_jabatan !== null ? (float) $pos->allowance_jabatan : null;
         $this->selectedId = $id;
         $this->editing = true;
     }
@@ -121,7 +121,6 @@ class PositionComponent extends Component
         $pos = Position::findOrFail($id);
         $this->deleteName = $pos->name;
         $this->confirmingDeletion = true;
-        $this->dispatch('open-modal', 'delete-pos');
         $this->selectedId = $id;
     }
 
@@ -129,12 +128,16 @@ class PositionComponent extends Component
     {
         Gate::authorize('manage_positions');
         $pos = Position::findOrFail($this->selectedId);
-        $pos->delete();
+        try {
+            $pos->delete();
+            $this->dispatch('toast', variant: 'success', text: __('Jabatan berhasil dihapus.'));
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->dispatch('toast', variant: 'error', text: __('Jabatan tidak bisa dihapus karena masih digunakan.'));
+        }
         $this->confirmingDeletion = false;
         $this->selectedId = null;
         $this->deleteName = null;
         $this->resetPage();
-        $this->dispatch('toast', variant: 'success', text: __('Jabatan berhasil dihapus.'));
     }
 
     public function updatedSearch(): void
@@ -164,7 +167,10 @@ class PositionComponent extends Component
     {
         $positions = Position::query()
             ->with('department.branch')
-            ->when(filled($this->search), fn ($q) => $q->where('name', 'ilike', '%'.trim($this->search).'%'))
+            ->when(filled($this->search), function ($q) {
+                $search = '%'.trim($this->search).'%';
+                $q->where('name', \Illuminate\Support\Facades\DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
+            })
             ->orderBy('name')
             ->paginate($this->perPage);
 
