@@ -103,6 +103,7 @@ class DepartmentComponent extends Component
         $dept = Department::findOrFail($id);
         $this->deleteName = $dept->name;
         $this->confirmingDeletion = true;
+        $this->dispatch('open-modal', 'delete-dept');
         $this->selectedId = $id;
     }
 

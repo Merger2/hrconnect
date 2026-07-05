@@ -117,6 +117,7 @@ class BranchComponent extends Component
         $this->deleteName = $branch->name;
         $this->confirmingDeletion = true;
         $this->selectedId = $id;
+        $this->dispatch('open-modal', 'delete-branch');
     }
 
     public function delete(): void
