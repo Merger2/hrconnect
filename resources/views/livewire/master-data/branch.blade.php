@@ -64,7 +64,7 @@
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('creating', false)">{{ __('Batal') }}</x-button>
-                <x-button variant="primary" wire:click="create">{{ __('Simpan') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Simpan') }}</x-button>
             </div>
         </form>
     </div>
@@ -90,7 +90,7 @@
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('editing', false)">{{ __('Batal') }}</x-button>
-                <x-button variant="primary" wire:click="update">{{ __('Perbarui') }}</x-button>
+                <x-button variant="primary" type="submit">{{ __('Perbarui') }}</x-button>
             </div>
         </form>
     </div>
