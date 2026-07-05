@@ -132,20 +132,19 @@ function installSweetAlertConfirmations(root = document) {
 window.L = L;
 window.profilePhotoEditor = profilePhotoEditor;
 
-let branchMap;
-
 window.initializeMap = function ({ onUpdate, location }) {
     const defaultLoc = location ?? [-6.2088, 106.8456];
 
-    branchMap = L.map('branch-map').setView(defaultLoc, 13);
+    const map = L.map('branch-map').setView(defaultLoc, 13);
+    window._branchMapRef = map;
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 21,
-    }).addTo(branchMap);
+    }).addTo(map);
 
-    const marker = L.marker(defaultLoc, { draggable: true }).addTo(branchMap);
+    const marker = L.marker(defaultLoc, { draggable: true }).addTo(map);
     marker.bindPopup('Geser marker atau geser peta untuk memilih lokasi').openPopup();
 
     const updateCoords = (lat, lng) => onUpdate(Number(lat).toFixed(6), Number(lng).toFixed(6));
@@ -155,23 +154,25 @@ window.initializeMap = function ({ onUpdate, location }) {
         updateCoords(pos.lat, pos.lng);
     });
 
-    branchMap.on('move', () => {
-        const center = branchMap.getCenter();
+    map.on('move', () => {
+        const center = map.getCenter();
         marker.setLatLng(center);
         updateCoords(center.lat, center.lng);
     });
 
     updateCoords(defaultLoc[0], defaultLoc[1]);
 
-    setTimeout(() => branchMap?.invalidateSize(), 300);
+    setTimeout(() => map.invalidateSize(), 300);
 };
 
 window.setMapLocation = function ({ location }) {
-    if (!location || !branchMap) return;
-    branchMap.setView(location, 13);
+    const map = window._branchMapRef;
+    if (!location || !map) return;
+    map.setView(location, 13);
 };
 
 window.detectLocation = function () {
+    const map = window._branchMapRef;
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -181,7 +182,7 @@ window.detectLocation = function () {
             const lngEl = document.getElementById('lng-input');
             if (latEl) { latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true })); }
             if (lngEl) { lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true })); }
-            if (branchMap) { branchMap.setView([lat, lng], 16); }
+            if (map) { map.setView([lat, lng], 16); }
             window.HRConnectAlert?.toast({ type: 'success', message: 'Lokasi terdeteksi' });
         },
         () => window.HRConnectAlert?.toast({ type: 'error', message: 'Gagal mendeteksi lokasi' }),
@@ -250,6 +251,39 @@ document.addEventListener('livewire:init', () => {
             type: data.variant || 'success',
             message: data.text || '',
         });
+    });
+
+    Livewire.on('branch-map-open', () => {
+        setTimeout(() => {
+            const latEl = document.getElementById('lat-input');
+            const lngEl = document.getElementById('lng-input');
+            const mapEl = document.getElementById('branch-map');
+            if (!mapEl || !latEl || !lngEl) return;
+
+            if (window._branchMapInit) {
+                window._branchMapInit = null;
+                if (window._branchMapRef) { window._branchMapRef.remove(); window._branchMapRef = null; }
+            }
+
+            const hasCoords = latEl.value && lngEl.value;
+            window.initializeMap({
+                location: hasCoords ? [parseFloat(latEl.value), parseFloat(lngEl.value)] : undefined,
+                onUpdate: (lat, lng) => {
+                    latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true }));
+                    lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true }));
+                },
+            });
+
+            window._branchMapInit = true;
+
+            [latEl, lngEl].forEach(el => {
+                el.addEventListener('input', () => {
+                    const lat = parseFloat(latEl.value);
+                    const lng = parseFloat(lngEl.value);
+                    if (!isNaN(lat) && !isNaN(lng)) window.setMapLocation({ location: [lat, lng] });
+                });
+            });
+        }, 300);
     });
 
     watchPickerMounts();

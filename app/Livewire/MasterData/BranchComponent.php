@@ -71,6 +71,7 @@ class BranchComponent extends Component
         $this->isActive = true;
         $this->selectedId = null;
         $this->creating = true;
+        $this->dispatch('branch-map-open');
     }
 
     public function create(): void
@@ -101,6 +102,7 @@ class BranchComponent extends Component
         $this->isActive = (bool) $branch->is_active;
         $this->selectedId = $id;
         $this->editing = true;
+        $this->dispatch('branch-map-open');
     }
 
     public function update(): void

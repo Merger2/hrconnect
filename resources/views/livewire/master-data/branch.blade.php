@@ -72,26 +72,6 @@
             </div>
         </form>
     </div>
-    <script>
-    (function() {
-        const latEl = document.getElementById('lat-input');
-        const lngEl = document.getElementById('lng-input');
-        if (!latEl || !lngEl) return;
-        window.initializeMap({
-            onUpdate: (lat, lng) => {
-                latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true }));
-                lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true }));
-            },
-        });
-        [latEl, lngEl].forEach(el => {
-            el.addEventListener('input', () => {
-                const lat = parseFloat(latEl.value);
-                const lng = parseFloat(lngEl.value);
-                if (!isNaN(lat) && !isNaN(lng)) window.setMapLocation({ location: [lat, lng] });
-            });
-        });
-    })();
-    </script>
     @endif
 
     @if($editing)
@@ -122,29 +102,6 @@
             </div>
         </form>
     </div>
-    <script>
-    (function() {
-        const latEl = document.getElementById('lat-input');
-        const lngEl = document.getElementById('lng-input');
-        if (!latEl || !lngEl) return;
-
-        const hasCoords = latEl.value && lngEl.value;
-        window.initializeMap({
-            location: hasCoords ? [parseFloat(latEl.value), parseFloat(lngEl.value)] : undefined,
-            onUpdate: (lat, lng) => {
-                latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true }));
-                lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true }));
-            },
-        });
-        [latEl, lngEl].forEach(el => {
-            el.addEventListener('input', () => {
-                const lat = parseFloat(latEl.value);
-                const lng = parseFloat(lngEl.value);
-                if (!isNaN(lat) && !isNaN(lng)) window.setMapLocation({ location: [lat, lng] });
-            });
-        });
-    })();
-    </script>
     @endif
 
     @if($confirmingDeletion)
