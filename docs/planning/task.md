@@ -1,6 +1,6 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-03 — Sesi I ✅ (audit fix). **All CRITICAL + HIGH resolved. 0 failed, 1.173 passed.** Progres: ~70%.
+> Updated: 2026-07-03 — Sesi J: Branch refactor ke **PasPapan DivisionComponent pattern (full Livewire)**. Root cause: `x-modal` `@js($show)` → ganti `@entangle`. Progres: ~72%.
 
 > **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
 
@@ -3321,3 +3321,82 @@ Hasil audit 3 agen: **Backend PHP**, **Frontend Blade/JS**, **Tests/Security/Mis
 | **I16** | Log rotation setup | 5 menit |
 | **I17** | Fix `__x.$data` Alpine internal → `$dispatch` | 10 menit |
 | **I18** | Fix escape quote `\'(take home)\'` → `(take home)` | 1 menit |
+
+---
+
+# Sesi J — Master Data Refactor: Ikut PasPapan DivisionComponent (Full Livewire)
+
+## Akar Masalah
+
+Branch CRUD tidak berfungsi karena **3 pola auth berbeda** (Bearer → Cookie → sessionStorage) merusak session CSRF. Setelah auth distabilkan ke sessionStorage + Bearer, masalah tetap ada karena **`x-modal` component tidak sync dua arah dengan Livewire**.
+
+| Komponen | Sebelum | Masalah |
+|----------|---------|---------|
+| `x-modal` | `x-data="{ open: @js($show) }"` | Hanya set initial state, tidak sync balik ke Livewire |
+| `wire:model` di div | `wire:model="creating"` | Livewire tidak bisa `@entangle` ke div |
+| `wire:model` di modal | Tidak ada `@entangle` | Modal tidak bisa tutup via Alpine atau buka via Livewire |
+
+**Solusi:** ikut **PasPapan `x-modal` pattern** — `@entangle($attributes->wire('model'))` untuk sync dua arah.
+
+## PasPapan Pattern (DivisionComponent)
+
+```blade
+{{-- Modal — @entangle sync sempurna --}}
+<x-overlays.dialog-modal wire:model="creating">
+    <x-slot name="title">New Division</x-slot>
+    <x-slot name="content">
+        <x-forms.input wire:model="name" label="Name" required />
+    </x-slot>
+    <x-slot name="footer">
+        <x-actions.button wire:click="create">Save</x-actions.button>
+    </x-slot>
+</x-overlays.dialog-modal>
+```
+
+```php
+// DivisionComponent — Livewire murni
+public bool $creating = false;
+public bool $editing = false;
+public ?string $name = null;
+
+public function showCreating() { $this->resetForm(); $this->creating = true; }
+public function create() {
+    Gate::authorize('manageMasterData');
+    $this->validate(['name' => 'required|unique:divisions']);
+    Division::create(['name' => trim($this->name)]);
+    $this->creating = false;
+    $this->banner('Created.');
+}
+```
+
+## Rencana Eksekusi
+
+### Step 1 — Fix `x-modal.blade.php` (root cause)
+- Ganti `x-data="{ open: @js($show) }"` → `x-data="{ show: @entangle($attributes->wire('model')) }"` + `x-show="show"`
+- Ini fix untuk SEMUA halaman yang pakai `<x-modal wire:model="...">`
+
+### Step 2 — Upgrade `BranchComponent` ke Livewire penuh
+- Tambah `$latitude`, `$longitude`, `$radius` properties
+- Validasi server-side
+- Kembalikan blade ke `wire:click`, `wire:model`, `wire:model.live.debounce`
+
+### Step 3 — Hapus `branch-index.js` Alpine.data
+- Tidak butuh lagi — semua via Livewire actions
+
+### Step 4 — Kembalikan route
+- `routes/master-data.php` → `BranchComponent::class` (bukan closure)
+
+### Step 5 — Sama untuk Department & Position
+
+| ID | Task | File | Estimasi |
+|:--:|------|------|:--------:|
+| **J1** | Fix `x-modal` — `@js` → `@entangle` | `components/modal.blade.php` | 5 menit |
+| **J2** | BranchComponent Livewire penuh | `app/Livewire/MasterData/BranchComponent.php` | 20 menit |
+| **J3** | Branch blade — `wire:click` + `wire:model` | `resources/views/livewire/master-data/branch.blade.php` | 15 menit |
+| **J4** | Hapus `branch-index.js` + unregister dari `app.js` | `resources/js/` | 2 menit |
+| **J5** | Kembalikan route | `routes/master-data.php` | 1 menit |
+| **J6** | DepartmentComponent Livewire penuh | `app/Livewire/MasterData/DepartmentComponent.php` | 15 menit |
+| **J7** | PositionComponent Livewire penuh | `app/Livewire/MasterData/PositionComponent.php` | 15 menit |
+| **J8** | Lint + test verify | CLI | 5 menit |
+
+**Total estimasi: ~1.5 jam**
