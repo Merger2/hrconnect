@@ -39,16 +39,28 @@
             </div>
 
             <!-- Password -->
-            <div class="relative">
+            <div class="relative" x-data="{ show: false }">
                 <label class="mb-1 block text-sm font-medium text-on-background">Kata Sandi</label>
-                <input
-                    name="password"
-                    type="password"
-                    required
-                    autocomplete="current-password"
-                    placeholder="Masukkan kata sandi"
-                    class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
-                />
+                <div class="relative">
+                    <input
+                        name="password"
+                        :type="show ? 'text' : 'password'"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Masukkan kata sandi"
+                        class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 pe-11 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"
+                    />
+                    <button
+                        type="button"
+                        @click="show = !show"
+                        :aria-pressed="show"
+                        :aria-label="show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                        class="absolute end-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant hover:text-ink hover:bg-surface-variant/40 focus:outline-none focus:text-ink"
+                        tabindex="-1"
+                    >
+                        <span class="material-symbols-outlined text-xl" x-text="show ? 'visibility_off' : 'visibility'">visibility</span>
+                    </button>
+                </div>
                 @error('password')
                     <p class="mt-1 text-xs text-error">{{ $message }}</p>
                 @enderror

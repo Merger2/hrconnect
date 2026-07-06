@@ -154,7 +154,7 @@ window.initializeMap = function ({ onUpdate, location }) {
         updateCoords(pos.lat, pos.lng);
     });
 
-    map.on('move', () => {
+    map.on('drag', () => {
         const center = map.getCenter();
         marker.setLatLng(center);
         updateCoords(center.lat, center.lng);
