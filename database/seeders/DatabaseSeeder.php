@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            \Laravolt\Indonesia\Seeds\DatabaseSeeder::class,
             RoleAndPermissionSeeder::class,
             SuperAdminSeeder::class,
             CompanyAndDepartmentSeeder::class,

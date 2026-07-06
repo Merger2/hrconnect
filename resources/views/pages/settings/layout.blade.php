@@ -11,11 +11,10 @@
                        wire:navigate>{{ __('Profile') }}</a>
                 </li>
                 <li>
-                    <a href="{{ route('security.edit') }}"
+                    <a href="{{ route('profile.edit') }}#security"
                        @class(['flex rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                               'bg-ink/5 text-ink' => request()->routeIs('security.edit'),
-                               'text-ink hover:bg-surface-container-high' => !request()->routeIs('security.edit')])
-                       wire:navigate>{{ __('Security') }}</a>
+                               'text-ink hover:bg-surface-container-high'])
+                    >{{ __('Security') }}</a>
                 </li>
                 <li>
                     <a href="{{ route('appearance.edit') }}"
