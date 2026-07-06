@@ -20,7 +20,7 @@ Dokumen Software Requirements Specification (SRS) ini bertujuan untuk mendefinis
 
 HRConnect adalah sistem HRIS Enterprise berbasis web dengan arsitektur client-server yang mencakup modul-modul berikut:
 
-1. **Autentikasi & Keamanan** — Login email/password, Google OAuth SSO, 2FA TOTP, manajemen sesi, kebijakan password, RBAC (Spatie Permission).
+1. **Autentikasi & Keamanan** — Login email/password, 2FA TOTP, manajemen sesi, kebijakan password, RBAC (Spatie Permission).
 2. **Master Data** — Manajemen Perusahaan, Cabang (dengan GPS geofence), Departemen, Jabatan, Shift, Hari Libur, Pengaturan Perusahaan, Roles & Permissions.
 3. **Presensi (Attendance)** — Clock-in/out dengan GPS Geofencing (Haversine) + Face Recognition (face-api.js, FaceNet 128D), dukungan WFO/WFA, deteksi alpha via cron, peringatan keterlambatan kronis, manajemen perangkat.
 4. **Manajemen Cuti (Leave)** — 7 tipe cuti, perhitungan otomatis hari kerja (exclude weekend/holiday), kuota pro-rated tahun pertama, carry-forward, approval multi-level.
@@ -151,8 +151,7 @@ HRConnect adalah sistem HRIS Enterprise berbasis web dengan arsitektur client-se
 
 5. **External APIs** — Layanan eksternal yang diintegrasikan:
    - Gemini API (text-embedding-004 untuk embedding, Gemini 2.5 Flash untuk LLM RAG)
-   - Google OAuth 2.0 untuk SSO
-   - SMTP Server (Mailtrap dev / SES production) untuk email
+    - SMTP Server (Mailtrap dev / SES production) untuk email
    - Google reCAPTCHA (opsional) untuk form protection
 
 **Arsitektur Komunikasi:**
@@ -225,7 +224,7 @@ Berdasarkan Use Case Diagram (docs/architecture/use-case-diagram.md), sistem HRC
 
 **Modul Autentikasi (UC41-UC45):**
 - UC41: Login Email/Password (Laravel Fortify)
-- UC42: Login Google OAuth (SSO)
+- UC42: Login — Email/Password (Laravel Fortify)
 - UC43: Mengaktifkan/Menonaktifkan 2FA (TOTP, recovery codes)
 - UC44: Memaksa Perubahan Password (force_change_password)
 - UC45: Melihat Activity Logs (Spatie Activitylog)
@@ -274,7 +273,7 @@ Setiap Manager secara otomatis memiliki hak akses Employee (multi-role inheritan
 **Asumsi:**
 1. PostgreSQL dengan ekstensi pgvector, pg_trgm, dan pgcrypto sudah tersedia dan terkonfigurasi
 2. Gemini API key sudah tersedia untuk layanan embedding (text-embedding-004) dan LLM (Gemini 2.5 Flash)
-3. Google OAuth credentials (Client ID, Client Secret) sudah terdaftar dan dikonfigurasi
+3. — (Google OAuth tidak digunakan)
 4. CipherSweet key sudah di-generate (`php artisan ciphersweet:generate-key`) untuk enkripsi data PII
 5. Semua karyawan memiliki smartphone dengan kamera depan (minimal 2MP) dan GPS receiver
 6. Karyawan memiliki koneksi internet minimal 3G untuk operasi real-time (clock-in, chat AI)
@@ -291,7 +290,7 @@ Setiap Manager secara otomatis memiliki hak akses Employee (multi-role inheritan
 5. Spatie Activitylog — dependensi audit trail (composer)
 6. ParagonIE CipherSweet — dependensi enkripsi searchable (composer)
 7. Gemini API — dependensi eksternal untuk embedding dan RAG (HTTP API)
-8. Google OAuth 2.0 — dependensi eksternal untuk SSO (HTTP API)
+8. — (Google OAuth tidak digunakan)
 9. SMTP Server — dependensi eksternal untuk email (Mailtrap/SES)
 10. face-api.js — dependensi client-side face recognition (npm)
 11. Alpine.js — dependensi interaktivitas frontend (npm)
@@ -325,7 +324,7 @@ Sistem HRConnect menyediakan antarmuka pengguna berbasis web yang responsif untu
 - Manifest JSON untuk instalasi PWA
 
 **Halaman Kunci:**
-1. **Halaman Login** — Form email/password + tombol Google OAuth + opsi 2FA challenge
+1. **Halaman Login** — Form email/password + opsi 2FA challenge
 2. **Halaman Clock-In** — Kamera preview (face-api.js), GPS status, WFO/WFA toggle, catatan WFA
 3. **Dashboard** — Peran-spesifik: employee (ringkasan hari ini), manager (tim), HR (rekap), finance (payroll)
 4. **Riwayat Absensi** — Kalender bulanan dengan warna status, filter, export
@@ -369,7 +368,7 @@ Sistem HRConnect berinteraksi dengan perangkat lunak eksternal berikut:
 
 | Perangkat Lunak | Tujuan | Metode Koneksi | Data yang Dipertukarkan |
 |-----------------|--------|----------------|-------------------------|
-| Google OAuth 2.0 | Autentikasi SSO | OAuth 2.0 Authorization Code Flow | Email, profile (scope: openid, email, profile) |
+| — | (Google OAuth tidak digunakan) | — | — |
 | Gemini text-embedding-004 | Pembuatan embedding vektor | REST API (HTTP POST) | Teks chunk → vector 768D |
 | Gemini 2.5 Flash | LLM untuk RAG | REST API (HTTP POST) | Query + context chunks → response teks + sources |
 | SMTP Server (Mailtrap/SES) | Pengiriman email | SMTP Protocol | Email notifikasi, payslip, password reset |
@@ -404,14 +403,14 @@ Sistem HRConnect berinteraksi dengan perangkat lunak eksternal berikut:
 
 #### 3.2.1 Modul Autentikasi & Keamanan (UC41-UC45)
 
-Modul autentikasi dan keamanan menangani login, registrasi, verifikasi email, reset password, 2FA, Google OAuth, manajemen sesi, dan kebijakan password.
+Modul autentikasi dan keamanan menangani login, registrasi, verifikasi email, reset password, 2FA, manajemen sesi, dan kebijakan password.
 
 | ID | Nama | Deskripsi | Aktor | Prioritas |
 |----|------|-----------|-------|-----------|
 | AUTH-01 | Login Email/Password | Authentikasi menggunakan email dan password dengan rate limiting 5 percobaan/menit | Semua | Tinggi |
-| AUTH-02 | Login Google OAuth | Authentikasi SSO menggunakan Google Workspace dengan auto-verifikasi email | Semua | Tinggi |
+| AUTH-02 | — | (Google OAuth tidak digunakan) | — | — |
 | AUTH-03 | Registrasi Akun | Registrasi pengguna baru (hanya via admin, bukan self-registration) | Super Admin | Tinggi |
-| AUTH-04 | Verifikasi Email | Verifikasi alamat email setelah registrasi (otomatis jika via Google OAuth) | Semua | Sedang |
+| AUTH-04 | Verifikasi Email | Verifikasi alamat email setelah registrasi via Gmail SMTP | Semua | Sedang |
 | AUTH-05 | Reset Password | Lupa password via email link (Fortify built-in) | Semua | Tinggi |
 | AUTH-06 | Aktifkan 2FA TOTP | Mengaktifkan two-factor authentication dengan QR code (Google Authenticator/Authy) | Semua | Tinggi |
 | AUTH-07 | Nonaktifkan 2FA TOTP | Menonaktifkan 2FA dengan konfirmasi password | Semua | Sedang |
@@ -980,7 +979,7 @@ Modul notifikasi menangani pengiriman notifikasi in-app (database) dan email unt
 
 **Auth:**
 - Laravel Fortify (bukan Breeze/Jetstream/Sanctum SPA)
-- Google OAuth + Email/Password
+- Email/Password (Fortify)
 - 2FA TOTP untuk role sensitif
 
 ### 3.5 Atribut Sistem Perangkat Lunak
@@ -1142,7 +1141,7 @@ Sistem HRConnect menggunakan 48 tabel database dalam satu skema PostgreSQL. Beri
 **B. Users & Employees (4 tabel):**
 | Tabel | Primary Key | Kolom Kunci | Unik |
 |-------|-------------|-------------|------|
-| users | id (bigint) | company_id, name, email, password, google_id, password_changed_at, two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at, deleted_at | email |
+| users | id (bigint) | company_id, name, email, password, password_changed_at, two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at, deleted_at | email |
 | employees | id (bigint) | user_id, parent_id, company_id, branch_id, department_id, position_id, shift_id, employee_number, full_name, phone (encrypted), nik (encrypted), npwp (encrypted), bank_account_number (encrypted), face_embedding vector(128), pin, status, employment_type, join_date, resign_date, salary_type, deleted_at | employee_number, user_id |
 | family_details | id (bigint) | employee_id, nik (encrypted), name, relationship, gender, birth_date, phone (encrypted), address (encrypted), is_emergency | — |
 | devices | id (bigint) | employee_id, device_uuid, device_type, device_name, browser, os, is_verified, verified_at, last_used_at | device_uuid |

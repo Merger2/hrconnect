@@ -174,7 +174,6 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
 
 ### Login Methods
 - **Email + Password** (default)
-- **Google OAuth (SSO)** — Aktif dan utama, via Google Workspace
 - **2FA (TOTP)** — Opsional, bisa diaktifkan di settings
 
 ### 4.4 2FA Recovery `[S12]`
@@ -200,7 +199,6 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
 
 ### E-Payslip Security
 - Download E-Payslip → wajib **re-enter password login** (Password Confirmation)
-- **OAuth-only user:** Untuk user yang login via Google OAuth (tidak set password Laravel), prompt re-authentication via Google dengan parameter `prompt=reauth` (re-consent flow). Implementasi: redirect ke Google OAuth flow + return ke download URL setelah sukses. `[N7]`
 - PIN (6 digit) tersimpan di `employees.pin` — khusus untuk absensi (fallback saat face gagal)
 - **Separation of Concerns:** password (users) → login + payslip, pin (employees) → absensi shortcut
 - Download **unlimited** (tidak ada limit per bulan)
@@ -2092,8 +2090,6 @@ QUEUE_CONNECTION=database
 GEMINI_API_KEY=
 GEMINI_EMBEDDING_MODEL=text-embedding-004
 GEMINI_MODEL=gemini-2.5-flash
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
 CIPHERSWEET_SECRET_KEY=
 APP_NAME=HRConnect
 ```

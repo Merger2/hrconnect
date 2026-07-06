@@ -19,7 +19,7 @@
 └──────────────┘                │        │        │
                                 │  ┌─────▼─────┐  │
 ┌──────────────┐                │  │  PHP-FPM  │  │
-│ Google OAuth │ ◄────────────► │  │  Laravel  │  │
+│ SMTP Mail    │ ◄────────────► │  │  Laravel  │  │
 └──────────────┘                │  └─────┬─────┘  │
                                 │        │        │
 ┌──────────────┐                │  ┌─────▼─────┐  │
@@ -556,9 +556,6 @@ MAIL_FROM_NAME="${APP_NAME}"
 GEMINI_API_KEY=xxx
 GEMINI_EMBEDDING_MODEL=text-embedding-004
 GEMINI_MODEL=gemini-2.5-flash
-
-GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=xxx
 
 FACE_THRESHOLD=0.85
 GEOFENCE_DEFAULT_RADIUS=100

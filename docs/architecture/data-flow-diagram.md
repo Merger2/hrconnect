@@ -24,7 +24,8 @@ flowchart LR
     HR[HR Manager]
     F[Finance]
     SA[Super Admin]
-    GO[Google OAuth]
+
+
     OA[Gemini Embedding API]
     GM[Gemini 2.5 Flash API]
     NE[Neon PostgreSQL]
@@ -93,8 +94,8 @@ flowchart LR
 | 14 | Payroll Reports | HRIS | Finance | Laporan payroll, pajak, BPJS |
 | 15 | System Config | Super Admin | HRIS | Full access konfigurasi sistem |
 | 16 | System Logs | HRIS | Super Admin | Activity logs, audit trails |
-| 17 | OAuth Auth | Google OAuth | HRIS | Google Workspace SSO authentication |
-| 18 | OAuth Token | HRIS | Google OAuth | Token verifikasi |
+| 17 | — | — | — | (Google OAuth tidak digunakan) |
+| 18 | — | — | — | — |
 | 19 | Embedding Request | HRIS | Gemini Embedding API | Text chunks untuk embedding (text-embedding-004) |
 | 20 | 768D Embedding | Gemini Embedding API | HRIS | Vector embedding hasil proses |
 | 21 | RAG Query | HRIS | Gemini 2.5 Flash API | Query + context chunks untuk AI response |
@@ -429,7 +430,7 @@ flowchart TD
 | 3 | HR Manager | Approval Level 2 + Operasional | Approve L2, Manage Employees, Upload KnowledgeBase |
 | 4 | Finance | Payroll Processing | Generate Payroll, View Reports |
 | 5 | Super Admin | Full System Access | Config, Audit Logs |
-| 6 | Google OAuth | Authentication | SSO Google Workspace |
+| 6 | — | — | (Google OAuth tidak digunakan) |
 | 7 | Gemini Embedding API | Embedding Service | text-embedding-004 (768D) |
 | 8 | Gemini 2.5 Flash API | LLM Service | Gemini 2.5 Flash untuk RAG |
 | 9 | Neon PostgreSQL | Database | Data storage (pgvector) |
