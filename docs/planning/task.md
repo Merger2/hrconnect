@@ -3421,3 +3421,202 @@ public function create() {
 | **J8** | Lint + test verify | CLI | 5 menit |
 
 **Total estimasi: ~1.5 jam**
+
+---
+
+## §AUTONOMOUS LOOP PLAN (2026-07-06)
+
+### Goal
+
+~1500 total assertions melalui 3-phase loop: Playwright E2E regression (7 existing features) → TDD build (3 missing modules) → coverage gap fill. Loop autonomous via `scripts/autopilot.sh` yang driver `opencode run --auto` dengan `autopilot.md` agent.
+
+### Tooling Decisions
+
+| Aspek | Keputusan | Alasan |
+|:------|:----------|:-------|
+| E2E tool | Playwright (bukan Dusk) | face-api.js + GPS geolocation butuh browser mock yg Dusk tidak bisa |
+| Test attribute | `data-test="kebab-case"` (existing standard) | HRConnect sudah pakai ini, konsisten |
+| Config | `testIdAttribute: 'data-test'` di Playwright | Mapping attribute name |
+| Coverage | `"text"` reporter + summary | Tidak perlu HTML report untuk CI |
+| Login bypass | `__e2e-login` route (port dari PasPapan) | Isi form tiap test lambat, token bypass lebih cepat + reliable |
+| Auth flow | E2E auth gate + middleware `E2eLogin` (only in testing env) | Prevent abuse di production |
+
+### E2E Test File Structure
+
+```
+tests/Browser/
+├── playwright.config.ts
+├── package.json
+├── fixtures/
+│   ├── auth.ts              # login() helper, __e2e-login call
+│   ├── db-reset.ts           # RefreshDatabase via Artisan
+│   ├── camera-mock.ts        # fake MediaStream untuk face-api
+│   └── geo-mock.ts           # fake GeolocationPosition
+├── helpers/
+│   ├── expect-healthy.ts     # expectHealthyPage() pattern
+│   └── wait-for-livewire.ts  # networkidle after Livewire commit
+├── data/
+│   └── employees.ts          # test user credentials seeded
+├── specs/
+│   ├── 01-auth/
+│   │   ├── login.spec.ts
+│   │   ├── 2fa.spec.ts
+│   │   └── logout.spec.ts
+│   ├── 02-master-data/
+│   │   ├── branch.spec.ts
+│   │   ├── department.spec.ts
+│   │   └── position.spec.ts
+│   ├── 03-attendance/
+│   │   ├── clock-in.spec.ts
+│   │   ├── clock-out.spec.ts
+│   │   └── history.spec.ts
+│   ├── 04-leave/
+│   │   └── apply-leave.spec.ts
+│   ├── 05-overtime/
+│   │   └── apply-overtime.spec.ts
+│   ├── 06-reimbursement/
+│   │   └── apply-reimbursement.spec.ts
+│   ├── 07-payroll/
+│   │   ├── view-payslip.spec.ts
+│   │   └── admin-payroll.spec.ts
+│   ├── 08-approval/
+│   │   └── approve-reject.spec.ts
+│   ├── 09-kb-rag/
+│   │   ├── chat-sync.spec.ts
+│   │   └── chat-stream.spec.ts
+│   ├── 10-missing-modules/     # Phase 2 — TDD contracts
+│   │   ├── project-task.spec.ts
+│   │   ├── hr-checklist.spec.ts
+│   │   └── announcements.spec.ts
+│   └── 11-mobile/
+│       └── pwa-offline.spec.ts
+└── smoke.spec.ts               # top-level smoke (Phase 1 full path iteration)
+```
+
+### Data-test Seeding Scope
+
+~15-20 blade files, ~150-200 elements via component passthrough:
+
+| Blade | Elemen | data-test |
+|:------|:-------|:----------|
+| `login.blade.php` | email input, password input, submit button | `"login-email"`, `"login-password"`, `"login-submit"` |
+| `register.blade.php` | name, email, password, confirm | `"register-*"` |
+| `dashboard.blade.php` | stat cards, quick actions | `"dashboard-stat-*"`, `"dashboard-action-*"` |
+| Livewire SFC branch/department/position | form inputs, table, buttons | `"branch-*"`, `"dept-*"`, `"position-*"` |
+| `scan.blade.php` | camera, clock-in, clock-out | `"scan-*"` |
+| `apply-leave.blade.php` | date picker, type, submit | `"leave-*"` |
+| `overtime.blade.php` | form fields, submit | `"overtime-*"` |
+| `reimbursement.blade.php` | amount, receipt, submit | `"reimburse-*"` |
+| `payslip.blade.php` | filter, download | `"payslip-*"` |
+| `approval.blade.php` | approve/reject buttons | `"approval-*"` |
+| `kb-chat.blade.php` | input, send, message list | `"kb-*"` |
+| Component modal, sidebar, header | close, logout | `"modal-*"`, `"sidebar-*"`, `"header-*"` |
+
+### Setup Phase Deliverables (~2.5-3.5 jam)
+
+| # | Task | File | Estimasi |
+|:-:|:-----|:-----|:--------:|
+| S1 | data-test seeding komprehensif (~15-20 blade) | `resources/views/*` | 60 menit |
+| S2 | `__e2e-login` route + controller + middleware | `routes/web.php`, `app/Http/Controllers/E2eLoginController.php`, `app/Http/Middleware/E2eLogin.php` | 15 menit |
+| S3 | `tests/Browser/package.json` + `playwright.config.ts` | `tests/Browser/` | 10 menit |
+| S4 | Fixtures: auth, db-reset, camera-mock, geo-mock | `tests/Browser/fixtures/` | 20 menit |
+| S5 | Helpers: expect-healthy, wait-for-livewire | `tests/Browser/helpers/` | 10 menit |
+| S6 | Test data employees.ts + seeder update | `tests/Browser/data/employees.ts` + `database/seeders/` | 15 menit |
+| S7 | 21 Playwright spec files (7 regression + 3 TDD + 11 sub-specs) | `tests/Browser/specs/` | 60 menit |
+| S8 | `smoke.spec.ts` — full path iteration admin+user | root `tests/Browser/` | 10 menit |
+| S9 | `.opencode/agents/autopilot.md` — loop agent definition + denylist | `.opencode/agents/` | 15 menit |
+| S10 | `scripts/autopilot.sh` — loop driver script | `scripts/` | 15 menit |
+| S11 | `docs/planning/autopilot-state.md` + `.gitignore` entry | `docs/planning/` | 10 menit |
+| S12 | Update `AGENTS.md` — testing conventions subsection | `AGENTS.md` | 5 menit |
+| S13 | Pre-fix PRD: remove Google OAuth §4, add "BELUM DIIMPLEMENTASI" banner §16-18 | `docs/PRD.md` | 5 menit |
+
+### Autonomous Loop: 3 Phase
+
+#### Phase 1 — E2E Regression (7 existing features)
+
+MAX_ITER=8 per feature, stop on 5 consecutive deferred.
+
+| Order | Feature | Spec File | Priority |
+|:-----:|:--------|:----------|:--------:|
+| 1 | Auth (login, 2FA, logout) | `specs/01-auth/*` | P4 |
+| 2 | Master Data (branch, dept, position CRUD) | `specs/02-master-data/*` | P1 |
+| 3 | Attendance (clock-in, clock-out, history) | `specs/03-attendance/*` | P4 |
+| 4 | Leave (apply + quota validation) | `specs/04-leave/*` | P4 |
+| 5 | Overtime (apply + approval) | `specs/05-overtime/*` | P4 |
+| 6 | Reimbursement (apply + receipt upload) | `specs/06-reimbursement/*` | P4 |
+| 7 | Payroll + Approval + KB RAG + PWA | `specs/07-payroll/*`, `specs/08-approval/*`, `specs/09-kb-rag/*`, `specs/11-mobile/*` | P1-P2 |
+
+#### Phase 2 — TDD Build 3 Missing Modules
+
+MAX_ITER=25 per module. Each module: write failing spec first → build feature → pass spec.
+
+| Order | Module | PRD § | Spec File | Model | Migration |
+|:-----:|:-------|:-----:|:----------|:------|:----------|
+| 8 | Project / Task Management | §16 | `specs/10-missing-modules/project-task.spec.ts` | ✅ belum | ✅ belum |
+| 9 | HR Checklist | §17 | `specs/10-missing-modules/hr-checklist.spec.ts` | ✅ belum | ✅ belum |
+| 10 | Announcements | §18 | `specs/10-missing-modules/announcements.spec.ts` | ✅ belum | ✅ belum |
+
+#### Phase 3 — Coverage Gap Fill
+
+Per-batch MAX_ITER 10-15, target ~1500 total assertions.
+
+| Batch | Area | Target Assertions | Source |
+|:-----:|:-----|:-----------------:|:-------|
+| A | Unit/Feature: security policies + gates | +80 | auto-generate dari existing models |
+| B | Unit/Feature: enum consistency + color() | +40 | 33 enum, masing2 minimal 1 test |
+| C | Unit/Feature: edge cases (null, empty, boundary) | +120 | service layer boundary testing |
+| D | Unit/Feature: payroll calculation (PPh21, BPJS, overtime) | +150 | N7 compliance, brackets, TER tables |
+| E | Feature: RAG SSE streaming + pg_trgm fallback | +60 | N4 streaming path, memory persistence |
+| F | Feature: CipherSweet encrypted queries + blind index | +30 | PII split, whereBlind coverage |
+| G | Unit: observer + notification coverage | +40 | 8 observer, 7 notification class |
+| H | API: Sanctum endpoint contract tests | +100 | ~83 endpoint, minimal happy path per role |
+| I | Pest arch() tests (pint, strict types, naming) | +30 | Laravel arch presets |
+| J | Performance: N+1 detection + query count | +20 | DatabaseQueryCountAssertion |
+
+### Circuit Breaker
+
+| Rule | Threshold | Action |
+|:-----|:---------:|:-------|
+| Max consecutive deferred features | 5 | Stop loop, print summary |
+| Max iterations per feature (Phase 1) | 8 | Mark failed, continue next |
+| Max iterations per module (Phase 2) | 25 | Mark incomplete, continue next |
+| Max iterations per batch (Phase 3) | 15 | Mark partial, continue next |
+| Fatal error (crash, corrupted state) | 1 | Immediate stop, print diagnostics |
+
+### Test Count Target
+
+| Source | Count |
+|:-------|:-----:|
+| Existing Pest tests (baseline) | ~791 assertions |
+| Phase 1: 21 Playwright spec × ~8-12 assertions each | +150-200 |
+| Phase 2: 3 module TDD (unit + feature) | +300-400 |
+| Phase 3: 10 coverage batches | +500-700 |
+| **Target total** | **~1500** |
+
+### Execution Ordering Cross-References with N Findings
+
+| Loop Step | N Finding | Relation |
+|:---------:|:---------:|:---------|
+| Phase 3 Batch D | N7 (TER brackets) | Payroll compliance — bracket lookup bukan hardcode |
+| Phase 3 Batch E | N4 (pg_trgm streaming) | Streaming path DRY + pg_trgm fallback |
+| Phase 3 Batch E | N1 (conversation memory) | Persist conversationId ke DB |
+| Phase 3 Batch F | N5 (atomic batch) | Payroll atomic transaction |
+| Phase 3 Batch F | N6 (idempotency) | Pre-check before payroll run |
+| Phase 3 Batch I | N2 (RAG rate-limit) | Cost logging + throttle (defer) |
+| Phase 3 Batch I | N3 (document state machine) | Status progress + retry (defer) |
+| Deferred | N8 (approval matrix) | Post-skripsi, bukan MVP |
+
+### E2E Survey Results — 8 Reference Repos
+
+| Repo | E2E Tool | Spec Files | Verdict untuk HRConnect |
+|:-----|:---------|:----------:|:------------------------|
+| **PasPapan** | ✅ Playwright | 2 (269 lines) | **PORT** — `__e2e-login` route, `expectHealthyPage` smoke pattern, CI workflow with PostgreSQL service, console error capture, `waitForLoadState('networkidle')` |
+| quanta-hris-laravel | ✨ none | 0 | SKIP |
+| Laravel-Smarthr | ✨ none | 0 | SKIP |
+| hris | ✨ none | 0 | SKIP |
+| HRMS | ✨ none | 0 | SKIP |
+| ship-ai-with-laravel | ✨ none | 0 | SKIP |
+| laravelrag | ✨ none | 0 | SKIP |
+| laravel-ragkit | ✨ none | 0 | SKIP |
+
+**Clarification:** PasPapan is the sole repo with any browser/E2E setup. All 7 others use PHPUnit/Pest only. The `__e2e-login` route (`/__e2e-login?token=...&email=...&to=/home`) bypasses form authentication in CI — this pattern will be ported directly.
