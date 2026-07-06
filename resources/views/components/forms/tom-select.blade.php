@@ -18,11 +18,11 @@ $alpineModelAttributes = $attributes->whereStartsWith('x-model');
     @push('styles')
         <style>
             .ts-control {
-                background-color: var(--color-surface-container-low);
+                background-color: var(--color-canvas);
                 border: 0 !important;
                 box-shadow: inset 0 0 0 1px var(--color-outline-variant);
                 color: var(--color-ink);
-                border-radius: 1rem;
+                border-radius: 4px;
                 padding: 0 2.5rem 0 1rem;
                 font-size: 0.9rem;
                 line-height: 1.5rem;
@@ -82,7 +82,7 @@ $alpineModelAttributes = $attributes->whereStartsWith('x-model');
                 background-color: var(--color-canvas) !important;
                 border-color: var(--color-hairline-soft);
                 color: var(--color-body);
-                border-radius: 1rem;
+                border-radius: 4px;
                 box-shadow: 0 10px 15px -3px var(--color-outline-variant), 0 4px 6px -2px var(--color-hairline-soft) !important;
                 z-index: 99999 !important;
             }

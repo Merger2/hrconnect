@@ -1,11 +1,12 @@
 @props(['variant' => 'primary', 'size' => 'md', 'href' => null, 'icon' => null])
 
 @php
-$base = 'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+$base = 'inline-flex items-center justify-center gap-2 rounded-md font-semibold uppercase tracking-wider transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
 
 $variants = [
-    'primary' => 'bg-ink text-white hover:opacity-90',
+    'primary' => 'bg-primary text-white hover:bg-blue-700',
     'secondary' => 'border border-outline-variant text-ink hover:bg-surface-container-high',
+    'outline-coral' => 'border border-coral-400 text-coral-600 hover:bg-coral-50',
     'danger' => 'text-error hover:bg-error/5',
     'ghost' => 'text-on-surface-variant hover:text-ink hover:bg-surface-container-high',
     'success' => 'bg-success/15 text-success hover:bg-success/25',

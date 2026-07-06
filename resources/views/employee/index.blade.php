@@ -15,12 +15,14 @@
         @endphp
         <x-page-shell :title="$empTitle" :subtitle="$empSubtitle">
             <x-slot:actions>
-                @can('manage_employees')
-                    <x-button variant="primary" icon="add" @click="openCreateModal()">
-                        {{ __('Tambah Karyawan') }}
-                    </x-button>
+                    @can('manage_employees')
+                    <a href="{{ route('admin.employees.create') }}" wire:navigate>
+                        <x-button variant="primary" icon="add">
+                            {{ __('TAMBAH KARYAWAN') }}
+                        </x-button>
+                    </a>
                     <x-button variant="secondary" icon="download" @click="exportCSV">
-                        {{ __('Ekspor') }}
+                        {{ __('EKSPOR') }}
                     </x-button>
                 @endcan
             </x-slot:actions>
@@ -88,9 +90,11 @@
                     <p class="mt-1 text-sm text-on-surface-variant">{{ __('Coba ubah filter atau kata kunci pencarian') }}</p>
                     @can('manage_employees')
                         <div class="mt-4">
-                            <x-button variant="primary" icon="add" @click="openCreateModal()">
-                                {{ __('Tambah Karyawan') }}
-                            </x-button>
+                            <a href="{{ route('admin.employees.create') }}" wire:navigate>
+                                <x-button variant="primary" icon="add">
+                                    {{ __('Tambah Karyawan') }}
+                                </x-button>
+                            </a>
                         </div>
                     @endcan
                 </div>
@@ -145,11 +149,11 @@
                                                 <span class="hidden sm:inline">{{ __('Lihat') }}</span>
                                             </a>
                                             @can('manage_employees')
-                                                <button @click="openEditModal(e)"
+                                                <a :href="`/admin/employees/${e.id}/edit`" wire:navigate
                                                     class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-dim hover:text-ink">
                                                     <span class="material-symbols-outlined text-base">edit</span>
                                                     <span class="hidden sm:inline">{{ __('Edit') }}</span>
-                                                </button>
+                                                </a>
                                                 <button @click="openTerminateModal(e)"
                                                     class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-on-surface-variant transition-colors hover:bg-error/5 hover:text-error">
                                                     <span class="material-symbols-outlined text-base">block</span>
@@ -204,11 +208,11 @@
                             </div>
                             @can('manage_employees')
                             <div class="mt-3 grid grid-cols-2 gap-2">
-                                <button @click="openEditModal(e)"
+                                <a :href="`/admin/employees/${e.id}/edit`" wire:navigate
                                     class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-outline-variant/40 bg-canvas px-3 py-2 text-xs font-semibold text-ink transition-colors hover:bg-surface-dim">
                                     <span class="material-symbols-outlined text-base">edit</span>
                                     {{ __('Edit') }}
-                                </button>
+                                </a>
                                 <button @click="openTerminateModal(e)"
                                     class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-outline-variant/40 bg-canvas px-3 py-2 text-xs font-semibold text-ink transition-colors hover:bg-error/5 hover:text-error hover:border-error/20">
                                     <span class="material-symbols-outlined text-base">block</span>
@@ -267,10 +271,10 @@
                                     class="inline-flex items-center justify-center rounded-lg border border-outline-variant/40 bg-canvas px-2 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-dim">
                                     <span class="material-symbols-outlined text-base">visibility</span>
                                 </a>
-                                <button @click="openEditModal(e)"
+                                <a :href="`/admin/employees/${e.id}/edit`" wire:navigate
                                     class="inline-flex items-center justify-center rounded-lg border border-outline-variant/40 bg-canvas px-2 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-dim">
                                     <span class="material-symbols-outlined text-base">edit</span>
-                                </button>
+                                </a>
                                 <button @click="openTerminateModal(e)"
                                     class="inline-flex items-center justify-center rounded-lg border border-outline-variant/40 bg-canvas px-2 py-2 text-xs font-medium text-ink transition-colors hover:bg-error/5 hover:text-error hover:border-error/20">
                                     <span class="material-symbols-outlined text-base">block</span>
@@ -595,11 +599,11 @@
 
                     <div class="mt-6 flex items-center justify-center gap-3">
                         <button @click="terminateModalOpen = false"
-                            class="rounded-lg border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-surface-dim">
+                            class="inline-flex items-center justify-center gap-2 rounded-md border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-ink transition-colors hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed">
                             {{ __('Batal') }}
                         </button>
                         <button @click="submitTerminate()" x-bind:disabled="terminateLoading"
-                            class="rounded-lg bg-error px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-40">
+                            class="inline-flex items-center justify-center gap-2 rounded-md bg-error px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed">
                             <span x-show="!terminateLoading">{{ __('Konfirmasi PHK') }}</span>
                             <span x-show="terminateLoading" x-cloak>{{ __('Memproses...') }}</span>
                         </button>

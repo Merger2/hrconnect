@@ -154,7 +154,7 @@ window.profilePhotoEditor = profilePhotoEditor;
 window.initializeMap = function ({ onUpdate, location }) {
     const defaultLoc = location ?? [-6.2088, 106.8456];
 
-    const map = L.map('branch-map').setView(defaultLoc, 13);
+    const map = L.map('branch-map').setView(defaultLoc, 16);
     window._branchMapRef = map;
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -164,35 +164,39 @@ window.initializeMap = function ({ onUpdate, location }) {
     }).addTo(map);
 
     const marker = L.marker(defaultLoc, { draggable: true }).addTo(map);
-    marker.bindPopup('Geser marker atau geser peta untuk memilih lokasi').openPopup();
+    window._branchMarker = marker;
 
-    const updateCoords = (lat, lng) => onUpdate(Number(lat).toFixed(6), Number(lng).toFixed(6));
+    window._branchUpdateCoords = (lat, lng) => onUpdate(Number(lat).toFixed(6), Number(lng).toFixed(6));
 
     marker.on('dragend', (e) => {
         const pos = marker.getLatLng();
-        updateCoords(pos.lat, pos.lng);
+        window._branchUpdateCoords(pos.lat, pos.lng);
     });
 
     map.on('drag', () => {
         const center = map.getCenter();
         marker.setLatLng(center);
-        updateCoords(center.lat, center.lng);
+        window._branchUpdateCoords(center.lat, center.lng);
     });
 
-    updateCoords(defaultLoc[0], defaultLoc[1]);
+    window._branchUpdateCoords(defaultLoc[0], defaultLoc[1]);
 
-    setTimeout(() => map.invalidateSize(), 300);
+    setTimeout(() => map.invalidateSize(), 500);
 };
 
 window.setMapLocation = function ({ location }) {
     const map = window._branchMapRef;
+    const marker = window._branchMarker;
     if (!location || !map) return;
-    map.setView(location, 13);
+    map.setView(location, 16);
+    if (marker) marker.setLatLng(location);
 };
 
 window.detectLocation = function () {
-    const map = window._branchMapRef;
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+        window.HRConnectAlert?.toast({ type: 'error', message: 'Browser tidak mendukung geolokasi.' });
+        return;
+    }
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             const lat = pos.coords.latitude.toFixed(6);
@@ -201,10 +205,33 @@ window.detectLocation = function () {
             const lngEl = document.getElementById('lng-input');
             if (latEl) { latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true })); }
             if (lngEl) { lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true })); }
-            if (map) { map.setView([lat, lng], 16); }
+            if (window._branchMapRef) {
+                window._branchMapRef.setView([lat, lng], 18);
+                if (window._branchMarker) window._branchMarker.setLatLng([lat, lng]);
+                window._branchUpdateCoords?.(lat, lng);
+            }
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`)
+                .then(r => r.json())
+                .then(data => {
+                    const addr = data?.display_name;
+                    if (addr) {
+                        const addrEl = document.getElementById('address');
+                        if (addrEl) { addrEl.value = addr; addrEl.dispatchEvent(new Event('input', { bubbles: true })); }
+                    }
+                })
+                .catch(() => {});
             window.HRConnectAlert?.toast({ type: 'success', message: 'Lokasi terdeteksi' });
         },
-        () => window.HRConnectAlert?.toast({ type: 'error', message: 'Gagal mendeteksi lokasi' }),
+        (err) => {
+            const messages = {
+                1: 'Izin lokasi ditolak. Buka pengaturan browser untuk mengizinkan akses lokasi.',
+                2: 'Lokasi tidak tersedia. Pastikan GPS/Location Service aktif.',
+                3: 'Waktu mendeteksi lokasi habis. Coba lagi.',
+            };
+            const msg = messages[err.code] || 'Gagal mendeteksi lokasi.';
+            window.HRConnectAlert?.toast({ type: 'error', message: msg });
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
 };
 
