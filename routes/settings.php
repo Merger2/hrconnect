@@ -10,16 +10,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('appearance.edit');
+    Route::permanentRedirect('settings/security', 'settings/profile#security')->name('security.edit');
+    Route::permanentRedirect('settings/2fa', 'settings/profile#security');
 
-    Route::livewire('settings/security', 'pages::settings.security')
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('security.edit');
+    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('appearance.edit');
 });
