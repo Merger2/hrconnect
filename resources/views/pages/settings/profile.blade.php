@@ -62,7 +62,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
         $this->profilePhotoPath = $user->profile_photo_path;
 
         if ($employee) {
-            $this->phone = $employee->phone ?? '';
+            $this->phone = '';
             $this->province_id = $employee->province_id ? (string) $employee->province_id : null;
             $this->city_id = $employee->city_id ? (string) $employee->city_id : null;
             $this->district_id = $employee->district_id ? (string) $employee->district_id : null;
@@ -150,7 +150,12 @@ new #[Title('Pengaturan Profil')] class extends Component {
             ]);
         }
 
-        $this->dispatch('toast', variant: 'success', text: __('Profil diperbarui.'));
+        if ($user->wasChanged('email')) {
+            $user->sendEmailVerificationNotification();
+            $this->dispatch('toast', text: __('Link verifikasi telah dikirim ke email baru Anda.'));
+        } else {
+            $this->dispatch('toast', variant: 'success', text: __('Profil diperbarui.'));
+        }
     }
 
     public function resendVerificationNotification(): void

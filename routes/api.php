@@ -83,6 +83,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // ── User & Profile ───────────────────────────────────────────────
     Route::get('/user', [AuthController::class, 'me'])->name('api.user');
+    Route::get('/sanctum/token', [AuthController::class, 'sanctumToken'])
+        ->name('api.sanctum-token');
 
     Route::prefix('profile')->name('api.profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
