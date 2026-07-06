@@ -20,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @mixin IdeHelperUser
  */
-#[Fillable(['name', 'email', 'password', 'google_id', 'password_changed_at', 'profile_photo_path'])]
+#[Fillable(['name', 'email', 'password', 'password_changed_at', 'profile_photo_path'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'password_changed_at'])]
 class User extends Authenticatable implements MustVerifyEmailContract
 {

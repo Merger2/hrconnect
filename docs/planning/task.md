@@ -57,7 +57,7 @@
 | **Force Change Password** | Middleware Tier 3 skip saat `password_changed_at = null` → seharusnya force redirect | `CheckPasswordExpired.php` |
 | **Face Enrollment** | FE-1c ⏳ — belum ada UI register face | Kode |
 | **2FA Enforcement** | AUTH-09: 2FA wajib untuk HR/Finance/SuperAdmin — belum diimplement | Docs (SRS) |
-| **Google OAuth** | Config ada, flow belum selesai | Docs (SDD) |
+| **Google OAuth** | ❌ TIDAK DIGUNAKAN — kolom google_id dihapus via migration | — |
 | **Permission Finance** | ❌ `view_attendances` — finance gak bisa lihat absensi | PRD §3 + kode |
 | **Permission Employee** | ❌ `view_knowledgebase` — employee gak bisa akses AI chat | PRD §3 + kode |
 | **Permission approve_wfa** | Hanya manager, hr-manager bypass via `hasRole()` | Kode |
@@ -85,7 +85,7 @@
   └── Service Worker — hapus /offline dari PRECACHE
 
 🟢 PRIORITAS 3 (housekeeping)
-  ├── Google OAuth completion
+  ├── Google OAuth — REMOVED (not needed for HRIS)
   ├── Dead Code Cleanup
   ├── Factories × 5
   └── PHPStan baseline
@@ -3528,7 +3528,7 @@ tests/Browser/
 | S10 | `scripts/autopilot.sh` — loop driver script | `scripts/` | 15 menit |
 | S11 | `docs/planning/autopilot-state.md` + `.gitignore` entry | `docs/planning/` | 10 menit |
 | S12 | Update `AGENTS.md` — testing conventions subsection | `AGENTS.md` | 5 menit |
-| S13 | Pre-fix PRD: remove Google OAuth §4, add "BELUM DIIMPLEMENTASI" banner §16-18 | `docs/PRD.md` | 5 menit |
+| S13 | ✅ SELESAI — Google OAuth dihapus dari PRD, migration drop | `docs/PRD.md`, migration | — |
 
 ### Autonomous Loop: 3 Phase
 

@@ -41,13 +41,7 @@
 - **Enforcement:** Wajib untuk role HRD, Finance, Super Admin
 - **Setup:** QR code scan via Google Authenticator / Authy
 
-### 1.3 Google OAuth
-- **Provider:** Google Identity
-- **Scopes:** email, profile
-- **Flow:** Link to existing account via email match
-- **Verification:** Email auto-verified jika via Google
-
-### 1.4 Force Password Change
+### 1.3 Force Password Change
 - **Trigger:** First login after account created by admin
 - **Flag:** `users.force_password_change = true`
 - **Middleware:** `ForcePasswordChangeMiddleware`
@@ -430,9 +424,6 @@ GEMINI_API_KEY=xxx
 GEMINI_EMBEDDING_MODEL=text-embedding-004
 GEMINI_MODEL=gemini-2.5-flash
 
-# Google OAuth
-GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=xxx
 ```
 
 ---

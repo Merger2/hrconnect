@@ -94,7 +94,7 @@ app/Enums/SalaryType.php              ✅
 | 10 | `database/migrations/2026_05_08_000010_add_payroll_locked_to_payrolls_table.php` | ❌ TIDAK DIBUAT — lock via status=published |
 | 11 | `database/migrations/2026_05_08_000011_create_notifications_table.php` | Laravel notifications table |
 | 12 | `database/migrations/2026_05_08_000012_add_force_password_change_to_users_table.php` | force_password_change flag |
-| 13 | `database/migrations/2026_05_08_000013_add_google_oauth_to_users_table.php` | Verifikasi google_id sudah ada |
+| 13 | `database/migrations/2026_05_08_000013_add_google_oauth_to_users_table.php` | 🗑 DIHAPUS — google_id di-drop via new migration |
 | 14 | `database/migrations/2026_05_08_000014_add_password_changed_at_to_users_table.php` | Verifikasi password_changed_at sudah ada |
 | 15 | `database/migrations/2026_05_08_000015_create_knowledge_base_embeddings_table.php` | Chunks + embeddings untuk RAG |
 | 16 | `database/migrations/2026_05_08_000016_create_payroll_adjustments_table.php` | id, payroll_id, amount, reason, created_by, applied_to_period ⚠️ ERRATA: amount must be decimal(15,2) not integer; created_by must be nullable |
@@ -138,7 +138,7 @@ app/Models/KnowledgeBase.php       ✅ ⚠️ ERRATA: Add 'embedding' => \Pgvect
 | 2 | `app/Models/Attendance.php` | exception fields, GPS validation ⚠️ ERRATA ERR-004: Add clock_in_verification_method, clock_in_face_similarity_score, clock_out_verification_method, clock_out_face_similarity_score |
 | 3 | `app/Models/Device.php` | device_type, device_name, browser, os |
 | 4 | `app/Models/Payroll.php` | is_locked, locked_at, locked_by ⚠️ ERRATA C2: Use forceDelete() when regenerating payroll to avoid unique constraint violation |
-| 5 | `app/Models/User.php` | google_id, password_changed_at verify ⚠️ ERRATA C3: Add HasApiTokens trait from laravel/sanctum (not yet installed) |
+| 5 | `app/Models/User.php` | password_changed_at verify ⚠️ ERRATA C3: Add HasApiTokens trait from laravel/sanctum (not yet installed) — google_id REMOVED via migration |
 | 6 | `app/Models/Leave.php` | quota deduction, probation validation |
 | 7 | `app/Models/Approval.php` | multi-level support, escalation ⚠️ ERRATA C1: level field casts to ApprovalLevel enum; compare with enum values, not integers |
 

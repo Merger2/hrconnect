@@ -333,7 +333,7 @@ hrconnect/
 │   │   ├── 2026_05_08_000010_add_payroll_locked_to_payrolls_table.php 🚫 DIHAPUS
 │   │   ├── 2026_05_08_000011_create_notifications_table.php 🆕
 │   │   ├── 2026_05_08_000012_add_force_password_change_to_users_table.php 🆕
-│   │   ├── 2026_05_08_000013_add_google_oauth_to_users_table.php 🆕
+│   │   ├── 2026_05_08_000013_add_google_oauth_to_users_table.php 🗑 DIHAPUS
 │   │   ├── 2026_05_08_000014_add_password_changed_at_to_users_table.php 🆕
 │   │   └── 2026_05_08_000015_create_knowledge_base_embeddings_table.php 🆕
 │   └── seeders/
