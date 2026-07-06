@@ -44,6 +44,25 @@ const swalClasses = {
     cancelButton: '!m-0 !inline-flex !min-h-[3rem] !w-full !items-center !justify-center !rounded-xl !border !border-outline-variant !bg-canvas !px-5 !py-3 !text-sm !font-bold !text-ink',
 };
 
+const fetchSanctumToken = async () => {
+    if (sessionStorage.getItem('sanctum_token')) return;
+    try {
+        const res = await fetch('/api/v1/sanctum/token', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+        });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.data?.token) {
+                sessionStorage.setItem('sanctum_token', json.data.token);
+            }
+        }
+    } catch {
+        // Silent fail — token will be unavailable for this session
+    }
+};
+fetchSanctumToken();
+
 window.apiHeaders = () => {
     const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
     const token = sessionStorage.getItem('sanctum_token');

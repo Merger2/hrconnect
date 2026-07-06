@@ -74,14 +74,8 @@
 
         @auth
             @php
-                if (!session()->has('web_sanctum_token')) {
-                    $token = auth()->user()->createToken('web-frontend');
-                    session()->put('web_sanctum_token', $token->plainTextToken);
-                }
+                session()->forget('web_sanctum_token');
             @endphp
-            <script>
-                sessionStorage.setItem('sanctum_token', '{{ session('web_sanctum_token') }}');
-            </script>
         @endauth
 
         @vite(['resources/js/app.js'])
