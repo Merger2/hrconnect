@@ -128,11 +128,19 @@
                                 </td>
                             </tr>
                         </template>
-                        <template x-if="approvals.length === 0">
+                        <template x-if="approvals.length === 0 && tab === 'pending'">
                             <tr>
-                                <td :colspan="tab === 'pending' ? 6 : 6">
-                                    <x-empty-state :title="tab === 'pending' ? __('Tidak ada pending approval') : __('Belum ada histori approval')"
-                                                   :description="tab === 'pending' ? __('Semua request sudah diproses') : __('Anda belum memproses approval apapun')">
+                                <td colspan="6">
+                                    <x-empty-state :title="__('Tidak ada pending approval')" :description="__('Semua request sudah diproses')">
+                                        <x-slot name="icon"><span class="material-symbols-outlined text-3xl text-on-surface-variant/50">approval</span></x-slot>
+                                    </x-empty-state>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="approvals.length === 0 && tab === 'history'">
+                            <tr>
+                                <td colspan="6">
+                                    <x-empty-state :title="__('Belum ada histori approval')" :description="__('Anda belum memproses approval apapun')">
                                         <x-slot name="icon"><span class="material-symbols-outlined text-3xl text-on-surface-variant/50">approval</span></x-slot>
                                     </x-empty-state>
                                 </td>
@@ -180,8 +188,11 @@
                         </div>
                     </article>
                 </template>
-                <template x-if="approvals.length === 0">
-                    <x-empty-state :title="tab === 'pending' ? __('Tidak ada pending approval') : __('Belum ada histori approval')" />
+                <template x-if="approvals.length === 0 && tab === 'pending'">
+                    <x-empty-state :title="__('Tidak ada pending approval')" />
+                </template>
+                <template x-if="approvals.length === 0 && tab === 'history'">
+                    <x-empty-state :title="__('Belum ada histori approval')" />
                 </template>
             </div>
         </x-app.panel>

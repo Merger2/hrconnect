@@ -9,7 +9,7 @@
 
 @php
     $id = $id ?: $name;
-    $base = 'block w-full rounded-xl border bg-canvas px-3 py-2 text-sm text-ink placeholder:text-muted-soft focus:border-ink focus:ring-0';
+    $base = 'block w-full rounded-md border bg-canvas px-3 py-2 text-sm text-ink placeholder:text-muted-soft focus:border-ink focus:ring-0';
     $hasError = $errors->has($name);
     $classes = $hasError
         ? $base.' border-error'

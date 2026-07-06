@@ -230,7 +230,7 @@ new class extends Component {
 
                 <div>
                     <button
-                        :disabled="$errors->has('setupData') ? 'true' : 'false'"
+                        {{ $errors->has('setupData') ? 'disabled' : '' }}
                         class="w-full rounded-xl bg-ink px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                         wire:click="showVerificationIfNecessary"
                     >
