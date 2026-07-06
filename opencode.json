@@ -1,5 +1,13 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "task": {
+      "*": "allow",
+      "general": "allow",
+      "explore": "allow",
+      "scout": "allow"
+    }
+  },
   "mcp": {
     "laravel-boost": {
       "type": "local",

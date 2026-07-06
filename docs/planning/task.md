@@ -839,6 +839,27 @@ Hasil studi mendalam 5 repo referensi untuk pola arsitektur yang mempengaruhi 6 
 
 **Limitations:** hanya 3 tests (ExampleTest), controller-based (no DI), `$casts` array bug (key-value pair tidak lengkap), MySQL/SQLite (no PostgreSQL support).
 
+### 🔴 Survey Tambahan (2026-07-06) — 7 Temuan Baru dari 6 Repo Referensi
+
+> Audit menyusul 5 repo HRIS (`PasPapan`, `Quanta`, `Smarthr`) + 3 repo RAG (`ship-ai-with-laravel`, `laravelrag`, `laravel-ragkit`). `laravelrag` = skeleton kosong (skip). `Smarthr` tidak punya pattern baru (menu/enum/middleware semua lebih sederhana dari HRConnect). Yang sudah ✅ selesai (anti-replay QR P2-3, risk scorer P2-2, security headers deferred SEC-5) **tidak diulang** di bawah — cuma yang baru.
+
+**Skip list (jangan port):** Quanta `LemburService.ceil()` (over-credit), Quanta plain-varchar bank account, Quanta regenerasi PDF per download, Smarthr `yajra` DataTables (paradigm wrong), PasPapan `eval(gzinflate)` audit service (obfuscated license), Maatwebsite Excel DTO pattern (HRConnect Livewire already).
+
+| # | Item | Repo Sumber | Effort | Status HRConnect | Catatan |
+|:--:|:-----|:-----------|:-----:|:----------------:|:--------|
+| **N1** | **Persist conversation memory** — tabel `agent_conversation_messages`, write-side di `KnowledgeBaseService`, `agent->continue($id, $user)` rehydrate history | ship-ai-with-laravel | low | ❌ belum | Migration `agent_conversations` **sudah ada** (2026_06_19_183444). `conversationId` saat ini hanya di-echo, tidak disimpan. |
+| **N2** | **Cost / rate-limit middleware RAG** — throttle `kb_chat:10,1`, log `tokens_in/out`+model+duration via `spatie/activitylog`, listener failover | ship-ai-with-laravel | medium | ❌ belum | API limiter global 60/min terlalu kasar untuk chat. |
+| **N3** | **Document-status state machine** — kolom `processed_at`+`status_message`+retry-backoff `[10,60,180]s` di `knowledge_bases` indexing pipeline | laravel-ragkit | medium | ❌ belum | `KnowledgeBaseStatus` enum sudah ada; yang kurang: jam+message+retry path. Untuk HR-Manager UI progress view. |
+| **N4** | **pg_trgm fallback di streaming path** — extract `retrieve(string $query)` helper dari `chat()` sync, panggil juga dari `chatStream()` | (internal DRY) | low | ❌ belum | AGENTS.md sudah catat gap ini. Bukan port, cuma refactor internal HRConnect. |
+| **N5** | **Payroll atomic batch transaction** — `DB::transaction()` wrap batch + `try/catch+continue` per-employee calc, insert atomic di akhir | Quanta | low | ❌ belum | Bila 1 employee gagal mid-batch, ada potensi orphan rows saat ini. |
+| **N6** | **Idempotency pre-check payrolls** — `Payroll::where(period, year)->exists()` + partial unique index via `UniqueConstraintViolationException` convention | Quanta | low | ❌ belum | Guard race window antar manager/cron. Hindari skema ID Quanta (race-prone). |
+| **N7** | **Bracketed TER tables (PMK 168/2023)** — 3 tabel `golongan_ptkp`+`kategori_ter`+`tarif_ter`, rewrite `Pph21Service::calculatePPh21()` baca bracket bukan A/B/C hardcode | Quanta | medium | ⚠ parital | HRConnect hardcode 3 kategori dari marital+anak; Quanta baca bracket penuh dengan `batas_bawah`/`batas_atas`. Audit trail `%` breakdown. Untuk skripsi = compliance otentik. |
+| **N8** | **Approval matrix 1..N level dinamis** — tabel `approval_matrix_rules` (priority, conditions JSON, steps JSON ordered); routing by amount/threshold | PasPapan | medium | ❌ belum | HRConnect hardcode L1/L2. Bonus skripsi, bukan MVP — defer kalau deadline pressed. |
+
+**Urutan eksekusi (impact × effort):** N4 (low, fix besar untuk streaming RAG) → N1 (low, schema sudah ada) → N5 → N6 → N7 (medium, compliance) → N2 → N3 → N8 (defer).
+
+**Catatan:** HRConnect leads semua RAG repo di retrieval hybrid (pg_trgm + vector) — hanya ship-ai yang punya memory+cost pattern worth port. Laravrag skeleton, ragkit hosted (ChatBees, bukan pgvector).
+
 ---
 
 ## §BUSINESS LOGIC AUDIT — 11 Vulnerabilities Mapped (2026-06-28)

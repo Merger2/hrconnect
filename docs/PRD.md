@@ -1234,7 +1234,7 @@ enum TerCategory: string {
 
 | Enum File | Model | Kolom | Values |
 |-----------|-------|-------|--------|
-| `ApprovalLevel` | Approval | `level` | `L1_SUPERVISOR=1`, `L2_HR=2` |
+| `ApprovalLevel` | Approval | `level` | `L1_SUPERVISOR=1`, `L2_MANAGER=2`, `L3_HRD=3`, `L4_DIRECTOR=4` (MVP pakai L1 & L2; L3/L4 disiapkan untuk V2 — lihat ERR-003) |
 | `BloodType` | Employee | `blood_type` | `A+`, `A-`, `B+`, `B-`, `O+`, `O-`, `AB+`, `AB-` |
 | `BpjsType` | BpjsConfig | `name` | `kesehatan`, `jht`, `jp`, `jkk`, `jkm` |
 | `CompanySettingType` | CompanySetting | `type` | `string`, `integer`, `decimal`, `boolean`, `json` |
@@ -1321,7 +1321,7 @@ enum TerCategory: string {
 | `created_by` | bigint (FK→users) | ❌ | — |
 | `applied_to_period` | date | ❌ | — |
 
-### Alter Tables (6)
+### Alter Tables (7)
 1. `loan_installments` — add: status, due_date
 2. `leaves` — add: rejection_reason
 3. `overtimes` — add: start_time, end_time, description, rejection_reason
@@ -1329,7 +1329,7 @@ enum TerCategory: string {
 5. `shifts` — add: late_tolerance_minutes
 6. `attendances` — add: late_minutes, verification_method, clock_out_verification_method, face_similarity_score, clock_out_face_similarity_score `[ERR-004]`
 7. `attendances` — **`shift_id` harus nullable** (karyawan tanpa shift assignment) `[ERR-005]`
-7. `employees` — add: pin
+8. `employees` — add: pin
 
 ---
 
@@ -1396,12 +1396,14 @@ enum TerCategory: string {
 | Approval | relasi polymorphic `approvable`, relasi `approver` |
 | KnowledgeBase | relasi polymorphic `knowledgeable`, method `processEmbedding()` |
 
-### New Service Classes (5)
+### New Service Classes (5 inti — total 24 terdaftar, lihat `app/Services/`)
 1. **PayrollCalculator** — calculateProratedSalary(), calculatePTKP(), getTERCategory(), calculatePPh21(), calculateBPJS(), calculateOvertimePay(), countWorkingDays(), calculateThrProrated()
 2. **AttendanceService** — clockIn(), clockOut(), validateGPS(), validateFace(), handleWFA()
 3. **LeaveService** — calculateWorkDays(), validateLeaveQuota(), applyLeave(), initializeBalance()
 4. **ApprovalService** — createApprovalWorkflow(), approve(), reject(), checkAllApproved(), getDirectApprover()
 5. **ReimbursementService** — createReimbursement(), validateReceipt(), approve(), reject(), linkToPayroll()
+
+> **Catatan aktual:** Saat ini `app/Services/` berisi 24 service (20 top-level + 4 di `app/Services/Payroll/`: BpjsService, LemburService, PotonganService, Pph21Service). Daftar 5 di atas adalah yang asli direncanakan; sisanya ditambahkan saat development berjalan.
 
 ### New Export Classes (1)
 1. **Exports/** — AttendanceExport, LeaveExport, PayrollExport, EmployeeExport — extend `Maatwebsite\Excel\Concerns\FromCollection`
@@ -1410,10 +1412,18 @@ enum TerCategory: string {
 1. GenerateEmployeePayrollJob — queue: payroll_high, tries: 3, timeout: 120s
 2. ProcessKnowledgeBaseEmbedding — queue: default, tries: 2, timeout: 300s
 
-### New Commands (3)
+### New Commands (9)
 1. `attendance:detect-alpha` — dailyAt 23:59
 2. `attendance:detect-chronic-late` — weeklyOn Friday 18:00
-3. `leave:reset-quota` — yearOn 1 Jan 00:00
+3. `attendance:detect-missed-clock` — dailyAt 00:01 (deteksi hari sebelumnya)
+4. `attendance:send-reminders` — weekdays dailyAt 09:00
+5. `attendance:auto-approve-wfa` — dailyAt 02:00 (WFA pending > 3 hari kerja)
+6. `leave:reset-quota` — yearlyOn 1 Jan 00:00
+7. `payroll:generate` — manual trigger via Finance UI / artisan (tidak di-schedule)
+8. `knowledgebase:index` — manual trigger untuk reindex knowledge base
+9. `cache:warm` — dailyAt 05:00 (sebelum jam kerja)
+
+> **Catatan:** Jadwal lengkap ada di `routes/console.php`. Verifikasi via `php artisan schedule:list`.
 
 ### New Notifications (7)
 1. LeaveRequestSubmitted
@@ -1428,7 +1438,7 @@ enum TerCategory: string {
 
 ## 24. SERVICE CLASSES PLAN
 
-**Catatan:** Observers sudah dibuat: EmployeeObserver, AttendanceObserver, LeaveObserver, TaxConfigObserver, BpjsConfigObserver, HolidayObserver — semua terdaftar di `AppServiceProvider::boot()`.
+**Catatan:** Observers sudah dibuat (8 total) — EmployeeObserver, AttendanceObserver, LeaveObserver, PayrollObserver, TaxConfigObserver, BpjsConfigObserver, HolidayObserver, CompanySettingObserver — semua terdaftar di `AppServiceProvider::registerObservers()` (dipanggil dari `boot()`).
 
 ### 24.1 PayrollCalculatorService
 
