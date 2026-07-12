@@ -41,6 +41,10 @@ tests/e2e/.auth/
 /docs/
 /tests/
 /.github/
+/.mcp.json
+/AGENTS.md
+/DESIGN.md
+/GEMINI.md
 /_ide_helper.php
 /_ide_helper_models.php
 /phpstan.neon
