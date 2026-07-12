@@ -25,7 +25,7 @@ $inputId = $attributes->get('id', 'file-input-' . \Illuminate\Support\Str::uuid(
     <label
         for="{{ $inputId }}"
         @class([
-            'inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-outline-variant bg-canvas px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-dim focus-within:outline-none focus-within:ring-2 focus-within:ring-ink/20',
+            'inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-md border border-outline-variant bg-canvas px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-dim focus-within:outline-none focus-within:ring-2 focus-within:ring-ink/20',
             'pointer-events-none opacity-60' => $disabled,
         ])
     >

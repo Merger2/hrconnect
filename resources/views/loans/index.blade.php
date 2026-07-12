@@ -1,17 +1,11 @@
 <x-layouts::app.sidebar>
     <div x-data="loansIndex()">
-        {{-- Header --}}
-        <div class="mb-3 flex flex-col gap-2.5 border-b border-outline-variant/50 pb-3 xl:flex-row xl:items-center xl:justify-between">
-            <div class="min-w-0">
-                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Loan Management') }}</h1>
-                <p class="text-sm text-on-surface-variant">{{ __('Employee loan applications and repayment tracking') }}</p>
-            </div>
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <x-page-shell title="{{ __('Pinjaman') }}" subtitle="{{ __('Pengajuan pinjaman karyawan dan pelacakan cicilan') }}">
+            <x-slot:actions>
                 <x-button variant="primary" @click="openCreateModal" icon="add">
-                    {{ __('Apply Loan') }}
+                    {{ __('Tambah Pinjaman') }}
                 </x-button>
-            </div>
-        </div>
+            </x-slot:actions>
 
         {{-- Toolbar --}}
         <div class="mb-3 rounded-xl border border-outline-variant bg-canvas p-2.5 shadow-sm">
@@ -84,9 +78,9 @@
                                     <x-status-badge x-show="loan.status === 'pending'" tone="warning" pill>{{ __('Pending') }}</x-status-badge>
                                     <x-status-badge x-show="loan.status === 'approved'" tone="info" pill>{{ __('Approved') }}</x-status-badge>
                                     <x-status-badge x-show="loan.status === 'active'" tone="success" pill>{{ __('Active') }}</x-status-badge>
-                                    <x-status-badge x-show="loan.status === 'paid_off'" tone="zinc" pill>{{ __('Paid Off') }}</x-status-badge>
+                                    <x-status-badge x-show="loan.status === 'paid_off'" tone="neutral" pill>{{ __('Paid Off') }}</x-status-badge>
                                     <x-status-badge x-show="loan.status === 'rejected'" tone="error" pill>{{ __('Rejected') }}</x-status-badge>
-                                    <x-status-badge x-show="loan.status === 'cancelled'" tone="zinc" pill>{{ __('Cancelled') }}</x-status-badge>
+                                    <x-status-badge x-show="loan.status === 'cancelled'" tone="neutral" pill>{{ __('Cancelled') }}</x-status-badge>
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <button x-show="loan.status === 'pending' || loan.status === 'approved'" @click="cancelLoan(loan.id)"
@@ -132,9 +126,9 @@
                             <x-status-badge x-show="loan.status === 'pending'" tone="warning" pill>{{ __('Pending') }}</x-status-badge>
                             <x-status-badge x-show="loan.status === 'approved'" tone="info" pill>{{ __('Approved') }}</x-status-badge>
                             <x-status-badge x-show="loan.status === 'active'" tone="success" pill>{{ __('Active') }}</x-status-badge>
-                            <x-status-badge x-show="loan.status === 'paid_off'" tone="zinc" pill>{{ __('Paid Off') }}</x-status-badge>
+                            <x-status-badge x-show="loan.status === 'paid_off'" tone="neutral" pill>{{ __('Paid Off') }}</x-status-badge>
                             <x-status-badge x-show="loan.status === 'rejected'" tone="error" pill>{{ __('Rejected') }}</x-status-badge>
-                            <x-status-badge x-show="loan.status === 'cancelled'" tone="zinc" pill>{{ __('Cancelled') }}</x-status-badge>
+                            <x-status-badge x-show="loan.status === 'cancelled'" tone="neutral" pill>{{ __('Cancelled') }}</x-status-badge>
                         </div>
                         <button x-show="loan.status === 'pending' || loan.status === 'approved'" @click="cancelLoan(loan.id)"
                                 class="mt-2 rounded-lg px-2 py-1 text-xs font-medium text-error transition-colors hover:bg-error/5">
@@ -156,7 +150,7 @@
             <div x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center"
                  x-cloak x-trap.noscroll="showCreateModal">
                 <div class="fixed inset-0 bg-black/40" @click="showCreateModal = false"></div>
-                <div class="relative z-10 w-full max-w-lg rounded-2xl bg-canvas p-6 shadow-xl">
+                <div class="relative z-10 w-full max-w-lg rounded-lg bg-canvas p-6 shadow-xl">
                     <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('New Loan Application') }}</h2>
 
                     <div class="space-y-5">
@@ -191,6 +185,5 @@
             </div>
         </template>
     </div>
-
-
+</x-page-shell>
 </x-layouts::app.sidebar>

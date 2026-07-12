@@ -37,8 +37,7 @@ arch('controllers extend base Controller')
 
 arch('no dd or dump in app code')
     ->expect('App')
-    ->not->toUse(['dd', 'dump', 'var_dump', 'exit'])
-    ->ignoring('App\Services\GeminiClient');
+    ->not->toUse(['dd', 'dump', 'var_dump', 'exit']);
 
 arch('models extend Eloquent Model')
     ->expect('App\Models')

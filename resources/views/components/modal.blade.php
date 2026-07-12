@@ -1,70 +1,65 @@
-@props(['show' => false, 'maxWidth' => 'lg', 'closeable' => true])
+@props(['id', 'maxWidth', 'onclose' => null])
+
+@aware(['title' => null])
 
 @php
-$maxWidthClasses = [
-    'sm' => 'sm:max-w-sm',
-    'md' => 'sm:max-w-md',
-    'lg' => 'sm:max-w-lg',
-    'xl' => 'sm:max-w-xl',
-    '2xl' => 'sm:max-w-2xl',
-    '3xl' => 'sm:max-w-3xl',
-    '4xl' => 'sm:max-w-4xl',
-    '5xl' => 'sm:max-w-5xl',
-    '6xl' => 'sm:max-w-6xl',
-    '7xl' => 'sm:max-w-7xl',
-    'full' => 'sm:max-w-full',
-][$maxWidth] ?? 'sm:max-w-lg';
+$id = $id ?? md5($attributes->wire('model'));
+
+$maxWidth = [
+    'sm' => 'sm:max-w-sm', 'md' => 'sm:max-w-md', 'lg' => 'sm:max-w-lg',
+    'xl' => 'sm:max-w-xl', '2xl' => 'sm:max-w-2xl', '3xl' => 'sm:max-w-3xl',
+    '4xl' => 'sm:max-w-4xl', '5xl' => 'sm:max-w-5xl', '6xl' => 'sm:max-w-6xl',
+    '7xl' => 'sm:max-w-7xl', 'full' => 'sm:max-w-full',
+][$maxWidth ?? '2xl'];
 @endphp
 
-<div x-data="{ open: @js($show) }" x-on:keydown.escape.window="if (open) { open = false }">
+<div x-data="{ show: @entangle($attributes->wire('model')) }" x-on:keydown.escape.window="show = false; {{ $onclose }}">
     <template x-teleport="body">
-        <div x-show="open"
-            x-cloak
-            x-effect="if (open) { $nextTick(() => window.initUiPickers?.($el)) }"
-            @if ($closeable) x-on:click.self="open = false" @endif
-            class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
+        <div x-show="show" id="{{ $id }}"
+            x-effect="if (show) { $nextTick(() => window.initUiPickers?.($el)) }"
+            x-on:close.stop="show = false; {{ $onclose }}"
+            class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
+            style="display: none;"
             role="dialog"
             aria-modal="true"
-            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave="ease-in duration-200"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
+            <div x-show="show" class="fixed inset-0 z-0 transform transition-all"
+                x-on:click="show = false; {{ $onclose }}"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+            </div>
 
-            <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true"></div>
-
-            <div x-show="open"
-                class="relative z-10 mx-auto w-full {{ $maxWidthClasses }} transform overflow-y-auto rounded-2xl bg-canvas shadow-xl"
+            <div x-show="show"
+                class="{{ $maxWidth }} relative z-10 w-full transform overflow-y-auto rounded-xl bg-canvas shadow-xl transition-all sm:mx-auto"
                 style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
                 x-on:click.stop
-                x-trap.inert.noscroll="open"
-                x-transition:enter="transition ease-out duration-200"
+                x-trap.inert.noscroll="show"
+                role="dialog"
+                aria-modal="true"
+                x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-
-                @if (isset($title) || $closeable)
-                    <div class="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-ink">{{ $title ?? '' }}</h2>
-                        @if ($closeable)
-                            <button @@click="open = false" class="rounded-xl p-1 text-on-surface-variant hover:text-ink hover:bg-surface-container-high">
-                                <span class="material-symbols-outlined text-lg">close</span>
-                            </button>
-                        @endif
-                    </div>
-                @endif
-
-                <div class="px-6 py-4">
-                    {{ $slot }}
+                @if (isset($title))
+                <div class="border-b border-outline-variant/50 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-ink">{{ $title }}</h2>
                 </div>
-
+                @endif
+                <div class="p-6">{{ $slot }}</div>
                 @if (isset($footer))
-                    <div class="flex items-center justify-end gap-3 border-t border-outline-variant/50 px-6 py-4">
-                        {{ $footer }}
-                    </div>
+                <div class="flex justify-end gap-3 border-t border-outline-variant/50 px-6 py-4">{{ $footer }}</div>
                 @endif
             </div>
         </div>

@@ -3,9 +3,8 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-canvas pb-20 lg:pb-0"
+    <body class="min-h-screen bg-canvas pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0"
         x-data
-        x-init="$store.darkMode.init()"
     >
         <!-- ─── Desktop Sidebar ─── -->
         <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-e border-outline-variant bg-canvas lg:flex">
@@ -16,93 +15,40 @@
 
             {{-- Navigation --}}
             <nav class="flex-1 overflow-y-auto py-2">
-                <div class="px-4 pb-2 pt-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Main') }}</p>
+                @php
+                    $user = auth()->user();
+                    $menu = $user ? (new \App\Services\NavigationService)->build($user) : [];
+                @endphp
+                @if (empty($menu))
+                <div class="px-4 py-8 text-center text-xs text-on-surface-variant/40">{{ __('Tidak ada menu') }}</div>
+                @endif
+                @foreach($menu as $group)
+                <div class="px-4 pb-2 pt-5 first:pt-2">
+                    <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-on-surface-variant/60">{{ __($group['title']) }}</p>
                 </div>
 
-                <a href="{{ route('dashboard') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('dashboard'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('dashboard')])
+                @foreach($group['items'] as $item)
+                @php
+                    $pattern = $item['active_pattern'] ?? $item['route'];
+                    $isActive = request()->routeIs($pattern . '*') || request()->routeIs($item['route']);
+                @endphp
+                <a href="{{ route($item['route']) }}"
+                   @class(['group flex h-11 items-center gap-3 rounded-r-xl border-l-[3px] px-4 text-sm transition duration-150',
+                           'border-l-ink bg-ink/5 font-semibold text-ink' => $isActive,
+                           'border-l-transparent font-medium text-on-surface-variant hover:border-l-outline hover:bg-surface-dim/30 hover:text-ink' => !$isActive])
                    wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">home</span>
-                    <span>{{ __('Dashboard') }}</span>
+                    <span @class(['material-symbols-outlined text-xl transition duration-150',
+                                 'text-ink' => $isActive,
+                                 'text-on-surface-variant group-hover:text-ink' => !$isActive])>{{ $item['icon'] }}</span>
+                    <span class="leading-5">{{ __($item['label']) }}</span>
                 </a>
-
-                <div class="px-4 pb-2 pt-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('HR') }}</p>
-                </div>
-
-                @can('viewAny', App\Models\Employee::class)
-                    <a href="{{ route('admin.employees.index') }}"
-                       @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                               'bg-ink/5 text-ink' => request()->routeIs('admin.employees.*'),
-                               'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('admin.employees.*')])
-                       wire:navigate>
-                        <span class="material-symbols-outlined text-2xl">group</span>
-                        <span>{{ __('Employees') }}</span>
-                    </a>
-                @endcan
-
-                <a href="{{ route('attendance.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('attendance.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('attendance.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">schedule</span>
-                    <span>{{ __('Attendance') }}</span>
-                </a>
-
-                <a href="{{ route('leaves.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('leaves.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('leaves.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">calendar_month</span>
-                    <span>{{ __('Leave') }}</span>
-                </a>
-
-                <a href="{{ route('overtimes.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('overtimes.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('overtimes.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">bolt</span>
-                    <span>{{ __('Overtime') }}</span>
-                </a>
-
-                <a href="{{ route('reimbursements.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('reimbursements.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('reimbursements.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">wallet</span>
-                    <span>{{ __('Reimbursement') }}</span>
-                </a>
-
-                <a href="{{ route('payroll.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('payroll.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('payroll.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">payments</span>
-                    <span>{{ __('Payroll') }}</span>
-                </a>
-
-                <a href="{{ route('approvals.index') }}"
-                   @class(['flex h-12 items-center gap-3 px-4 text-sm font-medium transition-colors',
-                           'bg-ink/5 text-ink' => request()->routeIs('approvals.*'),
-                           'text-on-surface-variant hover:bg-ink/5 hover:text-ink' => !request()->routeIs('approvals.*')])
-                   wire:navigate>
-                    <span class="material-symbols-outlined text-2xl">approval</span>
-                    <span>{{ __('Approvals') }}</span>
-                </a>
+                @endforeach
+                @endforeach
             </nav>
 
             {{-- User --}}
-            <div class="flex items-center justify-between border-t border-outline-variant p-3">
+            <div class="flex items-center border-t border-outline-variant p-3">
                 <x-desktop-user-menu />
-                <x-navigation.theme-toggle size="sm" />
             </div>
         </aside>
 
@@ -110,8 +56,7 @@
         <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-outline-variant bg-canvas px-4 lg:hidden">
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
             <div class="flex items-center gap-1">
-                <x-navigation.theme-toggle size="sm" />
-                <x-desktop-user-menu />
+                <x-desktop-user-menu :dropUp="false" />
             </div>
         </header>
 
@@ -124,17 +69,16 @@
         <x-bottom-nav />
 
         @persist('toast')
-            <div
-                x-data="toast"
-                x-show="show"
-                x-cloak
-                x-transition
-                class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-ink px-6 py-4 text-sm text-white shadow-lg"
-            >
-                <p x-text="message"></p>
-            </div>
+            <div id="toast-container"></div>
         @endpersist
 
+        @auth
+            @php
+                session()->forget('web_sanctum_token');
+            @endphp
+        @endauth
+
         @vite(['resources/js/app.js'])
+        @stack('scripts')
     </body>
 </html>

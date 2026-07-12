@@ -15,10 +15,12 @@ class RegisterFaceRequest extends FormRequest
     {
         return [
             'embedding' => ['sometimes', 'array', 'size:128'],
-            'embedding.*' => ['numeric', 'between:-1.5,1.5'],
+            'embedding.*' => ['numeric', 'between:-3,3'],
+            'descriptor' => ['sometimes', 'array', 'size:129'],
+            'descriptor.*' => ['numeric', 'between:-3,3'],
             'embeddings' => ['sometimes', 'array', 'min:2', 'max:10'],
             'embeddings.*' => ['array', 'size:128'],
-            'embeddings.*.*' => ['numeric', 'between:-1.5,1.5'],
+            'embeddings.*.*' => ['numeric', 'between:-3,3'],
             'captures' => ['sometimes', 'array'],
             'captures.*' => ['string'],
         ];
@@ -27,6 +29,13 @@ class RegisterFaceRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $data = $this->all();
+
+        if (isset($data['descriptor']) && ! isset($data['embedding'])) {
+            $descriptor = $data['descriptor'];
+            $data['embedding'] = array_slice($descriptor, 1);
+            $data['_descriptor_version'] = $descriptor[0];
+            $this->merge($data);
+        }
 
         if (isset($data['embeddings']) && ! isset($data['embedding'])) {
             $embeddings = $data['embeddings'];

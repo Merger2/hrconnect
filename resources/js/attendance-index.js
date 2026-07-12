@@ -25,31 +25,35 @@ export default function () {
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
         },
 
+        apiHeaders() {
+            return window.apiHeaders();
+        },
+
         async fetchToday() {
             try {
-                const res = await fetch('/api/v1/attendance/today', {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch('/api/v1/attendance/today', { headers: this.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.today = json.data;
                     this.todayStatus = (this.today.has_clocked_in && this.today.has_clocked_out) ? 'complete' : 'incomplete';
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data hari ini' });
+            }
         },
 
         async fetchAttendance() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/attendance?period=${this.period}&per_page=50`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/attendance?period=${this.period}&per_page=50`, { headers: this.apiHeaders() });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat riwayat absensi' });
+            }
             finally { this.loading = false; }
         },
 
@@ -81,7 +85,7 @@ export default function () {
         },
 
         statusLabel(status) {
-            const labels = { present: 'Present', late: 'Late', absent: 'Absent', wfa: 'WFA' };
+            const labels = { present: 'Hadir', late: 'Terlambat', absent: 'Absen', wfa: 'WFA' };
             return labels[status] || status;
         },
 

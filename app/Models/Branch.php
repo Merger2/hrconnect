@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @mixin IdeHelperBranch
  */
-#[Fillable(['company_id', 'name', 'address', 'is_main', 'is_active', 'latitude', 'longitude', 'radius'])]
+#[Fillable(['company_id', 'name', 'code', 'type', 'address', 'is_main', 'is_active', 'latitude', 'longitude', 'radius', 'metadata'])]
 class Branch extends Model
 {
     use HasFactory;
@@ -24,6 +24,7 @@ class Branch extends Model
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'radius' => 'integer',
+            'metadata' => 'array',
         ];
     }
 

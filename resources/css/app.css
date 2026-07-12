@@ -1,4 +1,4 @@
-@import 'https://fonts.googleapis.com/css2?family=Rubik:wght@500&family=Inter:wght@400;600&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Rubik:wght@500&family=Inter:wght@400;500;600;700&display=swap';
 @import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
 @import 'tailwindcss';
 
@@ -8,44 +8,163 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    /* Fonts — Rubik for display, Inter for body */
+    /* Fonts — Inter sebagai substitute Forma DJR Micro */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-display: 'Rubik', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter', 'Rubik', ui-sans-serif, system-ui, sans-serif;
 
     /* ═══════════════════════════════════════
-       MD3 Color Palette — App (neutral putih)
-       Landing page override via .landing-theme
+       HP-inspired Design System
+       Primary: HP Electric Blue (#024ad8)
        ═══════════════════════════════════════ */
 
-    /* Canvas & Text */
+    /* Canvas & Ink */
     --color-canvas: #ffffff;
-    --color-ink: #0a0a0a;
+    --color-ink: #1a1a1a;
+    --color-ink-soft: #292929;
 
-    /* MD3 Surface Layer Tokens — neutral untuk app */
-    --color-surface-container-low: #f5f5f5;
+    /* Surface — HP cloud/fog scale */
+    --color-cloud: #f7f7f7;
+    --color-fog: #e8e8e8;
+    --color-steel: #c2c2c2;
+    --color-graphite: #636363;
+    --color-charcoal: #3d3d3d;
+
+    /* ── Blue scale (HP Electric Blue #024ad8 at blue-600) ── */
+    --color-blue-50: #eef4fd;
+    --color-blue-100: #c9e0fc;
+    --color-blue-200: #a8c9f9;
+    --color-blue-300: #7aacf5;
+    --color-blue-400: #296ef9;
+    --color-blue-500: #1756e0;
+    --color-blue-600: #024ad8;
+    --color-blue-700: #0239b0;
+    --color-blue-800: #0e3191;
+    --color-blue-900: #0c1f5e;
+    --color-blue-950: #07103a;
+
+    /* ── Coral scale (warm secondary accent) ── */
+    --color-coral-50: #fff0ec;
+    --color-coral-100: #ffe0d4;
+    --color-coral-200: #ffc3aa;
+    --color-coral-300: #ff9e7a;
+    --color-coral-400: #ff7b5a;
+    --color-coral-500: #f55a3a;
+    --color-coral-600: #d63f22;
+    --color-coral-700: #b32f15;
+    --color-coral-800: #932814;
+    --color-coral-900: #7a2616;
+    --color-coral-950: #421006;
+
+    /* HP Electric Blue semantic aliases (backward compat) */
+    --color-primary: #024ad8;
+    --color-primary-bright: #296ef9;
+    --color-primary-deep: #0e3191;
+    --color-primary-soft: #c9e0fc;
+    --color-on-primary: #ffffff;
+
+    /* Error/Semantic */
+    --color-error: #b3262b;
+    --color-error-container: #fce8e8;
+    --color-on-error: #ffffff;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+
+    /* MD3 backward compat */
+    --color-surface-container-low: #f7f7f7;
     --color-surface-container: #eeeeee;
     --color-surface-container-high: #e5e5e5;
     --color-surface-container-highest: #d9d9d9;
+    --color-surface-dim: #e8e8e8;
+    --color-on-background: #1a1a1a;
+    --color-on-surface-variant: #636363;
+    --color-outline: #c2c2c2;
+    --color-outline-variant: #e8e8e8;
 
-    /* MD3 On-Surface Tokens */
-    --color-on-background: #1c1b1b;
-    --color-on-surface-variant: #444748;
+    /* Radius — HP two-tier (DESIGN.md full scale) */
+    --radius-xs: 2px;
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 8px;
+    --radius-xl: 16px;
+    --radius-pill: 9999px;
 
-    /* MD3 Outline Tokens */
-    --color-outline: #747878;
-    --color-outline-variant: #c4c7c7;
+    /* Typography scale — DESIGN.md (Inter substitute for Forma DJR Micro) */
+    --text-display-xxl: 72px;
+    --text-display-xxl--line-height: 1.0;
+    --text-display-xxl--font-weight: 500;
 
-    /* Primary */
-    --color-primary: #000000;
-    --color-primary-container: #1c1b1b;
-    --color-on-primary: #ffffff;
+    --text-display-xl: 56px;
+    --text-display-xl--line-height: 1.0;
+    --text-display-xl--font-weight: 500;
 
-    /* Error */
-    --color-error: #ba1a1a;
-    --color-error-container: #ffdad6;
-    --color-on-error: #ffffff;
+    --text-display-lg: 44px;
+    --text-display-lg--line-height: 1.0;
+    --text-display-lg--font-weight: 500;
 
-    /* Brand Colors — Landing page `.landing-theme` */
+    --text-display-md: 32px;
+    --text-display-md--line-height: 1.0;
+    --text-display-md--font-weight: 500;
+
+    --text-display-sm: 24px;
+    --text-display-sm--line-height: 1.17;
+    --text-display-sm--font-weight: 500;
+
+    --text-display-xs: 20px;
+    --text-display-xs--line-height: 1.0;
+    --text-display-xs--font-weight: 500;
+
+    --text-body-lg: 18px;
+    --text-body-lg--line-height: 1.33;
+    --text-body-lg--font-weight: 400;
+
+    --text-body-emphasis: 16px;
+    --text-body-emphasis--line-height: 1.38;
+    --text-body-emphasis--font-weight: 500;
+
+    --text-caption-md: 14px;
+    --text-caption-md--line-height: 1.5;
+    --text-caption-md--font-weight: 400;
+
+    --text-caption-sm: 12px;
+    --text-caption-sm--line-height: 1.33;
+    --text-caption-sm--font-weight: 400;
+
+    --text-caption-bold: 14px;
+    --text-caption-bold--line-height: 1.3;
+    --text-caption-bold--font-weight: 700;
+
+    --text-button-md: 14px;
+    --text-button-md--line-height: 1.4;
+    --text-button-md--font-weight: 600;
+
+    --text-price-md: 24px;
+    --text-price-md--line-height: 1.17;
+    --text-price-md--font-weight: 500;
+
+    /* Link tokens (DESIGN.md) */
+    --color-link: #024ad8;
+    --color-link-pressed: #0e3191;
+    --color-on-surface: #1a1a1a;
+
+    /* Shadow — HP Soft Lift + glassmorphism */
+    --shadow-soft: 0 2px 8px rgba(26, 26, 26, 0.08);
+    --shadow-modal: 0 8px 24px rgba(26, 26, 26, 0.12);
+    --shadow-glass: 0 4px 16px rgba(26, 26, 26, 0.06);
+
+    /* Legacy tokens (backward compat) */
+    --color-body: #1a1a1a;
+    --color-body-strong: #1a1a1a;
+    --color-muted: #636363;
+    --color-muted-soft: #9ca3af;
+    --color-hairline: #e8e8e8;
+    --color-hairline-soft: #f0f0f0;
+    --color-surface-soft: #f7f7f7;
+    --color-surface-card: #ffffff;
+    --color-surface-strong: #e5e5e5;
+    --color-accent: var(--color-primary);
+
+    /* Landing page brand colors */
     --color-brand-pink: #ff4d8b;
     --color-brand-teal: #1a3a3a;
     --color-brand-lavender: #b8a4ed;
@@ -54,30 +173,40 @@
     --color-brand-mint: #a4d4c5;
     --color-brand-coral: #ff6b5a;
 
-    /* Semantic */
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-info: #3b82f6;
+    /* ═══════════════════════════════════════
+       Dark Mode — HP deep navy interpretation
+       ═══════════════════════════════════════ */
+    --color-dark-canvas: #0c1f5e;
+    --color-dark-surface: #07103a;
+    --color-dark-surface-container-low: #0e3191;
+    --color-dark-surface-container: #0c1f5e;
+    --color-dark-surface-container-high: #07103a;
+    --color-dark-outline: #1a3a7a;
+    --color-dark-outline-variant: #1230a0;
+    --color-dark-ink: #ffffff;
+    --color-dark-on-surface-variant: #a8c9f9;
+    --color-dark-on-surface: #e8e8e8;
+    --color-dark-cloud: #0c1f5e;
+    --color-dark-fog: #07103a;
+}
 
-    /* ─── Legacy tokens (backward compat — remove after migration) ─── */
-    --color-body: #1c1b1b;
-    --color-body-strong: #0a0a0a;
-    --color-muted: #6b7280;
-    --color-muted-soft: #9ca3af;
-    --color-hairline: #d1d5db;
-    --color-hairline-soft: #e5e7eb;
-    --color-surface-soft: #f5f5f5;
-    --color-surface-card: #eeeeee;
-    --color-surface-strong: #e5e5e5;
+/* Dark mode auto-swap — .dark class toggle via JS or Tailwind dark: */
+.dark {
+    --color-canvas: var(--color-dark-canvas);
+    --color-ink: var(--color-dark-ink);
+    --color-on-surface-variant: var(--color-dark-on-surface-variant);
+    --color-cloud: var(--color-dark-cloud);
+    --color-fog: var(--color-dark-fog);
+    --color-outline: var(--color-dark-outline);
+    --color-outline-variant: var(--color-dark-outline-variant);
+    --color-surface-container-low: var(--color-dark-surface-container-low);
+    --color-surface-container: var(--color-dark-surface-container);
+    --color-surface-container-high: var(--color-dark-surface-container-high);
+}
 
-    /* Dark mode — landing page only */
-    --color-surface-dark: #0a1a1a;
-    --color-surface-dark-elevated: #1a2a2a;
-    --color-on-dark: #ffffff;
-    --color-on-dark-soft: #a0a0a0;
-
-    /* Backward compat for vendor views (livewire pagination ring-accent) */
-    --color-accent: var(--color-ink);
+.dark .glass {
+    background-color: rgb(14 49 145 / 0.8);
+    backdrop-filter: blur(12px) saturate(1.4);
 }
 
 @layer base {
@@ -92,7 +221,7 @@
 
 @layer components {
     .user-list-card {
-        @apply relative rounded-xl border border-outline-variant/60 bg-canvas shadow-sm transition;
+        @apply relative rounded-xl border border-outline-variant/60 bg-canvas shadow-soft transition;
     }
 
     .user-list-card:hover {
@@ -102,5 +231,40 @@
     .wcag-touch-target {
         min-height: 2.75rem;
         min-width: 2.75rem;
+    }
+
+    /* Glassmorphism — subtle frosted surface for sticky headers / overlay bars */
+    .glass {
+        background-color: rgb(255 255 255 / 0.8);
+        backdrop-filter: blur(12px) saturate(1.2);
+        -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    }
+
+    .glass-dark {
+        background-color: rgb(26 26 26 / 0.85);
+        backdrop-filter: blur(12px) saturate(1.2);
+        -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    }
+
+    /* HP chevron decoration — geometric blue slash (DESIGN.md signature) */
+    .chevron-decoration {
+        @apply bg-primary;
+        clip-path: polygon(20% 0, 100% 0, 80% 100%, 0 100%);
+    }
+
+    /* Surface band helpers (DESIGN.md section rhythm) */
+    .band-cloud {
+        @apply bg-cloud;
+    }
+    .band-fog {
+        @apply bg-fog;
+    }
+    .band-ink {
+        @apply bg-ink text-on-primary;
+    }
+
+    /* Smooth transition utility */
+    .transition-smooth {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }

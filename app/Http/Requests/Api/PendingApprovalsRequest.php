@@ -17,6 +17,8 @@ class PendingApprovalsRequest extends FormRequest
             'type' => ['nullable', 'in:leave,overtime,reimbursement,wfa'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'all' => ['nullable', 'in:1,true'],
+            'scope' => ['nullable', 'in:own,team'],
         ];
     }
 }

@@ -1,6 +1,6 @@
 @props(['title', 'description' => null])
 
-<div {{ $attributes->merge(['class' => 'overflow-hidden rounded-2xl border border-outline-variant/50 bg-canvas shadow-sm']) }}>
+<div {{ $attributes->merge(['class' => 'overflow-hidden rounded-lg border border-outline-variant/50 bg-canvas shadow-sm']) }}>
     @if (isset($title) || isset($icon))
         <div class="border-b border-outline-variant/50 bg-surface-dim/30 px-5 py-4">
             <div class="flex items-center gap-3">

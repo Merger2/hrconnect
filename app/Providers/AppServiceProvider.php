@@ -20,11 +20,15 @@ use App\Observers\PayrollObserver;
 use App\Observers\TaxConfigObserver;
 use App\Services\EmbeddingService;
 use App\Services\FaceRecognitionService;
-use App\Services\GeminiClient;
 use App\Services\GeofenceService;
+use App\Services\NavigationService;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Pgvector\Laravel\Schema as PgvectorSchema;
@@ -39,8 +43,8 @@ class AppServiceProvider extends ServiceProvider
         // A-7: Service bindings for DI
         $this->app->singleton(FaceRecognitionService::class);
         $this->app->singleton(GeofenceService::class);
-        $this->app->singleton(GeminiClient::class);
         $this->app->singleton(EmbeddingService::class);
+        $this->app->singleton(NavigationService::class);
     }
 
     /**
@@ -51,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         PgvectorSchema::register();
         $this->registerObservers();
+        $this->registerViewComposers();
     }
 
     /**
@@ -73,6 +78,24 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Configure API rate limiting.
+     *
+     * Global API throttle: 60 requests per minute per user (or IP for guests).
+     * Per-endpoint throttles (login 5/min, clock-in 5/5min, etc.) override this
+     * via more specific middleware declarations on individual routes.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
     }
 
     /**
@@ -93,5 +116,20 @@ class AppServiceProvider extends ServiceProvider
         CompanySetting::observe(CompanySettingObserver::class);
         Leave::observe(LeaveObserver::class);
         Payroll::observe(PayrollObserver::class);
+    }
+
+    /**
+     * Register View Composers for shared data injection.
+     *
+     * Pattern from laravel-smarthr: View::composer injects menu items
+     * built by a service that filters config/menu.php by user permissions.
+     */
+    protected function registerViewComposers(): void
+    {
+        View::composer('layouts.app.sidebar', function ($view) {
+            $user = auth()->user();
+            $menu = $user ? app(NavigationService::class)->build($user) : [];
+            $view->with('sidebarMenu', $menu);
+        });
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Middleware\CheckPasswordExpired;
-use App\Http\Middleware\DeviceDetection;
-use App\Http\Middleware\GeofenceValidation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             $modules = [
                 'attendance', 'employee', 'leave', 'overtime', 'payroll', 'approval',
-                'knowledge-base', 'asset', 'loan', 'reimbursement',
+                'knowledge-base', 'asset', 'loan', 'reimbursement', 'master-data', 'admin',
             ];
             foreach ($modules as $module) {
                 $path = base_path("routes/{$module}.php");
@@ -45,14 +43,16 @@ return Application::configure(basePath: dirname(__DIR__))
         // Proteksi Host header poisoning.
         $middleware->trustHosts(at: fn () => [config('app.url')]);
 
+        // Security headers: CSP, HSTS, X-Frame-Options (PasPapan pattern).
+        // Temporarily disabled — needs per-page CSP testing before activation.
+        // $middleware->web(append: [EnsureSecurityHeaders::class]);
+
         // Aliases shortcut untuk middleware Spatie & Sanctum (digunakan di routes).
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'password.expired' => CheckPasswordExpired::class,
-            'device.detection' => DeviceDetection::class,
-            'geofence' => GeofenceValidation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

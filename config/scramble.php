@@ -169,7 +169,7 @@ return [
         MiddlewareAuthSecurityStrategy::class,
         [
             'middleware' => ['auth', 'auth:sanctum'],
-            'scheme' => SecurityScheme::http('bearer'),
+            'scheme' => ['type' => 'http', 'scheme' => 'bearer'],
         ],
     ],
 ];

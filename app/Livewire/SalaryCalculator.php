@@ -2,10 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Enums\TerCategory;
 use App\Models\Employee;
 use App\Services\Payroll\BpjsService;
 use App\Services\Payroll\PotonganService;
-use App\Services\Payroll\Pph21Service;
+use App\Services\PayrollCalculatorService;
 use Livewire\Component;
 
 class SalaryCalculator extends Component
@@ -50,7 +51,17 @@ class SalaryCalculator extends Component
             $this->hariAlfa,
         );
 
-        $deductionPph21 = app(Pph21Service::class)->calculateMonthly($bruto * 12);
+        if ($this->employeeId) {
+            $employee = Employee::with('position')->find($this->employeeId);
+            if ($employee) {
+                $category = $employee->position?->ter_category ?? TerCategory::A;
+                $deductionPph21 = app(PayrollCalculatorService::class)->calculatePPh21($employee, $bruto, $category);
+            } else {
+                $deductionPph21 = 0;
+            }
+        } else {
+            $deductionPph21 = 0;
+        }
         $deductionBpjs = app(BpjsService::class)->calculate($this->gajiPokok, $this->tunjanganJabatan)['total'];
 
         $totalDeductions = $deductionAlfa + $deductionPph21 + $deductionBpjs;

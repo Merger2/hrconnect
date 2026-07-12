@@ -21,3 +21,13 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+trace.zip
+
+# Playwright auth storage state (session cookies, not source)
+tests/e2e/.auth/

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\VerificationMethod;
-use App\Enums\WfaStatus;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Shift;
@@ -38,7 +38,7 @@ class AttendanceFactory extends Factory
     {
         return $this->state(fn (array $attrs) => [
             'is_wfa' => true,
-            'status_wfa' => WfaStatus::PENDING->value,
+            'status_wfa' => ApprovalStatus::PENDING->value,
             'lat_in' => null,
             'long_in' => null,
             'wfa_note' => fake()->sentence(10),

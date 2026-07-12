@@ -43,6 +43,7 @@ class CheckPasswordExpired
         'password.request',
         'password.reset',
         'security.edit',
+        'profile.edit',
     ];
 
     public function handle(Request $request, Closure $next): Response

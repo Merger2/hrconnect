@@ -18,9 +18,10 @@ class CompanyController extends Controller
     {
         $this->authorize('viewAny', Company::class);
 
-        $perPage = (int) $request->input('per_page', 50);
+        $perPage = min((int) $request->input('per_page', 50), 100);
 
-        $companies = Company::orderBy('name')
+        $companies = Company::select('id', 'name', 'code', 'phone', 'email', 'website', 'is_active')
+            ->orderBy('name')
             ->paginate($perPage);
 
         return response()->json([

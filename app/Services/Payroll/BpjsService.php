@@ -10,13 +10,15 @@ class BpjsService
 {
     public function calculate(float $gajiPokok, float $tunjanganTetap = 0): array
     {
-        $dasar = $gajiPokok + $tunjanganTetap;
         $configs = BpjsConfig::cachedAll();
 
         $components = [];
         $total = 0;
 
         foreach ($configs as $config) {
+            // B-30: JHT hanya berdasarkan gaji pokok (PP 46/2015 Pasal 3),
+            // bukan gaji pokok + tunjangan tetap seperti komponen BPJS lain
+            $dasar = $config['name'] === 'jht' ? $gajiPokok : $gajiPokok + $tunjanganTetap;
             $ceiling = $config['ceiling'];
             $base = $ceiling !== null ? min($dasar, $ceiling) : $dasar;
             $amount = round($base * $config['employee_rate']);

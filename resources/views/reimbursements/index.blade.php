@@ -1,17 +1,11 @@
 <x-layouts::app.sidebar>
     <div x-data="reimbursementsIndex()">
-        {{-- Header --}}
-        <div class="mb-3 flex flex-col gap-2.5 border-b border-outline-variant/50 pb-3 xl:flex-row xl:items-center xl:justify-between">
-            <div class="min-w-0">
-                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Reimbursements') }}</h1>
-                <p class="text-sm text-on-surface-variant">{{ __('View and manage your reimbursement claims') }}</p>
-            </div>
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <x-page-shell title="{{ __('Klaim') }}" subtitle="{{ __('Riwayat pengajuan klaim Anda') }}">
+            <x-slot:actions>
                 <x-button variant="primary" href="{{ route('reimbursements.apply') }}" wire:navigate icon="add">
-                    {{ __('New Claim') }}
+                    {{ __('Ajukan Klaim') }}
                 </x-button>
-            </div>
-        </div>
+            </x-slot:actions>
 
         {{-- Toolbar --}}
         <div class="mb-3 rounded-xl border border-outline-variant bg-canvas p-2.5 shadow-sm">
@@ -134,6 +128,5 @@
             </div>
         </x-app.panel>
     </div>
-
-
+</x-page-shell>
 </x-layouts::app.sidebar>

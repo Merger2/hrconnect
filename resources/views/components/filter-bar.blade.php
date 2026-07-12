@@ -10,7 +10,7 @@
     @if (!($noButtons ?? false))
         <button
             @click="filterApply?.()"
-            class="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-white transition-colors hover:opacity-90">
+            class="rounded-md bg-ink px-4 py-2 text-xs font-semibold text-white transition-colors hover:opacity-90">
             {{ $applyLabel }}
         </button>
         <button

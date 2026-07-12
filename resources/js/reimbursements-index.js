@@ -24,15 +24,15 @@ export default function () {
         async fetchReimbursements() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/reimbursement?period=${this.period}&per_page=50`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/reimbursement?period=${this.period}&per_page=50`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data klaim' });
+            }
             finally { this.loading = false; }
         },
 
@@ -49,7 +49,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/reimbursement/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
@@ -64,7 +64,8 @@ export default function () {
         },
 
         formatCurrency(val) {
-            return 'Rp ' + (val || 0).toLocaleString('id-ID');
+            if (val === null || val === undefined) return '-';
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
         },
 
         formatDate(dateStr) {

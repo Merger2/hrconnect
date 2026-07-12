@@ -43,7 +43,7 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="w-full max-w-lg rounded-t-2xl bg-canvas p-6 shadow-xl sm:rounded-2xl">
+             class="w-full max-w-lg rounded-t-lg bg-canvas p-6 shadow-xl sm:rounded-lg">
             <div class="mb-4 flex items-center justify-between">
                 <div>
                     <h4 class="text-lg font-semibold text-ink">{{ __('Menu Lengkap') }}</h4>

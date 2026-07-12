@@ -1,14 +1,29 @@
-<x-layouts::app.sidebar>
-    <div x-data="approvalsIndex()">
+<x-layouts::app.sidebar :title="__('Persetujuan')">
+    <div x-data="approvalsIndex('{{ auth()->user()->roles->first()?->name ?? 'employee' }}')">
         {{-- Header --}}
         <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold text-ink">{{ __('Approvals') }}</h1>
-                <p class="mt-1 text-sm text-on-surface-variant">{{ __('Review and approve pending requests from your team') }}</p>
+                <h1 class="text-2xl font-semibold text-ink">
+                    @php $role = auth()->user()->roles->first()?->name @endphp
+                    {{ $role === 'employee' ? __('Pengajuan Saya') : __('Persetujuan') }}
+                </h1>
+                <p class="mt-1 text-sm text-on-surface-variant">
+                    @php
+                        $subtitle = match ($role) {
+                            'super-admin', 'hr-manager' => __('Semua pengajuan yang menunggu persetujuan'),
+                            'manager' => __('Pengajuan tim yang menunggu persetujuan Anda'),
+                            'finance' => __('Klaim reimbursement yang menunggu persetujuan'),
+                            default => __('Riwayat pengajuan Anda'),
+                        };
+                    @endphp
+                    {{ $subtitle }}
+                </p>
             </div>
         </div>
 
-        {{-- Tabs --}}
+        {{-- Tabs (hidden for employee) --}}
+        @php $canApprove = in_array($role, ['manager', 'hr-manager', 'super-admin', 'finance']) @endphp
+        @if($canApprove)
         <div class="mb-6 flex gap-1 rounded-xl bg-surface-container-low p-1">
             <button @click="tab = 'pending'; fetchApprovals()"
                     :class="tab === 'pending' ? 'bg-canvas text-ink shadow-sm' : 'text-on-surface-variant hover:text-ink'"
@@ -22,6 +37,7 @@
                 {{ __('History') }}
             </button>
         </div>
+        @endif
 
         {{-- Toolbar --}}
         <x-app.panel class="mb-6">
@@ -29,14 +45,15 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
                     <div class="xl:col-span-2">
                         <x-forms.select name="type" x-model="typeFilter" @change="fetchApprovals()"
-                            :options="['' => __('All Types'), 'leave' => __('Leave'), 'overtime' => __('Overtime'), 'reimbursement' => __('Reimbursement')]" />
+                            :options="['' => __('All Types'), 'leave' => __('Leave'), 'overtime' => __('Overtime'), 'reimbursement' => __('Reimbursement')]"
+                            x-bind:disabled="role === 'finance'" />
                     </div>
                 </div>
             </div>
         </x-app.panel>
 
         {{-- Summary stats --}}
-        <dl class="mb-4 flex flex-wrap gap-2" x-show="!loading && tab === 'pending'">
+        <dl class="mb-4 flex flex-wrap gap-2" x-show="!loading && tab === 'pending' && canApprove()">
             <div class="rounded-xl border border-warning/30 bg-warning/10 px-4 py-2">
                 <dt class="text-xs font-semibold uppercase text-warning">{{ __('Pending') }}</dt>
                 <dd class="text-lg font-bold text-warning" x-text="approvals.length">0</dd>
@@ -70,15 +87,15 @@
                                 <td class="px-4 py-3">
                                     <span class="font-medium text-ink" x-text="typeLabel(a.approvable_type)"></span>
                                 </td>
-                                <td class="px-4 py-3 text-ink" x-text="a.submitter?.full_name || 'Unknown'"></td>
+                                <td class="px-4 py-3 text-ink" x-text="a.submitter?.full_name || '{{ __('Tidak Diketahui') }}'"></td>
                                 <td class="px-4 py-3">
                                     <span x-show="tab === 'pending'"
                                           class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
                                           :class="a.level === 1 ? 'bg-info/10 text-info ring-1 ring-inset ring-info/30' : 'bg-primary/10 text-primary ring-1 ring-inset ring-primary/30'"
-                                          x-text="a.level_label || (a.level === 1 ? 'L1 Supervisor' : 'L2 Manager')"></span>
+                                          x-text="a.level_label || (a.level === 1 ? 'L1 {{ __('Supervisor') }}' : 'L2 {{ __('Manager') }}')"></span>
                                     <span x-show="tab === 'history'"
                                           class="text-sm text-on-surface-variant"
-                                          x-text="a.level_label || (a.level === 1 ? 'L1 Supervisor' : 'L2 Manager')"></span>
+                                          x-text="a.level_label || (a.level === 1 ? 'L1 {{ __('Supervisor') }}' : 'L2 {{ __('Manager') }}')"></span>
                                 </td>
                                 <td class="px-4 py-3 text-ink" x-text="formatDate(a.submitted_at || a.created_at)"></td>
                                 <td class="px-4 py-3">
@@ -87,7 +104,7 @@
                                     </template>
                                     <template x-if="tab === 'history'">
                                         <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset"
-                                              :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-danger/10 text-danger ring-danger/30'"
+                                              :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-error/10 text-error ring-error/30'"
                                               x-text="a.status === 'approved' ? '{{ __('Approved') }}' : '{{ __('Rejected') }}'"></span>
                                     </template>
                                 </td>
@@ -96,7 +113,7 @@
                                         <x-button variant="ghost" size="sm" icon="open_in_new" @click="openDetail(a.approval_id)">
                                             {{ __('Detail') }}
                                         </x-button>
-                                        <template x-if="tab === 'pending'">
+                                        <template x-if="tab === 'pending' && canApprove()">
                                             <>
                                                 <x-button variant="secondary" size="sm" icon="close" @click="openRejectModal(a.approval_id, a.submitter?.full_name)">
                                                     {{ __('Reject') }}
@@ -111,11 +128,19 @@
                                 </td>
                             </tr>
                         </template>
-                        <template x-if="approvals.length === 0">
+                        <template x-if="approvals.length === 0 && tab === 'pending'">
                             <tr>
-                                <td :colspan="tab === 'pending' ? 6 : 6">
-                                    <x-empty-state :title="tab === 'pending' ? __('Tidak ada pending approval') : __('Belum ada histori approval')"
-                                                   :description="tab === 'pending' ? __('Semua request sudah diproses') : __('Anda belum memproses approval apapun')">
+                                <td colspan="6">
+                                    <x-empty-state :title="__('Tidak ada pending approval')" :description="__('Semua request sudah diproses')">
+                                        <x-slot name="icon"><span class="material-symbols-outlined text-3xl text-on-surface-variant/50">approval</span></x-slot>
+                                    </x-empty-state>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="approvals.length === 0 && tab === 'history'">
+                            <tr>
+                                <td colspan="6">
+                                    <x-empty-state :title="__('Belum ada histori approval')" :description="__('Anda belum memproses approval apapun')">
                                         <x-slot name="icon"><span class="material-symbols-outlined text-3xl text-on-surface-variant/50">approval</span></x-slot>
                                     </x-empty-state>
                                 </td>
@@ -132,14 +157,14 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm font-medium text-ink" x-text="typeLabel(a.approvable_type) + ' #' + a.approvable_id"></p>
-                                <p class="mt-0.5 text-xs text-on-surface-variant" x-text="a.submitter?.full_name || 'Unknown'"></p>
+                                <p class="mt-0.5 text-xs text-on-surface-variant" x-text="a.submitter?.full_name || '{{ __('Tidak Diketahui') }}'"></p>
                             </div>
                             <template x-if="tab === 'pending'">
                                 <x-status-badge tone="warning">{{ __('Pending') }}</x-status-badge>
                             </template>
                             <template x-if="tab === 'history'">
                                 <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset"
-                                      :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-danger/10 text-danger ring-danger/30'"
+                                      :class="a.status === 'approved' ? 'bg-success/10 text-success ring-success/30' : 'bg-error/10 text-error ring-error/30'"
                                       x-text="a.status === 'approved' ? '{{ __('Approved') }}' : '{{ __('Rejected') }}'"></span>
                             </template>
                         </div>
@@ -151,7 +176,7 @@
                         </div>
                         <div class="flex gap-2">
                             <x-button variant="ghost" size="sm" @click="openDetail(a.approval_id)" icon="open_in_new" class="flex-1">{{ __('Detail') }}</x-button>
-                            <template x-if="tab === 'pending'">
+                            <template x-if="tab === 'pending' && canApprove()">
                                 <>
                                     <x-button variant="secondary" size="sm" @click="openRejectModal(a.approval_id, a.submitter?.full_name)" icon="close" class="flex-1">{{ __('Reject') }}</x-button>
                                     <x-button variant="primary" size="sm" @click="approve(a.approval_id)" x-bind:disabled="processing === a.approval_id" class="flex-1">
@@ -163,15 +188,18 @@
                         </div>
                     </article>
                 </template>
-                <template x-if="approvals.length === 0">
-                    <x-empty-state :title="tab === 'pending' ? __('Tidak ada pending approval') : __('Belum ada histori approval')" />
+                <template x-if="approvals.length === 0 && tab === 'pending'">
+                    <x-empty-state :title="__('Tidak ada pending approval')" />
+                </template>
+                <template x-if="approvals.length === 0 && tab === 'history'">
+                    <x-empty-state :title="__('Belum ada histori approval')" />
                 </template>
             </div>
         </x-app.panel>
 
         {{-- Detail Modal --}}
         <div x-show="detailModalOpen" x-cloak class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 pt-12" @keydown.escape.window="detailModalOpen = false" @click.outside="detailModalOpen = false">
-            <div class="w-full max-w-2xl rounded-2xl bg-canvas p-6 shadow-xl">
+            <div class="w-full max-w-2xl rounded-lg bg-canvas p-6 shadow-xl">
                 {{-- Modal header --}}
                 <div class="flex items-start justify-between">
                     <div>
@@ -190,14 +218,14 @@
                         <div class="flex items-start gap-3">
                             <div class="flex flex-col items-center">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
-                                     :class="step.status === 'approved' ? 'bg-success/10 text-success' : step.status === 'rejected' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'"
+                                     :class="step.status === 'approved' ? 'bg-success/10 text-success' : step.status === 'rejected' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'"
                                      x-text="step.status === 'approved' ? '✓' : step.status === 'rejected' ? '✗' : '○'"></div>
                                 <div x-show="i < (detailData?.approval_chain?.length || 1) - 1" class="mt-1 h-6 w-0.5 bg-outline-variant/30"></div>
                             </div>
                             <div class="flex-1 pb-4">
                                 <p class="text-sm font-medium text-ink" x-text="step.level_label || 'L' + step.level"></p>
                                 <p class="text-xs text-on-surface-variant" x-text="step.approver?.full_name || '{{ __('Unknown') }}'"></p>
-                                <p class="mt-0.5 text-xs" :class="step.status === 'approved' ? 'text-success' : step.status === 'rejected' ? 'text-danger' : 'text-warning'"
+                                <p class="mt-0.5 text-xs" :class="step.status === 'approved' ? 'text-success' : step.status === 'rejected' ? 'text-error' : 'text-warning'"
                                    x-text="step.status === 'approved' ? '{{ __('Approved') }}' : step.status === 'rejected' ? '{{ __('Rejected') }}' : '{{ __('Pending') }}'"></p>
                                 <p x-show="step.notes" class="mt-1 rounded-lg bg-surface-container-low px-2.5 py-1.5 text-xs text-on-surface-variant" x-text="'{{ __('Notes') }}: ' + step.notes"></p>
                                 <p x-show="step.approved_at" class="mt-0.5 text-xs text-on-surface-variant" x-text="formatDateTime(step.approved_at)"></p>
@@ -309,7 +337,7 @@
 
         {{-- Reject Modal --}}
         <div x-show="rejectModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" @keydown.escape.window="rejectModalOpen = false">
-            <div class="w-full max-w-md rounded-2xl bg-canvas p-6 shadow-xl" @click.outside="rejectModalOpen = false">
+            <div class="w-full max-w-md rounded-lg bg-canvas p-6 shadow-xl" @click.outside="rejectModalOpen = false">
                 <h3 class="text-lg font-semibold text-ink">{{ __('Reject Request') }}</h3>
                 <p class="mt-1 text-sm text-on-surface-variant" x-text="'{{ __('Reason for') }}: ' + (rejectTargetName || '')"></p>
                 <textarea x-model="rejectReason" class="mt-4 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-3 text-sm text-ink placeholder:text-on-surface-variant/50" rows="3" placeholder="{{ __('Alasan penolakan...') }}"></textarea>

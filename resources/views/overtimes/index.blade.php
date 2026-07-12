@@ -1,17 +1,11 @@
 <x-layouts::app.sidebar>
     <div x-data="overtimesIndex()">
-        {{-- Header --}}
-        <div class="mb-3 flex flex-col gap-2.5 border-b border-outline-variant/50 pb-3 xl:flex-row xl:items-center xl:justify-between">
-            <div class="min-w-0">
-                <h1 class="truncate text-lg font-semibold tracking-tight text-ink">{{ __('Overtime') }}</h1>
-                <p class="text-sm text-on-surface-variant">{{ __('View and manage your overtime records') }}</p>
-            </div>
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <x-page-shell title="{{ __('Lembur') }}" subtitle="{{ __('Riwayat pengajuan lembur Anda') }}">
+            <x-slot:actions>
                 <x-button variant="primary" href="{{ route('overtimes.apply') }}" wire:navigate icon="add">
-                    {{ __('Request Overtime') }}
+                    {{ __('Ajukan Lembur') }}
                 </x-button>
-            </div>
-        </div>
+            </x-slot:actions>
 
         {{-- Toolbar --}}
         <div class="mb-3 rounded-xl border border-outline-variant bg-canvas p-2.5 shadow-sm">
@@ -133,6 +127,5 @@
             </div>
         </x-app.panel>
     </div>
-
-
+</x-page-shell>
 </x-layouts::app.sidebar>

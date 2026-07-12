@@ -21,10 +21,9 @@ test('SuperAdminSeeder creates super-admin user with default credentials', funct
 });
 
 test('SuperAdminSeeder honor env credentials', function () {
-    config(['app.test' => 'placeholder']); // tidak relevan, sekedar sentuh config
-    putenv('SUPER_ADMIN_EMAIL=custom@example.com');
-    putenv('SUPER_ADMIN_PASSWORD=SuperSecret123!');
-    putenv('SUPER_ADMIN_NAME=Custom Boss');
+    config(['hrconnect.super_admin_email' => 'custom@example.com']);
+    config(['hrconnect.super_admin_password' => 'SuperSecret123!']);
+    config(['hrconnect.super_admin_name' => 'Custom Boss']);
 
     $this->seed(RoleAndPermissionSeeder::class);
     $this->seed(SuperAdminSeeder::class);
@@ -35,11 +34,6 @@ test('SuperAdminSeeder honor env credentials', function () {
     expect($admin->name)->toBe('Custom Boss');
     expect(Hash::check('SuperSecret123!', $admin->password))->toBeTrue();
     expect($admin->hasRole('super-admin'))->toBeTrue();
-
-    // Cleanup
-    putenv('SUPER_ADMIN_EMAIL');
-    putenv('SUPER_ADMIN_PASSWORD');
-    putenv('SUPER_ADMIN_NAME');
 });
 
 test('SuperAdminSeeder idempotent', function () {

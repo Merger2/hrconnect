@@ -343,7 +343,7 @@ Table users {
   email varchar(255) [unique]
   email_verified_at timestamp [null]
   password varchar(255)
-  google_id varchar(255) [null]
+  -- google_id varchar(255) [null] -- REMOVED via migration 2026_07_06
   password_changed boolean [default: false]
   password_changed_at timestamp [null]
   two_factor_secret text [null]

@@ -84,7 +84,7 @@ graph TD
         
         %% Authentication
         UC41[Login with Email/Password]
-        UC42[Login with Google OAuth]
+        UC42[Login with Email/Password]
         UC43[Enable/Disable 2FA]
         UC44[Force Change Password]
         UC45[View Activity Logs]

@@ -75,7 +75,7 @@
             <td style="width: 50%;">
                 <table><tr><td class="label">Cabang</td><td class="value">{{ $payroll->employee->branch?->name ?? '-' }}</td></tr></table>
                 <table><tr><td class="label">Tipe Kerja</td><td class="value">{{ $payroll->employee->employment_type?->value ?? '-' }}</td></tr></table>
-                <table><tr><td class="label">Tgl Masuk</td><td class="value">{{ optional($payroll->employee->join_date)->format('d M Y') ?? '-' }}</td></tr></table>
+                <table><tr><td class="label">Tgl Masuk</td><td class="value">{{ optional($payroll->employee->join_date)->locale('id')->translatedFormat('d F Y') ?? '-' }}</td></tr></table>
                 <table><tr><td class="label">Status Slip</td><td class="value">{{ strtoupper($payroll->status?->value ?? '-') }}</td></tr></table>
             </td>
         </tr>
