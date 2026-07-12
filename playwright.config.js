@@ -77,7 +77,7 @@ export default defineConfig({
     // Admin-authenticated tests (employee directory, payroll, approval, reimbursement)
     {
       name: 'chromium-admin',
-      testMatch: /(employee|payroll-settings|approval-reimbursement)\.spec\.ts/,
+      testMatch: /(employee|payroll-settings|reimbursement|approval)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
