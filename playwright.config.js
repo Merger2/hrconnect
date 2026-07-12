@@ -48,10 +48,10 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat)
+    // Employee-authenticated tests (clock-in, KB chat, loans, overtime)
     {
       name: 'chromium-employee',
-      testMatch: /(clock-in|rag-chat)\.spec\.ts/,
+      testMatch: /(clock-in|rag-chat|loans|overtime)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -61,10 +61,10 @@ export default defineConfig({
       },
     },
 
-    // HR-authenticated tests (face enrollment)
+    // HR-authenticated tests (face enrollment, master data)
     {
       name: 'chromium-hr',
-      testMatch: /face-enrollment\.spec\.ts/,
+      testMatch: /(face-enrollment|master-data)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],

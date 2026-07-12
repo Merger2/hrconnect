@@ -10,7 +10,8 @@
 @php
     $id = $id ?: $name;
     $base = 'block w-full rounded-md border bg-canvas px-3 py-2 text-sm text-ink placeholder:text-muted-soft focus:border-ink focus:ring-0';
-    $hasError = $errors->has($name);
+    $errorsBag = $errors ?? session('errors');
+    $hasError = $errorsBag && method_exists($errorsBag, 'has') ? $errorsBag->has($name) : false;
     $classes = $hasError
         ? $base.' border-error'
         : $base.' border-outline-variant';
