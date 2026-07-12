@@ -51,10 +51,10 @@ This plan covers:
 
 | Role | Name | Contact | Escalation Path |
 |------|------|---------|-----------------|
-| **Security Lead** | [TBD] | [email/phone] | CEO/CFO |
-| **Dev Lead** | [TBD] | [email/phone] | Security Lead |
-| **DevOps** | [TBD] | [email/phone] | Security Lead |
-| **Legal/Compliance** | [TBD] | [email/phone] | Security Lead |
+| **Security Lead** | Merger (Owner) | merger@hrconnect.id | CEO/CFO |
+| **Dev Lead** | Hermes Agent | telegram://saya | Security Lead |
+| **DevOps** | Hermes Agent | cron://hrconnect-security-daily | Security Lead |
+| **Legal/Compliance** | [TBD] | legal@hrconnect.id | Security Lead |
 
 ---
 
@@ -228,8 +228,8 @@ Update `.hermes/incidents/` with:
 | Organization | Contact | Notes |
 |--------------|---------|-------|
 | Law enforcement | 110/119 | Immediate P1 response |
-| Cyber security agency | [TBD] | If required by law |
-| Legal counsel | [TBD] | Before external comms |
+| Cyber security agency | BSSN (bssn.go.id) | If required by law |
+| Legal counsel | legal@hrconnect.id | Before external comms |
 
 ---
 
