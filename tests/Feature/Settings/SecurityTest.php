@@ -25,33 +25,33 @@ test('profile page can be rendered', function () {
 
 test('password can be updated from profile', function () {
     $user = User::factory()->create([
-        'password' => Hash::make('password'),
+        'password' => Hash::make('OldPassword123'),
     ]);
 
     $this->actingAs($user);
 
     $response = Livewire::test('pages::settings.profile')
-        ->set('current_password', 'password')
-        ->set('new_password', 'new-password')
-        ->set('new_password_confirmation', 'new-password')
+        ->set('current_password', 'OldPassword123')
+        ->set('new_password', 'NewPassword456')
+        ->set('new_password_confirmation', 'NewPassword456')
         ->call('updatePassword');
 
     $response->assertHasNoErrors();
 
-    expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
+    expect(Hash::check('NewPassword456', $user->refresh()->password))->toBeTrue();
 });
 
 test('correct password must be provided to update password', function () {
     $user = User::factory()->create([
-        'password' => Hash::make('password'),
+        'password' => Hash::make('OldPassword123'),
     ]);
 
     $this->actingAs($user);
 
     $response = Livewire::test('pages::settings.profile')
         ->set('current_password', 'wrong-password')
-        ->set('new_password', 'new-password')
-        ->set('new_password_confirmation', 'new-password')
+        ->set('new_password', 'NewPassword456')
+        ->set('new_password_confirmation', 'NewPassword456')
         ->call('updatePassword');
 
     $response->assertHasErrors(['current_password']);
