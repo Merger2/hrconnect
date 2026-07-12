@@ -80,10 +80,5 @@
 
         @vite(['resources/js/app.js'])
         @stack('scripts')
-
-        {{-- PWA Install Prompt --}}
-        @auth
-            <x-pwa-install-prompt />
-        @endauth
     </body>
 </html>
