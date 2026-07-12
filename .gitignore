@@ -31,3 +31,18 @@ trace.zip
 
 # Playwright auth storage state (session cookies, not source)
 tests/e2e/.auth/
+
+# Development-only — tidak ikut ke main
+/.hermes/
+/.agents/
+/.claude/
+/.codex/
+/.gemini/
+/docs/
+/tests/
+/.github/
+/_ide_helper.php
+/_ide_helper_models.php
+/phpstan.neon
+/phpstan.neon.dist
+/phpstan-baseline.neon
