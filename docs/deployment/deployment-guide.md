@@ -111,61 +111,18 @@ systemctl restart php8.5-fpm
 ```
 
 ### 3.3 Nginx Configuration
-```nginx
-# /etc/nginx/sites-available/hrconnect
-server {
-    listen 80;
-    server_name hrconnect.company.com;
-    root /var/www/hrconnect/public;
 
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:;" always;
+File lengkap: `docs/deployment/nginx.conf`
 
-    index index.php;
-
-    charset utf-8;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.5-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_read_timeout 120;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-
-    # PWA manifest
-    location /manifest.json {
-        add_header Content-Type application/json;
-        try_files $uri =404;
-    }
-
-    # Service worker
-    location /sw.js {
-        add_header Cache-Control "no-cache";
-        try_files $uri =404;
-    }
-}
-
-# Enable site
+```bash
+# Install default nginx config
+cp docs/deployment/nginx.conf /etc/nginx/sites-available/hrconnect
 ln -s /etc/nginx/sites-available/hrconnect /etc/nginx/sites-enabled/
 nginx -t
 systemctl reload nginx
 ```
+
+> ⚠️ **Catatan:** Security headers (CSP, HSTS, XFO) di-handle oleh Laravel middleware `EnsureSecurityHeaders`. Nginx hanya handle asset caching dan PWA routing. Jangan duplikasi header yang bisa menyebabkan konflik.
 
 ### 3.4 SSL with Let's Encrypt
 ```bash
@@ -260,13 +217,13 @@ php artisan view:cache
 ```
 
 ### 4.5 Queue Worker Setup
-```bash
-# Supervisor configuration
-nano /etc/supervisor/conf.d/hrconnect-worker.conf
+```ini
+; /etc/supervisor/conf.d/hrconnect-worker.conf
+; Lihat docs/deployment/hrconnect-worker.conf untuk file lengkap
 
 [program:hrconnect-worker]
 process_name=%(program_name)s_%(process_num)02d
- command=php /var/www/hrconnect/artisan queue:work --queue=default,payroll_high,notifications --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/hrconnect/artisan queue:work --queue=default,payroll_high,notifications --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasuser=false
