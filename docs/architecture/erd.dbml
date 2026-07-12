@@ -1,0 +1,982 @@
+// HRConnect HRIS - Database Schema for dbdiagram.io
+// Tech Stack: Laravel 13, PHP 8.5, PostgreSQL
+// PK: bigint (Auto-Increment) | Enums: native DBML Enum definitions
+
+// ============================================
+// ENUMS
+// ============================================
+
+Enum approval_level {
+  1
+  2
+  3
+  4
+}
+
+Enum gender {
+  L [note: "Laki-laki"]
+  P [note: "Perempuan"]
+}
+
+Enum employee_status {
+  active
+  inactive
+  resigned
+  terminated
+  deceased
+}
+
+Enum termination_type {
+  resign
+  dismissed
+  deceased
+  contract_end
+}
+
+Enum company_setting_type {
+  geodata
+  branding
+  attendance
+  leave
+  payroll
+  system
+}
+
+Enum device_type {
+  desktop
+  mobile
+  tablet
+}
+
+Enum leave_quota_reset {
+  yearly
+  monthly
+  one_time
+}
+
+Enum notification_type {
+  attendance
+  leave
+  payroll
+  system
+  approval
+  reminder
+}
+
+Enum resignation_reason {
+  personal
+  better_offer
+  relocation
+  health
+  other
+}
+
+Enum shift_schedule_type {
+  regular
+  rotating
+  custom
+}
+
+Enum employment_type {
+  permanent
+  contract
+  probation
+  intern
+}
+
+Enum marital_status {
+  single
+  married
+  divorced
+  widowed
+}
+
+Enum blood_type {
+  A+
+  A-
+  B+
+  B-
+  O+
+  O-
+  AB+
+  AB-
+}
+
+Enum education_level {
+  sd
+  smp
+  sma
+  smk
+  diploma
+  bachelor
+  master
+  doctorate
+  other
+}
+
+Enum salary_type {
+  monthly
+  hourly
+  daily
+}
+
+Enum attendance_status {
+  on_time
+  late
+  early
+  absent
+  permission
+  holiday
+  missed_clock_in
+  missed_clock_out
+}
+
+Enum approval_status {
+  pending
+  approved
+  rejected
+}
+
+Enum day_type {
+  full_day
+  morning
+  afternoon
+}
+
+Enum request_status {
+  pending
+  approved_l1
+  approved
+  rejected
+  cancelled
+}
+
+Enum payroll_status {
+  draft
+  published
+  paid
+}
+
+Enum payroll_item_type {
+  allowance
+  deduction
+}
+
+Enum loan_status {
+  pending
+  approved
+  rejected
+  active
+  paid_off
+  cancelled
+}
+
+Enum reimbursement_status {
+  pending
+  approved
+  rejected
+  paid
+}
+
+Enum asset_status {
+  available
+  assigned
+  disposed
+}
+
+Enum handover_category {
+  document
+  asset
+  data
+  access
+  responsibility
+}
+
+Enum knowledge_base_category {
+  hr_policy
+  it_guide
+  general
+  finance
+  other
+}
+
+Enum knowledge_base_status {
+  processing
+  ready
+  error
+}
+
+Enum ter_category {
+  A
+  B
+  C
+}
+
+Enum bpjs_type {
+  kesehatan
+  jht
+  jp
+  jkk
+  jkm
+}
+
+Enum family_relationship {
+  spouse
+  parent
+  child
+  sibling
+  friend
+  other
+}
+
+Enum loan_installment_status {
+  pending
+  paid
+  overdue
+}
+
+Enum wfa_status {
+  pending
+  approved
+  rejected
+}
+
+// ============================================
+// MASTER DATA
+// ============================================
+
+Table companies {
+  id bigint [pk, increment]
+  name varchar(255)
+  phone varchar(255)
+  email varchar(255)
+  website varchar(255)
+  npwp text [note: "encrypted"]
+  code varchar(255)
+  logo varchar(255) [note: "logo path"]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table branches {
+  id bigint [pk, increment]
+  company_id bigint
+  name varchar(255)
+  address text
+  latitude decimal(10, 7)
+  longitude decimal(10, 7)
+  radius int [default: 100, note: "meter"]
+  is_main boolean [default: false]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table departments {
+  id bigint [pk, increment]
+  branch_id bigint
+  name varchar(255)
+  code varchar(255) [unique]
+  description text
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+Table positions {
+  id bigint [pk, increment]
+  department_id bigint
+  name varchar(255)
+  code varchar(255) [unique]
+  grade int
+  basic_salary decimal(15, 2)
+  allowance_jabatan decimal(15, 2) [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+Table shifts {
+  id bigint [pk, increment]
+  name varchar(255)
+  start_time time
+  end_time time
+  late_tolerance_minutes int [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table shift_schedules {
+  id bigint [pk, increment]
+  employee_id bigint
+  shift_id bigint
+  date date
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (employee_id, date) [unique]
+  }
+}
+
+Table holidays {
+  id bigint [pk, increment]
+  date date [unique]
+  name varchar(255)
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// USERS & EMPLOYEES
+// ============================================
+
+Table users {
+  id bigint [pk, increment]
+  company_id bigint [null]
+  name varchar(255)
+  email varchar(255) [unique]
+  email_verified_at timestamp [null]
+  password varchar(255)
+  -- google_id varchar(255) [null] -- REMOVED via migration 2026_07_06
+  password_changed boolean [default: false]
+  password_changed_at timestamp [null]
+  two_factor_secret text [null]
+  two_factor_recovery_codes text [null]
+  two_factor_confirmed_at timestamp [null]
+  remember_token text [null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+Table employees {
+  id bigint [pk, increment]
+  user_id bigint [unique]
+  parent_id bigint [null, note: "manager/approver - self reference"]
+  company_id bigint
+  branch_id bigint
+  department_id bigint
+  position_id bigint
+  shift_id bigint [null]
+  province_id bigint [null]
+  city_id bigint [null]
+  district_id bigint [null]
+  village_id bigint [null]
+  postal_code varchar(10) [null]
+  address_detail text [null, note: "nullable - alamat boleh kosong"]
+  employee_number varchar(50) [unique]
+  full_name varchar(255)
+  phone text [note: "encrypted"]
+  bank_account_number text [null, note: "encrypted - nullable karena karyawan baru/probation mungkin belum punya rekening"]
+  bank_name varchar(100) [null, note: "nullable - sama seperti bank_account_number"]
+  npwp text [null, note: "encrypted - nullable karena karyawan baru mungkin belum punya NPWP"]
+  nik text [note: "encrypted"]
+  marital_status marital_status [default: single]
+  blood_type blood_type [null]
+  gender gender
+  status employee_status [default: active]
+  birth_date date
+  join_date date
+  resign_date date [null]
+  employment_type employment_type [default: permanent]
+  contract_start_date date [null]
+  contract_end_date date [null]
+  deceased_date date [null]
+  termination_reason text [null]
+  termination_type termination_type [null]
+  photo varchar(255) [null]
+  face_embedding vector(128) [null, note: "pgvector native type - 128 dimensions"]
+  pin varchar(60) [null, note: "bcrypt hash - 6 digit attendance PIN"]
+  education_level education_level
+  institution_name varchar(255)
+  major varchar(255) [null]
+  graduation_year int
+  salary_type salary_type
+  created_by bigint [null]
+  updated_by bigint [null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+
+  indexes {
+    (full_name)
+    (status)
+    (join_date)
+    (province_id)
+    (city_id)
+  }
+}
+
+Table family_details {
+  id bigint [pk, increment]
+  employee_id bigint
+  nik text [null, note: "encrypted via CipherSweet - nullable karena karyawan baru mungkin belum punya"]
+  name varchar(255)
+  relationship family_relationship
+  gender gender [null, note: "belum ada di migration awal - perlu alter table"]
+  birth_date date [null]
+  phone text [null, note: "encrypted via CipherSweet - nullable"]
+  address text [null, note: "encrypted via CipherSweet - nullable"]
+  job varchar(255) [null, note: "belum ada di migration awal - perlu alter table"]
+  is_emergency boolean [default: false, note: "belum ada di migration awal - perlu alter table"]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table devices {
+  id bigint [pk, increment]
+  employee_id bigint
+  device_uuid varchar(255) [unique, note: "hardware UUID"]
+  device_type varchar(20) [null, note: "desktop/mobile/tablet"]
+  device_name varchar(255) [null, note: "nama perangkat"]
+  browser varchar(255) [null]
+  os varchar(255) [null]
+  is_verified boolean [default: false]
+  verified_at timestamp [null]
+  last_used_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// ATTENDANCE
+// ============================================
+
+Table attendances {
+  id bigint [pk, increment]
+  employee_id bigint
+  shift_id bigint [null, note: "nullable - karyawan tanpa shift bisa clock-in; default shift via Observer"]
+  date date
+  clock_in timestamp
+  clock_out timestamp [null]
+  lat_in decimal(10, 8) [null]
+  long_in decimal(11, 8) [null]
+  clock_in_is_mocked boolean [default: false]
+  clock_in_accuracy decimal(8, 2) [null]
+  lat_out decimal(10, 8) [null]
+  long_out decimal(11, 8) [null]
+  clock_out_is_mocked boolean [null]
+  clock_out_accuracy decimal(8, 2) [null]
+  device_fingerprint varchar(255) [null]
+  verification_method varchar(50) [null, note: "clock-in method: face_verified|pin_verified|manual"]
+  face_similarity_score decimal(5, 2) [null, note: "clock-in face similarity percentage"]
+  clock_out_verification_method varchar(50) [null, note: "perlu alter table - clock-out method terpisah dari clock-in"]
+  clock_out_face_similarity_score decimal(5, 2) [null, note: "perlu alter table - clock-out face similarity terpisah"]
+  photo_selfie_in varchar(255) [null]
+  photo_selfie_out varchar(255) [null]
+  status attendance_status [default: on_time]
+  exception_type varchar(30) [null, note: "perlu alter table - late_exception, dll"]
+  exception_notes text [null, note: "perlu alter table"]
+  approved_late_by bigint [null, note: "perlu alter table - FK employees"]
+  exception_type varchar(30) [null]
+  exception_notes text [null]
+  approved_late_by bigint [null, note: "FK employees"]
+  is_wfa boolean [default: false]
+  status_wfa wfa_status [null]
+  wfa_note text [null, note: "WFA note minimal 20 karakter"]
+  late_minutes int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+
+  indexes {
+    (employee_id, date) [unique]
+    (date, status)
+  }
+}
+
+// ============================================
+// LEAVE MANAGEMENT
+// ============================================
+
+Table leave_types {
+  id bigint [pk, increment]
+  name varchar(255)
+  code varchar(255) [unique]
+  quota int [default: 12]
+  is_paid boolean [default: true]
+  deducts_from_quota boolean [default: true]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table leave_balances {
+  id bigint [pk, increment]
+  employee_id bigint
+  leave_type_id bigint
+  year int
+  quota decimal(4, 1) [default: 0]
+  used decimal(4, 1) [default: 0]
+  carry_forward decimal(4, 1) [default: 0, note: "max: 3 hari"]
+  carry_forward_deadline date [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (employee_id, leave_type_id, year) [unique]
+  }
+}
+
+Table leaves {
+  id bigint [pk, increment]
+  employee_id bigint
+  leave_type_id bigint
+  start_date date
+  end_date date
+  day_type day_type [default: full_day]
+  total_days decimal(4, 2)
+  reason text
+  proof_file varchar(255) [null]
+  status request_status [default: pending]
+  rejection_reason text [null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+
+  indexes {
+    (employee_id, start_date, end_date)
+    (status)
+  }
+}
+
+// ============================================
+// OVERTIME
+// ============================================
+
+Table overtimes {
+  id bigint [pk, increment]
+  employee_id bigint
+  attendance_id bigint [null]
+  date date
+  start_time time [null]
+  end_time time [null]
+  description text [null]
+  total_hours decimal(5, 2) [null]
+  amount decimal(15, 2) [null]
+  status request_status [default: pending]
+  rejection_reason text [null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+
+  indexes {
+    (employee_id)
+    (status)
+  }
+}
+
+// ============================================
+// APPROVAL WORKFLOW
+// ============================================
+
+Table approvals {
+  id bigint [pk, increment]
+  approvable_type varchar(255) [note: "polymorphic: App\\Models\\Leave|App\\Models\\Overtime"]
+  approvable_id bigint
+  approver_id bigint [note: "employee_id"]
+  level int [note: "1=L1_Supervisor, 2=L2_Manager, 3=L3_HRD, 4=L4_Director"]
+  status approval_status [default: pending]
+  notes text [null]
+  approved_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (approvable_type, approvable_id)
+    (status)
+  }
+}
+
+// ============================================
+// PAYROLL
+// ============================================
+
+Table payrolls {
+  id bigint [pk, increment]
+  employee_id bigint
+  period varchar(255)
+  basic_salary decimal(15, 2)
+  total_allowance decimal(15, 2)
+  gross_salary decimal(15, 2)
+  overtime_pay decimal(15, 2) [default: 0]
+  pph21 decimal(15, 2) [default: 0]
+  bpjs_health decimal(15, 2) [default: 0]
+  bpjs_employment decimal(15, 2) [default: 0]
+  loan_deduction decimal(15, 2) [default: 0]
+  attendance_penalty decimal(15, 2) [default: 0]
+  total_deduction decimal(15, 2)
+  net_salary decimal(15, 2)
+  status payroll_status [default: draft]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+
+  indexes {
+    (employee_id, period) [unique]
+    (status)
+  }
+}
+
+Table payroll_items {
+  id bigint [pk, increment]
+  payroll_id bigint
+  name varchar(255)
+  amount decimal(15, 2)
+  type payroll_item_type
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table payroll_adjustments {
+  id bigint [pk, increment]
+  payroll_id bigint [note: "original payroll being adjusted"]
+  amount decimal(15, 2) [note: "positive=add, negative=deduct - per §2.4 harus decimal bukan integer"]
+  reason text
+  created_by bigint [null, note: "FK users - nullable karena nullOnDelete, system-generated adjustment tanpa user (§4.1h)"]
+  applied_to_period date [note: "bulan adjustment diterapkan"]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (payroll_id)
+  }
+}
+
+// ============================================
+// LOAN (V2 - DEFERRED)
+// ============================================
+
+Table loans {
+  id bigint [pk, increment]
+  employee_id bigint
+  rejection_reason text [null, note: "enhancement - alasan penolakan"]
+  created_by bigint [null, note: "FK users"]
+  amount decimal(15, 2)
+  interest_rate decimal(5, 2) [default: 0]
+  tenor_months int [note: "lama cicilan"]
+  monthly_installment decimal(15, 2) [note: "enhancement - cicilan per bulan"]
+  status loan_status [default: pending]
+  is_settled boolean [default: false, note: "enhancement - penanda lunas"]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+Table loan_installments {
+  id bigint [pk, increment]
+  loan_id bigint
+  payroll_id bigint [null]
+  amount_paid decimal(15, 2)
+  installment_number int
+  status loan_installment_status [default: pending]
+  due_date date
+  paid_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// REIMBURSEMENT (V2 - DEFERRED)
+// ============================================
+
+Table reimbursement_categories {
+  id bigint [pk, increment]
+  company_id bigint [null]
+  name varchar(255)
+  code varchar(255) [unique]
+  is_active boolean [default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table reimbursements {
+  id bigint [pk, increment]
+  employee_id bigint
+  payroll_id bigint [null, note: "enhancement - FK payrolls, integrasi gaji"]
+  category_id bigint [note: "FK reimbursement_categories"]
+  title varchar(255) [note: "enhancement - judul klaim"]
+  expense_date date [note: "enhancement - tanggal pengeluaran"]
+  amount decimal(15, 2)
+  description text
+  receipt_file varchar(255) [null, note: "enhancement - bukti pembayaran"]
+  attachment_path varchar(255)
+  rejection_reason text [null, note: "enhancement - alasan penolakan"]
+  status reimbursement_status [default: pending]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+// ============================================
+// ASSET (V2 - DEFERRED)
+// ============================================
+
+Table assets {
+  id bigint [pk, increment]
+  company_id bigint [null]
+  name varchar(255)
+  serial_number varchar(255) [unique]
+  code varchar(255) [null]
+  category varchar(255) [null]
+  is_available boolean [default: true]
+  status asset_status [default: available]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+Table asset_handovers {
+  id bigint [pk, increment]
+  asset_id bigint
+  employee_id bigint
+  handover_date date
+  return_date date [null]
+  condition varchar(255)
+  category handover_category
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// PERFORMANCE (V2 - DEFERRED)
+// ============================================
+
+Table performance_reviews {
+  id bigint [pk, increment]
+  employee_id bigint
+  reviewer_id bigint [note: "FK employees - yang menilai"]
+  status varchar(20) [default: draft]
+  review_date date [null]
+  period varchar(20) [null, note: "e.g. 2026-Q1, 2026-H1"]
+  final_score decimal(5, 2) [null]
+  notes text [null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+// ============================================
+// KNOWLEDGEBASE AI (RAG)
+// ============================================
+
+Table knowledge_bases {
+  id bigint [pk, increment]
+  knowledgeable_type varchar(255) [note: "polymorphic - App\Models\Company, etc."]
+  knowledgeable_id bigint [note: "polymorphic ID"]
+  title varchar(255)
+  content text [note: "chunked text"]
+  embedding vector(768) [null, note: "pgvector - nullable karena insert sebelum embedding di-generate"]
+  metadata json [null, note: "chunk metadata: source, page, dll"]
+  category knowledge_base_category [default: general]
+  status knowledge_base_status [default: processing]
+  source_document varchar(255) [null]
+  page_number int [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (knowledgeable_type, knowledgeable_id)
+  }
+}
+
+// ============================================
+// CONFIGURATION
+// ============================================
+
+Table company_settings {
+  id bigint [pk, increment]
+  company_id bigint [null]
+  key varchar(255) [unique]
+  value json [null]
+  description text [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table tax_configs {
+  id bigint [pk, increment]
+  ter_category ter_category
+  min_income decimal(15, 2)
+  max_income decimal(15, 2)
+  rate decimal(5, 4)
+  effective_rate decimal(5, 4) [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table bpjs_configs {
+  id bigint [pk, increment]
+  name bpjs_type
+  employer_rate decimal(5, 4)
+  employee_rate decimal(5, 4)
+  ceiling decimal(15, 2) [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// SECURITY & LOGS
+// ============================================
+
+Table activity_logs {
+  id bigint [pk, increment]
+  log_name varchar(255)
+  description text
+  subject_type varchar(255) [null, note: "polymorphic"]
+  subject_id bigint [null]
+  causer_type varchar(255) [null, note: "polymorphic"]
+  causer_id bigint [null]
+  properties json
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table blind_indexes {
+  id bigint [pk, increment]
+  table_name varchar(255)
+  column_name varchar(255)
+  blind_index varchar(255)
+  row_id bigint
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (table_name, row_id)
+  }
+}
+
+// ============================================
+// INDONESIA REGION (Laravolt)
+// ============================================
+
+Table indonesia_provinces {
+  id char(2) [pk]
+  name varchar(255)
+}
+
+Table indonesia_cities {
+  id char(4) [pk]
+  province_id char(2)
+  name varchar(255)
+}
+
+Table indonesia_districts {
+  id char(6) [pk]
+  city_id char(4)
+  name varchar(255)
+}
+
+Table indonesia_villages {
+  id char(10) [pk]
+  district_id char(6)
+  name varchar(255)
+}
+
+// ============================================
+// LARAVEL DEFAULT TABLES
+// ============================================
+
+Table sessions {
+  id varchar(255) [pk]
+  user_id bigint [null]
+  ip_address varchar(45) [null]
+  user_agent text [null]
+  payload text
+  last_activity int
+}
+
+Table cache {
+  key varchar(255) [pk]
+  value text
+  expiration int
+}
+
+Table jobs {
+  id bigint [pk, increment]
+  queue varchar(255)
+  payload text
+  attempts smallint
+  reserved_at int [null]
+  available_at int
+  created_at int
+
+  indexes {
+    (queue)
+  }
+}
+
+Table job_batches {
+  id varchar(255) [pk]
+  name varchar(255)
+  total_jobs int
+  pending_jobs int
+  failed_jobs int
+  failed_job_ids text
+  options text [null]
+  created_at int
+  finished_at int [null]
+}
+
+Table password_reset_tokens {
+  email varchar(255) [pk]
+  token varchar(255)
+  created_at timestamp [null]
+}
+
+// ============================================
+// RELATIONSHIPS
+// ============================================
+
+Ref: companies.id > branches.company_id
+Ref: companies.id > users.company_id
+Ref: branches.id > departments.branch_id
+Ref: departments.id > positions.department_id
+Ref: positions.id > employees.position_id
+Ref: users.id - employees.user_id
+Ref: employees.id > employees.parent_id
+Ref: companies.id > employees.company_id
+Ref: branches.id > employees.branch_id
+Ref: departments.id > employees.department_id
+Ref: employees.id > attendances.employee_id
+Ref: shifts.id > attendances.shift_id
+Ref: employees.id > leaves.employee_id
+Ref: leave_types.id > leaves.leave_type_id
+Ref: employees.id > leave_balances.employee_id
+Ref: leave_types.id > leave_balances.leave_type_id
+Ref: employees.id > overtimes.employee_id
+Ref: attendances.id > overtimes.attendance_id
+Ref: employees.id > payrolls.employee_id
+Ref: payrolls.id > payroll_items.payroll_id
+Ref: payrolls.id > payroll_adjustments.payroll_id
+Ref: users.id > payroll_adjustments.created_by
+Ref: employees.id > approvals.approver_id
+Ref: employees.id > attendances.approved_late_by
+Ref: employees.id > family_details.employee_id
+Ref: employees.id > devices.employee_id
+Ref: shifts.id > shift_schedules.shift_id
+Ref: employees.id > shift_schedules.employee_id
+Ref: employees.id > loans.employee_id
+Ref: users.id > loans.created_by
+Ref: loans.id > loan_installments.loan_id
+Ref: payrolls.id > loan_installments.payroll_id
+Ref: reimbursement_categories.id > reimbursements.category_id
+Ref: employees.id > reimbursements.employee_id
+Ref: payrolls.id > reimbursements.payroll_id
+Ref: companies.id > reimbursement_categories.company_id
+Ref: companies.id > assets.company_id
+Ref: assets.id > asset_handovers.asset_id
+Ref: employees.id > asset_handovers.employee_id
+Ref: employees.id > performance_reviews.employee_id
+Ref: employees.id > performance_reviews.reviewer_id
+Ref: companies.id > company_settings.company_id
+Ref: indonesia_provinces.id > employees.province_id
+Ref: indonesia_provinces.id > indonesia_cities.province_id
+Ref: indonesia_cities.id > indonesia_districts.city_id
+Ref: indonesia_districts.id > indonesia_villages.district_id

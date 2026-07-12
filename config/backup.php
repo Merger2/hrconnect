@@ -24,22 +24,24 @@ return [
         'source' => [
             'files' => [
                 'include' => [
-                    base_path(),
-                    storage_path(),
+                    // DB-only backup to avoid ZipArchive 1.11.4 / PHP 8.5 bug
+                    // File backups can be done via filesystem snapshots
                 ],
 
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
                     base_path('.git'),
+                    base_path('public/storage'),
                     storage_path('framework'),
                     storage_path('app/backup-temp'),
                     storage_path('app/backups'),
+                    storage_path('logs'),
                 ],
 
                 'follow_links' => false,
 
-                'ignore_unreadable_directories' => false,
+                'ignore_unreadable_directories' => true,
 
                 'relative_path' => base_path(),
             ],
@@ -77,7 +79,7 @@ return [
 
         'encryption' => 'default',
 
-        'verify_backup' => true,
+        'verify_backup' => false,
 
         'tries' => 2,
 
