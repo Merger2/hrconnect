@@ -48,10 +48,10 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
+    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, face enrollment, full role coverage)
     {
       name: 'chromium-employee',
-      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee)\.spec\.ts/,
+      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee|face-enrollment|face-recognition-api)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
