@@ -43,6 +43,7 @@ class CheckPasswordExpired
         'password.request',
         'password.reset',
         'security.edit',
+        'profile.edit',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -71,7 +72,7 @@ class CheckPasswordExpired
             }
 
             return redirect()
-                ->route('security.edit')
+                ->route('profile.edit')
                 ->with('warning', 'Ini pertama kali Anda login. Silakan ganti password sekarang.');
         }
 
@@ -85,7 +86,7 @@ class CheckPasswordExpired
 
         // Expired → redirect ke security.edit dengan warning
         return redirect()
-            ->route('security.edit')
+            ->route('profile.edit')
             ->with('warning', "Password Anda sudah kedaluwarsa (lebih dari {$expiryDays} hari). Silakan ganti password sekarang demi keamanan akun.");
     }
 }

@@ -79,6 +79,7 @@ test('create page renders', function () {
 test('can create a branch via form', function () {
     Livewire::actingAs($this->user)
         ->test(BranchForm::class)
+        ->set('companyId', (string) $this->company->id)
         ->set('name', 'Test Branch')
         ->call('save')
         ->assertHasNoErrors()

@@ -10,6 +10,7 @@ use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Jobs\ProcessKnowledgeBaseEmbedding;
 use App\Models\KnowledgeBase;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Laravel\Ai\Streaming\Events\TextDelta;
 use Throwable;
 
 /**
@@ -38,7 +38,6 @@ use Throwable;
 class KnowledgeBaseService
 {
     public function __construct(
-        protected GeminiClient $gemini,
         protected EmbeddingService $embedding,
     ) {}
 
@@ -47,16 +46,16 @@ class KnowledgeBaseService
      *
      * Yields SSE-compatible arrays for StreamedResponse.
      * Flow: embed question → vector search top-5 → stream via agent.
-     * No pg_trgm fallback in streaming mode.
      *
+     * @param  User|null  $user  User to associate conversation with (for memory persistence)
      * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array}, void, void>
      */
-    public function chatStream(string $question, ?string $conversationId = null): \Generator
+    public function chatStream(string $question, ?string $conversationId = null, ?User $user = null): \Generator
     {
         $question = trim($question);
 
         try {
-            $queryEmbedding = $this->gemini->embed($question);
+            $queryEmbedding = $this->embedding->embed($question);
             $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
 
             $context = $chunks->map(fn (KnowledgeBase $kb) => [
@@ -74,35 +73,56 @@ PERTANYAAN: {$question}
 JAWABAN:
 PROMPT;
 
-            $agent = new HrKnowledgeBaseAgent;
-            $streamable = $agent->stream($agentPrompt);
+            $agent = $this->prepareAgent($user, $conversationId);
+            // Streaming structured output is not supported by Gemini,
+            // so we use sync prompt() and yield the full answer as a single event.
+            $result = $agent->prompt($agentPrompt);
 
-            $responseConversationId = $conversationId ?? (string) Str::uuid();
+            yield ['text' => $result['answer'] ?? ''];
+
+            $newConversationId = $result->conversationId ?? $conversationId ?? (string) Str::uuid();
+
             $sources = $chunks->map(fn (KnowledgeBase $kb) => [
                 'id' => $kb->id,
                 'title' => $kb->title,
                 'snippet' => mb_substr($kb->content, 0, 200),
             ])->all();
 
-            $currentResponse = null;
-            $streamable->then(function ($response) use (&$currentResponse) {
-                $currentResponse = $response;
-            });
-
-            foreach ($streamable as $event) {
-                if ($event instanceof TextDelta) {
-                    yield ['text' => $event->delta];
-                }
-            }
-
             yield [
-                'conversation_id' => $responseConversationId,
+                'conversation_id' => $newConversationId,
                 'sources' => $sources,
             ];
         } catch (Throwable $e) {
-            Log::warning('Gemini RAG streaming gagal', [
+            Log::warning('Gemini RAG streaming gagal, fallback ke pg_trgm', [
                 'error' => $e->getMessage(),
             ]);
+
+            try {
+                $chunks = $this->embedding->searchByKeyword($question, topK: 5);
+
+                if ($chunks->isNotEmpty()) {
+                    $snippets = $chunks->map(
+                        fn (KnowledgeBase $kb) => "- {$kb->title}: ".mb_substr($kb->content, 0, 150)
+                    )->implode("\n");
+
+                    yield ['text' => "Sistem AI sedang offline. Berikut hasil pencarian keyword yang mungkin relevan:\n\n{$snippets}"];
+
+                    yield [
+                        'conversation_id' => $conversationId ?? (string) Str::uuid(),
+                        'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
+                            'id' => $kb->id,
+                            'title' => $kb->title,
+                            'snippet' => mb_substr($kb->content, 0, 200),
+                        ])->all(),
+                    ];
+
+                    return;
+                }
+            } catch (Throwable $fallbackError) {
+                Log::error('pg_trgm fallback juga gagal', [
+                    'error' => $fallbackError->getMessage(),
+                ]);
+            }
 
             yield ['text' => 'Maaf, layanan AI sedang tidak tersedia. Silakan coba lagi nanti.'];
             yield ['conversation_id' => $conversationId ?? (string) Str::uuid()];
@@ -117,9 +137,10 @@ PROMPT;
      * 3. Generate response via Gemini 2.5 Flash dengan context
      * 4. Fallback ke pg_trgm kalau Gemini fail
      *
-     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string}
+     * @param  User|null  $user  User untuk conversation memory
+     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string, conversation_id?: string}
      */
-    public function chat(string $question): array
+    public function chat(string $question, ?string $conversationId = null, ?User $user = null): array
     {
         $question = trim($question);
 
@@ -129,7 +150,7 @@ PROMPT;
 
         try {
             // Tier 1: vector search via Gemini embedding
-            $queryEmbedding = $this->gemini->embed($question);
+            $queryEmbedding = $this->embedding->embed($question);
             $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
 
             $context = $chunks->map(fn (KnowledgeBase $kb) => [
@@ -147,7 +168,7 @@ PERTANYAAN: {$question}
 JAWABAN:
 PROMPT;
 
-            $agent = new HrKnowledgeBaseAgent;
+            $agent = $this->prepareAgent($user, $conversationId);
             $result = $agent->prompt($agentPrompt);
 
             return [
@@ -162,22 +183,41 @@ PROMPT;
                 'confidence' => $result['confidence'] ?? 'low',
                 'fallback' => false,
                 'model' => config('services.gemini.model'),
+                'conversation_id' => $result->conversationId ?? $conversationId,
             ];
         } catch (Throwable $e) {
             Log::warning('Gemini RAG flow gagal, fallback ke pg_trgm', [
                 'error' => $e->getMessage(),
             ]);
 
-            return $this->fallbackKeywordSearch($question);
+            return $this->fallbackKeywordSearch($question, $conversationId);
         }
+    }
+
+    /**
+     * Prepare the agent with optional conversation memory.
+     */
+    protected function prepareAgent(?User $user, ?string $conversationId = null): HrKnowledgeBaseAgent
+    {
+        $agent = new HrKnowledgeBaseAgent;
+
+        if ($user) {
+            if ($conversationId) {
+                return $agent->continue($conversationId, as: $user);
+            }
+
+            return $agent->forUser($user);
+        }
+
+        return $agent;
     }
 
     /**
      * Fallback kalau Gemini API down — pg_trgm keyword search.
      *
-     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string}
+     * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string, conversation_id?: string}
      */
-    protected function fallbackKeywordSearch(string $question): array
+    protected function fallbackKeywordSearch(string $question, ?string $conversationId = null): array
     {
         $chunks = $this->embedding->searchByKeyword($question, topK: 5);
 
@@ -188,6 +228,7 @@ PROMPT;
                 'confidence' => 'low',
                 'fallback' => true,
                 'model' => 'pg_trgm',
+                'conversation_id' => $conversationId,
             ];
         }
 
@@ -206,6 +247,7 @@ PROMPT;
             'confidence' => 'low',
             'fallback' => true,
             'model' => 'pg_trgm',
+            'conversation_id' => $conversationId,
         ];
     }
 

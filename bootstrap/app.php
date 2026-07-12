@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\CheckPasswordExpired;
-use App\Http\Middleware\EnsureSecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             $modules = [
                 'attendance', 'employee', 'leave', 'overtime', 'payroll', 'approval',
-                'knowledge-base', 'asset', 'loan', 'reimbursement', 'master-data',
+                'knowledge-base', 'asset', 'loan', 'reimbursement', 'master-data', 'admin',
             ];
             foreach ($modules as $module) {
                 $path = base_path("routes/{$module}.php");

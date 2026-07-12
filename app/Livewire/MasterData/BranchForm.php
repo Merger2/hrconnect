@@ -28,17 +28,15 @@ class BranchForm extends Component
 
     public ?Branch $branch = null;
 
-    public int $companyId = 0;
+    public string $companyId = '';
 
     public function mount(?Branch $branch = null): void
     {
-        $this->companyId = (int) (Company::first()?->id ?? 0);
-
         if ($branch?->exists) {
             Gate::authorize('update', $branch);
 
             $this->branch = $branch;
-            $this->companyId = (int) $branch->company_id;
+            $this->companyId = (string) $branch->company_id;
             $this->name = $branch->name;
             $this->address = $branch->address ?? '';
             $this->latitude = $branch->latitude;
@@ -55,6 +53,7 @@ class BranchForm extends Component
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('branches')->ignore($this->branch?->id)],
+            'companyId' => ['required', 'exists:companies,id'],
             'address' => ['nullable', 'string', 'max:500'],
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
@@ -81,7 +80,7 @@ class BranchForm extends Component
         }
 
         $data = [
-            'company_id' => $this->companyId,
+            'company_id' => (int) $this->companyId,
             'name' => trim($this->name),
             'address' => $this->address ? trim($this->address) : null,
             'is_main' => (bool) $this->isMain,
@@ -106,6 +105,8 @@ class BranchForm extends Component
 
     public function render()
     {
-        return view('livewire.master-data.branch-form');
+        return view('livewire.master-data.branch-form', [
+            'companies' => Company::orderBy('name')->pluck('name', 'id'),
+        ]);
     }
 }

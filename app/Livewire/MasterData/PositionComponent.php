@@ -6,6 +6,7 @@ namespace App\Livewire\MasterData;
 
 use App\Models\Department;
 use App\Models\Position;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -133,6 +134,7 @@ class PositionComponent extends Component
         if ($pos->employees()->count() > 0) {
             $this->dispatch('toast', variant: 'error', text: __('Jabatan tidak bisa dihapus karena masih digunakan oleh pegawai.'));
             $this->confirmingDeletion = false;
+
             return;
         }
 
@@ -173,7 +175,7 @@ class PositionComponent extends Component
             ->with('department.branch')
             ->when(filled($this->search), function ($q) {
                 $search = '%'.trim($this->search).'%';
-                $q->where('name', \Illuminate\Support\Facades\DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
+                $q->where('name', DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
             })
             ->orderBy('name')
             ->paginate($this->perPage);

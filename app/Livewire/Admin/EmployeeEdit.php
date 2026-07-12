@@ -3,9 +3,17 @@
 namespace App\Livewire\Admin;
 
 use App\Livewire\Forms\EmployeeForm;
+use App\Models\Branch;
+use App\Models\Company;
+use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Position;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Laravolt\Indonesia\Models\City;
+use Laravolt\Indonesia\Models\District;
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\Village;
 use Livewire\Component;
 
 class EmployeeEdit extends Component
@@ -112,27 +120,36 @@ class EmployeeEdit extends Component
 
     public function render()
     {
-        $provinces = \Laravolt\Indonesia\Models\Province::orderBy('name')->get();
+        $provinces = Province::orderBy('name')->get();
 
         $cities = collect();
         if ($this->form->province_id) {
-            $cities = \Laravolt\Indonesia\Models\City::where('province_id', $this->form->province_id)->orderBy('name')->get();
+            $province = Province::find($this->form->province_id);
+            $cities = $province
+                ? City::where('province_code', $province->code)->orderBy('name')->get()
+                : collect();
         }
 
         $districts = collect();
         if ($this->form->city_id) {
-            $districts = \Laravolt\Indonesia\Models\District::where('city_id', $this->form->city_id)->orderBy('name')->get();
+            $city = City::find($this->form->city_id);
+            $districts = $city
+                ? District::where('city_code', $city->code)->orderBy('name')->get()
+                : collect();
         }
 
         $villages = collect();
         if ($this->form->district_id) {
-            $villages = \Laravolt\Indonesia\Models\Village::where('district_id', $this->form->district_id)->orderBy('name')->get();
+            $district = District::find($this->form->district_id);
+            $villages = $district
+                ? Village::where('district_code', $district->code)->orderBy('name')->get()
+                : collect();
         }
 
-        $companies = \App\Models\Company::orderBy('name')->get(['id', 'name']);
-        $branches = \App\Models\Branch::orderBy('name')->get(['id', 'name']);
-        $departments = \App\Models\Department::orderBy('name')->get(['id', 'name']);
-        $positions = \App\Models\Position::orderBy('name')->get(['id', 'name']);
+        $companies = Company::orderBy('name')->get(['id', 'name']);
+        $branches = Branch::orderBy('name')->get(['id', 'name']);
+        $departments = Department::orderBy('name')->get(['id', 'name']);
+        $positions = Position::orderBy('name')->get(['id', 'name']);
         $managers = Employee::where('id', '!=', $this->employee->id)
             ->whereHas('user', fn ($q) => $q->whereNotNull('id'))
             ->orderBy('full_name')

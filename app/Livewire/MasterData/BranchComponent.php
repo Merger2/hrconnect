@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\MasterData;
 
 use App\Models\Branch;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -74,7 +75,7 @@ class BranchComponent extends Component
             'branches' => Branch::query()
                 ->when(filled($this->search), function ($q) {
                     $search = '%'.trim($this->search).'%';
-                    $q->where('name', \Illuminate\Support\Facades\DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
+                    $q->where('name', DB::getDriverName() === 'pgsql' ? 'ilike' : 'like', $search);
                 })
                 ->orderBy('name')
                 ->paginate($this->perPage),

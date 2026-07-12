@@ -89,7 +89,8 @@
                 <div class="grid gap-5 sm:grid-cols-2">
                     <div>
                         <x-forms.label for="employee_number">{{ __('Nomor Karyawan') }}</x-forms.label>
-                        <x-forms.input wire:model="form.employee_number" id="employee_number" required class="mt-1.5 w-full" placeholder="{{ __('EMP-001') }}" />
+                        <x-forms.input wire:model="form.employee_number" id="employee_number" readonly class="mt-1.5 w-full cursor-not-allowed bg-surface-container-highest" />
+                        <p class="mt-0.5 text-xs text-on-surface-variant/60">{{ __('Dibuat otomatis') }}</p>
                         <x-forms.error name="form.employee_number" />
                     </div>
                     <div>

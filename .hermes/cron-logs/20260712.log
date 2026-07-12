@@ -1,0 +1,6 @@
+[0;32m[2026-07-12 15:43:31][0m INFO: === HRConnect Autonomous Dev Cycle Started ===
+[0;34m[2026-07-12 15:43:31][0m AGENT: Agent orchestration enabled (FE/BE/QA)
+[0;32m[2026-07-12 15:43:31][0m INFO: Processing: [FE_FACE_IMPORT] Fix face-api.js import
+[0;34m[2026-07-12 15:43:31][0m AGENT: Task type: frontend
+[0;34m[2026-07-12 15:43:31][0m AGENT: Routing to agent: frontend → FE-AGENT.md
+[0;32m[2026-07-12 15:43:31][0m INFO: Running OpenCode: FE_FACE_IMPORT
