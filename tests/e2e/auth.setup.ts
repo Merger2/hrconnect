@@ -10,6 +10,8 @@ if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
 const employeeFile = path.join(authDir, 'employee.json');
 const hrFile = path.join(authDir, 'hr.json');
 const adminFile = path.join(authDir, 'admin.json');
+const managerFile = path.join(authDir, 'manager.json');
+const financeFile = path.join(authDir, 'finance.json');
 
 setup('authenticate as employee', async ({ page }) => {
   await page.goto('/login');
@@ -36,4 +38,22 @@ setup('authenticate as admin', async ({ page }) => {
   await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
   await page.context().storageState({ path: adminFile });
+});
+
+setup('authenticate as manager', async ({ page }) => {
+  await page.goto('/login');
+  await page.locator('input[name="email"]').fill('manager@hrconnect.test');
+  await page.locator('input[name="password"]').fill('password');
+  await page.locator('button[type="submit"]').click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+  await page.context().storageState({ path: managerFile });
+});
+
+setup('authenticate as finance', async ({ page }) => {
+  await page.goto('/login');
+  await page.locator('input[name="email"]').fill('finance@hrconnect.test');
+  await page.locator('input[name="password"]').fill('password');
+  await page.locator('button[type="submit"]').click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+  await page.context().storageState({ path: financeFile });
 });

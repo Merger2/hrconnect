@@ -31,10 +31,12 @@ class E2eTestSeeder extends Seeder
         $employeeRole = Role::where('name', 'employee')->first();
 
         $testUsers = [
-            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'password'],
             ['email' => 'employee@hrconnect.test',  'name' => 'Test Employee', 'role' => 'employee',   'password' => 'password'],
             ['email' => 'hr@hrconnect.test',        'name' => 'Test HR',       'role' => 'hr-manager', 'password' => 'password'],
+            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'password'],
             ['email' => 'admin@hrconnect.local',    'name' => 'Super Admin',   'role' => 'super-admin', 'password' => 'ChangeMe!2026'],
+            ['email' => 'manager@hrconnect.test',   'name' => 'Test Manager',  'role' => 'manager',    'password' => 'password'],
+            ['email' => 'finance@hrconnect.test',   'name' => 'Test Finance',  'role' => 'finance',    'password' => 'password'],
         ];
 
         foreach ($testUsers as $data) {

@@ -48,10 +48,10 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat, loans, overtime)
+    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
     {
       name: 'chromium-employee',
-      testMatch: /(clock-in|rag-chat|loans|overtime)\.spec\.ts/,
+      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -61,10 +61,10 @@ export default defineConfig({
       },
     },
 
-    // HR-authenticated tests (face enrollment, master data)
+    // HR-authenticated tests (face enrollment, master data, full role coverage)
     {
       name: 'chromium-hr',
-      testMatch: /(face-enrollment|master-data)\.spec\.ts/,
+      testMatch: /(face-enrollment|master-data|role-hr)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -74,7 +74,33 @@ export default defineConfig({
       },
     },
 
-    // Admin-authenticated tests (employee directory, payroll, approval, reimbursement)
+    // Manager-authenticated tests
+    {
+      name: 'chromium-manager',
+      testMatch: /role-manager\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'manager.json'),
+      },
+    },
+
+    // Finance-authenticated tests
+    {
+      name: 'chromium-finance',
+      testMatch: /role-finance\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'finance.json'),
+      },
+    },
+
+    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement)
     {
       name: 'chromium-admin',
       testMatch: /(employee|payroll-settings|reimbursement|approval)\.spec\.ts/,
