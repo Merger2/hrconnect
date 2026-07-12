@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "created_at": "2026-07-11T12:59:00Z",
+  "metrics": {
+    "FE_FACE_IMPORT": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "FE_FACE_MISMATCH": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "E2E_FACE_ENROLL": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "FE_CLOCK_IN_UI": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "E2E_CLOCK_IN": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "BE_RAG_DEADCODE": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "E2E_RAG_CHAT": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "BE_LOAN_TRAIT": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "BE_PPH21_FIX": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    },
+    "UNIT_TESTS": {
+      "status": "pending",
+      "attempts": 0,
+      "passed_tests": 0,
+      "failed_tests": 0
+    }
+  }
+}

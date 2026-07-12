@@ -144,7 +144,7 @@ $r = $result ?: [
                 const totalPotongan = potonganAlfa + potonganPph21 + potonganBpjs;
                 const bersih = Math.max(0, bruto - totalPotongan);
 
-                const fmt = (v) => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+                const fmt = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(v));
 
                 const el = (id) => document.getElementById(id);
                 if (el('calc-gaji-pokok')) el('calc-gaji-pokok').textContent = fmt(gajiPokok);

@@ -15,15 +15,15 @@ export default function () {
         async fetchPayrolls() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/payroll?year=${this.year}&per_page=50`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/payroll?year=${this.year}&per_page=50`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.payrolls = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data payroll' });
+            }
             finally { this.loading = false; }
         },
 
@@ -35,7 +35,8 @@ export default function () {
         },
 
         formatCurrency(val) {
-            return 'Rp ' + (val || 0).toLocaleString('id-ID');
+            if (val === null || val === undefined) return '-';
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
         },
     };
 }

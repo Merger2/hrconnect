@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Services\FaceRecognitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeResource extends JsonResource
 {
@@ -27,6 +28,7 @@ class EmployeeResource extends JsonResource
             'employment_type' => $this->employment_type?->value,
             'salary_type' => $this->salary_type?->value,
             'address_detail' => $this->address_detail,
+            'photo_url' => $this->photo ? Storage::url($this->photo) : null,
             'face_registered' => app(FaceRecognitionService::class)->hasFaceEnrolled($this->resource),
             'pin_set' => ! empty($this->pin),
             'position' => $this->whenLoaded('position', fn () => $this->position ? [

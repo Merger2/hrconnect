@@ -464,38 +464,7 @@ Receipt/Proof:
 
 ## 10. GOOGLE OAUTH TOKEN EXPIRED
 
-### Skenario: Token Google OAuth Expired Saat Session Aktif
-**Trigger:** User login via Google, token access expired, session masih aktif
-
-**Handling:**
-```
-1. Auto refresh token secara silent (background)
-2. Jika refresh berhasil → user tidak sadar, session berlanjut
-3. Jika refresh gagal (revoked, account disabled) → redirect ke login ulang
-4. Error message: "Sesi Anda telah berakhir. Silakan login kembali."
-5. Jangan show error teknis (OAuth, token, expired) ke user
-6. Data session tetap aman, tidak ada data leak
-```
-
-**Kode Implementasi:**
-```php
-// app/Http/Middleware/GoogleOAuthRefresh.php
-public function handle(Request $request, Closure $next)
-{
-    $user = $request->user();
-
-    if ($user && $user->google_id) {
-        try {
-            $token = $this->refreshGoogleToken($user);
-            // Token berhasil di-refresh, session tetap aktif
-        } catch (Exception $e) {
-            // Refresh gagal → logout dan redirect ke login
-            auth()->logout();
-            $request->session()->invalidate();
-            return redirect()->route('login')
-                ->with('info', 'Sesi Anda telah berakhir. Silakan login kembali.');
-        }
-    }
+> **TIDAK DIIMPLEMENTASI —** Google OAuth tidak digunakan di HRConnect. Verifikasi email via Gmail SMTP sebagai gantinya. Lihat error handling SMTP di §6.
 
     return $next($request);
 }
@@ -571,7 +540,7 @@ audit:       Payroll changes, role changes, approvals
 | Mail server down | In-app notification | 3x | ERROR | Notification di bell |
 | Database down | Maintenance page | 0 | CRITICAL | "Sistem maintenance" |
 | Neon cold start | Warm-up cron | 0 | WARNING | Skeleton loader (UI) |
-| Google OAuth expired | Refresh token | 1x | WARNING | "Sesi berakhir, login ulang" |
+| Google OAuth expired | — (tidak dipakai) | — | — | — |
 
 ---
 

@@ -48,11 +48,18 @@ class KnowledgeBaseController extends Controller
 
     #[Endpoint(title: 'Chat', description: 'Ask a question against the knowledge base (RAG with Gemini + pgvector + pg_trgm fallback). Flow: Knowledge Base (usage).')]
     #[BodyParameter(name: 'question', description: 'Question text (min 5, max 500 chars)', required: true, type: 'string')]
+    #[BodyParameter(name: 'conversation_id', description: 'Optional conversation ID to continue existing chat', required: false, type: 'string')]
     public function chat(ChatRequest $request): JsonResponse
     {
         $this->authorize('chat', KnowledgeBase::class);
 
-        $result = $this->kbService->chat($request->validated('question'));
+        $data = $request->validated();
+
+        $result = $this->kbService->chat(
+            question: $data['question'],
+            conversationId: $data['conversation_id'] ?? null,
+            user: $request->user(),
+        );
 
         return response()->json([
             'status' => 'success',
@@ -67,8 +74,12 @@ class KnowledgeBaseController extends Controller
 
         $data = $request->validated();
 
-        return response()->stream(function () use ($data) {
-            foreach ($this->kbService->chatStream($data['question'], $data['conversation_id'] ?? null) as $event) {
+        return response()->stream(function () use ($data, $request) {
+            foreach ($this->kbService->chatStream(
+                question: $data['question'],
+                conversationId: $data['conversation_id'] ?? null,
+                user: $request->user(),
+            ) as $event) {
                 echo 'data: '.json_encode($event)."\n\n";
                 ob_flush();
                 flush();

@@ -31,7 +31,7 @@ C4Deployment
                 component "Tailwind CSS v4 (Styling)"
                 component "Laravel Fortify (Authentication)"
                 component "Spatie Permission (RBAC)"
-                component "Google OAuth (SSO)"
+                component "SMTP Email"
             }
         }
         
@@ -104,10 +104,10 @@ C4Deployment
             }
         }
         
-        node "Google OAuth (Google Workspace)" as GoogleOAuth {
-            artifact "SSO Authentication" as GoogleSSO {
-                component "OAuth 2.0 Flow"
-                component "Token Verification"
+        node "SMTP Email" as EmailService2 {
+            artifact "Email Service" as EmailArt2 {
+                component "Mailtrap (Dev)"
+                component "SES/Mailgun (Prod)"
             }
         }
         
@@ -138,11 +138,8 @@ C4Deployment
     PHPRuntime -->|12. HTTPS API Call<br/>RAG Query + Context| Gemini
     Gemini -->|13. AI Response + Sources| PHPRuntime
     
-    WebServer -->|14. OAuth Callback<br/>Google SSO| GoogleOAuth
-    GoogleOAuth -->|15. Token Validation| WebServer
-    
-    PHPRuntime -->|16. SMTP/SendGrid<br/>Email Notifications| EmailService
-    EmailService -->|17. Email Delivery| PWA
+    PHPRuntime -->|14. SMTP<br/>Email Notifications| EmailService2
+    EmailService2 -->|15. Email Delivery| PWA
     
     PHPRuntime -->|18. File Storage<br/>PDF Payslips, PDF KnowledgeBase| Storage
     
@@ -178,7 +175,7 @@ flowchart TB
         FluxUI[Flux UI<br/>Component Library]
         Fortify[Laravel Fortify<br/>Authentication]
         Spatie[Spatie Permission<br/>RBAC]
-        GoogleSSO[Google OAuth<br/>SSO Integration]
+        EmailService2[SMTP Email<br/>Mail Service]
         
         Laravel --> Livewire
         Laravel --> FluxUI
@@ -219,7 +216,7 @@ flowchart TB
     subgraph "External APIs"
         OA[Gemini Embedding API<br/>text-embedding-004<br/>768D embedding]
         GM[Gemini 2.5 Flash API<br/>RAG Response<br/>Context + Query]
-        GO[Google OAuth<br/>SSO Workspace]
+        SMTP[SMTP<br/>Email Provider]
         EM[Mailtrap/SES<br/>Email Service]
     end
     
@@ -300,8 +297,7 @@ flowchart LR
     subgraph "External Services"
         OA[Gemini Embedding API<br/>text-embedding-004]
         GM[Gemini 2.5 Flash API<br/>LLM]
-        GO[Google OAuth<br/>SSO]
-        EM[Email Service<br/>SMTP]
+        EM[SMTP<br/>Email Provider]
     end
     
     %% Client to Application
@@ -389,7 +385,7 @@ flowchart LR
 |-------------|--------|-------------|----------------|
 | Gemini Embedding API | PDF Embedding | text-embedding-004, 768D | PRD 13.1 |
 | Gemini 2.5 Flash | RAG LLM | Context + Query processing | PRD 13.1 |
-| Google OAuth | SSO Workspace | OAuth 2.0, token verification | PRD 4.1 |
+| — | — | (Google OAuth tidak digunakan) | — |
 | Mailtrap/SES/Mailgun | Email | SMTP, In-App + Email notifications | PRD 15.3 |
 
 ### 4.4 PWA Client (Employee)
@@ -453,8 +449,7 @@ MAIL_USERNAME=mailtrap_user
 MAIL_PASSWORD=mailtrap_pass
 
 GEMINI_API_KEY=AIzaSyxxxxxxxxxxxxxxxx
-GOOGLE_CLIENT_ID=521tech.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=google_secret
+-- GOOGLE_CLIENT_ID=xxx — TIDAK DIGUNAKAN
 
 CIPHERSWEET_SECRET_KEY=secret_key_32_bytes
 ```
@@ -475,7 +470,7 @@ CIPHERSWEET_SECRET_KEY=secret_key_32_bytes
 
 | Item | Configuration | PRD Reference |
 |------|---------------|----------------|
-| Login Methods | Email+Password, Google OAuth (SSO) | PRD 4.1 |
+| Login Methods | Email+Password, 2FA TOTP | PRD 4.1 |
 | 2FA | TOTP (Optional) | PRD 4.1 |
 | Password Policy | Min 8 chars, uppercase+lowercase+number | PRD 4.2 |
 | Session Timeout | 120 minutes (2 hours) idle | PRD 4.3 |
@@ -505,7 +500,7 @@ CIPHERSWEET_SECRET_KEY=secret_key_32_bytes
 7. **Approval Workflow**: 2 level (Manager L1 → HR Manager L2) (PRD 12.1)
 8. **Cron Jobs**: attendance:detect-alpha (23:59), leave:reset-quota (Jan 1) (PRD 16)
 9. **PWA Requirements**: Mobile-first, bottom nav, face-api.js, GPS (PRD 23)
-10. **Google OAuth**: SSO via Google Workspace (PRD 4.1)
+10. — (Google OAuth tidak digunakan)
 11. **Neon PostgreSQL**: Cloud database dengan pgvector, pg_trgm, pgcrypto (PRD 2)
 12. **CipherSweet**: Enkripsi NIK, phone, NPWP dengan blind index (PRD 17.1)
 13. **E-Payslip**: Generate sekali saat publish, streaming download (PRD 11.8)

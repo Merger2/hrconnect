@@ -90,7 +90,7 @@ Lapisan aplikasi mengandung logika bisnis spesifik use-case dan koordinasi alira
 Lapisan domain merepresentasikan inti bisnis sistem. Mencakup Models (29+ Eloquent models dengan relasi dan logika domain), Enums (33 PHP 8.1 backed enums untuk status dan klasifikasi), Traits/Concerns (Approvable, ManagesWorkDays, PasswordValidationRules, ProfileValidationRules), dan Observers (6 observer class untuk event siklus hidup model).
 
 **4. Infrastructure Layer**
-Lapisan infrastruktur menyediakan dukungan teknis untuk lapisan di atasnya. Mencakup Database (PostgreSQL 15+ dengan ekstensi pgvector, pg_trgm, pgcrypto), Queue (database driver dengan 2 queue: payroll_high dan default), Cache (database driver — tanpa Redis, Cache::tags() tidak didukung), File Storage (private disk untuk payslips, knowledgebase, face photos; public disk untuk avatars dan logo), serta External API Integration (Gemini API untuk embedding dan LLM, Google OAuth 2.0 untuk SSO, SMTP untuk email).
+Lapisan infrastruktur menyediakan dukungan teknis untuk lapisan di atasnya. Mencakup Database (PostgreSQL 15+ dengan ekstensi pgvector, pg_trgm, pgcrypto), Queue (database driver dengan 2 queue: payroll_high dan default), Cache (database driver — tanpa Redis, Cache::tags() tidak didukung), File Storage (private disk untuk payslips, knowledgebase, face photos; public disk untuk avatars dan logo), serta External API Integration (Gemini API untuk embedding dan LLM, SMTP untuk email).
 
 **Aliran Data:**
 ```
@@ -146,8 +146,6 @@ Sistem HRConnect terdiri dari komponen-komponen berikut berdasarkan deployment-d
 - Laravel 13 Application dengan Livewire 4, Flux UI 2, Tailwind CSS v4
 - Laravel Fortify untuk autentikasi (login, register, reset password, email verification, 2FA)
 - Spatie Permission untuk RBAC
-- Google OAuth untuk SSO
-
 **PHP Runtime (VPS)**
 - PayrollCalculatorService — kalkulasi gaji dan komponen payroll
 - AttendanceService — logika presensi dan validasi
@@ -175,7 +173,6 @@ Sistem HRConnect terdiri dari komponen-komponen berikut berdasarkan deployment-d
 
 **External APIs**
 - Gemini API: text-embedding-004 (768D embedding) + Gemini 2.5 Flash (RAG LLM)
-- Google OAuth 2.0: SSO dengan OAuth 2.0 authorization code flow
 - SMTP: Mailtrap (development), SES/Mailgun (production) untuk email
 
 **File Storage**
@@ -475,12 +472,6 @@ Akses file private hanya melalui authenticated routes dengan middleware otorisas
 - text-embedding-004: Model embedding 768 dimensi untuk KnowledgeBase RAG. Digunakan di ProcessKnowledgeBaseEmbedding job.
 - Gemini 2.5 Flash: LLM untuk RAG chat. Menerima context chunks dari pgvector + query user, mengembalikan jawaban dengan referensi sumber.
 
-**Google OAuth 2.0**:
-- Provider: Google Identity Services
-- Flow: OAuth 2.0 authorization code
-- Scopes: email, profile
-- Fitur: Login + auto-verifikasi email, link ke akun existing via email match
-
 **SMTP**:
 - Development: Mailtrap (email tidak benar-benar terkirim)
 - Production: SES (AWS) atau Mailgun
@@ -737,13 +728,6 @@ Interaksi pengguna dengan Livewire components mengikuti pola berikut:
 - Alpine.js integration: `x-on:wire:message` untuk menangani event Livewire dari Alpine.js
 
 #### 4.2.3 Integration Interfaces
-
-**Google OAuth Integration:**
-- Protocol: OAuth 2.0 Authorization Code Flow
-- Scopes: `openid`, `email`, `profile`
-- Callback URL: `{APP_URL}/auth/google/callback`
-- Flow: User klik "Login dengan Google" → redirect ke consent screen Google → callback dengan authorization code → tukar dengan access token → cari/create user berdasarkan email → login
-- Link akun: Jika email sudah terdaftar dengan password, user akan di-link (tidak dibuat duplikat)
 
 **Gemini API Integration:**
 - REST API via HTTPS dengan API key
@@ -1101,7 +1085,7 @@ Diagram deployment tersedia di `docs/architecture/deployment-diagram.md` yang me
 - PWA Client (Employee Device): Browser dengan face-api.js, Geolocation API, Service Worker
 - VPS Server: Nginx web server, PHP 8.5 Runtime, Queue Worker, Cron Scheduler, File Storage
 - Neon PostgreSQL Cloud: Database dengan pgvector, pg_trgm, pgcrypto
-- External APIs: Gemini API, Google OAuth, SMTP Email Service
+- External APIs: Gemini API, SMTP Email Service
 
 ### B. Class Diagram
 

@@ -1,125 +1,168 @@
 ---
 version: alpha
-name: Clay-design-analysis
-description: A vibrant claymation-meets-data interface for Clay.com (GTM data-orchestration platform). Anchors on white canvas with dark-navy primary CTAs, custom rounded display type, and saturated single-color feature cards — hot pink, deep teal, lavender, peach, ochre — that punctuate long-scroll explainer pages. Brand voltage comes from 3D-rendered claymation illustrations (mountains, characters, mascots) used as full-bleed hero artifacts and the bright multi-color card surfaces showing product UI fragments.
+name: HP-design-analysis
+description: An inspired interpretation of HP's design language — a white-paper enterprise-consumer system anchored by HP Electric Blue (`#024ad8`) as the lone signal CTA, near-black ink (`#1a1a1a`) for headlines, geometric Forma-DJR sans throughout, and angular blue-chevron decorations that nod to the HP wordmark's slashes. Cards round at 8–16px, photos sit in soft 16px frames, and dark navy slabs anchor the customer-story and "how can we help" closing bands.
 
 colors:
-  primary: "#0a0a0a"
-  primary-active: "#1f1f1f"
-  primary-disabled: "#e5e5e5"
-  ink: "#0a0a0a"
-  body: "#3a3a3a"
-  body-strong: "#1a1a1a"
-  muted: "#6a6a6a"
-  muted-soft: "#9a9a9a"
-  hairline: "#e5e5e5"
-  hairline-soft: "#f0f0f0"
-  canvas: "#fffaf0"
-  surface-soft: "#faf5e8"
-  surface-card: "#f5f0e0"
-  surface-strong: "#ebe6d6"
-  surface-dark: "#0a1a1a"
-  surface-dark-elevated: "#1a2a2a"
+  primary: "#024ad8"
+  primary-bright: "#296ef9"
+  primary-deep: "#0e3191"
+  primary-soft: "#c9e0fc"
   on-primary: "#ffffff"
-  on-dark: "#ffffff"
-  on-dark-soft: "#a0a0a0"
-  brand-pink: "#ff4d8b"
-  brand-teal: "#1a3a3a"
-  brand-lavender: "#b8a4ed"
-  brand-peach: "#ffb084"
-  brand-ochre: "#e8b94a"
-  brand-mint: "#a4d4c5"
-  brand-coral: "#ff6b5a"
-  success: "#22c55e"
-  warning: "#f59e0b"
-  error: "#ef4444"
+  # Full blue scale anchored at HP Electric Blue
+  blue-50: "#eef4fd"
+  blue-100: "#c9e0fc"
+  blue-200: "#a8c9f9"
+  blue-300: "#7aacf5"
+  blue-400: "#296ef9"
+  blue-500: "#1756e0"
+  blue-600: "#024ad8"
+  blue-700: "#0239b0"
+  blue-800: "#0e3191"
+  blue-900: "#0c1f5e"
+  blue-950: "#07103a"
+  # Coral scale — warm secondary accent
+  coral-50: "#fff0ec"
+  coral-100: "#ffe0d4"
+  coral-200: "#ffc3aa"
+  coral-300: "#ff9e7a"
+  coral-400: "#ff7b5a"
+  coral-500: "#f55a3a"
+  coral-600: "#d63f22"
+  coral-700: "#b32f15"
+  coral-800: "#932814"
+  coral-900: "#7a2616"
+  coral-950: "#421006"
+  ink: "#1a1a1a"
+  ink-deep: "#000000"
+  ink-soft: "#292929"
+  on-ink: "#ffffff"
+  canvas: "#ffffff"
+  paper: "#ffffff"
+  cloud: "#f7f7f7"
+  fog: "#e8e8e8"
+  steel: "#c2c2c2"
+  graphite: "#636363"
+  charcoal: "#3d3d3d"
+  hairline: "#e8e8e8"
+  hairline-strong: "#c2c2c2"
+  link: "#024ad8"
+  link-pressed: "#0e3191"
+  bloom-coral: "#ff7b5a"
+  bloom-rose: "#ffe0d4"
+  bloom-deep: "#d63f22"
+  bloom-wine: "#7a2616"
+  storm-mist: "#8ebdce"
+  storm-sea: "#7fadbe"
+  storm-deep: "#356373"
+  error: "#b3262b"
 
 typography:
-  display-xl:
-    fontFamily: "Plain Black, Inter, sans-serif"
+  display-xxl:
+    fontFamily: Forma DJR Micro
     fontSize: 72px
     fontWeight: 500
-    lineHeight: 1
-    letterSpacing: -2.5px
-  display-lg:
-    fontFamily: "Plain Black, Inter, sans-serif"
+    lineHeight: 1.0
+    letterSpacing: 0
+  display-xl:
+    fontFamily: Forma DJR Micro
     fontSize: 56px
     fontWeight: 500
-    lineHeight: 1.05
-    letterSpacing: -2px
-  display-md:
-    fontFamily: "Plain Black, Inter, sans-serif"
-    fontSize: 40px
+    lineHeight: 1.0
+    letterSpacing: 0
+  display-lg:
+    fontFamily: Forma DJR Micro
+    fontSize: 44px
     fontWeight: 500
-    lineHeight: 1.1
-    letterSpacing: -1px
-  display-sm:
-    fontFamily: "Plain Black, Inter, sans-serif"
+    lineHeight: 1.0
+    letterSpacing: 0
+  display-md:
+    fontFamily: Forma DJR Micro
     fontSize: 32px
     fontWeight: 500
-    lineHeight: 1.15
-    letterSpacing: -0.5px
-  title-lg:
-    fontFamily: "Inter, sans-serif"
-    fontSize: 24px
-    fontWeight: 600
-    lineHeight: 1.3
-    letterSpacing: -0.3px
-  title-md:
-    fontFamily: "Inter, sans-serif"
-    fontSize: 18px
-    fontWeight: 600
-    lineHeight: 1.4
+    lineHeight: 1.0
     letterSpacing: 0
-  title-sm:
-    fontFamily: "Inter, sans-serif"
-    fontSize: 16px
-    fontWeight: 600
-    lineHeight: 1.4
+  display-sm:
+    fontFamily: Forma DJR Micro
+    fontSize: 24px
+    fontWeight: 500
+    lineHeight: 1.17
+    letterSpacing: 0
+  display-xs:
+    fontFamily: Forma DJR Micro
+    fontSize: 20px
+    fontWeight: 500
+    lineHeight: 1.0
+    letterSpacing: 0
+  body-lg:
+    fontFamily: Forma DJR Micro
+    fontSize: 18px
+    fontWeight: 400
+    lineHeight: 1.33
     letterSpacing: 0
   body-md:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: Forma DJR Micro
     fontSize: 16px
     fontWeight: 400
-    lineHeight: 1.55
+    lineHeight: 1.38
     letterSpacing: 0
-  body-sm:
-    fontFamily: "Inter, sans-serif"
+  body-emphasis:
+    fontFamily: Forma DJR Micro
+    fontSize: 16px
+    fontWeight: 500
+    lineHeight: 1.38
+    letterSpacing: 0
+  caption-md:
+    fontFamily: Forma DJR Micro
     fontSize: 14px
     fontWeight: 400
-    lineHeight: 1.55
+    lineHeight: 1.5
     letterSpacing: 0
-  caption:
-    fontFamily: "Inter, sans-serif"
-    fontSize: 13px
-    fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: 0
-  caption-uppercase:
-    fontFamily: "Inter, sans-serif"
+  caption-sm:
+    fontFamily: Forma DJR Micro
     fontSize: 12px
-    fontWeight: 600
-    lineHeight: 1.4
-    letterSpacing: 1.5px
-  button:
-    fontFamily: "Inter, sans-serif"
-    fontSize: 14px
-    fontWeight: 600
-    lineHeight: 1
+    fontWeight: 400
+    lineHeight: 1.33
     letterSpacing: 0
-  nav-link:
-    fontFamily: "Inter, sans-serif"
+  caption-bold:
+    fontFamily: Forma DJR Micro
     fontSize: 14px
+    fontWeight: 700
+    lineHeight: 1.3
+    letterSpacing: 0
+  link-md:
+    fontFamily: Forma DJR Micro
+    fontSize: 16px
     fontWeight: 500
+    lineHeight: 1.38
+    letterSpacing: 0
+  button-md:
+    fontFamily: Forma DJR Micro
+    fontSize: 14px
+    fontWeight: 600
     lineHeight: 1.4
+    letterSpacing: 0.7px
+    textTransform: uppercase
+  button-sm:
+    fontFamily: Forma DJR Micro
+    fontSize: 12.6px
+    fontWeight: 700
+    lineHeight: 1.0
+    letterSpacing: 0.126px
+  price-md:
+    fontFamily: Forma DJR Micro
+    fontSize: 24px
+    fontWeight: 500
+    lineHeight: 1.17
     letterSpacing: 0
 
 rounded:
-  xs: 6px
-  sm: 8px
-  md: 12px
-  lg: 16px
-  xl: 24px
+  none: 0px
+  xs: 2px
+  sm: 3px
+  md: 4px
+  lg: 8px
+  xl: 16px
   pill: 9999px
   full: 9999px
 
@@ -128,123 +171,69 @@ spacing:
   xs: 8px
   sm: 12px
   md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 48px
-  section: 96px
+  lg: 20px
+  xl: 24px
+  xxl: 32px
+  section: 80px
 
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
+    typography: "{typography.button-md}"
     rounded: "{rounded.md}"
-    padding: 12px 20px
+    padding: 12px 24px
     height: 44px
-  button-primary-active:
-    backgroundColor: "{colors.primary-active}"
+  button-primary-pressed:
+    backgroundColor: "{colors.primary-deep}"
     textColor: "{colors.on-primary}"
-    rounded: "{rounded.md}"
   button-primary-disabled:
-    backgroundColor: "{colors.primary-disabled}"
-    textColor: "{colors.muted}"
+    backgroundColor: "{colors.steel}"
+    textColor: "{colors.on-primary}"
+  button-ink:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.button-md}"
     rounded: "{rounded.md}"
-  button-secondary:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.md}"
-    padding: 12px 20px
+    padding: 12px 24px
     height: 44px
-  button-on-color:
+  button-outline:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.primary}"
+    typography: "{typography.button-md}"
+    rounded: "{rounded.md}"
+    padding: 12px 24px
+    height: 44px
+  button-outline-ink:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.button}"
+    typography: "{typography.button-md}"
     rounded: "{rounded.md}"
-    padding: 12px 20px
+    padding: 12px 24px
     height: 44px
   button-text-link:
-    backgroundColor: transparent
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-  text-link:
-    backgroundColor: transparent
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-  top-nav:
     backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.nav-link}"
-    height: 64px
-  hero-band:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-xl}"
-    padding: 96px
-  hero-illustration-card:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.xl}"
-  feature-card-pink:
-    backgroundColor: "{colors.brand-pink}"
+    textColor: "{colors.primary}"
+    typography: "{typography.link-md}"
+    padding: 4px 0
+  badge-pill-ink:
+    backgroundColor: "{colors.ink}"
     textColor: "{colors.on-primary}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.xl}"
-    padding: 32px
-  feature-card-teal:
-    backgroundColor: "{colors.brand-teal}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.xl}"
-    padding: 32px
-  feature-card-lavender:
-    backgroundColor: "{colors.brand-lavender}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.xl}"
-    padding: 32px
-  feature-card-peach:
-    backgroundColor: "{colors.brand-peach}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.xl}"
-    padding: 32px
-  feature-card-ochre:
-    backgroundColor: "{colors.brand-ochre}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.xl}"
-    padding: 32px
-  feature-card-cream:
-    backgroundColor: "{colors.surface-card}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.xl}"
-    padding: 32px
-  product-mockup-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
+    typography: "{typography.body-md}"
     rounded: "{rounded.lg}"
-    padding: 24px
-  testimonial-card:
-    backgroundColor: "{colors.surface-card}"
+    padding: 6px 12px
+  badge-pill-outline:
+    backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
     typography: "{typography.body-md}"
     rounded: "{rounded.lg}"
-    padding: 24px
-  pricing-tier-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-lg}"
-    rounded: "{rounded.lg}"
-    padding: 32px
-  pricing-tier-card-featured:
-    backgroundColor: "{colors.brand-teal}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.title-lg}"
-    rounded: "{rounded.lg}"
-    padding: 32px
+    padding: 6px 12px
+  badge-sale-coral:
+    backgroundColor: "{colors.bloom-coral}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.caption-bold}"
+    rounded: "{rounded.sm}"
+    padding: 4px 8px
   text-input:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
@@ -255,159 +244,243 @@ components:
   text-input-focused:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-  category-tab:
-    backgroundColor: transparent
-    textColor: "{colors.muted}"
-    typography: "{typography.nav-link}"
-    rounded: "{rounded.pill}"
-    padding: 8px 16px
-  category-tab-active:
-    backgroundColor: "{colors.surface-card}"
-    textColor: "{colors.ink}"
-    typography: "{typography.nav-link}"
-    rounded: "{rounded.pill}"
-  badge-pill:
-    backgroundColor: "{colors.surface-card}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.pill}"
-    padding: 4px 12px
-  expert-card:
+  text-input-search:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  cta-band-illustrated:
-    backgroundColor: "{colors.surface-soft}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.md}"
+    padding: 12px 16px
+    height: 40px
+  card-product:
+    backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.display-md}"
     rounded: "{rounded.xl}"
-    padding: 80px
-  footer:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.body}"
-    typography: "{typography.body-sm}"
-    padding: 80px
+    padding: 24px
+  card-product-feature:
+    backgroundColor: "{colors.cloud}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: 32px
+  card-pricing-tier:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: 24px
+  card-pricing-tier-featured:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: 24px
+  card-customer-story:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: 16px
+  card-article-tile:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: 16px
+  card-category-icon:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-emphasis}"
+    rounded: "{rounded.lg}"
+    padding: 16px
+  promo-strip-dark:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.xl}"
+    padding: 48px
+  hero-promo-card:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.xl}"
+    padding: 32px
+  utility-strip:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.caption-md}"
+    height: 36px
+    padding: 0 24px
+  nav-bar-top:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-md}"
+    height: 64px
+    padding: 0 32px
+  nav-link:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-md}"
+    padding: 8px 16px
+  category-tab:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-emphasis}"
+    rounded: "{rounded.pill}"
+    padding: 8px 20px
+  category-tab-active:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.pill}"
+  faq-row:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-emphasis}"
+    rounded: "{rounded.lg}"
+    padding: 20px 24px
+  chevron-decoration:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.none}"
+  help-band-dark:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.body-md}"
+    padding: 64px 32px
+  footer-dark:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.body-md}"
+    padding: 64px 32px
 ---
 
 ## Overview
 
-Clay.com is the most playful B2B SaaS interface in the GTM-data category. The base atmosphere is **cream-tinted white canvas** (`{colors.canvas}` — #fffaf0) holding dark-navy ink type and **3D-rendered claymation illustrations** (mountains, mascot characters, peach/ochre/lavender landscapes) as the dominant brand voltage. Where most data-platform brands play it cool with grids and gradients, Clay leans hard into hand-crafted-looking 3D illustrations and saturated single-color feature cards.
+HP reads like a long-running consumer-electronics catalog crossed with an enterprise-software product page. The whole system sits on **pure white** (`{colors.canvas}` — `#ffffff`) with thin gray panels (`{colors.cloud}` / `{colors.fog}`) for alternating section bands. There is one chromatic action color — **HP Electric Blue** (`{colors.primary}` — `#024ad8`) — and one ink color (`{colors.ink}` — `#1a1a1a`); together they do ninety percent of the work. Type is a single family across every surface: **Forma DJR Micro**, HP's bespoke geometric grotesque, set at weight 500 for headlines and 400 for body — clean, neutral, slightly mechanical.
 
-Type voice runs **Plain Black** (or substituted with Inter weight 500-600) — a custom rounded display face used at very large sizes (72px hero) with negative letter-spacing. Body type uses Inter at standard weights. The display weight stays at 500, never bolder — the rounded character of the typeface gives it warmth without needing weight.
+The signature gesture is **angular blue chevrons** — sharp 0-radius slashes derived from the HP wordmark's pair of parallel slashes — that anchor the homepage hero, the laptop-page hero, and the printer pricing page. They appear on the left and right edges of the primary banner card, layered behind product photography. Outside those decorative slashes, every other surface is rectilinear with **soft 8–16px corners** on cards and a 4px corner on buttons.
 
-Component voltage comes from **saturated single-color feature cards** in a 6-color palette: hot pink, deep teal, lavender, peach, ochre, and cream-card. Each card shows product UI fragments at small scale — Claygent agent runs, sequencer flows, CRM enrichment outputs. The colored card IS the primary visual element on every long-scroll page.
+The system breaks into three voice modes: a **white commercial body** for product browsing (cards, category icons, pricing tiers); a **dark navy slab** (`{colors.ink}` near-black) for testimonial bands, the closing "How can we help?" footer-prelude, and the page footer; and a **light fog band** (`{colors.cloud}` / `{colors.fog}`) for utility sections like comparison strips and FAQ accordions. The blue accent appears only on filled CTAs, link text, the chevron decorations, and the active price-stamp on a featured tier — never as a section background.
 
 **Key Characteristics:**
-- Cream-tinted white canvas (`{colors.canvas}` — #fffaf0). The warmth differentiates Clay from cool-gray competitor sites.
-- Dark navy/black primary CTAs (`{colors.primary}` — #0a0a0a). Buttons rounded `{rounded.md}` (12px) — friendly modern but not pill.
-- 6-color saturated feature card palette: `{colors.brand-pink}`, `{colors.brand-teal}`, `{colors.brand-lavender}`, `{colors.brand-peach}`, `{colors.brand-ochre}`, `{colors.surface-card}` (cream).
-- 3D claymation illustrations (mountains, characters, abstract shapes) as full-bleed hero artifacts — the brand's most-recognized visual element.
-- Custom rounded Plain Black display typeface at 500 weight with -1 to -2.5px letter-spacing on display sizes.
-- Border radius is generous: `{rounded.md}` (12px) for buttons + inputs, `{rounded.lg}` (16px) for content cards, `{rounded.xl}` (24px) for feature cards. The bigger radius matches the rounded display type's character.
-- Product UI fragments embedded inside colored cards at small scale — agent run logs, sequencer flows, enrichment results.
-- Section rhythm `{spacing.section}` (96px) between major bands.
-- Footer is cream-tinted (`{colors.surface-soft}`) — Clay does NOT use a dark footer. Even the closing band stays warm-light.
+- Pure white canvas (`{colors.canvas}`) with deep ink (`{colors.ink}`) running every body surface; light fog bands (`{colors.cloud}`, `{colors.fog}`) alternate for section rhythm
+- HP Electric Blue (`{colors.primary}`) is the lone CTA fill and link color; it appears at most twice per viewport
+- Bespoke Forma DJR Micro across every surface — display, body, button, caption — at weights 400 / 500 / 600 / 700
+- Cards round at `{rounded.xl}` (16px) for product/pricing tiles; buttons sit at `{rounded.md}` (4px) with capitalize labels
+- Geometric blue chevrons (`{colors.primary}` rectangles cut at 45°) frame hero photography and reinforce the wordmark
+- Dark-navy slabs (`{colors.ink}`) close every page rhythm — testimonial bands, "how can we help?" prelude, and the footer
+- Section rhythm: utility-strip → top nav → white body → cloud-band → ink slab → cloud-band → ink footer
 
 ## Colors
 
+> **No Interaction sub-section.** Hover colors are silently filtered. Allowed sub-sections: Brand & Accent, Surface, Text, Semantic.
+
 ### Brand & Accent
-- **Primary** (`{colors.primary}` — #0a0a0a): All primary CTAs, h1/h2 ink type. Near-black with slight warmth.
-- **Brand Pink** (`{colors.brand-pink}` — #ff4d8b): Hot-pink feature card surface. Sequencer / outbound feature pages.
-- **Brand Teal** (`{colors.brand-teal}` — #1a3a3a): Deep teal-green feature card. Often the featured pricing tier.
-- **Brand Lavender** (`{colors.brand-lavender}` — #b8a4ed): Soft lavender feature card.
-- **Brand Peach** (`{colors.brand-peach}` — #ffb084): Warm peach feature card.
-- **Brand Ochre** (`{colors.brand-ochre}` — #e8b94a): Mustard / ochre feature card and illustration accents.
-- **Brand Mint** (`{colors.brand-mint}` — #a4d4c5): Mint accent on illustrations and small badges.
-- **Brand Coral** (`{colors.brand-coral}` — #ff6b5a): Coral accent for highlights.
+- **Blue scale** (`{colors.blue-50}` through `{colors.blue-950}`): a full 10-shade custom scale anchored at HP Electric Blue (`{colors.blue-600}` — `#024ad8`). Covering every UI need from pale selection fills (`{colors.blue-50/100}`) to deep nav bars (`{colors.blue-900/950}`).
+- **HP Electric Blue** (`{colors.primary}` — `#024ad8`): the system's primary signal — CTA fill, link color, chevron-decoration. Reserved for no more than two flame elements per viewport.
+- **Coral scale** (`{colors.coral-50}` through `{colors.coral-950}`): a warm secondary accent (`{colors.coral-400}` — `#ff7b5a`) used for secondary buttons, "cancel" actions, notification badges, highlight borders, and active tab indicators. Adds visual warmth alongside the cool blue primary.
 
 ### Surface
-- **Canvas** (`{colors.canvas}` — #fffaf0): The default page floor. Cream-tinted white.
-- **Surface Soft** (`{colors.surface-soft}` — #faf5e8): Footer and CTA-band background.
-- **Surface Card** (`{colors.surface-card}` — #f5f0e0): Cream feature cards, testimonial cards.
-- **Surface Strong** (`{colors.surface-strong}` — #ebe6d6): Stronger cream for emphasized bands.
-- **Surface Dark** (`{colors.surface-dark}` — #0a1a1a): Dark teal-tinted near-black for occasional dark cards (rare).
-- **Surface Dark Elevated** (`{colors.surface-dark-elevated}` — #1a2a2a): Elevated dark cards.
-- **Hairline** (`{colors.hairline}` — #e5e5e5): 1px borders on cards and inputs.
+- **Canvas** (`{colors.canvas}` — `#ffffff`): the universal page background. White, full opacity.
+- **Paper** (`{colors.paper}` — `#ffffff`): card surfaces — same white as canvas, with hairline borders or shadows providing the lift.
+- **Cloud** (`{colors.cloud}` — `#f7f7f7`): the lightest gray section band, used for alternating-row backgrounds and product-feature card groups.
+- **Fog** (`{colors.fog}` — `#e8e8e8`): a slightly darker gray surface band, used for FAQ outer panels and the "Trending laptops" header strip.
+- **Steel** (`{colors.steel}` — `#c2c2c2`): hairline border used on outlined elements with stronger emphasis (focus states, active filter).
+- **Blue-soft surfaces** (`{colors.blue-50}` / `{colors.blue-100}`): pale blue fills used for selected states, filter chips, and section-background alternation alongside cloud/fog.
+- **Coral surfaces** (`{colors.coral-50}` — `{colors.coral-200}`): warm tinted surfaces used for alert banners, "cancel" action backgrounds, and highlight borders on secondary interactive zones.
+- **Bloom Coral / Bloom Rose** (`{colors.bloom-coral}` / `{colors.bloom-rose}` — `#ff7b5a`, `#ffe0d4`): sale-tag chip + soft warm accent, now unified with the coral secondary palette.
+- **Storm Mist / Sea / Deep** (`{colors.storm-mist}`, `{colors.storm-sea}`, `{colors.storm-deep}` — `#8ebdce`, `#7fadbe`, `#356373`): the teal-storm tones reserved for the printer-plan illustration backdrop and supporting infographic accents.
 
 ### Text
-- **Ink** (`{colors.ink}` — #0a0a0a): Headlines and primary text.
-- **Body Strong** (`{colors.body-strong}` — #1a1a1a): Emphasized body, lead paragraphs.
-- **Body** (`{colors.body}` — #3a3a3a): Default running-text.
-- **Muted** (`{colors.muted}` — #6a6a6a): Sub-headings, breadcrumbs, footer body.
-- **Muted Soft** (`{colors.muted-soft}` — #9a9a9a): Captions, fine-print.
-- **On Primary / On Dark** (`{colors.on-primary}` — #ffffff): Text on primary buttons + dark feature cards (teal).
+- **Ink** (`{colors.ink}` — `#1a1a1a`): the universal text color on white surfaces — headlines, body, button labels, navigation.
+- **Ink Deep** (`{colors.ink-deep}` — `#000000`): pure black used for the wordmark and 1px hairline strokes around badge outlines.
+- **Ink Soft** (`{colors.ink-soft}` — `#292929`): an alternate near-black used inside dark-navy slabs as a subtle textural shift.
+- **On Ink** (`{colors.on-ink}` — `#ffffff`): pure white used for headline and body text on every dark-navy slab.
+- **Charcoal** (`{colors.charcoal}` — `#3d3d3d`): muted body color on white surfaces — secondary descriptions, fine-print disclaimers.
+- **Graphite** (`{colors.graphite}` — `#636363`): smaller-print color, used for legal lines and timestamp metadata.
 
 ### Semantic
-- **Success** (`{colors.success}` — #22c55e): Success states.
-- **Warning** (`{colors.warning}` — #f59e0b): Warning callouts.
-- **Error** (`{colors.error}` — #ef4444): Validation errors.
+- **Bloom Deep** (`{colors.bloom-deep}` — `#d63f22`) + **Bloom Wine** (`{colors.bloom-wine}` — `#7a2616`): error and discount-emphasis colors. Now mapped to the coral scale (`coral-600` / `coral-900`) for a unified warm-destructive voice.
+- **Coral 400** (`{colors.coral-400}` — `#ff7b5a`): the warm secondary accent — used for "Batal", "Kembali" buttons, notification badges, highlight borders, and active tab indicators. Provides visual counterpoint to the cool blue primary.
+- **Storm Deep** (`{colors.storm-deep}` — `#356373`): used as a neutral status accent (e.g., printer-plan tier "Versatile" tier color).
 
 ## Typography
 
 ### Font Family
-The system runs **Plain Black** (a custom rounded display face) for headlines and **Inter** for body, navigation, and UI. Plain Black at weight 500 with negative letter-spacing handles every display headline; Inter handles the rest. The fallback stack walks `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` for both.
+
+The voice is **single-family**: Forma DJR Micro (HP's bespoke geometric grotesque, fallback Arial) across every surface — display, body, button, caption. Forma DJR Micro is a wide, slightly rounded grotesque designed at small optical sizes to stay legible at UI-chrome scale. HP runs it at weight 400 for body, 500 for display headlines, 600/700 for emphasis and button labels.
+
+The 16/14/12-px caption tier carries the catalog metadata — model numbers, spec rows, fine print — at weight 400 with a 1.4–1.5 line-height. Button labels lift to weight 600/700 with positive 0.5–1.1px letter-spacing and uppercase transform — the only place the system tracks letters.
 
 ### Hierarchy
 
 | Token | Size | Weight | Line Height | Letter Spacing | Use |
 |---|---|---|---|---|---|
-| `{typography.display-xl}` | 72px | 500 | 1.0 | -2.5px | Homepage h1 ("Go to market with unique data") — Plain Black |
-| `{typography.display-lg}` | 56px | 500 | 1.05 | -2px | Section heads — Plain Black |
-| `{typography.display-md}` | 40px | 500 | 1.1 | -1px | Sub-section heads, product names |
-| `{typography.display-sm}` | 32px | 500 | 1.15 | -0.5px | CTA-band heads, feature card titles |
-| `{typography.title-lg}` | 24px | 600 | 1.3 | -0.3px | Pricing plan names, larger feature titles |
-| `{typography.title-md}` | 18px | 600 | 1.4 | 0 | Card titles, intro paragraphs |
-| `{typography.title-sm}` | 16px | 600 | 1.4 | 0 | Small card titles, list labels |
-| `{typography.body-md}` | 16px | 400 | 1.55 | 0 | Default running-text |
-| `{typography.body-sm}` | 14px | 400 | 1.55 | 0 | Footer body, fine-print |
-| `{typography.caption}` | 13px | 500 | 1.4 | 0 | Badge labels, captions |
-| `{typography.caption-uppercase}` | 12px | 600 | 1.4 | 1.5px | Section labels, "FEATURED" badges |
-| `{typography.button}` | 14px | 600 | 1.0 | 0 | Standard button labels |
-| `{typography.nav-link}` | 14px | 500 | 1.4 | 0 | Top-nav menu items |
+| `{typography.display-xxl}` | 72px | 500 | 1.0 | 0 | Hero headline (homepage, laptop hub) |
+| `{typography.display-xl}` | 56px | 500 | 1.0 | 0 | Section headlines on landing pages |
+| `{typography.display-lg}` | 44px | 500 | 1.0 | 0 | Sub-section headlines on shop pages |
+| `{typography.display-md}` | 32px | 500 | 1.0 | 0 | Promo strip headlines, FAQ section headers |
+| `{typography.display-sm}` | 24px | 500 | 1.17 | 0 | Card titles, pricing-tier names |
+| `{typography.display-xs}` | 20px | 500 | 1.0 | 0 | Inline list headers, accordion labels |
+| `{typography.body-lg}` | 18px | 400 | 1.33 | 0 | Lead paragraphs |
+| `{typography.body-md}` | 16px | 400 | 1.38 | 0 | Default body |
+| `{typography.body-emphasis}` | 16px | 500 | 1.38 | 0 | Bolded run-in copy |
+| `{typography.caption-md}` | 14px | 400 | 1.5 | 0 | Specs, metadata, captions |
+| `{typography.caption-bold}` | 14px | 700 | 1.3 | 0 | Sale tags, in-card highlights |
+| `{typography.caption-sm}` | 12px | 400 | 1.33 | 0 | Footnotes, legal lines |
+| `{typography.link-md}` | 16px | 500 | 1.38 | 0 | Inline link emphasis |
+| `{typography.button-md}` | 14px | 600 | 1.4 | 0.7px | Primary/secondary button labels (uppercase) |
+| `{typography.button-sm}` | 12.6px | 700 | 1.0 | 0.126px | Compact button labels in tight cells |
+| `{typography.price-md}` | 24px | 500 | 1.17 | 0 | Tier and product price stamps |
 
 ### Principles
-Plain Black at weight 500 + negative letter-spacing IS the brand voice. Going to weight 700 reads as bombastic; the rounded character of the typeface adds warmth that bolder weight would flatten.
 
-The body-vs-display split is functional: Plain Black for Plain Black moments (headlines), Inter for everything else (running text, UI, buttons). Mixing them is a system violation.
+The typographic decision worth flagging: HP runs **weight 500 for every display size**, including the largest 72px hero headline. Most editorial systems jump to 600/700 at hero scale; HP doesn't. The result feels open and approachable rather than commanding — appropriate for a brand that sells across consumer, SMB, and enterprise audiences in the same catalog.
+
+Forma DJR Micro's rounded-grotesque shapes do most of the warmth. There's no italic in the system except inside legal disclaimers; emphasis is carried by weight (500 → body-emphasis, 700 → caption-bold) instead.
 
 ### Note on Font Substitutes
-If Plain Black is unavailable, **Inter** at weight 500 with -0.05em letter-spacing is a usable approximation. **Söhne Breit** at weight Buch is an alternative if licensed. **Recoleta** at weight 500 carries similar rounded-display warmth.
+
+Forma DJR Micro is proprietary (Commercial Type / Mark Caneso). Closest open-source substitutes:
+- **Inter** at weights 400 / 500 / 600 / 700 — slightly narrower than Forma DJR Micro; bump font-size by ~3% to compensate
+- **Manrope** at weights 400 / 500 / 600 / 700 — closer in proportion, gentler curves; use directly with no metric adjustment
+- **Roboto** at weights 400 / 500 / 700 — flatter character; use as last-resort fallback
+
+When swapping, set body line-height to 1.4 and display line-height to 1.0 explicitly — the Forma DJR Micro line-height numbers are tight, and most substitutes default looser.
 
 ## Layout
 
 ### Spacing System
-- **Base unit:** 4px.
-- **Tokens:** `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 96px.
-- **Section padding:** `{spacing.section}` (96px) between major editorial bands.
-- **Card internal padding:** `{spacing.xl}` (32px) for feature cards and pricing tiers; `{spacing.lg}` (24px) for testimonial and product mockup cards.
+
+- **Base unit**: 8px. Smaller half-step at 4px. The scale is gentle — most card padding lands at 16px or 24px; section gap at 80px.
+- **Tokens (front matter)**: `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 20px · `{spacing.xl}` 24px · `{spacing.xxl}` 32px · `{spacing.section}` 80px
+- **Section padding**: `{spacing.section}` (80px) vertical between major bands on desktop; collapses to ~48px on mobile.
+- **Card internal padding**: `{spacing.xl}` (24px) for product cards; `{spacing.xxl}` (32px) for promo strips and feature cards; `{spacing.md}` (16px) for compact article tiles.
+- **Gutter**: `{spacing.xl}` (24px) between grid columns at desktop; `{spacing.md}` (16px) on tablet/mobile.
+
+The 80px section gap is the universal rhythm constant — it appears between every major homepage band, between the hero and the comparison table on the printer-plan page, and between feature rows on the laptop-shop page.
 
 ### Grid & Container
-- **Max content width:** ~1280px centered.
-- **Editorial body:** Single 12-column grid; hero often uses 7/5 split (h1 left, illustration right).
-- **Feature card grids:** 3-up at desktop, 2-up at tablet, 1-up at mobile.
-- **Pricing grid:** 3-4 up at desktop, 1-up at mobile.
+
+- **Desktop max-width**: 1366px content container with full-bleed-on-canvas section backgrounds.
+- **Hero**: a single full-width photo card (homepage and laptop-hub hero) with the headline overlay positioned upper-left or upper-right.
+- **Product family grid**: 4 columns at >1200px, 3 at 1024–1199px, 2 at 768–1023px, 1 below 768px.
+- **Pricing tiers**: 4 columns at >1024px, 2x2 grid at 768–1023px, single-column accordion below 768px.
+- **Footer**: 5-column link grid at >1024px, collapsing to 2-column then accordion on mobile.
 
 ### Whitespace Philosophy
-Clay uses generous whitespace around big rounded display headlines and saturated feature cards. The cream canvas + colored cards + 3D illustrations create a playful warmth that competing data-platform sites lack.
+
+Whitespace is **commercial-clean** — generous around hero photography, tight around catalog spec rows. Product cards leave breathing room above and below the photo (≥32px) so the laptop or printer reads as a hero shot rather than a thumbnail. The fine-print disclaimer regions (legal, footnote rows) tighten line-height to 1.3 and shrink type to 11–12px so the bulk of fine print stays compact.
 
 ## Elevation & Depth
 
 | Level | Treatment | Use |
 |---|---|---|
-| Flat | No shadow, no border | Body sections, top nav, hero |
-| Soft hairline | 1px `{colors.hairline}` border | Inputs, small content cards |
-| Saturated card | Brand pink/teal/lavender/peach/ochre fill — no shadow | Feature cards |
-| Cream card | `{colors.surface-card}` background — no shadow | Testimonial, secondary cards |
-| Subtle drop shadow | Faint shadow at low alpha | Hover-elevated states (rare) |
+| 0 — Flat | No border, no shadow. | Section bands (white, cloud, fog), full-bleed photo heroes |
+| 1 — Hairline | 1px solid `{colors.hairline}` (`#e8e8e8`) border, no shadow. | Outlined buttons, comparison-table cells, FAQ accordion outers |
+| 2 — Soft Lift | `0 2px 8px rgba(26, 26, 26, 0.08)`. | Product cards, pricing-tier columns, customer-story tiles |
+| 3 — Floating Modal | `0 8px 24px rgba(26, 26, 26, 0.12)`. | Add-to-cart drawer, mobile-nav sheet, image zoom modal |
 
-The system uses no heavy shadows. Depth comes from the saturated color contrast between cream canvas and bright feature cards.
+The system is mostly flat — depth is communicated by **color contrast** (cloud-band vs. white card on the same band) rather than shadow elevation. The Soft Lift level is the workhorse for the catalog — every product tile and pricing column gets it; nothing else does. Modal-floating is rare and reserved for transient overlays.
 
 ### Decorative Depth
-- **3D claymation illustrations** — mountains, characters, mascots rendered in a hand-crafted 3D style. The brand's most-recognized depth element. Not a token — these are illustrated assets.
-- **Mascot characters** appear as inline figures in feature cards and CTAs.
+
+The system's most distinctive depth gesture is the **HP blue chevron pair** — two angular `{colors.primary}` slashes (no radius, no shadow) that sit on the left and right of the homepage hero card and the laptop-shop hero. They're not decorative noise; they're a literal echo of the HP wordmark's two parallel slashes, scaled up to architectural size. Treat them as a brand artifact, not a generic geometric flourish.
+
+Photography on the homepage and laptop-shop pages frames product imagery inside `{rounded.xl}` (16px) containers with a soft 1px hairline. Lifestyle photography (testimonials, "How HP works for X") sits full-bleed inside dark-navy slabs without rounding.
 
 ## Shapes
 
@@ -415,89 +488,174 @@ The system uses no heavy shadows. Depth comes from the saturated color contrast 
 
 | Token | Value | Use |
 |---|---|---|
-| `{rounded.xs}` | 6px | Small badges, dropdown items |
-| `{rounded.sm}` | 8px | Small buttons, hairline-border accent |
-| `{rounded.md}` | 12px | Standard CTA buttons, text inputs |
-| `{rounded.lg}` | 16px | Content cards, testimonial cards, pricing tiers |
-| `{rounded.xl}` | 24px | Feature cards (the saturated brand-color cards) |
-| `{rounded.pill}` | 9999px | Category tabs, badge pills |
-| `{rounded.full}` | 9999px / 50% | Avatars, icon buttons |
+| `{rounded.none}` | 0px | Hero chevron decorations, full-bleed photo heroes, marquee strips |
+| `{rounded.xs}` | 2px | Secondary chip backgrounds, sale-tag pills |
+| `{rounded.sm}` | 3px | Default secondary CTA radius (small touch zones) |
+| `{rounded.md}` | 4px | Primary buttons, secondary buttons, text inputs |
+| `{rounded.lg}` | 8px | Badge pills, category-icon cards, FAQ row containers |
+| `{rounded.xl}` | 16px | Product cards, pricing tiers, customer-story tiles, photo frames |
+| `{rounded.pill}` | 9999px | Category sub-nav tabs, search-pill input, filter chips |
+
+The system maintains a clear two-tier philosophy: **buttons stay sharp** (4px, almost rectilinear) while **cards and photo frames stay soft** (16px). This split is the visual signature — sharp interactive elements against softer container surfaces.
+
+### Photography Geometry
+
+Hero photography sits in `{rounded.xl}` (16px) frames with no border. Product family thumbnails inside the laptop-grid are 1:1 (square) on a `{colors.canvas}` background, padded so the laptop is shown at ~70% of the frame. Customer-story photography uses 16:9 inside the same `{rounded.xl}` frame. There are no full-bleed circular avatars; testimonial avatars are 4px-rounded squares.
 
 ## Components
 
-### Top Navigation
-
-**`top-nav`** — Cream nav bar pinned to top. 64px tall, `{colors.canvas}` background. Carries the Clay logo + wordmark at left, primary horizontal menu (Product, Solutions, Resources, Pricing, Customers) center, right-side cluster with "Sign in" + "Try free" `{component.button-primary}`. Menu items in `{typography.nav-link}` (Inter 14px / 500).
+> **No hover states documented.** Every component spec below documents only Default and Active/Pressed states. Variants live as separate front-matter entries.
 
 ### Buttons
 
-**`button-primary`** — Background `{colors.primary}` (near-black), text `{colors.on-primary}` (white), type `{typography.button}` (Inter 14px / 600), padding 12px × 20px, height 44px, rounded `{rounded.md}` (12px).
+**`button-primary`** — the lone HP Electric Blue CTA
+- Background `{colors.primary}`, text `{colors.on-primary}`, type `{typography.button-md}` (uppercase, 0.7px tracking), padding `{spacing.sm} {spacing.xl}` (12 × 24), height 44px, rounded `{rounded.md}`
+- Pressed state `button-primary-pressed` — background `{colors.primary-deep}`, same text
+- Disabled state `button-primary-disabled` — background `{colors.steel}`, white text
+- Used for: "Buy now", "Shop now", "Get a printer", primary form submit
 
-**`button-secondary`** — Cream button with hairline outline. Background `{colors.canvas}`, text `{colors.ink}`, 1px hairline border.
+**`button-ink`** — black filled CTA
+- Background `{colors.ink}`, text `{colors.on-primary}`, padding `{spacing.sm} {spacing.xl}`, height 44px, rounded `{rounded.md}`, type `{typography.button-md}`
+- Used for: "Buy now" on dark photo overlays, secondary primary actions where the blue would clash with imagery
 
-**`button-on-color`** — White button used over saturated brand-color feature cards. Same shape as primary but inverted (white background, ink text).
+**`button-outline`** — blue-text outlined CTA
+- Background `{colors.canvas}`, text `{colors.primary}`, 1px `{colors.primary}` border, padding `{spacing.sm} {spacing.xl}`, height 44px, rounded `{rounded.md}`
+- Used for: "Compare", "Customize", "Learn more" — secondary actions on white surfaces
 
-**`button-text-link`** — Inline text button, no background. Used for "Sign in" and inline link CTAs.
+**`button-outline-ink`** — black-text outlined CTA
+- Background `{colors.canvas}`, text `{colors.ink}`, 1px `{colors.ink}` border, padding `{spacing.sm} {spacing.xl}`, height 44px, rounded `{rounded.md}`
+- Used for: "View" buttons inside product family card grids — neutral against the blue primary
 
-**`text-link`** — Inline body links in `{colors.ink}` with underline.
+**`button-text-link`** — inline blue link with underline
+- Background `{colors.canvas}`, text `{colors.primary}`, type `{typography.link-md}`, padding `{spacing.xxs} 0`
+- Used for: "See details", "Read more" inside cards and disclaimer rows
 
 ### Cards & Containers
 
-**`hero-band`** — Cream-canvas hero with 7-5 grid: h1 + sub-headline + button row on the left, 3D claymation illustration on the right. Vertical padding `{spacing.section}` (96px).
+**`card-product`** — the workhorse product tile
+- Background `{colors.canvas}`, rounded `{rounded.xl}` (16px), padding `{spacing.xl}` (24px), Soft Lift shadow
+- Layout: hero photo (1:1 ratio) on top, title in `{typography.display-xs}`, spec rows in `{typography.caption-md}`, price in `{typography.price-md}`, CTA pinned to bottom
+- Used for: laptop catalog cards, desktop catalog cards
 
-**`hero-illustration-card`** — Right-side artifact holding 3D claymation illustration (mountains, mascot character, abstract shapes). Background `{colors.surface-soft}`, rounded `{rounded.xl}` (24px). The illustration IS the artifact.
+**`card-product-feature`** — full-row feature card with photo + copy
+- Background `{colors.cloud}`, rounded `{rounded.xl}`, padding `{spacing.xxl}` (32px)
+- Layout: photo on the left (50% width), copy on the right with section eyebrow + title + body + CTA pair
+- Used for: "Trending laptops" feature rows, "Shop these must haves"
 
-**`feature-card-pink`** / **`feature-card-teal`** / **`feature-card-lavender`** / **`feature-card-peach`** / **`feature-card-ochre`** — Saturated single-color feature cards. Background varies per variant; rounded `{rounded.xl}` (24px); padding `{spacing.xl}` (32px). Each card carries an h3 in `{typography.title-md}`, a body description, and a product UI fragment or mascot illustration. Text color flips to `{colors.on-dark}` (white) on pink and teal cards, `{colors.ink}` (dark) on lavender/peach/ochre cards (the lighter saturations have enough contrast for dark text).
+**`card-pricing-tier`** + **`card-pricing-tier-featured`**
+- Background `{colors.canvas}`, rounded `{rounded.xl}`, padding `{spacing.xl}`, Soft Lift shadow
+- Tier name in `{typography.display-sm}`, monthly price in `{typography.display-md}` with `{typography.caption-md}` cadence, page count caption, full feature list, primary CTA
+- Featured tier carries `{colors.primary}` text accent on the price-stamp + a `{colors.primary}` thin top border instead of a colored card background — never inverted to dark
 
-**`feature-card-cream`** — Lower-key feature card variant on `{colors.surface-card}`. Used for less-emphasized features that don't warrant a saturated color.
+**`card-customer-story`** — the three-up testimonial tile
+- Background `{colors.canvas}`, rounded `{rounded.xl}`, padding `{spacing.md}` (16px), Soft Lift shadow
+- 16:9 photo at top in `{rounded.xl}` frame, quote excerpt in `{typography.body-md}`, attribution row at the bottom
+- Used in the "See what our customers say" homepage section
 
-**`product-mockup-card`** — Card showing actual Clay product UI (Claygent agent runs, sequencer flows, CRM enrichment tables). Background `{colors.canvas}` with hairline border, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px).
+**`card-article-tile`** — the four-up "Latest from HP" tile
+- Background `{colors.canvas}`, rounded `{rounded.xl}`, padding `{spacing.md}`, Soft Lift shadow
+- 16:9 thumbnail at top, date eyebrow in `{typography.caption-sm}`, title in `{typography.body-emphasis}`, "Read more" link
 
-**`testimonial-card`** — Customer quote cards. Background `{colors.surface-card}` (cream), rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). Top row has avatar + name + role; below sits the testimonial in `{typography.body-md}`.
+**`card-category-icon`** — the small icon-and-label card in the homepage "Our Products" row
+- Background `{colors.canvas}`, rounded `{rounded.lg}` (8px), padding `{spacing.md}`
+- 48px icon at top, label in `{typography.body-emphasis}` below
+- Used for: Laptops, Desktops, Printers, Computer Tools, Accessories, Enterprise Solutions
 
-**`pricing-tier-card`** — Standard tier card. Background `{colors.canvas}` with hairline, rounded `{rounded.lg}`, padding `{spacing.xl}` (32px).
+**`hero-promo-card`** — the homepage hero card with chevron decorations
+- Background `{colors.canvas}`, rounded `{rounded.xl}`, padding `{spacing.xxl}` (32px)
+- Photography occupies left half; copy block (eyebrow + headline + price stamp + CTA pair) occupies right half
+- Flanked by `chevron-decoration` blue slashes outside the card's bounding box on left and right edges
 
-**`pricing-tier-card-featured`** — The featured tier flips to `{colors.brand-teal}` (deep teal-green). The teal surface IS the featured signal.
-
-**`expert-card`** — Used on /experts page. Background `{colors.canvas}` with hairline, rounded `{rounded.lg}`, padding `{spacing.lg}`. Carries an avatar at top, expert name, specialization, and a "Book session" link.
+**`promo-strip-dark`** — the inline dark navy promo block
+- Background `{colors.ink}`, text `{colors.on-ink}`, rounded `{rounded.xl}`, padding `{spacing.xxl} 48px`
+- Used for: "When did work start getting in the way of work?" mid-page promo, the SMB testimonial slab
 
 ### Inputs & Forms
 
-**`text-input`** — Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.md}` (12px), padding 12px × 16px, height 44px. 1px hairline border.
+**`text-input`** + **`text-input-focused`**
+- Background `{colors.canvas}`, text `{colors.ink}`, rounded `{rounded.md}`, padding `{spacing.sm} {spacing.md}`, height 44px
+- 1px `{colors.steel}` border in default; gains 1px `{colors.ink}` border on focus (no halo)
 
-**`text-input-focused`** — Border thickens to ink for emphasis.
+**`text-input-search`** — pill search in the top nav
+- Background `{colors.canvas}`, rounded `{rounded.md}`, padding `{spacing.sm} {spacing.md}`, height 40px, 1px `{colors.steel}` border, magnifying-glass icon at right
 
-### Tabs / Badges
+**`badge-pill-ink`** — filled tag pill
+- Background `{colors.ink}`, text `{colors.on-primary}`, rounded `{rounded.lg}`, padding 6px 12px, type `{typography.body-md}`
+- Used inline next to product titles to mark "New" or featured indicators
 
-**`category-tab`** + **`category-tab-active`** — Pill-shaped tabs in sub-nav. Inactive: transparent + muted text. Active: cream-card background + ink text. Padding 8px × 16px.
+**`badge-pill-outline`** — outlined tag pill
+- Background `{colors.canvas}`, text `{colors.ink}`, 1px `{colors.ink}` border, rounded `{rounded.lg}`, padding 6px 12px
 
-**`badge-pill`** — Small cream-fill pill labels in `{typography.caption}` (13px / 500), rounded `{rounded.pill}`.
+**`badge-sale-coral`** — the sale price-stamp
+- Background `{colors.bloom-coral}`, text `{colors.on-primary}`, rounded `{rounded.sm}`, padding `{spacing.xxs} {spacing.xs}`, type `{typography.caption-bold}`
+- Used for: "Save $200", "25% off" overlay tags on hero promo cards
 
-### CTA / Footer
+### Navigation
 
-**`cta-band-illustrated`** — Pre-footer "Turn your growth ideas into reality today" band. Background `{colors.surface-soft}`, rounded `{rounded.xl}`, padding 80px. Carries an h2 in `{typography.display-md}`, a sub-line, and a `{component.button-primary}` — usually paired with a 3D illustration of a mascot or scene.
+**`utility-strip`** — the top-of-page utility bar
+- Background `{colors.ink}`, text `{colors.on-primary}`, height 36px, padding 0 {spacing.xl}, type `{typography.caption-md}`
+- Holds: country/locale picker, "For Business / For Home" toggle, "Sign in" link, cart link
 
-**`footer`** — Cream-tinted footer (NOT dark navy unlike most SaaS sites). Background `{colors.surface-soft}`, text `{colors.body}`. 4-column link list. Vertical padding 80px. Often features a horizon-style 3D mountain illustration at the very bottom — Clay's signature footer mountain.
+**`nav-bar-top`** — desktop top nav (sits below utility strip)
+- Background `{colors.canvas}`, height 64px, padding 0 32px
+- Layout: HP wordmark logo flush left → middle category list (Laptops / Desktops / Printers / Accessories / Solutions / Support) → right slot with Search field, Sign-in link, Cart icon
+- 1px `{colors.hairline}` bottom border separates nav from page
+
+**`nav-link`**
+- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, padding `{spacing.xs} {spacing.md}`
+- Active page draws a 2px `{colors.primary}` underline below the text baseline
+
+**Top Nav (Mobile)**
+- Same height, hamburger icon replaces the middle category list, Search and Cart stay visible
+- Drawer expands as a full-canvas sheet with `{typography.body-lg}` link list and a sticky Sign-in CTA at bottom
+
+**`category-tab`** + **`category-tab-active`** — the pill sub-nav
+- Default: background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-emphasis}`, rounded `{rounded.pill}`, padding `{spacing.xs} {spacing.lg}`
+- Active: background `{colors.ink}`, text `{colors.on-primary}`, same rounding
+- Used on the laptop-shop page for "All / Trending / On Sale" filtering, and on the homepage "How can we help?" closing band
+
+### Signature Components
+
+**`chevron-decoration`** — the geometric blue slash motif
+- Background `{colors.primary}`, rounded `{rounded.none}`, no shadow
+- Renders as a sharp parallelogram cut at ~60° angle, sized to the height of the hero card it flanks
+- Reserved for hero bands and full-page banners — never decorative noise inside cards
+
+**`faq-row`** — the accordion row on the printer-plan FAQ
+- Background `{colors.canvas}`, rounded `{rounded.lg}`, padding `{spacing.lg} {spacing.xl}`, type `{typography.body-emphasis}`
+- 1px `{colors.hairline}` divider between rows; chevron-down icon on the right collapsed, chevron-up when expanded
+- Body answer renders inside the same row container in `{typography.body-md}` after expansion
+
+**`help-band-dark`** — the closing "How can we help?" prelude band
+- Background `{colors.ink}`, text `{colors.on-primary}`, padding 64px {spacing.xl}
+- Layout: large lifestyle photograph as the band background (low-opacity) with chip-style category tabs centered: Browse Topics / Live Chat / Contact / Diagnose / Order Status
+
+**`footer-dark`**
+- Background `{colors.ink}`, text `{colors.on-primary}`, type `{typography.body-md}`, padding 64px {spacing.xl}
+- 5-column link grid (Company / Shop / Support / Resources / Connect) with `{typography.body-emphasis}` headers and `{typography.caption-md}` link rows
+- Bottom strip carries social icons, language picker, and legal lines in `{typography.caption-sm}` muted to `{colors.steel}`
 
 ## Do's and Don'ts
 
 ### Do
-- Anchor every page on the cream canvas (`{colors.canvas}` — #fffaf0). The warm tint differentiates Clay from cool-gray data sites.
-- Use 3D claymation illustrations as hero artifacts. Hand-crafted 3D characters and mountains ARE the brand.
-- Cycle saturated feature cards across the page — pink → teal → lavender → peach → ochre → cream. Repeating the same color twice in a row reads as off-rhythm.
-- Use Plain Black at weight 500 with negative letter-spacing on every display headline.
-- Show product UI fragments inside saturated feature cards. The brand voltage is product-driven, not abstract.
-- Use cream footer (NOT dark). Clay deliberately closes pages with warm cream rather than the standard dark-footer SaaS template.
-- Anchor every band with `{spacing.section}` (96px) vertical rhythm.
+- Reserve `{colors.primary}` for the primary CTA, link color, and `chevron-decoration` motif — at most twice per viewport
+- Set every headline in Forma DJR Micro at weight 500 with line-height 1.0 — resist the urge to bump weight at hero scale
+- Use `{rounded.xl}` (16px) for cards and photo frames; `{rounded.md}` (4px) for buttons and inputs — keep the two-tier split sharp
+- Pair white `{colors.canvas}` body bands with `{colors.cloud}` (`#f7f7f7`) alternating bands; let the gray do the breathing
+- Close every page rhythm with a dark-navy `{colors.ink}` slab — the "How can we help?" prelude + footer
+- Set button labels in uppercase with `{typography.button-md}` (0.7px tracking) — the only place the system tracks letters
+- Use Soft Lift shadow exclusively for product cards and pricing tiers — leave section bands flat
+- Frame product photography inside `{rounded.xl}` containers; never use full-bleed circular masks
 
 ### Don't
-- Don't use cool grays for canvas. The cream tint is non-negotiable.
-- Don't use a 7th brand-color card. The 6-color palette is saturated enough.
-- Don't bold display weight beyond 500. Plain Black at 700 reads as bombastic.
-- Don't repeat the same brand-color card twice in a row.
-- Don't replace claymation illustrations with flat vector art. The hand-crafted 3D character IS the brand voice.
-- Don't use a dark footer. The cream footer is part of the system's warm-throughout pacing.
-- Don't add hover state styling beyond what the system already encodes.
+- Don't introduce additional saturated colors beyond the blue scale + coral scale + storm teal — three chromatic families is the maximum
+- Don't use coral in the same viewport as a destructive-action red; coral occupies the warm-secondary role, not the error role
+- Don't apply heavy material shadows — depth is via color contrast (cloud vs. white) and Soft Lift only
+- Don't round buttons above `{rounded.md}` (4px); a soft 8px+ button reads as a different brand
+- Don't run Forma DJR Micro below 12px — small caption at 11px is the floor
+- Don't use the chevron decoration as inline noise; it is a hero-only architectural element tied to the wordmark
+- Don't drop ink text opacity to create hierarchy — switch surface or shift to `{colors.charcoal}` / `{colors.graphite}` instead
+- Don't replace the HP wordmark with a generic sans lockup; the wordmark is a custom mark with its own ratio
 
 ## Responsive Behavior
 
@@ -505,100 +663,37 @@ The system uses no heavy shadows. Depth comes from the saturated color contrast 
 
 | Name | Width | Key Changes |
 |---|---|---|
-| Mobile | < 768px | Hamburger nav; hero h1 72→36px; hero-illustration-card stacks below; feature grids 1-up; pricing 1-up |
-| Tablet | 768–1024px | Top nav tightens; feature cards 2-up; pricing 2-up |
-| Desktop | 1024–1440px | Full top-nav; 3-up feature cards; 3-up pricing tiers |
-| Wide | > 1440px | Same as desktop with more breathing room; max content 1280px |
+| Mobile | < 480px | Single-column stack; hamburger nav; section padding drops to ~48px; hero serif scales to ~36px |
+| Mobile-Large | 480–767px | Same column count; hero scales to ~44px; pricing tiers stack vertically |
+| Tablet | 768–1023px | 2-column product grid; pricing 2x2; nav still full text labels |
+| Desktop | 1024–1279px | 3-column product grid; 4-column pricing; full nav |
+| Desktop-Large | ≥ 1280px | 4-column product grid; 1366px content max-width with full-bleed bands |
 
 ### Touch Targets
-- `{component.button-primary}` at minimum 44 × 44px (matches WCAG AAA).
-- `{component.text-input}` height is 44px.
+
+Every interactive element clears 44×44px on mobile. `button-primary` at 44px height + 24px horizontal padding meets WCAG-AAA touch target. `category-tab` at 8px 20px padding bumps to 12px 24px on touch screens. Nav-link tap areas extend invisibly beyond the text run to the full 44px row height. Sticky cart/sign-in icons in the top nav use 44×44 invisible hit boxes around their visible 24×24 glyph.
 
 ### Collapsing Strategy
-- Top nav collapses to hamburger at < 768px.
-- Hero 7-5 grid → single-column on mobile.
-- Feature card grids reduce columns rather than scaling.
-- Saturated feature cards retain their colored fill at every breakpoint.
-- Pricing tier cards collapse 4 → 2 → 1.
+
+- **Utility strip**: stays visible on every breakpoint; dropdowns collapse into a single "Account" icon below 768px
+- **Top nav**: middle category list collapses into a hamburger drawer below 1024px; the right-side Search + Sign-in + Cart stay visible
+- **Hero**: stays single-column at every breakpoint; chevron decorations shrink to ~60% size on tablet and disappear entirely on mobile
+- **Product family grid**: 4 → 3 → 2 → 1 column as breakpoints shrink; cards keep `{rounded.xl}` corners at every size
+- **Pricing comparison table**: 4-column grid on desktop collapses to 2x2 on tablet, then stacks into individual accordion-style cards on mobile
+- **Footer**: 5-column link grid → 2-column tablet → single-column accordion on mobile; HP wordmark stays flush left
+
+### Image Behavior
+
+Hero photography uses `{rounded.xl}` containers at every breakpoint. The chevron decorations vanish on mobile; the underlying photo card centers in the viewport. Lifestyle photography in the testimonial and "how-can-we-help" bands maintains 16:9 ratio with horizontal cropping rather than letterboxing on mobile. There are no art-direction crop swaps between desktop and mobile — the same image is used at every size.
 
 ## Iteration Guide
 
-1. Focus on ONE component at a time. Reference its YAML key (`{component.feature-card-pink}`, `{component.pricing-tier-card-featured}`).
-2. Pick the right brand-color card for the feature: pink for outbound/sequencer, teal for enterprise/featured, lavender for AI-agent products, peach for general SaaS warmth, ochre for community / experts.
-3. Variants of an existing component (`-active`, `-disabled`) live as separate entries.
-4. Use `{token.refs}` everywhere — never inline hex.
-5. Never document hover.
-6. Display headlines stay Plain Black 500 with negative letter-spacing. Body stays Inter 400.
-7. The cream-throughout palette is a system contract — don't add a dark footer.
-
-## Known Gaps
-
-- Plain Black is licensed to Clay and not available as a public web font; Inter weight 500 with negative letter-spacing is the closest substitute.
-- 3D claymation illustrations are commissioned assets, not system tokens — they're rendered per-page.
-- The mascot characters (named characters that recur across the site) are illustrated assets; their exact lineage and naming are not formalized in tokens.
-- Animation and transition timings (3D illustration parallax on scroll, feature card entrance animations) are not in scope.
-- Form validation states beyond `{component.text-input-focused}` are not extracted.
-- The actual Clay product surface (in-app data tables, formula editor, agent builder) shares some tokens with the marketing site but adds many product-specific components that are out of scope.
-
----
-
-## App Theme vs Landing Page Split (2026-06-23)
-
-HRConnect has **two CSS variable themes** that share the same token names but use different values:
-
-### App Theme (`resources/css/app.css` — DS-1)
-
-Used for all authenticated pages: dashboard, settings, ESS (attendance, leaves, overtimes, reimbursements). Neutral high-contrast palette optimized for readability:
-
-| Token | Value | On `#ffffff` | WCAG AA |
-|-------|-------|:------------:|:-------:|
-| `--color-canvas` | `#ffffff` | — | — |
-| `--color-ink` | `#0a0a0a` | 18.9:1 | ✅ |
-| `--color-body` | `#3a3a3a` | 8.1:1 | ✅ |
-| `--color-body-strong` | `#1a1a1a` | 15.2:1 | ✅ |
-| `--color-muted` | `#535353` | 6.7:1 | ✅ |
-| `--color-muted-soft` | `#888888` | 3.5:1 | ⚠️ |
-| `--color-hairline` | `#cfcfcf` | 1.4:1 | — |
-| `--color-hairline-soft` | `#f0f0f0` | 1.1:1 | — |
-| `--color-surface-soft` | `#f7f7f7` | 1.0:1 | — |
-| `--color-surface-card` | `#efefef` | 1.1:1 | — |
-| `--color-surface-strong` | `#d0d0d0` | 1.4:1 | — |
-
-All brand colors (`brand-pink`, `brand-teal`, etc.), surface-dark variants, and semantic colors (`success`, `warning`, `error`) are unchanged from the original values above.
-
-### Landing Theme (`resources/views/welcome.blade.php` — DS-2)
-
-Used exclusively on the public landing page. Overrides CSS variables via `.landing-theme` class to restore the original cream vintage palette. All brand-color feature cards, hero, and decorative elements retain their intended DESIGN.md appearance.
-
-Tokens overridden by `.landing-theme { ... }`:
-
-| Token | Value |
-|-------|-------|
-| `--color-canvas` | `#fffaf0` |
-| `--color-surface-soft` | `#faf5e8` |
-| `--color-surface-card` | `#f5f0e0` |
-| `--color-surface-strong` | `#ebe6d6` |
-| `--color-muted` | `#6a6a6a` |
-| `--color-muted-soft` | `#9a9a9a` |
-| `--color-hairline` | `#e5e5e5` |
-| `--color-hairline-soft` | `#f0f0f0` |
-
-### Token Mapping Guide
-
-| Design Token | App Value | Landing Value |
-|---|---|---|
-| `bg-canvas` | `#ffffff` | `#fffaf0` |
-| `bg-surface-soft` | `#f7f7f7` | `#faf5e8` |
-| `bg-surface-card` | `#efefef` | `#f5f0e0` |
-| `text-body` | `#3a3a3a` | `#3a3a3a` |
-| `text-muted` | `#535353` | `#6a6a6a` |
-| `text-muted-soft` | `#888888` | `#9a9a9a` |
-| `border-hairline` | `#cfcfcf` | `#e5e5e5` |
-
-All other tokens (`ink`, `body`, `body-strong`, `on-primary`, `on-dark`, brand colors, semantic colors, border radius) are identical across both themes.
-
-### Why Two Themes?
-
-The original cream palette (`#fffaf0` canvas, `#f5f0e0` surface-card) works beautifully for marketing pages with saturated brand-color feature cards and full-bleed illustrations, but fails WCAG AA contrast minimums for data-dense HR application pages. The app theme trades character for readability without affecting the landing page experience.
-
-This split is enforced purely via CSS variable override — no duplicate CSS, no separate builds. A single `<style>` block in `welcome.blade.php` scopes the cream palette to the landing page; all other pages inherit the neutral app theme from `@theme` in `app.css`.
+1. Focus on ONE component at a time; resist refactoring an entire section in one pass
+2. Reference component names and tokens directly (`{colors.primary}`, `{typography.display-xxl}`, `{rounded.xl}`, `card-product`) — do not paraphrase to hex/px in prose
+3. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically
+4. Add new variants as separate component entries (`-pressed`, `-disabled`, `-focused`); never bury state inside prose
+5. Default body to `{typography.body-md}`; reach for `{typography.body-emphasis}` for run-in bolds; keep display sizes for true heading roles
+6. Keep `{colors.primary}` scarce — at most two flame elements per viewport (one CTA + one chevron decoration). Three flame items in one viewport is over-saturation
+7. Use `{colors.coral-400}` as the warm secondary accent — secondary/tertiary buttons, "cancel" links, highlight borders, info banners. Coral should appear at most once per card or section to avoid competing with the blue primary
+8. Reach for the full blue scale (`blue-50`–`blue-950`) directly instead of mixing custom hexes — it covers every UI need from pale selection fills (`blue-50`) to deep nav bars (`blue-950`)
+9. When introducing a new section band, choose from `{colors.canvas}` / `{colors.cloud}` / `{colors.fog}` / `{colors.ink}` — the grey surface vocabulary

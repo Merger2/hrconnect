@@ -1,4 +1,4 @@
-export default function () {
+export default function (role = 'employee') {
     return {
         approvals: [],
         tab: 'pending',
@@ -13,33 +13,61 @@ export default function () {
         detailModalOpen: false,
         detailData: null,
         detailLoading: false,
+        role: role,
+
+        get normalizedRole() {
+            return { 'super-admin': 'hr', 'hr-manager': 'hr' }[this.role] ?? this.role;
+        },
 
         init() {
+            if (this.normalizedRole === 'employee') {
+                this.tab = 'history';
+            }
+            if (this.normalizedRole === 'finance') {
+                this.typeFilter = 'reimbursement';
+            }
             this.fetchApprovals();
         },
 
         typeLabel(type) {
-            const map = { Leave: 'Cuti', Overtime: 'Lembur', Reimbursement: 'Reimbursement' };
+            const map = { leave: 'Cuti', overtime: 'Lembur', reimbursement: 'Klaim', Leave: 'Cuti', Overtime: 'Lembur', Reimbursement: 'Klaim' };
             return map[type] || type;
         },
 
         async fetchApprovals() {
             this.loading = true;
             try {
-                const endpoint = this.tab === 'pending' ? '/api/v1/approvals/pending' : '/api/v1/approvals/history';
-                const url = endpoint + '?per_page=50' + (this.typeFilter ? `&type=${this.typeFilter}` : '');
-                const res = await fetch(url, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                let endpoint, params = new URLSearchParams({ per_page: '50' });
+                const nr = this.normalizedRole;
+                if (nr === 'employee') {
+                    endpoint = '/api/v1/approvals/pending';
+                    params.set('scope', 'own');
+                } else if (nr === 'hr') {
+                    endpoint = '/api/v1/approvals/pending';
+                    params.set('all', '1');
+                } else {
+                    endpoint = this.tab === 'pending' ? '/api/v1/approvals/pending' : '/api/v1/approvals/history';
+                }
+                if (this.typeFilter && nr !== 'employee') {
+                    params.set('type', this.typeFilter);
+                }
+                const url = endpoint + '?' + params.toString();
+                const res = await fetch(url, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.approvals = json.data;
-                    if (this.tab === 'pending') {
+                    if (this.tab === 'pending' && nr !== 'employee') {
                         this.pendingCount = json.meta?.total || json.data.length;
                     }
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat approvals' });
+            }
             finally { this.loading = false; }
+        },
+
+        canApprove() {
+            return ['manager', 'hr', 'finance'].includes(this.normalizedRole);
         },
 
         async approve(id) {
@@ -48,16 +76,16 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/approvals/${id}/approve`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify({}),
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Approved' });
+                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Disetujui' });
                     this.approvals = this.approvals.filter(a => a.approval_id !== id);
                     this.pendingCount = this.approvals.length;
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Failed' });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });
@@ -70,14 +98,12 @@ export default function () {
             this.detailModalOpen = true;
             this.detailData = null;
             try {
-                const res = await fetch(`/api/v1/approvals/${id}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/approvals/${id}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.detailData = json.data;
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Failed to load detail' });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal memuat detail' });
                     this.detailModalOpen = false;
                 }
             } catch {
@@ -103,16 +129,16 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/approvals/${id}/reject`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify({ rejection_reason: this.rejectReason }),
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Rejected' });
+                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Ditolak' });
                     this.approvals = this.approvals.filter(a => a.approval_id !== id);
                     this.pendingCount = this.approvals.length;
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Failed' });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });

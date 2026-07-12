@@ -68,7 +68,7 @@ Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'v
 
 // ─── AUTHENTICATED (Sanctum) ──────────────────────────────────────────
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // ── Auth (logout) ────────────────────────────────────────────────
     Route::prefix('auth')->name('api.auth.')->group(function () {
@@ -83,6 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── User & Profile ───────────────────────────────────────────────
     Route::get('/user', [AuthController::class, 'me'])->name('api.user');
+    Route::get('/sanctum/token', [AuthController::class, 'sanctumToken'])
+        ->name('api.sanctum-token');
 
     Route::prefix('profile')->name('api.profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
@@ -196,7 +198,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('permission:view_branches')
         ->group(function () {
             Route::get('/', [BranchController::class, 'index'])->name('index');
+            Route::post('/', [BranchController::class, 'store'])->name('store')->middleware('permission:manage_branches');
             Route::get('/{branch}', [BranchController::class, 'show'])->name('show');
+            Route::put('/{branch}', [BranchController::class, 'update'])->name('update')->middleware('permission:manage_branches');
+            Route::delete('/{branch}', [BranchController::class, 'destroy'])->name('destroy')->middleware('permission:manage_branches');
         });
 
     // ── Master Data — Department ──────────────────────────────────

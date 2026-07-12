@@ -27,7 +27,7 @@ export default function () {
             try {
                 const res = await fetch(`/api/v1/employees/${this.selectedEmployee.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         status: 'terminated',
                         termination_type: this.terminateForm.type,
@@ -38,7 +38,7 @@ export default function () {
 
                 if (!res.ok) {
                     const err = await res.json();
-                    this.terminateError = err.message || 'Failed to terminate';
+                    this.terminateError = err.message || 'Gagal melakukan PHK';
                     return;
                 }
 
@@ -48,7 +48,7 @@ export default function () {
                     window.employeesIndexInstance.fetchEmployees();
                 }
             } catch (e) {
-                this.terminateError = 'An error occurred';
+                this.terminateError = 'Terjadi kesalahan';
             } finally {
                 this.terminateLoading = false;
             }

@@ -9,6 +9,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
     $this->user = User::factory()->create(['email_verified_at' => now()]);
+    $this->user->assignRole('employee');
 });
 
 // ─── Public Auth Pages ─────────────────────────────────────────────
@@ -97,10 +98,10 @@ test('settings/appearance returns 200 for authenticated verified user', function
         ->assertOk();
 });
 
-test('settings/security requires password confirmation for 2FA', function () {
+test('settings/security redirects to profile security tab', function () {
     $this->actingAs($this->user)
         ->get('/settings/security')
-        ->assertRedirect('/user/confirm-password');
+        ->assertRedirect('settings/profile#security');
 });
 
 // ─── HR Module Pages (authenticated) ────────────────────────────────

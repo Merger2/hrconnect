@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->restrictOnDelete();
             $table->string('name');
-            $table->text('address');
+            $table->text('address')->nullable();
             $table->boolean('is_main')->default(false);
             $table->boolean('is_active')->default(true);
             $table->decimal('latitude', 10, 7)->nullable()->comment('Titik Y Pusat Kantor');

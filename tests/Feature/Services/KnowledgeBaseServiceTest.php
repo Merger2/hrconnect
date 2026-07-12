@@ -8,17 +8,19 @@ use App\Jobs\ProcessKnowledgeBaseEmbedding;
 use App\Models\KnowledgeBase;
 use App\Models\User;
 use App\Services\EmbeddingService;
-use App\Services\GeminiClient;
 use App\Services\KnowledgeBaseService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Validation\ValidationException;
+use Laravel\Ai\Embeddings;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    Embeddings::fake();
+
     $kbDir = storage_path('app/knowledgebase');
     if (! is_dir($kbDir)) {
         mkdir($kbDir, 0755, true);
@@ -27,21 +29,20 @@ beforeEach(function () {
 
 describe('chat', function () {
     it('throws BusinessRuleException for short question (< 5 chars)', function () {
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
 
         expect(fn () => $svc->chat('abc'))
             ->toThrow(BusinessRuleException::class, '5-500 karakter');
     });
 
     it('throws BusinessRuleException for long question (> 500 chars)', function () {
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
 
         expect(fn () => $svc->chat(str_repeat('a', 501)))
             ->toThrow(BusinessRuleException::class, '5-500 karakter');
     });
 
     it('returns answer with sources on vector search + Gemini success', function () {
-        $gemini = mock(GeminiClient::class);
         $embedding = mock(EmbeddingService::class);
 
         $kb1 = KnowledgeBase::create([
@@ -61,7 +62,7 @@ describe('chat', function () {
             'status' => KnowledgeBaseStatus::READY,
         ]);
 
-        $gemini->shouldReceive('embed')->once()->andReturn(array_fill(0, 768, 0.1));
+        $embedding->shouldReceive('embed')->once()->andReturn(array_fill(0, 768, 0.1));
         $embedding->shouldReceive('searchSimilar')->once()->andReturn(new Collection([$kb1, $kb2]));
 
         HrKnowledgeBaseAgent::fake([[
@@ -69,7 +70,7 @@ describe('chat', function () {
             'confidence' => 'high',
         ]]);
 
-        $svc = new KnowledgeBaseService($gemini, $embedding);
+        $svc = new KnowledgeBaseService($embedding);
         $result = $svc->chat('Apa itu cuti tahunan?');
 
         expect($result['answer'])->toBe('Karyawan berhak atas 12 hari cuti tahunan.');
@@ -78,12 +79,10 @@ describe('chat', function () {
         expect($result['sources'][1]['title'])->toBe('Cuti Sakit');
         expect($result['fallback'])->toBeFalse();
         expect($result['model'])->toBe(config('services.gemini.model'));
+        expect($result)->toHaveKey('conversation_id');
     });
 
     it('falls back to keyword search when Gemini throws', function () {
-        $gemini = mock(GeminiClient::class);
-        $embedding = mock(EmbeddingService::class);
-
         $kb = KnowledgeBase::create([
             'knowledgeable_type' => KnowledgeBase::class,
             'knowledgeable_id' => 1,
@@ -93,23 +92,24 @@ describe('chat', function () {
             'status' => KnowledgeBaseStatus::READY,
         ]);
 
-        $gemini->shouldReceive('embed')->once()->andThrow(new Exception('Gemini API down'));
-        $embedding->shouldReceive('searchByKeyword')->once()->andReturn(new Collection([$kb]));
+        // Override Embeddings::fake() to throw — this will make the real
+        // EmbeddingService::embed() throw, triggering the fallback path.
+        Embeddings::fake(fn () => throw new Exception('Gemini API down'));
 
-        $svc = new KnowledgeBaseService($gemini, $embedding);
-        $result = $svc->chat('Apa itu cuti tahunan?');
+        // Use real service — embed() throws via faked Embeddings, then
+        // searchByKeyword() does LIKE query in SQLite to find $kb
+        $svc = app(KnowledgeBaseService::class);
+        $result = $svc->chat('cuti tahunan'); // matches content via LIKE
 
         expect($result['fallback'])->toBeTrue();
         expect($result['model'])->toBe('pg_trgm');
         expect($result['confidence'])->toBe('low');
         expect($result['answer'])->toContain('offline');
         expect($result['sources'])->toHaveCount(1);
+        expect($result['sources'][0]['title'])->toBe('Cuti Tahunan');
     });
 
     it('fallback keyword search returns empty message when no chunks match', function () {
-        $gemini = mock(GeminiClient::class);
-        $embedding = mock(EmbeddingService::class);
-
         KnowledgeBase::create([
             'knowledgeable_type' => KnowledgeBase::class,
             'knowledgeable_id' => 1,
@@ -119,11 +119,11 @@ describe('chat', function () {
             'status' => KnowledgeBaseStatus::READY,
         ]);
 
-        $gemini->shouldReceive('embed')->once()->andThrow(new Exception('Gemini API down'));
-        $embedding->shouldReceive('searchByKeyword')->once()->andReturn(new Collection);
+        Embeddings::fake(fn () => throw new Exception('Gemini API down'));
 
-        $svc = new KnowledgeBaseService($gemini, $embedding);
-        $result = $svc->chat('tidak ada yang cocok');
+        $svc = app(KnowledgeBaseService::class);
+        // Query that doesn't match any content
+        $result = $svc->chat('pajak penghasilan pph21');
 
         expect($result['fallback'])->toBeTrue();
         expect($result['model'])->toBe('pg_trgm');
@@ -131,11 +131,29 @@ describe('chat', function () {
         expect($result['answer'])->toContain('tidak ada informasi');
         expect($result['sources'])->toBeEmpty();
     });
+
+    it('accepts user and conversationId for memory', function () {
+        $embedding = mock(EmbeddingService::class);
+        $embedding->shouldReceive('embed')->once()->andReturn(array_fill(0, 768, 0.1));
+        $embedding->shouldReceive('searchSimilar')->once()->andReturn(new Collection);
+
+        HrKnowledgeBaseAgent::fake([[
+            'answer' => 'Test answer.',
+            'confidence' => 'high',
+        ]]);
+
+        $user = User::factory()->create();
+        $svc = new KnowledgeBaseService($embedding);
+        $result = $svc->chat('Test question', conversationId: 'test-conv-123', user: $user);
+
+        expect($result['answer'])->toBe('Test answer.');
+        expect($result['fallback'])->toBeFalse();
+    });
 });
 
 describe('uploadPdf', function () {
     it('throws BusinessRuleException for non-PDF file', function () {
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
 
         $txt = UploadedFile::fake()->create('test.txt', 1024, 'text/plain');
 
@@ -144,7 +162,7 @@ describe('uploadPdf', function () {
     });
 
     it('throws BusinessRuleException for file over 10 MB', function () {
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
 
         $pdf = UploadedFile::fake()->create('test.pdf', 11264, 'application/pdf');
 
@@ -155,16 +173,14 @@ describe('uploadPdf', function () {
     it('dispatches ProcessKnowledgeBaseEmbedding job on success', function () {
         Queue::fake();
 
-        $gemini = mock(GeminiClient::class);
         $embedding = mock(EmbeddingService::class);
-
         $embedding->shouldReceive('extractTextFromPdf')->once()->andReturn('Extracted text content for testing.');
         $embedding->shouldReceive('chunkText')->once()->andReturn(['Chunk one', 'Chunk two', 'Chunk three']);
 
         $pdf = UploadedFile::fake()->create('test.pdf', 1024, 'application/pdf');
         $owner = User::factory()->create();
 
-        $svc = new KnowledgeBaseService($gemini, $embedding);
+        $svc = new KnowledgeBaseService($embedding);
         $result = $svc->uploadPdf($pdf, 'Test Document', KnowledgeBaseCategory::HR_POLICY, $owner);
 
         expect($result)->toBeInstanceOf(KnowledgeBase::class);
@@ -180,12 +196,11 @@ describe('uploadPdf', function () {
     });
 
     it('throws ValidationException when owner is missing', function () {
-        $gemini = mock(GeminiClient::class);
         $embedding = mock(EmbeddingService::class);
 
         $pdf = UploadedFile::fake()->create('test.pdf', 1024, 'application/pdf');
 
-        $svc = new KnowledgeBaseService($gemini, $embedding);
+        $svc = new KnowledgeBaseService($embedding);
 
         expect(fn () => $svc->uploadPdf($pdf, 'Test Document', KnowledgeBaseCategory::HR_POLICY))
             ->toThrow(ValidationException::class);
@@ -205,7 +220,7 @@ describe('reindex', function () {
             'status' => KnowledgeBaseStatus::ERROR,
         ]);
 
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
         $svc->reindex($kb);
 
         expect($kb->fresh()->status)->toBe(KnowledgeBaseStatus::PROCESSING);
@@ -243,7 +258,7 @@ describe('deleteKnowledgeBase', function () {
             'status' => KnowledgeBaseStatus::READY,
         ]);
 
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
         $count = $svc->deleteKnowledgeBase($kb1);
 
         expect($count)->toBe(2);
@@ -269,7 +284,7 @@ describe('deleteKnowledgeBase', function () {
             'status' => KnowledgeBaseStatus::READY,
         ]);
 
-        $svc = new KnowledgeBaseService(mock(GeminiClient::class), mock(EmbeddingService::class));
+        $svc = app(KnowledgeBaseService::class);
         $count = $svc->deleteKnowledgeBase($kb1);
 
         expect($count)->toBe(1);

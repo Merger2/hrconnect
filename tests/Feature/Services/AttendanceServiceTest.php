@@ -1,8 +1,8 @@
 <?php
 
+use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\VerificationMethod;
-use App\Enums\WfaStatus;
 use App\Exceptions\AlreadyClockedInException;
 use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
@@ -161,7 +161,7 @@ describe('clockIn', function () {
         expect($result)->toBeInstanceOf(Attendance::class);
         expect($result->employee_id)->toBe($employee->id);
         expect($result->is_wfa)->toBeTrue();
-        expect($result->status_wfa)->toBe(WfaStatus::PENDING);
+        expect($result->status_wfa)->toBe(ApprovalStatus::PENDING);
         expect($result->wfa_note)->toBe('Saya bekerja dari rumah hari ini karena banjir di area sekitar.');
         expect($result->verification_method)->toBe(VerificationMethod::PIN_VERIFIED);
         expect($result->clock_in)->not->toBeNull();
@@ -218,7 +218,7 @@ describe('clockIn', function () {
         ]);
 
         expect($result->is_wfa)->toBeTrue();
-        expect($result->status_wfa)->toBe(WfaStatus::PENDING);
+        expect($result->status_wfa)->toBe(ApprovalStatus::PENDING);
         expect($result->late_minutes)->toBe(0);
     });
 

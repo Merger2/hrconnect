@@ -3,9 +3,9 @@
 **PT 521 Teknologi Indonesia**
 **Laravel 13 + Livewire 4 + Material Design 3 + PostgreSQL**
 
-**Versi:** 4.0 — Flux UI dihapus, migrasi ke Material Design 3
-**Tanggal Update:** 2026-06-23
-**Status:** Frontend Development — Backend 100% selesai
+**Versi:** 5.0 — Penambahan modul Project & Task Management, HR Checklist, Announcements
+**Tanggal Update:** 2026-07-02
+**Status:** Frontend Development — Backend + PRD update
 
 ---
 
@@ -26,22 +26,25 @@
 13. [Module: KnowledgeBase AI (RAG)](#13-module-knowledgebase-ai-rag)
 14. [Module: Master Data](#14-module-master-data)
 15. [Notifications](#15-notifications)
-16. [Queue & Job Architecture](#16-queue--job-architecture)
-17. [Security & Data Protection](#17-security--data-protection)
-18. [Database Schema](#18-database-schema)
-19. [Migration Plan](#19-migration-plan)
-20. [Model Plan](#20-model-plan)
-21. [Service Classes Plan](#21-service-classes-plan)
-22. [Seeder Plan](#22-seeder-plan)
-23. [PWA Requirements](#23-pwa-requirements)
-24. [UI/UX Guidelines](#24-uiux-guidelines)
-25. [12-Week Execution Plan](#25-12-week-execution-plan)
-26. [Edge Cases & Real-World Scenarios](#26-edge-cases--real-world-scenarios)
-27. [Features Deferred to V2](#27-features-deferred-to-v2)
-28. [Glossary](#28-glossary)
-29. [Validation Rules](#29-validation-rules)
-30. [Locale & Format](#30-locale--format)
-31. [Data Retention & PDP Compliance](#31-data-retention--pdp-compliance)
+16. [Module: Project & Task Management](#16-module-project--task-management)
+17. [Module: HR Checklist](#17-module-hr-checklist)
+18. [Module: Announcements](#18-module-announcements)
+19. [Queue & Job Architecture](#19-queue--job-architecture)
+20. [Security & Data Protection](#20-security--data-protection)
+21. [Database Schema](#21-database-schema)
+22. [Migration Plan](#22-migration-plan)
+23. [Model Plan](#23-model-plan)
+24. [Service Classes Plan](#24-service-classes-plan)
+25. [Seeder Plan](#25-seeder-plan)
+26. [PWA Requirements](#26-pwa-requirements)
+27. [UI/UX Guidelines](#27-uiux-guidelines)
+28. [12-Week Execution Plan](#28-12-week-execution-plan)
+29. [Edge Cases & Real-World Scenarios](#29-edge-cases--real-world-scenarios)
+30. [Features Deferred to V2](#30-features-deferred-to-v2)
+31. [Glossary](#31-glossary)
+32. [Validation Rules](#32-validation-rules)
+33. [Locale & Format](#33-locale--format)
+34. [Data Retention & PDP Compliance](#34-data-retention--pdp-compliance)
 
 ---
 
@@ -52,6 +55,9 @@ HRConnect adalah sistem HRIS (Human Resource Information System) berskala Enterp
 - Pengajuan Cuti dan Lembur dengan Multi-Layer Approval
 - Penggajian Otomatis (PPh 21 TER + BPJS)
 - **KnowledgeBase AI (RAG)** untuk HRD (nilai jual utama skripsi)
+- **Project & Task Management** dengan alokasi resource + timesheet
+- **HR Checklist** untuk onboarding/offboarding terstruktur
+- **Announcements** untuk pengumuman internal
 - PWA Mobile-First untuk Employee Self-Service (ESS)
 
 **Fitur yang DITUNDA ke V2:** Loan/Kasbon, Asset Management, Performance Review, WhatsApp Notifications.
@@ -168,7 +174,6 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
 
 ### Login Methods
 - **Email + Password** (default)
-- **Google OAuth (SSO)** — Aktif dan utama, via Google Workspace
 - **2FA (TOTP)** — Opsional, bisa diaktifkan di settings
 
 ### 4.4 2FA Recovery `[S12]`
@@ -194,7 +199,6 @@ Tiga fitur ini adalah **pembeda utama** skripsi ini dari HRIS biasa dan **TIDAK 
 
 ### E-Payslip Security
 - Download E-Payslip → wajib **re-enter password login** (Password Confirmation)
-- **OAuth-only user:** Untuk user yang login via Google OAuth (tidak set password Laravel), prompt re-authentication via Google dengan parameter `prompt=reauth` (re-consent flow). Implementasi: redirect ke Google OAuth flow + return ke download URL setelah sukses. `[N7]`
 - PIN (6 digit) tersimpan di `employees.pin` — khusus untuk absensi (fallback saat face gagal)
 - **Separation of Concerns:** password (users) → login + payslip, pin (employees) → absensi shortcut
 - Download **unlimited** (tidak ada limit per bulan)
@@ -815,7 +819,224 @@ date (unique), name, is_active
 
 ---
 
-## 16. QUEUE & JOB ARCHITECTURE
+## 16. MODULE: PROJECT & TASK MANAGEMENT
+
+### 16.1 Overview
+Module untuk mengelola proyek, tugas (task), dan alokasi sumber daya karyawan. Mengintegrasikan timesheet untuk melacak waktu kerja per tugas/proyek. Pola arsitektur mengacu pada PasPapan Operational Workspace.
+
+**Fitur Utama:**
+- Manajemen proyek (CRUD, status lifecycle, timeline)
+- Alokasi anggota tim per proyek dengan persentase alokasi
+- Task board (Kanban-style: todo → in_progress → done)
+- Checklist item per task
+- Timesheet (log durasi per task per hari)
+- Laporan utilisasi sumber daya
+
+### 16.2 Data Model
+
+```
+Project
+  ├── manager_id → Employee (project manager)
+  ├── ProjectMember
+  │     ├── employee_id → Employee
+  │     └── allocation_pct (decimal 5,2) — % alokasi waktu
+  └── ProjectTask
+        ├── assigned_to → Employee
+        ├── status: todo / in_progress / done
+        ├── priority: low / normal / high
+        ├── estimated_hours (decimal 8,2)
+        └── ProjectTaskChecklistItem
+              ├── title
+              ├── is_done (boolean)
+              └── sort_order
+
+TimeEntry
+  ├── project_id → Project
+  ├── task_id → ProjectTask (nullable — untuk log ke proyek tanpa task spesifik)
+  ├── employee_id → Employee
+  ├── date (date)
+  ├── duration_minutes (integer)
+  └── description (text, nullable)
+```
+
+### 16.3 Project Lifecycle
+
+| Status | Deskripsi |
+|--------|-----------|
+| `active` | Proyek berjalan |
+| `on_hold` | Ditunda sementara |
+| `completed` | Selesai |
+
+Transisi: `active` ↔ `on_hold` → `completed` (tidak bisa kembali setelah completed).
+
+### 16.4 Task Lifecycle
+
+| Status | Deskripsi |
+|--------|-----------|
+| `todo` | Belum dikerjakan |
+| `in_progress` | Sedang dikerjakan |
+| `done` | Selesai (set `completed_at` timestamp) |
+
+Transisi: `todo` → `in_progress` → `done`. Checklist item bisa di-toggle kapan saja.
+
+### 16.5 Resource Allocation (ProjectMember)
+- Satu karyawan bisa dialokasikan ke banyak proyek
+- `allocation_pct` = persentase waktu (1-100%)
+- Contoh: Employee A: Proyek X 60% + Proyek Y 40% = 100%
+- Validasi: total alokasi per employee tidak wajib 100% (bisa < 100% jika ada idle/non-project time)
+- HR/Manager bisa lihat laporan utilisasi: total capacity vs allocated
+
+### 16.6 Timesheet (TimeEntry)
+- Employee log waktu per task via `MyTasksComponent`
+- Input: date, duration (jam:menit), description (opsional)
+- Validasi: tidak boleh log di masa depan, durasi maks 16 jam/hari
+- Laporan: total hours per project/employee per periode
+
+### 16.7 UI/UX
+
+| Halaman | Komponen | Akses |
+|---------|----------|-------|
+| **Project List** | `ProjectManagerComponent` — tabel + filter status, search | Admin (manage_projects) |
+| **Project Detail** | Tab: Overview, Team, Tasks, Timesheet | Admin (view_projects) |
+| **Task Board** | Kanban-style columns (todo/in_progress/done), drag-drop | Admin + assignee |
+| **My Tasks** | `MyTasksComponent` — daftar tugas saya, filter status | Employee |
+| **My Timesheet** | `MyTimesheetComponent` — log waktu per task per hari | Employee |
+| **Resource Report** | Tabel utilisasi per employee per periode | Admin (view_reports) |
+
+### 16.8 Permissions
+
+| Permission | Role | Gate |
+|-----------|------|------|
+| `view_projects` | HR-Manager, Manager | ✅ |
+| `manage_projects` | HR-Manager | ✅ |
+| `view_all_tasks` | HR-Manager, Manager | ✅ |
+| `view_reports_resource` | HR-Manager, Finance | ✅ |
+
+### 16.9 Related Enums
+
+| Enum | Values |
+|------|--------|
+| `ProjectStatus` | `active`, `on_hold`, `completed` |
+| `TaskStatus` | `todo`, `in_progress`, `done` |
+| `TaskPriority` | `low`, `normal`, `high` |
+
+---
+
+## 17. MODULE: HR CHECKLIST
+
+### 17.1 Overview
+Template-based checklist untuk onboarding (karyawan baru) dan offboarding (resign/PHK). Mengkoordinasikan tugas antar departemen (HR, IT, Admin) untuk memastikan tidak ada langkah terlewat.
+
+### 17.2 Data Model
+
+```
+HrChecklistTemplate
+  ├── type: onboarding / offboarding
+  ├── name
+  └── HrChecklistTemplateItem
+        ├── title
+        ├── category (hr / it / admin / manager)
+        ├── assignee_type: hr / employee / manager
+        ├── due_offset_days (integer — H+berapa dari effective_date)
+        ├── is_required (boolean)
+        └── sort_order
+
+HrChecklistCase
+  ├── template_id → HrChecklistTemplate
+  ├── employee_id → Employee
+  ├── type: onboarding / offboarding
+  ├── status: active / completed / cancelled
+  ├── effective_date (date — tanggal join/resign)
+  └── HrChecklistTask
+        ├── template_item_id → HrChecklistTemplateItem
+        ├── assigned_to → Employee
+        ├── due_date (date)
+        ├── status: pending / done / skipped / blocked
+        ├── completed_at
+        └── notes
+```
+
+### 17.3 Template System
+
+Dua template default:
+
+**Onboarding Template:**
+| Item | Kategori | Assignee | H+ |
+|------|----------|----------|:--:|
+| Siapkan akun email & aplikasi | IT | IT | -3 |
+| Siapkan laptop/PC | IT | IT | -2 |
+| Siapkan meja & akses kantor | Admin | Admin | -1 |
+| Orientasi perusahaan & pengenalan tim | HR | HR | 0 |
+| Input data karyawan ke sistem | HR | HR | 0 |
+| Setup face enrollment | HR | HR | 1 |
+| Assign project & perkenalan tugas | Manager | Manager | 1 |
+
+**Offboarding Template:**
+| Item | Kategori | Assignee | H+ |
+|------|----------|----------|:--:|
+| Kembalikan laptop/aset | IT | Employee | 0 |
+| Nonaktifkan akun email & akses | IT | IT | 0 |
+| Serah terima tugas & dokumen | Manager | Employee | -3 |
+| Hitung gaji akhir & pesangon | HR | HR | 0 |
+| Exit interview | HR | HR | 0 |
+
+### 17.4 Case Lifecycle
+1. HR buat `HrChecklistCase` saat employee join (onboarding) atau saat resign diajukan (offboarding)
+2. System generate `HrChecklistTask` dari template items
+3. Masing-masing assignee lihat tugas di `MyChecklistComponent`
+4. Tugas bisa di-skip (jika tidak relevan) atau blocked (jika ada dependency)
+5. Case otomatis `completed` ketika semua required task selesai
+
+### 17.5 Permissions
+
+| Permission | Role |
+|-----------|------|
+| `manage_hr_checklist` | HR-Manager |
+| View/update assigned tasks | Employee (hanya tugas sendiri) |
+
+---
+
+## 18. MODULE: ANNOUNCEMENTS
+
+### 18.1 Overview
+Fitur pengumuman internal perusahaan. HR/Manager bisa mempublikasikan pengumuman yang muncul di dashboard & notifikasi karyawan.
+
+### 18.2 Data Model
+
+```
+Announcement
+  ├── title (string 255)
+  ├── content (text)
+  ├── published_at (timestamp, nullable — null = draft)
+  ├── created_by → Employee
+  └── timestamps
+```
+
+### 18.3 Behavior
+- **Draft:** `published_at = null` — hanya visible ke HR
+- **Published:** `published_at = now()` — visible ke semua employee
+- **Expired:** `expired_at` (nullable) — jika diisi, pengumuman auto-hide setelah tanggal tsb
+- Urutan: published_at DESC (terbaru di atas)
+- Batas: 5 pengumuman terbaru di dashboard, "Lihat Semua" → full list
+
+### 18.4 UI/UX
+
+| Halaman | Konten |
+|---------|--------|
+| Dashboard | 5 pengumuman terbaru (card, judul + excerpt) |
+| Announcement List | Full list dengan filter (published/draft/expired) |
+| Create/Edit | Form: title, content, publish date (opsional), expire date (opsional) |
+
+### 18.5 Permissions
+
+| Permission | Role |
+|-----------|------|
+| `manage_announcements` | HR-Manager, Super-Admin |
+| View | Semua employee (hanya published) |
+
+---
+
+## 19. QUEUE & JOB ARCHITECTURE
 
 | Queue | Purpose |
 |-------|---------|
@@ -839,9 +1060,9 @@ date (unique), name, is_active
 
 ---
 
-## 17. SECURITY & DATA PROTECTION
+## 20. SECURITY & DATA PROTECTION
 
-### 17.1 CipherSweet Encryption
+### 20.1 CipherSweet Encryption
 | Model | Field | Blind Index |
 |-------|-------|-------------|
 | Employee | nik, phone, npwp, bank_account_number | phone_hash, nik_hash, npwp_hash |
@@ -850,15 +1071,15 @@ date (unique), name, is_active
 
 **Status enkripsi (per AGENTS.md + code):** Employee — ✅ selesai; Company.npwp — ✅ selesai; FamilyDetail — ⚠️ partial (model `#[Hidden]` sudah, blind index pending) `[CAT-003][N2]`
 
-### 17.2 Data Masking
+### 20.2 Data Masking
 - Tampilkan `3271********99`, data asli tetap terenkripsi
 
-### 17.3 Activity Logs
+### 20.3 Activity Logs
 - Dihandle oleh **Spatie ActivityLog Package** (`php artisan activitylog:clean`)
 - Command: `activitylog:clean --days=365` dijadwalkan via Scheduler harian
 - Custom model `ActivityLog.php` dihapus — mencegah conflict dengan model bawaan Spatie
 
-#### 17.3.1 Activity Log Coverage `[S6]`
+#### 20.3.1 Activity Log Coverage `[S6]`
 
 **Models yang di-log via Spatie LogsActivity trait:**
 Employee, User, Payroll, PayrollAdjustment, Leave, Overtime, Reimbursement, Loan, Asset, AssetHandover, CompanySetting, TaxConfig, BpjsConfig, Holiday, Approval, KnowledgeBase, Shift.
@@ -883,17 +1104,17 @@ attendance.exception_approved
 
 **PII handling di log:** untuk field PII (`nik`, `phone`, `npwp`, `bank_account_number`) → log NAMA FIELD-nya saja, **bukan value** (privacy).
 
-### 17.4 Soft Deletes
+### 20.4 Soft Deletes
 - employees, departments, positions, leaves, overtimes, payrolls, attendances
 
-### 17.5 Backup
+### 20.5 Backup
 - **SERVER-LEVEL ONLY** — tidak ada tombol di UI
 
-### 17.6 Face Embedding Security
+### 20.6 Face Embedding Security
 - Embedding 128D disimpan di `employees.face_embedding` (vector(128))
 - Hanya digunakan untuk similarity comparison, tidak bisa di-reverse ke foto asli
 
-### 17.7 File Upload Specifications `[S3]`
+### 20.7 File Upload Specifications `[S3]`
 
 | Type | Max Size | MIME | Storage Path | Encryption | Antivirus |
 |------|----------|------|--------------|-----------|-----------|
@@ -909,7 +1130,7 @@ attendance.exception_approved
 
 **DITUNDA V2:** Antivirus scan via ClamAV daemon (clamav-symfony), virus quarantine folder.
 
-### 17.8 Concurrency Control `[S10]`
+### 20.8 Concurrency Control `[S10]`
 - **Pessimistic locking:** `Payroll::generatePayroll()` pakai `lockForUpdate()` (per task.md §0.4) untuk cegah double-generation.
 - **Optimistic locking:** Employee/Payroll edit — DITUNDA V2 (toleransi last-write-wins untuk MVP).
 - **Multi-device session:** User boleh login multi-device. Tidak ada force-logout otomatis.
@@ -918,7 +1139,7 @@ attendance.exception_approved
 
 ---
 
-## 18. DATABASE SCHEMA
+## 21. DATABASE SCHEMA
 
 ### Existing Tables — Source of Truth: `docs/architecture/erd.dbml` (48 tabel) `[K4][N3]`
 
@@ -1011,7 +1232,7 @@ enum TerCategory: string {
 
 | Enum File | Model | Kolom | Values |
 |-----------|-------|-------|--------|
-| `ApprovalLevel` | Approval | `level` | `L1_SUPERVISOR=1`, `L2_HR=2` |
+| `ApprovalLevel` | Approval | `level` | `L1_SUPERVISOR=1`, `L2_MANAGER=2`, `L3_HRD=3`, `L4_DIRECTOR=4` (MVP pakai L1 & L2; L3/L4 disiapkan untuk V2 — lihat ERR-003) |
 | `BloodType` | Employee | `blood_type` | `A+`, `A-`, `B+`, `B-`, `O+`, `O-`, `AB+`, `AB-` |
 | `BpjsType` | BpjsConfig | `name` | `kesehatan`, `jht`, `jp`, `jkk`, `jkm` |
 | `CompanySettingType` | CompanySetting | `type` | `string`, `integer`, `decimal`, `boolean`, `json` |
@@ -1098,7 +1319,7 @@ enum TerCategory: string {
 | `created_by` | bigint (FK→users) | ❌ | — |
 | `applied_to_period` | date | ❌ | — |
 
-### Alter Tables (6)
+### Alter Tables (7)
 1. `loan_installments` — add: status, due_date
 2. `leaves` — add: rejection_reason
 3. `overtimes` — add: start_time, end_time, description, rejection_reason
@@ -1106,11 +1327,11 @@ enum TerCategory: string {
 5. `shifts` — add: late_tolerance_minutes
 6. `attendances` — add: late_minutes, verification_method, clock_out_verification_method, face_similarity_score, clock_out_face_similarity_score `[ERR-004]`
 7. `attendances` — **`shift_id` harus nullable** (karyawan tanpa shift assignment) `[ERR-005]`
-7. `employees` — add: pin
+8. `employees` — add: pin
 
 ---
 
-## 19. MIGRATION PLAN
+## 22. MIGRATION PLAN
 
 ### Defensive Migration Pattern `[CAT-018]`
 - **pgvector guard:** Gunakan `DB::statement()` untuk ekstensi pgvector, dengan `Schema::hasColumn()` check sebelum alter kolom — pastikan kompatibel dengan SQLite untuk testing lokal
@@ -1144,7 +1365,7 @@ enum TerCategory: string {
 
 ---
 
-## 20. MODEL PLAN
+## 23. MODEL PLAN
 
 ### New Models (7)
 1. CompanySetting — key-value helper (get/set static methods)
@@ -1173,12 +1394,14 @@ enum TerCategory: string {
 | Approval | relasi polymorphic `approvable`, relasi `approver` |
 | KnowledgeBase | relasi polymorphic `knowledgeable`, method `processEmbedding()` |
 
-### New Service Classes (5)
+### New Service Classes (5 inti — total 24 terdaftar, lihat `app/Services/`)
 1. **PayrollCalculator** — calculateProratedSalary(), calculatePTKP(), getTERCategory(), calculatePPh21(), calculateBPJS(), calculateOvertimePay(), countWorkingDays(), calculateThrProrated()
 2. **AttendanceService** — clockIn(), clockOut(), validateGPS(), validateFace(), handleWFA()
 3. **LeaveService** — calculateWorkDays(), validateLeaveQuota(), applyLeave(), initializeBalance()
 4. **ApprovalService** — createApprovalWorkflow(), approve(), reject(), checkAllApproved(), getDirectApprover()
 5. **ReimbursementService** — createReimbursement(), validateReceipt(), approve(), reject(), linkToPayroll()
+
+> **Catatan aktual:** Saat ini `app/Services/` berisi 24 service (20 top-level + 4 di `app/Services/Payroll/`: BpjsService, LemburService, PotonganService, Pph21Service). Daftar 5 di atas adalah yang asli direncanakan; sisanya ditambahkan saat development berjalan.
 
 ### New Export Classes (1)
 1. **Exports/** — AttendanceExport, LeaveExport, PayrollExport, EmployeeExport — extend `Maatwebsite\Excel\Concerns\FromCollection`
@@ -1187,10 +1410,18 @@ enum TerCategory: string {
 1. GenerateEmployeePayrollJob — queue: payroll_high, tries: 3, timeout: 120s
 2. ProcessKnowledgeBaseEmbedding — queue: default, tries: 2, timeout: 300s
 
-### New Commands (3)
+### New Commands (9)
 1. `attendance:detect-alpha` — dailyAt 23:59
 2. `attendance:detect-chronic-late` — weeklyOn Friday 18:00
-3. `leave:reset-quota` — yearOn 1 Jan 00:00
+3. `attendance:detect-missed-clock` — dailyAt 00:01 (deteksi hari sebelumnya)
+4. `attendance:send-reminders` — weekdays dailyAt 09:00
+5. `attendance:auto-approve-wfa` — dailyAt 02:00 (WFA pending > 3 hari kerja)
+6. `leave:reset-quota` — yearlyOn 1 Jan 00:00
+7. `payroll:generate` — manual trigger via Finance UI / artisan (tidak di-schedule)
+8. `knowledgebase:index` — manual trigger untuk reindex knowledge base
+9. `cache:warm` — dailyAt 05:00 (sebelum jam kerja)
+
+> **Catatan:** Jadwal lengkap ada di `routes/console.php`. Verifikasi via `php artisan schedule:list`.
 
 ### New Notifications (7)
 1. LeaveRequestSubmitted
@@ -1203,11 +1434,11 @@ enum TerCategory: string {
 
 ---
 
-## 21. SERVICE CLASSES PLAN
+## 24. SERVICE CLASSES PLAN
 
-**Catatan:** Observers sudah dibuat: EmployeeObserver, AttendanceObserver, LeaveObserver, TaxConfigObserver, BpjsConfigObserver, HolidayObserver — semua terdaftar di `AppServiceProvider::boot()`.
+**Catatan:** Observers sudah dibuat (8 total) — EmployeeObserver, AttendanceObserver, LeaveObserver, PayrollObserver, TaxConfigObserver, BpjsConfigObserver, HolidayObserver, CompanySettingObserver — semua terdaftar di `AppServiceProvider::registerObservers()` (dipanggil dari `boot()`).
 
-### 21.1 PayrollCalculatorService
+### 24.1 PayrollCalculatorService
 
 ```php
 // Method utama
@@ -1246,7 +1477,7 @@ calculateUangPenghargaanMasaKerja(Employee $employee): float
 - **Hardcoded SQL error code 23505 DILARANG** — gunakan `UniqueConstraintViolationException` untuk menangani constraint violation secara database-agnostic `[CAT-019]`
 - `calculatePTKP()` dihapus dari implementasi — PTKP hanya digunakan untuk menentukan kategori TER via `TerCategory::resolveFromStatus()`. Nilai nominal PTKP tidak dipakai di metode TER (Tarif Efektif Rata-rata).
 
-### 21.2 AttendanceService
+### 24.2 AttendanceService
 
 ```php
 // Method utama
@@ -1261,7 +1492,7 @@ clockOut(Employee $employee, array $data): Attendance
 - `linkOvertimeToAttendance()` → `AttendanceObserver::saved()` (observer pattern)
 - `FaceNotRecognizedException` tidak boleh di-swap (swallowed) — tiered fallback: face → PIN → manual approval `[CAT-017]`
 
-### 21.3 LeaveService
+### 24.3 LeaveService
 
 ```php
 // Method utama
@@ -1273,7 +1504,7 @@ carryForward(Employee $employee, int $fromYear, int $toYear): void
 
 **Catatan:** `validateLeaveQuota()` tidak sebagai method terpisah — validasi kuota dilakukan inline di `applyLeave()`. Quota hanya divalidasi saat submit, baru di-deduct setelah full L2 approval (via `ApprovalService::approve()` callback ke `LeaveService::applyLeave()`).
 
-### 21.4 ApprovalService
+### 24.4 ApprovalService
 
 ```php
 // Method utama
@@ -1286,7 +1517,7 @@ reject(Approval $approval, string $reason): void
 
 ---
 
-## 22. SEEDER PLAN
+## 25. SEEDER PLAN
 
 ### Urutan Seeder
 1. RolesAndPermissionsSeeder — 5 roles + 50+ permissions
@@ -1300,9 +1531,9 @@ reject(Approval $approval, string $reason): void
 
 ---
 
-## 23. PWA REQUIREMENTS
+## 26. PWA REQUIREMENTS
 
-### 23.1 manifest.json `[S7]`
+### 26.1 manifest.json `[S7]`
 ```json
 {
   "name": "HRConnect",
@@ -1327,12 +1558,12 @@ reject(Approval $approval, string $reason): void
 }
 ```
 
-### 23.2 Service Worker
+### 26.2 Service Worker
 - **Strategy:** `NetworkFirst` untuk API calls, `CacheFirst` untuk static assets (JS/CSS/images), `StaleWhileRevalidate` untuk halaman dashboard.
 - **Offline page:** `/offline.html` — tampilkan saat tidak ada koneksi + ada attempt clock-in.
 - **DITUNDA V2:** IndexedDB sync queue untuk clock-in offline (PWA Offline mode).
 
-### 23.3 Camera Permission Flow
+### 26.3 Camera Permission Flow
 ```
 1. User tap "Clock In"
 2. Browser prompt permission akses kamera
@@ -1341,12 +1572,12 @@ reject(Approval $approval, string $reason): void
 5. Camera tidak tersedia (HP tidak punya kamera depan) → langsung fallback ke PIN
 ```
 
-### 23.4 Splash Screens
+### 26.4 Splash Screens
 - Generate via `realfavicongenerator.net` atau `pwa-asset-generator`
 - **iOS splash:** 8 sizes (1125x2436, 1242x2688, 828x1792, 1242x2208, 750x1334, 640x1136, 1668x2224, 2048x2732) — link via `<link rel="apple-touch-startup-image">`
 - **Android:** handled otomatis oleh manifest (`background_color` + `icon-512`)
 
-### 23.5 Install Prompt UX
+### 26.5 Install Prompt UX
 - **Trigger:** setelah 2x login berturut-turut, ATAU setelah first successful clock-in.
 - **Custom UI:** Custom modal/bottom sheet (Alpine + Tailwind) dengan tombol "Install Aplikasi" + "Nanti Saja".
 - **Suppress:** simpan flag di localStorage; tidak muncul lagi 14 hari jika user dismiss.
@@ -1357,9 +1588,9 @@ reject(Approval $approval, string $reason): void
 
 ---
 
-## 24. UI/UX GUIDELINES
+## 27. UI/UX GUIDELINES
 
-### 24.1 Design System — Material Design 3
+### 27.1 Design System — Material Design 3
 
 HRConnect menggunakan **Material Design 3** sebagai design language dengan palette kustom cream-warm. Tidak ada Flux UI.
 
@@ -1444,7 +1675,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | `rounded-[2rem]` | 32px | Camera card |
 | `rounded-full` | 9999px | Avatar, pill |
 
-### 24.2 Layout Strategy
+### 27.2 Layout Strategy
 
 | Platform | Navigation | Komponen |
 |----------|-----------|----------|
@@ -1462,7 +1693,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 - `sticky top-0 z-50 bg-canvas`
 - Hidden on desktop (`md:hidden`)
 
-### 24.3 Accessibility Commitment `[S8]`
+### 27.3 Accessibility Commitment `[S8]`
 - **Target:** WCAG 2.1 Level AA (subset).
 - **Color contrast:** minimum 4.5:1 untuk text normal, 3:1 untuk large text/UI components.
 - **Keyboard navigation:** semua aksi (form submit, modal close, dropdown, dll) harus bisa dijangkau via Tab/Shift+Tab/Enter/Esc.
@@ -1471,7 +1702,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 - **Screen reader:** tested di NVDA (Windows) + VoiceOver (iOS) untuk halaman utama (Login, Clock-In, Inbox, Payslip).
 - **Catatan:** full WCAG validation memerlukan manual testing dengan assistive technologies + expert review accessibility — tidak fully automated.
 
-### 24.4 Component Standards `[N5]`
+### 27.4 Component Standards `[N5]`
 - **Loading state:** Skeleton card (Tailwind `animate-pulse bg-surface-container-high rounded-2xl`) untuk list/table; spinner untuk button submit.
 - **Empty state:** ilustrasi claymation + pesan kontekstual + CTA primary (contoh: "Belum ada cuti — Ajukan Cuti").
 - **Error toast:** Custom Alpine toast (success/warning/danger/info) — durasi 5 detik, dismissible.
@@ -1484,7 +1715,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 
 ---
 
-## 25. EXECUTION PLAN
+## 28. EXECUTION PLAN
 
 > **Update 2026-06-23:** Backend 100% ✅ selesai (193 app/ PHP files, 51 API endpoints, 1,121 tests). Sekarang fokus Frontend ESS.
 
@@ -1544,9 +1775,9 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 
 ---
 
-## 26. EDGE CASES & REAL-WORLD SCENARIOS
+## 29. EDGE CASES & REAL-WORLD SCENARIOS
 
-### 26.1 Karyawan Meninggal
+### 29.1 Karyawan Meninggal
 | Komponen | Treatment |
 |----------|-----------|
 | Gaji | Pro-rated s/d `deceased_date` |
@@ -1556,7 +1787,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | Status | `termination_type = deceased` |
 | Payslip | Tetap di-generate untuk ahli waris |
 
-### 26.2 Karyawan Resign di Tengah Bulan
+### 29.2 Karyawan Resign di Tengah Bulan
 | Komponen | Treatment |
 |----------|-----------|
 | Gaji | Pro-rated s/d `resign_date` |
@@ -1566,7 +1797,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | Loan/Kasbon | Potong sekaligus dari gaji terakhir |
 | Status | `termination_type = resign` |
 
-### 26.3 Karyawan PHK — 3 Variant `[M7]`
+### 29.3 Karyawan PHK — 3 Variant `[M7]`
 
 | Variant | `phk_variant` | Pesangon | Penghargaan Masa Kerja | Catatan |
 |---------|---------------|----------|------------------------|---------|
@@ -1585,7 +1816,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | THR | Pro-rated jika sudah kerja ≥1 bulan |
 | Status | `termination_type = dismissed`, `phk_variant` = sesuai variant |
 
-### 26.4 Karyawan Kontrak (PKWT) Habis
+### 29.4 Karyawan Kontrak (PKWT) Habis
 | Komponen | Treatment |
 |----------|-----------|
 | Gaji | Pro-rated s/d `contract_end_date` |
@@ -1594,7 +1825,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | THR | Pro-rated jika sudah kerja >3 bulan |
 | Status | `termination_type = contract_end` |
 
-### 26.5 Karyawan Cuti Besar (Unpaid Leave)
+### 29.5 Karyawan Cuti Besar (Unpaid Leave)
 | Komponen | Treatment |
 |----------|-----------|
 | Gaji | TIDAK dibayar selama cuti |
@@ -1602,35 +1833,35 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | Quota cuti tahunan | TIDAK berkurang |
 | Masa kerja | Tetap dihitung |
 
-### 26.6 Karyawan Join di Tengah Bulan
+### 29.6 Karyawan Join di Tengah Bulan
 - Gaji pro-rated dari `join_date`
 - Jika join setelah cut-off → masuk payroll bulan berikutnya
 - Cuti tahunan pro-rated: (sisa bulan / 12) × 12 hari
 
-### 26.7 Karyawan Kerja di Hari Libur Nasional
+### 29.7 Karyawan Kerja di Hari Libur Nasional
 - Dihitung sebagai **lembur holiday**, bukan weekday biasa
 - Rate: tiered — 2x (jam 1-8), 3x (jam 9-10), 4x (jam 11+) `[ERR-001]`
 - Karyawan monthly salary sudah dapat gaji di hari libur, lembur = tambahan
 
-### 26.8 Karyawan Tanpa Atasan Langsung (`parent_id = NULL`)
+### 29.8 Karyawan Tanpa Atasan Langsung (`parent_id = NULL`)
 - Approval Level 1 otomatis **skip** ke HR Manager (Level 2)
 - Ini terjadi untuk CEO, direktur, atau posisi baru yang belum punya atasan
 
-### 26.9 WFA Approval Setelah Clock-In
+### 29.9 WFA Approval Setelah Clock-In
 - Karyawan absen dulu → status `is_wfa = true`, `status_wfa = pending`
 - Manager review setelahnya
 - Jika reject → status absensi bisa diubah menjadi `absent`
 
-### 26.10 Payroll Lock Permanen
+### 29.10 Payroll Lock Permanen
 - Status `published` → **LOCKED PERMANEN**
 - Koreksi hanya bisa via adjustment di periode berikutnya
 - Tidak ada "unpublish" atau "edit" setelah publish
 
 ---
 
-## 27. FEATURES DEFERRED TO V2
+## 30. FEATURES DEFERRED TO V2
 
-### 27.1 Promoted to V1 (sudah masuk MVP) `[N12]`
+### 30.1 Promoted to V1 (sudah masuk MVP) `[N12]`
 
 | Fitur | Lokasi PRD | Catatan |
 |-------|-----------|---------|
@@ -1639,7 +1870,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | Chronic Late Warning System | §6.5 (V1) | Cron weekly Friday 18:00 |
 | THR/Bonus Auto-Calculation | §11.11 (V1) | Pro-rated formula |
 
-### 27.2 Tetap V2 (TIDAK di-code di MVP)
+### 30.2 Tetap V2 (TIDAK di-code di MVP)
 
 | Fitur | Alasan | Estimasi |
 |-------|--------|----------|
@@ -1664,14 +1895,14 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 | Optimistic locking (Employee/Payroll edit) | Last-write-wins toleransi MVP | 1 minggu |
 | Tax/BPJS configurable rates UI | Hardcoded di seeder MVP | 1 minggu |
 
-### 27.3 CATATAN V2
+### 30.3 CATATAN V2
 - Fitur V2 sudah tercatat di PRD ini untuk referensi.
 - Tabel-tabel persiapan (`reimbursement_categories`, `loan_installments`) tetap dibuat di Phase 1.
 - Saat V2 dimulai, tinggal implementasi UI dan logic, tidak perlu migration baru.
 
 ---
 
-## 28. GLOSSARY `[F]`
+## 31. GLOSSARY `[F]`
 
 | Istilah | Definisi |
 |---------|----------|
@@ -1722,7 +1953,7 @@ HRConnect menggunakan **Material Design 3** sebagai design language dengan palet
 
 ---
 
-## 29. VALIDATION RULES `[S2]`
+## 32. VALIDATION RULES `[S2]`
 
 Aturan validasi standar untuk semua FormRequest. Implementasikan via Laravel validation rules:
 
@@ -1752,9 +1983,9 @@ Aturan validasi standar untuk semua FormRequest. Implementasikan via Laravel val
 
 ---
 
-## 30. LOCALE & FORMAT `[S1][S17]`
+## 33. LOCALE & FORMAT `[S1][S17]`
 
-### 30.1 Application Defaults
+### 33.1 Application Defaults
 | Setting | Value | Lokasi Config |
 |---------|-------|---------------|
 | Timezone | `Asia/Jakarta` (WIB, UTC+7) | `config/app.php` `'timezone'` |
@@ -1769,11 +2000,11 @@ Aturan validasi standar untuk semua FormRequest. Implementasikan via Laravel val
 | Number decimal | `,` (koma) | id_ID locale |
 | Currency display | `Rp 1.234.567,-` (no decimal untuk IDR) | Helper `formatRupiah($amount)` |
 
-### 30.2 Carbon Configuration
+### 33.2 Carbon Configuration
 - Application uses `CarbonImmutable` — set di `AppServiceProvider::boot()` via `Date::use(CarbonImmutable::class)` (sudah ada — lihat AGENTS.md).
 - All datetime stored di UTC, displayed di WIB via `->setTimezone('Asia/Jakarta')`.
 
-### 30.3 Number/Currency Helpers
+### 33.3 Number/Currency Helpers
 ```php
 // app/Helpers/Format.php
 function formatRupiah(int|float $amount, bool $withSymbol = true): string {
@@ -1788,9 +2019,9 @@ function formatDateID(Carbon $date): string {
 
 ---
 
-## 31. DATA RETENTION & PDP COMPLIANCE `[S4][S5][S18]`
+## 34. DATA RETENTION & PDP COMPLIANCE `[S4][S5][S18]`
 
-### 31.1 Backup Schedule (Server-Level Only — sesuai §17.5)
+### 34.1 Backup Schedule (Server-Level Only — sesuai §17.5)
 | Aspek | Spesifikasi |
 |-------|-------------|
 | Frequency | Daily 01:00 WIB (PostgreSQL `pg_dump` full) + weekly tarball `/storage` |
@@ -1802,7 +2033,7 @@ function formatDateID(Carbon $date): string {
 | RTO | 4 jam (max downtime tolerance) |
 | Akses backup | Hanya super-admin via SSH ke backup server, bukan via UI |
 
-### 31.2 Data Retention by Entity
+### 34.2 Data Retention by Entity
 
 | Entity | Active Period | Post-Resign Action | Anonymization |
 |--------|---------------|--------------------|---------------|
@@ -1817,7 +2048,7 @@ function formatDateID(Carbon $date): string {
 
 **Implementasi:** Job `PruneStaleDataJob` (scheduled monthly) yang mengeksekusi retention policy per entity.
 
-### 31.3 PDP Compliance (UU 27/2022)
+### 34.3 PDP Compliance (UU 27/2022)
 
 **Hak Subjek Data:**
 | Hak | Implementasi |
@@ -1839,7 +2070,7 @@ function formatDateID(Carbon $date): string {
 - Tanpa consent → fallback ke PIN-only (face dan GPS disabled).
 - Consent disimpan di `users.consent_face_embedding`, `users.consent_gps_tracking` (boolean).
 
-### 31.4 Data Breach Response
+### 34.4 Data Breach Response
 - Jika terjadi breach (akses tidak sah, data leak):
   1. Segera hentikan akses (revoke token, force logout).
   2. Investigasi via `activity_log` + server access log.
@@ -1859,8 +2090,6 @@ QUEUE_CONNECTION=database
 GEMINI_API_KEY=
 GEMINI_EMBEDDING_MODEL=text-embedding-004
 GEMINI_MODEL=gemini-2.5-flash
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
 CIPHERSWEET_SECRET_KEY=
 APP_NAME=HRConnect
 ```
@@ -1905,7 +2134,7 @@ activitylog:clean --days=365     → daily
 
 ---
 
-**PRD VERSI 4.0 — Frontend Development Phase. Backend 100% ✅.**
+**PRD VERSI 5.0 — Frontend Development Phase. Backend 100% ✅.**
 
 ---
 

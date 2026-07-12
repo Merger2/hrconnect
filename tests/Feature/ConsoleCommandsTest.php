@@ -1,10 +1,10 @@
 <?php
 
+use App\Enums\ApprovalStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\EmployeeStatus;
 use App\Enums\RequestStatus;
 use App\Enums\VerificationMethod;
-use App\Enums\WfaStatus;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -392,14 +392,14 @@ test('auto-approve-wfa approve WFA yang sudah melebihi batas waktu', function ()
         'status' => AttendanceStatus::ON_TIME,
         'verification_method' => VerificationMethod::FACE_VERIFIED,
         'is_wfa' => true,
-        'status_wfa' => WfaStatus::PENDING,
+        'status_wfa' => ApprovalStatus::PENDING,
     ]);
 
     Artisan::call('attendance:auto-approve-wfa', ['--date' => now()->toDateString()]);
     $output = Artisan::output();
 
     expect($output)->toContain('1 WFA di-auto-approve');
-    expect(Attendance::first()->status_wfa)->toBe(WfaStatus::APPROVED);
+    expect(Attendance::first()->status_wfa)->toBe(ApprovalStatus::APPROVED);
 });
 
 test('auto-approve-wfa skip WFA yang masih dalam batas waktu', function () {
@@ -414,14 +414,14 @@ test('auto-approve-wfa skip WFA yang masih dalam batas waktu', function () {
         'status' => AttendanceStatus::ON_TIME,
         'verification_method' => VerificationMethod::FACE_VERIFIED,
         'is_wfa' => true,
-        'status_wfa' => WfaStatus::PENDING,
+        'status_wfa' => ApprovalStatus::PENDING,
     ]);
 
     Artisan::call('attendance:auto-approve-wfa', ['--date' => now()->toDateString()]);
     $output = Artisan::output();
 
     expect($output)->toContain('0 WFA di-auto-approve');
-    expect(Attendance::first()->status_wfa)->toBe(WfaStatus::PENDING);
+    expect(Attendance::first()->status_wfa)->toBe(ApprovalStatus::PENDING);
 });
 
 // ─── attendance:send-reminders ─────────────────────────────────────────

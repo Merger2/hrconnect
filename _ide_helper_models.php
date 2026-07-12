@@ -138,7 +138,7 @@ namespace App\Models{
  * @property string|null $photo_selfie_out
  * @property \App\Enums\AttendanceStatus $status
  * @property bool $is_wfa
- * @property \App\Enums\WfaStatus|null $status_wfa
+ * @property \App\Enums\ApprovalStatus|null $status_wfa
  * @property string|null $exception_type
  * @property string|null $exception_notes
  * @property int|null $approved_late_by

@@ -19,6 +19,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 #[Group('Asset')]
 class AssetController extends Controller
@@ -50,9 +51,10 @@ class AssetController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhere('serial_number', 'ilike', "%{$search}%")
-                    ->orWhere('code', 'ilike', "%{$search}%");
+                $likeOp = DB::getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $q->where('name', $likeOp, "%{$search}%")
+                    ->orWhere('serial_number', $likeOp, "%{$search}%")
+                    ->orWhere('code', $likeOp, "%{$search}%");
             });
         }
 

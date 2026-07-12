@@ -24,15 +24,15 @@ export default function () {
             try {
                 const params = new URLSearchParams({ per_page: 50 });
                 if (this.statusFilter) params.set('status', this.statusFilter);
-                const res = await fetch(`/api/v1/loans?${params}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                });
+                const res = await fetch(`/api/v1/loans?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
                 }
-            } catch { /* silent */ }
+            } catch {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data pinjaman' });
+            }
             finally { this.loading = false; }
         },
 
@@ -59,7 +59,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch('/api/v1/loans', {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.form),
                 });
                 const json = await res.json();
@@ -82,7 +82,7 @@ export default function () {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(`/api/v1/loans/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
@@ -97,7 +97,8 @@ export default function () {
         },
 
         formatCurrency(val) {
-            return 'Rp ' + (val || 0).toLocaleString('id-ID');
+            if (val === null || val === undefined) return '-';
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
         },
     };
 }

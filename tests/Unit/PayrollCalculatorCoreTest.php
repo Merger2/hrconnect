@@ -881,11 +881,11 @@ test('leave cash out uses remaining balance and daily rate', function () {
     $result = $this->service->calculateLeaveCashOut($emp);
 
     expect($result)->toBeGreaterThan(0.0);
-    // remaining = 10, hourly = 5_000_000
-    // working days this month (June 2026) = 22
-    // daily_rate = 5_000_000 / 22 = 227,272.727...
-    // result = 10 * round(5_000_000 / 22, 2) = 2,272,727.27
-    expect($result)->toBe(2_272_727.27);
+    // PP 35/2021 Pasal 40 Ayat 4: daily rate = gaji / 21 (5-day work week)
+    // remaining = 10, monthly = 5_000_000
+    // daily_rate = 5_000_000 / 21 = 238,095.238...
+    // result = round(10 * (5_000_000 / 21), 2) = 2,380,952.38
+    expect($result)->toBe(2_380_952.38);
 });
 
 // ─── Payroll Lock Behavior ───────────────────────────────────

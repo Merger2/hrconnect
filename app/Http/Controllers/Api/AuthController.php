@@ -192,6 +192,31 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Get active Sanctum token for current user.
+     *
+     * Returns the current Bearer token for the authenticated session.
+     * Caches token for 5 minutes to reduce DB writes.
+     *
+     * @tags Auth
+     */
+    public function sanctumToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $sessionId = session()->getId();
+
+        $token = cache()->remember("sanctum_token:{$user->id}:{$sessionId}", 300, function () use ($user) {
+            $user->tokens()->where('name', 'web-frontend')->delete();
+
+            return $user->createToken('web-frontend')->plainTextToken;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => ['token' => $token],
+        ]);
+    }
+
     private function userPayload(User $user): array
     {
         return [

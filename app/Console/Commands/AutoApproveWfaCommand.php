@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\WfaStatus;
+use App\Enums\ApprovalStatus;
 use App\Models\Attendance;
 use App\Models\CompanySetting;
 use Carbon\CarbonImmutable;
@@ -28,7 +28,7 @@ class AutoApproveWfaCommand extends Command
 
         $pendingAttendances = Attendance::query()
             ->where('is_wfa', true)
-            ->where('status_wfa', WfaStatus::PENDING->value)
+            ->where('status_wfa', ApprovalStatus::PENDING->value)
             ->whereDate('date', '<=', $cutoffDate->toDateString())
             ->get();
 
@@ -40,12 +40,12 @@ class AutoApproveWfaCommand extends Command
             DB::transaction(function () use ($attendance, $timeoutDays) {
                 $locked = Attendance::lockForUpdate()->find($attendance->id);
 
-                if (! $locked || $locked->status_wfa !== WfaStatus::PENDING) {
+                if (! $locked || $locked->status_wfa !== ApprovalStatus::PENDING) {
                     return;
                 }
 
                 $locked->update([
-                    'status_wfa' => WfaStatus::APPROVED,
+                    'status_wfa' => ApprovalStatus::APPROVED,
                 ]);
 
                 activity()

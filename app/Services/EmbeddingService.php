@@ -10,6 +10,7 @@ use App\Models\KnowledgeBase;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Ai\Embeddings;
 use Smalot\PdfParser\Parser as PdfParser;
 
 /**
@@ -18,7 +19,7 @@ use Smalot\PdfParser\Parser as PdfParser;
  * Flow upload PDF:
  * 1. extractTextFromPdf($filePath) → raw string
  * 2. chunkText($text) → array of chunks (60 tokens, overlap 10 per PRD §13.1)
- * 3. Per chunk → GeminiClient::embed → store sebagai row di knowledge_bases
+ * 3. Per chunk → Embeddings::for() → store sebagai row di knowledge_bases
  *    dengan page_number=chunk_index, embedding=768D vector
  *
  * Vector search pakai pgvector cosine distance: `embedding <=> '[...]'::vector`.
@@ -33,10 +34,6 @@ class EmbeddingService
     private const CHUNK_CHARS = 240;
 
     private const OVERLAP_CHARS = 40;
-
-    public function __construct(
-        protected GeminiClient $gemini,
-    ) {}
 
     /**
      * Extract teks dari PDF file path.
@@ -102,6 +99,38 @@ class EmbeddingService
     }
 
     /**
+     * Generate embedding 768D dari text via Laravel AI SDK.
+     *
+     * @return array<int, float> 768 dimensi float
+     *
+     * @throws BusinessRuleException
+     */
+    public function embed(string $text): array
+    {
+        if ($text === '' || mb_strlen($text) > 30_000) {
+            throw new BusinessRuleException('Teks untuk embedding harus 1-30000 karakter.');
+        }
+
+        try {
+            $embeddingModel = (string) config('services.gemini.embedding_model', 'text-embedding-004');
+
+            $embeddings = Embeddings::for([$text])
+                ->dimensions(768)
+                ->generate(model: $embeddingModel);
+
+            $vector = $embeddings->first() ?? [];
+
+            if (! is_array($vector) || count($vector) !== 768) {
+                throw new BusinessRuleException('Embedding SDK tidak mengembalikan 768 dimensi.');
+            }
+
+            return array_map('floatval', $vector);
+        } catch (\Throwable $e) {
+            throw new BusinessRuleException('Gagal generate embedding: '.$e->getMessage());
+        }
+    }
+
+    /**
      * Process single KnowledgeBase: re-embed content yang sudah ada di kolom content.
      *
      * Dipakai oleh ProcessKnowledgeBaseEmbedding Job untuk reindex.
@@ -115,7 +144,7 @@ class EmbeddingService
         }
 
         try {
-            $embedding = $this->gemini->embed($kb->content);
+            $embedding = $this->embed($kb->content);
             $vectorString = $this->formatVector($embedding);
 
             if (DB::getDriverName() === 'pgsql') {
@@ -142,7 +171,7 @@ class EmbeddingService
      *
      * Fallback ke pg_trgm full-text search kalau pgvector tidak tersedia.
      *
-     * @param  array<int, float>  $queryEmbedding  768D vector dari GeminiClient::embed
+     * @param  array<int, float>  $queryEmbedding  768D vector dari EmbeddingService::embed
      * @return Collection<int, KnowledgeBase>
      */
     public function searchSimilar(array $queryEmbedding, int $topK = 5): Collection

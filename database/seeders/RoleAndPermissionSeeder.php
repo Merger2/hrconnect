@@ -152,6 +152,7 @@ class RoleAndPermissionSeeder extends Seeder
         return [
             PermissionEnum::VIEW_DASHBOARD,
             PermissionEnum::VIEW_EMPLOYEES,
+            PermissionEnum::VIEW_KNOWLEDGEBASE,
             // L1 Approvals (Manager)
             PermissionEnum::VIEW_ATTENDANCES,
             PermissionEnum::VIEW_LEAVES,
