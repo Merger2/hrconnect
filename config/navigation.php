@@ -47,6 +47,13 @@ return [
             ],
         ],
         [
+            'title' => 'IT Support',
+            'roles' => ['super-admin', 'it-support'],
+            'items' => [
+                ['label' => 'Monitoring Dashboard', 'route' => 'monitoring', 'icon' => 'monitoring', 'can' => 'view_activity_logs'],
+            ],
+        ],
+        [
             'title' => 'Persetujuan',
             'roles' => ['super-admin', 'hr-manager', 'manager', 'finance'],
             'items' => [
