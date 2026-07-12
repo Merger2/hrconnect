@@ -163,11 +163,11 @@ test('36 component schemas are defined', function () {
     expect(count($spec['components']['schemas'] ?? []))->toBe(36);
 });
 
-test('62 path templates with 80 operations are documented', function () {
+test('63 path templates with 82 operations are documented', function () {
     $spec = openApiSpec();
     $paths = $spec['paths'];
 
-    expect(count($paths))->toBe(62);
+    expect(count($paths))->toBe(63);
 
     $ops = 0;
     foreach ($paths as $methods) {
@@ -178,7 +178,7 @@ test('62 path templates with 80 operations are documented', function () {
         }
     }
 
-    expect($ops)->toBe(80);
+    expect($ops)->toBe(84);
 });
 
 // ─── Route Completeness ──────────────────────────────────────────────

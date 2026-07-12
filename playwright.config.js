@@ -1,70 +1,85 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * Playwright configuration for HRConnect E2E tests
  * @see https://playwright.dev/docs/test-configuration
  */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const authDir = path.join(__dirname, 'tests/e2e/.auth');
+
 export default defineConfig({
   testDir: './tests/e2e',
-  
+
   /* Run tests in files in parallel */
   fullyParallel: true,
-  
+
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  
+
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  
+
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  
+
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  reporter: [['html', { open: 'never' }], ['list']],
+
+  /* Shared settings for all the projects below. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.APP_URL || 'http://localhost:8000',
-    
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    
-    /* Screenshot on failure */
     screenshot: 'only-on-failure',
-    
-    /* Video on failure */
     video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
   projects: [
+    // Setup project — logs in once per role, saves storageState (avoids login throttle)
     {
-      name: 'chromium',
-      use: { 
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+      use: {
         ...devices['Desktop Chrome'],
-        // Grant camera and geolocation permissions for face recognition and GPS tests
         permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 }, // Jakarta coordinates
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
       },
     },
 
-    // Uncomment for cross-browser testing
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    /* Test against mobile viewports. */
+    // Employee-authenticated tests (clock-in, KB chat)
     {
-      name: 'Mobile Chrome',
-      use: { 
-        ...devices['Pixel 5'],
+      name: 'chromium-employee',
+      testMatch: /(clock-in|rag-chat)\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'employee.json'),
+      },
+    },
+
+    // HR-authenticated tests (face enrollment)
+    {
+      name: 'chromium-hr',
+      testMatch: /face-enrollment\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'hr.json'),
+      },
+    },
+
+    // Auth flow tests (login/logout) — no stored state, tests login itself
+    {
+      name: 'chromium-auth',
+      testMatch: /auth\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
       },

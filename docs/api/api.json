@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/api"
+            "url": "http://192.168.1.23:8000/api"
         }
     ],
     "tags": [
@@ -118,6 +118,34 @@
                             ],
                             "minimum": 1,
                             "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "1",
+                                "true"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "scope",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "own",
+                                "team"
+                            ]
                         }
                     }
                 ],
@@ -308,6 +336,34 @@
                             ],
                             "minimum": 1,
                             "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "1",
+                                "true"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "scope",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "own",
+                                "team"
+                            ]
                         }
                     }
                 ],
@@ -2900,6 +2956,52 @@
                 }
             }
         },
+        "/v1/sanctum/token": {
+            "get": {
+                "operationId": "sanctum-token",
+                "description": "Returns the current Bearer token for the authenticated session.\nCaches token for 5 minutes to reduce DB writes.",
+                "summary": "Get active Sanctum token for current user",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "token"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/branches": {
             "get": {
                 "operationId": "branches.index",
@@ -2907,6 +3009,15 @@
                 "summary": "List Branches",
                 "tags": [
                     "Branch"
+                ],
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -2964,6 +3075,104 @@
                         "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
+            },
+            "post": {
+                "operationId": "branches.store",
+                "description": "Create a new branch.",
+                "summary": "Create Branch",
+                "tags": [
+                    "Branch"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "address": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 500
+                                    },
+                                    "latitude": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "minimum": -90,
+                                        "maximum": 90
+                                    },
+                                    "longitude": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "minimum": -180,
+                                        "maximum": 180
+                                    },
+                                    "radius": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 10,
+                                        "maximum": 5000
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Cabang berhasil ditambahkan."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
             }
         },
         "/v1/branches/{branch}": {
@@ -3005,6 +3214,172 @@
                                     "required": [
                                         "status",
                                         "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "branches.update",
+                "description": "Update an existing branch.",
+                "summary": "Update Branch",
+                "tags": [
+                    "Branch"
+                ],
+                "parameters": [
+                    {
+                        "name": "branch",
+                        "in": "path",
+                        "required": true,
+                        "description": "The branch ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "address": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 500
+                                    },
+                                    "latitude": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "minimum": -90,
+                                        "maximum": 90
+                                    },
+                                    "longitude": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "minimum": -180,
+                                        "maximum": 180
+                                    },
+                                    "radius": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 10,
+                                        "maximum": 5000
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Cabang berhasil diperbarui."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "branches.destroy",
+                "description": "Delete a branch.",
+                "summary": "Delete Branch",
+                "tags": [
+                    "Branch"
+                ],
+                "parameters": [
+                    {
+                        "name": "branch",
+                        "in": "path",
+                        "required": true,
+                        "description": "The branch ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Cabang berhasil dihapus."
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
                                     ]
                                 }
                             }
@@ -4080,7 +4455,7 @@
         "/v1/face/register": {
             "post": {
                 "operationId": "face.register",
-                "description": "Enroll face embedding (128D FaceNet vector) for biometric verification. Supports single embedding or 6-frame enrollment with liveness variance.",
+                "description": "Enroll face embedding (128D) or geometry descriptor (129D) for biometric verification.",
                 "summary": "Register Face",
                 "tags": [
                     "Face Recognition"
@@ -4119,6 +4494,10 @@
                                                 "face_registered_at": {
                                                     "type": "string"
                                                 },
+                                                "descriptor_type": {
+                                                    "type": "string",
+                                                    "const": "geometry"
+                                                },
                                                 "capture_count": {
                                                     "type": "integer"
                                                 }
@@ -4126,6 +4505,7 @@
                                             "required": [
                                                 "employee_id",
                                                 "face_registered_at",
+                                                "descriptor_type",
                                                 "capture_count"
                                             ]
                                         }
@@ -4178,7 +4558,7 @@
         "/v1/face/verify": {
             "post": {
                 "operationId": "face.verify",
-                "description": "Test face verification against enrolled embedding without recording attendance. Flow: Clock In (utility).",
+                "description": "Test face verification against enrolled embedding without recording attendance.",
                 "summary": "Verify Face",
                 "tags": [
                     "Face Recognition"
@@ -4331,6 +4711,10 @@
                                             "question": {
                                                 "type": "string",
                                                 "description": "Question text (min 5, max 500 chars)"
+                                            },
+                                            "conversation_id": {
+                                                "type": "string",
+                                                "description": "Optional conversation ID to continue existing chat"
                                             }
                                         },
                                         "required": [
@@ -4408,6 +4792,12 @@
                                                         "model": {
                                                             "type": "string",
                                                             "const": "pg_trgm"
+                                                        },
+                                                        "conversation_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
                                                         }
                                                     },
                                                     "required": [
@@ -4415,7 +4805,8 @@
                                                         "sources",
                                                         "confidence",
                                                         "fallback",
-                                                        "model"
+                                                        "model",
+                                                        "conversation_id"
                                                     ]
                                                 },
                                                 {
@@ -4444,6 +4835,12 @@
                                                         "model": {
                                                             "type": "string",
                                                             "const": "pg_trgm"
+                                                        },
+                                                        "conversation_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
                                                         }
                                                     },
                                                     "required": [
@@ -4451,7 +4848,8 @@
                                                         "sources",
                                                         "confidence",
                                                         "fallback",
-                                                        "model"
+                                                        "model",
+                                                        "conversation_id"
                                                     ]
                                                 },
                                                 {
@@ -4514,6 +4912,12 @@
                                                         },
                                                         "model": {
                                                             "type": "string"
+                                                        },
+                                                        "conversation_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
                                                         }
                                                     },
                                                     "required": [
@@ -4521,7 +4925,8 @@
                                                         "sources",
                                                         "confidence",
                                                         "fallback",
-                                                        "model"
+                                                        "model",
+                                                        "conversation_id"
                                                     ]
                                                 }
                                             ]
@@ -6600,75 +7005,8 @@
                                             "const": "success"
                                         },
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "employee_id": {
-                                                    "type": "integer"
-                                                },
-                                                "period": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "basic_salary": {
-                                                    "type": "integer"
-                                                },
-                                                "total_allowance": {
-                                                    "type": "integer"
-                                                },
-                                                "gross_salary": {
-                                                    "type": "integer"
-                                                },
-                                                "overtime_pay": {
-                                                    "type": "integer"
-                                                },
-                                                "pph21": {
-                                                    "type": "integer"
-                                                },
-                                                "bpjs_health": {
-                                                    "type": "integer"
-                                                },
-                                                "bpjs_employment": {
-                                                    "type": "integer"
-                                                },
-                                                "loan_deduction": {
-                                                    "type": "integer"
-                                                },
-                                                "attendance_penalty": {
-                                                    "type": "integer"
-                                                },
-                                                "total_deduction": {
-                                                    "type": "integer"
-                                                },
-                                                "net_salary": {
-                                                    "type": "integer"
-                                                },
-                                                "created_at": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "employee_id",
-                                                "period",
-                                                "status",
-                                                "basic_salary",
-                                                "total_allowance",
-                                                "gross_salary",
-                                                "overtime_pay",
-                                                "pph21",
-                                                "bpjs_health",
-                                                "bpjs_employment",
-                                                "loan_deduction",
-                                                "attendance_penalty",
-                                                "total_deduction",
-                                                "net_salary",
-                                                "created_at"
-                                            ]
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
@@ -7714,6 +8052,13 @@
                         "type": "string",
                         "minLength": 5,
                         "maxLength": 500
+                    },
+                    "conversation_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
                     }
                 },
                 "required": [
@@ -7761,6 +8106,13 @@
                             "null"
                         ]
                     },
+                    "gps_variance": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "minimum": 0
+                    },
                     "is_mocked": {
                         "type": [
                             "boolean",
@@ -7790,11 +8142,24 @@
                         ],
                         "items": {
                             "type": "number",
-                            "minimum": -1.5,
-                            "maximum": 1.5
+                            "minimum": -3,
+                            "maximum": 3
                         },
                         "minItems": 128,
                         "maxItems": 128
+                    },
+                    "descriptor": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "number",
+                            "minimum": -3,
+                            "maximum": 3
+                        },
+                        "minItems": 129,
+                        "maxItems": 129
                     }
                 },
                 "title": "ClockInRequest"
@@ -8035,11 +8400,21 @@
                         "type": "array",
                         "items": {
                             "type": "number",
-                            "minimum": -1.5,
-                            "maximum": 1.5
+                            "minimum": -3,
+                            "maximum": 3
                         },
                         "minItems": 128,
                         "maxItems": 128
+                    },
+                    "descriptor": {
+                        "type": "array",
+                        "items": {
+                            "type": "number",
+                            "minimum": -3,
+                            "maximum": 3
+                        },
+                        "minItems": 129,
+                        "maxItems": 129
                     },
                     "embeddings": {
                         "type": "array",
@@ -8047,8 +8422,8 @@
                             "type": "array",
                             "items": {
                                 "type": "number",
-                                "minimum": -1.5,
-                                "maximum": 1.5
+                                "minimum": -3,
+                                "maximum": 3
                             },
                             "minItems": 128,
                             "maxItems": 128
