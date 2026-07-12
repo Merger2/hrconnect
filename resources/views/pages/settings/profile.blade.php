@@ -183,7 +183,10 @@ new #[Title('Pengaturan Profil')] class extends Component {
             throw $e;
         }
 
-        Auth::user()->update(['password' => $validated['new_password']]);
+        Auth::user()->update([
+            'password' => $validated['new_password'],
+            'password_changed_at' => now(),
+        ]);
         $this->reset('current_password', 'new_password', 'new_password_confirmation');
         $this->dispatch('toast', variant: 'success', text: __('Kata sandi diperbarui.'));
     }

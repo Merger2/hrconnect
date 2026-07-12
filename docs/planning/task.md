@@ -1,10 +1,10 @@
 # Task Tracker — HRConnect Skripsi: Face Recognition + GPS Geofencing + RAG Knowledge Base
 
-> Updated: 2026-07-03 — Sesi J ✅. **Branch, Department, Position full Livewire (PasPapan DivisionComponent pattern)**. Root cause fixed: `x-modal @js` → `@entangle`. Progres: ~75%.
+> Updated: 2026-07-09 — **AUDIT REALITAS: Backend ~35-40% ready.** Face enrollment + clock-in **tidak berfungsi**. Strategy: copy logic dari PasPapan, bedakan UI (MD3, Material Symbols). Target: demo dalam 1 minggu untuk dospem.
 
-> **SESI A ✅ (2026-06-28):** 14/14 items completed — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. **EV-2 (Gmail SMTP) deferred.**
+> **SESI A ✅ (2026-06-28):** 14/14 items — EV-1..7, PERM-1/2/3, SEC-1/2/3/4, P0-1..4, P1-5/6/7. EV-2 (Gmail SMTP) deferred.
 
-> **SESI B ✅ (2026-06-28):** 13+3 items — C-1..4 camera bugs, FE-1c..h face enrollment/liveness/TinyFaceDetector/EAR blink/CDN cleanup/face crop, SEC-GPS-1/2/3 GPS 3-layer, P2-2/3/4.
+> **SESI B ✅ (2026-06-28):** 13+3 items — C-1..4 camera bugs, FE-1c..h face enrollment/liveness, SEC-GPS-1/2/3 GPS 3-layer.
 
 > **SESI C ✅ (2026-06-28):** RAG Knowledge Base UI — Chat AI (SSE streaming), Upload PDF, Manage.
 
@@ -12,9 +12,11 @@
 
 > **SESI E ✅ (2026-06-28):** Approvals — index (Pending+History), detail modal.
 
-> **SESI F ✅ (2026-07-01):** 22+ items — Face-registration rewrite (PasPapan head-turn liveness, geometry descriptor, guide overlay, auto-capture, countdown, progress bar, post-success nav), Employee index rewrite (summary bar, avatar, badge tone, ID labels, mobile cards), Employee show rewrite (section cards, info grid, PII gate), Dashboard role split (admin vs employee), API 401 auth fix (42 fetch calls via `window.apiHeaders()`), Sidebar gating 12 items, Bottom nav gating per permission, Route `can:` middleware (8 route files), ApprovalPolicy created, AssetController SQL driver-aware, EAR blink detection clock-in, FaceController `updateOrCreate`+`is_active`, JS silent catch → toast (9 files), EmployeeResource `photo_url` added, UX-1..9 all fixed, language consistency (80+ ID keys). **Reference repos studied: PasPapan, Quanta HRIS, Laravel-Smarthr, HRMS, hris.**
+> **SESI F ✅ (2026-07-01):** 22+ items — Face-registration rewrite (head-turn liveness, geometry descriptor, guide overlay, auto-capture), Employee index/show rewrite, Dashboard role split, Sidebar/BottomNav gating, Route `can:` middleware (8 route files), ApprovalPolicy, API 401 fix.
 
-> **EXECUTION STATUS (2026-07-01):** Ses A+B+C+D+E+F ✅ complete. **Next priorities: P1 route closures (15 closures) + Branch geofencing UI + Finance payroll admin UI + Manager team view.** Backend 100% ready (51 endpoints, 1,173 tests, 4,128 assertions).
+> **SESI J ✅ (2026-07-03):** Branch, Department, Position full Livewire (PasPapan pattern). Leaflet geofencing UI.
+
+> **STATUS REALITAS:** Sesi A-J selesai, tapi face enrollment + clock-in **masih broken** (face-api.js import gagal, face_crop/photo_selfie mismatch, `is_mocked` hardcode). Backend punya bug kritikal: Loan trait missing, KnowledgeBaseFactory enum crash, Employee import 404, Pph21 dua metode bertentangan, RAG_MOCK_MODE dead code, crossCheckIpLocation dead code. **Demo 1 minggu fokus: Face + Attendance + RAG + CipherSweet — tanpa payroll.**
 
 > **SECURITY POSTURE (2026-07-01):** Full audit keamanan selesai. Ditemukan **4 critical** (Sanctum token never-expire, fake GPS 100% client-trusted, no liveness detection, no security headers middleware), **8 warning** (MustVerifyEmail, API gate, 2FA enforcement, dll), **8 sudah secure** (CipherSweet, PII masking, Argon2id, rate limiting, IDOR, session encrypted, host protection, FormRequest). **Post-Sesi A+B+F: 1 critical fixed (Sanctum expiry ✅, fake GPS multi-layer ✅, liveness ✅, face-api.js import ✅, face_crop→photo_selfie ✅, gps_variance ✅, is_mocked ✅), 1 deferred (headers).**
 
@@ -27,17 +29,17 @@
 | ⏳ | Not started |
 | 🚫 | Deferred/cancelled |
 
-## Status Snapshot — Overall Project: **~65-70% selesai**
+## Status Snapshot — Overall Project: **~35-40% production-ready**
 
 | Area | % | Status | Notes |
 |------|:-:|:------:|-------|
-| Backend (app/) | 85% | ⚠️ | 34 models, 33 enums, 24 services. **2 CRITICAL bugs: FK relation broken, enum comparison**. |
+| Backend (app/) | 60% | ⚠️ | 34 models, 33 enums, 24 services. **Known bugs: Loan trait missing, KnowledgeBaseFactory enum crash, Employee import 404, Pph21 dual-method conflict.** |
 | Database (migrations) | 100% | ✅ | 50 migrations, 0 pending. PG guarded. |
-| API (routes) | 95% | ✅ | 80 endpoints, Sanctum, rate limits, permission guards. |
-| Security | 80% | ⚠️ | **8 composer vulnerabilities (1 HIGH)**. Security headers disabled. |
-| Tests | 93% | ⚠️ | 1.171 passed, **2 failed**, 2 skipped. |
-| **Frontend** | **~55%** | 🚧 | 30 domain pages. **8 tanpa x-page-shell. 6 campur EN/ID. 7 console.log. 24 component unused.** |
-| **Production** | **70/100** | ⚠️ | 3 fix P0 + 8 composer audit. |
+| API (routes) | 85% | ⚠️ | 80 endpoints, Sanctum. RAG_MOCK_MODE dead config, crossCheckIpLocation dead code. |
+| Security | 75% | ⚠️ | CipherSweet ✅, Argon2id ✅. Sanctum never-expire, security headers missing. |
+| Tests | 85% | ⚠️ | ~1,171 tests pass. Kualitas dipertanyakan. |
+| **Face Recognition** | **10%** | 🔴 | **Tidak berfungsi.** Face-api.js import broken, face_crop/photo_selfie mismatch, is_mocked hardcode. |
+| **Frontend (demo-critical)** | **~40%** | 🚧 | Dashboard ✅, RAG ✅, Employee CRUD ✅. Face enrollment ❌, Clock-in ❌, Approval UI ❌. |
 | PHPStan | 0% | 🚧 | |
 
 ## 🔍 AUDIT FINDINGS — Full Codebase + Docs Review (2026-06-24)
@@ -265,82 +267,30 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 
 ---
 
-## 🎯 POST-STUDY PLAN — ~62 Blade Files Baru
+## 🎯 1-WEEK DEMO PLAN — 7 Hari Menuju Dospem
 
-| Round | Baru | Pages | Modal | Modul |
-|:-----:|:----:|:-----:|:-----:|-------|
-| **1** | 11 | 9 WebController + 1 Livewire | — | **Route closures → Controller + Branch Geo UI** — enable `route:cache` |
-| **2** | 3 | 1 Livewire + 2 partial | 2 | **Payroll Admin** — generate, workflow, bulk publish/pay |
-| **3** | 5 | 3 pages | 2 | **Payroll Settings** — allowances, deductions, PTKP, BPJS |
-| **4** | 6 | 5 pages + 1 PDF | 1 | **Reports** — attendance, payroll, PPh21, BPJS, performance |
-| **5** | 5 | 4 pages | 1 | **Notifications + Loan/Asset admin** — center, preferences, management |
-| **6** | 12 | 8 email + 1 middleware | 3 | **Email + Cleanup** — templates, security headers |
-| **Total** | **~42** | **~22 pages** | **~20 modal/partial** | **+~38 existing = ~80 Blade files** |
+**Fokus**: Face enrollment (Livewire) → Clock-in face verification → Approval flow → Demo test.
+**Skip**: Payroll admin, reports, notifications, payroll settings, email templates — tidak relevan untuk demo.
+**Strategy**: Copy logic dari PasPapan (readable files), bedakan UI (MD3 tokens, Material Symbols, tidak mirip sama sekali).
 
-### Round 1 — Route Closures → Controller + Branch Geofencing UI
+| Hari | Prioritas | Task | Sumber |
+|:---:|:---------|------|--------|
+| **H1** | 🔴 | **Face Enrollment Livewire** — Copy `FaceEnrollment.php` (126L) + blade PasPapan. Adapt ke HRConnect models, ganti UI ke MD3. Ganti `face-registration.blade.php` (743L) seluruhnya. Liveness head-turn, geometry descriptor, guide overlay. | PasPapan `app/Livewire/User/FaceEnrollment.php` + blade (992L, readable) |
+| **H2** | 🔴 | **Clock-in Face Verification** — Sederhanakan `clock-in.blade.php` (327L). Integrasi liveness PasPapan + face matching ke `AttendanceService::clockIn()`. Fix `face_crop`→`photo_selfie`, `is_mocked` hardcode, face-api.js import. | PasPapan `user/scan.blade.php` (1100L, readable) |
+| **H3** | 🟡 | **Employee Lifecycle Demo** — Verify employee CRUD + CipherSweet + photo. Fix KnowledgeBaseFactory enum bug + Employee import 404. | HRConnect existing |
+| **H4** | 🟡 | **Approval UI (plagiarism-safe)** — Copy PasPapan approval logic (BE), buat UI baru card-based MD3. Leave apply → Manager approve flow. | PasPapan approval service + HRConnect existing API |
+| **H5** | 🟡 | **RAG Chat AI Demo** — Verify RAG works with real Gemini API key. Fix pg_trgm fallback di streaming path. | HRConnect existing |
+| **H6** | 🟢 | **Full Demo Run** — Register face → Clock-in → Apply leave → Approve → Dashboard. Fix bugs. | All |
+| **H7** | 🟢 | **Cadangan + Polish** — Bug fixes, edge cases, verify all demo flows. | All |
 
-**Prioritas 1:** Buat 9 invokable WebController untuk enable `route:cache`. **Prioritas 2:** Branch Livewire component untuk geofencing config.
-
-| Item | Tipe | Pattern |
-|------|------|---------|
-| `AttendanceWebController` | Invokable controller | `__invoke()` → `view('attendance.index')` |
-| `OvertimeWebController` | Invokable controller | Sama |
-| `ReimbursementWebController` | Invokable controller | Sama |
-| `PayrollWebController` | Invokable controller | Sama |
-| `LoanWebController` | Invokable controller | Sama |
-| `AssetWebController` | Invokable controller | Sama |
-| `ApprovalWebController` | Invokable controller | Sama |
-| `EmployeeWebController` | Invokable controller | Sama (2 routes) |
-| `KnowledgeBaseWebController` | Invokable controller | Sama (2 routes) |
-| `BranchComponent` | Livewire + Blade | Modal CRUD, Leaflet map, lat/lng/radius fields |
-
-### Round 2 — Payroll Admin UI (Finance)
-
-| Item | Tipe | Notes |
-|------|------|-------|
-| `PayrollManagerComponent` | Livewire (full-page) | Summary cards, status filter, bulk publish/pay, detail modal |
-| Payroll generate | Modal/form | Period → preview → generate (batch, via existing services) |
-| Payroll detail admin | Modal | Employee breakdown per payroll period |
-| Payroll status workflow | Badge/Pill | DRAFT→PUBLISHED→PAID |
-
-### Round 3 — Payroll Settings + BPJS/Tax Config
-
-| Item | Tipe | Notes |
-|------|------|-------|
-| Allowances CRUD | Page + modal | PasPapan pattern |
-| Deductions CRUD | Page + modal | PasPapan pattern |
-| PTKP/TER config | Page | Existing services, UI only |
-| BPJS config | Page | Existing services, UI only |
-
-### Round 4 — Reports + Dashboard Charts
-
-| Item | Tipe |
-|------|------|
-| Attendance recap + PDF | Page |
-| Payroll financial report | Page |
-| PPh21 report | Page |
-| BPJS report | Page |
-| Performance report | Page |
-
-### Round 5 — Notifications + Polish
-
-| Item | Tipe |
-|------|------|
-| Notification center | Page |
-| Notification preferences | Page |
-| Loan admin view | Page |
-| Asset admin view | Page |
-
-### Round 6 — Email + Cleanup
-
-| Item | Tipe |
-|------|------|
-| Email templates (8) | leave approved/rejected, overtime, reimbursement, account created |
-| Security headers middleware | CSP, HSTS, X-Frame-Options |
-
-### Day Items Removed — Migrated to Round-Based Plan Above
-
-(Day 2-7 daily breakdowns removed. Lihat Round 1-6 di atas untuk prioritas baru berdasarkan studi repo.)
+### Yang TIDAK disentuh minggu ini
+- Payroll Admin UI (butuh Publish/Pay API dulu)
+- Payroll Settings (Allowances, Deductions, PTKP, BPJS)
+- Reports (Attendance, Payroll, PPh21, BPJS)
+- Notifications center
+- Email templates
+- Route closures → Controller (zero impact ke demo)
+- Security headers middleware
 
 ---
 
@@ -430,36 +380,36 @@ Semua komponen menggunakan: **MD3 palette** (`bg-surface-container-low`, `text-o
 | **DC-4** | **PHPStan baseline** | Hapus 7 entry deleted notifications | 🟢 | ⏳ |
 | **DC-5** | **Merge WfaStatus → ApprovalStatus** | WfaStatus isinya identik (PENDING/APPROVED/REJECTED). Hapus enum, ganti semua import. 9 file. | 🟢 | ✅ |
 
-## 🎯 POST-STUDY STRATEGY (2026-07-01)
+## 🎯 1-WEEK DEMO STRATEGY (2026-07-09)
 
 ### Goal
-Selesaikan **~62 Blade files** prioritas berdasarkan studi 5 repo referensi. Backend 100% ready (80+ endpoints, 1,173 tests). Reference patterns sudah dipelajari.
+Selesaikan demo face recognition + absensi + RAG + CipherSweet dalam 1 minggu untuk dospem. Backend tidak "100% ready" — ada bug kritikal. Strategy: **copy logic PasPapan, bedakan UI MD3**.
 
-**Key decisions from repo study:**
-- **Route→Controller:** 9 invokable WebController (PasPapan pattern) — enable `route:cache`
-- **Branch Geo UI:** Livewire `BranchComponent` + Leaflet map — PasPapan master data pattern
-- **Payroll Admin:** Livewire `PayrollManagerComponent` — PasPapan UI + Quanta batch generate
-- **Manager View:** Integrated into existing approvals (not separate route group) — PasPapan pattern
-- **No Filament** — semua Livewire SFC
-- **No `manager/` route prefix** — cukup scope filter
+**Reality check:**
+- Face enrollment saat ini **tidak berfungsi** — akan diganti Livewire component copy dari PasPapan
+- Clock-in face verification **tidak berfungsi** — akan disederhanakan pakai liveness PasPapan
+- Backend punya bug: Loan trait missing, KnowledgeBaseFactory enum crash, Employee import 404, Pph21 dual-method
+- **Yang BISA didemo**: Employee CRUD, Dashboard role-split, RAG chat, CipherSweet, Leave/Overtime apply
+
+**Yang TIDAK disentuh minggu ini:**
+- Payroll admin (butuh Publish/Pay API dulu)
+- Reports (PPh21, BPJS, attendance)
+- Notifications, email templates
+- Route closures → Controller (zero impact ke demo)
 
 ### Strategy
-1. **Round 1**: Route closures → 9 WebController + Branch Livewire component. Enable `route:cache` first.
-2. **Round 2**: Payroll Admin UI — Finance needs generate, review, publish workflow.
-3. **Round 3**: Payroll Settings — Allowances, Deductions, PTKP/TER, BPJS configs.
-4. **Round 4**: Reports — financial, tax, attendance performance.
-5. **Round 5**: Notifications, Loan/Asset admin pages.
-6. **Round 6**: Email templates (8) + Security headers middleware.
+1. **H1-H2**: Face enrollment + clock-in (copy PasPapan, UI baru MD3)
+2. **H3**: Employee lifecycle demo + bug fixes
+3. **H4-H5**: Approval UI + RAG demo
+4. **H6-H7**: Full demo integration test + polish
 
 ### Prinsip
 | Prinsip | Detail |
 |---------|--------|
-| **PasPapan patterns** | Semua pola UI dari PasPapan (master data, payroll manager, approval inbox) |
-| **Quanta logic** | Payroll batch generation via existing services (BpjsService, Pph21Service, dll) |
-| **No closures** | Route files harus zero closure untuk `route:cache` |
+| **Copy logic, not UI** | Backend/logic dari PasPapan boleh sama. UI wajib beda (MD3 tokens, Material Symbols, layout berbeda). |
+| **No Custom CSS** | Hanya utility classes + DESIGN.md tokens |
 | **Modal for CRUD** | Tidak pernah bikin page terpisah untuk create/edit |
-| **No custom CSS** | Hanya utility classes + DESIGN.md tokens |
-| **Backend first** | Semua data dari API endpoint existing — tidak perlu backend change |
+| **Face: TinyFaceDetector only** | Hapus FaceRecognitionNet (5.4MB). Cukup TinyFaceDetector (190KB) + FaceLandmark68Net. |
 
 ### Security Posture — Hasil Audit (2026-06-24)
 
@@ -592,7 +542,7 @@ Dibandingkan dengan docs resmi: `justadudewhohacks.github.io/face-api.js/docs/`
 | E (Approvals) | ✅ | 3 items — index with pending/history tabs, detail modal |
 | **F (Overhaul)** | **✅** | **22+ items** — Face rewrite (PasPapan pattern), Employee index/show overhaul, Sidebar/BottomNav gating, Route middleware, Dashboard split, API 401 auth fix, UX all fixed, Reference repos studied |
 | **Selesai** | **✅ A+B+C+D+E+F** | **66+ items** |
-| **Next: P1 route closures + Branch Geo UI + Payroll Admin** | **🚧** | |
+| **Next: Face enrollment Livewire (H1) + Clock-in fix (H2) + Approval UI (H4)** | **🚧** | |
 
 ---
 
@@ -926,7 +876,7 @@ Hasil studi mendalam 5 repo referensi untuk pola arsitektur yang mempengaruhi 6 
 | PHPStan | `vendor/bin/phpstan analyse` |
 | Dev server | `composer run dev` |
 
-## Execution Order — Prioritised (Post-Reference-Repo Study)
+## Execution Order — 1-Week Demo (2026-07-09)
 
 ```
 SESI A ✅ — Auth & Permission + Security + Business Logic (14 items)
@@ -935,34 +885,35 @@ SESI C ✅ — RAG Knowledge Base UI (3 items)
 SESI D ✅ — ESS Pages (8 items)
 SESI E ✅ — Approvals (3 items)
 SESI F ✅ — Face rewrite, Employee overhaul, Sidebar/BottomNav gating, Route middleware, 
-            Dashboard split, API 401 fix, UX-1..9, Language ID, Reference repos studied (22+ items)
+           Dashboard split, API 401 fix, UX-1..9, Language ID (22+ items)
+SESI J ✅ — Branch, Department, Position Livewire + Leaflet geofencing UI
   ═══════════════════════════════════════════════════
-  NOW: Prioritised Next Steps (Post-Study)
+  NOW: 1-Week Demo Sprint
   ═══════════════════════════════════════════════════
-ROUND 1 — Route Closures→Controller (9 WebControllers) + Branch Geofencing UI
-ROUND 2 — Payroll Admin UI (Finance) + Manager Inbox integration
-ROUND 3 — Payroll Settings (Allowances, Deductions, PTKP, BPJS)
-ROUND 4 — Reports (Attendance, Payroll, PPh21, BPJS) + Dashboard Charts
-ROUND 5 — Notifications + Settings polish + Loan/Asset admin
-ROUND 6 — Polish + Email + Cleanup + Security Headers
+H1 — Face Enrollment Livewire (copy PasPapan, adapt MD3)
+H2 — Clock-in Face Verification (simplify, fix bugs)
+H3 — Employee Lifecycle Demo + Bug Fixes (KnowledgeBaseFactory, Employee Import)
+H4 — Approval UI (plagiarism-safe MD3, copy PasPapan BE logic)
+H5 — RAG Chat AI Demo (verify Gemini API, fix streaming pg_trgm)
+H6 — Full Demo Integration Test (register face → clock-in → leave → approve)
+H7 — Cadangan + Polish (edge cases, bug fixes)
+  ═══════════════════════════════════════════════════
+  DEFERRED (post-demo):
+    - Payroll Admin UI
+    - Payroll Settings (BPJS, PTKP, TER)
+    - Reports (PPh21, BPJS, attendance)
+    - Notifications + Email templates
+    - Route closures → Controller
+    - Security headers middleware
   ═══════════════════════════════════════════════════
 ```
 
 ### Catatan Kunci Eksekusi
-- **Sesi A+B+C+D+E+F ✅** — Semua selesai. Backend 100% ready (80+ endpoints, 1,173 tests, 4,128 assertions).
-- **Route closures dulu** — 15 closures di 9 route files blokir `route:cache`. Buat 9 invokable WebController (PasPapan pattern).
-- **Branch Geo dulu** — HR-Manager perlu atur lat/lng/radius cabang untuk geofencing. Livewire component + Leaflet.
-- **Payroll Admin** — Finance butuh generate payroll, review draft, publish, pay. Pola dari PasPapan `PayrollManager` + Quanta `HitungGajiService`.
-- **Manager View** — Integrasi ke approval existing (tab), bukan route group terpisah (PasPapan pattern).
-- **Form modal pattern** — Semua create/edit pakai modal, bukan page terpisah.
+- **Sesi A+B+C+D+E+F+J ✅** — Selesai. Face enrollment + clock-in masih broken, akan difix di H1-H2.
+- **Backend tidak 100%** — Bug: Loan trait missing, KnowledgeBaseFactory enum crash, Employee import 404, Pph21 dual-method.
 - **Gmail SMTP (EV-2)** masih deferred — `MAIL_MAILER=log`.
-- **Decisions from repo study:**
-  - **No Filament** — semua Livewire SFC (HRConnect pattern)
-  - **No separate `manager/` route group** — integrasi ke admin panel (PasPapan pattern)
-  - **PasPapan = primary reference** untuk UI/UX patterns
-  - **Quanta = secondary** untuk payroll Indonesia logic (sudah ada di services layer)
-  - **Geometry descriptor (129 float)** untuk face registration (PasPapan), FaceNet (128D) untuk clock-in
-- **~100 Blade files target** — ~38 existing + ~62 baru.
+- **Strategy**: Copy logic PasPapan, bedakan UI MD3 (Material Symbols, no green/cream, tailwind tokens).
+- **TinyFaceDetector only** — Hapus FaceRecognitionNet (5.4MB). 190KB TinyFaceDetector + FaceLandmark68Net.
 
 ---
 
@@ -1337,20 +1288,20 @@ Berdasarkan semua temuan + referensi pola dari semua repo (PasPapan, Quanta HRIS
 | **P2** | **AssetController** | SQL `ilike` → driver-aware operator (ILIKE/LIKE) | ✅ |
 | **P1** | **DB_SSLMODE** | Revert to `prefer` (production-only) | ✅ |
 
-### ⏳ Belum Dikerjakan (Next)
+### ⏳ Prioritas Demo (7 Hari) — Mulai 2026-07-09
 
-| Tier | ID | Task | Pola dari Repo | File | Effort |
-|:----:|:--:|------|:---------------|------|:------:|
-| **P1** | **H1** | **Route closures → 9 WebControllers** — 15 closures di 9 route files blokir `route:cache`. Buat `AttendanceWebController`, `OvertimeWebController`, `ReimbursementWebController`, `PayrollWebController`, `LoanWebController`, `AssetWebController`, `ApprovalWebController`, `EmployeeWebController`, `KnowledgeBaseWebController`. | PasPapan: `__invoke()` → `return view('...')` | `routes/*.php`, `app/Http/Controllers/Web/*.php` | 30 menit |
-| **P1** | **Branch Geo** | **Branch geofencing UI** — CRUD branch dengan lat/lng/radius untuk HR-Manager. Livewire `BranchComponent` + Leaflet map picker. API controller sudah ada, UI tidak. | PasPapan: `DivisionComponent` (modal CRUD, search, pagination, responsive). Quanta: `CabangResource` fields. | `resources/views/livewire/branch-component.blade.php`, `app/Livewire/BranchComponent.php` | 2 jam | ✅ Selesai Sesi I |
-| **P2** | **Payroll Admin** | **Finance payroll management UI** — Livewire `PayrollManagerComponent`. Generate per period, status workflow DRAFT→PUBLISH→PAID, summary cards, bulk actions, detail modal. | PasPapan: `PayrollManager` Livewire (summary cards, status filter, bulk publish/pay). Quanta: batch generate via `HitungGajiService`. | `resources/views/payroll/admin-index.blade.php`, `app/Livewire/PayrollManagerComponent.php` | 3 jam |
-| **P2** | **Manager View** | **Manager team monitoring** — tab/filter di approval existing untuk L1 approvals by team scope. Bukan route group terpisah. | PasPapan: Manager Inbox integrated into admin panel (tabbed). | `resources/views/approvals/index.blade.php` (upgrade) | 1 jam |
-| **P2** | **H2** | **Tambah `verified` middleware** ke `profile.edit` route | Simple add | `routes/settings.php` | 1 menit |
-| **P3** | **FC11** | **Hapus `captures` dari payload** — 6 base64 JPEG dikirim percuma | Hapus field dari Request + Controller + Blade | `FaceController.php`, `RegisterFaceRequest.php`, `face-registration.blade.php` | 5 menit |
-| **P3** | **FC6** | **Pindah descriptor compute** ke saat clock-in (1x), bukan tiap frame (300ms) | PasPapan: compute only on verify trigger | `clock-in.blade.php` | 10 menit |
-| **P3** | **C1** | **SQL LIKE escape** — wildcard `%` + `_` tidak di-escape | Prepared statement | `EmployeeController`, `AssetController` | 10 menit |
-| **P3** | **Security headers** | **Buat `EnsureSecurityHeaders` middleware** — CSP, HSTS, X-Frame-Options | PasPapan: dedicated middleware | Middleware baru + `bootstrap/app.php` | 30 menit |
-| **P3** | **H3-H9, M1-M10, L1-L8** | Perbaikan kualitas kode lainnya | Various | Variatif | Variatif |
+| Hari | ID | Task | Sumber | File Target |
+|:---:|:--:|------|--------|------|
+| **H1** | **FACE-1** | **Face Enrollment Livewire component** — Copy PasPapan `FaceEnrollment.php` (126L), adapt ke HRConnect models. Liveness head-turn, geometry descriptor, guide overlay, countdown, progress bar. **Ganti `face-registration.blade.php` (743L) seluruhnya.** | PasPapan `app/Livewire/User/FaceEnrollment.php` + blade (992L) | `app/Livewire/Employee/FaceEnrollment.php`, `resources/views/livewire/employee/face-enrollment.blade.php` |
+| **H2** | **FACE-2** | **Clock-in Face Verification fix** — Sederhanakan `clock-in.blade.php` (327L). Integrasi face matching + liveness PasPapan. Fix `face_crop`→`photo_selfie`, `is_mocked` hardcode, face-api.js import. | PasPapan `user/scan.blade.php` (1100L) | `resources/views/attendance/clock-in.blade.php`, `app/Services/AttendanceService.php` |
+| **H3** | **BUG-1** | **Fix KnowledgeBaseFactory** — Panggil `\App\Enums\KnowledgeBaseStatus::PUBLISHED`, bukan `DRAFT` (enum tidak ada). | HRConnect | `database/factories/KnowledgeBaseFactory.php` |
+| **H3** | **BUG-2** | **Fix Employee import 404** — Tambah route `POST /api/v1/employees/import` atau selesaikan pipeline `ImportEmployeesJob`. | HRConnect | `routes/api.php` |
+| **H3** | **BUG-3** | **Fix Loan Approvable trait** — Tambah trait `Approvable` yang hilang. Atau buat `LoanService` handle approval tanpa trait. | HRConnect | `app/Models/Loan.php` |
+| **H4** | **APPROVE-1** | **Approval UI (plagiarism-safe)** — Copy PasPapan approval BE logic (service layer), buat UI baru card-based + MD3 tokens. Wajib beda dari PasPapan. | PasPapan approval service | `resources/views/approvals/index.blade.php` (upgrade) |
+| **H5** | **RAG-1** | **Fix RAG pg_trgm streaming** — Extract `retrieve()` helper dari sync `chat()`, panggil juga dari `chatStream()`. | HRConnect | `app/Services/KnowledgeBaseService.php` |
+| **H5** | **RAG-2** | **Verify Gemini API** — Pastikan `GEMINI_API_KEY` valid di `.env`. Tes `POST /api/v1/knowledgebase/chat`. | HRConnect | `.env` |
+| **H6** | **INT-1** | **Full demo integration test** — Register face → Clock-in → Apply leave → Manager approve → Check dashboard. Fix semua bug. | All | All |
+| **H7** | **POLISH** | **Cadangan + Polish** — Edge cases, bug fixes, verify semua demo flow. | All | All |
 
 # 🔴 Employee UI Audit — Perbandingan dengan Referensi (1 Juli 2026)
 
@@ -2408,178 +2359,6 @@ Component + model + migration siap. Tapi pipeline backend tidak ada.
 | **4** | **D2** — Hapus PayslipResource | Finance | ~1 menit | Bersihkan dead code |
 | **5** | **D5** — Import pipeline lengkap | HR-Manager | ~4 jam | Fitur import CSV karyawan |
 | — | **AttendanceResource + KnowledgeBaseResource** | — | Skip | Tidak worth the refactor |
-
----
-
-# 🔴 Browser Console Error Analysis — 1 Juli 2026
-
-Hasil inspeksi browser console pada semua halaman. **Semua route error disebabkan oleh JS runtime errors, bukan route Laravel.**
-
-## F1 — `Failed to resolve module specifier 'face-api.js'` 🔴 CRITICAL
-
-| Aspek | Detail |
-|-------|--------|
-| **Error** | `Uncaught TypeError: Failed to resolve module specifier 'face-api.js'` |
-| **Sumber** | `face-registration.blade.php:22` (startCamera) + `clock-in.blade.php:21` (init) |
-| **Akar masalah** | `import('face-api.js')` dipanggil di dalam string Alpine `x-data` expression. Alpine mengevaluasi string ini di **luar konteks module Vite** — bare module specifier `'face-api.js'` tidak bisa di-resolve oleh Vite. |
-| **Dampak** | Semua fitur face (registrasi + clock-in) **tidak berfungsi** |
-| **Fix** | Import statis di `app.js`, expose ke `window.faceapi` (sama seperti pattern `window.L = L` untuk Leaflet) |
-| **Referensi** | PasPapan: `<script src="/assets/js/face-api.min.js">` (UMD global) |
-
-### Detail implementasi
-- `app.js`: `import * as faceapi from 'face-api.js'; window.faceapi = faceapi;`
-- `face-registration.blade.php`: Hapus `faceapi: null` dari x-data, hapus `import('face-api.js')` dari `startCamera()`, pakai `window.faceapi` langsung
-- `clock-in.blade.php`: Sama — hapus `faceapi: null`, hapus `import()`, pakai `window.faceapi`
-
-## F2 — `face_crop` vs `photo_selfie` mismatch 🔴 CRITICAL
-
-| Aspek | Detail |
-|-------|--------|
-| **File** | `clock-in.blade.php:166` vs `ClockInRequest.php:48` |
-| **Sekarang** | JS kirim `payload.face_crop`, server validasi `photo_selfie` |
-| **Dampak** | `$data['photo_selfie']` = null → **foto wajah tidak pernah tersimpan** di DB |
-| **Fix** | Ganti `payload.face_crop` → `payload.photo_selfie` di `clock-in.blade.php:166` |
-
-## F3 — `gps_variance` missing dari ClockInRequest rules 🔴 CRITICAL
-
-| Aspek | Detail |
-|-------|--------|
-| **File** | `ClockInRequest.php` (rules) |
-| **Sekarang** | `gps_variance` tidak ada di rules array |
-| **Dampak** | Controller panggil `$request->validated()` (line 43 AttendanceController) — field tidak masuk validasi. `$data['gps_variance']` = null di AttendanceService:169 → risk scorer dapat null |
-| **Fix** | Tambah `'gps_variance' => ['nullable', 'numeric', 'min:0']` ke `ClockInRequest::rules()` |
-
-## F4 — `is_mocked: false` hardcoded 🔴 CRITICAL
-
-| Aspek | Detail |
-|-------|--------|
-| **File** | `clock-in.blade.php:159` |
-| **Sekarang** | `is_mocked: false` selalu dikirim tanpa pengecekan GPS mock |
-| **Dampak** | Anti-fake-GPS check di `AttendanceService::clockIn()` (cek `$data['is_mocked'] == true`) **tidak pernah trigger** |
-| **Fix** | Hapus hardcode; biarkan `undefined` (server handle null) atau implementasi deteksi mock GPS client-side |
-
----
-
-# 🔴 Comprehensive Code Audit — 4 Parallel Agents (1 Juli 2026)
-
-Audit mendalam kode HRConnect oleh 4 agen paralel. **40+ temuan terverifikasi.**
-
-## CRITICAL (Harus diperbaiki segera)
-
-| ID | Temuan | File | Dampak |
-|:--:|--------|------|--------|
-| **C1** | SQL injection via `LIKE` wildcard | `EmployeeController` | Search `%_%` match unintended records. `%` + `_` wildcard tidak di-escape. |
-| **C2** | Mass assignment di EmployeeController | `EmployeeController::store()` | Field `face_embedding`, `pin` bisa di-set via mass request — tidak ada Guard |
-| **C3** | PII leak via EmployeeResource | `app/Http/Resources/EmployeeResource.php` | `nik`, `phone`, `npwp`, `bank_account_number` terexpose di listing — Hidden attribute hanya untuk serialization langsung |
-| **C4** | Dual face embedding desync | `FaceController::register()` | Embedding disimpan di **2 tempat**: `face_descriptors` + `employee.face_embedding`. Tidak ada mekanisme sinkronisasi — desync jika salah satu gagal. |
-| **C5** | View expose full model | `BelongsTo` + `HasMany` relationships tanpa select guard | Resource query `load()` bisa expose hidden fields via relationship eager loading |
-| **C6** | Amount integer truncation | Migration `decimal` → PHP `int` cast | Payroll amount dengan decimal bisa truncated saat kalkulasi |
-| **C7** | FeaturePolicy / ApprovalPolicy missing | `ApprovalController` | Tidak ada Policy class — autorisasi manual `approver_id` check. 1 controller tanpa Policy. |
-| **C8** | `import('face-api.js')` gagal di Alpine | face-registration, clock-in | **Lihat F1 di atas** — semua fitur face broken |
-| **C9** | `face_crop` vs `photo_selfie` mismatch | clock-in, ClockInRequest | **Lihat F2** — foto wajah tidak tersimpan |
-| **C10** | `gps_variance` missing dari rules | ClockInRequest | **Lihat F3** — risk scorer tidak dapat data |
-| **C11** | `is_mocked: false` hardcoded | clock-in blade | **Lihat F4** — anti-fake-GPS tidak berfungsi |
-
-## HIGH (Prioritas setelah CRITICAL)
-
-| ID | Temuan | File | Detail |
-|:--:|--------|------|--------|
-| **H1** | 7 route closures disable `route:cache` | 7 route files di `routes/` | Route closures prevent Laravel route caching — gunakan invokable controller |
-| **H2** | Missing `verified` middleware di `profile.edit` | `routes/settings.php` | Profile bisa diakses tanpa verifikasi email |
-| **H3** | Email enumeration timing | `FortifyServiceProvider` | Login response time berbeda untuk email exist vs tidak — timing attack vector |
-| **H4** | Route closures di 7 files | `routes/{attendance,leave,overtime,payroll,approval,knowledge-base,asset,loan,reimbursement}.php` | Multiple files pakai closure → `route:cache` skip semua |
-| **H5** | Missing auth on `categories()` | Route definition | Endpoint tanpa auth guard |
-| **H6** | Livewire navigated toast re-registration | `app.js` | `livewire:navigated` listener mungkin daftarkan multiple handler → multiple toast muncul |
-| **H7** | `Number::currency` intl fallback | `Number::currency($amount, 'IDR')` | Fallback locale mungkin tidak support IDR formatting |
-| **H8** | Payroll period LIKE full scan | Period query | Full table scan untuk filter period |
-| **H9** | Dual font loading | CSS | Font dimuat 2x — sekali dari Google Fonts, sekali dari local |
-| **H10** | Face liveness variance threshold 0.5 terlalu longgar | `face-registration.blade.php:104` | Variance 0.5 sebagai threshold liveness — terlalu rendah |
-| **H11** | EAR (Eye Aspect Ratio) tidak pernah digunakan untuk liveness | `clock-in.blade.php:105-107` | EAR dihitung (`computeEAR`) tapi tidak dipakai untuk apa pun |
-| **H12** | Descriptor dihitung setiap frame | `clock-in.blade.php:104` | `lastDescriptor` di-update tiap frame (300ms) — sia-sia, cukup 1x saat clock-in |
-| **H13** | Dual storage FaceDescriptor vs Employee.face_embedding | `FaceRecognitionService` | Service cek 2 tempat berbeda — desync risk tinggi |
-| **H14** | Old FaceDescriptor tidak di-deactivate saat re-enroll | `FaceController::register()` | Tidak ada `is_active = false` untuk descriptor lama → multiple active descriptors |
-
-## MEDIUM
-
-| ID | Temuan | File | Detail |
-|:--:|--------|------|--------|
-| **M1** | No model timeout in FaceRecognition queries | `FaceRecognitionService` | Query tanpa timeout — bisa hang |
-| **M2** | Empty catch swallows errors | `face-registration.blade.php:70,114,156` | `catch {}` tanpa logging — error siluman |
-| **M3** | 6 JPEG base64 dikirim ke server via captures | `face-registration.blade.php:139-146` | Base64 JPEG captures terkirim tapi hanya `captures_count` yang disimpan. Boros bandwidth. |
-| **M4** | `computeVariance()` math salah | `face-registration.blade.php:120-133` | Variance dibagi `embeddings.length` bukan `(embeddings.length * dims)` |
-| **M5** | Vite dynamic import mungkin gagal di production | `face-registration.blade.php:22`, `clock-in.blade.php:21` | Dynamic `import()` di production = chunk split issue |
-| **M6** | No `beforeunload` cleanup | `face-registration.blade.php` | Stream tidak dihentikan saat user navigasi away |
-| **M7** | No CSRF rotation | Rate limiter config | CSRF token tidak rotate |
-| **M8** | Password expiry not notified | Password expiry config | User tidak dapat notifikasi sebelum password expired |
-| **M9** | Device verification whitelist no-op | Device verification | Whitelist tidak diimplementasi — bypass verification repeat |
-| **M10** | Audit log untuk PII access tidak detail | Audit Log | Tidak ada detail field apa yang diakses |
-
-## LOW
-
-| ID | Temuan | Detail |
-|:--:|--------|--------|
-| **L1** | `for` attribute di label tidak cocok dengan `id` input | Beberapa form komponen |
-| **L2** | `alt` text missing di beberapa img | Aksesibilitas |
-| **L3** | Console log statement di production | `console.log` masih ada di beberapa JS file |
-| **L4** | Magic number `0.5` untuk scoreThreshold | Tidak ada konstanta bernama |
-| **L5** | `setTimeout(..., 1500)` untuk GPS sampling — hardcoded | Tanpa konstanta |
-| **L6** | No empty state untuk loading error | Beberapa tampilan loading tanpa error handling UI |
-| **L7** | Inconsistent `__()` usage (ID vs EN mix) | Beberapa blade masih pakai English |
-| **L8** | `destroy()` method di Alpine tidak selalu dipanggil | Beberapa komponen tanpa cleanup |
-
-# 🔴 Face Registration & Recognition Audit — 26 Issues (1 Juli 2026)
-
-Hasil audit mendalam terhadap flow face registration (face-registration.blade.php + FaceController) dan face recognition (clock-in.blade.php + FaceRecognitionService + AttendanceService).
-
-## CRITICAL (3)
-
-| ID | Issue | File | Fix |
-|:--:|-------|------|-----|
-| **FC1** | `gps_variance` di-drop oleh `$request->validated()` | `ClockInRequest.php` | Tambah `'gps_variance' => ['nullable', 'numeric', 'min:0']` — **sama dengan F3** |
-| **FC2** | `face_crop` dikirim JS tapi `photo_selfie` divalidasi server | `clock-in.blade.php:166` vs `ClockInRequest.php:48` | Ganti `face_crop` → `photo_selfie` — **sama dengan F2** |
-| **FC3** | `is_mocked: false` hardcoded | `clock-in.blade.php:159` | Hapus hardcode atau implementasi deteksi — **sama dengan F4** |
-
-## HIGH (5)
-
-| ID | Issue | File | Detail |
-|:--:|-------|------|--------|
-| **FC4** | Liveness variance threshold 0.5 terlalu longgar | `face-registration.blade.php:104` | Variance 0.5 tidak membedakan gerakan real vs statis. Pasang threshold lebih ketat (misal 0.15) atau implementasi challenge-response |
-| **FC5** | EAR (Eye Aspect Ratio) dihitung tapi tidak digunakan | `clock-in.blade.php:105-107, 119-126` | `computeEAR()` dipanggil setiap deteksi, hasilnya di-push ke `earHistory`, tapi **tidak pernah** digunakan untuk verifikasi liveness (blink detection) |
-| **FC6** | Descriptor dihitung setiap frame — sia-sia | `clock-in.blade.php:104` | `lastDescriptor` di-update tiap 300ms; seharusnya hanya dihitung 1x saat user klik clock-in (`captureFaceCrop`) |
-| **FC7** | Dual storage: FaceDescriptor vs Employee.face_embedding | `FaceController::register():82-83` | Embedding disimpan di 2 tempat tanpa sinkronisasi. Lapisan lama (`employee.face_embedding`) seharusnya dihapus setelah FaceDescriptor stabil. |
-| **FC8** | Old FaceDescriptor tidak di-deactivate saat re-enroll | `FaceController::register()` | `FaceDescriptor::create()` tanpa `where('is_active', false)` update dulu. Multiple active descriptors bisa muncul. |
-
-## MEDIUM (10)
-
-| ID | Issue | Detail |
-|:--:|-------|--------|
-| **FC9** | `nearestNeighbors` tanpa timeout di pgvector | Query bisa hang jika indeks rusak |
-| **FC10** | Empty `catch {}` di 3 tempat (face-registration) | Error siluman — tidak ada logging |
-| **FC11** | 6 base64 JPEG capture dikirim ke server | Hanya `captures_count` yang disimpan — 6 gambar full-res base64 terkirim percuma |
-| **FC12** | `computeVariance()` math wrong | Variance dibagi `embeddings.length` bukan `embeddings.length * dims` |
-| **FC13** | Vite dynamic import di production | `import('face-api.js')` di production bikin code split terpisah |
-| **FC14** | No `beforeunload` cleanup di face-registration | Stream kamera tetap jalan saat navigasi |
-| **FC15** | `faceapi.euclideanDistance()` tidak dipakai | Service pake cosine distance via pgvector, tapi JS bisa compute client-side untuk real-time feedback |
-| **FC16** | Tidak ada max retry untuk model loading | Jika model gagal load, infinite retry tiap 300ms di detection loop |
-| **FC17** | No empty state jika camera izin ditolak permanent | Hanya set statusText, tidak ada UI guidance |
-| **FC18** | `photo_selfie` column expects base64 string no size limit | Payload bisa sangat besar (~100KB per capture) tanpa validasi |
-
-## LOW (8)
-
-| ID | Issue | Detail |
-|:--:|-------|--------|
-| **FC19** | No aria-label di video element | Aksesibilitas |
-| **FC20** | `captureFrame()` tidak stop detection loop selama capture | Race condition: detection loop hitung descriptor bersamaan dengan capture |
-| **FC21** | `modelsLoading` flag tidak direset jika gagal | User stuck di loading state forever |
-| **FC22** | No loading indicator untuk `registerFace()` API call | User tidak tahu request sedang diproses |
-| **FC23** | Magic number `0.3` dan `0.5` untuk scoreThreshold | Tidak ada konstanta |
-| **FC24** | `setTimeout(() => sample(i + 1), 1500)` hardcoded | Tidak ada konstanta untuk interval GPS |
-| **FC25** | No validation bahwa captureCount === embeddings.length | Bisa mismatch (1:1 mapping diperlukan) |
-| **FC26** | `destroy()` method ada tapi tidak di-trigger otomatis oleh Alpine | Perlu `@cleanup` atau `x-effect` untuk cleanup |
-
----
-
-
 
 # 🟢 UX Issues — Semua Selesai (9 item ✅)
 

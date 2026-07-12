@@ -37,12 +37,11 @@ return [
 
     'gemini' => [
         'api_key' => env('GOOGLE_AI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
-        'embedding_model' => env('GEMINI_EMBEDDING_MODEL', 'text-embedding-004'),
+        'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
+        'embedding_model' => env('GEMINI_EMBEDDING_MODEL', 'gemini-embedding-001'),
         'embedding_dimensions' => (int) env('GEMINI_EMBEDDING_DIMENSIONS', 768),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'timeout' => (int) env('GEMINI_TIMEOUT', 30),
-        'mock_mode' => (bool) env('RAG_MOCK_MODE', false),
         'max_retries' => (int) env('GEMINI_MAX_RETRIES', 3),
     ],
 

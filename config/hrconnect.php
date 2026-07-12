@@ -11,12 +11,6 @@ return [
     */
 
     /*
-     * RAG Mock Mode — bypass Gemini API calls, use local keyword-matched responses.
-     * Enabled for demo/presentation to avoid internet dependency.
-     */
-    'rag_mock_mode' => env('RAG_MOCK_MODE', false),
-
-    /*
      * Face Recognition: maximum cosine distance threshold (0.0 - 1.0).
      * 0.15 ≈ 85% similarity. Lower = stricter matching.
      * Can be overridden via CompanySetting key 'face_distance_threshold'.

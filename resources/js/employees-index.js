@@ -20,6 +20,11 @@ export default function () {
         terminateError: '',
         terminateLoading: false,
 
+        createModalOpen: false,
+        editing: false,
+        form: { name: '', email: '', password: '', employee_number: '', full_name: '', nik: '', phone: '', gender: '', marital_status: '', blood_type: '', birth_date: '', company_id: '', branch_id: '', department_id: '', position_id: '', parent_id: '', employment_type: '', salary_type: '', join_date: '', education_level: '', institution_name: '', graduation_year: '' },
+        lookup: { companies: [], branches: [], departments: [], positions: [], managers: [] },
+
         init() {
             this.fetchDepartments();
             this.fetchEmployees();

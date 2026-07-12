@@ -4,7 +4,6 @@ use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\KnowledgeBase;
 use App\Services\EmbeddingService;
-use App\Services\GeminiClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Embeddings;
 
@@ -15,7 +14,7 @@ beforeEach(function () {
 });
 
 test('chunkText split sesuai chunk size dan overlap', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $text = str_repeat('Karyawan PT 521 Teknologi mendapat fasilitas BPJS lengkap. ', 20);
     $chunks = $svc->chunkText($text, chunkChars: 100, overlapChars: 20);
@@ -29,28 +28,28 @@ test('chunkText split sesuai chunk size dan overlap', function () {
 });
 
 test('chunkText skip chunk yang terlalu pendek', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $tinyText = 'Hello';
     expect($svc->chunkText($tinyText))->toBe([]);
 });
 
 test('chunkText handle text kosong return empty array', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     expect($svc->chunkText(''))->toBe([]);
     expect($svc->chunkText('   '))->toBe([]);
 });
 
 test('formatVector return string format pgvector', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $vector = [0.1, -0.2, 0.3];
     expect($svc->formatVector($vector))->toBe('[0.1,-0.2,0.3]');
 });
 
 test('formatVector handle 768D vector', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $vector = array_fill(0, 768, 0.1);
     $result = $svc->formatVector($vector);
@@ -60,14 +59,14 @@ test('formatVector handle 768D vector', function () {
 });
 
 test('extractTextFromPdf throw kalau file tidak ada', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     expect(fn () => $svc->extractTextFromPdf('/nonexistent/file.pdf'))
         ->toThrow(BusinessRuleException::class, 'tidak dapat dibaca');
 });
 
 test('processKnowledgeBase set status error kalau content kosong', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $kb = KnowledgeBase::factory()->create();
     $kb->update(['content' => '']);
@@ -78,7 +77,7 @@ test('processKnowledgeBase set status error kalau content kosong', function () {
 });
 
 test('processKnowledgeBase set status ready on success', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $kb = KnowledgeBase::factory()->create([
         'content' => 'Some test content for embedding.',
@@ -90,7 +89,7 @@ test('processKnowledgeBase set status ready on success', function () {
 });
 
 test('searchSimilar returns ready records in SQLite (fallback)', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     KnowledgeBase::factory()->count(3)->create(['status' => KnowledgeBaseStatus::READY]);
     KnowledgeBase::factory()->create(['status' => KnowledgeBaseStatus::ERROR]);
@@ -101,7 +100,7 @@ test('searchSimilar returns ready records in SQLite (fallback)', function () {
 });
 
 test('searchByKeyword uses like fallback in SQLite', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     KnowledgeBase::factory()->create([
         'content' => 'BPJS Kesehatan dan BPJS Ketenagakerjaan',
@@ -114,7 +113,7 @@ test('searchByKeyword uses like fallback in SQLite', function () {
 });
 
 test('searchByKeyword returns empty hasil kalau tidak ada kecocokan', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     KnowledgeBase::factory()->create([
         'content' => 'Cuti tahunan karyawan adalah 12 hari.',
@@ -127,7 +126,7 @@ test('searchByKeyword returns empty hasil kalau tidak ada kecocokan', function (
 });
 
 test('searchSimilar respects topK parameter in SQLite fallback', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     KnowledgeBase::factory()->count(5)->create(['status' => KnowledgeBaseStatus::READY]);
 
@@ -137,7 +136,7 @@ test('searchSimilar respects topK parameter in SQLite fallback', function () {
 });
 
 test('processKnowledgeBase stores embedding vector content on success', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     $kb = KnowledgeBase::factory()->create([
         'content' => 'BPJS Kesehatan mencakup layanan rawat inap dan rawat jalan.',
@@ -151,12 +150,10 @@ test('processKnowledgeBase stores embedding vector content on success', function
     expect($fresh->embedding)->not->toBeNull();
 });
 
-test('processKnowledgeBase sets error status when GeminiClient embedding fails', function () {
-    $client = Mockery::mock(GeminiClient::class);
-    $client->shouldReceive('embed')
-        ->andThrow(new RuntimeException('API timeout'));
+test('processKnowledgeBase sets error status when embedding fails', function () {
+    Embeddings::fake(fn () => throw new RuntimeException('API timeout'));
 
-    $svc = new EmbeddingService($client);
+    $svc = app(EmbeddingService::class);
 
     $kb = KnowledgeBase::factory()->create([
         'content' => 'Test content that will fail embedding.',
@@ -168,7 +165,7 @@ test('processKnowledgeBase sets error status when GeminiClient embedding fails',
 });
 
 test('end-to-end: processKnowledgeBase then searchSimilar finds the record', function () {
-    $svc = new EmbeddingService(new GeminiClient);
+    $svc = app(EmbeddingService::class);
 
     KnowledgeBase::factory()->create([
         'content' => 'BPJS Ketenagakerjaan meliputi JHT, JKK, JK, dan JP.',
@@ -182,4 +179,32 @@ test('end-to-end: processKnowledgeBase then searchSimilar finds the record', fun
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($kb->id);
     expect($results->first()->status->value)->toBe('ready');
+});
+
+test('embed returns 768D vector via SDK fake', function () {
+    $svc = app(EmbeddingService::class);
+
+    $vector = $svc->embed('Test pertanyaan');
+
+    expect($vector)->toBeArray();
+    expect(count($vector))->toBe(768);
+    foreach ($vector as $v) {
+        expect($v)->toBeFloat();
+    }
+});
+
+test('embed reject teks kosong', function () {
+    $svc = app(EmbeddingService::class);
+
+    expect(fn () => $svc->embed(''))
+        ->toThrow(BusinessRuleException::class, 'harus 1-30000 karakter');
+});
+
+test('embed reject teks terlalu panjang (> 30000 char)', function () {
+    $svc = app(EmbeddingService::class);
+
+    $longText = str_repeat('a', 30_001);
+
+    expect(fn () => $svc->embed($longText))
+        ->toThrow(BusinessRuleException::class, 'harus 1-30000 karakter');
 });

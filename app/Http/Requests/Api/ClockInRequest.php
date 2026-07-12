@@ -30,10 +30,24 @@ class ClockInRequest extends FormRequest
             'is_mocked' => ['nullable', 'boolean'],
             'embedding' => ['nullable', 'array', 'size:128'],
             'embedding.*' => ['numeric', 'between:-3,3'],
+            'descriptor' => ['nullable', 'array', 'size:129'],
+            'descriptor.*' => ['numeric', 'between:-3,3'],
             'pin' => ['nullable', 'string', 'digits:6'],
             'wfa_note' => ['required_if:is_wfa,true', 'string', 'min:20'],
             'photo_selfie' => ['nullable', 'string'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $data = $this->all();
+
+        if (isset($data['descriptor']) && ! isset($data['embedding'])) {
+            $descriptor = $data['descriptor'];
+            $data['embedding'] = array_slice($descriptor, 1);
+            $data['_descriptor_version'] = $descriptor[0];
+            $this->merge($data);
+        }
     }
 
     public function messages(): array

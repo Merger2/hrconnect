@@ -175,7 +175,8 @@ function permissionMatrix(): Generator
 
     // manager
     $mgrCan = [
-        'view_dashboard', 'view_employees', 'view_attendances', 'view_leaves',
+        'view_dashboard', 'view_employees', 'view_knowledgebase',
+        'view_attendances', 'view_leaves',
         'approve_leaves_l1', 'view_overtimes', 'approve_overtimes_l1',
         'view_reimbursements', 'approve_reimbursements_l1',
         'approve_wfa', 'view_wfa_pending',
@@ -191,7 +192,7 @@ function permissionMatrix(): Generator
         'manage_tax_configs', 'manage_bpjs_configs',
         'view_activity_logs', 'view_audit_logs',
         'manage_settings', 'manage_company_settings', 'manage_roles',
-        'manage_holidays', 'manage_shifts', 'manage_knowledgebase', 'view_knowledgebase',
+        'manage_holidays', 'manage_shifts', 'manage_knowledgebase',
     ];
     foreach ($mgrCan as $p) {
         yield "manager can {$p}" => ['manager', $p, true];
