@@ -91,11 +91,12 @@ Schedule::command('backup:clean')
     ->onSuccess(fn () => logger()->info('backup:clean selesai'))
     ->onFailure(fn () => logger()->error('backup:clean gagal'));
 
-Schedule::command('backup:run')
+// Backup: setiap hari jam 01:30 (DB dump + files via tar.gz — workaround ZipArchive 1.11.4/PHP 8.5 bug)
+Schedule::command('hrconnect:backup')
     ->dailyAt('01:30')
     ->environments(['production'])
     ->runInBackground()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/schedule.log'))
-    ->onSuccess(fn () => logger()->info('backup:run selesai'))
-    ->onFailure(fn () => logger()->error('backup:run gagal'));
+    ->onSuccess(fn () => logger()->info('hrconnect:backup selesai'))
+    ->onFailure(fn () => logger()->error('hrconnect:backup gagal'));
