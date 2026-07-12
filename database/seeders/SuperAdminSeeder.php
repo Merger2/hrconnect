@@ -26,10 +26,11 @@ class SuperAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = env('SUPER_ADMIN_EMAIL', 'admin@hrconnect.local');
-        $password = env('SUPER_ADMIN_PASSWORD', 'ChangeMe!2026');
-        $name = env('SUPER_ADMIN_NAME', 'Super Admin');
+        $email = config('hrconnect.super_admin_email', 'admin@hrconnect.local');
+        $password = config('hrconnect.super_admin_password', 'ChangeMe!2026');
+        $name = config('hrconnect.super_admin_name', 'Super Admin');
 
+        /** @var \App\Models\User $user */
         $user = User::firstOrCreate(
             ['email' => $email],
             [
@@ -41,6 +42,7 @@ class SuperAdminSeeder extends Seeder
 
         if (! $user->hasRole('super-admin')) {
             $user->assignRole('super-admin');
+            $user->refresh();
         }
 
         $this->command?->info("Super Admin ready: {$email}");
