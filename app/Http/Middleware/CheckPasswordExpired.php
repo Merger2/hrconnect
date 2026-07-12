@@ -72,7 +72,7 @@ class CheckPasswordExpired
             }
 
             return redirect()
-                ->route('profile.edit')
+                ->route('security.edit')
                 ->with('warning', 'Ini pertama kali Anda login. Silakan ganti password sekarang.');
         }
 
@@ -86,7 +86,7 @@ class CheckPasswordExpired
 
         // Expired → redirect ke security.edit dengan warning
         return redirect()
-            ->route('profile.edit')
+            ->route('security.edit')
             ->with('warning', "Password Anda sudah kedaluwarsa (lebih dari {$expiryDays} hari). Silakan ganti password sekarang demi keamanan akun.");
     }
 }

@@ -192,6 +192,14 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Get active Sanctum token for current user.
+     *
+     * Returns the current Bearer token for the authenticated session.
+     * Caches token for 5 minutes to reduce DB writes.
+     *
+     * @tags Auth
+     */
     public function sanctumToken(Request $request): JsonResponse
     {
         $user = $request->user();
