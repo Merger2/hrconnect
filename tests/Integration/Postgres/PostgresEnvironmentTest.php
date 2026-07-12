@@ -7,6 +7,7 @@ use App\Exceptions\FaceNotRegisteredException;
 use App\Models\CompanySetting;
 use App\Models\Employee;
 use App\Models\Payroll;
+use App\Services\EmbeddingService;
 use App\Services\FaceRecognitionService;
 use App\Services\PayrollCalculatorService;
 use Carbon\CarbonImmutable;
@@ -621,8 +622,13 @@ test('pgcrypto crypt produces a valid bcrypt hash', function () {
 });
 
 test('pgcrypto crypt verification matches known password', function () {
+    // Generate valid bcrypt hash, then verify against it (single-salt CTE)
     $result = DB::selectOne(<<<'SQL'
-        SELECT crypt('testpass', '$2a$08$00000000000000000000000000000000000000000') = '$2a$08$00000000000000000000000000000000000000000' AS matches
+        WITH h AS (
+            SELECT crypt('testpass', gen_salt('bf')) AS hash
+        )
+        SELECT crypt('testpass', h.hash) = h.hash AS matches
+        FROM h
     SQL);
 
     expect($result)->not->toBeNull();
@@ -730,6 +736,9 @@ test('EmbeddingService searchSimilar returns empty when no matching status', fun
 // ─── EmbeddingService with pg_trgm ──────────────
 
 test('EmbeddingService searchByKeyword returns matching results via pg_trgm similarity', function () {
+    // Lower pg_trgm threshold so shorter queries (cuti tahunan) still match partial content
+    DB::statement('SELECT set_limit(0.2)');
+
     $targetId = DB::table('knowledge_bases')->insertGetId([
         'knowledgeable_type' => Employee::class,
         'knowledgeable_id' => 1,
@@ -780,10 +789,10 @@ test('EmbeddingService searchByKeyword returns empty for completely unrelated qu
 // ─── Additional pg_trgm ─────────────────────────
 
 test('pg_trgm show_trgm returns array of trigrams', function () {
-    $trgm = DB::selectOne("SELECT show_trgm('cuti') AS trigrams");
+    $trgm = DB::selectOne("SELECT to_json(show_trgm('cuti')) AS trigrams");
 
     expect($trgm)->not->toBeNull();
-    $raw = is_string($trgm->trigrams) ? json_decode($trgm->trigrams) : $trgm->trigrams;
+    $raw = json_decode($trgm->trigrams);
     expect($raw)->toBeArray();
     expect(count($raw))->toBeGreaterThanOrEqual(3);
 });
