@@ -74,6 +74,19 @@ export default defineConfig({
       },
     },
 
+    // Admin-authenticated tests (employee directory, payroll, approval, reimbursement)
+    {
+      name: 'chromium-admin',
+      testMatch: /(employee|payroll-settings|approval-reimbursement)\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'admin.json'),
+      },
+    },
+
     // Auth flow tests (login/logout) — no stored state, tests login itself
     {
       name: 'chromium-auth',

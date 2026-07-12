@@ -9,6 +9,7 @@ if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
 
 const employeeFile = path.join(authDir, 'employee.json');
 const hrFile = path.join(authDir, 'hr.json');
+const adminFile = path.join(authDir, 'admin.json');
 
 setup('authenticate as employee', async ({ page }) => {
   await page.goto('/login');
@@ -26,4 +27,13 @@ setup('authenticate as hr', async ({ page }) => {
   await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
   await page.context().storageState({ path: hrFile });
+});
+
+setup('authenticate as admin', async ({ page }) => {
+  await page.goto('/login');
+  await page.locator('input[name="email"]').fill('admin@hrconnect.local');
+  await page.locator('input[name="password"]').fill('ChangeMe!2026');
+  await page.locator('button[type="submit"]').click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+  await page.context().storageState({ path: adminFile });
 });

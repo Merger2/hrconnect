@@ -31,9 +31,10 @@ class E2eTestSeeder extends Seeder
         $employeeRole = Role::where('name', 'employee')->first();
 
         $testUsers = [
-            ['email' => 'test@hrconnect.test',     'name' => 'Test User',   'role' => 'employee'],
-            ['email' => 'employee@hrconnect.test', 'name' => 'Test Employee', 'role' => 'employee'],
-            ['email' => 'hr@hrconnect.test',       'name' => 'Test HR',     'role' => 'hr-manager'],
+            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'password'],
+            ['email' => 'employee@hrconnect.test',  'name' => 'Test Employee', 'role' => 'employee',   'password' => 'password'],
+            ['email' => 'hr@hrconnect.test',        'name' => 'Test HR',       'role' => 'hr-manager', 'password' => 'password'],
+            ['email' => 'admin@hrconnect.local',    'name' => 'Super Admin',   'role' => 'super-admin', 'password' => 'ChangeMe!2026'],
         ];
 
         foreach ($testUsers as $data) {
@@ -42,11 +43,18 @@ class E2eTestSeeder extends Seeder
                 ['email' => $data['email']],
                 [
                     'name'                => $data['name'],
-                    'password'            => Hash::make('password'),
+                    'password'            => Hash::make($data['password'] ?? 'password'),
                     'email_verified_at'   => now(),
                     'password_changed_at' => now(),
                 ]
             );
+
+            // Ensure password is always correct (firstOrCreate tidak update existing)
+            if (! Hash::check($data['password'] ?? 'password', $user->password)) {
+                $user->password = Hash::make($data['password'] ?? 'password');
+                $user->password_changed_at = now();
+                $user->save();
+            }
 
             $roleName = $data['role'];
             if (! $user->hasRole($roleName)) {
