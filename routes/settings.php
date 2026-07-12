@@ -16,3 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::livewire('settings/appearance', 'pages::settings.appearance')->name('appearance.edit');
 });
+
+// IT Support Monitoring Dashboard
+Route::middleware(['auth', 'verified', 'can:view_dashboard'])->group(function () {
+    Route::livewire('monitoring', 'it-support.monitoring-dashboard')->name('monitoring');
+});

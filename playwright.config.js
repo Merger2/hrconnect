@@ -48,10 +48,10 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
+    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, face enrollment, full role coverage)
     {
       name: 'chromium-employee',
-      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee)\.spec\.ts/,
+      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee|face-enrollment|face-recognition-api)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -100,10 +100,10 @@ export default defineConfig({
       },
     },
 
-    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement)
+    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement, monitoring)
     {
       name: 'chromium-admin',
-      testMatch: /(employee|payroll-settings|reimbursement|approval)\.spec\.ts/,
+      testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
