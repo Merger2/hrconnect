@@ -99,30 +99,6 @@ class GeofenceService
         }
     }
 
-    public function crossCheckIpLocation(string $ip, array $gpsData): array
-    {
-        $result = [
-            'ip' => $ip,
-            'geoip_available' => false,
-            'ip_country' => null,
-            'ip_city' => null,
-            'anomaly_score' => 0,
-        ];
-
-        if (class_exists(GeoIP::class)) {
-            try {
-                $geoIp = geoip($ip);
-                $result['geoip_available'] = true;
-                $result['ip_country'] = $geoIp->country ?? null;
-                $result['ip_city'] = $geoIp->city ?? null;
-            } catch (\Exception $e) {
-                $result['geoip_available'] = false;
-            }
-        }
-
-        return $result;
-    }
-
     /**
      * B3.2 fix: validasi koordinat dari client (PWA).
      * Cegah null/string/range invalid lolos ke deg2rad() yang silent error.

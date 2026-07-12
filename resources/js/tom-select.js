@@ -61,6 +61,10 @@ window.tomSelectInput = (options, placeholder, wireModel, disabled = false, live
 
         if (this.options && this.options.length > 0) {
             config.options = this.options;
+            config.preload = false;
+        } else if (this.options && typeof this.options === 'object' && !Array.isArray(this.options)) {
+            config.options = Object.entries(this.options).map(([id, name]) => ({ id, name }));
+            config.preload = false;
         }
 
         this.tomSelectInstance = new window.TomSelect(this.$refs.select, config);

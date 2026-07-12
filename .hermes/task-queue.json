@@ -1,0 +1,151 @@
+{
+  "version": "1.0",
+  "created_at": "2026-07-11T12:58:00Z",
+  "strategy": "e2e-first-loop",
+  "description": "HRConnect autonomous dev: E2E testing loop with Playwright + OpenCode",
+  "queue": [
+    {
+      "id": "FE_FACE_IMPORT",
+      "priority": 1,
+      "type": "frontend",
+      "depends_on": []
+    },
+    {
+      "id": "FE_FACE_MISMATCH",
+      "priority": 2,
+      "type": "backend",
+      "depends_on": [
+        "FE_FACE_IMPORT"
+      ]
+    },
+    {
+      "id": "E2E_FACE_ENROLL",
+      "priority": 3,
+      "type": "e2e",
+      "depends_on": [
+        "FE_FACE_MISMATCH"
+      ]
+    },
+    {
+      "id": "FE_CLOCK_IN_UI",
+      "priority": 4,
+      "type": "frontend",
+      "depends_on": [
+        "E2E_FACE_ENROLL"
+      ]
+    },
+    {
+      "id": "E2E_CLOCK_IN",
+      "priority": 5,
+      "type": "e2e",
+      "depends_on": [
+        "FE_CLOCK_IN_UI"
+      ]
+    },
+    {
+      "id": "BE_RAG_DEADCODE",
+      "priority": 6,
+      "type": "backend",
+      "depends_on": []
+    },
+    {
+      "id": "E2E_RAG_CHAT",
+      "priority": 7,
+      "type": "e2e",
+      "depends_on": [
+        "BE_RAG_DEADCODE"
+      ]
+    },
+    {
+      "id": "BE_LOAN_TRAIT",
+      "priority": 8,
+      "type": "backend",
+      "depends_on": []
+    },
+    {
+      "id": "BE_PPH21_FIX",
+      "priority": 9,
+      "type": "backend",
+      "depends_on": []
+    },
+    {
+      "id": "UNIT_TESTS",
+      "priority": 10,
+      "type": "unit",
+      "depends_on": []
+    }
+  ],
+  "tasks": {
+    "FE_FACE_IMPORT": {
+      "status": "in_progress",
+      "title": "Fix face-api.js import",
+      "description": "Fix broken face-api.js import in resources/js/face-recognition.js. Check node_modules, verify CDN link in layout, test browser console",
+      "acceptance": "No console errors, face-api module loaded",
+      "test_cmd": "npm run build",
+      "last_run": 1783845811.729954
+    },
+    "FE_FACE_MISMATCH": {
+      "status": "pending",
+      "title": "Fix face_crop/photo_selfie mismatch",
+      "description": "Resolve database column mismatch: ensure face enrollment stores in correct column (photo_selfie). Check migration, model, and form binding",
+      "acceptance": "Face crop saved successfully, no SQL errors",
+      "test_cmd": "php artisan test tests/Feature/FaceEnrollmentTest.php"
+    },
+    "E2E_FACE_ENROLL": {
+      "status": "pending",
+      "title": "E2E: Face enrollment flow",
+      "description": "Test complete face enrollment: login → face page → capture → verify → save. Use Playwright with camera mock",
+      "acceptance": "E2E test passes, enrollment stored in DB",
+      "test_cmd": "npm run test:e2e tests/e2e/face-enrollment.spec.ts"
+    },
+    "FE_CLOCK_IN_UI": {
+      "status": "pending",
+      "title": "Complete clock-in UI with GPS",
+      "description": "Build clock-in Livewire component: GPS location picker, face verification, timestamp. Reference PasPapan pattern, use MD3 tokens",
+      "acceptance": "UI renders, GPS location works, face camera loads",
+      "test_cmd": "npm run build && php artisan test tests/Feature/ClockInTest.php"
+    },
+    "E2E_CLOCK_IN": {
+      "status": "pending",
+      "title": "E2E: Clock-in with GPS geofencing",
+      "description": "E2E: User location → face verification → clock-in confirmation. Mock GPS, verify geofence validation, check attendance record created",
+      "acceptance": "E2E passes, attendance record in DB with verified location",
+      "test_cmd": "npm run test:e2e tests/e2e/clock-in.spec.ts"
+    },
+    "BE_RAG_DEADCODE": {
+      "status": "pending",
+      "title": "Remove RAG dead code",
+      "description": "Clean up: RAG_MOCK_MODE config (app/Services/RAG*), crossCheckIpLocation method. Keep RAG service functional",
+      "acceptance": "RAG service works, no dead code remains",
+      "test_cmd": "php artisan test tests/Feature/RAGTest.php && vendor/bin/phpstan analyse"
+    },
+    "E2E_RAG_CHAT": {
+      "status": "pending",
+      "title": "E2E: RAG chat + PDF upload",
+      "description": "E2E: User uploads PDF → sends query → receives RAG response. Verify streaming, file cleanup",
+      "acceptance": "E2E passes, chat response streamed correctly",
+      "test_cmd": "npm run test:e2e tests/e2e/rag-chat.spec.ts"
+    },
+    "BE_LOAN_TRAIT": {
+      "status": "pending",
+      "title": "Add missing Loan trait",
+      "description": "Add HasLoans trait to Payroll model (or Employee). Reference LoanRequest model, ensure relationships work",
+      "acceptance": "Payroll→loans() relationship works, no missing method errors",
+      "test_cmd": "php artisan test tests/Feature/LoanTest.php"
+    },
+    "BE_PPH21_FIX": {
+      "status": "pending",
+      "title": "Consolidate Pph21 calculation",
+      "description": "Resolve dual-method Pph21: use single BpjsService::calculatePph21() method. Remove conflicting Pph21Service",
+      "acceptance": "Single calculation method, all payroll tests pass",
+      "test_cmd": "php artisan test tests/Feature/PayrollTest.php --filter=Pph21"
+    },
+    "UNIT_TESTS": {
+      "status": "pending",
+      "title": "Full test suite",
+      "description": "Run composer test: lint + unit tests + integration tests",
+      "acceptance": "All tests pass, 0 lint errors",
+      "test_cmd": "composer test"
+    }
+  }
+}

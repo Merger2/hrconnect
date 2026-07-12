@@ -1,5 +1,6 @@
 import './pwa-install';
 import './tom-select';
+import { faceapi } from './face-recognition';
 import { watchPickerMounts } from './datepicker';
 import { installValidation } from './validation';
 import profilePhotoEditor from './profile-photo-editor';
@@ -149,6 +150,7 @@ function installSweetAlertConfirmations(root = document) {
 }
 
 window.L = L;
+window.faceapi = faceapi;
 window.profilePhotoEditor = profilePhotoEditor;
 
 window.initializeMap = function ({ onUpdate, location }) {

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Forms;
 
 use App\Enums\EducationLevel;
+use App\Enums\EmployeeStatus;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -17,36 +20,59 @@ class EmployeeForm extends Form
     public ?Employee $employee = null;
 
     public string $name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
 
     public string $employee_number = '';
+
     public string $full_name = '';
+
     public string $nik = '';
+
     public string $phone = '';
+
     public string $gender = '';
+
     public string $marital_status = '';
+
     public string $blood_type = '';
+
     public string $birth_date = '';
+
     public string $join_date = '';
 
     public ?string $province_id = null;
+
     public ?string $city_id = null;
+
     public ?string $district_id = null;
+
     public ?string $village_id = null;
+
     public string $address_detail = '';
 
     public string $company_id = '';
+
     public string $branch_id = '';
+
     public string $department_id = '';
+
     public string $position_id = '';
+
     public ?string $parent_id = null;
+
     public string $employment_type = '';
+
     public string $salary_type = '';
 
     public string $education_level = '';
+
     public string $institution_name = '';
+
     public string $graduation_year = '';
 
     public function rules(): array
@@ -128,7 +154,7 @@ class EmployeeForm extends Form
             'education_level' => $this->education_level,
             'institution_name' => $this->institution_name,
             'graduation_year' => $this->graduation_year,
-            'status' => \App\Enums\EmployeeStatus::ACTIVE,
+            'status' => EmployeeStatus::ACTIVE,
         ]);
 
         $user->assignRole('employee');

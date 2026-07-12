@@ -20,7 +20,6 @@ use App\Observers\PayrollObserver;
 use App\Observers\TaxConfigObserver;
 use App\Services\EmbeddingService;
 use App\Services\FaceRecognitionService;
-use App\Services\GeminiClient;
 use App\Services\GeofenceService;
 use App\Services\NavigationService;
 use Carbon\CarbonImmutable;
@@ -44,7 +43,6 @@ class AppServiceProvider extends ServiceProvider
         // A-7: Service bindings for DI
         $this->app->singleton(FaceRecognitionService::class);
         $this->app->singleton(GeofenceService::class);
-        $this->app->singleton(GeminiClient::class);
         $this->app->singleton(EmbeddingService::class);
         $this->app->singleton(NavigationService::class);
     }

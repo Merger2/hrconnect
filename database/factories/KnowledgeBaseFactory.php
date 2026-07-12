@@ -31,7 +31,7 @@ class KnowledgeBaseFactory extends Factory
 
     public function draft(): static
     {
-        return $this->state(fn () => ['status' => KnowledgeBaseStatus::DRAFT]);
+        return $this->state(fn () => ['status' => KnowledgeBaseStatus::PROCESSING]);
     }
 
     public function error(): static

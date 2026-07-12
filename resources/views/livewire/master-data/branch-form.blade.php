@@ -16,6 +16,16 @@
 
         <form wire:submit="save" class="rounded-xl border border-outline-variant/30 bg-canvas p-6 shadow-soft space-y-5">
             <div>
+                <label for="company_id" class="mb-1 block text-sm font-medium text-ink">{{ __('Perusahaan') }} *</label>
+                <x-forms.tom-select 
+                    :options="$companies"
+                    wire:model="companyId"
+                    placeholder="{{ __('Pilih perusahaan') }}"
+                    id="company_id"
+                />
+                @error('companyId')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+            </div>
+            <div>
                 <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nama Cabang') }} *</label>
                 <input wire:model="name" required class="mt-1.5 w-full rounded-md border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink" placeholder="{{ __('Kantor Pusat, Cabang Bandung, dsb') }}" />
                 @error('name')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
