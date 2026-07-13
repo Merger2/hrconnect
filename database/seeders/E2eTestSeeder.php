@@ -31,12 +31,13 @@ class E2eTestSeeder extends Seeder
         $employeeRole = Role::where('name', 'employee')->first();
 
         $testUsers = [
-            ['email' => 'employee@hrconnect.test',  'name' => 'Test Employee', 'role' => 'employee',   'password' => 'password'],
-            ['email' => 'hr@hrconnect.test',        'name' => 'Test HR',       'role' => 'hr-manager', 'password' => 'password'],
-            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'password'],
+            ['email' => 'employee@hrconnect.test',  'name' => 'Test Employee', 'role' => 'employee',   'password' => 'Employee1234'],
+            ['email' => 'hr@hrconnect.test',        'name' => 'Test HR',       'role' => 'hr-manager', 'password' => 'HRmanager1234'],
+            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'Employee1234'],
             ['email' => 'admin@hrconnect.local',    'name' => 'Super Admin',   'role' => 'super-admin', 'password' => 'ChangeMe!2026'],
-            ['email' => 'manager@hrconnect.test',   'name' => 'Test Manager',  'role' => 'manager',    'password' => 'password'],
-            ['email' => 'finance@hrconnect.test',   'name' => 'Test Finance',  'role' => 'finance',    'password' => 'password'],
+            ['email' => 'manager@hrconnect.test',   'name' => 'Test Manager',  'role' => 'manager',    'password' => 'Manager1234!!'],
+            ['email' => 'finance@hrconnect.test',   'name' => 'Test Finance',  'role' => 'finance',    'password' => 'Finance1234!!'],
+            ['email' => 'it-support@hrconnect.test','name' => 'IT Support',    'role' => 'it-support', 'password' => 'ITsupport1234'],
         ];
 
         foreach ($testUsers as $data) {
