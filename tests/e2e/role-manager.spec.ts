@@ -17,11 +17,10 @@ test.describe('Role: Manager — all accessible pages', () => {
     '/assets',
     '/payroll',
     '/knowledge-base',
-    // Approvals
     '/approvals',
-    // Settings
     '/settings/profile',
     '/settings/security',
+    '/settings/appearance',
   ];
 
   for (const route of pages) {

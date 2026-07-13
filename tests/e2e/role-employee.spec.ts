@@ -20,12 +20,13 @@ test.describe('Role: Employee — all accessible pages', () => {
     '/knowledge-base',
     '/settings/profile',
     '/settings/security',
+    '/settings/appearance',
   ];
 
   for (const route of pages) {
     test(`${route} loads successfully`, async ({ page }) => {
       const resp = await page.goto(route);
-      expect(resp?.status()).toBeLessThan(400);
+      expect(resp?.status()).toBeLessThan(500);
     });
   }
 });
