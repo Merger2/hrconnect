@@ -17,13 +17,12 @@ test.describe('Role: Finance — all accessible pages', () => {
     '/assets',
     '/payroll',
     '/knowledge-base',
-    // Finance Admin
     '/admin/payroll',
     '/admin/reimbursements',
     '/approvals',
-    // Settings
     '/settings/profile',
     '/settings/security',
+    '/settings/appearance',
   ];
 
   for (const route of pages) {
