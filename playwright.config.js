@@ -103,7 +103,7 @@ export default defineConfig({
     // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement, monitoring)
     {
       name: 'chromium-admin',
-      testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring)\.spec\.ts/,
+      testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring|payroll-config|auth-enhanced|face-recognition-api|approval-workflow)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
