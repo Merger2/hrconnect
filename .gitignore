@@ -38,7 +38,8 @@ tests/e2e/.auth/
 /.claude/
 /.codex/
 /.gemini/
-/docs/
+/docs/**
+!/docs/api/api.json
 /tests/
 /.github/
 /_ide_helper.php
