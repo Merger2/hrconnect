@@ -1,0 +1,49 @@
+<?php
+
+use App\Http\Controllers\Controller;
+use App\Jobs\GenerateEmployeePayrollJob;
+use App\Jobs\GeneratePayslipPdfJob;
+use App\Jobs\ProcessKnowledgeBaseEmbedding;
+use App\Models\KnowledgeBase;
+use Illuminate\Database\Eloquent\Model;
+
+arch('services use strict types')
+    ->expect('App\Services')
+    ->toUseStrictTypes()
+    ->not->toUse(['dd', 'dump']);
+
+arch('jobs use strict types')
+    ->expect('App\Jobs')
+    ->toUseStrictTypes();
+
+test('all jobs have retry configuration', function () {
+    $refs = [
+        GenerateEmployeePayrollJob::class,
+        GeneratePayslipPdfJob::class,
+        ProcessKnowledgeBaseEmbedding::class,
+    ];
+
+    foreach ($refs as $ref) {
+        $props = (new ReflectionClass($ref))->getDefaultProperties();
+        expect($props)->toHaveKey('tries');
+        expect($props)->toHaveKey('backoff');
+        expect($props)->toHaveKey('timeout');
+    }
+});
+
+arch('controllers extend base Controller')
+    ->expect('App\Http\Controllers')
+    ->toExtend(Controller::class);
+
+arch('no dd or dump in app code')
+    ->expect('App')
+    ->not->toUse(['dd', 'dump', 'var_dump', 'exit']);
+
+arch('models extend Eloquent Model')
+    ->expect('App\Models')
+    ->toExtend(Model::class)
+    ->ignoring(KnowledgeBase::class);
+
+arch('enums are backed enums')
+    ->expect('App\Enums')
+    ->toImplement(BackedEnum::class);

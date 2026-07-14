@@ -43,11 +43,10 @@ class ReimbursementAdmin extends Component
     {
         $this->resetPage();
     }
-
     public function render()
     {
         $reimbursements = Reimbursement::query()
-            ->with(['employee.position', 'employee.department', 'category', 'approver'])
+            ->with(['employee.position', 'employee.department', 'category'])
             ->when($this->statusFilter !== 'all', fn ($q) => $q->where('status', $this->statusFilter))
             ->when(filled($this->categoryId), fn ($q) => $q->where('reimbursement_category_id', $this->categoryId))
             ->when(filled($this->search), function ($q) {
