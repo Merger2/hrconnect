@@ -1,6 +1,8 @@
 import './pwa-install';
 import './tom-select';
-import { faceapi } from './face-recognition';
+import { loadFaceModels, faceapi } from './face-recognition';
+import faceEnrollment from './face-enrollment';
+import { detectLocation, initGpsLocator, DEFAULT_CENTER } from './gps-locator';
 import { watchPickerMounts } from './datepicker';
 import { installValidation } from './validation';
 import profilePhotoEditor from './profile-photo-editor';
@@ -36,7 +38,6 @@ import 'flatpickr/dist/flatpickr.min.css';
 const normalizeIcon = (icon) => ({ danger: 'error', failed: 'error', failure: 'error', warn: 'warning' }[icon] || icon);
 
 const swalClasses = {
-    popup: '!rounded-[1.35rem] !border !border-outline-variant/50 !bg-canvas !px-5 !py-6 !shadow-[0_28px_80px_-42px_rgba(10,10,10,0.55)]',
     icon: '!my-2 !h-16 !w-16 !border-[0.28rem]',
     title: '!mt-4 !text-lg !font-bold !tracking-tight !text-ink',
     htmlContainer: '!mx-0 !mt-3 !text-sm !leading-6 !text-on-surface-variant',
@@ -45,8 +46,32 @@ const swalClasses = {
     cancelButton: '!m-0 !inline-flex !min-h-[3rem] !w-full !items-center !justify-center !rounded-xl !border !border-outline-variant !bg-canvas !px-5 !py-3 !text-sm !font-bold !text-ink',
 };
 
+// `authChecking` adalah flag yang True SELAMA kita sedang mengecek/mengambil
+// Sanctum token. Komponen Alpine yang butuh auth (mis. attendance/today,
+// leave/quota) harus menunggu flag ini False sebelum memanggil API, agar tidak
+// memicu 401/404 palsu di halaman publik (login, register, dll) yang juga
+// memuat app.js.
+// Baca status auth dari <meta name="auth-status"> — head.blade.php menambahkannya
+// di semua layout. Di halaman publik (login/register) value-nya 'guest'.
+window.isAuthenticated = document.querySelector('meta[name="auth-status"]')
+    ?.getAttribute('content') === 'authenticated';
+window.authChecking = true;
+
 const fetchSanctumToken = async () => {
-    if (sessionStorage.getItem('sanctum_token')) return;
+    // Hanya ambil token kalau user terautentikasi di halaman ini. app.js
+    // dimuat di LAYOUT, bukan per-halaman, jadi dia juga jalan di halaman
+    // publik (login/register/forgot-password). Memanggil endpoint yang
+    // butuh auth:sanctum di halaman publik akan menghasilkan 401 palsu.
+    if (!window.isAuthenticated) {
+        window.authChecking = false;
+        return;
+    }
+
+    if (sessionStorage.getItem('sanctum_token')) {
+        window.authChecking = false;
+        return;
+    }
+
     try {
         const res = await fetch('/api/v1/sanctum/token', {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -58,8 +83,11 @@ const fetchSanctumToken = async () => {
                 sessionStorage.setItem('sanctum_token', json.data.token);
             }
         }
+        // 401 di sini bukan error — berarti sesi belum ada (halaman publik).
     } catch {
-        // Silent fail — token will be unavailable for this session
+        // Silent fail — token akan unavailable untuk sesi ini.
+    } finally {
+        window.authChecking = false;
     }
 };
 fetchSanctumToken();
@@ -70,6 +98,18 @@ window.apiHeaders = () => {
     if (token) headers['Authorization'] = 'Bearer ' + token;
     return headers;
 };
+
+// Helper: tunggu hingga pemeriksaan auth selesai sebelum memanggil API
+// yang butuh Bearer token. Mengembalikan Promise<void>.
+window.whenAuthReady = () => new Promise((resolve) => {
+    if (!window.authChecking) return resolve();
+    const interval = setInterval(() => {
+        if (!window.authChecking) {
+            clearInterval(interval);
+            resolve();
+        }
+    }, 25);
+});
 
 window.HRConnectAlert = {
     toast(data) {
@@ -150,9 +190,14 @@ function installSweetAlertConfirmations(root = document) {
 }
 
 window.L = L;
-window.faceapi = faceapi;
 window.profilePhotoEditor = profilePhotoEditor;
-
+window.loadFaceModels = loadFaceModels;
+window.faceapi = faceapi;
+window.detectLocation = detectLocation;
+window.initGpsLocator = initGpsLocator;
+window.GPS_DEFAULT_CENTER = DEFAULT_CENTER;
+// Leaflet map utilities for branch geofence forms
+// Leaflet map utilities for branch geofence forms
 window.initializeMap = function ({ onUpdate, location }) {
     const defaultLoc = location ?? [-6.2088, 106.8456];
 
@@ -194,49 +239,6 @@ window.setMapLocation = function ({ location }) {
     if (marker) marker.setLatLng(location);
 };
 
-window.detectLocation = function () {
-    if (!navigator.geolocation) {
-        window.HRConnectAlert?.toast({ type: 'error', message: 'Browser tidak mendukung geolokasi.' });
-        return;
-    }
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            const lat = pos.coords.latitude.toFixed(6);
-            const lng = pos.coords.longitude.toFixed(6);
-            const latEl = document.getElementById('lat-input');
-            const lngEl = document.getElementById('lng-input');
-            if (latEl) { latEl.value = lat; latEl.dispatchEvent(new Event('input', { bubbles: true })); }
-            if (lngEl) { lngEl.value = lng; lngEl.dispatchEvent(new Event('input', { bubbles: true })); }
-            if (window._branchMapRef) {
-                window._branchMapRef.setView([lat, lng], 18);
-                if (window._branchMarker) window._branchMarker.setLatLng([lat, lng]);
-                window._branchUpdateCoords?.(lat, lng);
-            }
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`)
-                .then(r => r.json())
-                .then(data => {
-                    const addr = data?.display_name;
-                    if (addr) {
-                        const addrEl = document.getElementById('address');
-                        if (addrEl) { addrEl.value = addr; addrEl.dispatchEvent(new Event('input', { bubbles: true })); }
-                    }
-                })
-                .catch(() => {});
-            window.HRConnectAlert?.toast({ type: 'success', message: 'Lokasi terdeteksi' });
-        },
-        (err) => {
-            const messages = {
-                1: 'Izin lokasi ditolak. Buka pengaturan browser untuk mengizinkan akses lokasi.',
-                2: 'Lokasi tidak tersedia. Pastikan GPS/Location Service aktif.',
-                3: 'Waktu mendeteksi lokasi habis. Coba lagi.',
-            };
-            const msg = messages[err.code] || 'Gagal mendeteksi lokasi.';
-            window.HRConnectAlert?.toast({ type: 'error', message: msg });
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    );
-};
-
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('profilePhotoEditor', profilePhotoEditor);
     window.Alpine.data('payrollIndex', payrollIndex);
@@ -256,6 +258,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('importEmployeesForm', importEmployeesForm);
     window.Alpine.data('assetsIndex', assetsIndex);
     window.Alpine.data('knowledgeBaseChat', knowledgeBaseChat);
+    window.Alpine.data('faceEnrollment', faceEnrollment);
     window.Alpine.store('darkMode', {
         on: false,
 
@@ -354,4 +357,3 @@ const observer = new MutationObserver((mutations) => {
 });
 
 observer.observe(document.body, { childList: true, subtree: true });
-

@@ -173,9 +173,9 @@ class LeaveController extends Controller
 
         if (! $employee) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Akun Anda belum terhubung dengan data karyawan.',
-            ], 404);
+                'status' => 'success',
+                'data' => [],
+            ]);
         }
 
         $balances = LeaveBalance::with('leaveType:id,name,code,deducts_from_quota')

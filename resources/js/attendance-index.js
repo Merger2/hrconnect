@@ -11,7 +11,9 @@ export default function () {
         init() {
             this.todayFormatted = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             this.period = this.currentPeriod();
-            Promise.all([this.fetchToday(), this.fetchAttendance()]);
+            window.whenAuthReady().then(() => {
+                Promise.all([this.fetchToday(), this.fetchAttendance()]);
+            });
         },
 
         currentPeriod() {
@@ -25,13 +27,12 @@ export default function () {
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
         },
 
-        apiHeaders() {
-            return window.apiHeaders();
-        },
-
         async fetchToday() {
+            await window.whenAuthReady();
+            if (!window.isAuthenticated) return;
             try {
                 const res = await fetch('/api/v1/attendance/today', { headers: this.apiHeaders() });
+                if (!res.ok) return; // 401/404/422 => silent, not an error toast
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.today = json.data;
@@ -43,9 +44,12 @@ export default function () {
         },
 
         async fetchAttendance() {
+            await window.whenAuthReady();
+            if (!window.isAuthenticated) return;
             this.loading = true;
             try {
                 const res = await fetch(`/api/v1/attendance?period=${this.period}&per_page=50`, { headers: this.apiHeaders() });
+                if (!res.ok) return;
                 const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;

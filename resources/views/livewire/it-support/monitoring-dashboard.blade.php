@@ -16,7 +16,7 @@
                     <input type="checkbox" wire:model="autoRefresh" class="rounded border-gray-300">
                     Auto-refresh ({{ $refreshInterval }}s)
                 </label>
-                <button wire:click="refreshData" class="btn-primary" :disabled="$wire.loading">
+                <button wire:click="refreshData" class="btn-primary" wire:loading.attr="disabled">
                     <svg class="animate-spin -ml-1 -mr-2 h-4 w-4" wire:loading wire:target="refreshData" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     Refresh
                 </button>
@@ -26,7 +26,7 @@
         <!-- System Health Overview -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <div class="bg-white rounded-lg shadow p-6 border-l-4" :class="[
-                $systemHealth['overall'] === 'healthy' ? 'border-green-500' : ($systemHealth['overall'] === 'warning' ? 'border-yellow-500' : 'border-red-500')
+                systemHealth['overall'] === 'healthy' ? 'border-green-500' : (systemHealth['overall'] === 'warning' ? 'border-yellow-500' : 'border-red-500')
             ]">
                 <div class="flex items-center justify-between">
                     <div>
@@ -34,10 +34,10 @@
                         <p class="text-2xl font-bold text-gray-900 mt-1">{{ ucfirst($systemHealth['overall']) }}</p>
                     </div>
                     <div class="w-12 h-12 rounded-full flex items-center justify-center" :class="[
-                        $systemHealth['overall'] === 'healthy' ? 'bg-green-100 text-green-600' : ($systemHealth['overall'] === 'warning' ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600')
+                        systemHealth['overall'] === 'healthy' ? 'bg-green-100 text-green-600' : (systemHealth['overall'] === 'warning' ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600')
                     ]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="$systemHealth['overall'] === 'healthy' ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : ($systemHealth['overall'] === 'warning' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="systemHealth['overall'] === 'healthy' ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : (systemHealth['overall'] === 'warning' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')"></path>
                         </svg>
                     </div>
                 </div>
@@ -45,11 +45,11 @@
 
             @foreach(['queue' => 'Queue Workers', 'cron' => 'Cron Jobs', 'backup' => 'Backups', 'disk' => 'Disk Space', 'database' => 'Database'] as $key => $label)
                 <div class="bg-white rounded-lg shadow p-6 border-l-4" :class="[
-                    $systemHealth[$key]['status'] === 'healthy' ? 'border-green-500' : ($systemHealth[$key]['status'] === 'warning' ? 'border-yellow-500' : ($systemHealth[$key]['status'] === 'critical' ? 'border-red-500' : 'border-red-500'))
+                    systemHealth[$key]['status'] === 'healthy' ? 'border-green-500' : (systemHealth[$key]['status'] === 'warning' ? 'border-yellow-500' : (systemHealth[$key]['status'] === 'critical' ? 'border-red-500' : 'border-red-500'))
                 ]">
                     <p class="text-sm font-medium text-gray-500">{{ $label }}</p>
                     <p class="text-xl font-bold text-gray-900 mt-1" :class="[
-                        $systemHealth[$key]['status'] === 'healthy' ? 'text-green-600' : ($systemHealth[$key]['status'] === 'warning' ? 'text-yellow-600' : 'text-red-600')
+                        systemHealth[$key]['status'] === 'healthy' ? 'text-green-600' : (systemHealth[$key]['status'] === 'warning' ? 'text-yellow-600' : 'text-red-600')
                     ]">{{ $systemHealth[$key]['message'] ?? $systemHealth[$key]['status'] }}</p>
                     <p class="text-xs text-gray-400 mt-1">{{ $systemHealth[$key]['last_run'] ?? $systemHealth[$key]['latency'] ?? $systemHealth[$key]['percent'] ?? '' }}</p>
                 </div>

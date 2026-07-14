@@ -1,19 +1,19 @@
 @php
-/**
+/** 
  * PWA Install Prompt Component
  * Menampilkan tombol install Progressive Web App
  * Didukung oleh Chrome/Edge/Android
- *
+ * 
  * Usage: <x-pwa-install-prompt />
  */
-$showInstall = auth()->check() && ! request()->secure() === false;
+$showInstall = auth()->check() && !request()->secure();
 @endphp
 
 <div
     x-data="pwaInstall()"
     x-show="show"
     x-cloak
-    class="fixed bottom-4 right-4 z-50"
+    class="fixed bottom-6 right-6 z-50 max-w-sm"
     role="alert"
     aria-live="polite"
 >
@@ -78,7 +78,7 @@ function pwaInstall() {
             // Tampilkan prompt jika belum terinstall dan bukan standalone
             if (!this.isStandalone && !this.installed) {
                 // Tunggu 5 detik sebelum muncul
-                setTimeout(() => { this.show = true; }, 5000);
+                setTimeout(() => { this.show = true; }, 10000);
             }
 
             window.addEventListener('beforeinstallprompt', (e) => {

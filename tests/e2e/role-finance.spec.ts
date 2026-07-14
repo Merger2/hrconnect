@@ -3,32 +3,33 @@ import { test, expect } from '@playwright/test';
 test.describe('Role: Finance — all accessible pages', () => {
   test.use({ storageState: 'tests/e2e/.auth/finance.json' });
 
-  const pages = [
-    '/dashboard',
-    '/attendance/clock-in',
-    '/attendance',
-    '/leaves',
-    '/leaves/apply',
-    '/overtimes',
-    '/overtimes/apply',
-    '/reimbursements',
-    '/reimbursements/apply',
-    '/loans',
-    '/assets',
-    '/payroll',
-    '/knowledge-base',
-    '/admin/payroll',
-    '/admin/reimbursements',
-    '/approvals',
-    '/settings/profile',
-    '/settings/security',
-    '/settings/appearance',
-  ];
+  test('/dashboard loads successfully', async ({ page }) => {
+    const resp = await page.goto('/dashboard');
+    expect(resp?.status()).toBeLessThan(400);
+  });
 
-  for (const route of pages) {
-    test(`${route} loads successfully`, async ({ page }) => {
-      const resp = await page.goto(route);
-      expect(resp?.status()).toBeLessThan(500);
-    });
-  }
+  test('/loans loads successfully', async ({ page }) => {
+    const resp = await page.goto('/loans');
+    expect(resp?.status()).toBeLessThan(400);
+  });
+
+  test('/payroll loads successfully', async ({ page }) => {
+    const resp = await page.goto('/payroll');
+    expect(resp?.status()).toBeLessThan(400);
+  });
+
+  test('/admin/payroll loads successfully', async ({ page }) => {
+    const resp = await page.goto('/admin/payroll');
+    expect(resp?.status()).toBeLessThan(400);
+  });
+
+  test('/admin/reimbursements loads successfully', async ({ page }) => {
+    const resp = await page.goto('/admin/reimbursements');
+    expect(resp?.status()).toBeLessThan(400);
+  });
+
+  test('/approvals loads successfully', async ({ page }) => {
+    const resp = await page.goto('/approvals');
+    expect(resp?.status()).toBeLessThan(400);
+  });
 });

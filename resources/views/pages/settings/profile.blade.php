@@ -62,7 +62,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
         $this->profilePhotoPath = $user->profile_photo_path;
 
         if ($employee) {
-            $this->phone = '';
+            $this->phone = $employee->phone ?? '';
             $this->province_id = $employee->province_id ? (string) $employee->province_id : null;
             $this->city_id = $employee->city_id ? (string) $employee->city_id : null;
             $this->district_id = $employee->district_id ? (string) $employee->district_id : null;

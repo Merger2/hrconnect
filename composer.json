@@ -22,6 +22,7 @@
         "openspout/openspout": "^5.7",
         "paragonie/ciphersweet": "^4.10",
         "pgvector/pgvector": "^0.2.2",
+        "predis/predis": "*",
         "sentry/sentry-laravel": "*",
         "smalot/pdfparser": "^2.12",
         "spatie/laravel-activitylog": "^5.0",

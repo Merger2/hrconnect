@@ -6,13 +6,26 @@ export default function () {
         loadingQuota: true,
 
         init() {
-            this.fetchQuota();
-            this.fetchLeaves();
+            window.whenAuthReady().then(() => {
+                if (!window.isAuthenticated) {
+                    this.loading = false;
+                    this.loadingQuota = false;
+                    return;
+                }
+                this.fetchQuota();
+                this.fetchLeaves();
+            });
         },
 
         async fetchQuota() {
+            await window.whenAuthReady();
+            if (!window.isAuthenticated) {
+                this.loadingQuota = false;
+                return;
+            }
             try {
                 const res = await fetch('/api/v1/leave/quota', { headers: window.apiHeaders(), credentials: 'same-origin' });
+                if (!res.ok) return;
                 const json = await res.json();
                 if (json.status === 'success') this.quota = json.data;
             } catch {
@@ -22,9 +35,15 @@ export default function () {
         },
 
         async fetchLeaves() {
+            await window.whenAuthReady();
+            if (!window.isAuthenticated) {
+                this.loading = false;
+                return;
+            }
             this.loading = true;
             try {
                 const res = await fetch('/api/v1/leave?per_page=50', { headers: window.apiHeaders(), credentials: 'same-origin' });
+                if (!res.ok) return;
                 const json = await res.json();
                 if (json.status === 'success') this.leaves = json.data;
             } catch {
