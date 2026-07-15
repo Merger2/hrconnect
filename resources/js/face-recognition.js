@@ -7,7 +7,23 @@ const requiredNets = [
     faceapi.nets.faceLandmark68Net,
 ];
 
+let backendRegistered = false;
+
 export async function loadFaceModels() {
+    // Register tfjs backend (CPU fallback) before loading models
+    if (!backendRegistered) {
+        try {
+            await Promise.all([
+                import('@tensorflow/tfjs-backend-cpu'),
+                import('@tensorflow/tfjs-backend-webgl'),
+            ]);
+            // tfjs auto-registers CPU backend when imported
+            backendRegistered = true;
+        } catch (e) {
+            console.warn('[face-recognition] tfjs backend registration failed:', e);
+        }
+    }
+
     const loaded = await Promise.allSettled(
         requiredNets.map(net => net.loadFromUri(MODEL_URL))
     );

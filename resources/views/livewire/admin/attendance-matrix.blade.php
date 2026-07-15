@@ -4,11 +4,11 @@
             <div class="grid gap-3 md:grid-cols-5 lg:grid-cols-12">
                 <div class="md:col-span-2 lg:col-span-5">
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Cari Karyawan') }}</label>
-                    <input type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('Nama atau NIP...') }}" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-4 text-sm">
+                    <input type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('Nama atau NIP...') }}" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-4 text-sm text-ink placeholder:text-on-surface-variant/40 focus:border-ink focus:ring-1 focus:ring-ink/20">
                 </div>
                 <div class="lg:col-span-2">
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Cabang') }}</label>
-                    <select wire:model.live="branchId" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm">
+                    <select wire:model.live="branchId" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20">
                         <option value="">{{ __('Semua Cabang') }}</option>
                         @foreach($branches as $b)<option value="{{ $b->id }}">{{ $b->name }}</option>@endforeach
                     </select>
@@ -38,7 +38,7 @@
         </div>
 
         @if($attendances->count())
-        <div class="hidden lg:block overflow-hidden rounded-2xl border border-outline-variant shadow-soft">
+        <div class="hidden lg:block overflow-hidden rounded-xl border border-outline-variant shadow-soft">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-surface-dim">

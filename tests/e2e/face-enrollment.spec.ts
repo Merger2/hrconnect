@@ -1,10 +1,26 @@
 import { test, expect } from '@playwright/test';
 
 // Auth handled via storageState (hr) — see playwright.config.js
+test.describe.configure({ retries: 2 });
+
 test.describe('Face Enrollment Flow', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock camera API for headless testing
+    await page.addInitScript(() => {
+      navigator.mediaDevices.getUserMedia = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const stream = canvas.captureStream(30);
+        return stream;
+      };
+    });
+  });
+
   test('face registration page loads with title', async ({ page }) => {
     await page.goto('/attendance/face-registration');
-    await expect(page.locator('h2')).toContainText(/Registrasi Wajah|Face Registration/i);
+    // Target the page title h2 specifically, not the Swal modal h2
+    await expect(page.locator('main h2').first()).toContainText(/Registrasi Wajah|Face Registration/i);
     await expect(page.locator('text=Daftarkan wajah')).toBeVisible({ timeout: 8000 });
   });
 

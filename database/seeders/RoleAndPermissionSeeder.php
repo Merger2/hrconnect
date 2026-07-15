@@ -145,7 +145,9 @@ class RoleAndPermissionSeeder extends Seeder
 
     /**
      * Manager: L1 approval + view tim (filtered di Policy via parent_id).
-     * Manager OTOMATIS dapat semua permission Employee (multi-role inheritance via UI).
+     * NO view_branches, view_departments, view_positions — those are master data
+     * view permissions for HR/Super Admin only. Manager sees team data through
+     * policy filtering (parent_id), not master data view perms.
      */
     private function managerPermissions(): array
     {

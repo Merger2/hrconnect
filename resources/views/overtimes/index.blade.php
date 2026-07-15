@@ -8,32 +8,30 @@
             </x-slot:actions>
 
         {{-- Toolbar --}}
-        <div class="mb-3 rounded-xl border border-outline-variant bg-canvas p-2.5 shadow-sm">
-            <div class="grid grid-cols-1 items-end gap-4 md:grid-cols-2 xl:grid-cols-12">
-                <div class="xl:col-span-2">
-                    <label class="mb-1.5 block text-xs font-medium text-on-surface-variant">{{ __('Period') }}</label>
-                    <select x-model="period" @change="fetchOvertimes()"
-                            class="block w-full rounded-lg border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink ring-1 ring-inset ring-outline-variant focus:ring-2 focus:ring-inset focus:ring-ink">
-                        <option :value="currentPeriod()">{{ __('This Month') }}</option>
-                        <option :value="lastMonthPeriod()">{{ __('Last Month') }}</option>
-                    </select>
-                </div>
+        <div class="mb-4 flex flex-wrap items-end gap-3">
+            <div class="w-full sm:w-48">
+                <label class="mb-1.5 block text-xs font-medium text-on-surface-variant">{{ __('Period') }}</label>
+                <select x-model="period" @change="fetchOvertimes()"
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2.5 text-sm text-ink focus:border-primary focus:ring-2 focus:ring-primary/20">
+                    <option :value="currentPeriod()">{{ __('This Month') }}</option>
+                    <option :value="lastMonthPeriod()">{{ __('Last Month') }}</option>
+                </select>
             </div>
         </div>
 
         {{-- Summary stats --}}
-        <dl class="mb-4 flex flex-wrap gap-2" x-show="!loading">
-            <div class="rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5">
-                <dt class="text-xs font-semibold uppercase text-on-surface-variant">{{ __('Total Hours') }}</dt>
-                <dd class="text-sm font-bold text-ink" x-text="summary.total_hours + 'h'">0</dd>
+        <dl class="mb-5 grid grid-cols-3 gap-3" x-show="!loading">
+            <div class="ess-stat">
+                <dt class="ess-stat__label">{{ __('Total Hours') }}</dt>
+                <dd class="ess-stat__value" x-text="summary.total_hours + 'h'">0</dd>
             </div>
-            <div class="rounded-lg border border-warning/30 bg-warning/10 px-3 py-1.5">
-                <dt class="text-xs font-semibold uppercase text-warning">{{ __('Pending') }}</dt>
-                <dd class="text-sm font-bold text-warning" x-text="summary.pending_hours + 'h'">0</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label text-warning/80">{{ __('Pending') }}</dt>
+                <dd class="ess-stat__value text-warning" x-text="summary.pending_hours + 'h'">0</dd>
             </div>
-            <div class="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5">
-                <dt class="text-xs font-semibold uppercase text-success">{{ __('Approved') }}</dt>
-                <dd class="text-sm font-bold text-success" x-text="summary.approved_hours + 'h'">0</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label text-success/80">{{ __('Approved') }}</dt>
+                <dd class="ess-stat__value text-success" x-text="summary.approved_hours + 'h'">0</dd>
             </div>
         </dl>
 

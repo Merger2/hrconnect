@@ -18,7 +18,7 @@
                 <td class="px-4 py-3 font-medium text-ink">{{ $b->name }}</td>
                 <td class="px-4 py-3">
                     @if($b->is_main)
-                    <span class="material-symbols-outlined text-lg text-amber-500">stars</span>
+                    <span class="material-symbols-outlined text-lg text-warning">stars</span>
                     @else
                     <span class="text-xs text-on-surface-variant/40">-</span>
                     @endif

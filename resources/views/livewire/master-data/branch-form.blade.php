@@ -2,17 +2,17 @@
     <x-slot:title>{{ $branch?->exists ? __('Edit Cabang') : __('Tambah Cabang') }}</x-slot:title>
 
     <div class="mx-auto max-w-3xl space-y-6">
-        <div class="rounded-xl bg-gradient-to-r from-primary-soft/60 to-transparent p-6">
+        <section class="ess-card p-6">
             <div class="flex items-center gap-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-deep text-white shadow-soft">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-soft text-primary">
                     <span class="material-symbols-outlined text-xl">{{ $branch?->exists ? 'edit' : 'add' }}</span>
                 </div>
                 <div>
                     <h1 class="text-xl font-semibold text-ink">{{ $branch?->exists ? __('Edit Cabang') : __('Tambah Cabang') }}</h1>
-                    <p class="mt-0.5 text-sm text-muted">{{ $branch?->exists ? $branch->name : __('Isi data cabang baru') }}</p>
+                    <p class="mt-0.5 text-sm text-on-surface-variant">{{ $branch?->exists ? $branch->name : __('Isi data cabang baru') }}</p>
                 </div>
             </div>
-        </div>
+        </section>
 
         <form wire:submit="save" class="rounded-xl border border-outline-variant/30 bg-canvas p-6 shadow-soft space-y-5">
             <div>

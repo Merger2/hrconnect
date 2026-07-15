@@ -76,8 +76,25 @@
                 <p class="text-xs text-on-surface-variant" x-text="hintMessage"></p>
             </div>
 
+            {{-- Clear recovery path when browser blocks camera access --}}
+            <template x-if="status === 'error'">
+                <div class="rounded-xl border border-error/30 bg-error/10 p-4">
+                    <p class="text-sm font-semibold text-error">{{ __('Akses kamera diperlukan untuk mendaftarkan wajah') }}</p>
+                    <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-on-surface-variant">
+                        <li>{{ __('Klik ikon kamera di address bar browser, lalu pilih Izinkan.') }}</li>
+                        <li>{{ __('Pastikan kamera tidak sedang dipakai Zoom, Meet, atau aplikasi lain.') }}</li>
+                        <li>{{ __('Tekan tombol Coba Lagi di bawah.') }}</li>
+                    </ol>
+                    <button type="button" @click="retryCamera()"
+                        class="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary shadow-soft transition-smooth hover:bg-primary-deep">
+                        <span class="material-symbols-outlined text-lg">refresh</span>
+                        {{ __('Coba Lagi') }}
+                    </button>
+                </div>
+            </template>
+
             {{-- Action buttons --}}
-            <div class="flex gap-3">
+            <div class="flex gap-3" x-show="status !== 'error'">
                 <template x-if="$wire.isEnrolled">
                     <button wire:click="cancelCapture"
                         class="rounded-xl border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-container">
@@ -86,7 +103,7 @@
                 </template>
 
                 <button @click="capture({ manual: true })" :disabled="!canCapture()"
-                    :class="canCapture() ? 'bg-ink text-white hover:bg-ink/90' : 'bg-surface-container text-on-surface-variant cursor-not-allowed'"
+                    :class="canCapture() ? 'bg-primary text-on-primary hover:bg-primary-deep' : 'bg-surface-container text-on-surface-variant cursor-not-allowed'"
                     class="flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition">
                     <span class="material-symbols-outlined text-lg">photo_camera</span>
                     <span x-text="buttonLabel()"></span>

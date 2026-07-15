@@ -29,6 +29,7 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
+      workers: 1,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],

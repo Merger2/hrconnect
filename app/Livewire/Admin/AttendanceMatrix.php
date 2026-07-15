@@ -78,7 +78,7 @@ class AttendanceMatrix extends Component
         $branches = Branch::orderBy('name')->get();
 
         $stats = [
-            'present' => Attendance::whereYear('date', $this->year)->whereMonth('date', $this->month)->where('status', AttendanceStatus::PRESENT)->count(),
+            'present' => Attendance::whereYear('date', $this->year)->whereMonth('date', $this->month)->whereNotIn('status', [AttendanceStatus::ABSENT, AttendanceStatus::HOLIDAY, AttendanceStatus::MISSED_CLOCK_IN])->count(),
             'late' => Attendance::whereYear('date', $this->year)->whereMonth('date', $this->month)->where('late_minutes', '>', 0)->count(),
             'absent' => Attendance::whereYear('date', $this->year)->whereMonth('date', $this->month)->where('status', AttendanceStatus::ABSENT)->count(),
             'wfa' => Attendance::whereYear('date', $this->year)->whereMonth('date', $this->month)->where('is_wfa', true)->count(),

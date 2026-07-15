@@ -22,6 +22,25 @@ use Illuminate\Http\Request;
 #[Group('Attendance')]
 class AttendanceController extends Controller
 {
+    /**
+     * Map backend AttendanceStatus enum + is_wfa flag ke nilai yang dipakai FE
+     * (attendance-index.js: calcSummary/statusLabel/statusClasses/statusBorder
+     * mengharapkan 'present'|'late'|'absent'|'wfa').
+     */
+    private function statusForFe(Attendance $a): string
+    {
+        if ($a->is_wfa) {
+            return 'wfa';
+        }
+
+        return match ($a->status?->value) {
+            'on_time' => 'present',
+            'late' => 'late',
+            'absent' => 'absent',
+            default => $a->status?->value ?? 'present',
+        };
+    }
+
     public function __construct(
         protected AttendanceService $attendanceService,
     ) {}
@@ -56,7 +75,7 @@ class AttendanceController extends Controller
                 'date' => $attendance->date?->toDateString(),
                 'clock_in' => $attendance->clock_in?->toIso8601String(),
                 'is_wfa' => (bool) $attendance->is_wfa,
-                'status' => $attendance->status?->value,
+                'status' => $this->statusForFe($attendance),
                 'verification_method' => $attendance->verification_method,
                 'face_similarity_score' => $attendance->face_similarity_score,
                 'late_minutes' => $attendance->late_minutes,
@@ -132,12 +151,21 @@ class AttendanceController extends Controller
                 'has_clocked_out' => $attendance && $attendance->clock_out !== null,
                 'attendance' => $attendance ? [
                     'id' => $attendance->id,
+                    'employee_id' => $attendance->employee_id,
                     'date' => $attendance->date?->toDateString(),
                     'clock_in' => $attendance->clock_in?->toIso8601String(),
                     'clock_out' => $attendance->clock_out?->toIso8601String(),
                     'is_wfa' => (bool) $attendance->is_wfa,
-                    'status' => $attendance->status?->value,
+                    'status' => $this->statusForFe($attendance),
+                    'status_wfa' => $attendance->status_wfa,
                     'late_minutes' => $attendance->late_minutes,
+                    'verification_method' => $attendance->verification_method,
+                    'face_similarity_score' => $attendance->face_similarity_score,
+                    'exception_type' => $attendance->exception_type,
+                    'exception_notes' => $attendance->exception_notes,
+                    'approved_late_by' => $attendance->approved_late_by,
+                    'photo_selfie_in' => $attendance->photo_selfie_in,
+                    'photo_selfie_out' => $attendance->photo_selfie_out,
                 ] : null,
             ],
         ]);
@@ -180,7 +208,7 @@ class AttendanceController extends Controller
             'clock_in' => $a->clock_in?->toIso8601String(),
             'clock_out' => $a->clock_out?->toIso8601String(),
             'is_wfa' => (bool) $a->is_wfa,
-            'status' => $a->status?->value,
+            'status' => $this->statusForFe($a),
             'late_minutes' => $a->late_minutes,
         ]);
 
@@ -251,7 +279,7 @@ class AttendanceController extends Controller
             'data' => [
                 'id' => $attendance->id,
                 'status_wfa' => $attendance->status_wfa?->value,
-                'status' => $attendance->status?->value,
+                'status' => $this->statusForFe($attendance),
             ],
         ]);
     }

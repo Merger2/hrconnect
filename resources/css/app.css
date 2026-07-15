@@ -1,6 +1,8 @@
 @import 'https://fonts.googleapis.com/css2?family=Rubik:wght@500&family=Inter:wght@400;500;600;700&display=swap';
 @import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@plugin '@tailwindcss/forms';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -29,18 +31,18 @@
     --color-graphite: #636363;
     --color-charcoal: #3d3d3d;
 
-    /* ── Blue scale (HP Electric Blue #024ad8 at blue-600) ── */
-    --color-blue-50: #eef4fd;
-    --color-blue-100: #c9e0fc;
-    --color-blue-200: #a8c9f9;
-    --color-blue-300: #7aacf5;
-    --color-blue-400: #296ef9;
-    --color-blue-500: #1756e0;
-    --color-blue-600: #024ad8;
-    --color-blue-700: #0239b0;
-    --color-blue-800: #0e3191;
-    --color-blue-900: #0c1f5e;
-    --color-blue-950: #07103a;
+    /* ── Indigo scale (replaces HP Electric Blue — requested ESS standard: indigo-600) ── */
+    --color-blue-50: #eef2ff;
+    --color-blue-100: #e0e7ff;
+    --color-blue-200: #c7d2fe;
+    --color-blue-300: #a5b4fc;
+    --color-blue-400: #818cf8;
+    --color-blue-500: #6366f1;
+    --color-blue-600: #4f46e5;
+    --color-blue-700: #4338ca;
+    --color-blue-800: #3730a3;
+    --color-blue-900: #312e81;
+    --color-blue-950: #1e1b4b;
 
     /* ── Coral scale (warm secondary accent) ── */
     --color-coral-50: #fff0ec;
@@ -55,20 +57,20 @@
     --color-coral-900: #7a2616;
     --color-coral-950: #421006;
 
-    /* HP Electric Blue semantic aliases (backward compat) */
-    --color-primary: #024ad8;
-    --color-primary-bright: #296ef9;
-    --color-primary-deep: #0e3191;
-    --color-primary-soft: #c9e0fc;
+    /* Indigo semantic aliases (replaces HP Electric Blue primary) */
+    --color-primary: #4f46e5;
+    --color-primary-bright: #6366f1;
+    --color-primary-deep: #4338ca;
+    --color-primary-soft: #e0e7ff;
     --color-on-primary: #ffffff;
 
     /* Error/Semantic */
-    --color-error: #b3262b;
-    --color-error-container: #fce8e8;
+    --color-error: #c0392b;
+    --color-error-container: #fbeae8;
     --color-on-error: #ffffff;
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-info: #3b82f6;
+    --color-success: #15935a;
+    --color-warning: #c77700;
+    --color-info: #0f6fd1;
 
     /* MD3 backward compat */
     --color-surface-container-low: #f7f7f7;
@@ -219,6 +221,11 @@
     }
 }
 
+/* Hide elements with x-cloak attribute before Alpine mounts */
+[x-cloak] {
+    display: none !important;
+}
+
 @layer components {
     .user-list-card {
         @apply relative rounded-xl border border-outline-variant/60 bg-canvas shadow-soft transition;
@@ -226,6 +233,51 @@
 
     .user-list-card:hover {
         @apply border-outline-variant;
+    }
+
+    /* ─── ESS shared surfaces (clean, professional, mobile-first) ─── */
+
+    /* Standard soft card */
+    .ess-card {
+        @apply overflow-hidden rounded-xl border border-outline-variant/60 bg-canvas shadow-soft;
+    }
+
+    /* Section eyebrow + heading rhythm */
+    .ess-eyebrow {
+        @apply text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-on-surface-variant/70;
+    }
+    .ess-section-title {
+        @apply text-lg font-semibold tracking-tight text-ink;
+    }
+
+    /* Summary stat chip — replaces the old cramped bordered chips */
+    .ess-stat {
+        @apply flex flex-col gap-1 rounded-xl border border-outline-variant/60 bg-canvas p-4 shadow-soft;
+    }
+    .ess-stat__label {
+        @apply text-[0.7rem] font-semibold uppercase tracking-wide text-on-surface-variant/70;
+    }
+    .ess-stat__value {
+        @apply text-xl font-bold tracking-tight text-ink tabular-nums;
+    }
+
+    /* Segmented period / filter toggle */
+    .ess-segment {
+        @apply inline-flex items-center gap-1 rounded-xl border border-outline-variant/60 bg-surface-container-low p-1;
+    }
+    .ess-segment__btn {
+        @apply rounded-lg px-3.5 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:text-ink;
+    }
+    .ess-segment__btn--active {
+        @apply bg-canvas text-ink shadow-soft;
+    }
+
+    /* Table header cell */
+    .ess-th {
+        @apply px-4 py-3 text-left text-[0.7rem] font-semibold uppercase tracking-wide text-on-surface-variant;
+    }
+    .ess-td {
+        @apply px-4 py-3.5 text-sm text-ink;
     }
 
     .wcag-touch-target {
@@ -330,5 +382,95 @@
     .badge-error {
         @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold text-white;
         background: linear-gradient(135deg, #b3262b, #f87171);
+    }
+
+    /* ─── Semantic Tone Classes (replaces legacy teal/sky/amber/rose/violet/fuchsia/emerald) ─── */
+    /* Format: .tone-{name} → bg-{name}-container text-{name}  */
+    /* Tone: primary (indigo) — primary actions, clock-in, profile, AI chat */
+    .tone-primary {
+        @apply bg-primary-soft text-primary;
+    }
+    .tone-primary-bg {
+        @apply bg-primary-soft;
+    }
+    .tone-primary-text {
+        @apply text-primary;
+    }
+
+    /* Tone: info (blue) — informational, leave, attendance */
+    .tone-info {
+        @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300;
+    }
+    .tone-info-bg {
+        @apply bg-blue-100 dark:bg-blue-900/30;
+    }
+    .tone-info-text {
+        @apply text-blue-700 dark:text-blue-300;
+    }
+
+    /* Tone: success (green) — approvals, confirmations */
+    .tone-success {
+        @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
+    }
+    .tone-success-bg {
+        @apply bg-green-100 dark:bg-green-900/30;
+    }
+    .tone-success-text {
+        @apply text-green-700 dark:text-green-300;
+    }
+
+    /* Tone: warning (amber) — overtime, pending */
+    .tone-warning {
+        @apply bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300;
+    }
+    .tone-warning-bg {
+        @apply bg-amber-100 dark:bg-amber-900/30;
+    }
+    .tone-warning-text {
+        @apply text-amber-700 dark:text-amber-300;
+    }
+
+    /* Tone: error/coral (red/coral) — reimbursement, destructive, claims */
+    .tone-error {
+        @apply bg-coral-100 text-coral-700 dark:bg-coral-900/30 dark:text-coral-300;
+    }
+    .tone-error-bg {
+        @apply bg-coral-100 dark:bg-coral-900/30;
+    }
+    .tone-error-text {
+        @apply text-coral-700 dark:text-coral-300;
+    }
+
+    /* Tone: brand (purple/violet) — payroll, AI, knowledge */
+    .tone-brand {
+        @apply bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300;
+    }
+    .tone-brand-bg {
+        @apply bg-purple-100 dark:bg-purple-900/30;
+    }
+    .tone-brand-text {
+        @apply text-purple-700 dark:text-purple-300;
+    }
+
+    /* Tone: secondary (fuchsia/pink) — management, settings */
+    .tone-secondary {
+        @apply bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300;
+    }
+    .tone-secondary-bg {
+        @apply bg-pink-100 dark:bg-pink-900/30;
+    }
+    .tone-secondary-text {
+        @apply text-pink-700 dark:text-pink-300;
+    }
+
+    /* Tone: neutral (gray/slate) — security, secondary actions */
+    .tone-neutral {
+        @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
+    }
+    .tone-neutral-bg {
+        @apply bg-gray-100 dark:bg-gray-800;
+    }
+    .tone-neutral-text {
+        @apply text-gray-700 dark:text-gray-300;
     }
 }

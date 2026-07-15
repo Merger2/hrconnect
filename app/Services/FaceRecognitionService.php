@@ -123,6 +123,6 @@ class FaceRecognitionService
         }
 
         return ! empty($employee->getRawOriginal('face_embedding'))
-            || ! empty($employee->getAttributes()['face_embedding'] ?? null);
+            || ! empty($employee->face_embedding);
     }
 }

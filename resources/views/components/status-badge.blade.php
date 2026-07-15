@@ -10,8 +10,8 @@ $toneClass = match ($tone) {
     'warning' => 'bg-warning/10 text-warning ring-warning/20',
     'error', 'danger' => 'bg-error/10 text-error ring-error/20',
     'info' => 'bg-info/10 text-info ring-info/20',
-    'primary' => 'bg-primary/10 text-primary ring-primary/20',
-    'accent' => 'bg-primary-container/30 text-primary ring-primary/20',
+    'primary' => 'bg-primary-soft text-primary ring-primary/20',
+    'accent' => 'bg-coral-50 text-coral-600 ring-coral-100',
     'neutral' => 'bg-surface-dim text-on-surface-variant ring-outline-variant/30',
     default => 'bg-surface-dim text-on-surface-variant ring-outline-variant/30',
 };

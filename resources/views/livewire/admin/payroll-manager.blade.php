@@ -78,33 +78,33 @@
         @endif
 
         <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <div class="flex min-h-[4rem] flex-col justify-center rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3">
-                <dt class="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">{{ __('Bruto') }}</dt>
-                <dd class="mt-0.5 truncate text-base font-bold text-ink">Rp {{ number_format($summaryCards['total_gross'], 0, ',', '.') }}</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label">{{ __('Bruto') }}</dt>
+                <dd class="ess-stat__value">Rp {{ number_format($summaryCards['total_gross'], 0, ',', '.') }}</dd>
             </div>
-            <div class="flex min-h-[4rem] flex-col justify-center rounded-2xl border border-success/40 bg-success/5 px-4 py-3">
-                <dt class="text-[11px] font-semibold uppercase tracking-[0.12em] text-success">{{ __('Neto') }}</dt>
-                <dd class="mt-0.5 truncate text-base font-bold text-success">Rp {{ number_format($summaryCards['total_net'], 0, ',', '.') }}</dd>
+            <div class="ess-stat" style="border-color: var(--color-success);">
+                <dt class="ess-stat__label text-success">{{ __('Neto') }}</dt>
+                <dd class="ess-stat__value text-success">Rp {{ number_format($summaryCards['total_net'], 0, ',', '.') }}</dd>
             </div>
-            <div class="flex min-h-[4rem] flex-col justify-center rounded-2xl border border-error/40 bg-error/5 px-4 py-3">
-                <dt class="text-[11px] font-semibold uppercase tracking-[0.12em] text-error">{{ __('Potongan') }}</dt>
-                <dd class="mt-0.5 truncate text-base font-bold text-error">Rp {{ number_format($summaryCards['total_deduction'], 0, ',', '.') }}</dd>
+            <div class="ess-stat" style="border-color: var(--color-error);">
+                <dt class="ess-stat__label text-error">{{ __('Potongan') }}</dt>
+                <dd class="ess-stat__value text-error">Rp {{ number_format($summaryCards['total_deduction'], 0, ',', '.') }}</dd>
             </div>
-            <div class="flex min-h-[4rem] flex-col justify-center rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3">
-                <dt class="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">{{ __('Status') }}</dt>
+            <div class="ess-stat">
+                <dt class="ess-stat__label">{{ __('Status') }}</dt>
                 <dd class="mt-1 flex flex-wrap items-center gap-1">
                     <x-status-badge :tone="'neutral'" :pill="true">{{ $summaryCards['draft_count'] }} Draft</x-status-badge>
                     <x-status-badge :tone="'info'" :pill="true">{{ $summaryCards['published_count'] }} Pub</x-status-badge>
                     <x-status-badge :tone="'success'" :pill="true">{{ $summaryCards['paid_count'] }} Paid</x-status-badge>
                 </dd>
             </div>
-            <div class="flex min-h-[4rem] flex-col justify-center rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3">
-                <dt class="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">{{ __('Karyawan') }}</dt>
-                <dd class="mt-0.5 truncate text-base font-bold text-ink">{{ $summaryCards['employee_count'] }}</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label">{{ __('Karyawan') }}</dt>
+                <dd class="ess-stat__value">{{ $summaryCards['employee_count'] }}</dd>
             </div>
-            <div class="flex min-h-[4rem] flex-col justify-center rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3">
-                <dt class="text-[11px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">{{ __('Periode') }}</dt>
-                <dd class="mt-0.5 truncate text-sm font-bold text-ink">{{ \Carbon\Carbon::createFromFormat('!m', $month)->translatedFormat('F') }} {{ $year }}</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label">{{ __('Periode') }}</dt>
+                <dd class="text-sm font-bold text-ink">{{ \Carbon\Carbon::createFromFormat('!m', $month)->translatedFormat('F') }} {{ $year }}</dd>
             </div>
         </dl>
 
@@ -186,7 +186,7 @@
             @endforelse
         </div>
 
-        <div class="hidden lg:block overflow-hidden rounded-2xl border border-outline-variant shadow-sm">
+        <div class="hidden lg:block overflow-hidden rounded-xl border border-outline-variant shadow-sm">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-surface-dim">

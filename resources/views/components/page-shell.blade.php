@@ -13,11 +13,12 @@ $descriptionId = $desc ? \Illuminate\Support\Str::slug($title) . '-description' 
 
 <section aria-labelledby="{{ $titleId }}" @if ($descriptionId) aria-describedby="{{ $descriptionId }}" @endif>
     <div {{ $attributes->merge(['class' => $containerClass ?? 'space-y-6']) }}>
-        <div class="flex flex-col gap-4 border-b border-outline-variant/50 pb-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0 space-y-1">
-                <h1 id="{{ $titleId }}" class="truncate text-2xl font-semibold tracking-tight text-ink">{{ $title }}</h1>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+                <p class="ess-eyebrow">{{ __('Halaman') }}</p>
+                <h1 id="{{ $titleId }}" class="mt-1 text-xl font-semibold tracking-tight text-ink sm:text-2xl">{{ $title }}</h1>
                 @if ($desc)
-                    <p id="{{ $descriptionId }}" class="max-w-3xl text-sm text-on-surface-variant">{{ $desc }}</p>
+                    <p id="{{ $descriptionId }}" class="mt-1 text-sm text-on-surface-variant">{{ $desc }}</p>
                 @endif
             </div>
             @if (isset($actions))

@@ -21,6 +21,7 @@ return [
                     'label_for' => ['manager' => 'Anggota Tim'],
                 ],
                 ['label' => 'Absensi', 'route' => 'attendance.index', 'icon' => 'schedule', 'can' => 'view_attendances'],
+                ['label' => 'Registrasi Wajah', 'route' => 'attendance.face-registration', 'icon' => 'face', 'can' => 'view_attendances'],
                 ['label' => 'Cuti', 'route' => 'leaves.index', 'icon' => 'calendar_month', 'can' => 'view_leaves'],
                 ['label' => 'Lembur', 'route' => 'overtimes.index', 'icon' => 'bolt', 'can' => 'view_overtimes'],
                 ['label' => 'Klaim', 'route' => 'reimbursements.index', 'icon' => 'wallet', 'can' => 'view_reimbursements'],
