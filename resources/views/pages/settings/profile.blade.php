@@ -1,5 +1,4 @@
 <?php
-
 use App\Concerns\ProfileValidationRules;
 use App\Concerns\PasswordValidationRules;
 use App\Models\UserNotificationPreference;
@@ -296,6 +295,16 @@ new #[Title('Pengaturan Profil')] class extends Component {
     }
 
     #[Computed]
+    public function hasFaceEnrolled(): bool
+    {
+        $employee = Auth::user()->employee;
+        if (! $employee) {
+            return false;
+        }
+        return app(\App\Services\FaceRecognitionService::class)->hasFaceEnrolled($employee);
+    }
+
+    #[Computed]
     public function showDeleteUser(): bool
     {
         return !Auth::user() instanceof MustVerifyEmail
@@ -366,28 +375,40 @@ new #[Title('Pengaturan Profil')] class extends Component {
     <div class="flex items-start gap-8 max-md:flex-col">
         {{-- Sidebar --}}
         <aside class="w-full shrink-0 md:w-48">
-            <nav class="flex flex-wrap gap-1 md:flex-col">
-                <button @click="setTab('details')" :class="activeTab === 'details' ? 'bg-ink/10 text-ink font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-ink/5'" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors">
+            <nav class="flex flex-wrap gap-1 md:flex-col" role="tablist" aria-label="{{ __('Navigasi Pengaturan') }}">
+                <button @click="setTab('details')" :class="activeTab === 'details' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                    role="tab" :aria-selected="activeTab === 'details'">
                     <span class="material-symbols-outlined text-lg">person</span>
                     <span>{{ __('Detail') }}</span>
                 </button>
-                <button @click="setTab('password')" :class="activeTab === 'password' ? 'bg-ink/10 text-ink font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-ink/5'" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors">
+                <button @click="setTab('password')" :class="activeTab === 'password' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                    role="tab" :aria-selected="activeTab === 'password'">
                     <span class="material-symbols-outlined text-lg">lock</span>
                     <span>{{ __('Kata Sandi') }}</span>
                 </button>
-                <button @click="setTab('security')" :class="activeTab === 'security' ? 'bg-ink/10 text-ink font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-ink/5'" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors">
+                <button @click="setTab('security')" :class="activeTab === 'security' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                    role="tab" :aria-selected="activeTab === 'security'">
                     <span class="material-symbols-outlined text-lg">security</span>
                     <span>{{ __('2FA') }}</span>
                 </button>
-                <button @click="setTab('sessions')" :class="activeTab === 'sessions' ? 'bg-ink/10 text-ink font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-ink/5'" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors">
+                <button @click="setTab('sessions')" :class="activeTab === 'sessions' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                    role="tab" :aria-selected="activeTab === 'sessions'">
                     <span class="material-symbols-outlined text-lg">devices</span>
                     <span>{{ __('Perangkat') }}</span>
                 </button>
-                <button @click="setTab('activity')" :class="activeTab === 'activity' ? 'bg-ink/10 text-ink font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-ink/5'" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors">
+                <button @click="setTab('activity')" :class="activeTab === 'activity' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                    role="tab" :aria-selected="activeTab === 'activity'">
                     <span class="material-symbols-outlined text-lg">history</span>
                     <span>{{ __('Aktivitas') }}</span>
                 </button>
-                <button @click="setTab('notifications')" :class="activeTab === 'notifications' ? 'bg-ink/10 text-ink font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-ink/5'" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors">
+                <button @click="setTab('notifications')" :class="activeTab === 'notifications' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                    role="tab" :aria-selected="activeTab === 'notifications'">
                     <span class="material-symbols-outlined text-lg">notifications</span>
                     <span>{{ __('Notifikasi') }}</span>
                 </button>
@@ -398,37 +419,46 @@ new #[Title('Pengaturan Profil')] class extends Component {
         <div class="min-w-0 flex-1">
             {{-- DETAILS TAB --}}
             <section x-show="activeTab === 'details'" x-cloak x-transition.opacity.duration.150ms>
-                <div class="mb-6 overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                {{-- Profile Header Card --}}
+                <div class="mb-6 ess-card">
                     <div class="p-6">
                         <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                            <div class="relative shrink-0">
-                                <div class="flex size-24 items-center justify-center overflow-hidden rounded-full bg-surface-container text-2xl font-semibold text-ink ring-2 ring-outline-variant">
-                                    @if ($profilePhotoPath)
-                                        <img src="{{ Storage::disk('public')->url($profilePhotoPath) }}" alt="{{ $name }}" class="size-full object-cover" />
-                                    @else
-                                        {{ auth()->user()->initials() }}
-                                    @endif
-                                </div>
-                                <label class="absolute bottom-0 right-0 flex size-8 cursor-pointer items-center justify-center rounded-full bg-ink text-white shadow-sm ring-2 ring-canvas">
-                                    <span class="material-symbols-outlined text-sm">photo_camera</span>
-                                    <input type="file" wire:model="photo" accept="image/*" class="hidden" />
-                                </label>
-                            </div>
-                            <div class="flex flex-col items-center gap-1 sm:items-start">
-                                <h2 class="text-xl font-semibold text-ink">{{ $name }}</h2>
-                                <p class="text-sm text-on-surface-variant">{{ $email }}</p>
-                                @if ($profilePhotoPath)
-                                    <button type="button" wire:click="removePhoto" class="mt-1 rounded-lg px-3 py-1 text-xs font-medium text-error hover:bg-error/10">{{ __('Hapus Foto') }}</button>
-                                @endif
-                                @error('photo')<p class="text-xs text-error">{{ $message }}</p>@enderror
-                            </div>
-                        </div>
+                                                <div class="relative shrink-0 w-20 sm:w-32 sm:shrink-0">
+                                                    <div class="flex size-24 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-2xl font-semibold text-primary ring-2 ring-primary/20 dark:ring-primary/40">
+                                                        @if ($profilePhotoPath)
+                                                            <img src="{{ Storage::disk('public')->url($profilePhotoPath) }}" alt="{{ $name }}" class="size-full object-cover" />
+                                                        @else
+                                                            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm ring-2 ring-primary/20 dark:ring-primary/40">
+                                                                <span class="material-symbols-outlined text-2xl">{{ auth()->user()->initials() }}</span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <label class="absolute bottom-0 right-0 flex size-8 cursor-pointer items-center justify-center rounded-full bg-primary text-on-primary shadow-sm ring-2 ring-canvas dark:ring-ink">
+                                                        <span class="material-symbols-outlined text-sm">photo_camera</span>
+                                                        <input type="file" wire:model="photo" accept="image/*" class="hidden" />
+                                                    </label>
+                                                </div>
+                                                <div class="flex flex-col items-center gap-1 sm:items-start">
+                                                    <h2 class="text-xl font-semibold text-ink sm:text-2xl mb-1">{{ $name }}</h2>
+                                                    <p class="text-sm text-on-surface-variant">{{ $email }}</p>
+                                                    @if ($profilePhotoPath)
+                                                        <button type="button" wire:click="removePhoto"
+                                                            class="mt-1 rounded-lg px-3 py-1 text-xs font-medium text-error hover:bg-error/10 dark:hover:bg-error/10 transition-colors">
+                                                            {{ __('Hapus Foto') }}
+                                                        </button>
+                                                    @endif
+                                                    @error('photo')
+                                                        <p class="text-xs text-error">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                {{-- Profile Info Form --}}
+                <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
-                        <h3 class="text-sm font-semibold text-ink">{{ __('Informasi Profil') }}</h3>
+                        <h3 class="ess-eyebrow">{{ __('Informasi Profil') }}</h3>
                     </div>
                     <form wire:submit="updateProfileInformation" class="space-y-5 p-6">
                         <div>
@@ -441,7 +471,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
                             <x-forms.input wire:model="email" type="email" required autocomplete="email" class="mt-1.5 w-full" />
                             <x-forms.error name="email" />
                             @if ($this->hasUnverifiedEmail)
-                                <div class="mt-4 rounded-xl border border-warning/30 bg-warning/5 px-4 py-3">
+                                <div class="mt-4 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3">
                                     <p class="text-sm text-warning">
                                         {{ __('Alamat email Anda belum diverifikasi.') }}
                                         <button class="font-medium underline hover:no-underline" wire:click.prevent="resendVerificationNotification">
@@ -461,7 +491,8 @@ new #[Title('Pengaturan Profil')] class extends Component {
                         <div class="grid gap-5 sm:grid-cols-2">
                             <div>
                                 <x-forms.label for="province_id" value="{{ __('Provinsi') }}" />
-                                <select wire:model.live="province_id" class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink">
+                                <select wire:model.live="province_id"
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
                                     <option value="">{{ __('Pilih Provinsi') }}</option>
                                     @foreach ($this->provinces as $prov)
                                         <option value="{{ $prov->id }}">{{ $prov->name }}</option>
@@ -470,7 +501,8 @@ new #[Title('Pengaturan Profil')] class extends Component {
                             </div>
                             <div>
                                 <x-forms.label for="city_id" value="{{ __('Kabupaten/Kota') }}" />
-                                <select wire:model.live="city_id" class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink">
+                                <select wire:model.live="city_id"
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
                                     <option value="">{{ __('Pilih Kabupaten/Kota') }}</option>
                                     @foreach ($this->cities as $city)
                                         <option value="{{ $city->id }}">{{ $city->name }}</option>
@@ -479,7 +511,8 @@ new #[Title('Pengaturan Profil')] class extends Component {
                             </div>
                             <div>
                                 <x-forms.label for="district_id" value="{{ __('Kecamatan') }}" />
-                                <select wire:model.live="district_id" class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink">
+                                <select wire:model.live="district_id"
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
                                     <option value="">{{ __('Pilih Kecamatan') }}</option>
                                     @foreach ($this->districts as $district)
                                         <option value="{{ $district->id }}">{{ $district->name }}</option>
@@ -488,7 +521,8 @@ new #[Title('Pengaturan Profil')] class extends Component {
                             </div>
                             <div>
                                 <x-forms.label for="village_id" value="{{ __('Kelurahan/Desa') }}" />
-                                <select wire:model.live="village_id" class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink">
+                                <select wire:model.live="village_id"
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
                                     <option value="">{{ __('Pilih Kelurahan/Desa') }}</option>
                                     @foreach ($this->villages as $village)
                                         <option value="{{ $village->id }}">{{ $village->name }}</option>
@@ -499,56 +533,93 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
                         <div>
                             <x-forms.label for="address_detail" value="{{ __('Alamat Lengkap') }}" />
-                            <textarea wire:model="address_detail" rows="2" class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-on-surface-variant/60 focus:border-ink focus:ring-1 focus:ring-ink"></textarea>
+                            <textarea wire:model="address_detail" rows="2"
+                                class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
                         </div>
-
-                        <div class="sm:w-1/3">
+                        <div>
                             <x-forms.label for="postal_code" value="{{ __('Kode Pos') }}" />
                             <x-forms.input wire:model="postal_code" type="text" class="mt-1.5 w-full" />
                         </div>
 
+                        {{-- Face ID Enrollment Card --}}
+                        <div class="mt-6 rounded-2xl border border-outline-variant bg-canvas p-5 shadow-soft">
+                            <div class="flex items-start gap-4">
+                                <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary shadow-sm">
+                                    <span class="material-symbols-outlined">face</span>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-base font-semibold text-ink">{{ __('Face ID Absensi') }}</h3>
+                                    @if ($this->hasFaceEnrolled)
+                                        <p class="mt-1 text-sm text-success">{{ __('Wajah sudah terdaftar. Anda bisa absen pakai Face ID.') }}</p>
+                                        <div class="mt-3 flex gap-2">
+                                            <a href="{{ route('attendance.face-registration') }}"
+                                               class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-on-primary shadow-soft transition-smooth hover:bg-primary-deep">
+                                                <span class="material-symbols-outlined text-sm">refresh</span>
+                                                {{ __('Perbarui Wajah') }}
+                                            </a>
+                                        </div>
+                                    @else
+                                        <p class="mt-1 text-sm text-on-surface-variant">
+                                            {{ __('Wajah belum terdaftar. Daftar sekarang agar bisa absen pakai Face ID (lebih cepat daripada PIN).') }}
+                                        </p>
+                                        <a href="{{ route('attendance.face-registration') }}"
+                                           class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-on-primary shadow-soft transition-smooth hover:bg-primary-deep">
+                                            <span class="material-symbols-outlined text-sm">add_a_photo</span>
+                                            {{ __('Daftar Wajah Sekarang') }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex items-center gap-3 border-t border-outline-variant/50 pt-4">
-                            <x-button type="submit" variant="primary">{{ __('Simpan') }}</x-button>
+                            <x-button type="submit" variant="primary">{{ __('Simpan Perubahan') }}</x-button>
                         </div>
                     </form>
                 </div>
 
-                @if ($this->showDeleteUser)
-                    <div class="mt-6 overflow-hidden rounded-xl border border-error/30 bg-error/5">
-                        <div class="border-b border-error/20 px-6 py-4">
-                            <h3 class="text-sm font-semibold text-error">{{ __('Hapus Akun') }}</h3>
-                        </div>
-                        <div class="p-6">
-                            <p class="text-sm text-on-surface-variant">{{ __('Hapus akun Anda dan seluruh data secara permanen. Tindakan ini tidak dapat dibatalkan.') }}</p>
-                            <div class="mt-4">
-                                <livewire:pages::settings.delete-user-form />
-                            </div>
-                        </div>
+                {{-- Danger Zone --}}
+                <div class="mt-6 ess-card border-error/30">
+                    <div class="border-b border-error/30 px-6 py-4">
+                        <h3 class="ess-eyebrow text-error">{{ __('Hapus Akun') }}</h3>
                     </div>
-                @endif
+                    <div class="p-6">
+                        <p class="text-sm text-on-surface-variant">
+                            {{ __('Hapus akun Anda dan seluruh data secara permanen. Tindakan ini tidak dapat dibatalkan.') }}
+                        </p>
+                        @if ($this->showDeleteUser)
+                            <button type="button"
+                                class="mt-4 rounded-lg px-4 py-2 text-sm font-medium text-error border border-error hover:bg-error/10 transition-colors"
+                                wire:click.prevent="$dispatch('confirm-delete-account')">
+                                {{ __('Hapus Akun') }}
+                            </button>
+                        @endif
+                    </div>
+                </div>
             </section>
 
             {{-- PASSWORD TAB --}}
             <section x-show="activeTab === 'password'" x-cloak x-transition.opacity.duration.150ms>
-                <div class="overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
-                        <h3 class="text-sm font-semibold text-ink">{{ __('Perbarui Kata Sandi') }}</h3>
-                        <p class="mt-0.5 text-xs text-on-surface-variant">{{ __('Gunakan kata sandi yang kuat, kombinasi huruf, angka, dan simbol.') }}</p>
+                        <h3 class="ess-eyebrow">{{ __('Ubah Kata Sandi') }}</h3>
+                        <p class="mt-1 text-sm text-on-surface-variant">{{ __('Pastikan kata sandi baru Anda kuat dan berbeda dari yang lama.') }}</p>
                     </div>
                     <form wire:submit="updatePassword" class="space-y-5 p-6">
                         <div>
-                            <x-forms.label for="current_password" value="{{ __('Kata Sandi Saat Ini') }}" />
+                            <x-forms.label for="current_password" value="{{ __('Kata Sandi Saat Ini') }}" required />
                             <x-forms.input wire:model="current_password" type="password" required autocomplete="current-password" class="mt-1.5 w-full" />
                             <x-forms.error name="current_password" />
                         </div>
                         <div>
-                            <x-forms.label for="new_password" value="{{ __('Kata Sandi Baru') }}" />
+                            <x-forms.label for="new_password" value="{{ __('Kata Sandi Baru') }}" required />
                             <x-forms.input wire:model="new_password" type="password" required autocomplete="new-password" class="mt-1.5 w-full" />
                             <x-forms.error name="new_password" />
                         </div>
                         <div>
-                            <x-forms.label for="new_password_confirmation" value="{{ __('Konfirmasi Kata Sandi') }}" />
+                            <x-forms.label for="new_password_confirmation" value="{{ __('Konfirmasi Kata Sandi') }}" required />
                             <x-forms.input wire:model="new_password_confirmation" type="password" required autocomplete="new-password" class="mt-1.5 w-full" />
+                            <x-forms.error name="new_password_confirmation" />
                         </div>
                         <div class="flex items-center gap-3 border-t border-outline-variant/50 pt-4">
                             <x-button type="submit" variant="primary">{{ __('Simpan') }}</x-button>
@@ -559,10 +630,10 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
             {{-- SECURITY / 2FA TAB --}}
             <section x-show="activeTab === 'security'" x-cloak x-transition.opacity.duration.150ms>
-                <div class="overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
-                        <h3 class="text-sm font-semibold text-ink">{{ __('Verifikasi Dua Langkah') }}</h3>
-                        <p class="mt-0.5 text-xs text-on-surface-variant">{{ __('Tingkatkan keamanan akun dengan kode verifikasi tambahan.') }}</p>
+                        <h3 class="ess-eyebrow">{{ __('Verifikasi Dua Langkah') }}</h3>
+                        <p class="mt-1 text-sm text-on-surface-variant">{{ __('Tingkatkan keamanan akun dengan kode verifikasi tambahan.') }}</p>
                     </div>
                     <div class="p-6">
                         @if ($canManageTwoFactor)
@@ -578,8 +649,9 @@ new #[Title('Pengaturan Profil')] class extends Component {
                                 <p class="mb-4 text-sm text-on-surface-variant">{{ __('Aktifkan verifikasi dua langkah untuk keamanan ekstra.') }}</p>
                                 <x-button variant="primary"
                                     x-data
-                                    @click="$dispatch('open-modal', 'two-factor-setup-modal'); $wire.dispatch('start-two-factor-setup')"
-                                >{{ __('Aktifkan 2FA') }}</x-button>
+                                    @click="$dispatch('open-modal', 'two-factor-setup-modal'); $wire.dispatch('start-two-factor-setup')">
+                                    {{ __('Aktifkan 2FA') }}
+                                </x-button>
                                 <livewire:pages::settings.two-factor-setup-modal :requires-confirmation="$requiresConfirmation" />
                             @endif
                         @else
@@ -591,15 +663,15 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
             {{-- SESSIONS TAB --}}
             <section x-show="activeTab === 'sessions'" x-cloak x-transition.opacity.duration.150ms>
-                <div class="overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
-                        <h3 class="text-sm font-semibold text-ink">{{ __('Perangkat & Sesi') }}</h3>
-                        <p class="mt-0.5 text-xs text-on-surface-variant">{{ __('Kelola perangkat yang terhubung ke akun Anda.') }}</p>
+                        <h3 class="ess-eyebrow">{{ __('Perangkat & Sesi') }}</h3>
+                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Kelola perangkat yang terhubung ke akun Anda.') }}</p>
                     </div>
                     <div class="p-6">
                         <div class="mb-4 space-y-3">
                             @forelse ($this->sessions as $session)
-                                <div class="flex items-center gap-3 rounded-lg border border-outline-variant/50 p-3">
+                                <div class="flex items-center gap-3 rounded-xl border border-outline-variant/50 p-3">
                                     <span class="material-symbols-outlined text-2xl text-on-surface-variant">
                                         {{ str_contains($session->user_agent ?? '', 'Mobile') ? 'smartphone' : 'desktop_windows' }}
                                     </span>
@@ -622,15 +694,15 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
             {{-- ACTIVITY LOG TAB --}}
             <section x-show="activeTab === 'activity'" x-cloak x-transition.opacity.duration.150ms>
-                <div class="overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
-                        <h3 class="text-sm font-semibold text-ink">{{ __('Log Aktivitas') }}</h3>
-                        <p class="mt-0.5 text-xs text-on-surface-variant">{{ __('Riwayat aktivitas akun Anda.') }}</p>
+                        <h3 class="ess-eyebrow">{{ __('Log Aktivitas') }}</h3>
+                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Riwayat aktivitas akun Anda.') }}</p>
                     </div>
                     <div class="p-6">
                         @php $activities = $this->activities; @endphp
                         @forelse ($activities as $log)
-                            <div class="flex items-start gap-3 border-b border-outline-variant/30 py-3 last:border-0">
+                            <div class="flex items-start gap-3 border-b border-outline-variant/50 py-3 last:border-0">
                                 <span class="material-symbols-outlined mt-0.5 text-base text-on-surface-variant">circle</span>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm text-ink">{{ $log->description }}</p>
@@ -649,10 +721,10 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
             {{-- NOTIFICATION PREFERENCES TAB --}}
             <section x-show="activeTab === 'notifications'" x-cloak x-transition.opacity.duration.150ms>
-                <div class="overflow-hidden rounded-xl border border-outline-variant bg-canvas shadow-sm">
+                <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
-                        <h3 class="text-sm font-semibold text-ink">{{ __('Preferensi Notifikasi') }}</h3>
-                        <p class="mt-0.5 text-xs text-on-surface-variant">{{ __('Atur notifikasi yang ingin Anda terima.') }}</p>
+                        <h3 class="ess-eyebrow">{{ __('Preferensi Notifikasi') }}</h3>
+                        <p class="mt-1 text-xs text-on-surface-variant">{{ __('Atur notifikasi yang ingin Anda terima.') }}</p>
                     </div>
                     <form wire:submit="saveNotificationPreferences" class="p-6">
                         <table class="w-full text-sm">
@@ -665,13 +737,13 @@ new #[Title('Pengaturan Profil')] class extends Component {
                             </thead>
                             <tbody>
                                 @foreach ($notificationPrefs as $id => $data)
-                                    <tr class="border-b border-outline-variant/30">
+                                    <tr class="border-b border-outline-variant/50">
                                         <td class="py-3 text-ink">{{ \Illuminate\Support\Str::headline($data['event_key']) }}</td>
                                         <td class="py-3 px-4 text-center">
-                                            <input type="checkbox" wire:model="notificationPrefs.{{ $id }}.in_app" class="rounded border-outline-variant text-ink focus:ring-ink" />
+                                            <input type="checkbox" wire:model="notificationPrefs.{{ $id }}.in_app" class="rounded border-outline-variant text-primary focus:ring-primary" />
                                         </td>
                                         <td class="py-3 text-center">
-                                            <input type="checkbox" wire:model="notificationPrefs.{{ $id }}.email" class="rounded border-outline-variant text-ink focus:ring-ink" />
+                                            <input type="checkbox" wire:model="notificationPrefs.{{ $id }}.email" class="rounded border-outline-variant text-primary focus:ring-primary" />
                                         </td>
                                     </tr>
                                 @endforeach

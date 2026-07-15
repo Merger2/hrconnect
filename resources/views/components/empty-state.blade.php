@@ -1,4 +1,4 @@
-@props(['title', 'description' => null, 'framed' => false])
+@props(['title', 'description' => null, 'framed' => false, 'icon' => null])
 
 @php
 $baseClass = $framed
@@ -7,11 +7,7 @@ $baseClass = $framed
 @endphp
 
 <div {{ $attributes->merge(['class' => $baseClass]) }}>
-    <div @class([
-        'mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full',
-        'bg-surface-container-high' => !$framed,
-        'bg-surface-dim' => $framed,
-    ])>
+    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full {{ $framed ? 'bg-surface-dim' : 'bg-surface-container-high' }}">
         @if (isset($icon))
             {{ $icon }}
         @else

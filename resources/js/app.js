@@ -15,6 +15,7 @@ import leaveApply from './leave-apply';
 import reimbursementsIndex from './reimbursements-index';
 import reimbursementApply from './reimbursement-apply';
 import attendanceIndex from './attendance-index';
+import clockIn from './clock-in';
 import approvalsIndex from './approvals-index';
 import employeesIndex from './employees-index';
 import employeeShow from './employee-show';
@@ -67,7 +68,7 @@ const fetchSanctumToken = async () => {
         return;
     }
 
-    if (sessionStorage.getItem('sanctum_token')) {
+    if (localStorage.getItem('sanctum_token')) {
         window.authChecking = false;
         return;
     }
@@ -80,7 +81,7 @@ const fetchSanctumToken = async () => {
         if (res.ok) {
             const json = await res.json();
             if (json.data?.token) {
-                sessionStorage.setItem('sanctum_token', json.data.token);
+                localStorage.setItem('sanctum_token', json.data.token);
             }
         }
         // 401 di sini bukan error — berarti sesi belum ada (halaman publik).
@@ -94,7 +95,7 @@ fetchSanctumToken();
 
 window.apiHeaders = () => {
     const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-    const token = sessionStorage.getItem('sanctum_token');
+    const token = localStorage.getItem('sanctum_token');
     if (token) headers['Authorization'] = 'Bearer ' + token;
     return headers;
 };
@@ -250,6 +251,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('reimbursementsIndex', reimbursementsIndex);
     window.Alpine.data('reimbursementApply', reimbursementApply);
     window.Alpine.data('attendanceIndex', attendanceIndex);
+    window.Alpine.data('clockIn', clockIn);
     window.Alpine.data('approvalsIndex', approvalsIndex);
     window.Alpine.data('employeesIndex', employeesIndex);
     window.Alpine.data('employeeShow', employeeShow);

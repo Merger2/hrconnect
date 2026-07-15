@@ -8,11 +8,11 @@
             </x-slot:actions>
 
         {{-- Quota --}}
-        <div x-show="!loadingQuota" class="mb-4 flex flex-wrap gap-2">
+        <div x-show="!loadingQuota" class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             <template x-for="q in quota" :key="q.leave_type?.id || q.leave_type?.code">
-                <div class="rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 text-center">
-                    <p class="text-xs font-medium text-on-surface-variant" x-text="q.leave_type?.name || 'Leave'"></p>
-                    <p class="text-sm font-bold text-ink" x-text="`${q.used} / ${q.quota}`"></p>
+                <div class="ess-stat">
+                    <p class="ess-stat__label truncate" x-text="q.leave_type?.name || 'Leave'"></p>
+                    <p class="ess-stat__value" x-text="`${q.used} / ${q.quota}`"></p>
                 </div>
             </template>
         </div>

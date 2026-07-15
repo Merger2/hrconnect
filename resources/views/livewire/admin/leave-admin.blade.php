@@ -4,11 +4,11 @@
             <div class="grid gap-3 md:grid-cols-4">
                 <div class="md:col-span-2">
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Cari Karyawan') }}</label>
-                    <input type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('Nama karyawan...') }}" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-4 text-sm">
+                    <input type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('Nama karyawan...') }}" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-4 text-sm text-ink placeholder:text-on-surface-variant/40 focus:border-ink focus:ring-1 focus:ring-ink/20">
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Status') }}</label>
-                    <select wire:model.live="statusFilter" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm">
+                    <select wire:model.live="statusFilter" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20">
                         <option value="all">{{ __('Semua') }}</option>
                         <option value="pending">{{ __('Menunggu') }}</option>
                         <option value="approved">{{ __('Disetujui') }}</option>
@@ -17,7 +17,7 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Tipe Cuti') }}</label>
-                    <select wire:model.live="leaveTypeId" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm">
+                    <select wire:model.live="leaveTypeId" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20">
                         <option value="">{{ __('Semua Tipe') }}</option>
                         @foreach($leaveTypes as $lt)<option value="{{ $lt->id }}">{{ $lt->name }}</option>@endforeach
                     </select>
@@ -32,7 +32,7 @@
         </div>
 
         @if($leaves->count())
-        <div class="hidden lg:block overflow-hidden rounded-2xl border border-outline-variant shadow-soft">
+        <div class="hidden lg:block overflow-hidden rounded-xl border border-outline-variant shadow-soft">
             <table class="w-full text-sm">
                 <thead class="bg-surface-dim">
                     <tr>

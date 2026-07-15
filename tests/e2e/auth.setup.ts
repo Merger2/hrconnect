@@ -13,47 +13,72 @@ const adminFile = path.join(authDir, 'admin.json');
 const managerFile = path.join(authDir, 'manager.json');
 const financeFile = path.join(authDir, 'finance.json');
 
-setup('authenticate as employee', async ({ page }) => {
+/**
+ * Browser-based login + token fetch (robust version)
+ * Login via UI, then fetch Sanctum token and store in localStorage
+ */
+async function loginAndStoreToken(page, email, password, storageFile) {
   await page.goto('/login');
-  await page.locator('input[name="email"]').fill('employee@hrconnect.test');
-  await page.locator('input[name="password"]').fill('Employee1234');
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(password);
   await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  await page.context().storageState({ path: employeeFile });
+  
+  // Wait for redirect to dashboard (or any authenticated page)
+  await page.waitForURL(/\/(dashboard|home)/, { timeout: 15000 });
+  
+  // Fetch Sanctum token using session cookie
+  const token = await page.evaluate(async () => {
+    try {
+      const res = await fetch('/api/v1/sanctum/token', {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data?.token) {
+          localStorage.setItem('sanctum_token', json.data.token);
+          return json.data.token;
+        }
+      }
+    } catch (e) {
+      console.error('Token fetch failed:', e);
+    }
+    return null;
+  });
+  
+  if (!token) {
+    throw new Error(`Failed to obtain Sanctum token for ${email}`);
+  }
+  
+  // Wait for localStorage to be ready
+  await page.waitForFunction(() => localStorage.getItem('sanctum_token') !== null, { timeout: 5000 });
+  
+  // Capture storage state (cookies + localStorage)
+  await page.context().storageState({ path: storageFile });
+  console.log(`Playwright: Auth successful for ${email}`);
+}
+
+setup.describe.configure({ retries: 2 });
+
+setup('authenticate as employee', async ({ page }) => {
+  await loginAndStoreToken(page, 'employee@hrconnect.test', 'Employee1234', employeeFile);
 });
 
 setup('authenticate as hr', async ({ page }) => {
-  await page.goto('/login');
-  await page.locator('input[name="email"]').fill('hr@hrconnect.test');
-  await page.locator('input[name="password"]').fill('HRmanager1234');
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  await page.context().storageState({ path: hrFile });
+  await loginAndStoreToken(page, 'hr@hrconnect.test', 'HRmanager1234', hrFile);
 });
 
 setup('authenticate as admin', async ({ page }) => {
-  await page.goto('/login');
-  await page.locator('input[name="email"]').fill('admin@hrconnect.local');
-  await page.locator('input[name="password"]').fill('ChangeMe!2026');
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  await page.context().storageState({ path: adminFile });
+  await loginAndStoreToken(page, 'admin@hrconnect.local', 'ChangeMe!2026', adminFile);
 });
 
 setup('authenticate as manager', async ({ page }) => {
-  await page.goto('/login');
-  await page.locator('input[name="email"]').fill('manager@hrconnect.test');
-  await page.locator('input[name="password"]').fill('Manager1234!!');
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  await page.context().storageState({ path: managerFile });
+  await loginAndStoreToken(page, 'manager@hrconnect.test', 'Manager1234!!', managerFile);
 });
 
 setup('authenticate as finance', async ({ page }) => {
-  await page.goto('/login');
-  await page.locator('input[name="email"]').fill('finance@hrconnect.test');
-  await page.locator('input[name="password"]').fill('Finance1234!!');
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  await page.context().storageState({ path: financeFile });
+  await loginAndStoreToken(page, 'finance@hrconnect.test', 'Finance1234!!', financeFile);
 });

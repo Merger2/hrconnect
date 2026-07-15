@@ -17,28 +17,28 @@ $showInstall = auth()->check() && !request()->secure();
     role="alert"
     aria-live="polite"
 >
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-blue-100 dark:border-blue-900 p-4 max-w-sm">
+    <div class="bg-canvas dark:bg-surface-container-high rounded-2xl shadow-2xl border border-outline-variant p-4 max-w-sm">
         <div class="flex items-start gap-3">
             <div class="flex-shrink-0">
                 <img src="/icon-192.svg" alt="HRConnect" class="w-12 h-12 rounded-xl" />
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                <p class="text-sm font-semibold text-ink dark:text-on-surface">
                     {{ __('Install HRConnect') }}
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p class="text-xs text-on-surface-variant dark:text-on-surface-variant mt-0.5">
                     {{ __('Akses cepat dari layar utama perangkat Anda') }}
                 </p>
                 <div class="flex items-center gap-2 mt-3">
                     <button
                         @click="installApp()"
-                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-gradient-to-r from-[#0096D6] to-[#00BCF2] hover:from-[#0080B8] hover:to-[#00A8D9] transition-all duration-200"
+                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors"
                     >
                         {{ __('Install') }}
                     </button>
                     <button
                         @click="show = false"
-                        class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        class="text-xs text-on-surface-variant hover:text-ink dark:hover:text-on-surface transition-colors"
                     >
                         {{ __('Nanti') }}
                     </button>
@@ -46,7 +46,7 @@ $showInstall = auth()->check() && !request()->secure();
             </div>
             <button
                 @click="show = false"
-                class="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                class="flex-shrink-0 p-1 text-on-surface-variant hover:text-ink dark:hover:text-on-surface transition-colors"
                 aria-label="{{ __('Tutup') }}"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@ $showInstall = auth()->check() && !request()->secure();
     <button
         x-show="!deferredPrompt && isStandalone === false"
         @click="showInstallGuide()"
-        class="mt-2 w-full text-xs text-center text-blue-500 hover:text-blue-600 transition-colors"
+        class="mt-2 w-full text-xs text-center text-primary hover:text-primary/80 transition-colors"
     >
         {{ __('Pelajari cara install HRConnect') }}
     </button>

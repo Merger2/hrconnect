@@ -11,8 +11,8 @@
                 <div class="mx-auto w-full max-w-md">
                     <!-- Brand -->
                     <div class="mb-8 flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg">
-                            <span class="material-symbols-outlined text-2xl text-white">badge</span>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-on-primary">
+                            <x-app-logo-icon class="size-5 fill-current text-on-primary" />
                         </div>
                         <div>
                             <h1 class="text-xl font-bold text-ink">HRConnect</h1>
@@ -98,14 +98,14 @@
                                     @enderror
                                 </div>
 
-                                <button type="submit" class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30 focus:outline-none focus:ring-4 focus:ring-blue-600/20">
+                                <x-button type="submit" size="lg" class="w-full">
                                     {{ __('Continue') }}
                                 </button>
                             </div>
 
                             <div class="mt-5 text-center text-sm">
                                 <span class="text-on-surface-variant">{{ __('or you can') }}</span>
-                                <button type="button" @click="toggleInput()" class="ml-1 cursor-pointer font-medium text-blue-600 underline hover:text-blue-700">
+                                <button type="button" @click="toggleInput()" class="ml-1 cursor-pointer font-medium text-primary hover:text-primary-deep">
                                     <span x-show="!showRecoveryInput">{{ __('login using a recovery code') }}</span>
                                     <span x-show="showRecoveryInput">{{ __('login using an authentication code') }}</span>
                                 </button>
@@ -116,23 +116,23 @@
             </div>
 
             <!-- Right: Visual -->
-            <div class="relative hidden overflow-hidden bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800 lg:flex lg:flex-col lg:justify-center lg:items-center lg:p-16">
-                <div class="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl"></div>
-                <div class="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-white/5 blur-3xl"></div>
-                <div class="relative z-10 max-w-md text-center text-white">
-                    <div class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
-                        <span class="material-symbols-outlined text-4xl">verified_user</span>
+            <div class="relative hidden overflow-hidden bg-ink lg:flex lg:flex-col lg:justify-center lg:items-center lg:p-16">
+                <div class="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
+                <div class="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-primary/5 blur-3xl"></div>
+                <div class="relative z-10 max-w-md text-center text-on-primary">
+                    <div class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 backdrop-blur">
+                        <span class="material-symbols-outlined text-4xl text-primary">verified_user</span>
                     </div>
                     <h3 class="text-4xl font-bold leading-tight tracking-tight">{{ __('Keamanan ekstra') }}</h3>
-                    <p class="mt-4 text-lg text-white/80">{{ __('Verifikasi dua langkah melindungi akun Anda dari akses tidak sah.') }}</p>
+                    <p class="mt-4 text-lg text-on-primary/80">{{ __('Verifikasi dua langkah melindungi akun Anda dari akses tidak sah.') }}</p>
                     <div class="mt-10 flex flex-col gap-3 text-left">
-                        <div class="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur">
-                            <span class="material-symbols-outlined">security</span>
-                            <span class="text-sm">{{ __('Lindungi data HR & payroll perusahaan') }}</span>
+                        <div class="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3 backdrop-blur">
+                            <span class="material-symbols-outlined text-primary">security</span>
+                            <span class="text-sm text-on-primary/90">{{ __('Lindungi data HR & payroll perusahaan') }}</span>
                         </div>
-                        <div class="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur">
-                            <span class="material-symbols-outlined">devices</span>
-                            <span class="text-sm">{{ __('Bisa pakai Google Authenticator atau Authy') }}</span>
+                        <div class="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3 backdrop-blur">
+                            <span class="material-symbols-outlined text-primary">devices</span>
+                            <span class="text-sm text-on-primary/90">{{ __('Bisa pakai Google Authenticator atau Authy') }}</span>
                         </div>
                     </div>
                 </div>

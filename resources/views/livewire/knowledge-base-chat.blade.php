@@ -16,10 +16,10 @@
         </div>
         <div class="flex items-center gap-2">
             <span class="relative flex h-1.5 w-1.5">
-                <span x-show="isStreaming" class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/60"></span>
-                <span :class="isStreaming ? 'bg-emerald-500' : 'bg-white/20'" class="relative inline-flex h-1.5 w-1.5 rounded-full"></span>
+                <span x-show="isStreaming" class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60"></span>
+                <span :class="isStreaming ? 'bg-success' : 'bg-white/20'" class="relative inline-flex h-1.5 w-1.5 rounded-full"></span>
             </span>
-            <span x-text="isStreaming ? 'Menulis...' : 'Online'" class="text-[11px] font-medium" :class="isStreaming ? 'text-emerald-400' : 'text-white/40'"></span>
+            <span x-text="isStreaming ? 'Menulis...' : 'Online'" class="text-[11px] font-medium" :class="isStreaming ? 'text-success' : 'text-white/40'"></span>
         </div>
     </div>
 
@@ -99,7 +99,7 @@
             <button
                 type="submit"
                 :disabled="isStreaming || !input.trim()"
-                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition-opacity disabled:opacity-40 hover:opacity-90"
+                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary transition-opacity disabled:opacity-40 hover:bg-primary-deep hover:shadow-modal"
             >
                 <span class="material-symbols-outlined text-sm">arrow_upward</span>
             </button>

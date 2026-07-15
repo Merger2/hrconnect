@@ -1,15 +1,11 @@
 <x-layouts::app.sidebar>
     <div x-data="leaveApply({{ Js::from(['leaveTypes' => $leaveTypes->toArray(), 'hasEmployee' => $employee !== null]) }})">
-        {{-- Header --}}
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-semibold text-ink">{{ __('Pengajuan Cuti') }}</h1>
-                <p class="mt-1 text-sm text-on-surface-variant">{{ __('Ajukan cuti atau izin baru') }}</p>
-            </div>
-            <x-button variant="secondary" href="{{ route('leaves.index') }}" wire:navigate icon="arrow_back">
-                {{ __('Kembali') }}
-            </x-button>
-        </div>
+        <x-page-shell title="{{ __('Pengajuan Cuti') }}" subtitle="{{ __('Ajukan cuti atau izin baru') }}">
+            <x-slot:actions>
+                <x-button variant="secondary" href="{{ route('leaves.index') }}" wire:navigate icon="arrow_back">
+                    {{ __('Kembali') }}
+                </x-button>
+            </x-slot:actions>
 
         <div class="mx-auto max-w-2xl">
             {{-- Quota Summary --}}
@@ -127,5 +123,6 @@
                 </div>
             </x-app.panel>
         </div>
+        </x-page-shell>
     </div>
 </x-layouts::app.sidebar>

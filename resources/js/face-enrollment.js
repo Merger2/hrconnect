@@ -15,7 +15,9 @@ export default function faceEnrollment() {
         moveBack: 'Mundur sedikit dari kamera',
         alignFace: 'Posisikan wajah di tengah panduan',
         descriptorFailed: 'Gagal merekam wajah. Tetap diam dan coba lagi.',
-        cameraError: 'Tidak dapat mengakses kamera.',
+        cameraError: 'Kamera belum bisa diakses.',
+        cameraPermissionError: 'Akses kamera ditolak. Klik Izinkan pada notifikasi browser, lalu tekan Coba Lagi.',
+        cameraUnavailableError: 'Kamera sedang dipakai aplikasi lain atau tidak tersedia. Tutup aplikasi lain, lalu coba lagi.',
         faceError: 'Tidak dapat memverifikasi wajah saat ini. Silakan coba lagi.',
         captureFace: 'Rekam Wajah',
         captureNow: 'Rekam sekarang',
@@ -214,6 +216,12 @@ export default function faceEnrollment() {
                 window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
                 window.faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
             ]);
+        },
+
+        async retryCamera() {
+            this.cleanup();
+            this.initialized = false;
+            await this.init();
         },
 
         async startCamera() {
@@ -600,13 +608,14 @@ export default function faceEnrollment() {
 
         failHard(message, error) {
             this.cleanup();
-            this.setStage('error', message, messages.permissionHint);
-            this.reportClientError('fatal', error, { user_message: message });
-            Swal.fire(
-                'Kesalahan Kamera',
-                `${message}<br><br><small>Error: ${error?.name || error?.message || "Unknown error"}</small>`,
-                'error'
-            );
+            const isPermissionError = error?.name === 'NotAllowedError' || /permission denied/i.test(error?.message || '');
+            const isDeviceUnavailable = error?.name === 'NotReadableError' || error?.name === 'NotFoundError';
+            const actionableMessage = isPermissionError
+                ? messages.cameraPermissionError
+                : (isDeviceUnavailable ? messages.cameraUnavailableError : message);
+
+            this.setStage('error', actionableMessage, messages.permissionHint);
+            this.reportClientError('fatal', error, { user_message: actionableMessage });
         },
     };
 }

@@ -11,8 +11,8 @@
                 <div class="mx-auto w-full max-w-md">
                     <!-- Brand -->
                     <div class="mb-8 flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg">
-                            <span class="material-symbols-outlined text-2xl text-white">badge</span>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-on-primary">
+                            <x-app-logo-icon class="size-5 fill-current text-on-primary" />
                         </div>
                         <div>
                             <h1 class="text-xl font-bold text-ink">HRConnect</h1>
@@ -33,40 +33,33 @@
                         @csrf
 
                         <!-- Email Address -->
-                        <div>
-                            <label for="email" class="mb-1.5 block text-sm font-semibold text-on-background">{{ __('Email address') }}</label>
-                            <input
-                                id="email" name="email" type="email" required autofocus
-                                placeholder="email@example.com"
-                                class="w-full rounded-xl border-2 border-fog bg-canvas px-4 py-3 text-sm text-ink placeholder:text-on-surface-variant/60 transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"
-                            />
-                            @error('email')
-                                <p class="mt-1.5 text-xs text-error">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <x-forms.input label="{{ __('Email address') }}" name="email" id="email" type="email" required autofocus placeholder="email@example.com" />
+                        @error('email')
+                            <p class="mt-1.5 text-xs text-error">{{ $message }}</p>
+                        @enderror
 
-                        <button type="submit" class="w-full rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30 focus:outline-none focus:ring-4 focus:ring-blue-600/20" data-test="email-password-reset-link-button">
+                        <x-button type="submit" size="lg" class="w-full" data-test="email-password-reset-link-button">
                             {{ __('Email password reset link') }}
-                        </button>
+                        </x-button>
                     </form>
 
                     <div class="mt-6 text-center text-sm text-on-surface-variant">
                         <span>{{ __('Or, return to') }}</span>
-                        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700" wire:navigate>{{ __('log in') }}</a>
+                        <a href="{{ route('login') }}" class="font-medium text-primary hover:text-primary-deep" wire:navigate>{{ __('log in') }}</a>
                     </div>
                 </div>
             </div>
 
             <!-- Right: Visual -->
-            <div class="relative hidden overflow-hidden bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800 lg:flex lg:flex-col lg:justify-center lg:items-center lg:p-16">
-                <div class="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl"></div>
-                <div class="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-white/5 blur-3xl"></div>
-                <div class="relative z-10 max-w-md text-center text-white">
-                    <div class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
-                        <span class="material-symbols-outlined text-4xl">lock_reset</span>
+            <div class="relative hidden overflow-hidden bg-ink lg:flex lg:flex-col lg:justify-center lg:items-center lg:p-16">
+                <div class="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
+                <div class="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-primary/5 blur-3xl"></div>
+                <div class="relative z-10 max-w-md text-center text-on-primary">
+                    <div class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 backdrop-blur">
+                        <span class="material-symbols-outlined text-4xl text-primary">lock_reset</span>
                     </div>
                     <h3 class="text-4xl font-bold leading-tight tracking-tight">{{ __('Tenang, kami bantu') }}</h3>
-                    <p class="mt-4 text-lg text-white/80">{{ __('Masukkan email terdaftar dan kami kirim tautan reset password.') }}</p>
+                    <p class="mt-4 text-lg text-on-primary/80">{{ __('Masukkan email terdaftar dan kami kirim tautan reset password.') }}</p>
                 </div>
             </div>
         </div>

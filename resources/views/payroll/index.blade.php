@@ -1,42 +1,33 @@
 <x-layouts::app.sidebar>
     <div x-data="payrollIndex()">
-        {{-- Header --}}
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-semibold text-ink">{{ __('Payroll') }}</h1>
-                <p class="mt-1 text-sm text-on-surface-variant">{{ __('View your payslips and salary history') }}</p>
+        <x-page-shell title="{{ __('Payroll') }}" subtitle="{{ __('View your payslips and salary history') }}">
+
+        {{-- Toolbar --}}
+        <div class="mb-4 flex flex-wrap items-end gap-3">
+            <div class="w-full sm:w-40">
+                <label class="mb-1.5 block text-xs font-medium text-on-surface-variant">{{ __('Year') }}</label>
+                <select x-model="year" @change="fetchPayrolls()"
+                        class="block w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2.5 text-sm text-ink focus:border-primary focus:ring-2 focus:ring-primary/20">
+                    <template x-for="y in years" :key="y">
+                        <option :value="y" x-text="y"></option>
+                    </template>
+                </select>
             </div>
         </div>
 
-        {{-- Toolbar --}}
-        <x-app.panel class="mb-6">
-            <div class="p-4">
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
-                    <div class="xl:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Year') }}</label>
-                        <select x-model="year" @change="fetchPayrolls()" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink">
-                            <template x-for="y in years" :key="y">
-                                <option :value="y" x-text="y"></option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </x-app.panel>
-
         {{-- Summary stats --}}
-        <dl class="mb-4 flex flex-wrap gap-2" x-show="!loading">
-            <div class="rounded-xl border border-ink/20 bg-surface-container-high px-4 py-2">
-                <dt class="text-xs font-semibold uppercase text-on-surface-variant">{{ __('Total Gross') }}</dt>
-                <dd class="text-lg font-bold text-ink" x-text="formatCurrency(summary.total_gross)">0</dd>
+        <dl class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3" x-show="!loading">
+            <div class="ess-stat">
+                <dt class="ess-stat__label">{{ __('Total Gross') }}</dt>
+                <dd class="text-lg font-bold text-ink tabular-nums" x-text="formatCurrency(summary.total_gross)">0</dd>
             </div>
-            <div class="rounded-xl border border-success/30 bg-success/10 px-4 py-2">
-                <dt class="text-xs font-semibold uppercase text-success">{{ __('Take Home') }}</dt>
-                <dd class="text-lg font-bold text-success" x-text="formatCurrency(summary.total_net)">0</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label text-success/80">{{ __('Take Home') }}</dt>
+                <dd class="text-lg font-bold text-success tabular-nums" x-text="formatCurrency(summary.total_net)">0</dd>
             </div>
-            <div class="rounded-xl border border-error/30 bg-error/10 px-4 py-2">
-                <dt class="text-xs font-semibold uppercase text-error">{{ __('Deductions') }}</dt>
-                <dd class="text-lg font-bold text-error" x-text="formatCurrency(summary.total_deduction)">0</dd>
+            <div class="ess-stat">
+                <dt class="ess-stat__label text-error/80">{{ __('Deductions') }}</dt>
+                <dd class="text-lg font-bold text-error tabular-nums" x-text="formatCurrency(summary.total_deduction)">0</dd>
             </div>
         </dl>
 
@@ -129,7 +120,6 @@
                 </template>
             </div>
         </x-app.panel>
+        </x-page-shell>
     </div>
-
-
 </x-layouts::app.sidebar>

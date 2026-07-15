@@ -3,17 +3,17 @@
 
     <div class="space-y-8">
         {{-- Header --}}
-        <div class="rounded-xl bg-gradient-to-r from-primary-soft/60 to-transparent p-6">
+        <section class="ess-card p-6">
             <div class="flex items-center gap-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-deep text-white shadow-soft">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-soft text-primary">
                     <span class="material-symbols-outlined text-xl">person_add</span>
                 </div>
                 <div>
                     <h1 class="text-xl font-semibold text-ink">{{ __('Tambah Karyawan') }}</h1>
-                    <p class="mt-0.5 text-sm text-muted">{{ __('Isi data karyawan baru') }}</p>
+                    <p class="mt-0.5 text-sm text-on-surface-variant">{{ __('Isi data karyawan baru') }}</p>
                 </div>
             </div>
-        </div>
+        </section>
 
         <form x-data="{
             password: '',
