@@ -8,8 +8,8 @@
         <div>
             <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Account') }}</p>
             <div class="grid gap-4 sm:grid-cols-2">
-                <x-forms.input name="name" label="{{ __('Name') }}" x-model="form.name" required />
-                <x-forms.input name="email" label="{{ __('Email') }}" type="email" x-model="form.email" required />
+                <x-forms.input name="name" label="{{ __('Name') }}" x-model="form.name" required placeholder="Nama lengkap" />
+                <x-forms.input name="email" label="{{ __('Email') }}" type="email" x-model="form.email" required placeholder="email@example.com" />
             </div>
             <div x-show="!editing" class="mt-4">
                 <x-forms.input name="password" label="{{ __('Password') }}" type="password" x-model="form.password" required />
@@ -22,21 +22,21 @@
         <div>
             <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Employee Details') }}</p>
             <div class="grid gap-4 sm:grid-cols-2">
-                <x-forms.input name="employee_number" label="{{ __('Employee Number') }}" x-model="form.employee_number" required />
-                <x-forms.input name="full_name" label="{{ __('Full Name') }}" x-model="form.full_name" required />
-                <x-forms.input name="nik" label="{{ __('NIK') }}" x-model="form.nik" maxlength="16" required />
-                <x-forms.input name="phone" label="{{ __('Phone') }}" x-model="form.phone" required />
+                <x-forms.input name="employee_number" label="{{ __('Employee Number') }}" x-model="form.employee_number" required placeholder="Nomor karyawan" />
+                <x-forms.input name="full_name" label="{{ __('Full Name') }}" x-model="form.full_name" required placeholder="Nama lengkap" />
+                <x-forms.input name="nik" label="{{ __('NIK') }}" x-model="form.nik" maxlength="16" required placeholder="16 digit NIK" />
+                <x-forms.input name="phone" label="{{ __('Phone') }}" x-model="form.phone" required placeholder="+62xxx atau 08xxx" />
 
-                <x-forms.select name="gender" x-model="form.gender" required
-                    :options="['' => __('Select...'), 'L' => __('Male'), 'P' => __('Female')]" />
+                <x-forms.select name="gender" x-model="form.gender" required placeholder="{{ __('Pilih...') }}"
+                    :options="['' => __('Pilih...'), 'L' => __('Male'), 'P' => __('Female')]" />
 
-                <x-forms.select name="marital_status" x-model="form.marital_status" required
-                    :options="['' => __('Select...'), 'single' => __('Single'), 'married' => __('Married'), 'divorced' => __('Divorced'), 'widowed' => __('Widowed')]" />
+                <x-forms.select name="marital_status" x-model="form.marital_status" required placeholder="{{ __('Pilih...') }}"
+                    :options="['' => __('Pilih...'), 'single' => __('Single'), 'married' => __('Married'), 'divorced' => __('Divorced'), 'widowed' => __('Widowed')]" />
 
-                <x-forms.select name="blood_type" x-model="form.blood_type"
-                    :options="['' => __('Select...'), 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-', 'O+' => 'O+', 'O-' => 'O-']" />
+                <x-forms.select name="blood_type" x-model="form.blood_type" placeholder="{{ __('Pilih...') }}"
+                    :options="['' => __('Pilih...'), 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-', 'O+' => 'O+', 'O-' => 'O-']" />
 
-                <x-forms.input name="birth_date" label="{{ __('Birth Date') }}" type="date" x-model="form.birth_date" required />
+                <x-forms.input name="birth_date" label="{{ __('Birth Date') }}" type="date" x-model="form.birth_date" required placeholder="{{ __('Pilih tanggal') }}" />
             </div>
         </div>
 
@@ -116,9 +116,9 @@
                 <x-forms.select name="education_level" x-model="form.education_level" required
                     :options="['' => __('Select...'), 'sd' => __('SD / Sederajat'), 'smp' => __('SMP / Sederajat'), 'sma' => __('SMA / Sederajat'), 'smk' => __('SMK / Sederajat'), 'diploma' => __('Diploma (D1-D4)'), 'bachelor' => __('Sarjana (S1)'), 'master' => __('Magister (S2)'), 'doctorate' => __('Doktor (S3)'), 'other' => __('Lainnya')]" />
 
-                <x-forms.input name="institution_name" label="{{ __('Institution') }}" x-model="form.institution_name" required />
+                <x-forms.input name="institution_name" label="{{ __('Institution') }}" x-model="form.institution_name" required placeholder="Nama universitas/sekolah" />
 
-                <x-forms.input name="graduation_year" label="{{ __('Graduation Year') }}" type="number" x-model="form.graduation_year" min="1950" required />
+                <x-forms.input name="graduation_year" label="{{ __('Graduation Year') }}" type="number" x-model="form.graduation_year" min="1950" required placeholder="2024" />
             </div>
         </div>
 

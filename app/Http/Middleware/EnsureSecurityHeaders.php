@@ -12,6 +12,9 @@ class EnsureSecurityHeaders
     {
         $response = $next($request);
 
+        // Permissions Policy - Allow camera/geolocation for same-origin (required for face recognition)
+        $response->headers->set('Permissions-Policy', 'geolocation=(self), camera=(self), microphone=()');
+
         // Prevent clickjacking
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
@@ -19,7 +22,7 @@ class EnsureSecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
         // HTTP Strict Transport Security (1 tahun, include subdomains)
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        // $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 
         // Referrer policy: hanya kirim origin untuk cross-origin
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');

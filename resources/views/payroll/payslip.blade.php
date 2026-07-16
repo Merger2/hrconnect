@@ -5,45 +5,45 @@
     <title>Slip Gaji {{ $payroll->employee->employee_number }} — {{ $period_label }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica', 'Arial', sans-serif; }
-        body { font-size: 11px; color: #1f2937; padding: 32px 40px; }
-        h1 { font-size: 18px; font-weight: bold; color: #1f2937; }
+        body { font-size: 11px; color: var(--md-sys-color-on-surface, #1f2937); padding: 32px 40px; }
+        h1 { font-size: 18px; font-weight: bold; color: var(--md-sys-color-on-surface, #1f2937); }
         table { width: 100%; border-collapse: collapse; }
         td { vertical-align: top; padding: 2px 4px; }
 
-        .header-table { width: 100%; margin-bottom: 16px; border-bottom: 2px solid #1f2937; padding-bottom: 16px; }
+        .header-table { width: 100%; margin-bottom: 16px; border-bottom: 2px solid var(--md-sys-color-on-surface, #1f2937); padding-bottom: 16px; }
         .header-left { font-size: 14px; font-weight: bold; }
-        .header-left .meta { font-size: 9px; color: #6b7280; font-weight: normal; margin-top: 4px; }
+        .header-left .meta { font-size: 9px; color: var(--md-sys-color-on-surface-variant, #6b7280); font-weight: normal; margin-top: 4px; }
         .header-right { text-align: right; }
-        .header-right .period { font-size: 11px; color: #6b7280; margin-top: 4px; font-weight: normal; }
+        .header-right .period { font-size: 11px; color: var(--md-sys-color-on-surface-variant, #6b7280); margin-top: 4px; font-weight: normal; }
 
-        .info-table { width: 100%; margin-bottom: 24px; background-color: #f9fafb; }
+        .info-table { width: 100%; margin-bottom: 24px; background-color: var(--md-sys-color-surface-container, #f9fafb); }
         .info-table td { padding: 4px 12px; font-size: 10px; width: 50%; }
-        .info-table .label { color: #6b7280; width: 100px; }
+        .info-table .label { color: var(--md-sys-color-on-surface-variant, #6b7280); width: 100px; }
         .info-table .value { font-weight: bold; }
 
         .col-table { width: 100%; margin-bottom: 24px; }
         .col-table td { width: 50%; padding: 0 8px; vertical-align: top; }
-        .col-inner { border: 1px solid #e5e7eb; }
-        .col-head { padding: 8px 12px; background-color: #f3f4f6; font-weight: bold; font-size: 11px; border-bottom: 1px solid #e5e7eb; }
-        .col-head.income { color: #047857; }
-        .col-head.deduction { color: #b91c1c; }
-        .col-row { padding: 6px 12px; font-size: 10px; border-bottom: 1px solid #f3f4f6; }
-        .col-row .pull-left { float: left; color: #4b5563; }
+        .col-inner { border: 1px solid var(--md-sys-color-outline-variant, #e5e7eb); }
+        .col-head { padding: 8px 12px; background-color: var(--md-sys-color-surface-container-high, #f3f4f6); font-weight: bold; font-size: 11px; border-bottom: 1px solid var(--md-sys-color-outline-variant, #e5e7eb); }
+        .col-head.income { color: var(--md-sys-color-success, #047857); }
+        .col-head.deduction { color: var(--md-sys-color-error, #b91c1c); }
+        .col-row { padding: 6px 12px; font-size: 10px; border-bottom: 1px solid var(--md-sys-color-surface-container-high, #f3f4f6); }
+        .col-row .pull-left { float: left; color: var(--md-sys-color-on-surface-variant, #4b5563); }
         .col-row .pull-right { float: right; font-weight: bold; }
         .col-row:after { content: ''; display: table; clear: both; }
-        .col-total { padding: 8px 12px; background-color: #f9fafb; font-weight: bold; border-top: 1px solid #d1d5db; }
+        .col-total { padding: 8px 12px; background-color: var(--md-sys-color-surface-container, #f9fafb); font-weight: bold; border-top: 1px solid var(--md-sys-color-outline, #d1d5db); }
         .col-total .pull-left { float: left; }
         .col-total .pull-right { float: right; }
         .col-total:after { content: ''; display: table; clear: both; }
-        .col-total.income .pull-right { color: #047857; }
-        .col-total.deduction .pull-right { color: #b91c1c; }
+        .col-total.income .pull-right { color: var(--md-sys-color-success, #047857); }
+        .col-total.deduction .pull-right { color: var(--md-sys-color-error, #b91c1c); }
 
         .net-table { width: 100%; margin-bottom: 24px; }
-        .net-table td { padding: 16px 20px; background-color: #1f2937; color: white; }
+        .net-table td { padding: 16px 20px; background-color: var(--md-sys-color-on-surface, #1f2937); color: var(--md-sys-color-surface, #ffffff); }
         .net-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
         .net-value { font-size: 20px; font-weight: bold; text-align: right; }
 
-        .footer { padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #9ca3af; text-align: center; }
+        .footer { padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant, #e5e7eb); font-size: 9px; color: var(--md-sys-color-outline, #9ca3af); text-align: center; }
         .footer .auto { font-style: italic; }
     </style>
 </head>

@@ -158,12 +158,12 @@ export default function clockIn(config = {}) {
         canCapture() { return this.status === 'ready-to-capture' && !this.clockingIn && !this.captureBusy; },
 
         async loadModels() {
-            if (typeof window.faceapi === 'undefined') throw new Error('face-api.js unavailable');
-            await Promise.all([
-                window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
-                window.faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
-            ]);
-        },
+                    if (typeof window.faceapi === 'undefined') throw new Error('face-api.js unavailable');
+                    await Promise.all([
+                        window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
+                        window.faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelUrl),
+                    ]);
+                },
 
         async startCamera() {
             this.setStage('opening-camera', messages.openingCamera, messages.permissionHint);
@@ -379,6 +379,13 @@ export default function clockIn(config = {}) {
 
                 this.setStage('saving', messages.savingFace, messages.readyHint);
                 await this.$wire.call('saveFaceDescriptor', descriptor);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Data wajah tersimpan.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 this.cleanup();
             } catch (error) {
                 await this.reportClientError('capture', error, { descriptor_mode: 'geometry' });
@@ -465,7 +472,7 @@ export default function clockIn(config = {}) {
             }
             await Promise.all([
                 window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
-                window.faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
+                window.faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelUrl),
             ]);
         },
 
@@ -555,7 +562,7 @@ export default function clockIn(config = {}) {
         // PIN Fallback methods
         handlePinInput(e, i) {
             const val = e.target.value;
-            if (val && i < 6) this.$refs.pinInputs.children[i].focus();
+            if (val && i < 6) this.$refs.pinInputs.children[i - 1].focus();
         },
         clearPin() { this.pinDigits = Array(6).fill(''); },
 
@@ -580,15 +587,78 @@ export default function clockIn(config = {}) {
                 });
                 const json = await res.json();
                 if (res.ok) {
-                    Livewire.dispatch('toast', { variant: 'success', text: json.message });
+                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Absen PIN berhasil!' });
                     setTimeout(() => window.location.href = '/attendance', 1000);
                 } else {
-                    Livewire.dispatch('toast', { variant: 'error', text: json.message });
+                    Livewire.dispatch('toast', { variant: 'error', text: json.message || 'PIN salah atau gagal absen.' });
                     this.clearPin();
                 }
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi gagal' });
             } finally { this.clockingIn = false; }
+        },
+
+        async doClockIn() {
+            // Face-based clock-in
+            if (this.clockingIn || this.captureBusy) return;
+            this.clockingIn = true;
+
+            try {
+                const video = this.$refs.video;
+                if (!video || video.readyState < 2) {
+                    Livewire.dispatch('toast', { variant: 'error', text: 'Kamera belum siap.' });
+                    this.clockingIn = false;
+                    return;
+                }
+
+                // Detect face and build descriptor
+                const opts = captureOptions[0];
+                const detect = await window.faceapi.detectAllFaces(video, new window.faceapi.TinyFaceDetectorOptions(opts)).withFaceLandmarks(true);
+                if (!detect || detect.length === 0) {
+                    Livewire.dispatch('toast', { variant: 'error', text: 'Wajah tidak terdeteksi. Posisikan wajah di kamera.' });
+                    this.clockingIn = false;
+                    return;
+                }
+                if (detect.length > 1) {
+                    Livewire.dispatch('toast', { variant: 'error', text: 'Hanya satu wajah yang diperbolehkan.' });
+                    this.clockingIn = false;
+                    return;
+                }
+
+                const descriptor = buildFaceGeometryDescriptor(detect[0].landmarks);
+
+                const payload = {
+                    descriptor: descriptor,
+                    latitude: this.gps?.latitude ?? null,
+                    longitude: this.gps?.longitude ?? null,
+                    accuracy: this.gps?.accuracy ?? null,
+                    is_wfa: this.wfaMode,
+                };
+
+                const res = await fetch('/api/v1/attendance/clock-in', {
+                    method: 'POST',
+                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload),
+                });
+
+                const json = await res.json();
+
+                if (res.ok) {
+                    Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Absen berhasil!' });
+                    setTimeout(() => window.location.href = '/attendance', 1000);
+                } else {
+                    // Wait, if still detecting face we just got an error
+                    const errMsg = json.message || 'Wajah tidak dikenali. Coba lagi.';
+                    Livewire.dispatch('toast', { variant: 'error', text: errMsg });
+                }
+            } catch (error) {
+                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal absen: ' + (error.message || 'Koneksi terputus') });
+                await this.reportClientError('clock-in', error, { descriptor_mode: 'geometry' });
+            } finally {
+                this.clockingIn = false;
+                this.captureBusy = false;
+            }
         },
 
         failHard(message) {

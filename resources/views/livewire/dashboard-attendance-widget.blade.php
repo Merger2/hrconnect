@@ -6,7 +6,7 @@
         <div class="p-5">
             <div class="flex items-start justify-between gap-3 mb-4">
                 <div class="min-w-0">
-                    <p class="text-xs font-bold uppercase tracking-widest text-blue-600">{{ __('Dashboard') }}</p>
+                    <p class="text-xs font-bold uppercase tracking-widest text-primary">{{ __('Dashboard') }}</p>
                     <h3 class="mt-1 text-lg font-semibold leading-tight tracking-tight text-ink">{{ __('Hari Ini') }}</h3>
                     <p class="mt-0.5 text-xs text-on-surface-variant" x-text="todayFormatted"></p>
                 </div>

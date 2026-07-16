@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         leaves: [],
@@ -24,9 +26,7 @@ export default function () {
                 return;
             }
             try {
-                const res = await fetch('/api/v1/leave/quota', { headers: window.apiHeaders(), credentials: 'same-origin' });
-                if (!res.ok) return;
-                const json = await res.json();
+                const json = await apiFetch('/api/v1/leave/quota', { credentials: 'same-origin' });
                 if (json.status === 'success') this.quota = json.data;
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat kuota cuti' });
@@ -42,9 +42,7 @@ export default function () {
             }
             this.loading = true;
             try {
-                const res = await fetch('/api/v1/leave?per_page=50', { headers: window.apiHeaders(), credentials: 'same-origin' });
-                if (!res.ok) return;
-                const json = await res.json();
+                const json = await apiFetch('/api/v1/leave?per_page=50', { credentials: 'same-origin' });
                 if (json.status === 'success') this.leaves = json.data;
             } catch {
                 Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data cuti' });
@@ -56,11 +54,10 @@ export default function () {
             if (!confirm('Batalkan pengajuan cuti ini?')) return;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/leave/${id}`, {
+                const json = await apiFetch(`/api/v1/leave/${id}`, {
                     method: 'DELETE',
-                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
+                    headers: { 'X-CSRF-TOKEN': token },
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Dibatalkan' });
                     this.fetchLeaves();
@@ -68,8 +65,8 @@ export default function () {
                 } else {
                     Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
-            } catch {
-                Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });
+            } catch (e) {
+                Livewire.dispatch('toast', { variant: 'error', text: e.message || 'Koneksi error' });
             }
         },
 

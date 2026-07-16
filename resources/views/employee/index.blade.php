@@ -324,17 +324,19 @@
                         <div>
                             <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Akun') }}</p>
                             <div class="grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nama') }} *</label>
-                                    <input type="text" x-model="form.name"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Email') }} *</label>
-                                    <input type="email" x-model="form.email"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                            </div>
+                                                        <div>
+                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nama') }} *</label>
+                                                            <input type="text" x-model="form.name"
+                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                placeholder="{{ __('Masukkan nama lengkap') }}">
+                                                        </div>
+                                                        <div>
+                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Email') }} *</label>
+                                                            <input type="email" x-model="form.email"
+                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                placeholder="{{ __('contoh@domain.com') }}">
+                                                        </div>
+                                                    </div>
                             <div x-show="!editing" class="mt-4">
                                 <label class="mb-1 block text-sm font-medium text-ink">{{ __('Kata Sandi') }} *</label>
                                 <input type="password" x-model="form.password"
@@ -347,67 +349,72 @@
                         <div>
                             <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Data Karyawan') }}</p>
                             <div class="grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nomor Karyawan') }} *</label>
-                                    <input type="text" x-model="form.employee_number"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nama Lengkap') }} *</label>
-                                    <input type="text" x-model="form.full_name"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('NIK') }} *</label>
-                                    <input type="text" x-model="form.nik" maxlength="16"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Telepon') }} *</label>
-                                    <input type="text" x-model="form.phone"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jenis Kelamin') }} *</label>
-                                    <select x-model="form.gender"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <option value="L">{{ __('Laki-laki') }}</option>
-                                        <option value="P">{{ __('Perempuan') }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Status Pernikahan') }} *</label>
-                                    <select x-model="form.marital_status"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <option value="single">{{ __('Lajang') }}</option>
-                                        <option value="married">{{ __('Menikah') }}</option>
-                                        <option value="divorced">{{ __('Cerai') }}</option>
-                                        <option value="widowed">{{ __('Duda/Janda') }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Gol. Darah') }}</label>
-                                    <select x-model="form.blood_type"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <option value="A+">A+</option>
-                                        <option value="A-">A-</option>
-                                        <option value="B+">B+</option>
-                                        <option value="B-">B-</option>
-                                        <option value="AB+">AB+</option>
-                                        <option value="AB-">AB-</option>
-                                        <option value="O+">O+</option>
-                                        <option value="O-">O-</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tanggal Lahir') }} *</label>
-                                    <input type="date" x-model="form.birth_date"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nomor Karyawan') }} *</label>
+                                                                <input type="text" x-model="form.employee_number"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ __('Masukkan nomor karyawan') }}">
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Nama Lengkap') }} *</label>
+                                                                <input type="text" x-model="form.full_name"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ __('Masukkan nama lengkap') }}">
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('NIK') }} *</label>
+                                                                <input type="text" x-model="form.nik" maxlength="16"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ __('16 digit NIK') }}">
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Telepon') }} *</label>
+                                                                <input type="text" x-model="form.phone"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ __('+62xxx atau 08xxx') }}">
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jenis Kelamin') }} *</label>
+                                                                <select x-model="form.gender"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                    <option value="">{{ __('Pilih...') }}</option>
+                                                                    <option value="L">{{ __('Laki-laki') }}</option>
+                                                                    <option value="P">{{ __('Perempuan') }}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Status Pernikahan') }} *</label>
+                                                                <select x-model="form.marital_status"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                    <option value="">{{ __('Pilih...') }}</option>
+                                                                    <option value="single">{{ __('Lajang') }}</option>
+                                                                    <option value="married">{{ __('Menikah') }}</option>
+                                                                    <option value="divorced">{{ __('Cerai') }}</option>
+                                                                    <option value="widowed">{{ __('Duda/Janda') }}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Gol. Darah') }}</label>
+                                                                <select x-model="form.blood_type"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                    <option value="">{{ __('Pilih...') }}</option>
+                                                                    <option value="A+">A+</option>
+                                                                    <option value="A-">A-</option>
+                                                                    <option value="B+">B+</option>
+                                                                    <option value="B-">B-</option>
+                                                                    <option value="AB+">AB+</option>
+                                                                    <option value="AB-">AB-</option>
+                                                                    <option value="O+">O+</option>
+                                                                    <option value="O-">O-</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tanggal Lahir') }} *</label>
+                                                                <input type="date" x-model="form.birth_date"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ __('YYYY-MM-DD') }}">
+                                                            </div>
+                                                        </div>
                         </div>
 
                         <hr class="border-outline-variant/50">
@@ -415,122 +422,126 @@
                         <div>
                             <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Kepegawaian') }}</p>
                             <div class="grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Perusahaan') }} *</label>
-                                    <select x-model="form.company_id"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <template x-for="c in lookup.companies" :key="c.id">
-                                            <option :value="c.id" x-text="c.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Cabang') }} *</label>
-                                    <select x-model="form.branch_id"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <template x-for="b in lookup.branches" :key="b.id">
-                                            <option :value="b.id" x-text="b.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Departemen') }} *</label>
-                                    <select x-model="form.department_id"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <template x-for="d in lookup.departments" :key="d.id">
-                                            <option :value="d.id" x-text="d.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jabatan') }} *</label>
-                                    <select x-model="form.position_id"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <template x-for="p in lookup.positions" :key="p.id">
-                                            <option :value="p.id" x-text="p.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Atasan Langsung') }}</label>
-                                    <select x-model="form.parent_id"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Tidak Ada') }}</option>
-                                        <template x-for="m in lookup.managers" :key="m.id">
-                                            <option :value="m.id" x-text="m.full_name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jenis Kepegawaian') }} *</label>
-                                    <select x-model="form.employment_type"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <option value="permanent">{{ __('Tetap') }}</option>
-                                        <option value="contract">{{ __('Kontrak') }}</option>
-                                        <option value="probation">{{ __('Percobaan') }}</option>
-                                        <option value="intern">{{ __('Magang') }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tipe Gaji') }} *</label>
-                                    <select x-model="form.salary_type"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <option value="monthly">{{ __('Bulanan') }}</option>
-                                        <option value="daily">{{ __('Harian') }}</option>
-                                        <option value="hourly">{{ __('Per Jam') }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tanggal Masuk') }} *</label>
-                                    <input type="date" x-model="form.join_date"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                            </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Perusahaan') }} *</label>
+                                                                                            <select x-model="form.company_id"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Pilih...') }}</option>
+                                                                                                <template x-for="c in lookup.companies" :key="c.id">
+                                                                                                    <option :value="c.id" x-text="c.name"></option>
+                                                                                                </template>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Cabang') }} *</label>
+                                                                                            <select x-model="form.branch_id"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Pilih...') }}</option>
+                                                                                                <template x-for="b in lookup.branches" :key="b.id">
+                                                                                                    <option :value="b.id" x-text="b.name"></option>
+                                                                                                </template>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Departemen') }} *</label>
+                                                                                            <select x-model="form.department_id"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Pilih...') }}</option>
+                                                                                                <template x-for="d in lookup.departments" :key="d.id">
+                                                                                                    <option :value="d.id" x-text="d.name"></option>
+                                                                                                </template>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jabatan') }} *</label>
+                                                                                            <select x-model="form.position_id"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Pilih...') }}</option>
+                                                                                                <template x-for="p in lookup.positions" :key="p.id">
+                                                                                                    <option :value="p.id" x-text="p.name"></option>
+                                                                                                </template>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Atasan Langsung') }}</label>
+                                                                                            <select x-model="form.parent_id"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Tidak Ada') }}</option>
+                                                                                                <template x-for="m in lookup.managers" :key="m.id">
+                                                                                                    <option :value="m.id" x-text="m.full_name"></option>
+                                                                                                </template>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jenis Kepegawaian') }} *</label>
+                                                                                            <select x-model="form.employment_type"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Pilih...') }}</option>
+                                                                                                <option value="permanent">{{ __('Tetap') }}</option>
+                                                                                                <option value="contract">{{ __('Kontrak') }}</option>
+                                                                                                <option value="probation">{{ __('Percobaan') }}</option>
+                                                                                                <option value="intern">{{ __('Magang') }}</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tipe Gaji') }} *</label>
+                                                                                            <select x-model="form.salary_type"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                                                <option value="">{{ __('Pilih...') }}</option>
+                                                                                                <option value="monthly">{{ __('Bulanan') }}</option>
+                                                                                                <option value="daily">{{ __('Harian') }}</option>
+                                                                                                <option value="hourly">{{ __('Per Jam') }}</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tanggal Masuk') }} *</label>
+                                                                                            <input type="date" x-model="form.join_date"
+                                                                                                class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                                                placeholder="{{ __('YYYY-MM-DD') }}">
+                                                                                        </div>
+                                                                                    </div>
                         </div>
 
                         <hr class="border-outline-variant/50">
 
                         <div>
-                            <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Pendidikan') }}</p>
-                            <div class="grid gap-4 sm:grid-cols-3">
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jenjang') }} *</label>
-                                    <select x-model="form.education_level"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
-                                        <option value="">{{ __('Pilih...') }}</option>
-                                        <option value="sd">{{ __('SD / Sederajat') }}</option>
-                                        <option value="smp">{{ __('SMP / Sederajat') }}</option>
-                                        <option value="sma">{{ __('SMA / Sederajat') }}</option>
-                                        <option value="smk">{{ __('SMK / Sederajat') }}</option>
-                                        <option value="diploma">{{ __('Diploma (D1-D4)') }}</option>
-                                        <option value="bachelor">{{ __('Sarjana (S1)') }}</option>
-                                        <option value="master">{{ __('Magister (S2)') }}</option>
-                                        <option value="doctorate">{{ __('Doktor (S3)') }}</option>
-                                        <option value="other">{{ __('Lainnya') }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Institusi') }} *</label>
-                                    <input type="text" x-model="form.institution_name"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                                <div>
-                                    <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tahun Lulus') }} *</label>
-                                    <input type="number" x-model="form.graduation_year" min="1950" :max="new Date().getFullYear()"
-                                        class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
-                                </div>
-                            </div>
-                        </div>
+                                                        <label class="mb-2 block text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{{ __('Education') }}</label>
+                                                        <div class="grid gap-4 sm:grid-cols-3">
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Jenjang') }} *</label>
+                                                                <select x-model="form.education_level"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink">
+                                                                    <option value="">{{ __('Pilih...') }}</option>
+                                                                    <option value="sd">{{ __('SD / Sederajat') }}</option>
+                                                                    <option value="smp">{{ __('SMP / Sederajat') }}</option>
+                                                                    <option value="sma">{{ __('SMA / Sederajat') }}</option>
+                                                                    <option value="smk">{{ __('SMK / Sederajat') }}</option>
+                                                                    <option value="diploma">{{ __('Diploma (D1-D4)') }}</option>
+                                                                    <option value="bachelor">{{ __('Sarjana (S1)') }}</option>
+                                                                    <option value="master">{{ __('Magister (S2)') }}</option>
+                                                                    <option value="doctorate">{{ __('Doktor (S3)') }}</option>
+                                                                    <option value="other">{{ __('Lainnya') }}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Institusi') }} *</label>
+                                                                <input type="text" x-model="form.institution_name"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ __('Masukkan nama universitas/sekolah') }}">
+                                                            </div>
+                                                            <div>
+                                                                <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tahun Lulus') }} *</label>
+                                                                <input type="number" x-model="form.graduation_year" min="1950" :max="new Date().getFullYear()"
+                                                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                                                    placeholder="{{ date('Y') }}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                        <div x-show="formError" x-cloak class="rounded-lg bg-error/10 p-3 text-sm text-error">
-                            <p x-text="formError"></p>
-                        </div>
+                                                    {{-- Error Display --}}
+                                                    <div x-show="formError" x-cloak class="rounded-lg bg-error/10 p-3 text-sm text-error">
+                                                        <p x-text="formError"></p>
+                                                    </div>
                     </div>
 
                     <div class="mt-6 flex items-center justify-end gap-3 border-t border-outline-variant/50 pt-4">
@@ -588,7 +599,8 @@
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-ink">{{ __('Tanggal Efektif') }} *</label>
                                 <input type="date" x-model="terminateForm.date"
-                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                                    class="h-10 w-full rounded-lg border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
+                                    placeholder="{{ __('YYYY-MM-DD') }}">
                             </div>
 
                             <div x-show="terminateError" x-cloak class="rounded-lg bg-error/10 p-3 text-sm text-error">

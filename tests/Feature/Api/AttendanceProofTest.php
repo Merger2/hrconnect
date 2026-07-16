@@ -370,9 +370,10 @@ test('index validates per_page max 100', function () {
 // ═══════════════════════════════════════════════════════════════════════
 
 test('clock-in with face recognition succeeds', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+        'is_active' => true,
+    ]);
 
     $faceService = $this->mock(FaceRecognitionService::class);
     $faceService->shouldReceive('hasFaceEnrolled')
@@ -395,9 +396,10 @@ test('clock-in with face recognition succeeds', function () {
 });
 
 test('clock-in falls back to PIN when face not recognized', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+        'is_active' => true,
+    ]);
 
     $faceService = $this->mock(FaceRecognitionService::class);
     $faceService->shouldReceive('hasFaceEnrolled')
@@ -418,9 +420,10 @@ test('clock-in falls back to PIN when face not recognized', function () {
 });
 
 test('clock-in with face embedding but no fallback PIN returns 422', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+        'is_active' => true,
+    ]);
 
     $faceService = $this->mock(FaceRecognitionService::class);
     $faceService->shouldReceive('hasFaceEnrolled')
@@ -492,9 +495,10 @@ test('WFA clock-out succeeds without location data', function () {
 // ═══════════════════════════════════════════════════════════════════════
 
 test('clock-out with face verification succeeds', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+        'is_active' => true,
+    ]);
 
     $this->withHeader('Authorization', "Bearer {$this->token}")
         ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
@@ -521,9 +525,10 @@ test('clock-out with face verification succeeds', function () {
 });
 
 test('clock-out falls back to PIN when face not recognized', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+        'is_active' => true,
+    ]);
 
     $this->withHeader('Authorization', "Bearer {$this->token}")
         ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [
@@ -548,9 +553,10 @@ test('clock-out falls back to PIN when face not recognized', function () {
 });
 
 test('clock-out with face fails when no fallback PIN given', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', array_fill(0, 128, 0.01)).']',
+        'is_active' => true,
+    ]);
 
     $this->withHeader('Authorization', "Bearer {$this->token}")
         ->postJson('/api/v1/attendance/clock-in', array_merge(gpsData(), [

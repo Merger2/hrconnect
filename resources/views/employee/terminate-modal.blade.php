@@ -14,7 +14,9 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-ink">{{ __('Termination Type') }} *</label>
             <select x-model="terminateForm.type"
-                class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+                placeholder="{{ __('Pilih tipe...') }}">
+                <option value="">{{ __('Pilih tipe...') }}</option>
                 <option value="phk">{{ __('PHK (Layoff)') }}</option>
                 <option value="disciplinary">{{ __('Disciplinary Termination') }}</option>
                 <option value="mutual">{{ __('Mutual Agreement') }}</option>
@@ -27,13 +29,14 @@
             <label class="mb-1 block text-sm font-medium text-ink">{{ __('Reason') }} *</label>
             <textarea x-model="terminateForm.reason" rows="3"
                 class="w-full rounded-xl border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
-                placeholder="{{ __('Explain the reason for termination...') }}"></textarea>
+                placeholder="{{ __('Jelaskan alasan PHK...') }}"></textarea>
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-ink">{{ __('Effective Date') }} *</label>
             <input type="date" x-model="terminateForm.date"
-                class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink">
+                class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+                placeholder="{{ __('Pilih tanggal') }}">
         </div>
 
         <div x-show="terminateError" x-cloak class="rounded-xl bg-error/10 p-3 text-sm text-error">

@@ -154,14 +154,14 @@
                     <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('New Loan Application') }}</h2>
 
                     <div class="space-y-5">
-                        <x-forms.input name="amount" label="{{ __('Amount (IDR)') }}" type="number" x-model="form.amount" min="1" required />
+                        <x-forms.input name="amount" label="{{ __('Amount (IDR)') }}" type="number" x-model="form.amount" min="1" required placeholder="Jumlah pinjaman" />
 
                         <div>
-                            <x-forms.input name="interest_rate" label="{{ __('Interest Rate (%)') }}" type="number" x-model="form.interest_rate" min="0" step="0.01" />
+                            <x-forms.input name="interest_rate" label="{{ __('Interest Rate (%)') }}" type="number" x-model="form.interest_rate" min="0" step="0.01" placeholder="0 untuk tanpa bunga" />
                             <p class="mt-1.5 text-xs text-on-surface-variant">{{ __('Set 0 for interest-free loan') }}</p>
                         </div>
 
-                        <x-forms.input name="tenor_months" label="{{ __('Tenor (months)') }}" type="number" x-model="form.tenor_months" min="1" max="120" required />
+                        <x-forms.input name="tenor_months" label="{{ __('Tenor (months)') }}" type="number" x-model="form.tenor_months" min="1" max="120" required placeholder="Jangka waktu (bulan)" />
                     </div>
 
                     <x-sections.section-border />

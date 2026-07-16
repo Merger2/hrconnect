@@ -11,12 +11,12 @@
     data-test="sidebar-menu-button"
 >
     @if($user)
-    <button @click="open = !open" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white hover:bg-white/10">
-        <div class="flex size-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">
+    <button @click="open = !open" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-container-high transition-colors">
+        <div class="flex size-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
             {{ $user->initials() }}
         </div>
         <span class="max-w-28 truncate">{{ $user->name }}</span>
-        <span class="material-symbols-outlined text-base text-white/50">unfold_more</span>
+        <span class="material-symbols-outlined text-base text-on-surface-variant">unfold_more</span>
     </button>
     @endif
 

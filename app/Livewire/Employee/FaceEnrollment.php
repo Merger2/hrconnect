@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Employee;
 
 use App\Models\FaceDescriptor;
+use App\Services\FaceRecognitionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -57,18 +58,7 @@ class FaceEnrollment extends Component
 
             // Store geometry descriptor coordinates only (128D).
             // Version prefix is metadata only — pgvector requires consistent dimensions.
-            $vectorString = '['.implode(',', $descriptor).']';
-
-            FaceDescriptor::updateOrCreate(
-                ['employee_id' => $employee->id],
-                [
-                    'embedding' => $vectorString,
-                    'is_active' => true,
-                    'metadata' => $metadata,
-                ]
-            );
-
-            $employee->forceFill(['face_embedding' => $vectorString])->save();
+            app(FaceRecognitionService::class)->saveFaceDescriptor($employee, $descriptor);
 
             $this->isEnrolled = true;
             $this->isCapturing = false;
@@ -96,7 +86,8 @@ class FaceEnrollment extends Component
             FaceDescriptor::where('employee_id', $employee->id)
                 ->update(['is_active' => false]);
 
-            $employee->forceFill(['face_embedding' => null])->save();
+            // employees.face_embedding was dropped — see migration 2026_07_16_000100
+            // Do not write to non-existent column
 
             $this->isEnrolled = false;
 

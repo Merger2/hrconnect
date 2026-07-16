@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         records: [],
@@ -24,8 +26,7 @@ export default function () {
             try {
                 const params = new URLSearchParams({ per_page: 50 });
                 if (this.statusFilter) params.set('status', this.statusFilter);
-                const res = await fetch(`/api/v1/loans?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/loans?${params}`, { credentials: 'same-origin' });
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
@@ -57,12 +58,11 @@ export default function () {
             this.formError = '';
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch('/api/v1/loans', {
+                const json = await apiFetch('/api/v1/loans', {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.form),
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Berhasil' });
                     this.showCreateModal = false;
@@ -70,8 +70,8 @@ export default function () {
                 } else {
                     this.formError = json.message || 'Gagal mengajukan pinjaman';
                 }
-            } catch {
-                this.formError = 'Koneksi error';
+            } catch (e) {
+                this.formError = e.message || 'Koneksi error';
             }
             finally { this.submitting = false; }
         },
@@ -80,19 +80,18 @@ export default function () {
             if (!confirm('Batalkan pengajuan pinjaman ini?')) return;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/loans/${id}`, {
+                const json = await apiFetch(`/api/v1/loans/${id}`, {
                     method: 'DELETE',
-                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
+                    headers: { 'X-CSRF-TOKEN': token },
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Dibatalkan' });
                     this.fetchLoans();
                 } else {
                     Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
-            } catch {
-                Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });
+            } catch (e) {
+                Livewire.dispatch('toast', { variant: 'error', text: e.message || 'Koneksi error' });
             }
         },
 

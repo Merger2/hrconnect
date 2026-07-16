@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         payrolls: [],
@@ -15,8 +17,7 @@ export default function () {
         async fetchPayrolls() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/payroll?year=${this.year}&per_page=50`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/payroll?year=${this.year}&per_page=50`, { credentials: 'same-origin' });
                 if (json.status === 'success') {
                     this.payrolls = json.data;
                     this.calcSummary();

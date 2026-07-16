@@ -34,7 +34,7 @@
     },
     "overrides": {
         "node-fetch": "2.7.0",
-        "@tensorflow/tfjs-core": "2.4.0"
+        "@tensorflow/tfjs-core": "2.8.6"
     },
     "devDependencies": {
         "@playwright/test": "^1.61.1",

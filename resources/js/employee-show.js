@@ -19,8 +19,7 @@ export default function () {
 
         async fetchPii() {
             try {
-                const res = await fetch(`/api/v1/employees/${this.employee.id}/pii`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/employees/${this.employee.id}/pii`, { credentials: 'same-origin' });
                 this.pii = json.data || {};
             } catch {
                 this.pii = {};

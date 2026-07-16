@@ -59,7 +59,7 @@ new class extends Component {
         <form method="POST" wire:submit="deleteUser">
             <div class="px-6 pb-2">
                 <x-forms.label for="password" value="{{ __('Kata Sandi') }}" />
-                <x-forms.input wire:model="password" type="password" class="mt-1.5 w-full" />
+                <x-forms.input wire:model="password" type="password" class="mt-1.5 w-full" placeholder="••••••••" />
                 <x-forms.error name="password" />
             </div>
             <div class="flex items-center justify-end gap-3 border-t border-outline-variant/50 bg-surface-dim/30 px-6 py-4">

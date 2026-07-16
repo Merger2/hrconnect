@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\PgVector;
 use App\Enums\BloodType;
 use App\Enums\EducationLevel;
 use App\Enums\EmployeeStatus;
@@ -42,7 +41,7 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
     'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'phk_variant', 'photo',
     'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
 ])]
-#[Hidden(['face_embedding', 'pin', 'nik', 'phone', 'npwp', 'bank_account_number'])]
+#[Hidden(['pin', 'nik', 'phone', 'npwp', 'bank_account_number'])]
 class Employee extends Model implements CipherSweetEncrypted
 {
     use HasFactory, HasNeighbors, SoftDeletes, UsesCipherSweet;
@@ -71,7 +70,7 @@ class Employee extends Model implements CipherSweetEncrypted
             'termination_type' => TerminationType::class,
             'graduation_year' => 'integer',
             'pin' => 'hashed',
-            'face_embedding' => PgVector::class,
+
         ];
     }
 

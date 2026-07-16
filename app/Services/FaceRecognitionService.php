@@ -1,128 +1,108 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
-use App\Exceptions\BusinessRuleException;
-use App\Exceptions\FaceNotRecognizedException;
-use App\Exceptions\FaceNotRegisteredException;
-use App\Models\CompanySetting;
-use App\Models\Employee;
 use App\Models\FaceDescriptor;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Log;
-use Pgvector\Laravel\Distance;
-use Pgvector\Laravel\Vector;
+use App\Models\Employee;
 
 class FaceRecognitionService
 {
-    const EMBEDDING_DIMENSION = 128;
-
-    private function getFaceDistanceThreshold(): float
-    {
-        try {
-            $value = CompanySetting::get('face_distance_threshold');
-
-            return $value !== null ? (float) $value : (float) config('hrconnect.face_distance_threshold', 0.15);
-        } catch (QueryException $e) {
-            Log::warning('CompanySetting table not available, using config default', ['error' => $e->getMessage()]);
-
-            return (float) config('hrconnect.face_distance_threshold', 0.15);
-        }
-    }
-
     public function getEmbeddingDimension(): int
     {
-        return self::EMBEDDING_DIMENSION;
+        return 68;
     }
 
     public function verifyFace(Employee $employee, array $embedding): array
     {
-        $maxDistance = (float) ($this->getFaceDistanceThreshold());
+        $descriptors = FaceDescriptor::where('employee_id', $employee->id)
+            ->where('is_active', true)
+            ->get();
 
-        if (count($embedding) !== self::EMBEDDING_DIMENSION) {
-            throw new BusinessRuleException('Vector embedding harus 128D.');
-        }
-
-        $hasNonNumeric = collect($embedding)->contains(fn ($v) => ! is_numeric($v));
-        if ($hasNonNumeric) {
-            throw new BusinessRuleException('Vector embedding tidak valid: semua nilai harus numerik.');
-        }
-
-        if (! $this->hasFaceEnrolled($employee)) {
-            throw new FaceNotRegisteredException(
-                'Wajah karyawan ini belum terdaftar. Silakan hubungi HRD untuk registrasi wajah.'
-            );
-        }
-
-        $employee->load('user');
-        $vector = new Vector($embedding);
-
-        try {
-            if ($this->hasFaceEnrolledViaDescriptors($employee)) {
-                $result = FaceDescriptor::where('employee_id', $employee->id)
-                    ->where('is_active', true)
-                    ->nearestNeighbors('embedding', $vector, Distance::Cosine)
-                    ->first();
-            } else {
-                $result = Employee::where('id', $employee->id)
-                    ->nearestNeighbors('face_embedding', $vector, Distance::Cosine)
-                    ->first();
-            }
-        } catch (QueryException $e) {
-            Log::error('Face recognition vector query failed', [
+        if ($descriptors->isEmpty()) {
+            return [
                 'employee_id' => $employee->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw new BusinessRuleException('Layanan face recognition sedang tidak tersedia. Gunakan PIN sebagai fallback.');
+                'valid' => false,
+                'similarity_percentage' => 0,
+                'is_match' => false,
+                'match_score' => 0,
+                'threshold' => 0.4,
+                'matching_descriptors' => collect(),
+            ];
         }
 
-        if (! $result) {
-            throw new FaceNotRecognizedException('Wajah tidak dikenali. Silakan coba lagi dengan pencahayaan yang cukup.');
+        $scores = [];
+        foreach ($descriptors as $descriptor) {
+            $score = $this->calculateSimilarity($embedding, $descriptor->embedding);
+            $scores[] = $score;
         }
 
-        $distance = $result->neighbor_distance;
+        // Majority voting: at least 3 of 5 descriptors must match
+        $threshold = 0.4;
+        $matchCount = collect($scores)->filter(fn($s) => $s >= $threshold)->count();
+        $isMatch = $matchCount >= 3;
 
-        if ($distance > $maxDistance) {
-            $similarityPercentage = (1 - $distance) * 100;
-            $formattedSim = number_format($similarityPercentage, 2);
-            throw new FaceNotRecognizedException("Wajah tidak dikenali! Kemiripan hanya {$formattedSim}%. Pastikan pencahayaan terang dan tidak memakai masker.");
-        }
+        $avgScore = collect($scores)->avg();
 
         return [
-            'valid' => true,
-            'similarity_percentage' => (1 - $distance) * 100,
+            'employee_id' => $employee->id,
+            'valid' => $isMatch,
+            'is_match' => $isMatch,
+            'similarity_percentage' => round($avgScore * 100, 2),
+            'match_score' => $avgScore,
+            'match_count' => $matchCount,
+            'threshold' => $threshold,
+            'matching_descriptors' => $descriptors->filter(
+                fn($d) => $this->calculateSimilarity($embedding, $d->embedding) >= $threshold
+            ),
         ];
-    }
-
-    private function hasFaceEnrolledViaDescriptors(Employee $employee): bool
-    {
-        try {
-            return FaceDescriptor::where('employee_id', $employee->id)
-                ->where('is_active', true)
-                ->exists();
-        } catch (QueryException) {
-            return false;
-        }
     }
 
     public function hasFaceEnrolled(Employee $employee): bool
     {
-        try {
-            $hasDescriptors = FaceDescriptor::where('employee_id', $employee->id)
-                ->where('is_active', true)
-                ->exists();
+        return FaceDescriptor::where('employee_id', $employee->id)
+            ->where('is_active', true)
+            ->exists();
+    }
 
-            if ($hasDescriptors) {
-                return true;
-            }
-        } catch (QueryException) {
-            // Fallback: check employee's legacy face_embedding column
+    /**
+     * Calculate cosine similarity between two embeddings
+     */
+    public function calculateSimilarity(array $embedding1, array $embedding2): float
+    {
+        $dotProduct = 0;
+        $norm1 = 0;
+        $norm2 = 0;
+
+        foreach ($embedding1 as $i => $value1) {
+            $norm1 += $value1 * $value1;
+            $norm2 += $embedding2[$i] * $embedding2[$i];
+            $dotProduct += $value1 * $embedding2[$i];
         }
 
-        return ! empty($employee->getRawOriginal('face_embedding'))
-            || ! empty($employee->face_embedding);
+        if ($norm1 === 0 || $norm2 === 0) {
+            return 0;
+        }
+
+        return $dotProduct / (sqrt($norm1) * sqrt($norm2));
+    }
+
+    /**
+     * Save face descriptor for an employee.
+     *
+     * @param Employee $employee The employee to save the descriptor for.
+     * @param array $descriptor A 128D or 129D array of face descriptor values.
+     */
+    public function saveFaceDescriptor(Employee $employee, array $descriptor): void
+    {
+        FaceDescriptor::updateOrCreate(
+            ['employee_id' => $employee->id],
+            [
+                'embedding' => $descriptor,
+                'is_active' => true,
+                'metadata' => ['source' => 'web'],
+            ]
+        );
+        // employees.face_embedding was dropped — see migration 2026_07_16_000100
+        // Do not write to non-existent column
     }
 }

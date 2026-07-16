@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         form: {
@@ -66,18 +68,18 @@ export default function () {
 
         async fetchLookups() {
             try {
-                const [cRes, bRes, dRes, pRes, mRes] = await Promise.all([
-                    fetch('/api/v1/companies?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/branches?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/departments?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/positions?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
-                    fetch('/api/v1/employees?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' }),
+                const [companies, branches, departments, positions, managers] = await Promise.all([
+                    apiFetch('/api/v1/companies?per_page=100', { credentials: 'same-origin' }),
+                    apiFetch('/api/v1/branches?per_page=100', { credentials: 'same-origin' }),
+                    apiFetch('/api/v1/departments?per_page=100', { credentials: 'same-origin' }),
+                    apiFetch('/api/v1/positions?per_page=100', { credentials: 'same-origin' }),
+                    apiFetch('/api/v1/employees?per_page=100', { credentials: 'same-origin' }),
                 ]);
-                this.companies = (await cRes.json()).data || [];
-                this.branches = (await bRes.json()).data || [];
-                this.departments = (await dRes.json()).data || [];
-                this.positions = (await pRes.json()).data || [];
-                this.managers = (await mRes.json()).data || [];
+                this.companies = companies.data || [];
+                this.branches = branches.data || [];
+                this.departments = departments.data || [];
+                this.positions = positions.data || [];
+                this.managers = managers.data || [];
             } catch (e) {
                 console.error('Gagal memuat data referensi', e);
             }
@@ -91,26 +93,25 @@ export default function () {
                 const url = isEdit ? `/api/v1/employees/${this.editing.id}` : '/api/v1/employees';
                 const method = isEdit ? 'PUT' : 'POST';
 
-                const res = await fetch(url, {
+                const json = await apiFetch(url, {
                     method,
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(this.form),
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    this.formError = err.message || Object.values(err.errors || {}).flat().join(', ');
+                if (json.status === 'success' || json.data) {
+                    this.$dispatch('close-modal', 'create-employee');
+                    this.resetForm();
+                    this.editing = null;
+                    if (window.employeesIndexInstance) {
+                        window.employeesIndexInstance.fetchEmployees();
+                    }
                     return;
                 }
 
-                this.$dispatch('close-modal', 'create-employee');
-                this.resetForm();
-                this.editing = null;
-                if (window.employeesIndexInstance) {
-                    window.employeesIndexInstance.fetchEmployees();
-                }
+                this.formError = json.message || 'Terjadi kesalahan';
             } catch (e) {
-                this.formError = 'Terjadi kesalahan';
+                this.formError = e.message || 'Terjadi kesalahan';
             } finally {
                 this.formLoading = false;
             }

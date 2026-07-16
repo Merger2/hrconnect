@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         if (! app()->isProduction()) {
             $this->call(DemoDataSeeder::class);
             $this->call(E2eTestSeeder::class);
+            $this->call(AttendanceSeeder::class);
 
             User::where('email', 'test@example.com')->firstOrCreate([
                 'name' => 'Test User',

@@ -17,7 +17,7 @@
         <div class="flex items-center gap-2">
             <span class="relative flex h-1.5 w-1.5">
                 <span x-show="isStreaming" class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60"></span>
-                <span :class="isStreaming ? 'bg-success' : 'bg-white/20'" class="relative inline-flex h-1.5 w-1.5 rounded-full"></span>
+                :class="isStreaming ? 'bg-success' : 'bg-white/20'" class="relative inline-flex h-1.5 w-1.5 rounded-full"></span>
             </span>
             <span x-text="isStreaming ? 'Menulis...' : 'Online'" class="text-[11px] font-medium" :class="isStreaming ? 'text-success' : 'text-white/40'"></span>
         </div>
@@ -93,7 +93,7 @@
                     rows="1"
                     x-on:input="$el.style.height = 'auto'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px'"
                     placeholder="Tanya tentang kebijakan HR, cuti, BPJS, payroll..."
-                    class="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
+                    class="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
                 ></textarea>
             </div>
             <button

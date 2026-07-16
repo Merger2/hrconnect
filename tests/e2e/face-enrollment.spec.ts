@@ -29,7 +29,8 @@ test.describe('Face Enrollment Flow', () => {
     await page.waitForTimeout(2500);
     const guideOrTitle = page.locator('h2, [role="status"]').first();
     await expect(guideOrTitle).toBeVisible({ timeout: 8000 });
-    await expect(page.locator('text=Daftarkan wajah')).toBeVisible();
+    // Use more specific selector to avoid strict mode violation (two elements contain "Daftarkan wajah")
+    await expect(page.locator('text=Daftarkan wajah Anda untuk verifikasi absensi')).toBeVisible();
   });
 
   test('face enrollment shows camera or enrolled state', async ({ page }) => {
@@ -54,5 +55,32 @@ test.describe('Face Enrollment Flow', () => {
     await page.waitForTimeout(2000);
     const bodyText = await page.locator('body').textContent();
     expect(bodyText.length).toBeGreaterThan(50);
+  });
+
+  test('re-enroll (Perbarui Face ID) starts camera without "video element is not ready"', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(msg.text());
+    });
+    page.on('pageerror', (err) => errors.push(err.message));
+
+    await page.goto('/attendance/face-registration');
+    await page.waitForTimeout(3000);
+
+    const hasEnrolled = await page.locator('text=Face ID Aktif').isVisible({ timeout: 3000 }).catch(() => false);
+    test.skip(!hasEnrolled, 'Seed user is not enrolled yet — nothing to re-enroll.');
+
+    await expect(page.locator('text=Perbarui Face ID')).toBeVisible();
+    await page.locator('text=Perbarui Face ID').click();
+
+    // Capture template (with <video>) must render and camera must attach.
+    await expect(page.locator('video')).toBeAttached({ timeout: 8000 });
+    // Give the camera boot + first detection tick a moment.
+    await page.waitForTimeout(2500);
+
+    const fatal = errors.filter((e) =>
+      /video element is not ready|TypeError/i.test(e)
+    );
+    expect(fatal, `Console errors: ${JSON.stringify(errors)}`).toHaveLength(0);
   });
 });

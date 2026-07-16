@@ -8,9 +8,8 @@
     <div x-data="clockIn({ hasFaceEnrolled: {{ $hasFace ? 'true' : 'false' }} })" class="mx-auto flex max-w-[480px] flex-col gap-5 md:max-w-3xl md:gap-6">
 
         {{-- CAMERA SECTION (only when face enrolled) --}}
-        <template x-if="!pinRequired">
-            {{-- Camera View --}}
-            <section class="relative overflow-hidden rounded-2xl border border-outline-variant bg-canvas" aria-label="{{ __('Kamera Absensi') }}">
+        <section x-show="!pinRequired" x-transition
+            class="relative overflow-hidden rounded-2xl border border-outline-variant bg-canvas" aria-label="{{ __('Kamera Absensi') }}">
                 <video x-ref="video" autoplay playsinline muted class="block w-full" style="aspect-ratio: 4/3;"></video>
                 <canvas x-ref="overlay" class="absolute inset-0 h-full w-full"></canvas>
 
@@ -24,21 +23,20 @@
                 </div>
             </section>
 
-            {{-- Status pill + hint --}}
-            <div class="flex flex-col items-center gap-2">
+        {{-- Status pill + hint --}}
+        <div x-show="!pinRequired" class="flex flex-col items-center gap-2">
                 <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium" role="status" aria-live="polite"
-                    :class="{
-                        'bg-success/10 text-success': status === 'ready-to-capture',
-                        'bg-warning/10 text-warning ring-1 ring-warning/30': ['turn-face', 'arming-liveness', 'recenter-face', 'blink', 'align-face'].includes(status),
-                        'bg-error/10 text-error': status === 'error',
-                        'bg-surface-container-low text-on-surface-variant': !['ready-to-capture', 'turn-face', 'arming-liveness', 'recenter-face', 'blink', 'align-face', 'error'].includes(status)
-                    }">
+                     :class="{
+                         'bg-success/10 text-success': status === 'ready-to-capture',
+                         'bg-warning/10 text-warning ring-1 ring-warning/30': ['turn-face', 'arming-liveness', 'recenter-face', 'blink', 'align-face'].includes(status),
+                         'bg-error/10 text-error': status === 'error',
+                         'bg-surface-container-low text-on-surface-variant': !['ready-to-capture', 'turn-face', 'arming-liveness', 'recenter-face', 'blink', 'align-face', 'error'].includes(status)
+                     }">
                     <span x-show="showSpinner()" class="material-symbols-outlined animate-spin text-base">sync</span>
                     <span x-text="statusMessage"></span>
                 </div>
                 <p class="text-xs text-on-surface-variant" x-text="hintMessage"></p>
             </div>
-        </template>
 
         {{-- PIN MODE (when face not enrolled) --}}
         <template x-if="pinRequired">
@@ -64,7 +62,8 @@
                                    x-model="pinDigits[i - 1]"
                                    @input="handlePinInput($event, i)"
                                    @keydown.backspace="if (!pinDigits[i - 1] && i > 1) $refs.pinInputs.children[i - 2].focus()"
-                                   :aria-label="'{{ __('Digit PIN') }} ' + i" />
+                                   :aria-label="'{{ __('Digit PIN') }} ' + i"
+                                   placeholder="•" />
                         </template>
                     </div>
 
@@ -107,7 +106,7 @@
                 </div>
                 <div class="flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1 text-xs font-semibold uppercase">
                     <div class="size-2 rounded-full"
-                        :class="geoStatus !== '@js(__(\"Tidak Ada\"))' && geoStatus !== '@js(__(\"Mendeteksi...\"))' ? 'animate-pulse bg-success' : 'bg-on-surface-variant/30'"></div>
+                        :class="geoStatus !== 'Tidak Ada' && geoStatus !== 'Mendeteksi...' ? 'animate-pulse bg-success' : 'bg-on-surface-variant/30'"></div>
                     <span x-text="geoStatus" class="text-on-surface-variant"></span>
                 </div>
             </div>

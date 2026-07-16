@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         importFile: null,
@@ -24,24 +26,22 @@ export default function () {
                 const formData = new FormData();
                 formData.append('file', this.importFile);
 
-                const res = await fetch('/api/v1/employees/import', {
+                const json = await apiFetch('/api/v1/employees/import', {
                     method: 'POST',
-                    headers: { ...window.apiHeaders() },
                     body: formData,
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    this.importError = err.message || 'Gagal import';
+                if (json.status === 'success' || json.data) {
+                    this.$dispatch('close-modal', 'import-employees');
+                    this.importFile = null;
+                    if (window.employeesIndexInstance) {
+                        window.employeesIndexInstance.fetchEmployees();
+                    }
                     return;
                 }
 
-                this.$dispatch('close-modal', 'import-employees');
-                this.importFile = null;
-                if (window.employeesIndexInstance) {
-                    window.employeesIndexInstance.fetchEmployees();
-                }
-            } catch (e) {
+                this.importError = json.message || 'Gagal import';
+            } catch {
                 this.importError = 'Terjadi kesalahan';
             } finally {
                 this.importLoading = false;

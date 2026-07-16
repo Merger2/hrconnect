@@ -12,14 +12,14 @@
     @vite(['resources/css/app.css'])
     <style>
         .landing-theme {
-            --color-canvas: #fffaf0;
-            --color-surface-soft: #faf5e8;
-            --color-surface-card: #f5f0e0;
-            --color-surface-strong: #ebe6d6;
-            --color-muted: #6a6a6a;
-            --color-muted-soft: #9a9a9a;
-            --color-hairline: #e5e5e5;
-            --color-hairline-soft: #f0f0f0;
+            --color-canvas: var(--md-sys-color-surface, #fffaf0);
+            --color-surface-soft: var(--md-sys-color-surface-variant, #faf5e8);
+            --color-surface-card: var(--md-sys-color-surface-container-low, #f5f0e0);
+            --color-surface-strong: var(--md-sys-color-surface-container, #ebe6d6);
+            --color-muted: var(--md-sys-color-on-surface-variant, #6a6a6a);
+            --color-muted-soft: var(--md-sys-color-outline, #9a9a9a);
+            --color-hairline: var(--md-sys-color-outline-variant, #e5e5e5);
+            --color-hairline-soft: var(--md-sys-color-surface-container-highest, #f0f0f0);
         }
     </style>
 </head>

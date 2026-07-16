@@ -46,6 +46,7 @@
                     <div class="xl:col-span-2">
                         <x-forms.select name="type" x-model="typeFilter" @change="fetchApprovals()"
                             :options="['' => __('All Types'), 'leave' => __('Leave'), 'overtime' => __('Overtime'), 'reimbursement' => __('Reimbursement')]"
+                            placeholder="Pilih..."
                             x-bind:disabled="role === 'finance'" />
                     </div>
                 </div>

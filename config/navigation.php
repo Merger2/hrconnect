@@ -4,14 +4,14 @@ return [
     'groups' => [
         [
             'title' => 'Utama',
-            'roles' => ['super-admin', 'hr-manager', 'finance', 'manager', 'employee'],
+            'roles' => ['super-admin', 'hr', 'manager', 'employee'],
             'items' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'home', 'can' => 'view_dashboard'],
             ],
         ],
         [
             'title' => 'SDM',
-            'roles' => ['super-admin', 'hr-manager', 'manager', 'employee'],
+            'roles' => ['super-admin', 'hr', 'manager', 'employee'],
             'items' => [
                 [
                     'label' => 'Direktori Karyawan',
@@ -29,7 +29,7 @@ return [
         ],
         [
             'title' => 'Keuangan',
-            'roles' => ['super-admin', 'hr-manager', 'finance', 'employee'],
+            'roles' => ['super-admin', 'hr', 'employee'],
             'items' => [
                 ['label' => 'Pinjaman', 'route' => 'loans.index', 'icon' => 'account_balance', 'can' => 'view_loans'],
                 ['label' => 'Aset', 'route' => 'assets.index', 'icon' => 'inventory_2', 'can' => 'view_assets'],
@@ -38,7 +38,7 @@ return [
         ],
         [
             'title' => 'Admin',
-            'roles' => ['super-admin', 'hr-manager', 'finance'],
+            'roles' => ['super-admin', 'hr'],
             'items' => [
                 ['label' => 'Manajemen Penggajian', 'route' => 'admin.payroll.index', 'icon' => 'summarize', 'can' => 'view_payrolls'],
                 ['label' => 'Matriks Absensi', 'route' => 'admin.attendance.index', 'icon' => 'grid_view', 'can' => 'view_attendances'],
@@ -48,29 +48,22 @@ return [
             ],
         ],
         [
-            'title' => 'IT Support',
-            'roles' => ['super-admin', 'it-support'],
-            'items' => [
-                ['label' => 'Monitoring Dashboard', 'route' => 'monitoring', 'icon' => 'monitoring', 'can' => 'view_activity_logs'],
-            ],
-        ],
-        [
             'title' => 'Persetujuan',
-            'roles' => ['super-admin', 'hr-manager', 'manager', 'finance'],
+            'roles' => ['super-admin', 'hr', 'manager'],
             'items' => [
                 ['label' => 'Semua Persetujuan', 'route' => 'approvals.index', 'icon' => 'approval', 'can' => 'viewAny,App\\Models\\Approval'],
             ],
         ],
         [
             'title' => 'Lainnya',
-            'roles' => ['super-admin', 'hr-manager', 'employee'],
+            'roles' => ['super-admin', 'hr', 'employee'],
             'items' => [
                 ['label' => 'Basis Pengetahuan', 'route' => 'knowledge-base.index', 'icon' => 'menu_book', 'can' => 'view_knowledgebase'],
             ],
         ],
         [
             'title' => 'Master Data',
-            'roles' => ['super-admin', 'hr-manager'],
+            'roles' => ['super-admin', 'hr'],
             'items' => [
                 ['label' => 'Cabang', 'route' => 'master-data.branches', 'icon' => 'location_on', 'can' => 'view_branches'],
                 ['label' => 'Departemen', 'route' => 'master-data.departments', 'icon' => 'account_tree', 'can' => 'view_departments'],

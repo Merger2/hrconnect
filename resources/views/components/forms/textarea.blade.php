@@ -3,7 +3,7 @@
     'name' => '',
     'id' => '',
     'required' => false,
-    'placeholder' => '',
+    'placeholder' => 'Tulis di sini...',
     'rows' => 3,
 ])
 

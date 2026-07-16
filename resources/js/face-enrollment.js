@@ -122,10 +122,12 @@ export default function faceEnrollment() {
 
             try {
                 this.cleanup();
-                await this.loadPreviewModels();
+                await window.loadFaceModels();
+                await this.waitForRef('video');
                 await this.startCamera();
                 this.startDetection();
             } catch (error) {
+                console.error('[face-enrollment] init failed:', error);
                 await this.reportClientError('init', error);
                 this.failHard(messages.cameraError, error);
             }
@@ -214,7 +216,7 @@ export default function faceEnrollment() {
             }
             await Promise.all([
                 window.faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
-                window.faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
+                window.faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelUrl),
             ]);
         },
 

@@ -24,7 +24,7 @@
 <input type="{{ $type }}"
     id="{{ $id }}"
     name="{{ $name }}"
-    placeholder="{{ $placeholder }}"
+    placeholder="{{ $placeholder ?: 'Masukkan ' . strtolower($label) }}"
     @if ($required) required @endif
     {{ $attributes->merge(['class' => $classes]) }} />
 

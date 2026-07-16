@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         records: [],
@@ -24,14 +26,13 @@ export default function () {
         async fetchReimbursements() {
             this.loading = true;
             try {
-                const res = await fetch(`/api/v1/reimbursement?period=${this.period}&per_page=50`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/reimbursement?period=${this.period}&per_page=50`, { credentials: 'same-origin' });
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
                 }
-            } catch {
-                Livewire.dispatch('toast', { variant: 'error', text: 'Gagal memuat data klaim' });
+            } catch (error) {
+                Livewire.dispatch('toast', { variant: 'error', text: error.message || 'Gagal memuat data klaim' });
             }
             finally { this.loading = false; }
         },
@@ -47,19 +48,18 @@ export default function () {
             if (!confirm('Batalkan pengajuan reimbursement ini?')) return;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/reimbursement/${id}`, {
+                const json = await apiFetch(`/api/v1/reimbursement/${id}`, {
                     method: 'DELETE',
-                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
+                    headers: { 'X-CSRF-TOKEN': token },
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Dibatalkan' });
                     this.fetchReimbursements();
                 } else {
                     Livewire.dispatch('toast', { variant: 'error', text: json.message || 'Gagal' });
                 }
-            } catch {
-                Livewire.dispatch('toast', { variant: 'error', text: 'Koneksi error' });
+            } catch (error) {
+                Livewire.dispatch('toast', { variant: 'error', text: error.message || 'Koneksi error' });
             }
         },
 

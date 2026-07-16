@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         employees: [],
@@ -33,8 +35,7 @@ export default function () {
 
         async fetchDepartments() {
             try {
-                const res = await fetch('/api/v1/departments?per_page=100', { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch('/api/v1/departments?per_page=100', { credentials: 'same-origin' });
                 this.departments = json.data || [];
             } catch (e) {
                 console.error('Gagal memuat departemen', e);
@@ -51,8 +52,7 @@ export default function () {
                 if (this.filters.status) params.set('status', this.filters.status);
                 if (this.filters.department_id) params.set('department_id', this.filters.department_id);
 
-                const res = await fetch(`/api/v1/employees?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/employees?${params}`, { credentials: 'same-origin' });
                 this.employees = json.data || [];
                 this.total = json.meta?.total || 0;
                 this.lastPage = json.meta?.last_page || 1;
@@ -91,8 +91,7 @@ export default function () {
                 const params = new URLSearchParams();
                 if (this.filters.status) params.set('status', this.filters.status);
                 if (this.filters.department_id) params.set('department_id', this.filters.department_id);
-                const res = await fetch(`/api/v1/employees?per_page=100&${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/employees?per_page=100&${params}`, { credentials: 'same-origin' });
                 const data = json.data || [];
                 if (data.length === 0) return;
                 const headers = ['No. Karyawan', 'Nama Lengkap', 'Departemen', 'Jabatan', 'Status', 'Tanggal Masuk'];
@@ -130,27 +129,21 @@ export default function () {
             this.terminateError = '';
             this.terminateLoading = true;
             try {
-                const res = await fetch(`/api/v1/employees/${this.selectedEmployee.id}/terminate`, {
+                const json = await apiFetch(`/api/v1/employees/${this.selectedEmployee.id}/terminate`, {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: this.terminateForm.type,
-                        reason: this.terminateForm.reason,
-                        date: this.terminateForm.date,
-                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.terminateForm),
                 });
-
-                if (!res.ok) {
-                    const err = await res.json();
-                    this.terminateError = err.message || 'Gagal melakukan PHK';
-                    return;
+                
+                if (json.status === 'success') {
+                    this.terminateModalOpen = false;
+                    this.selectedEmployee = null;
+                    this.fetchEmployees();
+                } else {
+                    this.terminateError = json.message || 'Gagal melakukan terminasi';
                 }
-
-                this.terminateModalOpen = false;
-                this.selectedEmployee = null;
-                this.fetchEmployees();
             } catch (e) {
-                this.terminateError = 'Terjadi kesalahan';
+                this.terminateError = e.message || 'Terjadi kesalahan';
             } finally {
                 this.terminateLoading = false;
             }

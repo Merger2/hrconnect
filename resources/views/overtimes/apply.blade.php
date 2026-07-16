@@ -16,18 +16,18 @@
                 {{-- Date --}}
                 <div class="mb-5">
                     <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('Date') }}</label>
-                    <input type="date" x-model="form.date" :min="today()" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink" />
+                    <input type="date" x-model="form.date" :min="today()" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink" placeholder="{{ __('YYYY-MM-DD') }}" />
                 </div>
 
                 {{-- Time --}}
                 <div class="mb-5 grid grid-cols-2 gap-4">
                     <div>
                         <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('Start Time') }}</label>
-                        <input type="time" x-model="form.start_time" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink" />
+                        <input type="time" x-model="form.start_time" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink" placeholder="HH:MM" />
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-medium text-on-surface-variant">{{ __('End Time') }}</label>
-                        <input type="time" x-model="form.end_time" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink" />
+                        <input type="time" x-model="form.end_time" class="w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink" placeholder="HH:MM" />
                     </div>
                 </div>
 

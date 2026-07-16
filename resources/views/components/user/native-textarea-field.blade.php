@@ -6,6 +6,7 @@
     'icon' => 'edit_note',
     'modifier' => 'live',
     'rows' => 4,
+    'placeholder' => 'Tulis di sini...',
 ])
 
 <div class="space-y-1">
@@ -19,6 +20,7 @@
             id="{{ $id }}"
             rows="{{ $rows }}"
             aria-label="{{ $label }}"
+            placeholder="{{ $placeholder }}"
             @if ($modifier === 'defer') wire:model.defer="{{ $model }}"
             @elseif ($modifier === 'live') wire:model.live="{{ $model }}"
             @else wire:model="{{ $model }}" @endif

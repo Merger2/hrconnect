@@ -107,11 +107,14 @@ test('register face with GPS coordinates succeeds', function () {
 // ═══════════════════════════════════════════════════════════════════════
 
 test('verify face with valid embedding returns 200', function () {
-    $this->employee->forceFill([
-        'face_embedding' => '['.implode(',', validEmbedding()).']',
-    ])->save();
+    $this->employee->faceDescriptors()->create([
+        'embedding' => '['.implode(',', validEmbedding()).']',
+        'is_active' => true,
+    ]);
 
     $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('hasFaceEnrolled')
+        ->andReturn(true)
         ->shouldReceive('verifyFace')
         ->andReturn([
             'valid' => true,
@@ -142,6 +145,10 @@ test('verify face without prior registration returns 422', function () {
         'position_id' => $this->position->id,
     ]);
     $otherToken = $otherUser->createToken('test')->plainTextToken;
+
+    $this->mock(FaceRecognitionService::class)
+        ->shouldReceive('hasFaceEnrolled')
+        ->andReturn(false);
 
     $response = $this->withHeader('Authorization', "Bearer {$otherToken}")
         ->postJson('/api/v1/face/verify', [

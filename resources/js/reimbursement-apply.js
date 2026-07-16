@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         categories: [],
@@ -24,8 +26,7 @@ export default function () {
 
         async fetchCategories() {
             try {
-                const res = await fetch('/api/v1/reimbursement/categories', { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch('/api/v1/reimbursement/categories', { credentials: 'same-origin' });
                 if (json.status === 'success') this.categories = json.data;
             } catch {
                 this.error = 'Gagal memuat kategori';
@@ -50,6 +51,20 @@ export default function () {
             return true;
         },
 
+        validateStep(step) {
+            if (step === 0) {
+                if (!this.form.category_id) { this.error = 'Pilih kategori'; return false; }
+                if (!this.form.amount || this.form.amount < 1) { this.error = 'Masukkan jumlah yang valid'; return false; }
+                if (!this.form.expense_date) { this.error = 'Pilih tanggal'; return false; }
+            }
+            if (step === 1) {
+                if ((this.form.description || '').length < 10) { this.error = 'Deskripsi minimal 10 karakter'; return false; }
+                if (!this.form.receipt) { this.error = 'Upload bukti pembayaran'; return false; }
+            }
+            this.error = '';
+            return true;
+        },
+
         async submit() {
             if (!this.validate()) return;
             this.submitting = true;
@@ -63,20 +78,19 @@ export default function () {
                 if (this.form.receipt) fd.append('receipt', this.form.receipt);
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-                const res = await fetch('/api/v1/reimbursement', {
+                const json = await apiFetch('/api/v1/reimbursement', {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
+                    headers: { 'X-CSRF-TOKEN': token },
                     body: fd,
                 });
-                const json = await res.json();
-                if (res.ok && json.status === 'success') {
+                if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Klaim diajukan' });
                     window.location.href = '/reimbursements';
                 } else {
                     this.error = json.message || 'Gagal mengajukan klaim';
                 }
-            } catch {
-                this.error = 'Koneksi error';
+            } catch (error) {
+                this.error = error.message || 'Koneksi error';
             }
             finally { this.submitting = false; }
         },

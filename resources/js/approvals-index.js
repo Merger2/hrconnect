@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function (role = 'employee') {
     return {
         approvals: [],
@@ -52,8 +54,7 @@ export default function (role = 'employee') {
                     params.set('type', this.typeFilter);
                 }
                 const url = endpoint + '?' + params.toString();
-                const res = await fetch(url, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(url, { credentials: 'same-origin' });
                 if (json.status === 'success') {
                     this.approvals = json.data;
                     if (this.tab === 'pending' && nr !== 'employee') {
@@ -74,12 +75,11 @@ export default function (role = 'employee') {
             this.processing = id;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/approvals/${id}/approve`, {
+                const json = await apiFetch(`/api/v1/approvals/${id}/approve`, {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify({}),
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Disetujui' });
                     this.approvals = this.approvals.filter(a => a.approval_id !== id);
@@ -98,8 +98,7 @@ export default function (role = 'employee') {
             this.detailModalOpen = true;
             this.detailData = null;
             try {
-                const res = await fetch(`/api/v1/approvals/${id}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/approvals/${id}`, { credentials: 'same-origin' });
                 if (json.status === 'success') {
                     this.detailData = json.data;
                 } else {
@@ -127,12 +126,11 @@ export default function (role = 'employee') {
             this.processing = id;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/approvals/${id}/reject`, {
+                const json = await apiFetch(`/api/v1/approvals/${id}/reject`, {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify({ rejection_reason: this.rejectReason }),
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Ditolak' });
                     this.approvals = this.approvals.filter(a => a.approval_id !== id);

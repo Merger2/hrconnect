@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         form: {
@@ -36,25 +38,36 @@ export default function () {
             return true;
         },
 
+        validateStep(step) {
+            if (step === 0) {
+                if (!this.form.date) { this.error = 'Pilih tanggal'; return false; }
+                if (!this.form.start_time) { this.error = 'Pilih jam mulai'; return false; }
+                if (!this.form.end_time) { this.error = 'Pilih jam selesai'; return false; }
+                if (this.form.start_time === this.form.end_time) { this.error = 'Jam mulai dan selesai tidak boleh sama'; return false; }
+            }
+            if (step === 1 && this.form.description.length < 10) { this.error = 'Alasan minimal 10 karakter'; return false; }
+            this.error = '';
+            return true;
+        },
+
         async submit() {
             if (!this.validate()) return;
             this.submitting = true;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch('/api/v1/overtime', {
+                const json = await apiFetch('/api/v1/overtime', {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.form),
                 });
-                const json = await res.json();
-                if (res.ok && json.status === 'success') {
+                if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Lembur diajukan' });
                     window.location.href = '/overtimes';
                 } else {
                     this.error = json.message || 'Gagal mengajukan lembur';
                 }
-            } catch {
-                this.error = 'Koneksi error';
+            } catch (error) {
+                this.error = error.message || 'Koneksi error';
             }
             finally { this.submitting = false; }
         },

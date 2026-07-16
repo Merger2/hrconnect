@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         terminateForm: {
@@ -25,9 +27,9 @@ export default function () {
             this.terminateError = '';
             this.terminateLoading = true;
             try {
-                const res = await fetch(`/api/v1/employees/${this.selectedEmployee.id}`, {
+                const json = await apiFetch(`/api/v1/employees/${this.selectedEmployee.id}`, {
                     method: 'PUT',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         status: 'terminated',
                         termination_type: this.terminateForm.type,
@@ -36,19 +38,18 @@ export default function () {
                     }),
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    this.terminateError = err.message || 'Gagal melakukan PHK';
+                if (json.status === 'success') {
+                    this.$dispatch('close-modal', 'terminate-employee');
+                    this.selectedEmployee = null;
+                    if (window.employeesIndexInstance) {
+                        window.employeesIndexInstance.fetchEmployees();
+                    }
                     return;
                 }
 
-                this.$dispatch('close-modal', 'terminate-employee');
-                this.selectedEmployee = null;
-                if (window.employeesIndexInstance) {
-                    window.employeesIndexInstance.fetchEmployees();
-                }
+                this.terminateError = json.message || 'Gagal melakukan PHK';
             } catch (e) {
-                this.terminateError = 'Terjadi kesalahan';
+                this.terminateError = e.message || 'Terjadi kesalahan';
             } finally {
                 this.terminateLoading = false;
             }

@@ -4,7 +4,7 @@
     'id' => '',
     'required' => false,
     'options' => [],
-    'placeholder' => '',
+    'placeholder' => 'Pilih...',
 ])
 
 @php
@@ -24,9 +24,7 @@
     name="{{ $name }}"
     @if ($required) required @endif
     {{ $attributes->merge(['class' => $classes]) }}>
-    @if ($placeholder)
-        <option value="">{{ $placeholder }}</option>
-    @endif
+    <option value="">{{ $placeholder }}</option>
     @foreach ($options as $value => $text)
         <option value="{{ $value }}">{{ $text }}</option>
     @endforeach

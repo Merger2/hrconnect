@@ -56,7 +56,9 @@ class FaceController extends Controller
             ]
         );
 
-        $employee->forceFill(['face_embedding' => $vectorString])->save();
+        // TODO: Legacy face_embedding support removed. Face descriptors are now handled solely in FaceDescriptor model.
+        // Re-enable when necessary, but for now, rely on FaceDescriptor system.
+        // $employee->forceFill(['face_embedding' => $vectorString])->save();
 
         $response = [
             'status' => 'success',
@@ -91,6 +93,14 @@ class FaceController extends Controller
                 'status' => 'error',
                 'message' => 'Akun Anda belum terhubung dengan data karyawan.',
             ], 404);
+        }
+
+        // Check if face is enrolled first
+        if (! $this->faceService->hasFaceEnrolled($employee)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Face ID belum didaftarkan. Silakan daftarkan wajah terlebih dahulu.',
+            ], 422);
         }
 
         $result = $this->faceService->verifyFace($employee, $data['embedding']);

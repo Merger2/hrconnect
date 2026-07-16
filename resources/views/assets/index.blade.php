@@ -25,7 +25,7 @@
                 <div class="xl:col-span-3">
                     <label class="mb-1.5 block text-xs font-medium text-on-surface-variant">{{ __('Search') }}</label>
                     <input type="text" x-model="search" @input.debounce="fetchAssets()"
-                           placeholder="{{ __('Name or serial number...') }}"
+                           placeholder="{{ __('Cari nama atau nomor seri...') }}"
                            class="block w-full rounded-lg border border-outline-variant bg-canvas px-3 py-2 text-sm text-ink ring-1 ring-inset ring-outline-variant focus:ring-2 focus:ring-inset focus:ring-ink">
                 </div>
                 <div class="xl:col-span-2">
@@ -173,12 +173,12 @@
                     <h2 class="mb-4 text-lg font-semibold text-ink">{{ __('New Asset') }}</h2>
 
                     <div class="space-y-5">
-                        <x-forms.input name="name" label="{{ __('Name') }}" x-model="form.name" required />
-                        <x-forms.input name="serial_number" label="{{ __('Serial Number') }}" x-model="form.serial_number" required />
-                        <x-forms.input name="code" label="{{ __('Code') }}" x-model="form.code" />
+                        <x-forms.input name="name" label="{{ __('Name') }}" x-model="form.name" required placeholder="{{ __('Nama aset...') }}" />
+                        <x-forms.input name="serial_number" label="{{ __('Serial Number') }}" x-model="form.serial_number" required placeholder="{{ __('Nomor seri...') }}" />
+                        <x-forms.input name="code" label="{{ __('Code') }}" x-model="form.code" placeholder="{{ __('Kode aset (opsional)') }}" />
 
                         <x-forms.select name="category" x-model="form.category"
-                            :options="['' => __('Select...'), 'elektronik' => __('Electronics'), 'furniture' => __('Furniture'), 'kendaraan' => __('Vehicle'), 'peralatan' => __('Equipment')]" />
+                            :options="['' => __('Pilih kategori...'), 'elektronik' => __('Electronics'), 'furniture' => __('Furniture'), 'kendaraan' => __('Vehicle'), 'peralatan' => __('Equipment')]" placeholder="{{ __('Pilih kategori...') }}" />
                     </div>
 
                     <x-sections.section-border />

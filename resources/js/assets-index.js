@@ -1,3 +1,5 @@
+import { apiFetch } from './utils/api.js';
+
 export default function () {
     return {
         records: [],
@@ -42,8 +44,7 @@ export default function () {
                 if (this.statusFilter) params.set('status', this.statusFilter);
                 if (this.categoryFilter) params.set('category', this.categoryFilter);
                 if (this.search) params.set('search', this.search);
-                const res = await fetch(`/api/v1/assets?${params}`, { headers: window.apiHeaders(), credentials: 'same-origin' });
-                const json = await res.json();
+                const json = await apiFetch(`/api/v1/assets?${params}`, { credentials: 'same-origin' });
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
@@ -70,12 +71,11 @@ export default function () {
             this.formError = '';
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch('/api/v1/assets', {
+                const json = await apiFetch('/api/v1/assets', {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.form),
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Berhasil' });
                     this.showCreateModal = false;
@@ -98,12 +98,11 @@ export default function () {
             this.handoverError = '';
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/assets/${this.handoverAsset.id}/handover`, {
+                const json = await apiFetch(`/api/v1/assets/${this.handoverAsset.id}/handover`, {
                     method: 'POST',
-                    headers: { ...window.apiHeaders(), 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                     body: JSON.stringify(this.handoverForm),
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Berhasil' });
                     this.showHandoverModal = false;
@@ -121,11 +120,10 @@ export default function () {
             if (!confirm('Hapus aset ini?')) return;
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const res = await fetch(`/api/v1/assets/${id}`, {
+                const json = await apiFetch(`/api/v1/assets/${id}`, {
                     method: 'DELETE',
-                    headers: { ...window.apiHeaders(), 'X-CSRF-TOKEN': token },
+                    headers: { 'X-CSRF-TOKEN': token },
                 });
-                const json = await res.json();
                 if (json.status === 'success') {
                     Livewire.dispatch('toast', { variant: 'success', text: json.message || 'Berhasil' });
                     this.fetchAssets();

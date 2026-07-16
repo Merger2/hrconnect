@@ -83,6 +83,27 @@
     --color-outline: #c2c2c2;
     --color-outline-variant: #e8e8e8;
 
+    /* MD3 sys-color aliases (resolves var(--md-sys-color-*) used in Blade) */
+    --md-sys-color-background: var(--color-canvas);
+    --md-sys-color-surface: var(--color-canvas);
+    --md-sys-color-surface-container-low: var(--color-surface-container-low);
+    --md-sys-color-surface-container: var(--color-surface-container);
+    --md-sys-color-surface-container-high: var(--color-surface-container-high);
+    --md-sys-color-surface-container-highest: var(--color-surface-container-highest);
+    --md-sys-color-on-surface: var(--color-on-background);
+    --md-sys-color-on-surface-variant: var(--color-on-surface-variant);
+    --md-sys-color-on-background: var(--color-on-background);
+    --md-sys-color-primary: var(--color-primary);
+    --md-sys-color-primary-container: var(--color-primary-soft);
+    --md-sys-color-on-primary: var(--color-on-primary);
+    --md-sys-color-inverse-on-surface: var(--color-ink);
+    --md-sys-color-outline: var(--color-outline);
+    --md-sys-color-outline-variant: var(--color-outline-variant);
+    --md-sys-color-error: var(--color-error);
+    --md-sys-color-success: var(--color-success);
+    --md-sys-color-warning: var(--color-warning);
+    --md-sys-color-info: var(--color-info);
+
     /* Radius — HP two-tier (DESIGN.md full scale) */
     --radius-xs: 2px;
     --radius-sm: 3px;
