@@ -4,43 +4,36 @@ const MODEL_URL = '/models/av1';
 
 const requiredNets = [
     faceapi.nets.tinyFaceDetector,
-    faceapi.nets.faceLandmark68TinyNet,
+    faceapi.nets.faceLandmark68Net,
 ];
 
 let backendRegistered = false;
-let modelsLoadingPromise = null; // singleton guard
 
-export function loadFaceModels() {
-    // Return existing promise if loading already started/completed
-    if (modelsLoadingPromise) return modelsLoadingPromise;
-
-    modelsLoadingPromise = (async () => {
-        if (!backendRegistered) {
-            try {
-                await Promise.all([
-                    import('@tensorflow/tfjs-backend-cpu'),
-                    import('@tensorflow/tfjs-backend-webgl'),
-                ]);
-                backendRegistered = true;
-            } catch (e) {
-                console.warn('[face-recognition] tfjs backend registration failed:', e);
-            }
+export async function loadFaceModels() {
+    // Register tfjs backend (CPU fallback) before loading models
+    if (!backendRegistered) {
+        try {
+            await Promise.all([
+                import('@tensorflow/tfjs-backend-cpu'),
+                import('@tensorflow/tfjs-backend-webgl'),
+            ]);
+            // tfjs auto-registers CPU backend when imported
+            backendRegistered = true;
+        } catch (e) {
+            console.warn('[face-recognition] tfjs backend registration failed:', e);
         }
+    }
 
-        const loaded = await Promise.allSettled(
-            requiredNets.map(net => net.loadFromUri(MODEL_URL))
+    const loaded = await Promise.allSettled(
+        requiredNets.map(net => net.loadFromUri(MODEL_URL))
+    );
+    const failed = loaded.filter(r => r.status === 'rejected');
+    if (failed.length > 0) {
+        throw new Error(
+            'Gagal memuat model wajah: ' +
+            failed.map(r => r.reason?.message || 'unknown').join('; ')
         );
-        const failed = loaded.filter(r => r.status === 'rejected');
-        if (failed.length > 0) {
-            modelsLoadingPromise = null; // reset for retry
-            throw new Error(
-                'Gagal memuat model wajah: ' +
-                failed.map(r => r.reason?.message || 'unknown').join('; ')
-            );
-        }
-    })();
-
-    return modelsLoadingPromise;
+    }
 }
 
 export function computeEAR(landmarks) {

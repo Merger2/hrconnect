@@ -122,7 +122,7 @@ export default function faceEnrollment() {
 
             try {
                 this.cleanup();
-                await window.loadFaceModels();
+                await this.loadPreviewModels();
                 await this.waitForRef('video');
                 await this.startCamera();
                 this.startDetection();

@@ -8,30 +8,20 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Status') }}</label>
-                    <div class="relative">
-                        <select wire:model.live="statusFilter" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20 transition-colors hover:bg-surface-dim/10" placeholder="{{ __('Pilih...') }}">
-                            <option value="all">{{ __('Semua') }}</option>
-                            <option value="pending">{{ __('Menunggu') }}</option>
-                            <option value="approved">{{ __('Disetujui') }}</option>
-                            <option value="rejected">{{ __('Ditolak') }}</option>
-                            <option value="paid">{{ __('Dibayar') }}</option>
-                        </select>
-                        <span wire:loading wire:target="statusFilter" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                            <span class="loading-spinner"></span>
-                        </span>
-                    </div>
+                    <select wire:model.live="statusFilter" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20">
+                        <option value="all">{{ __('Semua') }}</option>
+                        <option value="pending">{{ __('Menunggu') }}</option>
+                        <option value="approved">{{ __('Disetujui') }}</option>
+                        <option value="rejected">{{ __('Ditolak') }}</option>
+                        <option value="paid">{{ __('Dibayar') }}</option>
+                    </select>
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Kategori') }}</label>
-                    <div class="relative">
-                        <select wire:model.live="categoryId" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20 transition-colors hover:bg-surface-dim/10" placeholder="{{ __('Pilih...') }}">
-                            <option value="">{{ __('Semua Kategori') }}</option>
-                            @foreach($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach
-                        </select>
-                        <span wire:loading wire:target="categoryId" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                            <span class="loading-spinner"></span>
-                        </span>
-                    </div>
+                    <select wire:model.live="categoryId" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 px-3 text-sm text-ink outline-none focus:border-ink focus:ring-1 focus:ring-ink/20">
+                        <option value="">{{ __('Semua Kategori') }}</option>
+                        @foreach($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach
+                    </select>
                 </div>
             </div>
         </x-slot>

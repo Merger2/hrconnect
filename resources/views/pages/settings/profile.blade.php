@@ -358,7 +358,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
 <div
     x-data="{
         activeTab: '{{ $activeTab }}',
-        tabs: ['details', 'password', 'security', 'sessions', 'activity', 'notifications', 'danger-zone'],
+        tabs: ['details', 'password', 'security', 'sessions', 'activity', 'notifications'],
         init() {
             const hash = window.location.hash.slice(1);
             if (this.tabs.includes(hash)) this.activeTab = hash;
@@ -374,49 +374,43 @@ new #[Title('Pengaturan Profil')] class extends Component {
 
     <div class="flex items-start gap-8 max-md:flex-col">
         {{-- Sidebar --}}
-        <aside class="w-full shrink-0 overflow-x-auto pb-2 no-scrollbar md:w-48 md:overflow-visible md:pb-0">
-            <nav class="flex min-w-max gap-1 md:flex-col" role="tablist" aria-label="{{ __('Navigasi Pengaturan') }}">
+        <aside class="w-full shrink-0 md:w-48">
+            <nav class="flex flex-wrap gap-1 md:flex-col" role="tablist" aria-label="{{ __('Navigasi Pengaturan') }}">
                 <button @click="setTab('details')" :class="activeTab === 'details' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
                     role="tab" :aria-selected="activeTab === 'details'">
                     <span class="material-symbols-outlined text-lg">person</span>
                     <span>{{ __('Detail') }}</span>
                 </button>
                 <button @click="setTab('password')" :class="activeTab === 'password' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
                     role="tab" :aria-selected="activeTab === 'password'">
                     <span class="material-symbols-outlined text-lg">lock</span>
                     <span>{{ __('Kata Sandi') }}</span>
                 </button>
                 <button @click="setTab('security')" :class="activeTab === 'security' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
                     role="tab" :aria-selected="activeTab === 'security'">
                     <span class="material-symbols-outlined text-lg">security</span>
                     <span>{{ __('2FA') }}</span>
                 </button>
                 <button @click="setTab('sessions')" :class="activeTab === 'sessions' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
                     role="tab" :aria-selected="activeTab === 'sessions'">
                     <span class="material-symbols-outlined text-lg">devices</span>
                     <span>{{ __('Perangkat') }}</span>
                 </button>
                 <button @click="setTab('activity')" :class="activeTab === 'activity' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
                     role="tab" :aria-selected="activeTab === 'activity'">
                     <span class="material-symbols-outlined text-lg">history</span>
                     <span>{{ __('Aktivitas') }}</span>
                 </button>
                 <button @click="setTab('notifications')" :class="activeTab === 'notifications' ? 'bg-primary/10 text-primary font-semibold' : 'text-on-surface-variant hover:text-ink hover:bg-surface-container-low'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors"
                     role="tab" :aria-selected="activeTab === 'notifications'">
                     <span class="material-symbols-outlined text-lg">notifications</span>
                     <span>{{ __('Notifikasi') }}</span>
-                </button>
-                <button @click="setTab('danger-zone')" :class="activeTab === 'danger-zone' ? 'bg-error/10 text-error font-semibold' : 'text-on-surface-variant hover:text-error hover:bg-error/5'"
-                    class="flex items-center gap-2 rounded-xl px-4 py-2 text-left text-sm transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
-                    role="tab" :aria-selected="activeTab === 'danger-zone'">
-                    <span class="material-symbols-outlined text-lg">warning</span>
-                    <span>{{ __('Zona Bahaya') }}</span>
                 </button>
             </nav>
         </aside>
@@ -424,15 +418,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
         {{-- Content --}}
         <div class="min-w-0 flex-1">
             {{-- DETAILS TAB --}}
-            <section
-                x-show="activeTab === 'details'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
+            <section x-show="activeTab === 'details'" x-cloak x-transition.opacity.duration.150ms>
                 {{-- Profile Header Card --}}
                 <div class="mb-6 ess-card">
                     <div class="p-6">
@@ -475,15 +461,15 @@ new #[Title('Pengaturan Profil')] class extends Component {
                         <h3 class="ess-eyebrow">{{ __('Informasi Profil') }}</h3>
                     </div>
                     <form wire:submit="updateProfileInformation" class="space-y-5 p-6">
-                    <x-forms.input wire:model="name" type="text" required autofocus autocomplete="name" placeholder="{{ __('Masukkan nama lengkap Anda') }}" class="mt-1.5 w-full" />
+                        <div>
+                            <x-forms.label for="name" value="{{ __('Nama') }}" />
+                            <x-forms.input wire:model="name" type="text" required autofocus autocomplete="name" class="mt-1.5 w-full" />
                             <x-forms.error name="name" />
-                            <p class="mt-1 text-xs text-on-surface-variant">{{ __('Nama yang akan ditampilkan di profil dan dokumen resmi.') }}</p>
                         </div>
                         <div>
                             <x-forms.label for="email" value="{{ __('Surel') }}" />
-                            <x-forms.input wire:model="email" type="email" required autocomplete="email" placeholder="{{ __('contoh@domain.com') }}" class="mt-1.5 w-full" />
+                            <x-forms.input wire:model="email" type="email" required autocomplete="email" class="mt-1.5 w-full" />
                             <x-forms.error name="email" />
-                            <p class="mt-1 text-xs text-on-surface-variant">{{ __('Email untuk login dan notifikasi sistem.') }}</p>
                             @if ($this->hasUnverifiedEmail)
                                 <div class="mt-4 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3">
                                     <p class="text-sm text-warning">
@@ -497,9 +483,8 @@ new #[Title('Pengaturan Profil')] class extends Component {
                         </div>
                         <div>
                             <x-forms.label for="phone" value="{{ __('No. Telepon') }}" />
-                            <x-forms.input wire:model="phone" type="text" placeholder="{{ __('08xxxxxxxxxx') }}" class="mt-1.5 w-full" />
+                            <x-forms.input wire:model="phone" type="text" class="mt-1.5 w-full" />
                             <x-forms.error name="phone" />
-                            <p class="mt-1 text-xs text-on-surface-variant">{{ __('Nomor telepon aktif untuk keperluan darurat dan verifikasi.') }}</p>
                         </div>
 
                         {{-- Regional Cascade --}}
@@ -507,93 +492,53 @@ new #[Title('Pengaturan Profil')] class extends Component {
                             <div>
                                 <x-forms.label for="province_id" value="{{ __('Provinsi') }}" />
                                 <select wire:model.live="province_id"
-                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
-                                    x-data="{ loading: false }"
-                                    @change.window="() => { $wire.loading = true; $dispatch('province-changed') }"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-wait"
-                                    wire:target="province_id">
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
                                     <option value="">{{ __('Pilih Provinsi') }}</option>
                                     @foreach ($this->provinces as $prov)
                                         <option value="{{ $prov->id }}">{{ $prov->name }}</option>
                                     @endforeach
                                 </select>
-                                @if (!$this->provinces->count())
-                                    <p class="mt-1 text-xs text-error">{{ __('Data provinsi tidak tersedia.') }}</p>
-                                @endif
                             </div>
                             <div>
                                 <x-forms.label for="city_id" value="{{ __('Kabupaten/Kota') }}" />
                                 <select wire:model.live="city_id"
-                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
-                                    :disabled="!$this->province_id"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-wait"
-                                    wire:target="city_id">
-                                    <option value="">{{ $this->province_id ? __('Pilih Kabupaten/Kota') : __('Pilih provinsi terlebih dahulu') }}</option>
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
+                                    <option value="">{{ __('Pilih Kabupaten/Kota') }}</option>
                                     @foreach ($this->cities as $city)
                                         <option value="{{ $city->id }}">{{ $city->name }}</option>
                                     @endforeach
                                 </select>
-                                @if ($this->province_id && !$this->cities->count())
-                                    <p class="mt-1 text-xs text-warning">{{ __('Tidak ada kabupaten/kota untuk provinsi ini.') }}</p>
-                                @endif
-                                @if (!$this->province_id)
-                                    <p class="mt-1 text-xs text-on-surface-variant">{{ __('Pilih provinsi untuk melihat daftar kabupaten/kota.') }}</p>
-                                @endif
                             </div>
                             <div>
                                 <x-forms.label for="district_id" value="{{ __('Kecamatan') }}" />
                                 <select wire:model.live="district_id"
-                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
-                                    :disabled="!$this->city_id"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-wait"
-                                    wire:target="district_id">
-                                    <option value="">{{ $this->city_id ? __('Pilih Kecamatan') : __('Pilih kabupaten/kota terlebih dahulu') }}</option>
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
+                                    <option value="">{{ __('Pilih Kecamatan') }}</option>
                                     @foreach ($this->districts as $district)
                                         <option value="{{ $district->id }}">{{ $district->name }}</option>
                                     @endforeach
                                 </select>
-                                @if ($this->city_id && !$this->districts->count())
-                                    <p class="mt-1 text-xs text-warning">{{ __('Tidak ada kecamatan untuk kabupaten/kota ini.') }}</p>
-                                @endif
-                                @if (!$this->city_id)
-                                    <p class="mt-1 text-xs text-on-surface-variant">{{ __('Pilih kabupaten/kota untuk melihat daftar kecamatan.') }}</p>
-                                @endif
                             </div>
                             <div>
                                 <x-forms.label for="village_id" value="{{ __('Kelurahan/Desa') }}" />
                                 <select wire:model.live="village_id"
-                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"
-                                    :disabled="!$this->district_id"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-wait"
-                                    wire:target="village_id">
-                                    <option value="">{{ $this->district_id ? __('Pilih Kelurahan/Desa') : __('Pilih kecamatan terlebih dahulu') }}</option>
+                                    class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary">
+                                    <option value="">{{ __('Pilih Kelurahan/Desa') }}</option>
                                     @foreach ($this->villages as $village)
                                         <option value="{{ $village->id }}">{{ $village->name }}</option>
                                     @endforeach
                                 </select>
-                                @if ($this->district_id && !$this->villages->count())
-                                    <p class="mt-1 text-xs text-warning">{{ __('Tidak ada kelurahan/desa untuk kecamatan ini.') }}</p>
-                                @endif
-                                @if (!$this->district_id)
-                                    <p class="mt-1 text-xs text-on-surface-variant">{{ __('Pilih kecamatan untuk melihat daftar kelurahan/desa.') }}</p>
-                                @endif
                             </div>
                         </div>
 
                         <div>
                             <x-forms.label for="address_detail" value="{{ __('Alamat Lengkap') }}" />
-                            <textarea wire:model="address_detail" rows="2" placeholder="{{ __('Jalan, RT/RW, nomor rumah, dll') }}"
-                                class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-standard)]"></textarea>
-                            <p class="mt-1 text-xs text-on-surface-variant">{{ __('Alamat lengkap termasuk jalan, nomor rumah, RT/RW untuk pengiriman surat dan keperluan administrasi.') }}</p>
+                            <textarea wire:model="address_detail" rows="2"
+                                class="mt-1.5 w-full rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm text-ink placeholder:text-muted-soft focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
                         </div>
                         <div>
                             <x-forms.label for="postal_code" value="{{ __('Kode Pos') }}" />
-                            <x-forms.input wire:model="postal_code" type="text" placeholder="{{ __('12345') }}" class="mt-1.5 w-full" />
-                            <p class="mt-1 text-xs text-on-surface-variant">{{ __('Kode pos 5 digit untuk wilayah Anda.') }}</p>
+                            <x-forms.input wire:model="postal_code" type="text" class="mt-1.5 w-full" />
                         </div>
 
                         {{-- Face ID Enrollment Card --}}
@@ -632,69 +577,29 @@ new #[Title('Pengaturan Profil')] class extends Component {
                         </div>
                     </form>
                 </div>
-            </section>
 
-            {{-- DANGER ZONE TAB --}}
-            <section
-                x-show="activeTab === 'danger-zone'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
-                <div class="ess-card border-error/30 bg-error/5">
+                {{-- Danger Zone --}}
+                <div class="mt-6 ess-card border-error/30">
                     <div class="border-b border-error/30 px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-error/10 text-error">
-                                <span class="material-symbols-outlined text-lg">warning</span>
-                            </div>
-                            <div>
-                                <h3 class="ess-eyebrow text-error">{{ __('Zona Bahaya') }}</h3>
-                                <p class="text-sm text-on-surface-variant">{{ __('Tindakan di bawah ini bersifat permanen dan tidak dapat dibatalkan. Hati-hati.') }}</p>
-                            </div>
-                        </div>
+                        <h3 class="ess-eyebrow text-error">{{ __('Hapus Akun') }}</h3>
                     </div>
                     <div class="p-6">
-                        <div class="mb-6 p-4 rounded-xl bg-canvas border border-error/20">
-                            <div class="flex items-start gap-3">
-                                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error">
-                                    <span class="material-symbols-outlined">delete_forever</span>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-ink">{{ __('Hapus Akun Permanen') }}</h4>
-                                    <p class="mt-1 text-sm text-on-surface-variant">{{ __('Hapus akun Anda dan seluruh data secara permanen. Tindakan ini tidak dapat dibatalkan. Semua data kehadiran, cuti, gaji, dan riwayat akan dihapus selamanya.') }}</p>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="text-sm text-on-surface-variant">
+                            {{ __('Hapus akun Anda dan seluruh data secara permanen. Tindakan ini tidak dapat dibatalkan.') }}
+                        </p>
                         @if ($this->showDeleteUser)
-                            <div class="pt-4 border-t border-outline-variant/50">
-                                <button type="button"
-                                    class="w-full rounded-lg px-4 py-2.5 text-sm font-medium text-error border border-error hover:bg-error/10 transition-colors"
-                                    wire:click.prevent="$dispatch('confirm-delete-account')">
-                                    <span class="flex items-center justify-center gap-2">
-                                        <span class="material-symbols-outlined text-sm">delete_forever</span>
-                                        {{ __('Hapus Akun Saya Permanen') }}
-                                    </span>
-                                </button>
-                                <p class="mt-2 text-center text-xs text-on-surface-variant">{{ __('Perlu verifikasi kata sandi sebelum menghapus.') }}</p>
-                            </div>
+                            <button type="button"
+                                class="mt-4 rounded-lg px-4 py-2 text-sm font-medium text-error border border-error hover:bg-error/10 transition-colors"
+                                wire:click.prevent="$dispatch('confirm-delete-account')">
+                                {{ __('Hapus Akun') }}
+                            </button>
                         @endif
                     </div>
                 </div>
             </section>
 
             {{-- PASSWORD TAB --}}
-            <section
-                x-show="activeTab === 'password'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
+            <section x-show="activeTab === 'password'" x-cloak x-transition.opacity.duration.150ms>
                 <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
                         <h3 class="ess-eyebrow">{{ __('Ubah Kata Sandi') }}</h3>
@@ -724,15 +629,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
             </section>
 
             {{-- SECURITY / 2FA TAB --}}
-            <section
-                x-show="activeTab === 'security'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
+            <section x-show="activeTab === 'security'" x-cloak x-transition.opacity.duration.150ms>
                 <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
                         <h3 class="ess-eyebrow">{{ __('Verifikasi Dua Langkah') }}</h3>
@@ -765,15 +662,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
             </section>
 
             {{-- SESSIONS TAB --}}
-            <section
-                x-show="activeTab === 'sessions'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
+            <section x-show="activeTab === 'sessions'" x-cloak x-transition.opacity.duration.150ms>
                 <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
                         <h3 class="ess-eyebrow">{{ __('Perangkat & Sesi') }}</h3>
@@ -787,23 +676,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
                                         {{ str_contains($session->user_agent ?? '', 'Mobile') ? 'smartphone' : 'desktop_windows' }}
                                     </span>
                                     <div class="min-w-0 flex-1">
-                                        <div class="flex items-center gap-2">
-                                            <p class="text-sm font-medium text-ink">{{ $session->ip_address }}</p>
-                                            @php
-                                                $ua = $session->user_agent ?? '';
-                                                $deviceName = str_contains($ua, 'Mobile') ? 'Mobile' : 'Desktop';
-                                                if (str_contains($ua, 'iPhone')) $deviceName = 'iPhone';
-                                                elseif (str_contains($ua, 'iPad')) $deviceName = 'iPad';
-                                                elseif (str_contains($ua, 'Android')) $deviceName = 'Android';
-                                                elseif (str_contains($ua, 'Mac')) $deviceName = 'Mac';
-                                                elseif (str_contains($ua, 'Windows')) $deviceName = 'Windows';
-                                                elseif (str_contains($ua, 'Linux')) $deviceName = 'Linux';
-                                            @endphp
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">{{ $deviceName }}</span>
-                                            @if ($session->id === request()->session()->getId())
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">{{ __('Perangkat Ini') }}</span>
-                                            @endif
-                                        </div>
+                                        <p class="text-sm font-medium text-ink">{{ $session->ip_address }}</p>
                                         <p class="truncate text-xs text-on-surface-variant">{{ $session->user_agent }}</p>
                                         <p class="text-xs text-on-surface-variant">{{ __('Terakhir aktif') }}: {{ \Carbon\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}</p>
                                     </div>
@@ -820,15 +693,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
             </section>
 
             {{-- ACTIVITY LOG TAB --}}
-            <section
-                x-show="activeTab === 'activity'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
+            <section x-show="activeTab === 'activity'" x-cloak x-transition.opacity.duration.150ms>
                 <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
                         <h3 class="ess-eyebrow">{{ __('Log Aktivitas') }}</h3>
@@ -838,15 +703,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
                         @php $activities = $this->activities; @endphp
                         @forelse ($activities as $log)
                             <div class="flex items-start gap-3 border-b border-outline-variant/50 py-3 last:border-0">
-                                <span class="material-symbols-outlined mt-0.5 text-base text-on-surface-variant">
-                                    {{ \Illuminate\Support\Str::contains($log->description, 'login') ? 'login' :
-                                       (\Illuminate\Support\Str::contains($log->description, 'password') ? 'lock' :
-                                       (\Illuminate\Support\Str::contains($log->description, 'email|surel|phone|telepon|alamat|profile|profil', true) ? 'manage_accounts' :
-                                       (\Illuminate\Support\Str::contains($log->description, '2fa|two.factor|otp', true) ? 'security' :
-                                       (\Illuminate\Support\Str::contains($log->description, 'face|wajah', true) ? 'face' :
-                                       (\Illuminate\Support\Str::contains($log->description, 'delete|hapus', true) ? 'delete' :
-                                       'history'))))) }}
-                                </span>
+                                <span class="material-symbols-outlined mt-0.5 text-base text-on-surface-variant">circle</span>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm text-ink">{{ $log->description }}</p>
                                     <p class="text-xs text-on-surface-variant">{{ $log->created_at->diffForHumans() }}</p>
@@ -863,15 +720,7 @@ new #[Title('Pengaturan Profil')] class extends Component {
             </section>
 
             {{-- NOTIFICATION PREFERENCES TAB --}}
-            <section
-                x-show="activeTab === 'notifications'"
-                x-transition:enter="transition duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-standard)]"
-                x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-[var(--motion-duration-fast)] ease-[var(--motion-easing-accelerated)]"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-2"
-                x-cloak>
+            <section x-show="activeTab === 'notifications'" x-cloak x-transition.opacity.duration.150ms>
                 <div class="ess-card">
                     <div class="border-b border-outline-variant/50 px-6 py-4">
                         <h3 class="ess-eyebrow">{{ __('Preferensi Notifikasi') }}</h3>
@@ -887,29 +736,9 @@ new #[Title('Pengaturan Profil')] class extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                @php
-                                    $notificationDescriptions = [
-                                        'system_alerts' => 'Peringatan sistem penting, pemeliharaan, dan update keamanan',
-                                        'attendance_reminder' => 'Pengingat absen masuk/pulang dan jadwal shift',
-                                        'leave_request' => 'Pengajuan cuti, izin, atau sakit yang perlu persetujuan',
-                                        'leave_approval' => 'Status persetujuan cuti/izin yang Anda ajukan',
-                                        'payroll_payslip' => 'Notifikasi slip gaji dan informasi payroll',
-                                        'overtime_approval' => 'Persetujuan lembur dan update status lembur',
-                                        'shift_change' => 'Perubahan jadwal shift atau penugasan shift baru',
-                                        'document_expiry' => 'Peringatan dokumen yang akan kedaluwarsa (KTP, SIM, sertifikat)',
-                                        'training_invitation' => 'Undangan pelatihan, seminar, dan program pengembangan',
-                                        'announcement' => 'Pengumuman resmi dari HR/manajemen',
-                                        'birthday' => 'Ulang tahun rekan kerja dan notifikasi ulang tahun Anda',
-                                    ];
-                                @endphp
                                 @foreach ($notificationPrefs as $id => $data)
                                     <tr class="border-b border-outline-variant/50">
-                                        <td class="py-3">
-                                            <div>
-                                                <p class="text-ink font-medium">{{ \Illuminate\Support\Str::headline($data['event_key']) }}</p>
-                                                <p class="text-xs text-on-surface-variant mt-0.5">{{ $notificationDescriptions[$data['event_key']] ?? 'Notifikasi terkait ' . \Illuminate\Support\Str::headline($data['event_key']) }}</p>
-                                            </div>
-                                        </td>
+                                        <td class="py-3 text-ink">{{ \Illuminate\Support\Str::headline($data['event_key']) }}</td>
                                         <td class="py-3 px-4 text-center">
                                             <input type="checkbox" wire:model="notificationPrefs.{{ $id }}.in_app" class="rounded border-outline-variant text-primary focus:ring-primary" />
                                         </td>

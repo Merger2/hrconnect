@@ -1,6 +1,5 @@
 <div class="mx-auto flex max-w-[480px] flex-col gap-5 md:max-w-3xl md:gap-6"
-    x-data="faceEnrollment()" 
-    x-init="init(); $watch('$wire.isCapturing', async (val) => { if (val) { await $nextTick(); if (!initialized) init(); } })">
+    x-data="faceEnrollment()" x-init="init()">
 
     <div class="flex items-center gap-3">
         <div class="flex size-10 items-center justify-center rounded-xl bg-surface-container text-on-surface-variant">
@@ -57,8 +56,7 @@
             </div>
 
             {{-- Camera view --}}
-            <div class="relative overflow-hidden rounded-2xl bg-surface-dim" aria-label="{{ __('Kamera Face ID') }}"
-                x-show="!$wire.isEnrolled || $wire.isCapturing">
+            <div class="relative overflow-hidden rounded-2xl bg-surface-dim" aria-label="{{ __('Kamera Face ID') }}">
                 <video x-ref="video" autoplay playsinline muted class="block w-full" style="aspect-ratio: 4/3;"></video>
                 <canvas x-ref="overlay" class="absolute inset-0 h-full w-full"></canvas>
             </div>
@@ -97,7 +95,7 @@
 
             {{-- Action buttons --}}
             <div class="flex gap-3" x-show="status !== 'error'">
-                <template x-if="$wire.isEnrolled || status === 'capturing-frames' || status === 'saving'">
+                <template x-if="$wire.isEnrolled">
                     <button wire:click="cancelCapture"
                         class="rounded-xl border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-container">
                         {{ __('Batal') }}

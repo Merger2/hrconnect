@@ -1,5 +1,3 @@
-import { apiFetch } from './utils/api.js';
-
 export default function () {
     return {
         records: [],
@@ -29,15 +27,13 @@ export default function () {
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
         },
 
-        apiHeaders() {
-            return { 'X-Requested-With': 'XMLHttpRequest', ...window.apiHeaders() };
-        },
-
         async fetchToday() {
             await window.whenAuthReady();
             if (!window.isAuthenticated) return;
             try {
-                const json = await apiFetch('/api/v1/attendance/today', { headers: this.apiHeaders() });
+                const res = await fetch('/api/v1/attendance/today', { headers: this.apiHeaders() });
+                if (!res.ok) return; // 401/404/422 => silent, not an error toast
+                const json = await res.json();
                 if (json.status === 'success') {
                     this.today = json.data;
                     this.todayStatus = (this.today.has_clocked_in && this.today.has_clocked_out) ? 'complete' : 'incomplete';
@@ -52,7 +48,9 @@ export default function () {
             if (!window.isAuthenticated) return;
             this.loading = true;
             try {
-                const json = await apiFetch(`/api/v1/attendance?period=${this.period}&per_page=50`, { headers: this.apiHeaders() });
+                const res = await fetch(`/api/v1/attendance?period=${this.period}&per_page=50`, { headers: this.apiHeaders() });
+                if (!res.ok) return;
+                const json = await res.json();
                 if (json.status === 'success') {
                     this.records = json.data;
                     this.calcSummary();
