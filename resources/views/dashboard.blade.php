@@ -122,13 +122,14 @@
                 <h2 class="text-lg font-semibold tracking-tight text-ink">{{ __('Akses Cepat') }}</h2>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-6">
                 {{-- Clock In --}}
                 <a href="{{ route('attendance.clock-in') }}"
                    class="group rounded-xl border border-outline-variant bg-canvas p-5 shadow-soft transition-smooth hover:border-primary/30 hover:shadow-modal">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary transition-smooth group-hover:bg-primary group-hover:text-on-primary">
                         <span class="material-symbols-outlined">badge</span>
                     </div>
+                    <p class="mt-4 text-sm font-medium text-ink">{{ __('Absen') }}</p>
                     <p class="text-xs text-on-surface-variant">{{ __('Wajah & GPS') }}</p>
                 </a>
 
@@ -164,20 +165,20 @@
             </div>
 
             {{-- Secondary Actions Row --}}
-            <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <a href="{{ route('payroll.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-4 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
+            <div class="mt-4 grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-6">
+                <a href="{{ route('payroll.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-5 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
                     <span class="material-symbols-outlined text-primary">payments</span>
                     <p class="mt-2 text-xs font-medium text-ink">{{ __('Slip Gaji') }}</p>
                 </a>
-                <a href="{{ route('loans.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-4 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
-                    <span class="material-symbols-outlined text-primary">account_balance</span>
+                <a href="{{ route('loans.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-5 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
+                    <span class="material-symbols-outlined text-account_balance">account_balance</span>
                     <p class="mt-2 text-xs font-medium text-ink">{{ __('Pinjaman') }}</p>
                 </a>
-                <a href="{{ route('assets.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-4 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
+                <a href="{{ route('assets.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-5 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
                     <span class="material-symbols-outlined text-primary">laptop</span>
                     <p class="mt-2 text-xs font-medium text-ink">{{ __('Aset') }}</p>
                 </a>
-                <a href="{{ route('knowledge-base.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-4 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
+                <a href="{{ route('knowledge-base.index') }}" class="group rounded-xl border border-outline-variant bg-canvas p-5 text-center shadow-soft transition-smooth hover:border-primary/20 hover:shadow-modal">
                     <span class="material-symbols-outlined text-primary">smart_toy</span>
                     <p class="mt-2 text-xs font-medium text-ink">{{ __('AI Chat') }}</p>
                 </a>

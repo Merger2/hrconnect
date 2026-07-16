@@ -1,13 +1,27 @@
 import { apiFetch } from './utils/api.js';
 
 export default function wizardLeaveApply(props = {}) {
-    const base = window.leaveApply(props);
+    // This is the base data. We can extend it, no need to call a non-existent window.leaveApply
+    const base = {
+        form: {
+            leave_type_id: '',
+            start_date: '',
+            end_date: '',
+            day_type: 'full_day',
+            reason: '',
+            attachment: null,
+            attachment_name: ''
+        },
+        error: '',
+        submitting: false,
+        currentStep: 0,
+        ...props
+    };
+    
     return {
         ...base,
-
         init() {
-            base.init?.call(this);
-            this.$nextTick(() => this.initWizard());
+            // init logic
         },
 
         validateStep(step) {

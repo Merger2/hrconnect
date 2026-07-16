@@ -71,29 +71,6 @@ export default function faceEnrollment() {
         return (noseTip.x - eyeMidX) / eyeDistance;
     }
 
-    function buildFaceGeometryDescriptor(landmarks) {
-        const leftEyeCenter = averagePoint(landmarks.getLeftEye());
-        const rightEyeCenter = averagePoint(landmarks.getRightEye());
-        const eyeMidX = (leftEyeCenter.x + rightEyeCenter.x) / 2;
-        const eyeMidY = (leftEyeCenter.y + rightEyeCenter.y) / 2;
-        const eyeDistance = Math.max(pointDistance(leftEyeCenter, rightEyeCenter), 1);
-        const roll = Math.atan2(rightEyeCenter.y - leftEyeCenter.y, rightEyeCenter.x - leftEyeCenter.x);
-        const cos = Math.cos(-roll);
-        const sin = Math.sin(-roll);
-        const excluded = new Set([0, 1, 15, 16]);
-        const descriptor = [2];
-
-        landmarks.positions.forEach((point, index) => {
-            if (excluded.has(index)) return;
-            const translatedX = (point.x - eyeMidX) / eyeDistance;
-            const translatedY = (point.y - eyeMidY) / eyeDistance;
-            descriptor.push(Number((translatedX * cos - translatedY * sin).toFixed(6)));
-            descriptor.push(Number((translatedX * sin + translatedY * cos).toFixed(6)));
-        });
-
-        return descriptor;
-    }
-
     return {
         status: 'loading-models',
         statusMessage: messages.loadingModels,
@@ -530,22 +507,39 @@ export default function faceEnrollment() {
         },
 
         async describeSnapshots(snapshots) {
-            let lastError = null;
+            const descriptors = [];
+
             for (const snapshot of snapshots) {
                 for (const opts of captureOptions) {
                     try {
                         const detection = await this.withTimeout(
-                            window.faceapi.detectSingleFace(snapshot, new window.faceapi.TinyFaceDetectorOptions(opts)).withFaceLandmarks(),
-                            4000, 'face landmark extraction'
+                            window.faceapi.detectSingleFace(snapshot, new window.faceapi.TinyFaceDetectorOptions(opts))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor(),
+                            4000, 'face recognition'
                         );
-                        if (detection?.landmarks?.positions?.length === 68) {
-                            return buildFaceGeometryDescriptor(detection.landmarks);
+
+                        if (detection?.descriptor) {
+                            const desc = Array.from(detection.descriptor);
+                            if (desc.length === 128) descriptors.push(desc);
                         }
-                    } catch (error) { lastError = error; }
+                    } catch (error) {
+                        // try next option
+                    }
                 }
             }
-            if (lastError) throw lastError;
-            throw new Error(messages.descriptorFailed);
+
+            if (descriptors.length === 0) throw new Error(messages.descriptorFailed);
+
+            // Average the captured descriptors for stability
+            const dim = descriptors[0].length;
+            const avg = new Array(dim).fill(0);
+            for (const d of descriptors) {
+                for (let i = 0; i < dim; i++) avg[i] += d[i];
+            }
+            for (let i = 0; i < dim; i++) avg[i] = Number((avg[i] / descriptors.length).toFixed(6));
+
+            return avg;
         },
 
         async capture({ manual = true } = {}) {
@@ -563,7 +557,7 @@ export default function faceEnrollment() {
                 const snapshots = await this.captureSnapshots();
                 const descriptor = await this.describeSnapshots(snapshots);
 
-                if (!descriptor || descriptor.length !== 129 || descriptor[0] !== 2) {
+                if (!descriptor || descriptor.length !== 128) {
                     throw new Error(messages.descriptorFailed);
                 }
 
@@ -571,7 +565,7 @@ export default function faceEnrollment() {
                 await this.$wire.call('saveFaceDescriptor', descriptor);
                 this.cleanup();
             } catch (error) {
-                await this.reportClientError('capture', error, { descriptor_mode: 'geometry' });
+                await this.reportClientError('capture', error, { descriptor_mode: 'faceRecognitionNet' });
                 this.captureBusy = false;
                 this.resetLiveness(messages.descriptorFailed);
                 this.startDetection();

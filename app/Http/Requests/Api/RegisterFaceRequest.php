@@ -14,10 +14,8 @@ class RegisterFaceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'embedding' => ['sometimes', 'array', 'size:128'],
+            'embedding' => ['required', 'array', 'size:128'],
             'embedding.*' => ['numeric', 'between:-3,3'],
-            'descriptor' => ['sometimes', 'array', 'size:129'],
-            'descriptor.*' => ['numeric', 'between:-3,3'],
             'embeddings' => ['sometimes', 'array', 'min:2', 'max:10'],
             'embeddings.*' => ['array', 'size:128'],
             'embeddings.*.*' => ['numeric', 'between:-3,3'],
@@ -30,10 +28,10 @@ class RegisterFaceRequest extends FormRequest
     {
         $data = $this->all();
 
+        // Legacy geometry descriptor (129D with [version, ...coords]) — no longer supported
         if (isset($data['descriptor']) && ! isset($data['embedding'])) {
             $descriptor = $data['descriptor'];
             $data['embedding'] = array_slice($descriptor, 1);
-            $data['_descriptor_version'] = $descriptor[0];
             $this->merge($data);
         }
 

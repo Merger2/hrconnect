@@ -2,52 +2,58 @@ import * as faceapi from 'face-api.js';
 
 const MODEL_URL = '/models/av1';
 
+// All face detection and recognition models needed for the pipeline
 const requiredNets = [
     faceapi.nets.tinyFaceDetector,
     faceapi.nets.faceLandmark68Net,
+    faceapi.nets.faceRecognitionNet,
+    faceapi.nets.faceLandmark68TinyNet,
 ];
 
-let backendRegistered = false;
+let backendInitialized = false;
+let backendReadyPromise = null;
 
-export async function loadFaceModels() {
-    // Register tfjs backend (CPU fallback) before loading models
-    if (!backendRegistered) {
+// Robustly preload TensorFlow.js runtime with minimal dependencies
+async function ensureBackendReady() {
+    if (backendInitialized) return Promise.resolve();
+    if (backendReadyPromise) return await backendReadyPromise;
+
+    backendReadyPromise = (async () => {
         try {
+            // Try to load backends - they automatically register
             await Promise.all([
                 import('@tensorflow/tfjs-backend-cpu'),
                 import('@tensorflow/tfjs-backend-webgl'),
             ]);
-            // tfjs auto-registers CPU backend when imported
-            backendRegistered = true;
+            backendInitialized = true;
         } catch (e) {
-            console.warn('[face-recognition] tfjs backend registration failed:', e);
+            console.warn('[face-recognition] Backend registration failed:', e);
+            // Allow continued operation (some environments continue without backends)
+            backendInitialized = true;
         }
-    }
+    })();
+    return await backendReadyPromise;
+}
+
+// Load all face models with robust error handling
+export async function loadFaceModels() {
+    await ensureBackendReady();
 
     const loaded = await Promise.allSettled(
         requiredNets.map(net => net.loadFromUri(MODEL_URL))
     );
     const failed = loaded.filter(r => r.status === 'rejected');
     if (failed.length > 0) {
-        throw new Error(
-            'Gagal memuat model wajah: ' +
-            failed.map(r => r.reason?.message || 'unknown').join('; ')
-        );
+        throw new Error('Gagal memuat model wajah: ' + failed.map(r => r.reason?.message || 'unknown').join('; '));
     }
 }
 
+// Utility functions for facial landmark and descriptor calculations
 export function computeEAR(landmarks) {
     const leftEye = landmarks.getLeftEye();
     const rightEye = landmarks.getRightEye();
-
-    const leftEAR = (
-        dist(leftEye[1], leftEye[5]) + dist(leftEye[2], leftEye[4])
-    ) / (2 * dist(leftEye[0], leftEye[3]));
-
-    const rightEAR = (
-        dist(rightEye[1], rightEye[5]) + dist(rightEye[2], rightEye[4])
-    ) / (2 * dist(rightEye[0], rightEye[3]));
-
+    const leftEAR = (dist(leftEye[1], leftEye[5]) + dist(leftEye[2], leftEye[4])) / (2 * dist(leftEye[0], leftEye[3]));
+    const rightEAR = (dist(rightEye[1], rightEye[5]) + dist(rightEye[2], rightEye[4])) / (2 * dist(rightEye[0], rightEye[3]));
     return (leftEAR + rightEAR) / 2;
 }
 

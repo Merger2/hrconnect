@@ -36,12 +36,9 @@ class FaceController extends Controller
 
         $metadata = [
             'source' => 'web',
+            'descriptor_type' => 'faceRecognitionNet',
+            'descriptor_version' => 1,
         ];
-
-        if (isset($data['_descriptor_version'])) {
-            $metadata['descriptor_type'] = 'geometry';
-            $metadata['descriptor_version'] = $data['_descriptor_version'];
-        }
 
         if (isset($data['captures'])) {
             $metadata['captures_count'] = count($data['captures']);

@@ -345,45 +345,41 @@ export default function clockIn(config = {}) {
             this.autoCaptureQueued = false;
         },
 
-        async capture({ manual = false } = {}) {
-            if (this.status !== 'ready-to-capture' && !manual) return;
-            if (this.captureBusy) return;
-            this.captureBusy = true;
+        async capture({ manual = true } = {}) {
+            if (!this.canCapture()) {
+                if (manual) this.setStage('turn-face', messages.passChallenge, messages.turnBothSidesHint);
+                return;
+            }
+
             this.clearAutoCapture();
+            this.captureBusy = true;
+            this.stopDetection();
+            this.setStage('saving', messages.savingFace, messages.readyHint);
 
             try {
                 const video = this.$refs.video;
                 const canvas = this.$refs.overlay;
                 if (!video || video.readyState < 2) throw new Error('Video not ready');
 
-                // Capture multiple frames with different options and average
-                const descriptors = [];
-                for (const opts of captureOptions) {
-                    const detect = await window.faceapi.detectAllFaces(video, new window.faceapi.TinyFaceDetectorOptions(opts)).withFaceLandmarks(true);
-                    if (detect.length > 0) {
-                        descriptors.push(buildFaceGeometryDescriptor(detect[0].landmarks));
-                    }
-                }
-                if (descriptors.length === 0) throw new Error(messages.descriptorFailed);
+                // Use faceRecognitionNet to compute the descriptor
+                const descriptor = await window.faceapi.computeFaceDescriptor(video);
 
-                // Average descriptors
-                const dim = descriptors[0].length;
-                const avg = [];
-                for (let i = 0; i < dim; i++) {
-                    let sum = 0;
-                    for (const d of descriptors) sum += d[i];
-                    avg.push(Number((sum / descriptors.length).toFixed(6)));
-                }
+                // Convert from Float32Array to a compatible format for the backend
+                // FaceRecognitionService expects an array, not a Float32Array
+                const descriptorArray = Array.from(descriptor);
 
-                const descriptor = [2, ...avg];
+                // Validate descriptor
+                if (!descriptorArray || descriptorArray.length !== 128) {
+                    throw new Error(messages.descriptorFailed);
+                }
 
                 this.setStage('saving', messages.savingFace, messages.readyHint);
-                await this.$wire.call('saveFaceDescriptor', descriptor);
+                await this.$wire.call('saveFaceDescriptor', descriptorArray);
                 this.cleanup();
             } catch (error) {
-                await this.reportClientError('capture', error, { descriptor_mode: 'geometry' });
+                await this.reportClientError('capture', error, { descriptor_mode: 'faceRecognitionNet' });
                 this.captureBusy = false;
-                this.setStage('align-face', messages.descriptorFailed, 'Tetap diam dan coba lagi');
+                this.setStage('align-face', messages.descriptorFailed);
                 this.startDetection();
                 Swal.fire(
                     'Gagal Face ID',

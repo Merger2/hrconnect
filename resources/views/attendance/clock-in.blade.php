@@ -1,10 +1,11 @@
+@php
+    $employee = Auth::user()->employee;
+    $hasFace = $employee
+        ? app(\App\Services\FaceRecognitionService::class)->hasFaceEnrolled($employee)
+        : false;
+@endphp
+
 <x-layouts::app.sidebar :title="__('Absen')">
-    @php
-        $employee = Auth::user()->employee;
-        $hasFace = $employee
-            ? app(\App\Services\FaceRecognitionService::class)->hasFaceEnrolled($employee)
-            : false;
-    @endphp
     <div x-data="clockIn({ hasFaceEnrolled: {{ $hasFace ? 'true' : 'false' }} })" class="mx-auto flex max-w-[480px] flex-col gap-5 md:max-w-3xl md:gap-6">
 
         {{-- CAMERA SECTION (only when face enrolled) --}}
@@ -62,18 +63,18 @@
                                    pattern="[0-9]*"
                                    class="h-12 w-11 rounded-xl border border-outline-variant bg-canvas text-center text-lg font-semibold text-ink focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                                    x-model="pinDigits[i - 1]"
-                                   @input="handlePinInput($event, i)"
-                                   @keydown.backspace="if (!pinDigits[i - 1] && i > 1) $refs.pinInputs.children[i - 2].focus()"
+                                   x-on:input="handlePinInput($event, i)"
+                                   x-on:keydown.backspace="if (!pinDigits[i - 1] && i > 1) $refs.pinInputs.children[i - 2].focus()"
                                    :aria-label="'{{ __('Digit PIN') }} ' + i" />
                         </template>
                     </div>
 
                     <div class="flex gap-2">
-                        <button type="button" @click="clearPin"
+                        <button type="button" x-on:click="clearPin"
                                 class="flex-1 rounded-xl border border-outline-variant bg-canvas px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-container-low">
                             {{ __('Batal') }}
                         </button>
-                        <button type="button" @click="submitPinClockIn" :disabled="pin.length !== 6 || clockingIn"
+                        <button type="button" x-on:click="submitPinClockIn" :disabled="pin.length !== 6 || clockingIn"
                                 class="flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition hover:bg-primary/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
                             <span x-show="!clockingIn" class="material-symbols-outlined text-lg">login</span>
                             <span x-text="clockingIn ? '{{ __('Memproses...') }}' : '{{ __('Absen dengan PIN') }}'"></span>
@@ -107,7 +108,7 @@
                 </div>
                 <div class="flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1 text-xs font-semibold uppercase">
                     <div class="size-2 rounded-full"
-                        :class="geoStatus !== '@js(__(\"Tidak Ada\"))' && geoStatus !== '@js(__(\"Mendeteksi...\"))' ? 'animate-pulse bg-success' : 'bg-on-surface-variant/30'"></div>
+                        :class="!['Tidak Ada', 'Mendeteksi...'].includes(geoStatus) ? 'animate-pulse bg-success' : 'bg-on-surface-variant/30'"></div>
                     <span x-text="geoStatus" class="text-on-surface-variant"></span>
                 </div>
             </div>
@@ -123,7 +124,7 @@
                         <li>{{ __('Pastikan GPS/Location diaktifkan di perangkat.') }}</li>
                         <li>{{ __('Tekan tombol Coba Lagi di bawah.') }}</li>
                     </ol>
-                    <button type="button" @click="retryGeo()"
+                    <button type="button" x-on:click="retryGeo()"
                         class="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary shadow-soft transition-smooth hover:bg-primary-deep">
                         <span class="material-symbols-outlined text-lg">refresh</span>
                         {{ __('Coba Lagi') }}
@@ -145,7 +146,7 @@
 
         {{-- Clock In Button (only when face enrolled) --}}
         <template x-if="!pinRequired">
-            <button @click="doClockIn()"
+            <button x-on:click="doClockIn()"
                     :disabled="clockingIn || !canCapture()"
                     :class="canCapture() ? 'bg-primary hover:bg-primary/90 text-on-primary' : 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'"
                     class="w-full py-4 px-6 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]">

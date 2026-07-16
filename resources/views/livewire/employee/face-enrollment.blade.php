@@ -1,5 +1,5 @@
 <div class="mx-auto flex max-w-[480px] flex-col gap-5 md:max-w-3xl md:gap-6"
-    x-data="faceEnrollment()" x-init="init()">
+    x-data="faceEnrollment()" x-effect="if ((!$wire.isEnrolled || $wire.isCapturing) && !initialized) init()">
 
     <div class="flex items-center gap-3">
         <div class="flex size-10 items-center justify-center rounded-xl bg-surface-container text-on-surface-variant">

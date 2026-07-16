@@ -19,17 +19,18 @@ test.describe('Face Enrollment Flow', () => {
 
   test('face registration page loads with title', async ({ page }) => {
     await page.goto('/attendance/face-registration');
-    // Target the page title h2 specifically, not the Swal modal h2
-    await expect(page.locator('main h2').first()).toContainText(/Registrasi Wajah|Face Registration/i);
-    await expect(page.locator('text=Daftarkan wajah')).toBeVisible({ timeout: 8000 });
+    // HRConnect design system: use specific title selector
+    await expect(page.locator('h2.text-lg.font-semibold.text-ink')).toContainText(/Registrasi Wajah|Face Registration/i);
+    await expect(page.locator('h2.text-lg.font-semibold.text-ink').first().locator('~ p.text-sm.text-on-surface-variant')).toBeVisible({ timeout: 8000 });
   });
 
   test('face enrollment shows status and guide text', async ({ page }) => {
     await page.goto('/attendance/face-registration');
     await page.waitForTimeout(2500);
-    const guideOrTitle = page.locator('h2, [role="status"]').first();
-    await expect(guideOrTitle).toBeVisible({ timeout: 8000 });
-    await expect(page.locator('text=Daftarkan wajah')).toBeVisible();
+    // Page title h2 is always present (enrolled or capture state)
+    await expect(page.locator('h2.text-lg.font-semibold.text-ink')).toContainText(/Registrasi Wajah|Face Registration/i, { timeout: 8000 });
+    // Subtitle beside the title
+    await expect(page.locator('h2.text-lg.font-semibold.text-ink').first().locator('~ p.text-sm.text-on-surface-variant')).toContainText(/Daftarkan wajah/i);
   });
 
   test('face enrollment shows camera or enrolled state', async ({ page }) => {
