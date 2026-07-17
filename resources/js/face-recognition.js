@@ -20,15 +20,35 @@ async function ensureBackendReady() {
 
     backendReadyPromise = (async () => {
         try {
-            // Try to load backends - they automatically register
+            // Load TensorFlow.js backends. They auto-register on import.
             await Promise.all([
                 import('@tensorflow/tfjs-backend-cpu'),
                 import('@tensorflow/tfjs-backend-webgl'),
             ]);
+
+            // Pick the best available backend and activate it.
+            if (faceapi.tf) {
+                const hasWebgl = faceapi.tf.engine()?.registry?.['webgl'] !== undefined;
+                const preferred = hasWebgl ? 'webgl' : 'cpu';
+                try {
+                    await faceapi.tf.setBackend(preferred);
+                    await faceapi.tf.ready();
+                } catch (be) {
+                    console.warn('[face-recognition] setBackend(' + preferred + ') failed, falling back to cpu:', be);
+                    await faceapi.tf.setBackend('cpu');
+                    await faceapi.tf.ready();
+                }
+            }
             backendInitialized = true;
         } catch (e) {
             console.warn('[face-recognition] Backend registration failed:', e);
-            // Allow continued operation (some environments continue without backends)
+            // Last-resort: try CPU backend directly so tensor ops still work.
+            try {
+                if (faceapi.tf) {
+                    await faceapi.tf.setBackend('cpu');
+                    await faceapi.tf.ready();
+                }
+            } catch (_) { /* no backend available */ }
             backendInitialized = true;
         }
     })();

@@ -47,8 +47,8 @@
             </nav>
 
             {{-- User --}}
-            <div class="flex items-center border-t border-white/10 p-3">
-                <x-desktop-user-menu />
+            <div class="flex items-center border-t border-outline-variant/60 p-3">
+                <x-desktop-user-menu :dropUp="true" />
             </div>
         </aside>
 

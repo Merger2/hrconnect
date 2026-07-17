@@ -93,7 +93,7 @@
                     rows="1"
                     x-on:input="$el.style.height = 'auto'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px'"
                     placeholder="Tanya tentang kebijakan HR, cuti, BPJS, payroll..."
-                    class="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
+                    class="w-full resize-none rounded-xl border border-blue-500/50 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
                 ></textarea>
             </div>
             <button

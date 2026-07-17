@@ -75,7 +75,7 @@
                                                 type="text"
                                                 inputmode="numeric"
                                                 maxlength="1"
-                                                class="h-14 w-12 rounded-xl border-2 border-fog bg-canvas text-center text-lg font-semibold text-ink transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"
+                                                class="h-14 w-12 rounded-xl border-2 border-primary-deep bg-canvas text-center text-lg font-semibold text-ink transition-all focus:border-primary-deep focus:ring-4 focus:ring-primary-deep/10"
                                             />
                                         </template>
                                     </div>
@@ -90,7 +90,7 @@
                                             x-bind:required="showRecoveryInput"
                                             autocomplete="one-time-code"
                                             x-model="recovery_code"
-                                            class="w-full rounded-xl border-2 border-fog bg-canvas px-4 py-3 text-sm text-ink placeholder:text-on-surface-variant/60 transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"
+                                            class="w-full rounded-xl border-2 border-primary-deep bg-canvas px-4 py-3 text-sm text-ink placeholder:text-on-surface-variant/60 transition-all focus:border-primary-deep focus:ring-4 focus:ring-primary-deep/10"
                                         />
                                     </div>
                                     @error('recovery_code')

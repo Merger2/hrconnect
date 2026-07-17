@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+import { ensureBackendReady } from './face-recognition.js';
 
 export default function faceEnrollment() {
     const messages = {
@@ -99,6 +100,7 @@ export default function faceEnrollment() {
 
             try {
                 this.cleanup();
+                await ensureBackendReady();
                 await this.loadPreviewModels();
                 await this.waitForRef('video');
                 await this.startCamera();

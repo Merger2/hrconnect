@@ -7,8 +7,6 @@
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
     /* Fonts — Inter sebagai substitute Forma DJR Micro */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -64,13 +62,37 @@
     --color-primary-soft: #e0e7ff;
     --color-on-primary: #ffffff;
 
+    /* Secondary (purple/violet) — payroll, AI, knowledge */
+    --color-secondary: #7c3aed;
+    --color-secondary-bright: #a78bfa;
+    --color-secondary-deep: #6d28d9;
+    --color-secondary-soft: #f3e8ff;
+    --color-on-secondary: #ffffff;
+
+    /* Tertiary (fuchsia/pink) — management, settings */
+    --color-tertiary: #db2777;
+    --color-tertiary-bright: #f472b6;
+    --color-tertiary-deep: #be185d;
+    --color-tertiary-soft: #fce7f3;
+    --color-on-tertiary: #ffffff;
+
     /* Error/Semantic */
     --color-error: #c0392b;
     --color-error-container: #fbeae8;
     --color-on-error: #ffffff;
+    --color-on-error-container: #c0392b;
     --color-success: #15935a;
+    --color-success-container: #e8f5e9;
+    --color-on-success: #ffffff;
+    --color-on-success-container: #15935a;
     --color-warning: #c77700;
+    --color-warning-container: #fff8e1;
+    --color-on-warning: #ffffff;
+    --color-on-warning-container: #c77700;
     --color-info: #0f6fd1;
+    --color-info-container: #e8f0fe;
+    --color-on-info: #ffffff;
+    --color-on-info-container: #0f6fd1;
 
     /* MD3 backward compat */
     --color-surface-container-low: #f7f7f7;
@@ -96,13 +118,41 @@
     --md-sys-color-primary: var(--color-primary);
     --md-sys-color-primary-container: var(--color-primary-soft);
     --md-sys-color-on-primary: var(--color-on-primary);
+    --md-sys-color-secondary: var(--color-secondary);
+    --md-sys-color-secondary-container: var(--color-secondary-soft);
+    --md-sys-color-on-secondary: var(--color-on-secondary);
+    --md-sys-color-on-secondary-container: var(--color-secondary);
+    --md-sys-color-tertiary: var(--color-tertiary);
+    --md-sys-color-tertiary-container: var(--color-tertiary-soft);
+    --md-sys-color-on-tertiary: var(--color-on-tertiary);
+    --md-sys-color-on-tertiary-container: var(--color-tertiary);
     --md-sys-color-inverse-on-surface: var(--color-ink);
     --md-sys-color-outline: var(--color-outline);
     --md-sys-color-outline-variant: var(--color-outline-variant);
     --md-sys-color-error: var(--color-error);
+    --md-sys-color-error-container: var(--color-error-container);
+    --md-sys-color-on-error: var(--color-on-error);
+    --md-sys-color-on-error-container: var(--color-on-error-container);
     --md-sys-color-success: var(--color-success);
+    --md-sys-color-success-container: var(--color-success-container);
+    --md-sys-color-on-success: var(--color-on-success);
+    --md-sys-color-on-success-container: var(--color-on-success-container);
     --md-sys-color-warning: var(--color-warning);
+    --md-sys-color-warning-container: var(--color-warning-container);
+    --md-sys-color-on-warning: var(--color-on-warning);
+    --md-sys-color-on-warning-container: var(--color-on-warning-container);
     --md-sys-color-info: var(--color-info);
+    --md-sys-color-info-container: var(--color-info-container);
+    --md-sys-color-on-info: var(--color-on-info);
+    --md-sys-color-on-info-container: var(--color-on-info-container);
+
+    /* ─── Motion tokens (MD3 standard) ─── */
+    --motion-duration-fast: 150ms;
+    --motion-duration-normal: 250ms;
+    --motion-duration-slow: 400ms;
+    --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --motion-easing-decelerate: cubic-bezier(0, 0, 0, 1);
 
     /* Radius — HP two-tier (DESIGN.md full scale) */
     --radius-xs: 2px;
@@ -195,41 +245,6 @@
     --color-brand-ochre: #e8b94a;
     --color-brand-mint: #a4d4c5;
     --color-brand-coral: #ff6b5a;
-
-    /* ═══════════════════════════════════════
-       Dark Mode — HP deep navy interpretation
-       ═══════════════════════════════════════ */
-    --color-dark-canvas: #0c1f5e;
-    --color-dark-surface: #07103a;
-    --color-dark-surface-container-low: #0e3191;
-    --color-dark-surface-container: #0c1f5e;
-    --color-dark-surface-container-high: #07103a;
-    --color-dark-outline: #1a3a7a;
-    --color-dark-outline-variant: #1230a0;
-    --color-dark-ink: #ffffff;
-    --color-dark-on-surface-variant: #a8c9f9;
-    --color-dark-on-surface: #e8e8e8;
-    --color-dark-cloud: #0c1f5e;
-    --color-dark-fog: #07103a;
-}
-
-/* Dark mode auto-swap — .dark class toggle via JS or Tailwind dark: */
-.dark {
-    --color-canvas: var(--color-dark-canvas);
-    --color-ink: var(--color-dark-ink);
-    --color-on-surface-variant: var(--color-dark-on-surface-variant);
-    --color-cloud: var(--color-dark-cloud);
-    --color-fog: var(--color-dark-fog);
-    --color-outline: var(--color-dark-outline);
-    --color-outline-variant: var(--color-dark-outline-variant);
-    --color-surface-container-low: var(--color-dark-surface-container-low);
-    --color-surface-container: var(--color-dark-surface-container);
-    --color-surface-container-high: var(--color-dark-surface-container-high);
-}
-
-.dark .glass {
-    background-color: rgb(14 49 145 / 0.8);
-    backdrop-filter: blur(12px) saturate(1.4);
 }
 
 @layer base {
@@ -405,93 +420,92 @@
         background: linear-gradient(135deg, #b3262b, #f87171);
     }
 
-    /* ─── Semantic Tone Classes (replaces legacy teal/sky/amber/rose/violet/fuchsia/emerald) ─── */
-    /* Format: .tone-{name} → bg-{name}-container text-{name}  */
+    /* ─── Semantic Tone Classes (MD3 tokens — consistent, themable) ─── */
     /* Tone: primary (indigo) — primary actions, clock-in, profile, AI chat */
     .tone-primary {
-        @apply bg-primary-soft text-primary;
+        @apply bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)];
     }
     .tone-primary-bg {
-        @apply bg-primary-soft;
+        @apply bg-[var(--md-sys-color-primary-container)];
     }
     .tone-primary-text {
-        @apply text-primary;
+        @apply text-[var(--md-sys-color-primary)];
     }
 
     /* Tone: info (blue) — informational, leave, attendance */
     .tone-info {
-        @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300;
+        @apply bg-[var(--md-sys-color-info-container)] text-[var(--md-sys-color-on-info-container)];
     }
     .tone-info-bg {
-        @apply bg-blue-100 dark:bg-blue-900/30;
+        @apply bg-[var(--md-sys-color-info-container)];
     }
     .tone-info-text {
-        @apply text-blue-700 dark:text-blue-300;
+        @apply text-[var(--md-sys-color-info)];
     }
 
     /* Tone: success (green) — approvals, confirmations */
     .tone-success {
-        @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
+        @apply bg-[var(--md-sys-color-success-container)] text-[var(--md-sys-color-on-success-container)];
     }
     .tone-success-bg {
-        @apply bg-green-100 dark:bg-green-900/30;
+        @apply bg-[var(--md-sys-color-success-container)];
     }
     .tone-success-text {
-        @apply text-green-700 dark:text-green-300;
+        @apply text-[var(--md-sys-color-success)];
     }
 
     /* Tone: warning (amber) — overtime, pending */
     .tone-warning {
-        @apply bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300;
+        @apply bg-[var(--md-sys-color-warning-container)] text-[var(--md-sys-color-on-warning-container)];
     }
     .tone-warning-bg {
-        @apply bg-amber-100 dark:bg-amber-900/30;
+        @apply bg-[var(--md-sys-color-warning-container)];
     }
     .tone-warning-text {
-        @apply text-amber-700 dark:text-amber-300;
+        @apply text-[var(--md-sys-color-warning)];
     }
 
     /* Tone: error/coral (red/coral) — reimbursement, destructive, claims */
     .tone-error {
-        @apply bg-coral-100 text-coral-700 dark:bg-coral-900/30 dark:text-coral-300;
+        @apply bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)];
     }
     .tone-error-bg {
-        @apply bg-coral-100 dark:bg-coral-900/30;
+        @apply bg-[var(--md-sys-color-error-container)];
     }
     .tone-error-text {
-        @apply text-coral-700 dark:text-coral-300;
+        @apply text-[var(--md-sys-color-error)];
     }
 
     /* Tone: brand (purple/violet) — payroll, AI, knowledge */
     .tone-brand {
-        @apply bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300;
+        @apply bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)];
     }
     .tone-brand-bg {
-        @apply bg-purple-100 dark:bg-purple-900/30;
+        @apply bg-[var(--md-sys-color-secondary-container)];
     }
     .tone-brand-text {
-        @apply text-purple-700 dark:text-purple-300;
+        @apply text-[var(--md-sys-color-secondary)];
     }
 
     /* Tone: secondary (fuchsia/pink) — management, settings */
     .tone-secondary {
-        @apply bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300;
+        @apply bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)];
     }
     .tone-secondary-bg {
-        @apply bg-pink-100 dark:bg-pink-900/30;
+        @apply bg-[var(--md-sys-color-tertiary-container)];
     }
     .tone-secondary-text {
-        @apply text-pink-700 dark:text-pink-300;
+        @apply text-[var(--md-sys-color-tertiary)];
     }
 
     /* Tone: neutral (gray/slate) — security, secondary actions */
     .tone-neutral {
-        @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
+        @apply bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)];
     }
     .tone-neutral-bg {
-        @apply bg-gray-100 dark:bg-gray-800;
+        @apply bg-[var(--md-sys-color-surface-container-high)];
     }
     .tone-neutral-text {
-        @apply text-gray-700 dark:text-gray-300;
+        @apply text-[var(--md-sys-color-on-surface-variant)];
     }
 }

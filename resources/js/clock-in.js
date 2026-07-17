@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+import { ensureBackendReady } from './face-recognition.js';
 
 const modelUrl = '/models/av1';
 
@@ -141,6 +142,7 @@ export default function clockIn(config = {}) {
             try {
                 this.cleanup();
                 await window.loadFaceModels();
+                await ensureBackendReady();
                 await this.startCamera();
                 this.startDetection();
             } catch (error) {

@@ -114,7 +114,7 @@ window.whenAuthReady = () => new Promise((resolve) => {
 
 window.HRConnectAlert = {
     toast(data) {
-        const isDark = document.documentElement.classList.contains('dark');
+        const isDark = false; // Light mode only.
         const config = {
             toast: true,
             position: 'bottom-end',
@@ -265,23 +265,23 @@ document.addEventListener('alpine:init', () => {
         on: false,
 
         init() {
-            // Dark mode temporarily disabled — CSS not ready for dark variant
-            // Remove 'dark' class if set from previous localStorage
+            // Light mode only — HRConnect design system enforces light theme.
+            // Strip any stale 'dark' class from previous builds/localStorage.
             document.documentElement.classList.remove('dark');
+            try { localStorage.removeItem('theme'); } catch (_) {}
         },
 
         toggle() {
-            // Disabled — no-op until dark mode CSS is implemented
+            // No-op — light mode only.
         },
 
         set(mode) {
-            // Disabled
+            // No-op — light mode only.
         },
 
         sync() {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            this.on = this.mode === 'dark' || (this.mode === 'system' && prefersDark);
-            document.documentElement.classList.toggle('dark', this.on);
+            // No-op — light mode only. Never add the 'dark' class.
+            document.documentElement.classList.remove('dark');
         },
     });
 });
