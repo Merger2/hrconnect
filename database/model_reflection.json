@@ -1,0 +1,1529 @@
+[
+    {
+        "class": "App\\Models\\ActivityLog",
+        "table": "activity_logs",
+        "fillable": [
+            "user_id",
+            "action",
+            "description",
+            "ip_address",
+            "count"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ActivityLogDetail",
+        "table": "activity_log_details",
+        "fillable": [
+            "activity_log_id",
+            "entity_type",
+            "entity_id",
+            "field",
+            "old_value",
+            "new_value",
+            "metadata",
+            "integrity_hash"
+        ],
+        "casts": {
+            "id": "int",
+            "old_value": "json",
+            "new_value": "json",
+            "metadata": "json"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Announcement",
+        "table": "announcements",
+        "fillable": [
+            "title",
+            "content",
+            "priority",
+            "created_by",
+            "modal_behavior",
+            "is_active",
+            "published_at",
+            "expired_at"
+        ],
+        "casts": {
+            "id": "int",
+            "published_at": "datetime",
+            "expired_at": "datetime",
+            "is_active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\AnnouncementUserView",
+        "table": "announcement_user_views",
+        "fillable": [
+            "announcement_id",
+            "user_id",
+            "viewed_at",
+            "dismissed_at",
+            "seen_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Appraisal",
+        "table": "appraisals",
+        "fillable": [
+            "employee_id",
+            "reviewer_id",
+            "evaluator_id",
+            "calibrator_id",
+            "period",
+            "review_date",
+            "meeting_date",
+            "final_score",
+            "status",
+            "notes",
+            "employee_acknowledgement",
+            "recommendations"
+        ],
+        "casts": {
+            "id": "int",
+            "meeting_date": "date",
+            "employee_acknowledgement": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\AppraisalEvaluation",
+        "table": "appraisal_evaluations",
+        "fillable": [
+            "appraisal_id",
+            "kpi_template_id",
+            "self_score",
+            "manager_score",
+            "comments"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Approval",
+        "table": "approvals",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ApprovalMatrixRule",
+        "table": "approval_matrix_rules",
+        "fillable": [
+            "module_name",
+            "condition_type",
+            "condition_value",
+            "approval_level",
+            "approver_id",
+            "approver_role_id",
+            "is_active"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\AssetHandover",
+        "table": "asset_handovers",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Attendance",
+        "table": "attendances",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\AttendanceCorrection",
+        "table": "attendance_corrections",
+        "fillable": [
+            "employee_id",
+            "attendance_date",
+            "actual_clock_in",
+            "actual_clock_out",
+            "reason",
+            "attachment",
+            "status",
+            "approved_by",
+            "approved_at",
+            "user_id",
+            "attendance_id",
+            "request_type",
+            "requested_time_in",
+            "requested_time_out",
+            "requested_shift_id",
+            "current_snapshot",
+            "head_approved_by",
+            "head_approved_at",
+            "reviewed_by",
+            "reviewed_at",
+            "rejection_note"
+        ],
+        "casts": {
+            "id": "int",
+            "attendance_date": "date",
+            "actual_clock_in": "datetime",
+            "actual_clock_out": "datetime",
+            "requested_time_in": "datetime",
+            "requested_time_out": "datetime",
+            "current_snapshot": "array",
+            "head_approved_at": "datetime",
+            "reviewed_at": "datetime",
+            "approved_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\AttendanceOfflineSubmission",
+        "table": "attendance_offline_submissions",
+        "fillable": [
+            "employee_id",
+            "attendance_date",
+            "clock_in",
+            "clock_out",
+            "latitude",
+            "longitude",
+            "photo_path",
+            "status",
+            "sync_error",
+            "synced_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\BpjsConfig",
+        "table": "bpjs_configs",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Branch",
+        "table": "branches",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\CashAdvance",
+        "table": "cash_advances",
+        "fillable": [
+            "user_id",
+            "amount",
+            "purpose",
+            "status",
+            "approval_matrix_rule_id",
+            "approval_steps",
+            "approval_current_step",
+            "approval_completed_steps",
+            "payment_month",
+            "payment_year",
+            "approved_by",
+            "approved_at",
+            "head_approved_by",
+            "head_approved_at",
+            "finance_approved_by",
+            "finance_approved_at"
+        ],
+        "casts": {
+            "id": "int",
+            "amount": "decimal:2",
+            "approval_steps": "array",
+            "approval_completed_steps": "array",
+            "approved_at": "datetime",
+            "head_approved_at": "datetime",
+            "finance_approved_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ChatMessage",
+        "table": "chat_messages",
+        "fillable": [
+            "chat_thread_id",
+            "user_id",
+            "body",
+            "attachment_disk",
+            "attachment_path",
+            "attachment_name",
+            "attachment_mime",
+            "attachment_size",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "metadata": "array"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ChatMessageRag",
+        "table": "chat_messages_rag",
+        "fillable": [
+            "chat_session_id",
+            "role",
+            "message",
+            "sources",
+            "tokens_used",
+            "response_time_ms"
+        ],
+        "casts": {
+            "id": "int",
+            "sources": "array",
+            "tokens_used": "integer",
+            "response_time_ms": "integer"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ChatSession",
+        "table": "chat_sessions",
+        "fillable": [
+            "employee_id",
+            "title",
+            "context",
+            "status",
+            "last_message_at"
+        ],
+        "casts": {
+            "id": "int",
+            "last_message_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ChatThread",
+        "table": "chat_threads",
+        "fillable": [
+            "company_id",
+            "created_by",
+            "type",
+            "title",
+            "is_archived",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "is_archived": "boolean",
+            "metadata": "array"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\CloudFile",
+        "table": "cloud_files",
+        "fillable": [
+            "company_id",
+            "project_id",
+            "chat_thread_id",
+            "owner_id",
+            "disk",
+            "path",
+            "original_name",
+            "mime_type",
+            "size",
+            "visibility",
+            "checksum",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "metadata": "array"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Company",
+        "table": "companies",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\CompanyAsset",
+        "table": "company_assets",
+        "fillable": [
+            "name",
+            "serial_number",
+            "type",
+            "purchase_date",
+            "purchase_cost",
+            "expiration_date",
+            "user_id",
+            "date_assigned",
+            "return_date",
+            "status",
+            "notes"
+        ],
+        "casts": {
+            "id": "int",
+            "date_assigned": "date",
+            "return_date": "date",
+            "purchase_date": "date",
+            "expiration_date": "date",
+            "purchase_cost": "decimal:2"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\CompanyAssetHistory",
+        "table": "company_asset_histories",
+        "fillable": [
+            "company_asset_id",
+            "action",
+            "from_employee_id",
+            "to_employee_id",
+            "notes",
+            "created_by"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\CompanySetting",
+        "table": "company_settings",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\CustomFormSubmission",
+        "table": "custom_form_submissions",
+        "fillable": [
+            "custom_form_template_id",
+            "company_id",
+            "submitted_by",
+            "status",
+            "payload",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\CustomFormTemplate",
+        "table": "custom_form_templates",
+        "fillable": [
+            "company_id",
+            "title",
+            "category",
+            "description",
+            "fields",
+            "is_active",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Device",
+        "table": "devices",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Division",
+        "table": "divisions",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\Education",
+        "table": "educations",
+        "fillable": [
+            "name"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Employee",
+        "table": "employees",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\EmployeeDocumentRequest",
+        "table": "employee_document_requests",
+        "fillable": [
+            "employee_id",
+            "document_type_id",
+            "requested_by",
+            "request_source",
+            "purpose",
+            "details",
+            "due_date",
+            "status",
+            "uploaded_path",
+            "uploaded_original_name",
+            "uploaded_at",
+            "generated_path",
+            "generated_template_id",
+            "generated_at",
+            "metadata",
+            "reviewed_by",
+            "reviewed_at",
+            "fulfillment_note",
+            "rejection_note"
+        ],
+        "casts": {
+            "id": "int",
+            "due_date": "date",
+            "uploaded_at": "datetime",
+            "generated_at": "datetime",
+            "reviewed_at": "datetime",
+            "metadata": "array"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\EmployeeDocumentTemplate",
+        "table": "employee_document_templates",
+        "fillable": [
+            "document_type_id",
+            "name",
+            "content",
+            "variables",
+            "is_active"
+        ],
+        "casts": {
+            "id": "int",
+            "variables": "array",
+            "is_active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\EmployeeDocumentType",
+        "table": "employee_document_types",
+        "fillable": [
+            "name",
+            "code",
+            "description",
+            "is_required",
+            "retention_days",
+            "category",
+            "requires_employee_upload",
+            "auto_generate_enabled",
+            "is_active"
+        ],
+        "casts": {
+            "id": "int",
+            "is_required": "boolean",
+            "retention_days": "integer",
+            "requires_employee_upload": "boolean",
+            "auto_generate_enabled": "boolean",
+            "is_active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\FaceDescriptor",
+        "table": "face_descriptors",
+        "fillable": [
+            "employee_id",
+            "embedding",
+            "is_active",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "embedding": "Pgvector\\Laravel\\Vector",
+            "is_active": "boolean",
+            "metadata": "array"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\FamilyDetail",
+        "table": "family_details",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\GeolocationLog",
+        "table": "geolocation_logs",
+        "fillable": [
+            "employee_id",
+            "latitude",
+            "longitude",
+            "accuracy",
+            "device_info",
+            "logged_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\GolonganPtkp",
+        "table": "golongan_ptkps",
+        "fillable": [
+            "kode",
+            "nama",
+            "ptkp_tahun",
+            "ptkp_bulan",
+            "kategori_ter_id",
+            "is_active"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Holiday",
+        "table": "holidays",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\HrChecklistCase",
+        "table": "hr_checklist_cases",
+        "fillable": [
+            "template_id",
+            "user_id",
+            "type",
+            "status",
+            "effective_date",
+            "started_by",
+            "completed_at"
+        ],
+        "casts": {
+            "id": "int",
+            "effective_date": "date",
+            "completed_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\HrChecklistTask",
+        "table": "hr_checklist_tasks",
+        "fillable": [
+            "case_id",
+            "template_item_id",
+            "depends_on_task_id",
+            "assigned_to",
+            "title",
+            "description",
+            "category",
+            "due_date",
+            "status",
+            "completed_by",
+            "completed_at",
+            "notes",
+            "attachment_path",
+            "attachment_original_name",
+            "attachment_uploaded_at"
+        ],
+        "casts": {
+            "id": "int",
+            "due_date": "date",
+            "completed_at": "datetime",
+            "attachment_uploaded_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\HrChecklistTemplate",
+        "table": "hr_checklist_templates",
+        "fillable": [
+            "type",
+            "name",
+            "description",
+            "division_id",
+            "job_title_id",
+            "is_active",
+            "created_by"
+        ],
+        "casts": {
+            "id": "int",
+            "is_active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\HrChecklistTemplateItem",
+        "table": "hr_checklist_template_items",
+        "fillable": [
+            "template_id",
+            "title",
+            "description",
+            "category",
+            "default_assignee_type",
+            "due_offset_days",
+            "is_required",
+            "sort_order",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "due_offset_days": "integer",
+            "is_required": "boolean",
+            "metadata": "array"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ImportExportRun",
+        "table": "import_export_runs",
+        "fillable": [
+            "resource",
+            "operation",
+            "status",
+            "requested_by_user_id",
+            "queue",
+            "source_disk",
+            "source_path",
+            "source_name",
+            "file_disk",
+            "file_path",
+            "file_name",
+            "mime_type",
+            "size_bytes",
+            "progress_percentage",
+            "processed_rows",
+            "total_rows",
+            "meta",
+            "error_message",
+            "started_at",
+            "completed_at",
+            "failed_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ImportProgress",
+        "table": "import_progress",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\IntegrationAttendanceEvent",
+        "table": "integration_attendance_events",
+        "fillable": [
+            "integration_client_id",
+            "source",
+            "idempotency_key",
+            "employee_code",
+            "user_id",
+            "attendance_id",
+            "event_type",
+            "occurred_at",
+            "latitude",
+            "longitude",
+            "device_id",
+            "status",
+            "normalized_payload",
+            "raw_payload",
+            "error_message",
+            "processed_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\IntegrationClient",
+        "table": "integration_clients",
+        "fillable": [
+            "name",
+            "contact_name",
+            "contact_email",
+            "api_key_hash",
+            "secret_encrypted",
+            "abilities",
+            "allowed_sources",
+            "allowed_ips",
+            "last_used_at",
+            "last_used_ip",
+            "expires_at",
+            "revoked_at",
+            "created_by"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\IntegrationDelivery",
+        "table": "integration_deliveries",
+        "fillable": [
+            "integration_endpoint_id",
+            "event_key",
+            "payload",
+            "status",
+            "attempts",
+            "response_status",
+            "response_body",
+            "signature",
+            "dispatched_at",
+            "failed_at"
+        ],
+        "casts": {
+            "id": "int",
+            "payload": "array",
+            "dispatched_at": "datetime",
+            "failed_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\IntegrationEndpoint",
+        "table": "integration_endpoints",
+        "fillable": [
+            "client_id",
+            "name",
+            "event_keys",
+            "url",
+            "secret",
+            "headers",
+            "active"
+        ],
+        "casts": {
+            "id": "int",
+            "event_keys": "array",
+            "headers": "array",
+            "secret": "encrypted",
+            "active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\JobLevel",
+        "table": "job_levels",
+        "fillable": [
+            "name",
+            "rank"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\JobTitle",
+        "table": "job_titles",
+        "fillable": [
+            "name",
+            "description",
+            "is_active",
+            "level",
+            "job_level_id",
+            "division_id"
+        ],
+        "casts": {
+            "id": "int",
+            "is_active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\KategoriTer",
+        "table": "kategori_ter",
+        "fillable": [
+            "kode",
+            "nama",
+            "deskripsi"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\KnowledgeBase",
+        "table": "knowledge_bases",
+        "fillable": [
+            "knowledgeable_type",
+            "knowledgeable_id",
+            "title",
+            "content",
+            "category",
+            "embedding",
+            "status",
+            "source_document",
+            "page_number",
+            "category_id",
+            "summary",
+            "source_type",
+            "file_type",
+            "file_size",
+            "original_filename",
+            "chunk_count",
+            "is_indexed",
+            "indexed_at",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "embedding": "array",
+            "metadata": "array",
+            "page_number": "integer",
+            "file_size": "integer",
+            "chunk_count": "integer",
+            "is_indexed": "boolean",
+            "indexed_at": "datetime",
+            "status": "App\\Enums\\KnowledgeBaseStatus"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\KnowledgeBaseCategory",
+        "table": "knowledge_base_categories",
+        "fillable": [
+            "name",
+            "slug",
+            "description",
+            "parent_id",
+            "color",
+            "icon",
+            "sort_order"
+        ],
+        "casts": {
+            "id": "int",
+            "sort_order": "integer"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\KnowledgeBaseChunk",
+        "table": "knowledge_base_chunks",
+        "fillable": [
+            "knowledge_base_id",
+            "chunk_text",
+            "chunk_index",
+            "embedding_model",
+            "token_count"
+        ],
+        "casts": {
+            "id": "int",
+            "chunk_index": "integer",
+            "token_count": "integer"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\KpiGroup",
+        "table": "kpi_groups",
+        "fillable": [
+            "name",
+            "weight",
+            "is_active",
+            "sort_order"
+        ],
+        "casts": {
+            "id": "int",
+            "weight": "float",
+            "is_active": "boolean",
+            "sort_order": "integer"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\KpiTemplate",
+        "table": "kpi_templates",
+        "fillable": [
+            "kpi_group_id",
+            "name",
+            "indicator_description",
+            "weight",
+            "is_active"
+        ],
+        "casts": {
+            "id": "int",
+            "weight": "float",
+            "is_active": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Leave",
+        "table": "leaves",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\LeaveBalance",
+        "table": "leave_balances",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\LeaveEntitlement",
+        "table": "leave_entitlements",
+        "fillable": [
+            "employee_id",
+            "leave_type_id",
+            "year",
+            "total_days",
+            "used_days",
+            "remaining_days"
+        ],
+        "casts": {
+            "id": "int",
+            "total_days": "decimal:1",
+            "used_days": "decimal:1",
+            "remaining_days": "decimal:1"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\LeaveType",
+        "table": "leave_types",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Loan",
+        "table": "loans",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\LoanInstallment",
+        "table": "loan_installments",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\OnlineMeeting",
+        "table": "online_meetings",
+        "fillable": [
+            "company_id",
+            "chat_thread_id",
+            "title",
+            "description",
+            "host_id",
+            "start_time",
+            "end_time",
+            "meeting_url",
+            "platform",
+            "meeting_id",
+            "password",
+            "status",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "start_time": "datetime",
+            "end_time": "datetime",
+            "metadata": "array"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\Overtime",
+        "table": "overtimes",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\Payroll",
+        "table": "payrolls",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\PayrollAdjustment",
+        "table": "payroll_adjustments",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\PayrollAudit",
+        "table": "payroll_audits",
+        "fillable": [
+            "payroll_id",
+            "employee_id",
+            "basic_salary",
+            "total_allowance",
+            "overtime_pay",
+            "gross_salary",
+            "ptkp",
+            "pph21_ter",
+            "pph21_netto",
+            "pph21_rate",
+            "bpjs_health",
+            "bpjs_employment",
+            "loan_deduction",
+            "attendance_penalty",
+            "total_deduction",
+            "net_salary",
+            "meta",
+            "calculated_by"
+        ],
+        "casts": {
+            "id": "int",
+            "basic_salary": "decimal:2",
+            "total_allowance": "decimal:2",
+            "overtime_pay": "decimal:2",
+            "gross_salary": "decimal:2",
+            "ptkp": "decimal:2",
+            "pph21_ter": "decimal:2",
+            "pph21_netto": "decimal:2",
+            "pph21_rate": "decimal:2",
+            "bpjs_health": "decimal:2",
+            "bpjs_employment": "decimal:2",
+            "loan_deduction": "decimal:2",
+            "attendance_penalty": "decimal:2",
+            "total_deduction": "decimal:2",
+            "net_salary": "decimal:2",
+            "meta": "array",
+            "calculated_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\PayrollComponent",
+        "table": "payroll_components",
+        "fillable": [
+            "name",
+            "code",
+            "type",
+            "description",
+            "is_taxable",
+            "is_bpjs_applicable",
+            "is_active",
+            "percentage"
+        ],
+        "casts": {
+            "id": "int",
+            "is_taxable": "boolean",
+            "is_bpjs_applicable": "boolean",
+            "is_active": "boolean",
+            "percentage": "decimal:2"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\PayrollItem",
+        "table": "payroll_items",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\PerformanceReview",
+        "table": "performance_reviews",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\Position",
+        "table": "positions",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\Project",
+        "table": "projects",
+        "fillable": [
+            "company_id",
+            "client_id",
+            "branch_id",
+            "manager_id",
+            "name",
+            "code",
+            "status",
+            "starts_at",
+            "ends_at",
+            "description",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ProjectTask",
+        "table": "project_tasks",
+        "fillable": [
+            "project_id",
+            "company_id",
+            "assigned_to",
+            "title",
+            "status",
+            "priority",
+            "due_date",
+            "description",
+            "metadata",
+            "completed_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ProjectTaskChecklistItem",
+        "table": "project_task_checklist_items",
+        "fillable": [
+            "project_task_id",
+            "title",
+            "is_done",
+            "sort_order",
+            "completed_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ProjectVisitEvidence",
+        "table": "project_visit_evidences",
+        "fillable": [
+            "log_name",
+            "event",
+            "subject_type",
+            "subject_id",
+            "attributes",
+            "old_attributes",
+            "tags",
+            "performed_by_type",
+            "performed_by_id",
+            "batch_uuid",
+            "user_id",
+            "evidence_url",
+            "evidence_type",
+            "evidence_filename",
+            "evidence_size",
+            "evidence_metadata",
+            "evidence_hash",
+            "project_id",
+            "evidence_description"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Reimbursement",
+        "table": "reimbursements",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\ReimbursementCategory",
+        "table": "reimbursement_categories",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Role",
+        "table": "roles",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Schedule",
+        "table": "schedules",
+        "fillable": [
+            "user_id",
+            "shift_id",
+            "date",
+            "is_off"
+        ],
+        "casts": {
+            "id": "int",
+            "date": "date",
+            "is_off": "boolean"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Setting",
+        "table": "settings",
+        "fillable": [
+            "key",
+            "value",
+            "group",
+            "type",
+            "description"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Shift",
+        "table": "shifts",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\ShiftSchedule",
+        "table": "shift_schedules",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\ShiftSwapRequest",
+        "table": "shift_swap_requests",
+        "fillable": [
+            "user_id",
+            "schedule_id",
+            "schedule_date",
+            "requester_id",
+            "target_id",
+            "current_shift_id",
+            "requested_shift_id",
+            "replacement_user_id",
+            "reason",
+            "status",
+            "reviewed_by",
+            "reviewed_at",
+            "rejection_note"
+        ],
+        "casts": {
+            "id": "int",
+            "schedule_date": "date",
+            "reviewed_at": "datetime"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Site",
+        "table": "sites",
+        "fillable": [
+            "name",
+            "code",
+            "address",
+            "city",
+            "province",
+            "postal_code",
+            "phone",
+            "email",
+            "latitude",
+            "longitude",
+            "radius_meters",
+            "is_active",
+            "settings"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\SystemBackupRun",
+        "table": "system_backup_runs",
+        "fillable": [
+            "type",
+            "status",
+            "requested_by_user_id",
+            "queue",
+            "file_disk",
+            "file_path",
+            "file_name",
+            "size_bytes",
+            "error_message",
+            "meta",
+            "started_at",
+            "completed_at",
+            "failed_at",
+            "deleted_at"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\TarifTer",
+        "table": "tarif_ter",
+        "fillable": [
+            "kategori_ter_id",
+            "batas_bawah",
+            "batas_atas",
+            "tarif"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\User",
+        "table": "users",
+        "fillable": [],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": true
+    },
+    {
+        "class": "App\\Models\\UserNotificationPreference",
+        "table": "user_notification_preferences",
+        "fillable": [
+            "user_id",
+            "event_key",
+            "channels",
+            "digest_enabled",
+            "digest_frequency",
+            "external_routes"
+        ],
+        "casts": {
+            "id": "int"
+        },
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\Wilayah",
+        "table": "wilayah",
+        "fillable": [
+            "kode",
+            "nama"
+        ],
+        "casts": [],
+        "uses_softdeletes": false
+    },
+    {
+        "class": "App\\Models\\WorkFromHomeRequest",
+        "table": "work_from_home_requests",
+        "fillable": [
+            "user_id",
+            "company_id",
+            "date",
+            "start_date",
+            "end_date",
+            "start_time",
+            "end_time",
+            "location_address",
+            "reason",
+            "status",
+            "approved_by",
+            "approved_at",
+            "reviewed_by",
+            "reviewed_at",
+            "review_note",
+            "rejection_reason",
+            "metadata"
+        ],
+        "casts": {
+            "id": "int",
+            "start_date": "date",
+            "end_date": "date",
+            "date": "date",
+            "approved_at": "datetime",
+            "reviewed_at": "datetime",
+            "metadata": "array"
+        },
+        "uses_softdeletes": false
+    }
+]

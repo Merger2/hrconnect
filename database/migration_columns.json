@@ -1,0 +1,1992 @@
+{
+    "users": {
+        "files": [
+            "0001_01_01_000000_create_users_table.php",
+            "2026_07_21_112036_add_group_to_users_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "email": "string",
+            "email_verified_at": "timestamp",
+            "password": "string",
+            "google_id": "string",
+            "password_changed_at": "timestamp",
+            "last_activity_at": "timestamp",
+            "profile_photo_path": "string",
+            "two_factor_secret": "text",
+            "two_factor_recovery_codes": "text",
+            "two_factor_confirmed_at": "timestamp",
+            "manager_id": "foreignId",
+            "company_id": "foreignId",
+            "token": "string",
+            "created_at": "timestamp",
+            "id": "string",
+            "user_id": "foreignId",
+            "ip_address": "string",
+            "user_agent": "text",
+            "last_activity": "integer",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "remember_token": "rememberToken",
+            "group": "string"
+        }
+    },
+    "cache": {
+        "files": [
+            "0001_01_01_000001_create_cache_table.php"
+        ],
+        "columns": {
+            "key": "string",
+            "value": "text",
+            "expiration": "integer",
+            "owner": "string"
+        }
+    },
+    "jobs": {
+        "files": [
+            "0001_01_01_000002_create_jobs_table.php"
+        ],
+        "columns": {
+            "queue": "text",
+            "payload": "text",
+            "attempts": "integer",
+            "reserved_at": "integer",
+            "available_at": "integer",
+            "created_at": "integer",
+            "id": "string",
+            "name": "string",
+            "total_jobs": "integer",
+            "pending_jobs": "integer",
+            "failed_jobs": "integer",
+            "failed_job_ids": "text",
+            "options": "text",
+            "cancelled_at": "integer",
+            "finished_at": "integer",
+            "uuid": "string",
+            "connection": "text",
+            "exception": "text",
+            "failed_at": "timestamp"
+        }
+    },
+    "activity_logs": {
+        "files": [
+            "2026_01_01_140536_create_activity_logs_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "action": "string",
+            "description": "text",
+            "count": "integer",
+            "ip_address": "string",
+            "integrity_hash": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "companies": {
+        "files": [
+            "2026_04_12_203653_create_companies_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "phone": "string",
+            "email": "string",
+            "website": "string",
+            "npwp": "text",
+            "code": "string",
+            "logo": "string",
+            "is_active": "boolean",
+            "slug": "string",
+            "status": "string",
+            "kode_perusahaan": "string",
+            "kebijakan_cuti": "text",
+            "kebijakan_lembur": "text",
+            "kebijakan_overtime": "text",
+            "tax_no": "string",
+            "alasan_resign": "text",
+            "bank_name": "string",
+            "nomor_rekening": "string",
+            "npwp_resign": "string",
+            "telepon": "string",
+            "status_perusahaan": "string",
+            "inisial": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "shifts": {
+        "files": [
+            "2026_04_12_211908_create_shifts_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "start_time": "time",
+            "end_time": "time",
+            "late_tolerance_minutes": "integer",
+            "is_active": "boolean",
+            "schedule_type": "string",
+            "shift_pattern": "string",
+            "break_minutes": "integer",
+            "is_flexible": "boolean",
+            "flexible_start": "time",
+            "flexible_end": "time",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "holidays": {
+        "files": [
+            "2026_04_12_212245_create_holidays_table.php"
+        ],
+        "columns": {
+            "date": "date",
+            "name": "string",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "leave_types": {
+        "files": [
+            "2026_04_12_212804_create_leave_types_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "code": "string",
+            "quota": "integer",
+            "is_paid": "boolean",
+            "deducts_from_quota": "boolean",
+            "eligible_for_carry_forward": "boolean",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "assets": {
+        "files": [
+            "2026_04_12_224615_create_assets_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "name": "string",
+            "serial_number": "string",
+            "code": "string",
+            "category": "string",
+            "is_available": "boolean",
+            "status": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "branches": {
+        "files": [
+            "2026_04_13_152045_create_branches_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "name": "string",
+            "code": "string",
+            "type": "string",
+            "address": "text",
+            "alamat_lengkap": "text",
+            "telepon": "string",
+            "email": "string",
+            "is_main": "boolean",
+            "is_active": "boolean",
+            "latitude": "decimal",
+            "longitude": "decimal",
+            "radius": "integer",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "divisions": {
+        "files": [
+            "2026_04_13_153747_create_divisions_table.php"
+        ],
+        "columns": {
+            "branch_id": "foreignId",
+            "name": "string",
+            "code": "string",
+            "description": "text",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "job_titles": {
+        "files": [
+            "2026_04_13_154751_create_job_titles_table.php",
+            "2026_07_20_000101_update_job_titles_table.php"
+        ],
+        "columns": {
+            "title": "string",
+            "level": "string",
+            "description": "text",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "job_level_id": "foreignId",
+            "division_id": "foreignId"
+        }
+    },
+    "positions": {
+        "files": [
+            "2026_04_13_154751_create_positions_table.php"
+        ],
+        "columns": {
+            "division_id": "foreignId",
+            "name": "string",
+            "code": "string",
+            "grade": "integer",
+            "basic_salary": "decimal",
+            "allowance_jabatan": "decimal",
+            "is_active": "boolean",
+            "job_title_id": "foreignId",
+            "min_salary": "decimal",
+            "max_salary": "decimal",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "golongan_ptkp": {
+        "files": [
+            "2026_04_15_100001_create_golongan_ptkp_table.php",
+            "2026_07_21_191203_restructure_ter_tax_tables.php"
+        ],
+        "columns": {
+            "kode": "string",
+            "nama": "string",
+            "ptkp_tahun": "decimal",
+            "ptkp_bulan": "decimal",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "kategori_ter_id": "foreignId",
+            "batas_bawah": "decimal",
+            "batas_atas": "decimal",
+            "tarif": "decimal",
+            "penghasilan_min": "decimal",
+            "penghasilan_max": "decimal",
+            "tarif_a": "decimal",
+            "tarif_b": "decimal",
+            "tarif_c": "decimal",
+            "min_income": "decimal",
+            "max_income": "decimal",
+            "rate": "decimal",
+            "effective_rate": "decimal"
+        }
+    },
+    "tarif_ter": {
+        "files": [
+            "2026_04_15_100002_create_tarif_ter_table.php"
+        ],
+        "columns": {
+            "penghasilan_min": "decimal",
+            "penghasilan_max": "decimal",
+            "tarif_a": "decimal",
+            "tarif_b": "decimal",
+            "tarif_c": "decimal",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "kategori_ter": {
+        "files": [
+            "2026_04_15_100003_create_kategori_ter_table.php"
+        ],
+        "columns": {
+            "kode": "string",
+            "nama": "string",
+            "deskripsi": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "employees": {
+        "files": [
+            "2026_04_16_192201_create_employees_table.php",
+            "2026_07_21_000020_add_lifecycle_fields_to_employees_table.php",
+            "2026_07_24_083812_fix_employee_wilayah_fk_to_laravolt.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "parent_id": "foreignId",
+            "company_id": "foreignId",
+            "branch_id": "foreignId",
+            "division_id": "foreignId",
+            "position_id": "foreignId",
+            "shift_id": "foreignId",
+            "province_id": "foreignId",
+            "city_id": "foreignId",
+            "district_id": "foreignId",
+            "village_id": "foreignId",
+            "postal_code": "string",
+            "address_detail": "text",
+            "employee_number": "string",
+            "full_name": "string",
+            "phone": "text",
+            "bank_account_number": "text",
+            "bank_name": "string",
+            "npwp": "text",
+            "nik": "text",
+            "marital_status": "string",
+            "blood_type": "string",
+            "status": "string",
+            "birth_date": "date",
+            "join_date": "date",
+            "employment_type": "string",
+            "contract_start_date": "date",
+            "contract_end_date": "date",
+            "resign_date": "date",
+            "deceased_date": "date",
+            "termination_type": "string",
+            "termination_reason": "text",
+            "phk_variant": "string",
+            "pin": "string",
+            "golongan_ptkp_id": "foreignId",
+            "tarif_ter_id": "foreignId",
+            "kategori_ter_id": "foreignId",
+            "kode_karyawan": "string",
+            "tanggal_masuk": "date",
+            "status_karyawan": "enum",
+            "nip": "string",
+            "bank_account_name": "string",
+            "ptkp_status": "string",
+            "payslip_password": "string",
+            "payslip_password_set_at": "timestamp",
+            "basic_salary": "decimal",
+            "bank_account_holder": "string",
+            "emergency_contact_name": "text",
+            "emergency_contact_phone": "text",
+            "emergency_contact_relation": "text",
+            "bpjs_kesehatan": "text",
+            "bpjs_ketenagakerjaan": "text",
+            "photo": "string",
+            "education_level": "string",
+            "institution_name": "string",
+            "major": "string",
+            "graduation_year": "integer",
+            "salary_type": "string",
+            "created_by": "foreignId",
+            "updated_by": "foreignId",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "probation_ends_at": "date",
+            "contract_ends_at": "date",
+            "resignation_submitted_at": "timestamp",
+            "resigned_at": "timestamp",
+            "resignation_reason": "text",
+            "exit_interview_completed_at": "timestamp",
+            "account_auto_disable_at": "timestamp",
+            "employment_status": "string",
+            "account_deletion_requested_at": "timestamp",
+            "account_deletion_reason": "text",
+            "account_deletion_reviewed_at": "timestamp",
+            "account_deletion_reviewed_by": "foreignId",
+            "account_deletion_review_notes": "text",
+            "manager_id": "foreignId"
+        }
+    },
+    "devices": {
+        "files": [
+            "2026_04_17_043732_create_devices_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "device_uuid": "string",
+            "device_type": "string",
+            "device_name": "string",
+            "browser": "string",
+            "os": "string",
+            "is_verified": "boolean",
+            "verified_at": "timestamp",
+            "last_used_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "attendances": {
+        "files": [
+            "2026_04_17_175332_create_attendances_table.php",
+            "2026_07_24_114410_add_approval_status_to_attendances_table.php",
+            "2026_07_24_121607_add_leave_fields_to_attendances_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "shift_id": "foreignId",
+            "date": "date",
+            "clock_in": "timestamp",
+            "clock_out": "timestamp",
+            "lat_in": "decimal",
+            "long_in": "decimal",
+            "clock_in_is_mocked": "boolean",
+            "clock_in_accuracy": "decimal",
+            "lat_out": "decimal",
+            "long_out": "decimal",
+            "clock_out_is_mocked": "boolean",
+            "clock_out_accuracy": "decimal",
+            "device_fingerprint": "string",
+            "face_similarity_score": "decimal",
+            "clock_out_verification_method": "string",
+            "clock_out_face_similarity_score": "decimal",
+            "photo_selfie_in": "string",
+            "photo_selfie_out": "string",
+            "status": "string",
+            "is_wfa": "boolean",
+            "status_wfa": "string",
+            "exception_type": "string",
+            "exception_notes": "text",
+            "approved_late_by": "foreignId",
+            "verification_method": "string",
+            "wfa_note": "text",
+            "late_minutes": "integer",
+            "risk_level": "string",
+            "risk_factors": "json",
+            "device_id": "foreignId",
+            "verification_type": "enum",
+            "photo_clock_in": "string",
+            "photo_clock_out": "string",
+            "ip_address": "string",
+            "is_offline_sync": "boolean",
+            "synced_at": "timestamp",
+            "latitude": "string",
+            "longitude": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "approval_status": "string",
+            "leave_type_id": "foreignId",
+            "note": "text"
+        }
+    },
+    "leaves": {
+        "files": [
+            "2026_04_17_175549_create_leaves_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "leave_type_id": "foreignId",
+            "start_date": "date",
+            "end_date": "date",
+            "day_type": "string",
+            "total_days": "decimal",
+            "reason": "text",
+            "proof_file": "string",
+            "rejection_reason": "text",
+            "status": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "family_details": {
+        "files": [
+            "2026_04_19_043720_create_family_details_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "name": "string",
+            "relationship": "string",
+            "nik": "text",
+            "birth_date": "date",
+            "job": "string",
+            "phone": "text",
+            "address": "text",
+            "is_emergency": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "asset_handovers": {
+        "files": [
+            "2026_04_19_044010_create_asset_handovers_table.php"
+        ],
+        "columns": {
+            "asset_id": "foreignId",
+            "employee_id": "foreignId",
+            "handover_date": "date",
+            "return_date": "date",
+            "condition": "string",
+            "category": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "overtimes": {
+        "files": [
+            "2026_04_19_044028_create_overtimes_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "attendance_id": "foreignId",
+            "date": "date",
+            "start_time": "time",
+            "end_time": "time",
+            "description": "text",
+            "total_hours": "decimal",
+            "amount": "decimal",
+            "insentif": "decimal",
+            "approved_by": "foreignId",
+            "approved_at": "timestamp",
+            "notes": "text",
+            "rejection_reason": "text",
+            "status": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "loans": {
+        "files": [
+            "2026_04_19_044050_create_loans_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "rejection_reason": "text",
+            "created_by": "foreignId",
+            "amount": "decimal",
+            "interest_rate": "decimal",
+            "tenor_months": "integer",
+            "monthly_installment": "decimal",
+            "status": "string",
+            "is_settled": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "performance_reviews": {
+        "files": [
+            "2026_04_19_044109_create_performance_reviews_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "reviewer_id": "foreignId",
+            "status": "string",
+            "review_date": "date",
+            "period": "string",
+            "final_score": "decimal",
+            "notes": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "reimbursement_categories": {
+        "files": [
+            "2026_04_20_161757_create_reimbursement_categories_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "name": "string",
+            "code": "string",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "approvals": {
+        "files": [
+            "2026_04_20_192640_create_approvals_table.php"
+        ],
+        "columns": {
+            "approver_id": "foreignId",
+            "approved_at": "timestamp",
+            "level": "integer",
+            "status": "string",
+            "notes": "text",
+            "approvable_type": "morphs",
+            "approvable_id": "bigInteger",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "payrolls": {
+        "files": [
+            "2026_04_20_192703_create_payrolls_table.php",
+            "2026_07_22_032214_add_rejection_reason_to_payrolls_table.php",
+            "2026_07_23_235000_remove_duplicate_payroll_columns.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "period": "string",
+            "basic_salary": "decimal",
+            "total_allowance": "decimal",
+            "gross_salary": "decimal",
+            "overtime_pay": "decimal",
+            "pph21": "decimal",
+            "bpjs_health": "decimal",
+            "bpjs_employment": "decimal",
+            "loan_deduction": "decimal",
+            "attendance_penalty": "decimal",
+            "total_deduction": "decimal",
+            "net_salary": "decimal",
+            "allowances_total": "decimal",
+            "deductions_total": "decimal",
+            "overtime_amount": "decimal",
+            "thp": "decimal",
+            "payroll_period": "string",
+            "payment_date": "date",
+            "payment_method": "enum",
+            "status": "string",
+            "pdf_path": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "rejection_reason": "text"
+        }
+    },
+    "loan_installments": {
+        "files": [
+            "2026_04_20_192725_create_loan_installments_table.php"
+        ],
+        "columns": {
+            "loan_id": "foreignId",
+            "payroll_id": "foreignId",
+            "amount_paid": "decimal",
+            "installment_number": "integer",
+            "status": "string",
+            "due_date": "date",
+            "paid_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "payroll_items": {
+        "files": [
+            "2026_04_20_203528_create_payroll_items_table.php"
+        ],
+        "columns": {
+            "payroll_id": "foreignId",
+            "name": "string",
+            "amount": "decimal",
+            "type": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "activity_log": {
+        "files": [
+            "2026_04_20_212019_create_activity_log_table.php"
+        ],
+        "columns": {
+            "log_name": "string",
+            "description": "text",
+            "event": "string",
+            "attribute_changes": "json",
+            "properties": "json",
+            "subject_type": "morphs",
+            "subject_id": "bigInteger",
+            "causer_type": "morphs",
+            "causer_id": "bigInteger",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "blind_indexes": {
+        "files": [
+            "2026_04_21_014315_create_blind_indexes_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "value": "string",
+            "indexable_type": "morphs",
+            "indexable_id": "bigInteger"
+        }
+    },
+    "reimbursements": {
+        "files": [
+            "2026_04_21_044041_create_reimbursements_table.php",
+            "2026_07_23_230000_add_approved_at_to_reimbursements_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "payroll_id": "foreignId",
+            "category_id": "foreignId",
+            "title": "string",
+            "expense_date": "date",
+            "amount": "decimal",
+            "description": "text",
+            "receipt_file": "string",
+            "attachment_path": "string",
+            "rejection_reason": "text",
+            "status": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "approved_at": "timestamp"
+        }
+    },
+    "knowledge_base_categories": {
+        "files": [
+            "2026_04_27_000000_create_knowledge_base_categories_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "slug": "string",
+            "description": "text",
+            "parent_id": "foreignId",
+            "sort_order": "integer",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "knowledge_bases": {
+        "files": [
+            "2026_04_28_133152_create_knowledge_bases_table.php"
+        ],
+        "columns": {
+            "title": "string",
+            "content": "text",
+            "category": "string",
+            "embedding": "text",
+            "status": "string",
+            "source_document": "string",
+            "page_number": "integer",
+            "category_id": "foreignId",
+            "summary": "text",
+            "source_type": "string",
+            "file_type": "string",
+            "file_size": "integer",
+            "original_filename": "string",
+            "chunk_count": "integer",
+            "is_indexed": "boolean",
+            "indexed_at": "timestamp",
+            "metadata": "json",
+            "knowledgeable_type": "morphs",
+            "knowledgeable_id": "bigInteger",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "leave_entitlements": {
+        "files": [
+            "2026_05_08_000005_create_leave_entitlements_table.php"
+        ],
+        "columns": {
+            "leave_type_id": "foreignId",
+            "employee_id": "foreignId",
+            "total_days": "decimal",
+            "used_days": "decimal",
+            "remaining_days": "decimal",
+            "year": "year",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "company_settings": {
+        "files": [
+            "2026_05_08_161731_create_company_settings_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "key": "string",
+            "value": "json",
+            "description": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "shift_schedules": {
+        "files": [
+            "2026_05_08_161810_create_shift_schedules_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "shift_id": "foreignId",
+            "date": "date",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "leave_balances": {
+        "files": [
+            "2026_05_08_161834_create_leave_balances_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "leave_type_id": "foreignId",
+            "year": "integer",
+            "quota": "decimal",
+            "used": "decimal",
+            "carry_forward": "decimal",
+            "carry_forward_deadline": "date",
+            "entitlement_id": "foreignId",
+            "carried_forward": "decimal",
+            "expired_at": "date",
+            "is_frozen": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "tax_configs": {
+        "files": [
+            "2026_05_08_161851_create_tax_configs_table.php"
+        ],
+        "columns": {
+            "min_income": "decimal",
+            "max_income": "decimal",
+            "rate": "decimal",
+            "effective_rate": "decimal",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "bpjs_configs": {
+        "files": [
+            "2026_05_08_161905_create_bpjs_configs_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "employer_rate": "decimal",
+            "employee_rate": "decimal",
+            "ceiling": "decimal",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "payroll_adjustments": {
+        "files": [
+            "2026_05_08_161915_create_payroll_adjustments_table.php"
+        ],
+        "columns": {
+            "payroll_id": "foreignId",
+            "amount": "decimal",
+            "reason": "text",
+            "created_by": "foreignId",
+            "applied_to_period": "date",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "personal_access_tokens": {
+        "files": [
+            "2026_05_31_055521_create_personal_access_tokens_table.php"
+        ],
+        "columns": {
+            "name": "text",
+            "token": "string",
+            "abilities": "text",
+            "last_used_at": "timestamp",
+            "expires_at": "timestamp",
+            "tokenable_type": "morphs",
+            "tokenable_id": "bigInteger",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "notifications": {
+        "files": [
+            "2026_06_03_154732_create_notifications_table.php"
+        ],
+        "columns": {
+            "id": "uuid",
+            "type": "string",
+            "data": "text",
+            "read_at": "timestamp",
+            "notifiable_type": "morphs",
+            "notifiable_id": "bigInteger",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "face_descriptors": {
+        "files": [
+            "2026_06_27_203025_create_face_descriptors_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "embedding": "text",
+            "is_active": "boolean",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "import_progress": {
+        "files": [
+            "2026_06_28_031331_create_import_progress_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "type": "string",
+            "file_path": "string",
+            "status": "string",
+            "total_rows": "integer",
+            "processed_rows": "integer",
+            "failed_rows": "integer",
+            "errors": "text",
+            "completed_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "user_notification_preferences": {
+        "files": [
+            "2026_07_06_022717_create_user_notification_preferences_table.php",
+            "2026_07_23_190747_add_external_routes_to_user_notification_preferences_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "event_key": "string",
+            "channels": "json",
+            "digest_enabled": "boolean",
+            "digest_frequency": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "external_routes": "json"
+        }
+    },
+    "activity_log_details": {
+        "files": [
+            "2026_07_19_132647_create_activity_log_details_table.php"
+        ],
+        "columns": {
+            "activity_log_id": "foreignId",
+            "entity_type": "string",
+            "field": "string",
+            "old_value": "json",
+            "new_value": "json",
+            "metadata": "json",
+            "integrity_hash": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "payroll_components": {
+        "files": [
+            "2026_07_20_000007_create_payroll_components_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "code": "string",
+            "type": "enum",
+            "description": "text",
+            "is_taxable": "boolean",
+            "is_bpjs_applicable": "boolean",
+            "is_active": "boolean",
+            "percentage": "decimal",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "chat_sessions": {
+        "files": [
+            "2026_07_20_000008_create_chat_sessions_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "title": "string",
+            "context": "text",
+            "status": "enum",
+            "last_message_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "employee_document_types": {
+        "files": [
+            "2026_07_20_000009_create_employee_document_types_table.php",
+            "2026_07_20_000013_add_code_to_employee_document_types_table.php",
+            "2026_07_20_000013_add_missing_columns_to_employee_document_types_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "slug": "string",
+            "description": "text",
+            "is_required": "boolean",
+            "icon": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "code": "string",
+            "retention_days": "integer",
+            "category": "string",
+            "requires_employee_upload": "boolean",
+            "auto_generate_enabled": "boolean",
+            "is_active": "boolean",
+            "admin_requestable": "boolean"
+        }
+    },
+    "approval_matrix_rules": {
+        "files": [
+            "2026_07_20_000010_create_approval_matrix_rules_table.php"
+        ],
+        "columns": {
+            "module_name": "string",
+            "condition_type": "string",
+            "condition_value": "string",
+            "approval_level": "integer",
+            "approver_id": "foreignId",
+            "approver_role_id": "foreignId",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "employee_document_templates": {
+        "files": [
+            "2026_07_20_000010_create_employee_document_templates_table.php"
+        ],
+        "columns": {
+            "document_type_id": "foreignId",
+            "name": "string",
+            "content": "text",
+            "variables": "text",
+            "paper_size": "string",
+            "orientation": "string",
+            "header": "text",
+            "footer": "text",
+            "layout_options": "json",
+            "file_path": "string",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "announcements": {
+        "files": [
+            "2026_07_20_000011_create_announcements_table.php",
+            "2026_07_23_132436_add_missing_columns_to_announcements_table.php"
+        ],
+        "columns": {
+            "title": "string",
+            "content": "text",
+            "priority": "enum",
+            "created_by": "foreignId",
+            "modal_behavior": "string",
+            "is_active": "boolean",
+            "published_at": "timestamp",
+            "expired_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "employee_documents": {
+        "files": [
+            "2026_07_20_000011_create_employee_documents_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "document_type_id": "foreignId",
+            "name": "string",
+            "file_path": "string",
+            "file_type": "string",
+            "file_size": "integer",
+            "expired_at": "date",
+            "notes": "text",
+            "is_verified": "boolean",
+            "verified_by": "foreignId",
+            "verified_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "announcement_user_views": {
+        "files": [
+            "2026_07_20_000012_create_announcement_user_views_table.php"
+        ],
+        "columns": {
+            "announcement_id": "foreignId",
+            "user_id": "foreignId",
+            "viewed_at": "timestamp",
+            "dismissed_at": "timestamp",
+            "seen_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "employee_document_requests": {
+        "files": [
+            "2026_07_20_000012_create_employee_document_requests_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "document_type_id": "foreignId",
+            "requested_by": "foreignId",
+            "request_source": "string",
+            "purpose": "text",
+            "details": "text",
+            "due_date": "date",
+            "status": "enum",
+            "uploaded_path": "string",
+            "uploaded_original_name": "string",
+            "uploaded_at": "timestamp",
+            "generated_path": "string",
+            "generated_template_id": "foreignId",
+            "generated_at": "timestamp",
+            "metadata": "json",
+            "reviewed_by": "foreignId",
+            "reviewed_at": "timestamp",
+            "fulfillment_note": "text",
+            "rejection_note": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "company_assets": {
+        "files": [
+            "2026_07_20_000013_create_company_assets_table.php",
+            "2026_07_20_000103_update_company_assets_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "kode_aset": "string",
+            "category": "string",
+            "brand": "string",
+            "model": "string",
+            "serial_number": "string",
+            "purchase_price": "decimal",
+            "purchase_date": "date",
+            "status": "enum",
+            "assigned_to": "foreignId",
+            "assigned_at": "date",
+            "specifications": "text",
+            "photo_path": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "expiration_date": "date",
+            "return_date": "date",
+            "notes": "text",
+            "user_id": "foreignId"
+        }
+    },
+    "company_asset_histories": {
+        "files": [
+            "2026_07_20_000014_create_company_asset_histories_table.php"
+        ],
+        "columns": {
+            "company_asset_id": "foreignId",
+            "action": "enum",
+            "from_employee_id": "foreignId",
+            "to_employee_id": "foreignId",
+            "notes": "text",
+            "created_by": "foreignId",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "appraisals": {
+        "files": [
+            "2026_07_20_000015_create_appraisals_table.php",
+            "2026_07_20_000106_update_appraisals_table.php",
+            "2026_07_21_190035_add_appraisal_acknowledgement_to_appraisals_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "reviewer_id": "foreignId",
+            "period": "string",
+            "review_date": "date",
+            "final_score": "decimal",
+            "status": "enum",
+            "notes": "text",
+            "recommendations": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "user_id": "foreignId",
+            "meeting_date": "date",
+            "employee_acknowledgement": "boolean",
+            "evaluator_id": "foreignId",
+            "calibrator_id": "foreignId"
+        }
+    },
+    "kpi_templates": {
+        "files": [
+            "2026_07_20_000016_create_kpi_templates_table.php",
+            "2026_07_22_040001_fix_kpi_relations_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "description": "text",
+            "department_type": "string",
+            "is_active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "kpi_group_id": "foreignId",
+            "indicator_description": "string",
+            "weight": "decimal",
+            "kpi_template_id": "foreignId"
+        }
+    },
+    "kpi_groups": {
+        "files": [
+            "2026_07_20_000017_create_kpi_groups_table.php"
+        ],
+        "columns": {
+            "kpi_template_id": "foreignId",
+            "name": "string",
+            "weight": "decimal",
+            "sort_order": "integer",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "attendance_corrections": {
+        "files": [
+            "2026_07_20_000018_create_attendance_corrections_table.php",
+            "2026_07_20_000100_update_attendance_corrections_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "attendance_date": "date",
+            "actual_clock_in": "time",
+            "actual_clock_out": "time",
+            "reason": "text",
+            "attachment": "string",
+            "status": "enum",
+            "approved_by": "foreignId",
+            "approved_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "user_id": "foreignId",
+            "attendance_id": "foreignId",
+            "request_type": "string",
+            "requested_time_in": "timestamp",
+            "requested_time_out": "timestamp",
+            "requested_shift_id": "foreignId",
+            "current_snapshot": "jsonb",
+            "head_approved_by": "foreignId",
+            "head_approved_at": "timestamp",
+            "reviewed_by": "foreignId",
+            "reviewed_at": "timestamp",
+            "rejection_note": "text"
+        }
+    },
+    "attendance_offline_submissions": {
+        "files": [
+            "2026_07_20_000019_create_attendance_offline_submissions_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "attendance_date": "date",
+            "clock_in": "time",
+            "clock_out": "time",
+            "latitude": "string",
+            "longitude": "string",
+            "photo_path": "string",
+            "status": "enum",
+            "sync_error": "text",
+            "synced_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "geolocation_logs": {
+        "files": [
+            "2026_07_20_000020_create_geolocation_logs_table.php"
+        ],
+        "columns": {
+            "employee_id": "foreignId",
+            "latitude": "decimal",
+            "longitude": "decimal",
+            "accuracy": "decimal",
+            "device_info": "string",
+            "logged_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "work_from_home_requests": {
+        "files": [
+            "2026_07_20_000023_create_work_from_home_requests_table.php",
+            "2026_07_22_040000_fix_work_from_home_requests_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "start_date": "date",
+            "end_date": "date",
+            "reason": "text",
+            "status": "enum",
+            "approved_by": "foreignId",
+            "approved_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "company_id": "foreignId",
+            "date": "date",
+            "start_time": "time",
+            "end_time": "time",
+            "location_address": "string",
+            "reviewed_by": "foreignId",
+            "reviewed_at": "timestamp",
+            "review_note": "text",
+            "rejection_reason": "text",
+            "metadata": "json"
+        }
+    },
+    "shift_swap_requests": {
+        "files": [
+            "2026_07_20_000024_create_shift_swap_requests_table.php",
+            "2026_07_20_000102_update_shift_swap_requests_table.php"
+        ],
+        "columns": {
+            "requestor_id": "foreignId",
+            "target_id": "foreignId",
+            "shift_requested_id": "foreignId",
+            "shift_offered_id": "foreignId",
+            "swap_date": "date",
+            "status": "enum",
+            "approved_by": "foreignId",
+            "approved_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "user_id": "foreignId",
+            "schedule_id": "foreignId",
+            "current_shift_id": "foreignId",
+            "replacement_user_id": "foreignId",
+            "reason": "text",
+            "rejection_note": "text"
+        }
+    },
+    "chat_threads": {
+        "files": [
+            "2026_07_20_000024b_create_chat_threads_table.php",
+            "2026_07_20_000104_update_chat_threads_table.php"
+        ],
+        "columns": {
+            "subject": "string",
+            "type": "enum",
+            "created_by": "foreignId",
+            "last_message_at": "timestamp",
+            "chat_thread_id": "foreignId",
+            "employee_id": "foreignId",
+            "last_read_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "company_id": "foreignId",
+            "is_archived": "boolean",
+            "metadata": "jsonb",
+            "user_id": "foreignId"
+        }
+    },
+    "chat_messages": {
+        "files": [
+            "2026_07_20_000025_create_chat_messages_table.php",
+            "2026_07_23_210000_fix_chat_messages_columns.php"
+        ],
+        "columns": {
+            "chat_thread_id": "foreignId",
+            "sender_id": "foreignId",
+            "message": "text",
+            "attachment_path": "string",
+            "attachment_type": "string",
+            "read_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "user_id": "foreignId",
+            "attachment_disk": "string",
+            "attachment_name": "string",
+            "attachment_mime": "string",
+            "metadata": "json"
+        }
+    },
+    "online_meetings": {
+        "files": [
+            "2026_07_20_000026_create_online_meetings_table.php",
+            "2026_07_20_000105_update_online_meetings_table.php"
+        ],
+        "columns": {
+            "title": "string",
+            "description": "text",
+            "organizer_id": "foreignId",
+            "start_time": "timestamp",
+            "end_time": "timestamp",
+            "meeting_url": "string",
+            "platform": "string",
+            "meeting_id": "string",
+            "password": "string",
+            "status": "enum",
+            "online_meeting_id": "foreignId",
+            "employee_id": "foreignId",
+            "is_required": "boolean",
+            "joined_at": "timestamp",
+            "left_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes",
+            "company_id": "foreignId",
+            "chat_thread_id": "foreignId",
+            "metadata": "jsonb"
+        }
+    },
+    "integration_attendance_events": {
+        "files": [
+            "2026_07_20_000107_update_integration_attendance_events_table.php",
+            "2026_07_22_000051_create_integration_attendance_events_table.php"
+        ],
+        "columns": {
+            "source": "string",
+            "idempotency_key": "string",
+            "user_id": "foreignId",
+            "attendance_id": "foreignId",
+            "latitude": "decimal",
+            "longitude": "decimal",
+            "device_id": "string",
+            "normalized_payload": "json",
+            "raw_payload": "json",
+            "processed_at": "timestamp",
+            "payload": "json",
+            "id": "ulid",
+            "event_type": "string",
+            "employee_external_id": "string",
+            "event_time": "timestamp",
+            "status": "string",
+            "error_message": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "integration_deliveries": {
+        "files": [
+            "2026_07_20_000108_update_integration_deliveries_table.php",
+            "2026_07_22_000053_create_integration_deliveries_table.php",
+            "2026_07_24_052645_update_integration_deliveries_table.php"
+        ],
+        "columns": {
+            "event_key": "string",
+            "payload": "json",
+            "signature": "string",
+            "status": "string",
+            "response_body": "string",
+            "dispatched_at": "timestamp",
+            "failed_at": "timestamp",
+            "payload_template": "text",
+            "encryption_key": "string",
+            "metadata": "json",
+            "id": "ulid",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "teams": {
+        "files": [
+            "2026_07_20_191047_create_teams_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "name": "string",
+            "personal_team": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "team_user": {
+        "files": [
+            "2026_07_20_191048_create_team_user_table.php"
+        ],
+        "columns": {
+            "team_id": "foreignId",
+            "user_id": "foreignId",
+            "role": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "team_invitations": {
+        "files": [
+            "2026_07_20_191049_create_team_invitations_table.php"
+        ],
+        "columns": {
+            "team_id": "foreignId",
+            "email": "string",
+            "role": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "appraisal_evaluations": {
+        "files": [
+            "2026_07_21_000001_050800_create_appraisal_evaluations_table.php"
+        ],
+        "columns": {
+            "appraisal_id": "foreignId",
+            "kpi_template_id": "foreignId",
+            "self_score": "decimal",
+            "manager_score": "decimal",
+            "comments": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "cash_advances": {
+        "files": [
+            "2026_07_21_000002_050810_create_cash_advances_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "amount": "decimal",
+            "purpose": "string",
+            "status": "string",
+            "approval_matrix_rule_id": "foreignId",
+            "approval_steps": "json",
+            "approval_current_step": "integer",
+            "approval_completed_steps": "json",
+            "payment_month": "tinyInteger",
+            "payment_year": "integer",
+            "approved_by": "foreignId",
+            "approved_at": "timestamp",
+            "head_approved_by": "foreignId",
+            "head_approved_at": "timestamp",
+            "finance_approved_by": "foreignId",
+            "finance_approved_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "cloud_files": {
+        "files": [
+            "2026_07_21_000003_050820_create_cloud_files_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "chat_thread_id": "foreignId",
+            "owner_id": "foreignId",
+            "disk": "string",
+            "path": "string",
+            "original_name": "string",
+            "mime_type": "string",
+            "visibility": "string",
+            "checksum": "string",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "custom_form_templates": {
+        "files": [
+            "2026_07_21_000004_050830_create_custom_form_templates_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "title": "string",
+            "category": "string",
+            "description": "text",
+            "fields": "json",
+            "is_active": "boolean",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "custom_form_submissions": {
+        "files": [
+            "2026_07_21_000005_050840_create_custom_form_submissions_table.php"
+        ],
+        "columns": {
+            "custom_form_template_id": "foreignId",
+            "company_id": "foreignId",
+            "submitted_by": "foreignId",
+            "status": "string",
+            "payload": "json",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "educations": {
+        "files": [
+            "2026_07_21_000007_050900_create_educations_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "job_levels": {
+        "files": [
+            "2026_07_21_000008_050905_create_job_levels_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "rank": "integer",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "hr_checklist_templates": {
+        "files": [
+            "2026_07_21_000009_050920_create_hr_checklist_templates_table.php"
+        ],
+        "columns": {
+            "type": "string",
+            "name": "string",
+            "description": "text",
+            "division_id": "foreignId",
+            "job_title_id": "foreignId",
+            "is_active": "boolean",
+            "created_by": "foreignId",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "hr_checklist_template_items": {
+        "files": [
+            "2026_07_21_000010_050930_create_hr_checklist_template_items_table.php"
+        ],
+        "columns": {
+            "template_id": "foreignId",
+            "title": "string",
+            "description": "text",
+            "category": "string",
+            "default_assignee_type": "string",
+            "due_offset_days": "integer",
+            "is_required": "boolean",
+            "sort_order": "integer",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "hr_checklist_cases": {
+        "files": [
+            "2026_07_21_000011_050940_create_hr_checklist_cases_table.php"
+        ],
+        "columns": {
+            "template_id": "foreignId",
+            "user_id": "foreignId",
+            "type": "string",
+            "status": "string",
+            "effective_date": "date",
+            "started_by": "foreignId",
+            "completed_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "hr_checklist_tasks": {
+        "files": [
+            "2026_07_21_000012_050950_create_hr_checklist_tasks_table.php"
+        ],
+        "columns": {
+            "case_id": "foreignId",
+            "template_item_id": "foreignId",
+            "assigned_to": "foreignId",
+            "title": "string",
+            "description": "text",
+            "category": "string",
+            "due_date": "date",
+            "status": "string",
+            "completed_by": "foreignId",
+            "completed_at": "timestamp",
+            "notes": "text",
+            "attachment_path": "string",
+            "attachment_original_name": "string",
+            "attachment_uploaded_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "import_export_runs": {
+        "files": [
+            "2026_07_21_000013_051010_create_import_export_runs_table.php"
+        ],
+        "columns": {
+            "resource": "string",
+            "operation": "string",
+            "status": "string",
+            "requested_by_user_id": "foreignId",
+            "queue": "string",
+            "source_disk": "string",
+            "source_path": "string",
+            "source_name": "string",
+            "file_disk": "string",
+            "file_path": "string",
+            "file_name": "string",
+            "mime_type": "string",
+            "progress_percentage": "decimal",
+            "meta": "json",
+            "error_message": "text",
+            "started_at": "timestamp",
+            "completed_at": "timestamp",
+            "failed_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "project_visit_evidences": {
+        "files": [
+            "2026_07_21_000014_051030_create_project_visit_evidences_table.php",
+            "2026_07_23_220003_add_project_fk_to_existing_tables.php"
+        ],
+        "columns": {
+            "log_name": "string",
+            "event": "string",
+            "subject_type": "string",
+            "attributes": "json",
+            "old_attributes": "json",
+            "tags": "json",
+            "performed_by_type": "string",
+            "batch_uuid": "uuid",
+            "user_id": "foreignId",
+            "evidence_url": "string",
+            "evidence_type": "string",
+            "evidence_filename": "string",
+            "evidence_metadata": "json",
+            "evidence_hash": "string",
+            "evidence_description": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "schedules": {
+        "files": [
+            "2026_07_21_000015_051040_create_schedules_table.php"
+        ],
+        "columns": {
+            "user_id": "foreignId",
+            "shift_id": "foreignId",
+            "date": "date",
+            "is_off": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "system_backup_runs": {
+        "files": [
+            "2026_07_21_000016_051050_create_system_backup_runs_table.php"
+        ],
+        "columns": {
+            "type": "string",
+            "status": "string",
+            "requested_by_user_id": "foreignId",
+            "queue": "string",
+            "file_disk": "string",
+            "file_path": "string",
+            "file_name": "string",
+            "error_message": "text",
+            "meta": "json",
+            "started_at": "timestamp",
+            "completed_at": "timestamp",
+            "failed_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "wilayah": {
+        "files": [
+            "2026_07_21_000017_051100_create_wilayahs_table.php"
+        ],
+        "columns": {
+            "kode": "string",
+            "nama": "string"
+        }
+    },
+    "sites": {
+        "files": [
+            "2026_07_21_000018_create_sites_table.php"
+        ],
+        "columns": {
+            "name": "string",
+            "code": "string",
+            "address": "text",
+            "city": "string",
+            "province": "string",
+            "postal_code": "string",
+            "phone": "string",
+            "email": "string",
+            "latitude": "decimal",
+            "longitude": "decimal",
+            "radius_meters": "integer",
+            "is_active": "boolean",
+            "settings": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "payroll_audits": {
+        "files": [
+            "2026_07_21_000019_create_payroll_audits_table.php"
+        ],
+        "columns": {
+            "payroll_id": "foreignId",
+            "employee_id": "foreignId",
+            "basic_salary": "decimal",
+            "total_allowance": "decimal",
+            "overtime_pay": "decimal",
+            "gross_salary": "decimal",
+            "ptkp": "decimal",
+            "pph21_ter": "decimal",
+            "pph21_netto": "decimal",
+            "pph21_rate": "decimal",
+            "bpjs_health": "decimal",
+            "bpjs_employment": "decimal",
+            "loan_deduction": "decimal",
+            "attendance_penalty": "decimal",
+            "total_deduction": "decimal",
+            "net_salary": "decimal",
+            "meta": "json",
+            "calculated_by": "string",
+            "calculated_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "settings": {
+        "files": [
+            "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php"
+        ],
+        "columns": {
+            "key": "string",
+            "value": "text",
+            "group": "string",
+            "type": "string",
+            "description": "string",
+            "is_public": "boolean",
+            "validation_rules": "json",
+            "options": "json",
+            "face_enrollment_required": "boolean",
+            "face_verification_required": "boolean",
+            "enterprise_license_key": "text",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "integration_clients": {
+        "files": [
+            "2026_07_22_000050_create_integration_clients_table.php"
+        ],
+        "columns": {
+            "id": "ulid",
+            "company_id": "foreignId",
+            "code": "string",
+            "name": "string",
+            "contact_name": "string",
+            "contact_email": "string",
+            "api_key_hash": "string",
+            "secret_encrypted": "text",
+            "abilities": "json",
+            "allowed_sources": "json",
+            "allowed_ips": "json",
+            "last_used_at": "timestamp",
+            "last_used_ip": "string",
+            "expires_at": "timestamp",
+            "revoked_at": "timestamp",
+            "created_by": "foreignId",
+            "created_at": "timestamps",
+            "updated_at": "timestamps",
+            "deleted_at": "softDeletes"
+        }
+    },
+    "integration_endpoints": {
+        "files": [
+            "2026_07_22_000052_create_integration_endpoints_table.php"
+        ],
+        "columns": {
+            "id": "ulid",
+            "name": "string",
+            "event_keys": "json",
+            "url": "string",
+            "secret": "text",
+            "headers": "json",
+            "active": "boolean",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "chat_messages_rag": {
+        "files": [
+            "2026_07_22_000060_create_chat_messages_rag_table.php"
+        ],
+        "columns": {
+            "chat_session_id": "foreignId",
+            "role": "enum",
+            "message": "text",
+            "sources": "json",
+            "tokens_used": "integer",
+            "response_time_ms": "integer",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "knowledge_base_chunks": {
+        "files": [
+            "2026_07_22_000061_create_knowledge_base_chunks_table.php"
+        ],
+        "columns": {
+            "knowledge_base_id": "foreignId",
+            "chunk_text": "text",
+            "chunk_index": "integer",
+            "embedding_model": "string",
+            "token_count": "integer",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "roles": {
+        "files": [
+            "2026_07_22_022049_add_columns_to_roles_table.php"
+        ],
+        "columns": {
+            "slug": "string",
+            "permission_keys": "json",
+            "is_super_admin": "boolean",
+            "description": "text",
+            "is_system": "boolean"
+        }
+    },
+    "projects": {
+        "files": [
+            "2026_07_23_220000_create_projects_table.php"
+        ],
+        "columns": {
+            "company_id": "foreignId",
+            "client_id": "foreignId",
+            "branch_id": "foreignId",
+            "manager_id": "foreignId",
+            "name": "string",
+            "code": "string",
+            "status": "string",
+            "starts_at": "date",
+            "ends_at": "date",
+            "description": "text",
+            "metadata": "json",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "project_tasks": {
+        "files": [
+            "2026_07_23_220001_create_project_tasks_table.php"
+        ],
+        "columns": {
+            "project_id": "foreignId",
+            "company_id": "foreignId",
+            "assigned_to": "foreignId",
+            "title": "string",
+            "status": "string",
+            "priority": "string",
+            "due_date": "date",
+            "description": "text",
+            "metadata": "json",
+            "completed_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    },
+    "project_task_checklist_items": {
+        "files": [
+            "2026_07_23_220002_create_project_task_checklist_items_table.php"
+        ],
+        "columns": {
+            "project_task_id": "foreignId",
+            "title": "string",
+            "is_done": "boolean",
+            "completed_at": "timestamp",
+            "created_at": "timestamps",
+            "updated_at": "timestamps"
+        }
+    }
+}

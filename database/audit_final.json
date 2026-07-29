@@ -1,0 +1,1472 @@
+[
+  {
+    "model": "GolonganPtkp",
+    "migration": "NOT FOUND",
+    "severity": "CRITICAL",
+    "type": "missing_migration",
+    "field": "N/A",
+    "problem": "No migration for table \"golongan_ptkps\"",
+    "evidence": "/home/merger/hrconnect/app/Models/GolonganPtkp.php",
+    "recommendation": "Create migration for \"golongan_ptkps\""
+  },
+  {
+    "model": "ActivityLogDetail",
+    "migration": "2026_07_19_132647_create_activity_log_details_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "activityLog_id",
+    "problem": "belongsTo(ActivityLog) expects FK \"activityLog_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ActivityLogDetail.php (activityLog)",
+    "recommendation": "Add FK \"activityLog_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Announcement",
+    "migration": "2026_07_20_000011_create_announcements_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Announcement.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Announcement",
+    "migration": "2026_07_20_000011_create_announcements_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "views_id",
+    "problem": "belongsTo(User) expects FK \"views_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Announcement.php (views)",
+    "recommendation": "Add FK \"views_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Announcement",
+    "migration": "2026_07_20_000011_create_announcements_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "dismissedByUsers_id",
+    "problem": "belongsTo(User) expects FK \"dismissedByUsers_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Announcement.php (dismissedByUsers)",
+    "recommendation": "Add FK \"dismissedByUsers_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Announcement",
+    "migration": "2026_07_20_000011_create_announcements_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "viewedByUsers_id",
+    "problem": "belongsTo(User) expects FK \"viewedByUsers_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Announcement.php (viewedByUsers)",
+    "recommendation": "Add FK \"viewedByUsers_id\" or override in belongsTo()"
+  },
+  {
+    "model": "AppraisalEvaluation",
+    "migration": "2026_07_21_000001_050800_create_appraisal_evaluations_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "kpiTemplate_id",
+    "problem": "belongsTo(KpiTemplate) expects FK \"kpiTemplate_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/AppraisalEvaluation.php (kpiTemplate)",
+    "recommendation": "Add FK \"kpiTemplate_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Attendance",
+    "migration": "2026_04_17_175332_create_attendances_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "approvedLateBy_id",
+    "problem": "belongsTo(Employee) expects FK \"approvedLateBy_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Attendance.php (approvedLateBy)",
+    "recommendation": "Add FK \"approvedLateBy_id\" or override in belongsTo()"
+  },
+  {
+    "model": "AttendanceCorrection",
+    "migration": "2026_07_20_000018_create_attendance_corrections_table.php",
+    "severity": "MEDIUM",
+    "type": "cast_mismatch",
+    "field": "actual_clock_in",
+    "problem": "Cast \"datetime\" vs column \"time\" in \"attendance_corrections\"",
+    "evidence": "/home/merger/hrconnect/app/Models/AttendanceCorrection.php",
+    "recommendation": "Verify cast for \"actual_clock_in\""
+  },
+  {
+    "model": "AttendanceCorrection",
+    "migration": "2026_07_20_000018_create_attendance_corrections_table.php",
+    "severity": "MEDIUM",
+    "type": "cast_mismatch",
+    "field": "actual_clock_out",
+    "problem": "Cast \"datetime\" vs column \"time\" in \"attendance_corrections\"",
+    "evidence": "/home/merger/hrconnect/app/Models/AttendanceCorrection.php",
+    "recommendation": "Verify cast for \"actual_clock_out\""
+  },
+  {
+    "model": "AttendanceCorrection",
+    "migration": "2026_07_20_000018_create_attendance_corrections_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "requestedShift_id",
+    "problem": "belongsTo(Shift) expects FK \"requestedShift_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/AttendanceCorrection.php (requestedShift)",
+    "recommendation": "Add FK \"requestedShift_id\" or override in belongsTo()"
+  },
+  {
+    "model": "AttendanceCorrection",
+    "migration": "2026_07_20_000018_create_attendance_corrections_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "headApprover_id",
+    "problem": "belongsTo(User) expects FK \"headApprover_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/AttendanceCorrection.php (headApprover)",
+    "recommendation": "Add FK \"headApprover_id\" or override in belongsTo()"
+  },
+  {
+    "model": "AttendanceCorrection",
+    "migration": "2026_07_20_000018_create_attendance_corrections_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "reviewer_id",
+    "problem": "belongsTo(User) expects FK \"reviewer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/AttendanceCorrection.php (reviewer)",
+    "recommendation": "Add FK \"reviewer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "AttendanceCorrection",
+    "migration": "2026_07_20_000018_create_attendance_corrections_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "approver_id",
+    "problem": "belongsTo(User) expects FK \"approver_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/AttendanceCorrection.php (approver)",
+    "recommendation": "Add FK \"approver_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CashAdvance",
+    "migration": "2026_07_21_000002_050810_create_cash_advances_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "approver_id",
+    "problem": "belongsTo(User) expects FK \"approver_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CashAdvance.php (approver)",
+    "recommendation": "Add FK \"approver_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CashAdvance",
+    "migration": "2026_07_21_000002_050810_create_cash_advances_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "headApprover_id",
+    "problem": "belongsTo(User) expects FK \"headApprover_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CashAdvance.php (headApprover)",
+    "recommendation": "Add FK \"headApprover_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CashAdvance",
+    "migration": "2026_07_21_000002_050810_create_cash_advances_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "financeApprover_id",
+    "problem": "belongsTo(User) expects FK \"financeApprover_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CashAdvance.php (financeApprover)",
+    "recommendation": "Add FK \"financeApprover_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ChatMessage",
+    "migration": "2026_07_20_000025_create_chat_messages_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "body",
+    "problem": "$fillable includes \"body\" but no column in \"chat_messages\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessage.php",
+    "recommendation": "Add column \"body\" or remove from $fillable"
+  },
+  {
+    "model": "ChatMessage",
+    "migration": "2026_07_20_000025_create_chat_messages_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "thread_id",
+    "problem": "belongsTo(ChatThread) expects FK \"thread_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessage.php (thread)",
+    "recommendation": "Add FK \"thread_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ChatMessageRag",
+    "migration": "2026_07_22_000060_create_chat_messages_rag_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "chatSession_id",
+    "problem": "belongsTo(ChatSession) expects FK \"chatSession_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessageRag.php (chatSession)",
+    "recommendation": "Add FK \"chatSession_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ChatThread",
+    "migration": "2026_07_20_000024b_create_chat_threads_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "title",
+    "problem": "$fillable includes \"title\" but no column in \"chat_threads\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatThread.php",
+    "recommendation": "Add column \"title\" or remove from $fillable"
+  },
+  {
+    "model": "ChatThread",
+    "migration": "2026_07_20_000024b_create_chat_threads_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatThread.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ChatThread",
+    "migration": "2026_07_20_000024b_create_chat_threads_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "members_id",
+    "problem": "belongsTo(User) expects FK \"members_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatThread.php (members)",
+    "recommendation": "Add FK \"members_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CloudFile",
+    "migration": "2026_07_21_000003_050820_create_cloud_files_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "thread_id",
+    "problem": "belongsTo(ChatThread) expects FK \"thread_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CloudFile.php (thread)",
+    "recommendation": "Add FK \"thread_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "type",
+    "problem": "$fillable includes \"type\" but no column in \"company_assets\"",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add column \"type\" or remove from $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "purchase_cost",
+    "problem": "$fillable includes \"purchase_cost\" but no column in \"company_assets\"",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add column \"purchase_cost\" or remove from $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "date_assigned",
+    "problem": "$fillable includes \"date_assigned\" but no column in \"company_assets\"",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add column \"date_assigned\" or remove from $fillable"
+  },
+  {
+    "model": "CompanyAssetHistory",
+    "migration": "2026_07_20_000014_create_company_asset_histories_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "asset_id",
+    "problem": "belongsTo(CompanyAsset) expects FK \"asset_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAssetHistory.php (asset)",
+    "recommendation": "Add FK \"asset_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CompanyAssetHistory",
+    "migration": "2026_07_20_000014_create_company_asset_histories_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "fromEmployee_id",
+    "problem": "belongsTo(Employee) expects FK \"fromEmployee_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAssetHistory.php (fromEmployee)",
+    "recommendation": "Add FK \"fromEmployee_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CompanyAssetHistory",
+    "migration": "2026_07_20_000014_create_company_asset_histories_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "toEmployee_id",
+    "problem": "belongsTo(Employee) expects FK \"toEmployee_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAssetHistory.php (toEmployee)",
+    "recommendation": "Add FK \"toEmployee_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CompanyAssetHistory",
+    "migration": "2026_07_20_000014_create_company_asset_histories_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(Employee) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAssetHistory.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CustomFormSubmission",
+    "migration": "2026_07_21_000005_050840_create_custom_form_submissions_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "template_id",
+    "problem": "belongsTo(CustomFormTemplate) expects FK \"template_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CustomFormSubmission.php (template)",
+    "recommendation": "Add FK \"template_id\" or override in belongsTo()"
+  },
+  {
+    "model": "CustomFormSubmission",
+    "migration": "2026_07_21_000005_050840_create_custom_form_submissions_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "submitter_id",
+    "problem": "belongsTo(User) expects FK \"submitter_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/CustomFormSubmission.php (submitter)",
+    "recommendation": "Add FK \"submitter_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Employee",
+    "migration": "2026_04_16_192201_create_employees_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "golonganPtkp_id",
+    "problem": "belongsTo(GolonganPtkp) expects FK \"golonganPtkp_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Employee.php (golonganPtkp)",
+    "recommendation": "Add FK \"golonganPtkp_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Employee",
+    "migration": "2026_04_16_192201_create_employees_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "directManager_id",
+    "problem": "belongsTo(Employee) expects FK \"directManager_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Employee.php (directManager)",
+    "recommendation": "Add FK \"directManager_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Employee",
+    "migration": "2026_04_16_192201_create_employees_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "accountDeletionReviewer_id",
+    "problem": "belongsTo(User) expects FK \"accountDeletionReviewer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Employee.php (accountDeletionReviewer)",
+    "recommendation": "Add FK \"accountDeletionReviewer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Employee",
+    "migration": "2026_04_16_192201_create_employees_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Employee.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Employee",
+    "migration": "2026_04_16_192201_create_employees_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "updater_id",
+    "problem": "belongsTo(User) expects FK \"updater_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Employee.php (updater)",
+    "recommendation": "Add FK \"updater_id\" or override in belongsTo()"
+  },
+  {
+    "model": "EmployeeDocumentRequest",
+    "migration": "2026_07_20_000012_create_employee_document_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "documentType_id",
+    "problem": "belongsTo(EmployeeDocumentType) expects FK \"documentType_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentRequest.php (documentType)",
+    "recommendation": "Add FK \"documentType_id\" or override in belongsTo()"
+  },
+  {
+    "model": "EmployeeDocumentRequest",
+    "migration": "2026_07_20_000012_create_employee_document_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "requester_id",
+    "problem": "belongsTo(User) expects FK \"requester_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentRequest.php (requester)",
+    "recommendation": "Add FK \"requester_id\" or override in belongsTo()"
+  },
+  {
+    "model": "EmployeeDocumentRequest",
+    "migration": "2026_07_20_000012_create_employee_document_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "reviewer_id",
+    "problem": "belongsTo(User) expects FK \"reviewer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentRequest.php (reviewer)",
+    "recommendation": "Add FK \"reviewer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "EmployeeDocumentRequest",
+    "migration": "2026_07_20_000012_create_employee_document_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "generatedTemplate_id",
+    "problem": "belongsTo(EmployeeDocumentTemplate) expects FK \"generatedTemplate_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentRequest.php (generatedTemplate)",
+    "recommendation": "Add FK \"generatedTemplate_id\" or override in belongsTo()"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "documentType_id",
+    "problem": "belongsTo(EmployeeDocumentType) expects FK \"documentType_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php (documentType)",
+    "recommendation": "Add FK \"documentType_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistCase",
+    "migration": "2026_07_21_000011_050940_create_hr_checklist_cases_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "starter_id",
+    "problem": "belongsTo(User) expects FK \"starter_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistCase.php (starter)",
+    "recommendation": "Add FK \"starter_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistTask",
+    "migration": "2026_07_21_000012_050950_create_hr_checklist_tasks_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "templateItem_id",
+    "problem": "belongsTo(HrChecklistTemplateItem) expects FK \"templateItem_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistTask.php (templateItem)",
+    "recommendation": "Add FK \"templateItem_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistTask",
+    "migration": "2026_07_21_000012_050950_create_hr_checklist_tasks_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "dependency_id",
+    "problem": "belongsTo(self) expects FK \"dependency_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistTask.php (dependency)",
+    "recommendation": "Add FK \"dependency_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistTask",
+    "migration": "2026_07_21_000012_050950_create_hr_checklist_tasks_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "assignee_id",
+    "problem": "belongsTo(User) expects FK \"assignee_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistTask.php (assignee)",
+    "recommendation": "Add FK \"assignee_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistTask",
+    "migration": "2026_07_21_000012_050950_create_hr_checklist_tasks_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "completer_id",
+    "problem": "belongsTo(User) expects FK \"completer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistTask.php (completer)",
+    "recommendation": "Add FK \"completer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistTemplate",
+    "migration": "2026_07_21_000009_050920_create_hr_checklist_templates_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistTemplate.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "HrChecklistTemplate",
+    "migration": "2026_07_21_000009_050920_create_hr_checklist_templates_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "jobTitle_id",
+    "problem": "belongsTo(JobTitle) expects FK \"jobTitle_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/HrChecklistTemplate.php (jobTitle)",
+    "recommendation": "Add FK \"jobTitle_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ImportExportRun",
+    "migration": "2026_07_21_000013_051010_create_import_export_runs_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "requestedBy_id",
+    "problem": "belongsTo(User) expects FK \"requestedBy_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ImportExportRun.php (requestedBy)",
+    "recommendation": "Add FK \"requestedBy_id\" or override in belongsTo()"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "integration_client_id",
+    "problem": "$fillable includes \"integration_client_id\" but no column in \"integration_attendance_events\"",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add column \"integration_client_id\" or remove from $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "employee_code",
+    "problem": "$fillable includes \"employee_code\" but no column in \"integration_attendance_events\"",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add column \"employee_code\" or remove from $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "occurred_at",
+    "problem": "$fillable includes \"occurred_at\" but no column in \"integration_attendance_events\"",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add column \"occurred_at\" or remove from $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "integrationClient_id",
+    "problem": "belongsTo(IntegrationClient) expects FK \"integrationClient_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php (integrationClient)",
+    "recommendation": "Add FK \"integrationClient_id\" or override in belongsTo()"
+  },
+  {
+    "model": "IntegrationClient",
+    "migration": "2026_07_22_000050_create_integration_clients_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationClient.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "IntegrationDelivery",
+    "migration": "2026_07_20_000108_update_integration_deliveries_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "endpoint_id",
+    "problem": "belongsTo(IntegrationEndpoint) expects FK \"endpoint_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationDelivery.php (endpoint)",
+    "recommendation": "Add FK \"endpoint_id\" or override in belongsTo()"
+  },
+  {
+    "model": "JobTitle",
+    "migration": "2026_04_13_154751_create_job_titles_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "name",
+    "problem": "$fillable includes \"name\" but no column in \"job_titles\"",
+    "evidence": "/home/merger/hrconnect/app/Models/JobTitle.php",
+    "recommendation": "Add column \"name\" or remove from $fillable"
+  },
+  {
+    "model": "JobTitle",
+    "migration": "2026_04_13_154751_create_job_titles_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "jobLevel_id",
+    "problem": "belongsTo(JobLevel) expects FK \"jobLevel_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/JobTitle.php (jobLevel)",
+    "recommendation": "Add FK \"jobLevel_id\" or override in belongsTo()"
+  },
+  {
+    "model": "KnowledgeBaseCategory",
+    "migration": "2026_04_27_000000_create_knowledge_base_categories_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "color",
+    "problem": "$fillable includes \"color\" but no column in \"knowledge_base_categories\"",
+    "evidence": "/home/merger/hrconnect/app/Models/KnowledgeBaseCategory.php",
+    "recommendation": "Add column \"color\" or remove from $fillable"
+  },
+  {
+    "model": "KnowledgeBaseCategory",
+    "migration": "2026_04_27_000000_create_knowledge_base_categories_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "icon",
+    "problem": "$fillable includes \"icon\" but no column in \"knowledge_base_categories\"",
+    "evidence": "/home/merger/hrconnect/app/Models/KnowledgeBaseCategory.php",
+    "recommendation": "Add column \"icon\" or remove from $fillable"
+  },
+  {
+    "model": "KnowledgeBaseChunk",
+    "migration": "2026_07_22_000061_create_knowledge_base_chunks_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "knowledgeBase_id",
+    "problem": "belongsTo(KnowledgeBase) expects FK \"knowledgeBase_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/KnowledgeBaseChunk.php (knowledgeBase)",
+    "recommendation": "Add FK \"knowledgeBase_id\" or override in belongsTo()"
+  },
+  {
+    "model": "KpiTemplate",
+    "migration": "2026_07_20_000016_create_kpi_templates_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "kpiGroup_id",
+    "problem": "belongsTo(KpiGroup) expects FK \"kpiGroup_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/KpiTemplate.php (kpiGroup)",
+    "recommendation": "Add FK \"kpiGroup_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Leave",
+    "migration": "2026_04_17_175549_create_leaves_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "leaveType_id",
+    "problem": "belongsTo(LeaveType) expects FK \"leaveType_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Leave.php (leaveType)",
+    "recommendation": "Add FK \"leaveType_id\" or override in belongsTo()"
+  },
+  {
+    "model": "LeaveBalance",
+    "migration": "2026_05_08_161834_create_leave_balances_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "leaveType_id",
+    "problem": "belongsTo(LeaveType) expects FK \"leaveType_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/LeaveBalance.php (leaveType)",
+    "recommendation": "Add FK \"leaveType_id\" or override in belongsTo()"
+  },
+  {
+    "model": "LeaveEntitlement",
+    "migration": "2026_05_08_000005_create_leave_entitlements_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "leaveType_id",
+    "problem": "belongsTo(LeaveType) expects FK \"leaveType_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/LeaveEntitlement.php (leaveType)",
+    "recommendation": "Add FK \"leaveType_id\" or override in belongsTo()"
+  },
+  {
+    "model": "Loan",
+    "migration": "2026_04_19_044050_create_loans_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/Loan.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "OnlineMeeting",
+    "migration": "2026_07_20_000026_create_online_meetings_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "host_id",
+    "problem": "$fillable includes \"host_id\" but no column in \"online_meetings\"",
+    "evidence": "/home/merger/hrconnect/app/Models/OnlineMeeting.php",
+    "recommendation": "Add column \"host_id\" or remove from $fillable"
+  },
+  {
+    "model": "OnlineMeeting",
+    "migration": "2026_07_20_000026_create_online_meetings_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "thread_id",
+    "problem": "belongsTo(ChatThread) expects FK \"thread_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/OnlineMeeting.php (thread)",
+    "recommendation": "Add FK \"thread_id\" or override in belongsTo()"
+  },
+  {
+    "model": "OnlineMeeting",
+    "migration": "2026_07_20_000026_create_online_meetings_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "host_id",
+    "problem": "belongsTo(User) expects FK \"host_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/OnlineMeeting.php (host)",
+    "recommendation": "Add FK \"host_id\" or override in belongsTo()"
+  },
+  {
+    "model": "PayrollAdjustment",
+    "migration": "2026_05_08_161915_create_payroll_adjustments_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "creator_id",
+    "problem": "belongsTo(User) expects FK \"creator_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/PayrollAdjustment.php (creator)",
+    "recommendation": "Add FK \"creator_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ProjectTask",
+    "migration": "2026_07_23_220001_create_project_tasks_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "assignee_id",
+    "problem": "belongsTo(User) expects FK \"assignee_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ProjectTask.php (assignee)",
+    "recommendation": "Add FK \"assignee_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ProjectTaskChecklistItem",
+    "migration": "2026_07_23_220002_create_project_task_checklist_items_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "task_id",
+    "problem": "belongsTo(ProjectTask) expects FK \"task_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ProjectTaskChecklistItem.php (task)",
+    "recommendation": "Add FK \"task_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "schedule_date",
+    "problem": "$fillable includes \"schedule_date\" but no column in \"shift_swap_requests\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add column \"schedule_date\" or remove from $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "requester_id",
+    "problem": "$fillable includes \"requester_id\" but no column in \"shift_swap_requests\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add column \"requester_id\" or remove from $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "requested_shift_id",
+    "problem": "$fillable includes \"requested_shift_id\" but no column in \"shift_swap_requests\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add column \"requested_shift_id\" or remove from $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "reviewed_by",
+    "problem": "$fillable includes \"reviewed_by\" but no column in \"shift_swap_requests\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add column \"reviewed_by\" or remove from $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fillable_missing",
+    "field": "reviewed_at",
+    "problem": "$fillable includes \"reviewed_at\" but no column in \"shift_swap_requests\"",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add column \"reviewed_at\" or remove from $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "requester_id",
+    "problem": "belongsTo(Employee) expects FK \"requester_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php (requester)",
+    "recommendation": "Add FK \"requester_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "currentShift_id",
+    "problem": "belongsTo(Shift) expects FK \"currentShift_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php (currentShift)",
+    "recommendation": "Add FK \"currentShift_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "requestedShift_id",
+    "problem": "belongsTo(Shift) expects FK \"requestedShift_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php (requestedShift)",
+    "recommendation": "Add FK \"requestedShift_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "replacementUser_id",
+    "problem": "belongsTo(User) expects FK \"replacementUser_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php (replacementUser)",
+    "recommendation": "Add FK \"replacementUser_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "reviewer_id",
+    "problem": "belongsTo(User) expects FK \"reviewer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php (reviewer)",
+    "recommendation": "Add FK \"reviewer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "SystemBackupRun",
+    "migration": "2026_07_21_000016_051050_create_system_backup_runs_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "requestedBy_id",
+    "problem": "belongsTo(User) expects FK \"requestedBy_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/SystemBackupRun.php (requestedBy)",
+    "recommendation": "Add FK \"requestedBy_id\" or override in belongsTo()"
+  },
+  {
+    "model": "TarifTer",
+    "migration": "2026_04_15_100002_create_tarif_ter_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "kategoriTer_id",
+    "problem": "belongsTo(KategoriTer) expects FK \"kategoriTer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/TarifTer.php (kategoriTer)",
+    "recommendation": "Add FK \"kategoriTer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "WorkFromHomeRequest",
+    "migration": "2026_07_20_000023_create_work_from_home_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "reviewer_id",
+    "problem": "belongsTo(User) expects FK \"reviewer_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/WorkFromHomeRequest.php (reviewer)",
+    "recommendation": "Add FK \"reviewer_id\" or override in belongsTo()"
+  },
+  {
+    "model": "WorkFromHomeRequest",
+    "migration": "2026_07_20_000023_create_work_from_home_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "employee_id",
+    "problem": "belongsTo(User) expects FK \"employee_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/WorkFromHomeRequest.php (employee)",
+    "recommendation": "Add FK \"employee_id\" or override in belongsTo()"
+  },
+  {
+    "model": "WorkFromHomeRequest",
+    "migration": "2026_07_20_000023_create_work_from_home_requests_table.php",
+    "severity": "MEDIUM",
+    "type": "fk_mismatch",
+    "field": "approver_id",
+    "problem": "belongsTo(User) expects FK \"approver_id\" not in migration",
+    "evidence": "/home/merger/hrconnect/app/Models/WorkFromHomeRequest.php (approver)",
+    "recommendation": "Add FK \"approver_id\" or override in belongsTo()"
+  },
+  {
+    "model": "ActivityLog",
+    "migration": "2026_01_01_140536_create_activity_logs_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "integrity_hash",
+    "problem": "Column \"integrity_hash\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ActivityLog.php",
+    "recommendation": "Add \"integrity_hash\" to $fillable"
+  },
+  {
+    "model": "Appraisal",
+    "migration": "2026_07_20_000015_create_appraisals_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "user_id",
+    "problem": "Column \"user_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Appraisal.php",
+    "recommendation": "Add \"user_id\" to $fillable"
+  },
+  {
+    "model": "ChatMessage",
+    "migration": "2026_07_20_000025_create_chat_messages_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "sender_id",
+    "problem": "Column \"sender_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessage.php",
+    "recommendation": "Add \"sender_id\" to $fillable"
+  },
+  {
+    "model": "ChatMessage",
+    "migration": "2026_07_20_000025_create_chat_messages_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "message",
+    "problem": "Column \"message\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessage.php",
+    "recommendation": "Add \"message\" to $fillable"
+  },
+  {
+    "model": "ChatMessage",
+    "migration": "2026_07_20_000025_create_chat_messages_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "attachment_type",
+    "problem": "Column \"attachment_type\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessage.php",
+    "recommendation": "Add \"attachment_type\" to $fillable"
+  },
+  {
+    "model": "ChatMessage",
+    "migration": "2026_07_20_000025_create_chat_messages_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "read_at",
+    "problem": "Column \"read_at\" (timestamp) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatMessage.php",
+    "recommendation": "Add \"read_at\" to $fillable"
+  },
+  {
+    "model": "ChatThread",
+    "migration": "2026_07_20_000024b_create_chat_threads_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "subject",
+    "problem": "Column \"subject\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatThread.php",
+    "recommendation": "Add \"subject\" to $fillable"
+  },
+  {
+    "model": "ChatThread",
+    "migration": "2026_07_20_000024b_create_chat_threads_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "last_message_at",
+    "problem": "Column \"last_message_at\" (timestamp) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ChatThread.php",
+    "recommendation": "Add \"last_message_at\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "kode_aset",
+    "problem": "Column \"kode_aset\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"kode_aset\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "category",
+    "problem": "Column \"category\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"category\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "brand",
+    "problem": "Column \"brand\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"brand\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "model",
+    "problem": "Column \"model\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"model\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "purchase_price",
+    "problem": "Column \"purchase_price\" (decimal) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"purchase_price\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "assigned_to",
+    "problem": "Column \"assigned_to\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"assigned_to\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "assigned_at",
+    "problem": "Column \"assigned_at\" (date) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"assigned_at\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "specifications",
+    "problem": "Column \"specifications\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"specifications\" to $fillable"
+  },
+  {
+    "model": "CompanyAsset",
+    "migration": "2026_07_20_000013_create_company_assets_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "photo_path",
+    "problem": "Column \"photo_path\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/CompanyAsset.php",
+    "recommendation": "Add \"photo_path\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "paper_size",
+    "problem": "Column \"paper_size\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php",
+    "recommendation": "Add \"paper_size\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "orientation",
+    "problem": "Column \"orientation\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php",
+    "recommendation": "Add \"orientation\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "header",
+    "problem": "Column \"header\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php",
+    "recommendation": "Add \"header\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "footer",
+    "problem": "Column \"footer\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php",
+    "recommendation": "Add \"footer\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "layout_options",
+    "problem": "Column \"layout_options\" (json) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php",
+    "recommendation": "Add \"layout_options\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentTemplate",
+    "migration": "2026_07_20_000010_create_employee_document_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "file_path",
+    "problem": "Column \"file_path\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentTemplate.php",
+    "recommendation": "Add \"file_path\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentType",
+    "migration": "2026_07_20_000009_create_employee_document_types_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "slug",
+    "problem": "Column \"slug\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentType.php",
+    "recommendation": "Add \"slug\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentType",
+    "migration": "2026_07_20_000009_create_employee_document_types_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "icon",
+    "problem": "Column \"icon\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentType.php",
+    "recommendation": "Add \"icon\" to $fillable"
+  },
+  {
+    "model": "EmployeeDocumentType",
+    "migration": "2026_07_20_000009_create_employee_document_types_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "admin_requestable",
+    "problem": "Column \"admin_requestable\" (boolean) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/EmployeeDocumentType.php",
+    "recommendation": "Add \"admin_requestable\" to $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "payload",
+    "problem": "Column \"payload\" (json) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add \"payload\" to $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "client_id",
+    "problem": "Column \"client_id\" (foreignUlid) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add \"client_id\" to $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "employee_external_id",
+    "problem": "Column \"employee_external_id\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add \"employee_external_id\" to $fillable"
+  },
+  {
+    "model": "IntegrationAttendanceEvent",
+    "migration": "2026_07_20_000107_update_integration_attendance_events_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "event_time",
+    "problem": "Column \"event_time\" (timestamp) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationAttendanceEvent.php",
+    "recommendation": "Add \"event_time\" to $fillable"
+  },
+  {
+    "model": "IntegrationClient",
+    "migration": "2026_07_22_000050_create_integration_clients_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "company_id",
+    "problem": "Column \"company_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationClient.php",
+    "recommendation": "Add \"company_id\" to $fillable"
+  },
+  {
+    "model": "IntegrationClient",
+    "migration": "2026_07_22_000050_create_integration_clients_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "code",
+    "problem": "Column \"code\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationClient.php",
+    "recommendation": "Add \"code\" to $fillable"
+  },
+  {
+    "model": "IntegrationDelivery",
+    "migration": "2026_07_20_000108_update_integration_deliveries_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "payload_template",
+    "problem": "Column \"payload_template\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationDelivery.php",
+    "recommendation": "Add \"payload_template\" to $fillable"
+  },
+  {
+    "model": "IntegrationDelivery",
+    "migration": "2026_07_20_000108_update_integration_deliveries_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "encryption_key",
+    "problem": "Column \"encryption_key\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationDelivery.php",
+    "recommendation": "Add \"encryption_key\" to $fillable"
+  },
+  {
+    "model": "IntegrationDelivery",
+    "migration": "2026_07_20_000108_update_integration_deliveries_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "metadata",
+    "problem": "Column \"metadata\" (json) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/IntegrationDelivery.php",
+    "recommendation": "Add \"metadata\" to $fillable"
+  },
+  {
+    "model": "JobTitle",
+    "migration": "2026_04_13_154751_create_job_titles_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "title",
+    "problem": "Column \"title\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/JobTitle.php",
+    "recommendation": "Add \"title\" to $fillable"
+  },
+  {
+    "model": "KpiGroup",
+    "migration": "2026_07_20_000017_create_kpi_groups_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "kpi_template_id",
+    "problem": "Column \"kpi_template_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/KpiGroup.php",
+    "recommendation": "Add \"kpi_template_id\" to $fillable"
+  },
+  {
+    "model": "KpiTemplate",
+    "migration": "2026_07_20_000016_create_kpi_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "description",
+    "problem": "Column \"description\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/KpiTemplate.php",
+    "recommendation": "Add \"description\" to $fillable"
+  },
+  {
+    "model": "KpiTemplate",
+    "migration": "2026_07_20_000016_create_kpi_templates_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "department_type",
+    "problem": "Column \"department_type\" (string) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/KpiTemplate.php",
+    "recommendation": "Add \"department_type\" to $fillable"
+  },
+  {
+    "model": "OnlineMeeting",
+    "migration": "2026_07_20_000026_create_online_meetings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "organizer_id",
+    "problem": "Column \"organizer_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/OnlineMeeting.php",
+    "recommendation": "Add \"organizer_id\" to $fillable"
+  },
+  {
+    "model": "PayrollAudit",
+    "migration": "2026_07_21_000019_create_payroll_audits_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "calculated_at",
+    "problem": "Column \"calculated_at\" (timestamp) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/PayrollAudit.php",
+    "recommendation": "Add \"calculated_at\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "is_public",
+    "problem": "Column \"is_public\" (boolean) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"is_public\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "validation_rules",
+    "problem": "Column \"validation_rules\" (json) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"validation_rules\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "options",
+    "problem": "Column \"options\" (json) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"options\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "group_index",
+    "problem": "Column \"group_index\" (unsignedInteger) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"group_index\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "face_enrollment_required",
+    "problem": "Column \"face_enrollment_required\" (boolean) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"face_enrollment_required\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "face_verification_required",
+    "problem": "Column \"face_verification_required\" (boolean) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"face_verification_required\" to $fillable"
+  },
+  {
+    "model": "Setting",
+    "migration": "2026_07_21_1784309737_2026_01_05_125552_create_settings_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "enterprise_license_key",
+    "problem": "Column \"enterprise_license_key\" (text) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/Setting.php",
+    "recommendation": "Add \"enterprise_license_key\" to $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "requestor_id",
+    "problem": "Column \"requestor_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add \"requestor_id\" to $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "shift_requested_id",
+    "problem": "Column \"shift_requested_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add \"shift_requested_id\" to $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "shift_offered_id",
+    "problem": "Column \"shift_offered_id\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add \"shift_offered_id\" to $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "swap_date",
+    "problem": "Column \"swap_date\" (date) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add \"swap_date\" to $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "approved_by",
+    "problem": "Column \"approved_by\" (foreignId) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add \"approved_by\" to $fillable"
+  },
+  {
+    "model": "ShiftSwapRequest",
+    "migration": "2026_07_20_000024_create_shift_swap_requests_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "approved_at",
+    "problem": "Column \"approved_at\" (timestamp) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/ShiftSwapRequest.php",
+    "recommendation": "Add \"approved_at\" to $fillable"
+  },
+  {
+    "model": "TarifTer",
+    "migration": "2026_04_15_100002_create_tarif_ter_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "penghasilan_min",
+    "problem": "Column \"penghasilan_min\" (decimal) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/TarifTer.php",
+    "recommendation": "Add \"penghasilan_min\" to $fillable"
+  },
+  {
+    "model": "TarifTer",
+    "migration": "2026_04_15_100002_create_tarif_ter_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "penghasilan_max",
+    "problem": "Column \"penghasilan_max\" (decimal) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/TarifTer.php",
+    "recommendation": "Add \"penghasilan_max\" to $fillable"
+  },
+  {
+    "model": "TarifTer",
+    "migration": "2026_04_15_100002_create_tarif_ter_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "tarif_a",
+    "problem": "Column \"tarif_a\" (decimal) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/TarifTer.php",
+    "recommendation": "Add \"tarif_a\" to $fillable"
+  },
+  {
+    "model": "TarifTer",
+    "migration": "2026_04_15_100002_create_tarif_ter_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "tarif_b",
+    "problem": "Column \"tarif_b\" (decimal) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/TarifTer.php",
+    "recommendation": "Add \"tarif_b\" to $fillable"
+  },
+  {
+    "model": "TarifTer",
+    "migration": "2026_04_15_100002_create_tarif_ter_table.php",
+    "severity": "MINOR",
+    "type": "orphan_column",
+    "field": "tarif_c",
+    "problem": "Column \"tarif_c\" (decimal) not in $fillable",
+    "evidence": "/home/merger/hrconnect/app/Models/TarifTer.php",
+    "recommendation": "Add \"tarif_c\" to $fillable"
+  }
+]
