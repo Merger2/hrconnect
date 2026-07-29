@@ -23,11 +23,23 @@ class ListEmployeeRequest extends FormRequest
     {
         return [
             'branch_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'division_id' => ['nullable', 'integer'],
             'status' => ['nullable', 'string'],
             'search' => ['nullable', 'string', 'min:2'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'search.min' => 'Pencarian minimal 2 karakter.',
+            'page.integer' => 'Halaman harus berupa angka bulat.',
+            'page.min' => 'Halaman minimal 1.',
+            'per_page.integer' => 'Jumlah per halaman harus berupa angka bulat.',
+            'per_page.min' => 'Jumlah per halaman minimal 1.',
+            'per_page.max' => 'Jumlah per halaman maksimal 100.',
         ];
     }
 }

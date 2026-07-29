@@ -13,7 +13,7 @@ use App\Http\Resources\AssetResource;
 use App\Models\Asset;
 use App\Models\AssetHandover;
 use App\Models\Employee;
-use App\Services\AssetService;
+use App\Services\Support\AssetService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;

@@ -21,4 +21,19 @@ class HandoverAssetRequest extends FormRequest
             'category' => ['nullable', 'string', 'in:document,asset,data,access,responsibility'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'employee_id.required' => 'Karyawan penerima wajib dipilih.',
+            'employee_id.exists' => 'Karyawan tidak ditemukan.',
+            'handover_date.required' => 'Tanggal serah terima wajib diisi.',
+            'handover_date.date' => 'Format tanggal serah terima tidak valid.',
+            'return_date.date' => 'Format tanggal pengembalian tidak valid.',
+            'return_date.after_or_equal' => 'Tanggal pengembalian harus setelah atau sama dengan tanggal serah terima.',
+            'condition.required' => 'Kondisi aset wajib diisi.',
+            'condition.max' => 'Kondisi aset maksimal 255 karakter.',
+            'category.in' => 'Kategori serah terima harus document, asset, data, access, atau responsibility.',
+        ];
+    }
 }

@@ -25,4 +25,21 @@ class ClockOutRequest extends FormRequest
             'photo_selfie' => ['nullable', 'string'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'latitude.numeric' => 'Latitude harus berupa angka.',
+            'latitude.between' => 'Latitude harus antara -90 dan 90.',
+            'longitude.numeric' => 'Longitude harus berupa angka.',
+            'longitude.between' => 'Longitude harus antara -180 dan 180.',
+            'accuracy.numeric' => 'Akurasi GPS harus berupa angka.',
+            'accuracy.min' => 'Akurasi GPS tidak boleh negatif.',
+            'is_mocked.boolean' => 'Status GPS palsu tidak valid.',
+            'embedding.size' => 'Data wajah harus 128 dimensi.',
+            'embedding.*.between' => 'Nilai embedding wajah tidak valid.',
+            'pin.digits' => 'PIN harus terdiri dari 6 digit angka.',
+            'verification_method.in' => 'Metode verifikasi tidak valid.',
+        ];
+    }
 }

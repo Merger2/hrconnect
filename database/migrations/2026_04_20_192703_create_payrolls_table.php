@@ -23,6 +23,13 @@ return new class extends Migration
             $table->decimal('attendance_penalty', 15, 2)->default(0);
             $table->decimal('total_deduction', 15, 2);
             $table->decimal('net_salary', 15, 2);
+            $table->decimal('allowances_total', 15, 2)->default(0);
+            $table->decimal('deductions_total', 15, 2)->default(0);
+            $table->decimal('overtime_amount', 15, 2)->default(0);
+            $table->decimal('thp', 15, 2)->after('net_salary')->nullable();
+            $table->string('payroll_period', 7)->nullable();
+            $table->date('payment_date')->nullable();
+            $table->enum('payment_method', ['transfer', 'cash', 'cheque'])->default('transfer');
             $table->string('status', 20)->default('draft');
             $table->string('pdf_path')->nullable()->after('status');
             $table->unique(['employee_id', 'period']);

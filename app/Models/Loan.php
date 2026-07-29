@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LoanStatus;
+use App\Traits\Approvable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['employee_id', 'rejection_reason', 'created_by', 'amount', 'interest_rate', 'tenor_months', 'monthly_installment', 'status', 'is_settled'])]
 class Loan extends Model
 {
-    use HasFactory, SoftDeletes;
+    use Approvable, HasFactory, SoftDeletes;
 
     protected function casts(): array
     {

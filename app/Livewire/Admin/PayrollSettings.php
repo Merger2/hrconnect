@@ -4,171 +4,182 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
-use App\Models\BpjsConfig;
-use App\Models\TaxConfig;
-use Illuminate\Support\Facades\Cache;
+use App\Models\PayrollComponent;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-class PayrollSettings extends Component
+final class PayrollSettings extends Component
 {
-    public string $activeTab = 'pph21';
+    use AuthorizesRequests;
+    use WithPagination;
 
-    // PPh21 (TER)
-    public ?int $taxSelectedId = null;
+    public string $search = '';
 
-    public bool $taxEditing = false;
+    public string $typeFilter = 'all';
 
-    public ?string $terCategory = null;
+    public string $activeFilter = 'all';
 
-    public ?string $minIncome = null;
+    public int $perPage = 10;
 
-    public ?string $maxIncome = null;
+    public bool $showModal = false;
 
-    public ?string $rate = null;
+    public bool $confirmingDeletion = false;
 
-    public ?string $effectiveRate = null;
+    public ?int $selectedId = null;
 
-    // BPJS
-    public ?int $bpjsSelectedId = null;
+    public string $name = '';
 
-    public bool $bpjsEditing = false;
+    public string $type = 'allowance';
 
-    public ?string $bpjsName = null;
+    public string $calculation_type = 'fixed';
 
-    public ?string $employerRate = null;
+    public ?float $amount = null;
 
-    public ?string $employeeRate = null;
+    public ?float $percentage = null;
 
-    public ?string $ceiling = null;
+    public bool $is_taxable = false;
 
-    protected function rules(): array
+    protected $queryString = ['search', 'typeFilter', 'activeFilter', 'perPage'];
+
+    public function updatingSearch(): void
     {
-        return [
-            'terCategory' => ['required', 'string', 'size:1', 'in:A,B,C'],
-            'minIncome' => ['required', 'numeric', 'min:0'],
-            'maxIncome' => ['required', 'numeric', 'gt:minIncome'],
-            'rate' => ['required', 'numeric', 'between:0,1'],
-            'effectiveRate' => ['nullable', 'numeric', 'between:0,1'],
-            'bpjsName' => ['required', 'string', 'max:50'],
-            'employerRate' => ['required', 'numeric', 'between:0,1'],
-            'employeeRate' => ['required', 'numeric', 'between:0,1'],
-            'ceiling' => ['nullable', 'numeric', 'min:0'],
-        ];
+        $this->resetPage();
     }
 
-    public function canManage(): bool
+    public function updatingTypeFilter(): void
     {
-        return Gate::allows('manage_tax_configs') || Gate::allows('manage_bpjs_configs');
+        $this->resetPage();
     }
 
-    // ── PPh21 ──────────────────────────────────────────
-    public function editTax(int $id): void
+    public function updatingActiveFilter(): void
     {
-        $this->resetErrorBag();
-        $tax = TaxConfig::findOrFail($id);
-        $this->taxSelectedId = $id;
-        $this->terCategory = $tax->ter_category;
-        $this->minIncome = (string) $tax->min_income;
-        $this->maxIncome = (string) $tax->max_income;
-        $this->rate = (string) $tax->rate;
-        $this->effectiveRate = $tax->effective_rate ? (string) $tax->effective_rate : null;
-        $this->taxEditing = true;
+        $this->resetPage();
     }
 
-    public function updateTax(): void
+    public function boot(): void
     {
-        Gate::authorize('manage_tax_configs');
-        $this->validate([
-            'terCategory' => ['required', 'string', 'size:1', 'in:A,B,C'],
-            'minIncome' => ['required', 'numeric', 'min:0'],
-            'maxIncome' => ['required', 'numeric', 'gt:minIncome'],
-            'rate' => ['required', 'numeric', 'between:0,1'],
-            'effectiveRate' => ['nullable', 'numeric', 'between:0,1'],
-        ]);
-        $tax = TaxConfig::findOrFail($this->taxSelectedId);
-        $tax->update([
-            'ter_category' => $this->terCategory,
-            'min_income' => $this->minIncome,
-            'max_income' => $this->maxIncome,
-            'rate' => $this->rate,
-            'effective_rate' => $this->effectiveRate,
-        ]);
-        Cache::forget('tax_configs:all');
-        $this->taxEditing = false;
-        $this->resetTaxForm();
-        $this->dispatch('toast', variant: 'success', text: __('Konfigurasi PPh21 berhasil diperbarui.'));
+        Gate::authorize('managePayrollSettings');
     }
 
-    private function resetTaxForm(): void
+    public function render(): View
     {
-        $this->taxSelectedId = null;
-        $this->terCategory = null;
-        $this->minIncome = null;
-        $this->maxIncome = null;
-        $this->rate = null;
-        $this->effectiveRate = null;
-    }
+        $query = PayrollComponent::query();
 
-    // ── BPJS ──────────────────────────────────────────
-    public function editBpjs(int $id): void
-    {
-        $this->resetErrorBag();
-        $bpjs = BpjsConfig::findOrFail($id);
-        $this->bpjsSelectedId = $id;
-        $this->bpjsName = $bpjs->name;
-        $this->employerRate = (string) $bpjs->employer_rate;
-        $this->employeeRate = (string) $bpjs->employee_rate;
-        $this->ceiling = $bpjs->ceiling ? (string) $bpjs->ceiling : null;
-        $this->bpjsEditing = true;
-    }
+        if ($this->search !== '') {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('code', 'like', '%'.$this->search.'%');
+            });
+        }
 
-    public function updateBpjs(): void
-    {
-        Gate::authorize('manage_bpjs_configs');
-        $this->validate([
-            'bpjsName' => ['required', 'string', 'max:50'],
-            'employerRate' => ['required', 'numeric', 'between:0,1'],
-            'employeeRate' => ['required', 'numeric', 'between:0,1'],
-            'ceiling' => ['nullable', 'numeric', 'min:0'],
-        ]);
-        $bpjs = BpjsConfig::findOrFail($this->bpjsSelectedId);
-        $bpjs->update([
-            'name' => $this->bpjsName,
-            'employer_rate' => $this->employerRate,
-            'employee_rate' => $this->employeeRate,
-            'ceiling' => $this->ceiling,
-        ]);
-        Cache::forget('bpjs_configs:all');
-        $this->bpjsEditing = false;
-        $this->resetBpjsForm();
-        $this->dispatch('toast', variant: 'success', text: __('Konfigurasi BPJS berhasil diperbarui.'));
-    }
+        if ($this->typeFilter !== 'all') {
+            $query->where('type', $this->typeFilter);
+        }
 
-    private function resetBpjsForm(): void
-    {
-        $this->bpjsSelectedId = null;
-        $this->bpjsName = null;
-        $this->employerRate = null;
-        $this->employeeRate = null;
-        $this->ceiling = null;
-    }
-
-    public function setTab(string $tab): void
-    {
-        $this->activeTab = $tab;
-    }
-
-    public function render()
-    {
-        $taxConfigs = TaxConfig::orderBy('ter_category')->orderBy('min_income')->get();
-        $bpjsConfigs = BpjsConfig::orderBy('name')->get();
+        if ($this->activeFilter !== 'all') {
+            $query->where('is_active', $this->activeFilter === 'active');
+        }
 
         return view('livewire.admin.payroll-settings', [
-            'taxConfigs' => $taxConfigs,
-            'bpjsConfigs' => $bpjsConfigs,
+            'components' => $query->orderBy('name')->paginate($this->perPage),
         ]);
+    }
+
+    public function create(): void
+    {
+        $this->resetValidation();
+        $this->reset(['selectedId', 'name', 'type', 'calculation_type', 'amount', 'percentage', 'is_taxable']);
+        $this->showModal = true;
+    }
+
+    public function edit(int $id): void
+    {
+        $component = PayrollComponent::findOrFail($id);
+
+        $this->selectedId = $component->id;
+        $this->name = $component->name;
+        $this->type = $component->type;
+        $this->calculation_type = $component->calculation_type ?? 'fixed';
+        $this->amount = $component->amount;
+        $this->percentage = $component->percentage;
+        $this->is_taxable = $component->is_taxable;
+
+        $this->showModal = true;
+    }
+
+    public function save(): void
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::in(['allowance', 'deduction'])],
+            'calculation_type' => ['required', Rule::in(['fixed', 'daily_presence', 'percentage_basic'])],
+            'is_taxable' => ['boolean'],
+        ];
+
+        if ($this->calculation_type === 'percentage_basic') {
+            $rules['percentage'] = ['required', 'numeric', 'min:0', 'max:100'];
+        } else {
+            $rules['amount'] = ['required', 'numeric', 'min:0'];
+        }
+
+        $validated = $this->validate($rules);
+
+        $data = [
+            'name' => $validated['name'],
+            'type' => $validated['type'],
+            'calculation_type' => $validated['calculation_type'],
+            'amount' => $validated['amount'] ?? null,
+            'percentage' => $validated['percentage'] ?? null,
+            'is_taxable' => $validated['is_taxable'] ?? false,
+        ];
+
+        if ($this->selectedId) {
+            $component = PayrollComponent::findOrFail($this->selectedId);
+            $component->update($data);
+
+            $this->dispatch('notify', type: 'success', message: __('Payroll component updated.'));
+        } else {
+            $data['code'] = strtoupper(str_replace(' ', '_', $validated['name']));
+            PayrollComponent::create($data);
+
+            $this->dispatch('notify', type: 'success', message: __('Payroll component created.'));
+        }
+
+        $this->showModal = false;
+        $this->reset(['selectedId', 'name', 'type', 'calculation_type', 'amount', 'percentage', 'is_taxable']);
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->selectedId = $id;
+        $this->confirmingDeletion = true;
+    }
+
+    public function delete(): void
+    {
+        $component = PayrollComponent::findOrFail($this->selectedId);
+        $component->delete();
+
+        $this->confirmingDeletion = false;
+        $this->selectedId = null;
+
+        $this->dispatch('notify', type: 'success', message: __('Payroll component deleted.'));
+    }
+
+    public function toggleActive(int $id): void
+    {
+        $component = PayrollComponent::findOrFail($id);
+        $component->update(['is_active' => ! $component->is_active]);
+
+        $this->dispatch('notify', type: 'success', message: $component->is_active
+            ? __('Payroll component activated.')
+            : __('Payroll component deactivated.')
+        );
     }
 }

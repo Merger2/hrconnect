@@ -39,6 +39,18 @@ return new class extends Migration
             $table->string('verification_method', 50)->nullable()->comment('face_verified|pin_verified|manual');
             $table->text('wfa_note')->nullable();
             $table->integer('late_minutes')->default(0);
+            $table->unsignedTinyInteger('risk_score')->nullable()->after('late_minutes');
+            $table->string('risk_level', 10)->nullable()->after('risk_score');
+            $table->json('risk_factors')->nullable()->after('risk_level');
+            $table->foreignId('device_id')->nullable()->constrained('devices');
+            $table->enum('verification_type', ['face', 'pin', 'manual', 'offline'])->default('face');
+            $table->string('photo_clock_in', 2048)->nullable();
+            $table->string('photo_clock_out', 2048)->nullable();
+            $table->string('ip_address', 45)->nullable();
+            $table->boolean('is_offline_sync')->default(false);
+            $table->timestamp('synced_at')->nullable();
+            $table->string('latitude', 20)->nullable();
+            $table->string('longitude', 20)->nullable();
             $table->unique(['employee_id', 'date']);
             $table->index(['date', 'status']);
             $table->timestamps();

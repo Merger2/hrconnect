@@ -19,6 +19,10 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->decimal('total_hours', 5, 2)->nullable();
             $table->decimal('amount', 15, 2)->nullable();
+            $table->decimal('insentif', 15, 2)->default(0);
+            $table->foreignId('approved_by')->nullable()->constrained('employees');
+            $table->timestamp('approved_at')->nullable();
+            $table->text('notes')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->string('status', 20)->default('pending');
             $table->index('employee_id');

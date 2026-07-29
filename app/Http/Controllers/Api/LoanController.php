@@ -8,7 +8,7 @@ use App\Http\Requests\Api\StoreLoanRequest;
 use App\Http\Requests\Api\UpdateLoanRequest;
 use App\Http\Resources\LoanResource;
 use App\Models\Loan;
-use App\Services\LoanService;
+use App\Services\HR\LoanService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
@@ -138,5 +138,15 @@ class LoanController extends Controller
             'status' => 'success',
             'message' => 'Pinjaman berhasil dibatalkan',
         ]);
+    }
+
+    public function payInstallment(Request $request, Loan $loan): JsonResponse
+    {
+        $this->authorize('update', $loan);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Pay installment via API not supported. Use web interface.',
+        ], 400);
     }
 }

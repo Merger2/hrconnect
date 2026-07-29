@@ -2,304 +2,218 @@
 
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AssetController;
-use App\Http\Controllers\Api\AttendanceController;
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AuthenticatedUserController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
-use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\Device\LocationController;
+use App\Http\Controllers\Api\Device\OfflineAttendanceSyncController;
+use App\Http\Controllers\Api\Device\PermissionsStatusController;
+use App\Http\Controllers\Api\Device\PhotoUploadController;
+use App\Http\Controllers\Api\DivisionController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\EmployeeTerminationController;
 use App\Http\Controllers\Api\FaceController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\Integrations\AttendanceEventController;
 use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\LoanController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OvertimeController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReimbursementController;
-use App\Models\KnowledgeBase;
+use App\Http\Controllers\Api\WilayahController;
+use App\Http\Middleware\EnsureEmployeeDeviceApiAccount;
+use App\Support\ApiTokenPermission;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes (v1)
+| API Routes — PWA / Mobile / Integration
 |--------------------------------------------------------------------------
 |
-| Prefix: /api/v1 (defined di bootstrap/app.php apiPrefix).
-| Auth: Sanctum Bearer token (PWA mobile) atau cookie stateful (SPA same-origin).
-| Token expiration: null (never expire — PWA reuse sampai logout/revoke).
+| - `auth:sanctum`  : token-based mobile/PWA
+| - `throttle:api`  : rate limiting untuk public/protected endpoints
+| - Grup bawah ini disusun by domain, bukan by controller.
 |
-| Lihat docs/api/api-contracts.md v2.0 untuk spesifikasi penuh 47 endpoint.
-|
-| HTTP code policy:
-| - 200 success, 201 created, 204 deleted
-| - 401 token invalid/missing
-| - 403 policy reject (IDOR fix)
-| - 409 state conflict (already clocked in, payroll locked, dll)
-| - 422 validation / business rule violation
-| - 429 rate limited
 */
 
-// ─── PUBLIC (no auth) ─────────────────────────────────────────────────
+// ─── Sanctum user ────────────────────────────────────────────────
+Route::middleware(['auth:sanctum', 'throttle:api'])
+    ->get('/user', AuthenticatedUserController::class)
+    ->name('api.user');
 
-Route::get('/health', HealthController::class)->name('api.health');
+// ─── Public / lightly protected ──────────────────────────────────
+Route::middleware('throttle:api')->group(function () {
+    // Health / monitoring
+    Route::get('/health', HealthController::class);
 
-Route::prefix('auth')->name('api.auth.')->group(function () {
-    Route::post('/login', [AuthController::class, 'login'])
-        ->middleware('throttle:5,1') // 5 attempts per 1 menit
-        ->name('login');
-
-    Route::post('/2fa/challenge', [AuthController::class, 'twoFactorChallenge'])
-        ->middleware('throttle:5,1')
-        ->name('2fa.challenge');
-
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
-        ->middleware('throttle:5,1')
-        ->name('forgot-password');
+    // Email verification (token-gated inside controller, not sanctum)
+    Route::controller(EmailVerificationController::class)->prefix('auth')->group(function () {
+        Route::post('/email/verification-notification', 'resend');
+        Route::get('/email/verify/{id}/{hash}', 'verify')->name('api.verification.verify');
+    });
 });
 
-// ─── Email Verification (public — signed URL from email) ────────────
-Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['throttle:5,1'])
-    ->name('api.verification.verify');
-
-// ─── AUTHENTICATED (Sanctum) ──────────────────────────────────────────
-
+// ─── Authenticated user / employee ──────────────────────────────
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
-
-    // ── Auth (logout) ────────────────────────────────────────────────
-    Route::prefix('auth')->name('api.auth.')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-        Route::post('/logout-all', [AuthController::class, 'logoutAll'])->name('logout-all');
+    // Self profile
+    Route::controller(ProfileController::class)->prefix('profile')->group(function () {
+        Route::get('/', 'show');
+        Route::put('/', 'update');
+        Route::post('/password', 'changePassword');
     });
 
-    // ── Email Verification (authenticated) ──────────────────────────
-    Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
-        ->middleware('throttle:5,1')
-        ->name('api.verification.resend');
-
-    // ── User & Profile ───────────────────────────────────────────────
-    Route::get('/user', [AuthController::class, 'me'])->name('api.user');
-    Route::get('/sanctum/token', [AuthController::class, 'sanctumToken'])
-        ->name('api.sanctum-token');
-
-    Route::prefix('profile')->name('api.profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'show'])->name('show');
-        Route::put('/', [ProfileController::class, 'update'])->name('update');
-        Route::post('/change-password', [ProfileController::class, 'changePassword'])
-            ->name('change-password');
+    // Face recognition (register / verify untuk login)
+    Route::controller(FaceController::class)->prefix('face')->group(function () {
+        Route::post('/register', 'register');
+        Route::post('/verify', 'verify');
     });
 
-    // ── Face Recognition ─────────────────────────────────────────────
-    Route::prefix('face')->name('api.face.')->group(function () {
-        Route::post('/register', [FaceController::class, 'register'])
-            ->middleware('throttle:10,1')
-            ->name('register');
-        Route::post('/verify', [FaceController::class, 'verify'])
-            ->middleware('throttle:10,1')
-            ->name('verify');
+    // Employee directory — HR/Admin only untuk read/write
+    Route::controller(EmployeeController::class)->prefix('employees')->group(function () {
+        Route::get('/', 'index')->can('view_employees');
+        Route::get('/me', 'me');
+        Route::post('/', 'store')->can('manage_employees');
+        Route::get('/{employee}', 'show')->can('view_employees');
+        Route::put('/{employee}', 'update')->can('manage_employees');
+        Route::delete('/{employee}', 'destroy')->can('manage_employees');
     });
 
-    // ── Attendance ───────────────────────────────────────────────────
-    Route::prefix('attendance')->name('api.attendance.')->group(function () {
-        Route::post('/clock-in', [AttendanceController::class, 'clockIn'])
-            ->middleware('throttle:5,5') // 5 per 5 menit
-            ->name('clock-in');
-        Route::post('/clock-out', [AttendanceController::class, 'clockOut'])
-            ->middleware('throttle:5,5')
-            ->name('clock-out');
-        Route::get('/today', [AttendanceController::class, 'today'])->name('today');
-        Route::get('/', [AttendanceController::class, 'index'])->name('index');
-        Route::post('/{attendance}/approve-wfa', [AttendanceController::class, 'approveWfa'])
-            ->name('approve-wfa');
+    // Notifications (user punya sendiri)
+    Route::controller(NotificationController::class)->prefix('notifications')->group(function () {
+        Route::get('/', 'index');
+        Route::put('/read-all', 'markAllAsRead');
+        Route::delete('/{notification}', 'destroy');
     });
 
-    // ── Leave ────────────────────────────────────────────────────────
-    Route::prefix('leave')->name('api.leave.')->group(function () {
-        Route::post('/', [LeaveController::class, 'store'])
-            ->middleware('throttle:10,1')
-            ->name('store');
-        Route::get('/', [LeaveController::class, 'index'])->name('index');
-        Route::get('/quota', [LeaveController::class, 'quota'])->name('quota');
-        Route::get('/{leave}', [LeaveController::class, 'show'])->name('show');
-        Route::delete('/{leave}', [LeaveController::class, 'destroy'])->name('destroy');
+    // Knowledge Base / chat RAG
+    Route::controller(KnowledgeBaseController::class)->prefix('knowledge-base')->group(function () {
+        Route::get('/', 'index')->can('view_knowledgebase');
+        Route::get('/{knowledgeBase}', 'show')->can('view_knowledgebase');
+        Route::post('/chat', 'chat')->can('view_knowledgebase');
+        Route::post('/upload', 'upload')->can('manage_knowledgebase');
+        Route::delete('/{knowledgeBase}', 'destroy')->can('manage_knowledgebase');
     });
 
-    // ── Overtime ─────────────────────────────────────────────────────
-    Route::prefix('overtime')->name('api.overtime.')->group(function () {
-        Route::post('/', [OvertimeController::class, 'store'])
-            ->middleware('throttle:10,1')
-            ->name('store');
-        Route::get('/', [OvertimeController::class, 'index'])->name('index');
-        Route::get('/{overtime}', [OvertimeController::class, 'show'])->name('show');
-        Route::delete('/{overtime}', [OvertimeController::class, 'destroy'])->name('destroy');
+    // User self-service — user manage own data
+    Route::controller(LeaveController::class)->prefix('leaves')->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{leave}', 'show');
+        Route::put('/{leave}', 'update');
+        Route::delete('/{leave}', 'destroy');
     });
 
-    // ── Reimbursement ────────────────────────────────────────────────
-    Route::prefix('reimbursement')->name('api.reimbursement.')->group(function () {
-        Route::post('/', [ReimbursementController::class, 'store'])
-            ->middleware('throttle:10,1')
-            ->name('store');
-        Route::get('/', [ReimbursementController::class, 'index'])->name('index');
-        Route::get('/categories', [ReimbursementController::class, 'categories'])
-            ->name('categories');
-        Route::get('/{reimbursement}', [ReimbursementController::class, 'show'])->name('show');
-        Route::patch('/{reimbursement}', [ReimbursementController::class, 'update'])
-            ->name('update');
-        Route::get('/{reimbursement}/receipt', [ReimbursementController::class, 'receipt'])
-            ->name('receipt');
-        Route::delete('/{reimbursement}', [ReimbursementController::class, 'destroy'])
-            ->name('destroy');
+    Route::controller(ReimbursementController::class)->prefix('reimbursements')->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{reimbursement}', 'show');
+        Route::put('/{reimbursement}', 'update');
+        Route::delete('/{reimbursement}', 'destroy');
     });
 
-    // ── Approval Workflow ────────────────────────────────────────────
-    Route::prefix('approvals')->name('api.approvals.')->group(function () {
-        Route::get('/pending', [ApprovalController::class, 'pending'])->name('pending');
-        Route::get('/history', [ApprovalController::class, 'history'])->name('history');
-        Route::get('/{approval}', [ApprovalController::class, 'show'])->name('show');
-        Route::post('/{approval}/approve', [ApprovalController::class, 'approve'])
-            ->name('approve');
-        Route::post('/{approval}/reject', [ApprovalController::class, 'reject'])
-            ->name('reject');
+    Route::controller(OvertimeController::class)->prefix('overtimes')->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{overtime}', 'show');
+        Route::put('/{overtime}', 'update');
+        Route::delete('/{overtime}', 'destroy');
     });
 
-    // ── Payroll ──────────────────────────────────────────────────────
-    Route::prefix('payroll')->name('api.payroll.')->group(function () {
-        Route::get('/', [PayrollController::class, 'index'])->name('index');
-        Route::post('/generate', [PayrollController::class, 'generate'])
-            ->middleware('permission:process_payroll')
-            ->name('generate');
-        Route::post('/export/monthly', [PayrollController::class, 'exportMonthly'])
-            ->middleware('permission:process_payroll')
-            ->name('export.monthly');
-        Route::post('/export/1721-a1', [PayrollController::class, 'export1721A1'])
-            ->middleware('permission:process_payroll')
-            ->name('export.1721-a1');
-        Route::post('/export/bpjs', [PayrollController::class, 'exportBpjs'])
-            ->middleware('permission:process_payroll')
-            ->name('export.bpjs');
-        Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
-        Route::get('/{payroll}/payslip', [PayrollController::class, 'payslip'])->name('payslip');
+    Route::controller(LoanController::class)->prefix('loans')->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{loan}', 'show');
+        Route::put('/{loan}', 'update');
+        Route::post('/{loan}/installments', 'payInstallment');
+        Route::delete('/{loan}', 'destroy');
     });
 
-    // ── Master Data — Company ─────────────────────────────────────
-    Route::prefix('companies')->name('api.companies.')
-        ->middleware('permission:view_companies')
-        ->group(function () {
-            Route::get('/', [CompanyController::class, 'index'])->name('index');
-            Route::get('/{company}', [CompanyController::class, 'show'])->name('show');
-        });
+    // Approval queue (user sebagai approver)
+    Route::controller(ApprovalController::class)->prefix('approvals')->group(function () {
+        Route::get('/', 'index');
+        Route::put('/{approval}/approve', 'approve');
+        Route::put('/{approval}/reject', 'reject');
+    });
 
-    // ── Master Data — Branch ──────────────────────────────────────
-    Route::prefix('branches')->name('api.branches.')
-        ->middleware('permission:view_branches')
-        ->group(function () {
-            Route::get('/', [BranchController::class, 'index'])->name('index');
-            Route::post('/', [BranchController::class, 'store'])->name('store')->middleware('permission:manage_branches');
-            Route::get('/{branch}', [BranchController::class, 'show'])->name('show');
-            Route::put('/{branch}', [BranchController::class, 'update'])->name('update')->middleware('permission:manage_branches');
-            Route::delete('/{branch}', [BranchController::class, 'destroy'])->name('destroy')->middleware('permission:manage_branches');
-        });
-
-    // ── Master Data — Department ──────────────────────────────────
-    Route::prefix('departments')->name('api.departments.')
-        ->middleware('permission:view_departments')
-        ->group(function () {
-            Route::get('/', [DepartmentController::class, 'index'])->name('index');
-            Route::get('/{department}', [DepartmentController::class, 'show'])->name('show');
-        });
-
-    // ── Master Data — Position ────────────────────────────────────
-    Route::prefix('positions')->name('api.positions.')
-        ->middleware('permission:view_positions')
-        ->group(function () {
-            Route::get('/', [PositionController::class, 'index'])->name('index');
-            Route::get('/{position}', [PositionController::class, 'show'])->name('show');
-        });
-
-    // ── Employee Directory (HR Manager + Super Admin) ────────────────
-    Route::prefix('employees')->name('api.employees.')
-        ->middleware('permission:view_employees')
-        ->group(function () {
-            Route::get('/', [EmployeeController::class, 'index'])->name('index');
-            Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
-            Route::get('/{employee}/pii', [EmployeeController::class, 'showPii'])
-                ->middleware('permission:manage_employees')
-                ->name('pii');
-            Route::post('/', [EmployeeController::class, 'store'])
-                ->middleware('permission:manage_employees')
-                ->name('store');
-            Route::put('/{employee}', [EmployeeController::class, 'update'])
-                ->middleware('permission:manage_employees')
-                ->name('update');
-            Route::delete('/{employee}', [EmployeeController::class, 'destroy'])
-                ->middleware('permission:manage_employees')
-                ->name('destroy');
-            Route::post('/{employee}/terminate', [EmployeeTerminationController::class, 'terminate'])
-                ->middleware('permission:manage_employees')
-                ->name('terminate');
-            Route::post('/terminate/contract-end', [EmployeeTerminationController::class, 'processContractEnd'])
-                ->middleware('permission:manage_employees')
-                ->name('terminate.contract-end');
-        });
-
-    // ── Loan Management ───────────────────────────────────────────
-    Route::prefix('loans')->name('api.loans.')
-        ->middleware('permission:view_loans')
-        ->group(function () {
-            Route::get('/', [LoanController::class, 'index'])->name('index');
-            Route::post('/', [LoanController::class, 'store'])
-                ->middleware('permission:manage_loans')
-                ->name('store');
-            Route::get('/{loan}', [LoanController::class, 'show'])->name('show');
-            Route::patch('/{loan}', [LoanController::class, 'update'])
-                ->middleware('permission:manage_loans')
-                ->name('update');
-            Route::delete('/{loan}', [LoanController::class, 'destroy'])->name('destroy');
-        });
-
-    // ── Asset Management ──────────────────────────────────────────
-    Route::prefix('assets')->name('api.assets.')
-        ->middleware('permission:view_assets')
-        ->group(function () {
-            Route::get('/', [AssetController::class, 'index'])->name('index');
-            Route::post('/', [AssetController::class, 'store'])
-                ->middleware('permission:manage_assets')
-                ->name('store');
-            Route::get('/{asset}', [AssetController::class, 'show'])->name('show');
-            Route::patch('/{asset}', [AssetController::class, 'update'])
-                ->middleware('permission:manage_assets')
-                ->name('update');
-            Route::delete('/{asset}', [AssetController::class, 'destroy'])
-                ->middleware('permission:manage_assets')
-                ->name('destroy');
-            Route::post('/{asset}/handover', [AssetController::class, 'handover'])
-                ->middleware('permission:manage_assets')
-                ->name('handover');
-            Route::post('/handover/{handover}/return', [AssetController::class, 'return'])
-                ->middleware('permission:manage_assets')
-                ->name('return');
-        });
-
-    // ── KnowledgeBase RAG (Sesi 11) ─────────────────────────────────
-    Route::prefix('knowledgebase')->name('api.knowledgebase.')->group(function () {
-        Route::post('/chat', [KnowledgeBaseController::class, 'chat'])
-            ->middleware('throttle:20,1')
-            ->name('chat');
-        Route::post('/chat-stream', [KnowledgeBaseController::class, 'chatStream'])
-            ->middleware('throttle:10,1')
-            ->name('chat.stream');
-        Route::get('/', [KnowledgeBaseController::class, 'index'])
-            ->middleware('can:viewAny,'.KnowledgeBase::class)
-            ->name('index');
-        Route::post('/', [KnowledgeBaseController::class, 'upload'])
-            ->middleware('permission:manage_knowledgebase')
-            ->name('upload');
-        Route::delete('/{knowledgeBase}', [KnowledgeBaseController::class, 'destroy'])
-            ->middleware('permission:manage_knowledgebase')
-            ->name('destroy');
+    // Company data (read-only)
+    Route::controller(CompanyController::class)->prefix('company')->group(function () {
+        Route::get('/hours', 'getCompanyOperationalHours')->can('view_companies');
+        Route::get('/branches', 'getCompanyBranches')->can('view_companies');
     });
 });
+
+// ─── Master data (authenticated, read-heavy) ────────────────────
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::controller(BranchController::class)->prefix('branches')->group(function () {
+        Route::get('/', 'index')->can('view_branches');
+        Route::get('/{branch}', 'show')->can('view_branches');
+    });
+
+    Route::controller(DivisionController::class)->prefix('divisions')->group(function () {
+        Route::get('/', 'index')->can('view_divisions');
+        Route::get('/{division}', 'show')->can('view_divisions');
+    });
+
+    Route::controller(PositionController::class)->prefix('positions')->group(function () {
+        Route::get('/', 'index')->can('view_positions');
+        Route::get('/{position}', 'show')->can('view_positions');
+    });
+});
+
+// ─── HR / Admin-only actions ────────────────────────────────────
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::controller(EmployeeTerminationController::class)->prefix('employee-terminations')->group(function () {
+        Route::get('/', 'index')->can('manage_employees');
+        Route::post('/{employee}', 'store')->can('manage_employees');
+        Route::post('/process-contract-end', 'processContractEnd')->can('manage_employees');
+    });
+
+    Route::controller(AssetController::class)->prefix('assets')->group(function () {
+        Route::get('/', 'index')->can('view_assets');
+        Route::post('/', 'store')->can('manage_assets');
+        Route::get('/{asset}', 'show')->can('view_assets');
+        Route::put('/{asset}', 'update')->can('manage_assets');
+        Route::delete('/{asset}', 'destroy')->can('manage_assets');
+    });
+
+    Route::controller(PayrollController::class)->prefix('payrolls')->group(function () {
+        Route::get('/', 'index')->can('view_payrolls');
+        Route::post('/generate', 'generate')->can('process_payroll');
+        Route::get('/{payroll}', 'show')->can('view_payrolls');
+        Route::get('/{payroll}/payslip', 'payslip')->can('view_payslip');
+        Route::post('/{payroll}/export-monthly', 'exportMonthly')->can('process_payroll');
+        Route::post('/{payroll}/export-1721a1', 'export1721A1')->can('process_payroll');
+        Route::post('/{payroll}/export-bpjs', 'exportBpjs')->can('process_payroll');
+    });
+});
+
+// ─── Wilayah Data ───────────────────────────────────────────────
+Route::prefix('wilayah')->middleware('throttle:wilayah')->group(function () {
+    Route::get('/provinces', [WilayahController::class, 'provinces']);
+    Route::get('/regencies/{provinceCode}', [WilayahController::class, 'regencies'])
+        ->where('provinceCode', '[0-9]{2}');
+    Route::get('/districts/{regencyCode}', [WilayahController::class, 'districts'])
+        ->where('regencyCode', '[0-9]{2}\.[0-9]{2}');
+    Route::get('/villages/{districtCode}', [WilayahController::class, 'villages'])
+        ->where('districtCode', '[0-9]{2}\.[0-9]{2}\.[0-9]{2}');
+});
+
+// ─── Capacitor Device API ───────────────────────────────────────
+Route::middleware(['auth:sanctum', EnsureEmployeeDeviceApiAccount::class, 'throttle:api'])->prefix('device')->group(function () {
+    Route::post('/location', LocationController::class)->middleware('abilities:'.ApiTokenPermission::DEVICE_LOCATION);
+    Route::post('/offline-attendance', OfflineAttendanceSyncController::class)->middleware('abilities:'.ApiTokenPermission::DEVICE_OFFLINE_ATTENDANCE);
+    Route::post('/photo', PhotoUploadController::class)->middleware('abilities:'.ApiTokenPermission::DEVICE_PHOTO);
+    Route::get('/permissions', PermissionsStatusController::class)->middleware('abilities:'.ApiTokenPermission::DEVICE_PERMISSIONS);
+});
+
+// ─── Integration Webhook ───────────────────────────────────────
+Route::prefix('integrations')
+    ->middleware(['throttle:attendance-integrations', 'attendance.integration.signature'])
+    ->group(function () {
+        Route::post('/attendance-events', [AttendanceEventController::class, 'store']);
+    });

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
 use App\Http\Resources\ProfileResource;
-use App\Services\ProfileService;
+use App\Services\HR\ProfileService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;

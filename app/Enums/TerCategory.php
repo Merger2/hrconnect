@@ -38,7 +38,8 @@ enum TerCategory: string
         }
 
         return match ($dependents) {
-            0, 1 => self::B,
+            0 => self::A,
+            1 => self::B,
             2, 3 => self::C,
         };
     }
@@ -53,5 +54,14 @@ enum TerCategory: string
         $dependentsLabel = $dependents > 3 ? '3+' : (string) max(0, $dependents);
 
         return "{$prefix}/{$dependentsLabel}";
+    }
+
+    public function golonganPtkpKode(): string
+    {
+        return match ($this) {
+            self::A => 'TK/0',
+            self::B => 'K/0',
+            self::C => 'K/3',
+        };
     }
 }

@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @mixin IdeHelperOvertime
  */
-#[Fillable(['employee_id', 'attendance_id', 'date', 'start_time', 'end_time', 'description', 'total_hours', 'amount', 'rejection_reason', 'status'])]
+#[Fillable(['employee_id', 'attendance_id', 'date', 'start_time', 'end_time', 'description', 'total_hours', 'amount', 'insentif', 'approved_by', 'approved_at', 'notes', 'rejection_reason', 'status'])]
 class Overtime extends Model
 {
     use Approvable, HasFactory, SoftDeletes;
@@ -22,8 +23,8 @@ class Overtime extends Model
     {
         return [
             'date' => 'date',
-            'start_time' => 'datetime',
-            'end_time' => 'datetime',
+            'start_time' => 'string',
+            'end_time' => 'string',
             'total_hours' => 'decimal:2',
             'amount' => 'decimal:2',
             'status' => RequestStatus::class,
@@ -46,15 +47,16 @@ class Overtime extends Model
             return 0.0;
         }
 
-        $end = $this->end_time;
+        $start = Carbon::parse($this->start_time);
+        $end = Carbon::parse($this->end_time);
 
         // B-11: Detect overnight shift (end < start) → add 1 day
-        if ($this->end_time->lessThan($this->start_time)) {
-            $end = $this->end_time->copy()->addDay();
+        if ($end->lessThan($start)) {
+            $end = $end->copy()->addDay();
         }
 
         // diffInMinutes / 60 mencegah pembulatan ke bawah yang merugikan uang karyawan
-        $minutes = $this->start_time->diffInMinutes($end);
+        $minutes = $start->diffInMinutes($end);
 
         return round($minutes / 60, 2);
     }

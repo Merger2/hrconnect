@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @mixin IdeHelperLeaveBalance
  */
-#[Fillable(['employee_id', 'leave_type_id', 'year', 'quota', 'used', 'carry_forward', 'carry_forward_deadline'])]
+#[Fillable(['employee_id', 'leave_type_id', 'year', 'quota', 'used', 'carry_forward', 'carry_forward_deadline', 'entitlement_id', 'carried_forward', 'expired_at', 'is_frozen'])]
 class LeaveBalance extends Model
 {
     use HasFactory;

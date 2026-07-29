@@ -13,6 +13,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('event_key');
             $table->json('channels');
+            $table->boolean('digest_enabled')->default(false);
+            $table->string('digest_frequency')->default('daily');
             $table->timestamps();
 
             $table->unique(['user_id', 'event_key']);

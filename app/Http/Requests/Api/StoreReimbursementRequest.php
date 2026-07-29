@@ -25,4 +25,20 @@ class StoreReimbursementRequest extends FormRequest
             ),
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'category_id.required' => 'Kategori reimbursemen wajib dipilih.',
+            'category_id.exists' => 'Kategori reimbursemen tidak valid.',
+            'amount.required' => 'Jumlah reimbursemen wajib diisi.',
+            'amount.numeric' => 'Jumlah reimbursemen harus berupa angka.',
+            'amount.min' => 'Jumlah reimbursemen minimal Rp1.000.',
+            'description.required' => 'Deskripsi reimbursemen wajib diisi.',
+            'description.min' => 'Deskripsi reimbursemen minimal 10 karakter.',
+            'description.max' => 'Deskripsi reimbursemen maksimal 1000 karakter.',
+            'expense_date.required' => 'Tanggal pengeluaran wajib diisi.',
+            'expense_date.before_or_equal' => 'Tanggal pengeluaran tidak boleh melebihi hari ini.',
+        ];
+    }
 }

@@ -1,11 +1,7 @@
-@props([
-    'title' => __('Konfirmasi Password'),
-    'content' => __('Untuk keamanan, harap konfirmasi password Anda untuk melanjutkan.'),
-    'button' => __('Konfirmasi'),
-])
+@props(['title' => __('Confirm Password'), 'content' => __('For your security, please confirm your password to continue.'), 'button' => __('Confirm')])
 
 @php
-$confirmableId = md5($attributes->wire('then'));
+    $confirmableId = md5($attributes->wire('then'));
 @endphp
 
 <span
@@ -19,41 +15,32 @@ $confirmableId = md5($attributes->wire('then'));
 </span>
 
 @once
-    <x-modal :show="false" max-width="md">
-        <x-slot name="title">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-error">lock</span>
-                <span>{{ $title }}</span>
-            </div>
-        </x-slot>
+<x-overlays.dialog-modal wire:model.live="confirmingPassword">
+    <x-slot name="title">
+        {{ $title }}
+    </x-slot>
 
-        <div>
-            <p class="text-sm text-on-surface-variant">{{ $content }}</p>
+    <x-slot name="content">
+        {{ $content }}
 
-            <div class="mt-4" x-data="{}" x-on:confirming-password.window="setTimeout(() => $refs.confirmable_password.focus(), 250)">
-                <input type="password"
-                    x-ref="confirmable_password"
-                    wire:model="confirmablePassword"
-                    wire:keydown.enter="confirmPassword"
-                    placeholder="{{ __('Password') }}"
-                    autocomplete="current-password"
-                    class="h-10 w-full rounded-xl border border-outline-variant bg-canvas px-3 text-sm text-ink outline-none placeholder:text-on-surface-variant focus:border-ink focus:ring-1 focus:ring-ink"
-                />
-                @error('confirmable_password')
-                    <p class="mt-2 text-sm text-error">{{ $message }}</p>
-                @enderror
-            </div>
+        <div class="mt-4" x-data="{}" x-on:confirming-password.window="setTimeout(() => $refs.confirmable_password.focus(), 250)">
+            <x-forms.input type="password" class="mt-1 block w-3/4" placeholder="{{ __('Password') }}" autocomplete="current-password"
+                        x-ref="confirmable_password"
+                        wire:model="confirmablePassword"
+                        wire:keydown.enter="confirmPassword" />
+
+            <x-forms.input-error for="confirmable_password" class="mt-2" />
         </div>
+    </x-slot>
 
-        <x-slot name="footer">
-            <button wire:click="stopConfirmingPassword"
-                class="rounded-xl border border-outline-variant bg-canvas px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-surface-dim">
-                {{ __('Batal') }}
-            </button>
-            <button wire:click="confirmPassword" wire:loading.attr="disabled"
-                class="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-40">
-                {{ $button }}
-            </button>
-        </x-slot>
-    </x-modal>
+    <x-slot name="footer">
+        <x-actions.secondary-button wire:click="stopConfirmingPassword" wire:loading.attr="disabled">
+            {{ __('Cancel') }}
+        </x-actions.secondary-button>
+
+        <x-actions.button class="ms-3" dusk="confirm-password-button" wire:click="confirmPassword" wire:loading.attr="disabled">
+            {{ $button }}
+        </x-actions.button>
+    </x-slot>
+</x-overlays.dialog-modal>
 @endonce

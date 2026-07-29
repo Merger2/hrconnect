@@ -25,6 +25,13 @@ return new class extends Migration
             $table->string('password');
             $table->string('google_id')->nullable();
             $table->timestamp('password_changed_at')->nullable();
+            $table->timestamp('last_activity_at')->nullable()->after('password_changed_at');
+            $table->string('profile_photo_path', 2048)->nullable()->after('password');
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+            $table->foreignId('manager_id')->nullable()->index();
+            $table->foreignId('company_id')->nullable()->index();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

@@ -5,27 +5,20 @@ namespace App\Http\Middleware;
 use App\Models\CompanySetting;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * CheckPasswordExpired — enforce password expiry policy (CAT-005).
  *
  * Default: 90 hari (configurable via CompanySetting key 'password_expiry_days').
- * Sumber: Security Config §1.5 + AGENTS.md "password_changed_at column exists; CheckPasswordExpired middleware does not (CAT-005 partial)".
  *
  * Logic:
  * 1. Skip kalau user guest (belum login)
  * 2. Skip kalau user belum punya password_changed_at (legacy/akun manual)
- * 3. Skip kalau halaman saat ini sudah di whitelist (cegah redirect loop):
- *    - logout
- *    - password.update / password.confirm / password.confirm.store / password.confirmation
- *    - security.edit (page untuk ubah password)
+ * 3. Skip kalau halaman saat ini sudah di whitelist (cegah redirect loop)
  * 4. Hitung selisih hari sejak password_changed_at
- * 5. Kalau > expiry days → redirect ke security.edit dengan flash warning
- *
- * Register sebagai alias 'password.expired' di bootstrap/app.php, lalu pasang
- * di route group yang dilindungi (atau global web middleware kalau mau enforce
- * di seluruh aplikasi setelah login).
+ * 5. Kalau > expiry days → redirect ke profile.show dengan flash warning
  */
 class CheckPasswordExpired
 {
@@ -42,8 +35,8 @@ class CheckPasswordExpired
         'password.email',
         'password.request',
         'password.reset',
-        'security.edit',
-        'profile.edit',
+        'profile.show',
+        'knowledge-base.*',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -57,8 +50,12 @@ class CheckPasswordExpired
 
         // Tier 2: skip kalau halaman saat ini di whitelist
         $currentRoute = $request->route()?->getName();
-        if ($currentRoute && in_array($currentRoute, self::WHITELIST_ROUTES, true)) {
-            return $next($request);
+        if ($currentRoute) {
+            foreach (self::WHITELIST_ROUTES as $pattern) {
+                if (Str::is($pattern, $currentRoute)) {
+                    return $next($request);
+                }
+            }
         }
 
         // Tier 3: force redirect kalau user belum punya password_changed_at
@@ -72,7 +69,7 @@ class CheckPasswordExpired
             }
 
             return redirect()
-                ->route('security.edit')
+                ->route('profile.show')
                 ->with('warning', 'Ini pertama kali Anda login. Silakan ganti password sekarang.');
         }
 
@@ -84,9 +81,9 @@ class CheckPasswordExpired
             return $next($request);
         }
 
-        // Expired → redirect ke security.edit dengan warning
+        // Expired → redirect ke profile.show dengan warning
         return redirect()
-            ->route('security.edit')
+            ->route('profile.show')
             ->with('warning', "Password Anda sudah kedaluwarsa (lebih dari {$expiryDays} hari). Silakan ganti password sekarang demi keamanan akun.");
     }
 }

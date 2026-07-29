@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ListOvertimeRequest;
 use App\Http\Requests\Api\StoreOvertimeRequest;
 use App\Http\Resources\OvertimeResource;
 use App\Models\Overtime;
-use App\Services\OvertimeService;
+use App\Services\HR\OvertimeService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -120,13 +119,21 @@ class OvertimeController extends Controller
         $this->authorize('delete', $overtime);
 
         DB::transaction(function () use ($overtime): void {
-            $overtime->update(['status' => RequestStatus::CANCELLED]);
+            $overtime->details()->delete();
             $overtime->delete();
         });
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Pengajuan lembur berhasil dibatalkan',
+            'message' => 'Overtime request deleted.',
         ]);
+    }
+
+    public function update(Request $request, Overtime $overtime): JsonResponse
+    {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Update overtime via API not supported.',
+        ], 400);
     }
 }

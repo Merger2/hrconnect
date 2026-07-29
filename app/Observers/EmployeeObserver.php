@@ -2,40 +2,60 @@
 
 namespace App\Observers;
 
+use App\Models\ActivityLog;
+use App\Models\ActivityLogDetail;
 use App\Models\Employee;
-use App\Models\Shift;
+use Illuminate\Support\Facades\Auth;
 
-/**
- * Observer untuk Employee model.
- * Tugas: auto-assign default shift_id saat employee baru dibuat tanpa shift.
- *
- * Logic resolve default shift:
- * 1. Cari Shift aktif dengan nama mengandung "Office Hour"
- * 2. Kalau tidak ada, pakai Shift aktif pertama
- * 3. Kalau tidak ada Shift sama sekali, biarkan shift_id NULL
- *    (migration sudah nullable, employee tetap bisa dibuat)
- *
- * Dipasang di AppServiceProvider::boot() (Sesi 10) lewat:
- *     Employee::observe(EmployeeObserver::class);
- */
 class EmployeeObserver
 {
     /**
-     * Triggered SEBELUM model di-INSERT.
-     * Pakai `creating` (bukan `created`) supaya modifikasi shift_id
-     * tersimpan saat INSERT pertama — tidak butuh extra UPDATE query.
+     * Field yang diaudit (sensitive fields).
      */
-    public function creating(Employee $employee): void
-    {
-        if (empty($employee->shift_id)) {
-            $defaultShift = Shift::where('is_active', true)
-                ->where('name', 'like', '%Office Hour%')
-                ->first()
-                ?? Shift::where('is_active', true)->first();
+    protected array $auditedFields = [
+        'basic_salary',
+    ];
 
-            if ($defaultShift) {
-                $employee->shift_id = $defaultShift->id;
-            }
+    public function updated(Employee $employee): void
+    {
+        $dirty = $employee->getDirty();
+
+        $changed = array_intersect(array_keys($dirty), $this->auditedFields);
+
+        if ($changed === []) {
+            return;
+        }
+
+        $actorId = Auth::id();
+        $action = 'Sensitive Field Changed';
+
+        $activityLog = ActivityLog::create([
+            'user_id' => $actorId,
+            'action' => $action,
+            'description' => 'Perubahan field sensitif pada Employee #'.$employee->id,
+            'ip_address' => request()?->ip(),
+        ]);
+
+        foreach ($changed as $field) {
+            $oldValue = $employee->getOriginal($field);
+            $newValue = $employee->$field;
+
+            ActivityLogDetail::create([
+                'activity_log_id' => $activityLog->id,
+                'entity_type' => Employee::class,
+                'entity_id' => (string) $employee->id,
+                'field' => $field,
+                'old_value' => ['value' => $oldValue],
+                'new_value' => ['value' => $newValue],
+                'integrity_hash' => hash_hmac('sha256', json_encode([
+                    'activity_log_id' => $activityLog->id,
+                    'entity_type' => Employee::class,
+                    'entity_id' => (string) $employee->id,
+                    'field' => $field,
+                    'old_value' => ['value' => $oldValue],
+                    'new_value' => ['value' => $newValue],
+                ], JSON_THROW_ON_ERROR), (string) config('app.key')),
+            ]);
         }
     }
 }

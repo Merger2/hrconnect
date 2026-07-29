@@ -9,7 +9,7 @@ use App\Http\Requests\Api\StoreLeaveRequest;
 use App\Http\Resources\LeaveResource;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
-use App\Services\LeaveService;
+use App\Services\HR\LeaveService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -173,9 +173,9 @@ class LeaveController extends Controller
 
         if (! $employee) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Akun Anda belum terhubung dengan data karyawan.',
-            ], 404);
+                'status' => 'success',
+                'data' => [],
+            ]);
         }
 
         $balances = LeaveBalance::with('leaveType:id,name,code,deducts_from_quota')
@@ -200,5 +200,13 @@ class LeaveController extends Controller
                 'available' => (float) $b->available(),
             ]),
         ]);
+    }
+
+    public function update(Request $request, Leave $leave): JsonResponse
+    {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Update leave via API not supported.',
+        ], 400);
     }
 }

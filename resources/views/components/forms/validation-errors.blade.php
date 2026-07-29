@@ -1,8 +1,8 @@
 @if ($errors->any())
-    <div {{ $attributes->merge(['class' => 'rounded-xl border border-error/30 bg-error/5 px-4 py-3']) }} role="alert" aria-live="assertive">
-        <div class="font-semibold text-error">{{ __('Ada masalah dengan input Anda.') }}</div>
+    <div {{ $attributes->merge(['class' => 'rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-900 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-100']) }} role="alert" aria-live="assertive">
+        <div class="font-semibold text-red-900 dark:text-red-100">{{ __('Whoops! Something went wrong.') }}</div>
 
-        <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-error/90">
+        <ul class="mt-3 list-disc list-inside space-y-1 text-sm text-red-800 dark:text-red-100">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach

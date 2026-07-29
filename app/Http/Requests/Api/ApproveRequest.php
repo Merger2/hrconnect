@@ -17,4 +17,11 @@ class ApproveRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'notes.max' => 'Catatan persetujuan maksimal 500 karakter.',
+        ];
+    }
 }

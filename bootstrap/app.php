@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckPasswordExpired;
+use App\Http\Middleware\EnsureSecurityHeaders;
+use App\Http\Middleware\RedirectLockedEnterpriseFeature;
+use App\Http\Middleware\UserMiddleware;
+use App\Http\Middleware\VerifyAttendanceIntegrationSignature;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,15 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         apiPrefix: 'api/v1',
         then: function () {
-            $modules = [
-                'attendance', 'employee', 'leave', 'overtime', 'payroll', 'approval',
-                'knowledge-base', 'asset', 'loan', 'reimbursement', 'master-data', 'admin',
-            ];
-            foreach ($modules as $module) {
+            $moduleRoutes = ['knowledge-base'];
+            foreach ($moduleRoutes as $module) {
                 $path = base_path("routes/{$module}.php");
                 if (file_exists($path)) {
                     Route::middleware('web')->group($path);
                 }
+            }
+
+            if (file_exists(base_path('routes/jetstream.php'))) {
+                Route::middleware('web')->group(base_path('routes/jetstream.php'));
             }
         },
     )
@@ -45,7 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Security headers: CSP, HSTS, X-Frame-Options (PasPapan pattern).
         $middleware->web(append: [
-            \App\Http\Middleware\EnsureSecurityHeaders::class,
+            EnsureSecurityHeaders::class,
         ]);
 
         // Aliases shortcut untuk middleware Spatie & Sanctum (digunakan di routes).
@@ -54,6 +60,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'password.expired' => CheckPasswordExpired::class,
+            'attendance.integration.signature' => VerifyAttendanceIntegrationSignature::class,
+            'user' => UserMiddleware::class,
+            'admin' => AdminMiddleware::class,
+            'feature.lock' => RedirectLockedEnterpriseFeature::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
