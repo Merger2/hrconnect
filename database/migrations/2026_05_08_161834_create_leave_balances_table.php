@@ -21,6 +21,10 @@ return new class extends Migration
             $table->decimal('used', 4, 1)->default(0);
             $table->decimal('carry_forward', 4, 1)->default(0);
             $table->date('carry_forward_deadline')->nullable();
+            $table->foreignId('entitlement_id')->nullable()->constrained('leave_entitlements');
+            $table->decimal('carried_forward', 5, 1)->default(0);
+            $table->date('expired_at')->nullable();
+            $table->boolean('is_frozen')->default(false);
             $table->timestamps();
 
             $table->unique(['employee_id', 'leave_type_id', 'year']);

@@ -12,22 +12,12 @@ const authDir = path.join(__dirname, 'tests/e2e/.auth');
 export default defineConfig({
   testDir: './tests/e2e',
 
-  /* Run tests in files in parallel */
   fullyParallel: true,
-
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-
-  /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html', { open: 'never' }], ['list']],
 
-  /* Shared settings for all the projects below. */
   use: {
     baseURL: process.env.APP_URL || 'http://localhost:8000',
     trace: 'on-first-retry',
@@ -35,12 +25,11 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
 
-  /* Configure projects for major browsers */
   projects: [
-    // Setup project — logs in once per role, saves storageState (avoids login throttle)
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
+      workers: 1,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],
@@ -48,10 +37,10 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, face enrollment, full role coverage)
+    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
     {
       name: 'chromium-employee',
-      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee|face-enrollment|face-recognition-api)\.spec\.ts/,
+      testMatch: /employee-pages\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -100,7 +89,7 @@ export default defineConfig({
       },
     },
 
-    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement, monitoring, super admin role)
+    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement)
     {
       name: 'chromium-admin',
       testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring|payroll-config|auth-enhanced|face-recognition-api|approval-workflow|role-super-admin)\.spec\.ts/,
@@ -113,7 +102,49 @@ export default defineConfig({
       },
     },
 
-    // Auth flow tests (login/logout) — no stored state, tests login itself
+    // Cross-role console, page-error, and network audit
+    {
+      name: 'chromium-audit',
+      testMatch: /console-network-audit\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+    {
+      name: 'chromium-pwa',
+      testMatch: /pwa\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+    {
+      name: 'chromium-ux',
+      testMatch: /user-experience\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+    {
+      name: 'chromium-profile',
+      testMatch: /profile\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
     {
       name: 'chromium-auth',
       testMatch: /auth\.spec\.ts/,
@@ -125,12 +156,5 @@ export default defineConfig({
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'php artisan serve',
-    url: 'http://localhost:8000',
-    reuseExistingServer: !process.env.CI,
-    stdout: 'ignore',
-    stderr: 'pipe',
-  },
+  // webServer disabled - server runs separately on localhost:8000
 });

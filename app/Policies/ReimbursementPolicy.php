@@ -2,103 +2,106 @@
 
 namespace App\Policies;
 
-use App\Enums\Permission;
-use App\Enums\ReimbursementStatus;
 use App\Models\Reimbursement;
 use App\Models\User;
+use App\Support\ApprovalMatrixService;
+use App\Support\MultiCompanyService;
 
-/**
- * ReimbursementPolicy — authorization untuk Reimbursement model.
- *
- * Matrix berbeda dengan Leave/Overtime:
- * - L1 → Manager (parent_id check)
- * - L2 → FINANCE (bukan HR Manager — sesuai SRS §3.2.2)
- * - HR Manager hanya view all (tidak approve)
- *
- * Status flow: PENDING → APPROVED (L1+L2) → PAID (after payroll generate)
- */
 class ReimbursementPolicy
 {
+    public function before(User $user): ?bool
+    {
+        return $user->isSuperadmin ? true : null;
+    }
+
+    public function __construct(
+        private readonly ApprovalMatrixService $approvalMatrix,
+        private readonly MultiCompanyService $multiCompany,
+    ) {}
+
     public function viewAny(User $user): bool
     {
-        return $user->can(Permission::VIEW_REIMBURSEMENTS->value);
+        return true;
+    }
+
+    public function viewAdminAny(User $user): bool
+    {
+        return $user->can('view_reimbursements');
     }
 
     public function view(User $user, Reimbursement $reimbursement): bool
     {
-        if ($user->hasRole('super-admin')) {
-            return true;
+        if (! $this->sameCompany($user, $reimbursement)) {
+            return false;
         }
 
-        if ($user->hasRole(['hr-manager', 'finance']) && $this->sameCompany($user, $reimbursement)) {
-            return true;
-        }
-
-        if ($user->employee?->id === $reimbursement->employee_id) {
-            return true;
-        }
-
-        if ($user->can(Permission::APPROVE_REIMBURSEMENTS_L1->value)
-            && $reimbursement->employee?->parent_id === $user->employee?->id) {
-            return true;
-        }
-
-        return false;
+        return $user->can('view_reimbursements')
+            || $reimbursement->employee?->user_id === $user->id
+            || $this->canReview($user, $reimbursement);
     }
 
     public function create(User $user): bool
     {
-        return $user->employee !== null;
+        return $user->isUser;
     }
 
-    public function update(User $user, Reimbursement $reimbursement): bool
+    public function approve(User $user, Reimbursement $reimbursement): bool
     {
-        if ($user->can(Permission::MANAGE_REIMBURSEMENTS->value)) {
-            return true;
-        }
-
-        return $user->employee?->id === $reimbursement->employee_id
-            && $reimbursement->status === ReimbursementStatus::PENDING;
-    }
-
-    public function delete(User $user, Reimbursement $reimbursement): bool
-    {
-        if ($user->can(Permission::MANAGE_REIMBURSEMENTS->value)) {
-            return true;
-        }
-
-        return $user->employee?->id === $reimbursement->employee_id
-            && $reimbursement->status === ReimbursementStatus::PENDING;
-    }
-
-    public function approveLevel1(User $user, Reimbursement $reimbursement): bool
-    {
-        if (! $user->can(Permission::APPROVE_REIMBURSEMENTS_L1->value)) {
+        if (! $this->sameCompany($user, $reimbursement)) {
             return false;
         }
 
-        return $reimbursement->employee?->parent_id === $user->employee?->id;
+        return $user->allowsAdminPermission('admin.reimbursements.approve')
+            || $this->canReview($user, $reimbursement);
     }
 
-    /**
-     * L2 untuk reimbursement adalah FINANCE, bukan HR Manager.
-     * B-14: Cegah cross-company approval — finance hanya bisa approve
-     * reimbursement dari company yang sama.
-     */
-    public function approveLevel2(User $user, Reimbursement $reimbursement): bool
+    public function reject(User $user, Reimbursement $reimbursement): bool
     {
-        if (! $user->can(Permission::APPROVE_REIMBURSEMENTS_L2->value)) {
+        return $this->approve($user, $reimbursement);
+    }
+
+    private function canReview(User $user, Reimbursement $reimbursement): bool
+    {
+        if (! $this->sameCompany($user, $reimbursement)) {
             return false;
         }
 
-        return $this->sameCompany($user, $reimbursement);
+        if ($this->approvalMatrix->canActorApprove($user, 'reimbursement', $reimbursement)) {
+            return true;
+        }
+
+        if ($user->employee?->subordinates->contains('id', $reimbursement->employee_id)) {
+            return true;
+        }
+
+        return $this->isFinanceHead($user) && $reimbursement->status === 'pending_finance';
     }
 
-    /**
-     * Pastikan user dan employee reimbursement berada di company yang sama.
-     */
-    private function sameCompany(User $user, Reimbursement $reimbursement): bool
+    private function isFinanceHead(User $user): bool
     {
-        return $user->employee?->company_id === $reimbursement->employee?->company_id;
+        $employee = $user->employee;
+
+        if ($employee === null) {
+            return false;
+        }
+
+        $position = $employee->position;
+
+        if ($position === null) {
+            return false;
+        }
+
+        $rank = $position->jobLevel?->rank ?? 99;
+        $divisionName = $position->division?->name ?? '';
+
+        return (int) $rank <= 2 && strtolower((string) $divisionName) === 'finance';
+    }
+
+    private function sameCompany(User $actor, Reimbursement $reimbursement): bool
+    {
+        $reimbursement->loadMissing('employee.user');
+
+        return $reimbursement->employee?->user !== null
+            && $this->multiCompany->canAccessUser($actor, $reimbursement->employee->user);
     }
 }

@@ -7,14 +7,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use ParagonIE\CipherSweet\BlindIndex;
+use ParagonIE\CipherSweet\EncryptedRow;
+use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
+use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
 /**
  * @mixin IdeHelperBranch
  */
 #[Fillable(['company_id', 'name', 'code', 'type', 'address', 'is_main', 'is_active', 'latitude', 'longitude', 'radius', 'metadata'])]
-class Branch extends Model
+class Branch extends Model implements CipherSweetEncrypted
 {
-    use HasFactory;
+    use HasFactory, UsesCipherSweet;
+
+    public static function configureCipherSweet(EncryptedRow $encryptedRow): void
+    {
+        $encryptedRow
+            ->addOptionalTextField('address')
+            ->addBlindIndex('address', new BlindIndex('address_hash'));
+    }
 
     protected function casts(): array
     {
@@ -38,9 +49,9 @@ class Branch extends Model
         return $this->hasMany(Employee::class);
     }
 
-    public function departments(): HasMany
+    public function divisions(): HasMany
     {
-        return $this->hasMany(Department::class);
+        return $this->hasMany(Division::class);
     }
 
     public function validateRadius(float $lat, float $lng, float $radius): bool

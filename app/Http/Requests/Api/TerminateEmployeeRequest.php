@@ -19,4 +19,14 @@ class TerminateEmployeeRequest extends FormRequest
             'date' => ['nullable', 'date'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'type.required' => 'Tipe pemutusan hubungan kerja wajib dipilih.',
+            'type.in' => 'Tipe PHK harus salah satu dari: resign, dismissed, deceased, contract_end.',
+            'reason.max' => 'Alasan PHK maksimal 500 karakter.',
+            'date.date' => 'Tanggal PHK tidak valid.',
+        ];
+    }
 }

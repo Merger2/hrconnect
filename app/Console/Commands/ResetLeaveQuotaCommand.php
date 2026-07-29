@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Enums\EmployeeStatus;
 use App\Models\Employee;
-use App\Services\LeaveService;
+use App\Services\HR\LeaveService;
 use Illuminate\Console\Command;
 use Throwable;
 

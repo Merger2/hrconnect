@@ -56,9 +56,21 @@ class SecureUploadPolicy
     private function profile(string $category): array
     {
         return match ($category) {
-            'receipt' => [
-                'extensions' => ['jpg', 'jpeg', 'png', 'pdf'],
-                'mimes' => ['image/jpeg', 'image/png', 'application/pdf'],
+            'spreadsheet' => [
+                'extensions' => ['csv', 'xls', 'xlsx', 'ods'],
+                'mimes' => [
+                    'text/plain',
+                    'text/csv',
+                    'application/csv',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.oasis.opendocument.spreadsheet',
+                ],
+                'max_kb' => 10 * 1024,
+            ],
+            'image' => [
+                'extensions' => ['jpg', 'jpeg', 'png'],
+                'mimes' => ['image/jpeg', 'image/png'],
                 'max_kb' => 5 * 1024,
             ],
             default => [

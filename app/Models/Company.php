@@ -15,12 +15,16 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 /**
  * @mixin IdeHelperCompany
  */
-#[Fillable(['name', 'phone', 'email', 'website', 'npwp', 'code', 'logo', 'is_active'])]
+#[Fillable(['name', 'phone', 'email', 'website', 'npwp', 'code', 'logo', 'is_active', 'slug', 'status'])]
 #[Hidden(['npwp'])]
 
 class Company extends Model implements CipherSweetEncrypted
 {
     use HasFactory, UsesCipherSweet;
+
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_SUSPENDED = 'suspended';
 
     protected function casts(): array
     {
@@ -33,7 +37,10 @@ class Company extends Model implements CipherSweetEncrypted
     {
         $encryptedRow
             ->addOptionalTextField('npwp')
-            ->addBlindIndex('npwp', new BlindIndex('npwp_hash'));
+            ->addBlindIndex('npwp', new BlindIndex('npwp_hash'))
+
+            ->addOptionalTextField('phone')
+            ->addBlindIndex('phone', new BlindIndex('phone_hash'));
     }
 
     public function branches(): HasMany

@@ -20,4 +20,14 @@ class UpdateProfileRequest extends FormRequest
             'bank_account_number' => ['nullable', 'regex:/^\d{8,18}$/'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'phone.regex' => 'Format nomor telepon tidak valid. Gunakan 08xx atau +62xx (10-13 digit).',
+            'address_detail.max' => 'Alamat maksimal 500 karakter.',
+            'bank_name.max' => 'Nama bank maksimal 100 karakter.',
+            'bank_account_number.regex' => 'Nomor rekening harus terdiri dari 8-18 digit angka.',
+        ];
+    }
 }

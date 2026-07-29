@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\AttendanceServiceInterface;
+use App\Contracts\AuditServiceInterface;
 use App\Models\Attendance;
 use App\Models\BpjsConfig;
 use App\Models\CompanySetting;
@@ -9,7 +11,6 @@ use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Payroll;
-use App\Models\TaxConfig;
 use App\Observers\AttendanceObserver;
 use App\Observers\BpjsConfigObserver;
 use App\Observers\CompanySettingObserver;
@@ -17,12 +18,14 @@ use App\Observers\EmployeeObserver;
 use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
 use App\Observers\PayrollObserver;
-use App\Observers\TaxConfigObserver;
-use App\Services\EmbeddingService;
-use App\Services\FaceRecognitionService;
-use App\Services\GeofenceService;
-use App\Services\NavigationService;
+use App\Services\Attendance\CommunityService;
+use App\Services\Attendance\GeofenceService;
+use App\Services\Audit\CommunityAuditService;
+use App\Services\Security\EmbeddingService;
+use App\Services\Security\FaceRecognitionService;
+use App\Services\Support\NavigationService;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -45,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GeofenceService::class);
         $this->app->singleton(EmbeddingService::class);
         $this->app->singleton(NavigationService::class);
+
+        // Service contracts
+        $this->app->bind(AttendanceServiceInterface::class, CommunityService::class);
+        $this->app->bind(AuditServiceInterface::class, CommunityAuditService::class);
     }
 
     /**
@@ -79,6 +86,14 @@ class AppServiceProvider extends ServiceProvider
             : null,
         );
 
+        RedirectIfAuthenticated::redirectUsing(function (Request $request) {
+            $user = $request->user();
+
+            return $user?->isAdmin
+                ? route('admin.dashboard')
+                : route('home');
+        });
+
         $this->configureRateLimiting();
     }
 
@@ -96,19 +111,22 @@ class AppServiceProvider extends ServiceProvider
                 $request->user()?->id ?: $request->ip()
             );
         });
+
+        RateLimiter::for('wilayah', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
+        RateLimiter::for('attendance-integrations', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
     }
 
     /**
      * Register Eloquent Model Observers.
      *
      * Observer untuk:
-     * - TaxConfig, BpjsConfig, Holiday — cache invalidation (Sesi 5-7)
-     * - Employee — auto-assign default shift (Sesi 8)
-     * - Attendance — cache invalidation (Sesi 9, prep for V2 dashboard)
+     * - BpjsConfig, Holiday — cache invalidation
+     * - Employee — auto-assign default shift
+     * - Attendance — cache invalidation
      */
     protected function registerObservers(): void
     {
-        TaxConfig::observe(TaxConfigObserver::class);
         BpjsConfig::observe(BpjsConfigObserver::class);
         Holiday::observe(HolidayObserver::class);
         Employee::observe(EmployeeObserver::class);

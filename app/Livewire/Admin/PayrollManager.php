@@ -1,321 +1,208 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Admin;
 
 use App\Enums\PayrollStatus;
-use App\Models\Employee;
+use App\Events\PayrollApproved;
+use App\Events\PayrollPaid;
+use App\Events\PayrollRejected;
+use App\Events\PayrollSubmitted;
+use App\Events\PayrollVerified;
+use App\Jobs\SendPayrollPayslipEmail;
 use App\Models\Payroll;
-use App\Services\PayrollCalculatorService;
+use App\Services\Payroll\PayslipPdfService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Cache;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Url;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-class PayrollManager extends Component
+final class PayrollManager extends Component
 {
     use WithPagination;
 
-    #[Url]
     public string $search = '';
 
-    #[Url]
-    public int $month;
+    public string $periodFilter = '';
 
-    #[Url]
-    public int $year;
+    public string $statusFilter = '';
 
-    #[Url]
-    public string $statusFilter = 'all';
+    public int $perPage = 20;
 
-    public array $selectedPayrolls = [];
+    public string $sortField = 'period';
 
-    public bool $selectAll = false;
+    public string $sortDirection = 'desc';
 
-    public bool $showGenerateModal = false;
+    public ?int $rejectingPayrollId = null;
 
-    public bool $showDetailModal = false;
+    public string $rejectionReason = '';
 
-    public ?array $detailPayroll = null;
-
-    public function mount(): void
-    {
-        if (! isset($this->month)) {
-            $this->month = (int) now()->month;
-        }
-        if (! isset($this->year)) {
-            $this->year = (int) now()->year;
-        }
-    }
+    protected $queryString = ['search', 'periodFilter', 'statusFilter', 'sortField', 'sortDirection'];
 
     public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingMonth(): void
+    public function updatingPeriodFilter(): void
     {
         $this->resetPage();
-        $this->selectedPayrolls = [];
-        $this->selectAll = false;
-    }
-
-    public function updatingYear(): void
-    {
-        $this->resetPage();
-        $this->selectedPayrolls = [];
-        $this->selectAll = false;
     }
 
     public function updatingStatusFilter(): void
     {
         $this->resetPage();
-        $this->selectedPayrolls = [];
-        $this->selectAll = false;
     }
 
-    #[Computed]
-    public function canManage(): bool
+    public function mount(): void
     {
-        $user = auth()->user();
-
-        return $user?->can('view_payrolls') || $user?->can('view_payslip');
-    }
-
-    #[Computed]
-    public function canFinanceAction(): bool
-    {
-        $user = auth()->user();
-
-        return $user?->can('process_payroll') || $user?->can('manage_tax');
-    }
-
-    #[Computed]
-    public function payrolls()
-    {
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-
-        $query = Payroll::query()
-            ->where('period', $period)
-            ->with(['employee.position', 'employee.department', 'employee.branch'])
-            ->when($this->statusFilter !== 'all', fn ($q) => $q->where('status', $this->statusFilter))
-            ->when($this->search !== '', function ($q) {
-                $q->whereHas('employee', fn ($sq) => $sq->where('full_name', 'ilike', '%'.$this->search.'%')
-                    ->orWhere('employee_number', 'ilike', '%'.$this->search.'%')
-                );
-            });
-
-        return $query->orderBy('id', 'desc')->paginate(15);
-    }
-
-    #[Computed]
-    public function summaryCards(): array
-    {
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-
-        $cacheKey = "payroll:summary:{$period}";
-
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($period) {
-            $all = Payroll::where('period', $period)->get();
-
-            return [
-                'total_gross' => $all->sum(fn ($p) => (float) ($p->gross_salary ?? 0)),
-                'total_net' => $all->sum(fn ($p) => (float) ($p->net_salary ?? 0)),
-                'total_deduction' => $all->sum(fn ($p) => (float) ($p->total_deduction ?? 0)),
-                'draft_count' => $all->where('status', PayrollStatus::DRAFT)->count(),
-                'published_count' => $all->where('status', PayrollStatus::PUBLISHED)->count(),
-                'paid_count' => $all->where('status', PayrollStatus::PAID)->count(),
-                'employee_count' => $all->count(),
-            ];
-        });
-    }
-
-    #[Computed]
-    public function selectedPayrollActionState(): array
-    {
-        if (empty($this->selectedPayrolls)) {
-            return ['has_actions' => false, 'can_publish' => false, 'can_pay' => false];
-        }
-
-        $query = Payroll::whereIn('id', $this->selectedPayrolls);
-
-        $hasDraft = (clone $query)->where('status', PayrollStatus::DRAFT)->exists();
-        $hasPublished = (clone $query)->where('status', PayrollStatus::PUBLISHED)->exists();
-
-        return [
-            'has_actions' => $this->canFinanceAction() && ($hasDraft || $hasPublished),
-            'can_publish' => $hasDraft,
-            'can_pay' => $hasPublished,
-        ];
-    }
-
-    public function updatedSelectAll($value): void
-    {
-        if ($value) {
-            $this->selectedPayrolls = $this->payrolls->getCollection()->pluck('id')->toArray();
-        } else {
-            $this->selectedPayrolls = [];
-        }
-    }
-
-    public function openGenerateModal(): void
-    {
-        $this->showGenerateModal = true;
-    }
-
-    public function generate(): void
-    {
-        if (! $this->canManage) {
-            return;
-        }
-
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-        $service = app(PayrollCalculatorService::class);
-
-        $employees = Employee::query()
-            ->whereHas('position')
-            ->cursor();
-
-        $count = 0;
-
-        foreach ($employees as $employee) {
-            try {
-                $service->generatePayroll($employee, $period);
-                $count++;
-            } catch (\Throwable $e) {
-                // Skip individual failures
-            }
-        }
-
-        Cache::forget("payroll:summary:{$period}");
-
-        $this->showGenerateModal = false;
-        $this->dispatch('toast', variant: 'success', text: "{$count} payroll berhasil digenerate untuk periode {$period}.");
-        $this->resetPage();
-    }
-
-    public function publish(int $payrollId): void
-    {
-        if (! $this->canManage) {
-            return;
-        }
-
-        $payroll = Payroll::findOrFail($payrollId);
-
-        if ($payroll->status !== PayrollStatus::DRAFT) {
-            return;
-        }
-
-        $payroll->updateQuietly(['status' => PayrollStatus::PUBLISHED]);
-
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-        Cache::forget("payroll:summary:{$period}");
-
-        $this->dispatch('toast', variant: 'success', text: 'Payroll berhasil diterbitkan.');
-    }
-
-    public function pay(int $payrollId): void
-    {
-        if (! $this->canManage) {
-            return;
-        }
-
-        $payroll = Payroll::findOrFail($payrollId);
-
-        if ($payroll->status !== PayrollStatus::PUBLISHED) {
-            return;
-        }
-
-        $payroll->updateQuietly(['status' => PayrollStatus::PAID]);
-
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-        Cache::forget("payroll:summary:{$period}");
-
-        $this->dispatch('toast', variant: 'success', text: 'Payroll berhasil ditandai sebagai sudah dibayar.');
-    }
-
-    public function bulkPublish(): void
-    {
-        if (! $this->canManage || empty($this->selectedPayrolls)) {
-            return;
-        }
-
-        Payroll::whereIn('id', $this->selectedPayrolls)
-            ->where('status', PayrollStatus::DRAFT)
-            ->update(['status' => PayrollStatus::PUBLISHED]);
-
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-        Cache::forget("payroll:summary:{$period}");
-
-        $this->selectedPayrolls = [];
-        $this->selectAll = false;
-
-        $this->dispatch('toast', variant: 'success', text: 'Payroll terpilih berhasil diterbitkan.');
-    }
-
-    public function bulkPay(): void
-    {
-        if (! $this->canManage || empty($this->selectedPayrolls)) {
-            return;
-        }
-
-        Payroll::whereIn('id', $this->selectedPayrolls)
-            ->where('status', PayrollStatus::PUBLISHED)
-            ->update(['status' => PayrollStatus::PAID]);
-
-        $period = sprintf('%d-%02d', $this->year, $this->month);
-        Cache::forget("payroll:summary:{$period}");
-
-        $this->selectedPayrolls = [];
-        $this->selectAll = false;
-
-        $this->dispatch('toast', variant: 'success', text: 'Payroll terpilih berhasil ditandai sebagai sudah dibayar.');
-    }
-
-    public function showDetail(int $payrollId): void
-    {
-        $payroll = Payroll::with(['employee', 'employee.position', 'employee.department'])
-            ->findOrFail($payrollId);
-
-        $this->detailPayroll = [
-            'id' => $payroll->id,
-            'name' => $payroll->employee?->full_name ?? '-',
-            'employee_number' => $payroll->employee?->employee_number ?? '-',
-            'position' => $payroll->employee?->position?->name ?? '-',
-            'department' => $payroll->employee?->department?->name ?? '-',
-            'period' => $payroll->period,
-            'basic_salary' => (float) ($payroll->basic_salary ?? 0),
-            'total_allowance' => (float) ($payroll->total_allowance ?? 0),
-            'gross_salary' => (float) ($payroll->gross_salary ?? 0),
-            'overtime_pay' => (float) ($payroll->overtime_pay ?? 0),
-            'pph21' => (float) ($payroll->pph21 ?? 0),
-            'bpjs_health' => (float) ($payroll->bpjs_health ?? 0),
-            'bpjs_employment' => (float) ($payroll->bpjs_employment ?? 0),
-            'loan_deduction' => (float) ($payroll->loan_deduction ?? 0),
-            'attendance_penalty' => (float) ($payroll->attendance_penalty ?? 0),
-            'total_deduction' => (float) ($payroll->total_deduction ?? 0),
-            'net_salary' => (float) ($payroll->net_salary ?? 0),
-            'status' => $payroll->status?->value ?? 'draft',
-        ];
-
-        $this->showDetailModal = true;
-    }
-
-    public function closeDetail(): void
-    {
-        $this->showDetailModal = false;
-        $this->detailPayroll = null;
+        $this->periodFilter = now()->format('Y-m');
     }
 
     public function render(): View
     {
+        $this->authorize('viewAny', Payroll::class);
+
+        $query = Payroll::with('employee:id,employee_number,full_name')
+            ->orderBy($this->sortField, $this->sortDirection);
+
+        if ($this->search) {
+            $query->whereHas('employee', fn ($q) => $q
+                ->where('full_name', 'like', "%{$this->search}%")
+                ->orWhere('employee_number', 'like', "%{$this->search}%")
+            );
+        }
+
+        if ($this->periodFilter) {
+            $query->where('period', $this->periodFilter);
+        }
+
+        if ($this->statusFilter) {
+            $query->where('status', $this->statusFilter);
+        }
+
+        $payrolls = $query->paginate($this->perPage);
+
         return view('livewire.admin.payroll-manager', [
-            'payrolls' => $this->payrolls,
-            'summaryCards' => $this->summaryCards,
-            'selectedActionState' => $this->selectedPayrollActionState,
+            'payrolls' => $payrolls,
+            'statuses' => PayrollStatus::cases(),
         ]);
+    }
+
+    public function sortBy(string $field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+            $this->sortField = $field;
+        }
+    }
+
+    public function submit(Payroll $payroll): void
+    {
+        $this->authorize('update', $payroll);
+
+        $payroll->update(['status' => PayrollStatus::SUBMITTED]);
+        event(new PayrollSubmitted($payroll));
+
+        $this->dispatch('notify', type: 'success', message: 'Payroll diajukan untuk verifikasi.');
+    }
+
+    public function verify(Payroll $payroll): void
+    {
+        $this->authorize('update', $payroll);
+
+        $payroll->update(['status' => PayrollStatus::VERIFIED]);
+        event(new PayrollVerified($payroll));
+
+        $this->dispatch('notify', type: 'success', message: 'Payroll diverifikasi.');
+    }
+
+    public function approve(Payroll $payroll): void
+    {
+        $this->authorize('update', $payroll);
+
+        $payroll->update(['status' => PayrollStatus::APPROVED]);
+        event(new PayrollApproved($payroll));
+
+        $this->dispatch('notify', type: 'success', message: 'Payroll disetujui.');
+    }
+
+    public function confirmReject(Payroll $payroll): void
+    {
+        $this->authorize('update', $payroll);
+
+        $this->rejectingPayrollId = $payroll->id;
+        $this->rejectionReason = '';
+    }
+
+    public function reject(): void
+    {
+        $this->validate(['rejectionReason' => 'required|string|min:3']);
+
+        $payroll = Payroll::findOrFail($this->rejectingPayrollId);
+
+        $this->authorize('update', $payroll);
+
+        $payroll->update([
+            'status' => PayrollStatus::DRAFT,
+            'rejection_reason' => $this->rejectionReason,
+        ]);
+        event(new PayrollRejected($payroll, $this->rejectionReason));
+
+        $this->rejectingPayrollId = null;
+        $this->rejectionReason = '';
+
+        $this->dispatch('notify', type: 'warning', message: 'Payroll ditolak dan dikembalikan ke Draft.');
+    }
+
+    public function cancelReject(): void
+    {
+        $this->rejectingPayrollId = null;
+        $this->rejectionReason = '';
+    }
+
+    public function markPaid(Payroll $payroll): void
+    {
+        $this->authorize('update', $payroll);
+
+        $payroll->update(['status' => PayrollStatus::PAID]);
+
+        event(new PayrollPaid($payroll));
+        SendPayrollPayslipEmail::dispatch($payroll->id);
+
+        $this->dispatch('notify', type: 'success', message: 'Payroll ditandai ditransfer. Email payslip terkirim.');
+    }
+
+    public function downloadPayslip(Payroll $payroll): void
+    {
+        $this->authorize('downloadPayslip', $payroll);
+
+        if (! in_array($payroll->status, [PayrollStatus::APPROVED, PayrollStatus::PAID], true)) {
+            $this->dispatch('notify', type: 'error', message: 'Payslip hanya untuk payroll Disetujui/Ditransfer.');
+
+            return;
+        }
+
+        $service = app(PayslipPdfService::class);
+        $path = $service->generateAndStore($payroll);
+
+        $filename = sprintf(
+            'payslip-%s-%s.pdf',
+            $payroll->period,
+            $payroll->employee?->employee_number ?? 'unknown'
+        );
+
+        $this->dispatch('download-file', url: $path, filename: $filename);
+    }
+
+    #[On('payroll-generated')]
+    public function refreshPayrolls(): void
+    {
+        $this->resetPage();
     }
 }

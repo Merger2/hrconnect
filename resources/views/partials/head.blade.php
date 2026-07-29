@@ -7,10 +7,11 @@
 
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/icon-512.svg">
+<link rel="apple-touch-icon" href="/apple-icon-180.png">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="var(--md-sys-color-background, #ffffff)">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="auth-status" content="{{ auth()->check() ? 'authenticated' : 'guest' }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">

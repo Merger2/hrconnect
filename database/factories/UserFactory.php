@@ -48,7 +48,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the model has two-factor authentication configured.
+     * Indicate that the user has two-factor authentication configured.
      */
     public function withTwoFactor(): static
     {
@@ -56,6 +56,15 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    public function admin(bool $superadmin = false): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email' => 'admin-'.uniqid().'@example.com',
+            'password' => Hash::make('password'),
+            'group' => $superadmin ? 'superadmin' : 'admin',
         ]);
     }
 }

@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RegisterFaceRequest;
-use App\Models\FaceDescriptor;
-use App\Services\FaceRecognitionService;
+use App\Services\Security\FaceRecognitionService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -18,11 +17,10 @@ class FaceController extends Controller
         protected FaceRecognitionService $faceService,
     ) {}
 
-    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D) or geometry descriptor (129D) for biometric verification.')]
+    #[Endpoint(title: 'Register Face', description: 'Enroll face embedding (128D) for biometric verification.')]
     public function register(RegisterFaceRequest $request): JsonResponse
     {
         $data = $request->validated();
-
         $employee = $request->user()->employee;
 
         if (! $employee) {
@@ -32,50 +30,16 @@ class FaceController extends Controller
             ], 404);
         }
 
-        $vectorString = '['.implode(',', $data['embedding']).']';
+        $this->faceService->saveFaceDescriptor($employee, $data['embedding']);
 
-        $metadata = [
-            'source' => 'web',
-        ];
-
-        if (isset($data['_descriptor_version'])) {
-            $metadata['descriptor_type'] = 'geometry';
-            $metadata['descriptor_version'] = $data['_descriptor_version'];
-        }
-
-        if (isset($data['captures'])) {
-            $metadata['captures_count'] = count($data['captures']);
-        }
-
-        FaceDescriptor::updateOrCreate(
-            ['employee_id' => $employee->id],
-            [
-                'embedding' => $vectorString,
-                'is_active' => true,
-                'metadata' => $metadata,
-            ]
-        );
-
-        $employee->forceFill(['face_embedding' => $vectorString])->save();
-
-        $response = [
+        return response()->json([
             'status' => 'success',
             'message' => 'Data wajah berhasil didaftarkan',
             'data' => [
                 'employee_id' => $employee->id,
                 'face_registered_at' => now()->toIso8601String(),
             ],
-        ];
-
-        if (isset($metadata['descriptor_type'])) {
-            $response['data']['descriptor_type'] = 'geometry';
-        }
-
-        if (isset($data['captures'])) {
-            $response['data']['capture_count'] = count($data['captures']);
-        }
-
-        return response()->json($response);
+        ]);
     }
 
     #[Endpoint(title: 'Verify Face', description: 'Test face verification against enrolled embedding without recording attendance.')]
@@ -83,7 +47,6 @@ class FaceController extends Controller
     public function verify(RegisterFaceRequest $request): JsonResponse
     {
         $data = $request->validated();
-
         $employee = $request->user()->employee;
 
         if (! $employee) {
@@ -91,6 +54,14 @@ class FaceController extends Controller
                 'status' => 'error',
                 'message' => 'Akun Anda belum terhubung dengan data karyawan.',
             ], 404);
+        }
+
+        // Check if face is enrolled first
+        if (! $this->faceService->hasFaceEnrolled($employee)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Face ID belum didaftarkan. Silakan daftarkan wajah terlebih dahulu.',
+            ], 422);
         }
 
         $result = $this->faceService->verifyFace($employee, $data['embedding']);

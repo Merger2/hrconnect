@@ -93,7 +93,9 @@ return [
 
         'gemini' => [
             'driver' => 'gemini',
-            'key' => env('GEMINI_API_KEY', env('GOOGLE_AI_API_KEY')),
+            'key' => env('GEMINI_API_KEY'),
+            'embedding_model' => env('GEMINI_EMBEDDING_MODEL', 'gemini-embedding-001'),
+            'embedding_dimensions' => (int) env('GEMINI_EMBEDDING_DIMENSIONS', 768),
             'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
         ],
 

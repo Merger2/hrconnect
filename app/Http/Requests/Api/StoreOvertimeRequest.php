@@ -33,6 +33,21 @@ class StoreOvertimeRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'date.required' => 'Tanggal lembur wajib diisi.',
+            'date.date' => 'Format tanggal lembur tidak valid.',
+            'date.after_or_equal' => 'Tanggal lembur tidak boleh sebelum hari ini.',
+            'start_time.required' => 'Jam mulai lembur wajib diisi.',
+            'start_time.date_format' => 'Format jam mulai harus HH:MM (contoh: 16:00).',
+            'end_time.required' => 'Jam selesai lembur wajib diisi.',
+            'end_time.date_format' => 'Format jam selesai harus HH:MM (contoh: 20:00).',
+            'description.required' => 'Deskripsi lembur wajib diisi.',
+            'description.min' => 'Deskripsi lembur minimal 10 karakter.',
+        ];
+    }
+
     /**
      * Hook validasi setelah rules() dasar lolos.
      * Di sini kita validasi logika bisnis yang butuh query database.

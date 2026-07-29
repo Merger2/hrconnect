@@ -25,7 +25,16 @@ return new class extends Migration
             $table->string('status', 20)->default('processing');
             $table->string('source_document')->nullable();
             $table->integer('page_number')->nullable();
-
+            // RAG extended fields
+            $table->foreignId('category_id')->nullable()->constrained('knowledge_base_categories');
+            $table->text('summary')->nullable();
+            $table->string('source_type', 50)->nullable();
+            $table->string('file_type', 50)->nullable();
+            $table->integer('file_size')->nullable();
+            $table->string('original_filename', 255)->nullable();
+            $table->integer('chunk_count')->default(0);
+            $table->boolean('is_indexed')->default(false);
+            $table->timestamp('indexed_at')->nullable();
             if (DB::getDriverName() === 'pgsql') {
                 $table->jsonb('metadata')->nullable();
             } else {

@@ -34,48 +34,55 @@ class DetectChronicLateCommand extends Command
 
     public function handle(): int
     {
-        $targetMonth = $this->option('month')
-            ? CarbonImmutable::createFromFormat('Y-m', $this->option('month'))
-            : now();
+        try {
+            $targetMonth = $this->option('month')
+                ? CarbonImmutable::createFromFormat('Y-m', $this->option('month'))
+                : now();
 
-        $threshold = (int) CompanySetting::get('chronic_late_threshold', 3);
+            $threshold = (int) CompanySetting::get('chronic_late_threshold', 3);
 
-        $this->info("Detect Chronic Late untuk: {$targetMonth->format('F Y')}");
-        $this->line("Threshold: {$threshold} kali keterlambatan");
-        $this->newLine();
+            $this->info("Detect Chronic Late untuk: {$targetMonth->format('F Y')}");
+            $this->line("Threshold: {$threshold} kali keterlambatan");
+            $this->newLine();
 
-        $startOfMonth = $targetMonth->copy()->startOfMonth();
-        $endOfMonth = $targetMonth->copy()->endOfMonth();
+            $startOfMonth = $targetMonth->copy()->startOfMonth();
+            $endOfMonth = $targetMonth->copy()->endOfMonth();
 
-        $detected = 0;
+            $detected = 0;
 
-        Employee::query()
-            ->where('status', EmployeeStatus::ACTIVE->value)
-            ->whereNull('resign_date')
-            ->chunk(100, function ($employees) use ($startOfMonth, $endOfMonth, $threshold, &$detected) {
-                foreach ($employees as $employee) {
-                    $lateCount = Attendance::where('employee_id', $employee->id)
-                        ->whereBetween('date', [
-                            $startOfMonth->toDateString(),
-                            $endOfMonth->toDateString(),
-                        ])
-                        ->where('late_minutes', '>', 0)
-                        ->count();
+            Employee::query()
+                ->where('status', EmployeeStatus::ACTIVE->value)
+                ->whereNull('resign_date')
+                ->chunk(100, function ($employees) use ($startOfMonth, $endOfMonth, $threshold, &$detected) {
+                    foreach ($employees as $employee) {
+                        $lateCount = Attendance::where('employee_id', $employee->id)
+                            ->whereBetween('date', [
+                                $startOfMonth->toDateString(),
+                                $endOfMonth->toDateString(),
+                            ])
+                            ->where('late_minutes', '>', 0)
+                            ->count();
 
-                    if ($lateCount >= $threshold) {
-                        $this->warn("⚠ {$employee->employee_number} — {$employee->full_name}: {$lateCount}x telat");
-                        $detected++;
+                        if ($lateCount >= $threshold) {
+                            $this->warn("⚠ {$employee->employee_number} — {$employee->full_name}: {$lateCount}x telat");
+                            $detected++;
 
-                        if ($employee->user) {
-                            $employee->user->notify(new ChronicLateWarning($employee, $lateCount));
+                            if ($employee->user) {
+                                $employee->user->notify(new ChronicLateWarning($employee, $lateCount));
+                            }
                         }
                     }
-                }
-            });
+                });
 
-        $this->newLine();
-        $this->info("Total karyawan dengan chronic late: {$detected}");
+            $this->newLine();
+            $this->info("Total karyawan dengan chronic late: {$detected}");
 
-        return self::SUCCESS;
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->error("Detect chronic late gagal: {$e->getMessage()}");
+            report($e);
+
+            return self::FAILURE;
+        }
     }
 }

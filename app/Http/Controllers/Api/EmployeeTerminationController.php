@@ -6,8 +6,8 @@ use App\Enums\TerminationType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\TerminateEmployeeRequest;
 use App\Models\Employee;
-use App\Services\EmployeeTerminationService;
-use App\Services\FaceRecognitionService;
+use App\Services\HR\EmployeeTerminationService;
+use App\Services\Security\FaceRecognitionService;
 use Carbon\CarbonImmutable;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -22,11 +22,26 @@ class EmployeeTerminationController extends Controller
         protected EmployeeTerminationService $terminationService,
     ) {}
 
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $terminations = Employee::query()
+            ->whereNotNull('status')
+            ->whereIn('status', ['resigned', 'dismissed', 'deceased'])
+            ->when(! $user->can('view_employees'), fn ($q) => $q->where('company_id', $user->company_id))
+            ->get(['id', 'full_name', 'status', 'resign_date', 'termination_reason']);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $terminations,
+        ]);
+    }
+
     #[Endpoint(title: 'Terminate Employee', description: 'Terminate an active employee with reason and effective date. Clears face_embedding, soft-deletes user (except deceased). Flow: Termination (Step 1/2) — Terminate PKWTT → Process Contract Ends.')]
     #[BodyParameter(name: 'type', description: 'Termination type: resign, dismissed, deceased, contract_end', required: true, type: 'string')]
     #[BodyParameter(name: 'reason', description: 'Termination reason', required: false, type: 'string')]
     #[BodyParameter(name: 'date', description: 'Effective termination date (Y-m-d, defaults to today)', required: false, type: 'string', format: 'date')]
-    public function terminate(TerminateEmployeeRequest $request, Employee $employee): JsonResponse
+    public function store(TerminateEmployeeRequest $request, Employee $employee): JsonResponse
     {
         $data = $request->validated();
 

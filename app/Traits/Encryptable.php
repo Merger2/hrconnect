@@ -80,7 +80,6 @@ trait Encryptable
     /**
      * Decrypt all encryptable attributes when loading from database.
      *
-     * @param  array  $attributes
      * @return array
      */
     protected function castAttributesFromDatabase(array $attributes)

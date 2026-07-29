@@ -2,48 +2,73 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CompanyResource;
+use App\Models\Branch;
 use App\Models\Company;
-use Dedoc\Scramble\Attributes\Endpoint;
-use Dedoc\Scramble\Attributes\Group;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-#[Group('Company')]
 class CompanyController extends Controller
 {
-    #[Endpoint(title: 'List Companies', description: 'Paginated company list.')]
-    public function index(Request $request): JsonResponse
+    /**
+     * Get operational hours for the authenticated user's company.
+     */
+    public function getCompanyOperationalHours(Request $request)
     {
-        $this->authorize('viewAny', Company::class);
+        $user = $request->user();
 
-        $perPage = min((int) $request->input('per_page', 50), 100);
+        if (! $user || ! $user->employee || ! $user->employee->company) {
+            return ApiResponse::format(false, 404, 'Company not found for this user.', null);
+        }
 
-        $companies = Company::select('id', 'name', 'code', 'phone', 'email', 'website', 'is_active')
-            ->orderBy('name')
-            ->paginate($perPage);
+        $company = $user->employee->company;
 
-        return response()->json([
-            'status' => 'success',
-            'data' => CompanyResource::collection($companies->getCollection())->resolve($request),
-            'meta' => [
-                'current_page' => $companies->currentPage(),
-                'last_page' => $companies->lastPage(),
-                'per_page' => $companies->perPage(),
-                'total' => $companies->total(),
+        return ApiResponse::format(true, 200, 'Operational hours retrieved successfully.', [
+            'company_name' => $company->name,
+            'working_hours' => [
+                'start_time' => $company->work_start_time ?? $company->office_hour_start ?? null,
+                'end_time' => $company->work_end_time ?? $company->office_hour_end ?? null,
             ],
         ]);
     }
 
-    #[Endpoint(title: 'Get Company', description: 'Get company detail with branches.')]
-    public function show(Request $request, Company $company): JsonResponse
+    /**
+     * Get branches for the authenticated user's company, including coordinates and radius.
+     */
+    public function getCompanyBranches(Request $request)
     {
-        $this->authorize('view', $company);
+        $user = $request->user();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => CompanyResource::make($company->load('branches'))->resolve($request),
+        if (! $user || ! $user->employee || ! $user->employee->company) {
+            return ApiResponse::format(false, 404, 'Company not found for this user.', null);
+        }
+
+        $company = $user->employee->company;
+        $branches = Branch::where('company_id', $company->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'address', 'latitude', 'longitude', 'radius_meters']);
+
+        if ($branches->isEmpty()) {
+            return ApiResponse::format(false, 404, 'No branches found for this company.', null);
+        }
+
+        $data = $branches->map(function ($b) {
+            return [
+                'branch_id' => $b->id,
+                'name' => $b->name,
+                'address' => $b->address,
+                'latitude' => (float) $b->latitude,
+                'longitude' => (float) $b->longitude,
+                'radius_meters' => (float) $b->radius_meters,
+            ];
+        });
+
+        return ApiResponse::format(true, 200, 'Company branches retrieved successfully.', [
+            'company' => [
+                'company_id' => $company->id,
+                'name' => $company->name,
+            ],
+            'branches' => $data,
         ]);
     }
 }

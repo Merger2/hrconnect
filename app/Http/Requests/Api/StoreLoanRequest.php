@@ -19,4 +19,20 @@ class StoreLoanRequest extends FormRequest
             'tenor_months' => ['required', 'integer', 'min:1', 'max:120'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'amount.required' => 'Jumlah pinjaman wajib diisi.',
+            'amount.numeric' => 'Jumlah pinjaman harus berupa angka.',
+            'amount.min' => 'Jumlah pinjaman minimal 1.',
+            'interest_rate.numeric' => 'Suku bunga harus berupa angka.',
+            'interest_rate.min' => 'Suku bunga tidak boleh negatif.',
+            'interest_rate.max' => 'Suku bunga maksimal 100%.',
+            'tenor_months.required' => 'Tenor pinjaman wajib diisi.',
+            'tenor_months.integer' => 'Tenor pinjaman harus berupa angka bulat.',
+            'tenor_months.min' => 'Tenor pinjaman minimal 1 bulan.',
+            'tenor_months.max' => 'Tenor pinjaman maksimal 120 bulan.',
+        ];
+    }
 }

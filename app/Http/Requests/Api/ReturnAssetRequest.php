@@ -18,4 +18,12 @@ class ReturnAssetRequest extends FormRequest
             'condition' => ['nullable', 'string', 'max:255'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'return_date.date' => 'Tanggal pengembalian tidak valid.',
+            'condition.max' => 'Kondisi aset maksimal 255 karakter.',
+        ];
+    }
 }

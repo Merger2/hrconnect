@@ -1,0 +1,83 @@
+<?php
+
+use App\Http\Controllers\Auth\VerifyEmailCodeController;
+use App\Http\Controllers\SseNotificationController;
+use App\Http\Controllers\System\AuthDebugController;
+use App\Http\Controllers\System\E2eDocumentUploadController;
+use App\Http\Controllers\System\E2eLoginController;
+use App\Http\Controllers\System\LanguageController;
+use App\Http\Controllers\System\ResetServiceWorkerController;
+use App\Http\Controllers\System\RootRedirectController;
+use App\Http\Controllers\System\TestErrorController;
+use App\Http\Controllers\System\VercelMaintenanceController;
+use App\Models\SystemBackupRun;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
+
+// Boost MCP browser logger endpoint — required to prevent infinite error loop
+Route::post('/_boost/browser-logs', fn () => response()->json(['status' => 'ok']))->name('boost.browser-logs');
+
+// Test Error Views. Keep this helper out of production so arbitrary users cannot
+// trigger dedicated error responses on demand.
+Route::get('/test-error/{code}', TestErrorController::class)->whereNumber('code');
+Route::get('/reset-sw', ResetServiceWorkerController::class);
+
+Route::get('/__auth-debug', AuthDebugController::class)->middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+]);
+
+Route::get('/__e2e-login', E2eLoginController::class);
+
+Route::post('/__e2e-document-upload', E2eDocumentUploadController::class)->middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+]);
+
+Route::post('/email/verify-code', VerifyEmailCodeController::class)
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.code.verify');
+
+Route::post('/__vercel-migrate', VercelMaintenanceController::class)
+    ->middleware('throttle:3,1')
+    ->withoutMiddleware([PreventRequestForgery::class]);
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/', RootRedirectController::class);
+
+    Route::prefix('admin')->middleware(['admin'])->group(function () {
+        Route::livewire('/system-maintenance', 'admin.system-maintenance')
+            ->name('admin.system-maintenance')
+            ->middleware('feature.lock:system_maintenance,admin.system_maintenance.view,admin.dashboard')
+            ->can('viewAny', SystemBackupRun::class);
+    });
+
+    Route::get('/sse/notifications', [SseNotificationController::class, 'stream'])
+        ->name('sse.notifications');
+});
+
+Livewire::setUpdateRoute(function ($handle) {
+    return Route::post(get_non_root_base_url_path().'/livewire/update', $handle);
+});
+
+Livewire::setScriptRoute(function ($handle) {
+    $path = config('app.debug') ? '/livewire/livewire.js' : '/livewire/livewire.min.js';
+
+    return Route::get(get_non_root_base_url_path().$path, $handle);
+});
+
+Route::controller(LanguageController::class)->group(function () {
+    Route::post('/user/language', 'update')->name('user.language.update');
+});
+
+Route::get('/enterprise-support', fn () => redirect('https://wa.me/628123456789'))
+    ->name('enterprise-support.whatsapp');
+
+Route::get('/admin/commercial', fn () => redirect()->route('admin.dashboard'))
+    ->name('admin.commercial');

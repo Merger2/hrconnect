@@ -19,4 +19,16 @@ class LoginRequest extends FormRequest
             'device_name' => ['required', 'string', 'max:255'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'device_name.required' => 'Nama perangkat wajib diisi.',
+            'device_name.max' => 'Nama perangkat maksimal 255 karakter.',
+        ];
+    }
 }

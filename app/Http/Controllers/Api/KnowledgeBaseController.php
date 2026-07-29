@@ -8,7 +8,7 @@ use App\Http\Requests\Api\ChatRequest;
 use App\Http\Requests\Api\ChatStreamRequest;
 use App\Http\Requests\Api\UploadDocumentRequest;
 use App\Models\KnowledgeBase;
-use App\Services\KnowledgeBaseService;
+use App\Services\KnowledgeBase\KnowledgeBaseService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -43,6 +43,25 @@ class KnowledgeBaseController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $docs,
+        ]);
+    }
+
+    #[Endpoint(title: 'Show Document', description: 'Get single knowledge base document details with its chunks.')]
+    public function show(Request $request, KnowledgeBase $knowledgeBase): JsonResponse
+    {
+        $knowledgeBase->load(['chunks' => fn ($q) => $q->select('id', 'knowledge_base_id', 'content', 'page_number', 'created_at')]);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'id' => $knowledgeBase->id,
+                'title' => $knowledgeBase->title,
+                'category' => $knowledgeBase->category?->value,
+                'status' => $knowledgeBase->status?->value,
+                'source_document' => $knowledgeBase->source_document,
+                'created_at' => $knowledgeBase->created_at?->toIso8601String(),
+                'chunks' => $knowledgeBase->chunks,
+            ],
         ]);
     }
 

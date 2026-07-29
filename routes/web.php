@@ -1,19 +1,13 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HealthCheckController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login')->name('home');
+Route::redirect('/offline', '/offline.html')->name('offline');
+Route::get('/health', HealthCheckController::class)->name('health');
 
-// IT Support Monitoring Dashboard
-Route::middleware(['auth', 'verified', 'can:view_activity_logs'])->group(function () {
-    Route::get('monitoring', \App\Livewire\ItSupport\MonitoringDashboard::class)->name('monitoring');
-});
-
-// Semua route ber-auth dilindungi password expiry check (CAT-005, default 90 hari).
-// Route 'security.edit' dan 'logout' otomatis di-skip oleh middleware.
-Route::middleware(['auth', 'verified', 'password.expired'])->group(function () {
-    Route::get('dashboard', DashboardController::class)->name('dashboard');
-});
-
-require __DIR__.'/settings.php';
+require __DIR__.'/web/system.php';
+require __DIR__.'/web/files.php';
+require __DIR__.'/web/user.php';
+require __DIR__.'/web/payroll.php';
+require __DIR__.'/web/admin.php';

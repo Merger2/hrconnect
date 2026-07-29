@@ -22,6 +22,21 @@ yarn-error.log
 /.vscode
 /.zed
 
+# Temp & audit files
+c.txt
+database/*.json
+public/test.php
+routes.json
+test_results.txt
+update.sh
+
+# Storage generated files
+/storage/app/private/imports/
+/storage/app/private/payslips/
+/storage/framework/testing/
+/storage/framework/views/*.php
+/storage/logs/*.log
+
 # Playwright
 /test-results/
 /playwright-report/
@@ -38,11 +53,15 @@ tests/e2e/.auth/
 /.claude/
 /.codex/
 /.gemini/
-/docs/
-/tests/
 /.github/
+/docs/**
+!/docs/api/api.json
+/tests/
 /_ide_helper.php
 /_ide_helper_models.php
 /phpstan.neon
 /phpstan.neon.dist
 /phpstan-baseline.neon
+storage/logs/*.log
+storage/logs/
+storage/framework/views/*.php
