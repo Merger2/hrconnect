@@ -55,10 +55,34 @@
     </div>
 
     {{-- Collapsible Map Container --}}
-    <div class="map-container relative z-10 mt-4 hidden overflow-hidden rounded-xl border border-slate-200 shadow-inner dark:border-slate-800" id="{{ $mapId }}" style="height: 250px;" wire:ignore></div>
+    <div class="map-container relative z-10 mt-4 hidden overflow-hidden rounded-xl border border-slate-200 shadow-inner dark:border-slate-800" id="{{ $mapId }}" style="height: 250px;" wire:ignore
+         data-lat="{{ $latitude ?? '-6.2088' }}" data-lng="{{ $longitude ?? '106.8456' }}"></div>
 </div>
 
 <script>
+    function initMap(mapId) {
+        const container = document.getElementById(mapId);
+        if (! container || container.dataset._mapInitialized) return;
+        container.dataset._mapInitialized = '1';
+
+        const lat = parseFloat(container.dataset.lat || '-6.2088');
+        const lng = parseFloat(container.dataset.lng || '106.8456');
+
+        if (typeof L === 'undefined') return;
+
+        const map = L.map(mapId, { zoomControl: true }).setView([lat, lng], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OSM</a>',
+        }).addTo(map);
+
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup(`<b>${lat.toFixed(6)}, ${lng.toFixed(6)}</b>`);
+
+        setTimeout(() => map.invalidateSize(), 200);
+    }
+
     function toggleMap(mapId) {
         const mapContainer = document.getElementById(mapId);
         const btn = document.getElementById('toggle-' + mapId + '-btn');
@@ -76,10 +100,8 @@
                 window.dispatchEvent(new Event('resize'));
             }, 100);
             
-            // Initialize map if function exists (handled by scan component usually)
-            if (typeof initMap === 'function') {
-                // initMap(mapId); // Might need specific logic depends on how maps are initialized
-            }
+            // Initialize map
+            initMap(mapId);
         } else {
             // Hide Map
             mapContainer.classList.add('hidden');

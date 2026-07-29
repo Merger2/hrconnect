@@ -257,6 +257,16 @@
                         </template>
                     </button>
                 </div>
+
+                {{-- Location map card — appears after GPS captured --}}
+                <div x-show="gpsCaptured" x-cloak class="mt-3">
+                    <x-user.location-card
+                        :mapId="'clock-in-map'"
+                        :title="__('Lokasi Anda')"
+                        :latitude="$wire.latitude"
+                        :longitude="$wire.longitude"
+                        icon="true" />
+                </div>
             </div>
 
             {{-- BOTH CHECKED IN AND OUT — DONE STATE --}}
