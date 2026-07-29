@@ -26,6 +26,7 @@ class AuditUi extends Command
 
     public function handle(): int
     {
+<<<<<<< HEAD
         $base = resource_path($this->option('path'));
         if (! is_dir($base)) {
             $this->error("Path not found: {$base}");
@@ -86,6 +87,75 @@ class AuditUi extends Command
         $this->comment('Run with --json for machine-readable output.');
 
         return self::SUCCESS;
+=======
+        try {
+            $base = resource_path($this->option('path'));
+            if (! is_dir($base)) {
+                $this->error("Path not found: {$base}");
+
+                return self::FAILURE;
+            }
+
+            $files = File::allFiles($base);
+            $report = [];
+
+            foreach ($files as $file) {
+                /** @var SplFileInfo $file */
+                if ($file->getExtension() !== 'blade.php' && $file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                $relative = $file->getRelativePathname();
+                // Skip vendor + compiled
+                if (str_starts_with($relative, 'vendor') || str_contains($relative, '\\')) {
+                    continue;
+                }
+
+                $content = $file->getContents();
+                $issues = $this->scanFile($content, $relative);
+
+                if (! empty($issues)) {
+                    $report[$relative] = $issues;
+                }
+            }
+
+            if ($this->option('json')) {
+                $this->line(json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+                return self::SUCCESS;
+            }
+
+            if (empty($report)) {
+                $this->info('✅ No UI/UX issues found in '.$this->option('path'));
+
+                return self::SUCCESS;
+            }
+
+            $this->warn('Found '.count($report).' file(s) with potential UI/UX issues:');
+            $this->newLine();
+
+            $rows = [];
+            $total = 0;
+            foreach ($report as $file => $issues) {
+                foreach ($issues as $issue) {
+                    $rows[] = [$file, $issue['type'], $issue['severity'], $issue['detail']];
+                    $total++;
+                }
+            }
+
+            $this->table(['File', 'Issue', 'Severity', 'Detail'], $rows);
+            $this->newLine();
+            $this->info("Total: {$total} issue(s) across ".count($report).' file(s).');
+            $this->comment('Run with --json for machine-readable output.');
+
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->error("Audit UI gagal: {$e->getMessage()}");
+            report($e);
+
+            return self::FAILURE;
+        }
+>>>>>>> main
     }
 
     /**

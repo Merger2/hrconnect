@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @mixin IdeHelperPosition
  */
-#[Fillable(['department_id', 'name', 'code', 'grade', 'basic_salary', 'allowance_jabatan', 'is_active'])]
+#[Fillable(['division_id', 'name', 'code', 'grade', 'basic_salary', 'allowance_jabatan', 'is_active'])]
 class Position extends Model
 {
     use HasFactory, SoftDeletes;
@@ -27,9 +27,9 @@ class Position extends Model
         ];
     }
 
-    public function department(): BelongsTo
+    public function division(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Division::class);
     }
 
     public function employees(): HasMany

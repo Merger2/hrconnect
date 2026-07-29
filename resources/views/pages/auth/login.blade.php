@@ -125,7 +125,11 @@
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
+<<<<<<< HEAD
                     navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+=======
+                    navigator.serviceWorker.register('/sw.js').catch(() => {});
+>>>>>>> main
                 });
             }
         </script>

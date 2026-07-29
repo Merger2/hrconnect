@@ -5,8 +5,13 @@
  * Didukung oleh Chrome/Edge/Android
  * 
  * Usage: <x-pwa-install-prompt />
+ * Catatan: beforeinstallprompt hanya fire di HTTPS.
+ * Di dev (HTTP), fallback ke panduan manual install.
  */
+<<<<<<< HEAD
 $showInstall = auth()->check() && !request()->secure();
+=======
+>>>>>>> main
 @endphp
 
 <div

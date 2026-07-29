@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Services\FaceRecognitionService;
+use App\Services\Security\FaceRecognitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +17,6 @@ class EmployeeResource extends JsonResource
             'employee_number' => $this->employee_number,
             'full_name' => $this->full_name,
             'email' => $this->whenLoaded('user', fn () => $this->user?->email),
-            'bank_name' => $this->bank_name,
             'gender' => $this->gender?->value,
             'marital_status' => $this->marital_status?->value,
             'blood_type' => $this->blood_type?->value,
@@ -27,7 +26,6 @@ class EmployeeResource extends JsonResource
             'status' => $this->status?->value,
             'employment_type' => $this->employment_type?->value,
             'salary_type' => $this->salary_type?->value,
-            'address_detail' => $this->address_detail,
             'photo_url' => $this->photo ? Storage::url($this->photo) : null,
             'face_registered' => app(FaceRecognitionService::class)->hasFaceEnrolled($this->resource),
             'pin_set' => ! empty($this->pin),
@@ -37,7 +35,7 @@ class EmployeeResource extends JsonResource
                 'grade' => $this->position->grade,
                 'basic_salary' => $this->position->basic_salary,
             ] : null),
-            'department' => DepartmentResource::make($this->whenLoaded('department')),
+            'division' => DivisionResource::make($this->whenLoaded('division')),
             'branch' => BranchResource::make($this->whenLoaded('branch')),
             'shift' => $this->whenLoaded('shift', fn () => $this->shift ? [
                 'id' => $this->shift->id,

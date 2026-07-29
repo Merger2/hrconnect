@@ -2,41 +2,47 @@
     'title',
     'description' => null,
     'backHref' => null,
+    'titleId' => null,
+    'plain' => false,
     'backLabel' => null,
 ])
 
-<header {{ $attributes->merge(['class' => 'mb-6']) }}>
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex min-w-0 items-start gap-3">
+<header {{ $attributes->merge(['class' => 'user-page-header' . ($plain ? ' user-page-header--plain' : '')]) }}>
+    <div class="user-page-header__row">
+        <div class="user-page-header__main">
             @if ($backHref)
-                <a href="{{ $backHref }}" aria-label="{{ $backLabel ?? __('Kembali') }}"
-                    class="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-surface-dim hover:text-ink"
-                >
-                    <span class="material-symbols-outlined text-xl">arrow_back</span>
+                <a href="{{ $backHref }}" class="user-page-header__back" aria-label="{{ $backLabel ?? __('Go back') }}">
+                    <x-heroicon-o-arrow-left class="h-5 w-5" />
                 </a>
             @endif
 
-            @if (isset($icon))
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-dim text-primary">
+            @isset($icon)
+                <div class="user-page-header__icon" aria-hidden="true">
                     {{ $icon }}
                 </div>
-            @endif
+            @endisset
 
-            <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                    <h1 class="text-xl font-semibold text-ink">{{ $title }}</h1>
-                    @if (isset($meta))
-                        <div>{{ $meta }}</div>
-                    @endif
+            <div class="user-page-header__copy">
+                <div class="user-page-header__headline">
+                    <h1 @if ($titleId) id="{{ $titleId }}" @endif class="user-page-header__title">{{ $title }}</h1>
+
+                    @isset($meta)
+                        <div class="user-page-header__meta">
+                            {{ $meta }}
+                        </div>
+                    @endisset
                 </div>
+
                 @if ($description)
-                    <p class="mt-0.5 text-sm text-on-surface-variant">{{ $description }}</p>
+                    <p class="user-page-header__description">{{ $description }}</p>
                 @endif
             </div>
         </div>
 
-        @if (isset($actions))
-            <div class="flex shrink-0 flex-wrap items-center gap-2">{{ $actions }}</div>
-        @endif
+        @isset($actions)
+            <div class="user-page-header__actions">
+                {{ $actions }}
+            </div>
+        @endisset
     </div>
 </header>

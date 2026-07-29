@@ -18,6 +18,7 @@ class EmployeePiiResource extends JsonResource
             'npwp' => $this->npwp,
             'bank_name' => $this->bank_name,
             'bank_account_number' => $this->bank_account_number,
+            'address_detail' => $this->address_detail,
         ];
     }
 }

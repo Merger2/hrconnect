@@ -7,7 +7,7 @@
 
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/icon-512.svg">
+<link rel="apple-touch-icon" href="/apple-icon-180.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="var(--md-sys-color-background, #ffffff)">
 <meta name="csrf-token" content="{{ csrf_token() }}">

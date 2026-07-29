@@ -1,34 +1,48 @@
-@import 'https://fonts.googleapis.com/css2?family=Rubik:wght@500&family=Inter:wght@400;500;600;700&display=swap';
-@import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200';
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 @plugin '@tailwindcss/forms';
 
+<<<<<<< HEAD
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+=======
+/* Light mode only — disable media-query dark mode (Tailwind v4 default).
+   `dark:` variants hanya aktif kalau ada class `.dark` di HTML, tidak pernah. */
+@custom-variant dark (&.dark);
+>>>>>>> main
 
 @theme {
-    /* Fonts — Inter sebagai substitute Forma DJR Micro */
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-display: 'Inter', 'Rubik', ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #024ad8;
+  --color-primary-50: #eef4ff;
+  --color-primary-100: #d1e0ff;
+  --color-primary-200: #a6c8ff;
+  --color-primary-300: #70a8ff;
+  --color-primary-400: #3b82f6;
+  --color-primary-500: #024ad8;
+  --color-primary-600: #0240b8;
+  --color-primary-700: #0136a0;
+  --color-primary-800: #012c88;
+  --color-primary-900: #002070;
+  --color-primary-950: #001458;
+  --color-primary-deep: #0240b8;
+  --color-primary-soft: #eef4ff;
 
-    /* ═══════════════════════════════════════
-       HP-inspired Design System
-       Primary: HP Electric Blue (#024ad8)
-       ═══════════════════════════════════════ */
+  --color-surface: #ffffff;
+  --color-surface-variant: #f5f7fa;
+  --color-ink: #1a1a1a;
+  --color-muted: #5f6369;
+  --color-outline: #c9cdd4;
 
-    /* Canvas & Ink */
-    --color-canvas: #ffffff;
-    --color-ink: #1a1a1a;
-    --color-ink-soft: #292929;
+  --color-error: #c0392b;
+  --color-success: #059669;
 
-    /* Surface — HP cloud/fog scale */
-    --color-cloud: #f7f7f7;
-    --color-fog: #e8e8e8;
-    --color-steel: #c2c2c2;
-    --color-graphite: #636363;
-    --color-charcoal: #3d3d3d;
+  --color-focus: #024ad8;
+  --color-on-primary: #ffffff;
+  --color-on-error: #ffffff;
 
+<<<<<<< HEAD
     /* ── Indigo scale (replaces HP Electric Blue — requested ESS standard: indigo-600) ── */
     --color-blue-50: #eef2ff;
     --color-blue-100: #e0e7ff;
@@ -245,16 +259,25 @@
     --color-brand-ochre: #e8b94a;
     --color-brand-mint: #a4d4c5;
     --color-brand-coral: #ff6b5a;
+=======
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.06);
+  --shadow-modal: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  --transition-smooth: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+>>>>>>> main
 }
 
 @layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: var(--color-outline-variant, currentColor);
-    }
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.5;
+    color-scheme: light;
+  }
+  input, button, textarea, select { font-family: inherit; }
+  *:focus-visible { @apply outline-2 outline-primary outline-offset-2; }
+  [x-cloak] { display: none !important; }
 }
 
 /* Hide elements with x-cloak attribute before Alpine mounts */
@@ -263,13 +286,35 @@
 }
 
 @layer components {
-    .user-list-card {
-        @apply relative rounded-xl border border-outline-variant/60 bg-canvas shadow-soft transition;
+  /* Login specific layout */
+  .login-grid { @apply grid grid-cols-1 lg:grid-cols-2 min-h-screen overflow-hidden; }
+  .login-sidebar {
+    @apply hidden lg:flex flex-col items-center justify-center bg-primary p-12 relative overflow-hidden;
+    .login-sidebar__inner { @apply max-w-md w-full text-center; }
+    .login-brand { @apply mb-8 flex items-center justify-center gap-3; }
+    .login-brand__icon {
+      @apply flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm;
     }
-
-    .user-list-card:hover {
-        @apply border-outline-variant;
+    .login-title { @apply text-4xl font-extrabold text-white mb-4; }
+    .login-copy { @apply text-lg text-white/90 mb-8 leading-relaxed; }
+  }
+  .login-sidebar::before,
+  .login-sidebar::after {
+    content: '';
+    @apply absolute rounded-full border-4 border-white/20;
+  }
+  .login-sidebar::before {
+    @apply top-20 left-20 w-32 h-32;
+  }
+  .login-sidebar::after {
+    @apply bottom-20 right-20 w-48 h-48;
+  }
+  .login-form-wrapper {
+    @apply flex items-center justify-center px-6 py-12;
+    .login-form-card {
+      @apply w-full max-w-sm rounded-2xl border border-outline bg-surface p-6;
     }
+<<<<<<< HEAD
 
     /* ─── ESS shared surfaces (clean, professional, mobile-first) ─── */
 
@@ -509,3 +554,13 @@
         @apply text-[var(--md-sys-color-on-surface-variant)];
     }
 }
+=======
+  }
+  .login-form-brand {
+    @apply lg:hidden mb-6 flex items-center gap-3;
+    .login-form-brand__icon {
+      @apply flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white;
+    }
+  }
+}
+>>>>>>> main

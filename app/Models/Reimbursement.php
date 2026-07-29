@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @mixin IdeHelperReimbursement
  */
-#[Fillable(['employee_id', 'payroll_id', 'category_id', 'title', 'expense_date', 'amount', 'description', 'receipt_file', 'attachment_path', 'status', 'rejection_reason'])]
+#[Fillable(['employee_id', 'payroll_id', 'category_id', 'title', 'expense_date', 'amount', 'description', 'receipt_file', 'attachment_path', 'status', 'rejection_reason', 'approved_at'])]
 class Reimbursement extends Model
 {
     use Approvable, HasFactory, SoftDeletes;
@@ -60,6 +60,7 @@ class Reimbursement extends Model
         return [
             'amount' => 'decimal:2',
             'expense_date' => 'date',
+            'approved_at' => 'datetime',
             'status' => ReimbursementStatus::class,
         ];
     }

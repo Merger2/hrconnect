@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Api;
 
-use App\Enums\EducationLevel;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -11,38 +10,70 @@ class StoreEmployeeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()?->can('create', Employee::class) ?? false;
+        return $this->user()?->can('create', Employee::class) ?? false;
     }
 
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
-            'employee_number' => ['required', 'string', 'unique:employees,employee_number'],
+            'employee_number' => ['required', 'string', 'max:50', Rule::unique('employees', 'employee_number')],
             'full_name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'regex:/^(\+62|0)\d{9,12}$/'],
-            'nik' => ['required', 'digits:16', Rule::encryptedUnique(Employee::class, 'nik_hash')],
             'company_id' => ['required', 'integer', 'exists:companies,id'],
             'branch_id' => ['required', 'integer', 'exists:branches,id'],
-            'department_id' => ['required', 'integer', 'exists:departments,id'],
+            'division_id' => ['required', 'integer', 'exists:divisions,id'],
             'position_id' => ['required', 'integer', 'exists:positions,id'],
-            'parent_id' => ['nullable', 'integer', 'exists:employees,id', function ($attribute, $value, $fail) {
-                if ($value !== null && (int) $value === (int) $this->input('id')) {
-                    $fail('Manager tidak boleh merujuk ke dirinya sendiri.');
-                }
-            }],
             'gender' => ['required', 'in:L,P'],
-            'marital_status' => ['required', 'in:single,married,divorced,widowed'],
-            'employment_type' => ['required', 'in:permanent,contract,probation,intern'],
-            'birth_date' => ['required', 'date'],
+            'marital_status' => ['required', 'string', 'max:50'],
+            'employment_type' => ['required', Rule::in(['permanent', 'contract', 'probation', 'intern'])],
+            'birth_date' => ['required', 'date', 'before:today'],
             'join_date' => ['required', 'date'],
-            'salary_type' => ['required', 'in:monthly,daily,hourly'],
-            'blood_type' => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
-            'education_level' => ['required', Rule::enum(EducationLevel::class)],
-            'institution_name' => ['required', 'string', 'max:255'],
-            'graduation_year' => ['required', 'integer', 'min:1950', 'max:'.date('Y')],
+            'salary_type' => ['required', Rule::in(['monthly', 'daily', 'hourly'])],
+            'nip' => ['nullable', 'string', 'max:50'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'basic_salary' => ['nullable', 'numeric', 'min:0'],
+            'address_detail' => ['nullable', 'string', 'max:500'],
+            'bank_name' => ['nullable', 'string', 'max:100'],
+            'bank_account_number' => ['nullable', 'regex:/^\d{8,18}$/'],
+            'bank_account_holder' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama pengguna wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'employee_number.required' => 'Nomor induk karyawan wajib diisi.',
+            'employee_number.unique' => 'Nomor induk karyawan sudah terdaftar.',
+            'full_name.required' => 'Nama lengkap wajib diisi.',
+            'company_id.required' => 'Perusahaan wajib dipilih.',
+            'company_id.exists' => 'Perusahaan tidak ditemukan.',
+            'branch_id.required' => 'Cabang wajib dipilih.',
+            'branch_id.exists' => 'Cabang tidak ditemukan.',
+            'division_id.required' => 'Divisi wajib dipilih.',
+            'division_id.exists' => 'Divisi tidak ditemukan.',
+            'position_id.required' => 'Posisi/Jabatan wajib dipilih.',
+            'position_id.exists' => 'Posisi tidak ditemukan.',
+            'gender.required' => 'Jenis kelamin wajib dipilih.',
+            'gender.in' => 'Jenis kelamin harus L atau P.',
+            'marital_status.required' => 'Status pernikahan wajib diisi.',
+            'employment_type.required' => 'Tipe karyawan wajib dipilih.',
+            'employment_type.in' => 'Tipe karyawan tidak valid.',
+            'birth_date.required' => 'Tanggal lahir wajib diisi.',
+            'birth_date.before' => 'Tanggal lahir harus sebelum hari ini.',
+            'join_date.required' => 'Tanggal bergabung wajib diisi.',
+            'salary_type.required' => 'Tipe gaji wajib dipilih.',
+            'salary_type.in' => 'Tipe gaji harus monthly, daily, atau hourly.',
+            'bank_account_number.regex' => 'Nomor rekening harus terdiri dari 8-18 digit angka.',
+            'basic_salary.numeric' => 'Gaji pokok harus berupa angka.',
+            'basic_salary.min' => 'Gaji pokok tidak boleh negatif.',
         ];
     }
 }

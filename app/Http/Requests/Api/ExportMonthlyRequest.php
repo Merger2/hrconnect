@@ -18,4 +18,13 @@ class ExportMonthlyRequest extends FormRequest
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'period.required' => 'Periode ekspor wajib diisi.',
+            'period.regex' => 'Format periode harus YYYY-MM (contoh: 2026-07).',
+            'branch_id.exists' => 'Cabang tidak ditemukan.',
+        ];
+    }
 }

@@ -1,6 +1,10 @@
 <?php
 
+<<<<<<< HEAD
 use App\Models\Employee;
+=======
+use App\Models\Setting;
+>>>>>>> main
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -44,7 +48,11 @@ if (! function_exists('app_name')) {
 if (! function_exists('format_currency')) {
     function format_currency(float $amount, ?string $locale = 'id_ID'): string
     {
+<<<<<<< HEAD
         return 'Rp' . number_format($amount, 0, ',', '.');
+=======
+        return 'Rp'.number_format($amount, 0, ',', '.');
+>>>>>>> main
     }
 }
 
@@ -99,3 +107,68 @@ if (! function_exists('is_production')) {
         return app()->environment('production');
     }
 }
+<<<<<<< HEAD
+=======
+
+if (! function_exists('normalize_internal_url')) {
+    function normalize_internal_url(?string $url): ?string
+    {
+        if (blank($url)) {
+            return null;
+        }
+
+        $parts = parse_url($url);
+
+        if ($parts === false) {
+            return $url;
+        }
+
+        if (! isset($parts['scheme']) && ! isset($parts['host'])) {
+            return $url;
+        }
+
+        $path = $parts['path'] ?? '/';
+        $query = isset($parts['query']) ? '?'.$parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#'.$parts['fragment'] : '';
+
+        return $path.$query.$fragment;
+    }
+}
+
+if (! function_exists('get_non_root_base_url_path')) {
+    function get_non_root_base_url_path(): string
+    {
+        $segments = explode('/', parse_url(config('app.url'), PHP_URL_PATH));
+
+        return count($segments) < 2 ? '' : $segments[1];
+    }
+}
+
+if (! function_exists('format_time')) {
+    function format_time($time): string
+    {
+        if (! $time) {
+            return '-';
+        }
+
+        if (is_string($time)) {
+            try {
+                $time = Carbon::parse($time);
+            } catch (Exception $e) {
+                return $time;
+            }
+        }
+
+        $format = Setting::getValue('app.time_format', '24');
+        $showSeconds = (bool) Setting::getValue('app.show_seconds', false);
+
+        if ($format == '12') {
+            $formatString = $showSeconds ? 'h:i:s A' : 'h:i A';
+        } else {
+            $formatString = $showSeconds ? 'H:i:s' : 'H:i';
+        }
+
+        return $time->format($formatString);
+    }
+}
+>>>>>>> main

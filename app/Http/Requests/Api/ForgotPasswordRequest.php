@@ -17,4 +17,12 @@ class ForgotPasswordRequest extends FormRequest
             'email' => ['required', 'email'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+        ];
+    }
 }

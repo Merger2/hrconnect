@@ -24,6 +24,19 @@ class RegisterFaceRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'embedding.required' => 'Data wajah wajib diisi.',
+            'embedding.size' => 'Data wajah harus 128 dimensi.',
+            'embedding.*.between' => 'Nilai embedding wajah harus antara -3 dan 3.',
+            'embeddings.min' => 'Minimal 2 sampel wajah diperlukan.',
+            'embeddings.max' => 'Maksimal 10 sampel wajah.',
+            'embeddings.*.size' => 'Setiap sampel wajah harus 128 dimensi.',
+            'embeddings.*.*.between' => 'Nilai embedding harus antara -3 dan 3.',
+        ];
+    }
+
     protected function prepareForValidation(): void
     {
         $data = $this->all();

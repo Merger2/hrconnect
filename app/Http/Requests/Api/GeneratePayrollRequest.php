@@ -19,4 +19,14 @@ class GeneratePayrollRequest extends FormRequest
             'employee_ids.*' => ['integer', 'exists:employees,id'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'period.required' => 'Periode penggajian wajib diisi.',
+            'period.regex' => 'Format periode harus YYYY-MM (contoh: 2026-07).',
+            'employee_ids.array' => 'Daftar karyawan harus berupa array.',
+            'employee_ids.*.exists' => 'Karyawan dengan ID tersebut tidak ditemukan.',
+        ];
+    }
 }

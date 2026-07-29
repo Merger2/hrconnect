@@ -16,24 +16,31 @@ class DetectMissedClockCommand extends Command
 
     public function handle(): int
     {
-        $yesterday = now()->subDay()->toDateString();
+        try {
+            $yesterday = now()->subDay()->toDateString();
 
-        $missedOut = Attendance::whereDate('date', $yesterday)
-            ->whereNotNull('clock_in')
-            ->whereNull('clock_out')
-            ->update(['status' => AttendanceStatus::MISSED_CLOCK_OUT]);
+            $missedOut = Attendance::whereDate('date', $yesterday)
+                ->whereNotNull('clock_in')
+                ->whereNull('clock_out')
+                ->update(['status' => AttendanceStatus::MISSED_CLOCK_OUT]);
 
-        $missedIn = Attendance::whereDate('date', $yesterday)
-            ->whereNull('clock_in')
-            ->whereNotNull('clock_out')
-            ->update(['status' => AttendanceStatus::MISSED_CLOCK_IN]);
+            $missedIn = Attendance::whereDate('date', $yesterday)
+                ->whereNull('clock_in')
+                ->whereNotNull('clock_out')
+                ->update(['status' => AttendanceStatus::MISSED_CLOCK_IN]);
 
-        $this->info("Marked {$missedOut} missed clock-out, {$missedIn} missed clock-in");
-        logger()->info('attendance:detect-missed-clock completed', [
-            'missed_clock_out' => $missedOut,
-            'missed_clock_in' => $missedIn,
-        ]);
+            $this->info("Marked {$missedOut} missed clock-out, {$missedIn} missed clock-in");
+            logger()->info('attendance:detect-missed-clock completed', [
+                'missed_clock_out' => $missedOut,
+                'missed_clock_in' => $missedIn,
+            ]);
 
-        return Command::SUCCESS;
+            return Command::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->error("Detect missed clock gagal: {$e->getMessage()}");
+            report($e);
+
+            return self::FAILURE;
+        }
     }
 }

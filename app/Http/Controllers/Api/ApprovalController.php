@@ -11,7 +11,7 @@ use App\Models\Approval;
 use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
-use App\Services\ApprovalService;
+use App\Support\ApprovalService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -31,7 +31,7 @@ class ApprovalController extends Controller
     #[QueryParameter(name: 'type', description: 'Filter by type (leave, overtime, reimbursement, wfa)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
     #[QueryParameter(name: 'per_page', description: 'Items per page (max 100)', type: 'integer')]
-    public function pending(PendingApprovalsRequest $request): JsonResponse
+    public function index(PendingApprovalsRequest $request): JsonResponse
     {
         $user = $request->user();
         $employee = $user->employee;

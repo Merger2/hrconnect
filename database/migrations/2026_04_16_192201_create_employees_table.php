@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('employees')->nullOnDelete();
             $table->foreignId('company_id')->constrained('companies')->restrictOnDelete();
             $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
-            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
+            $table->foreignId('division_id')->nullable()->constrained('divisions')->restrictOnDelete();
             $table->foreignId('position_id')->constrained('positions')->restrictOnDelete();
             $table->foreignId('shift_id')->nullable()->constrained('shifts')->restrictOnDelete();
             // --- ALAMAT(LARAVOLT) ---
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->text('phone');
             $table->text('bank_account_number')->nullable();
             $table->string('bank_name', 100)->nullable();
-            $table->text('npwp')->nullable();
+            $table->text('npwp')->nullable();  // Changed from string(15) to text for CipherSweet encryption
             $table->text('nik');
             $table->string('marital_status', 20)->default('single');
             $table->string('blood_type', 5)->nullable();
@@ -49,13 +49,27 @@ return new class extends Migration
             $table->text('termination_reason')->nullable();
             $table->string('phk_variant', 20)->nullable();
             $table->string('pin', 60)->nullable()->comment('bcrypt hash, 6 digit PIN absensi');
+            // --- QUANTA PAYROLL FIELDS ---
+            $table->foreignId('golongan_ptkp_id')->nullable()->constrained('golongan_ptkp');
+            $table->foreignId('tarif_ter_id')->nullable()->constrained('tarif_ter');
+            $table->foreignId('kategori_ter_id')->nullable()->constrained('kategori_ter');
+            $table->string('kode_karyawan', 20)->unique()->nullable();
+            $table->date('tanggal_masuk')->nullable();
+            $table->enum('status_karyawan', ['active', 'inactive', 'terminated'])->default('active');
+            $table->string('nip', 20)->nullable()->unique()->comment('Nomor Induk Pegawai untuk laporan pajak');
+            $table->string('bank_account_name', 100)->nullable()->comment('Nama sesuai rekening bank');
+            $table->string('ptkp_status', 10)->nullable()->comment('Status PTKP: TK/0, K/0, K/1, K/2, K/3');
+            $table->string('payslip_password', 100)->nullable();
+            $table->timestamp('payslip_password_set_at')->nullable();
+            $table->decimal('basic_salary', 15, 2)->nullable()->comment('Basic salary for payroll calc');
+            $table->string('bank_account_holder', 100)->nullable();
+            $table->text('emergency_contact_name')->nullable();
+            $table->text('emergency_contact_phone')->nullable();
+            $table->text('emergency_contact_relation')->nullable();
+            $table->text('bpjs_kesehatan')->nullable();
+            $table->text('bpjs_ketenagakerjaan')->nullable();
             // --- BIOMETRIK & PENDIDIKAN ---
             $table->string('photo')->nullable();
-            if (DB::getDriverName() === 'pgsql') {
-                $table->vector('face_embedding', dimensions: 128)->nullable()->comment('Menyimpan vektor embedding wajah untuk keperluan absensi berbasis wajah');
-            } else {
-                $table->text('face_embedding')->nullable()->comment('Fallback: Menyimpan vektor embedding wajah (text pada SQLite)');
-            }
             $table->string('education_level', 20);
             $table->string('institution_name');
             $table->string('major')->nullable();

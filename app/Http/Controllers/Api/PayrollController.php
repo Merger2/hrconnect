@@ -14,8 +14,8 @@ use App\Http\Resources\PayrollResource;
 use App\Jobs\GenerateEmployeePayrollJob;
 use App\Models\Employee;
 use App\Models\Payroll;
-use App\Services\PayrollExportService;
-use App\Services\PayslipPdfService;
+use App\Services\Payroll\PayrollExportService;
+use App\Services\Payroll\PayslipPdfService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -90,12 +90,12 @@ class PayrollController extends Controller
         ]);
     }
 
-    #[Endpoint(title: 'Download Payslip', description: 'Download payslip PDF for published/paid payroll. Flow: Payroll (Step 3/4) — Generate → List → Download → Export.')]
+    #[Endpoint(title: 'Download Payslip', description: 'Download payslip PDF for approved/paid payroll. Flow: Payroll (Step 3/4) — Generate → List → Download → Export.')]
     public function payslip(Request $request, Payroll $payroll): BinaryFileResponse
     {
         $this->authorize('downloadPayslip', $payroll);
 
-        if (! in_array($payroll->status, [PayrollStatus::PUBLISHED, PayrollStatus::PAID], true)) {
+        if (! in_array($payroll->status, [PayrollStatus::APPROVED, PayrollStatus::PAID], true)) {
             throw new BusinessRuleException(
                 'Payslip hanya tersedia untuk payroll yang sudah dipublikasi.'
             );
@@ -164,6 +164,8 @@ class PayrollController extends Controller
     #[BodyParameter(name: 'employee_ids', description: 'Specific employees to process (null = all active)', required: false, type: 'array')]
     public function generate(GeneratePayrollRequest $request): JsonResponse
     {
+        $this->authorize('create', Payroll::class);
+
         $data = $request->validated();
 
         $employeeIds = $data['employee_ids'] ?? null;

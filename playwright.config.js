@@ -37,9 +37,13 @@ export default defineConfig({
       },
     },
 
+<<<<<<< HEAD
+=======
+    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
+>>>>>>> main
     {
       name: 'chromium-employee',
-      testMatch: /(clock-in|rag-chat|loans|overtime|role-employee|face-enrollment|face-recognition-api)\.spec\.ts/,
+      testMatch: /employee-pages\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -85,6 +89,10 @@ export default defineConfig({
       },
     },
 
+<<<<<<< HEAD
+=======
+    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement)
+>>>>>>> main
     {
       name: 'chromium-admin',
       testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring|payroll-config|auth-enhanced|face-recognition-api|approval-workflow|role-super-admin)\.spec\.ts/,
@@ -110,6 +118,19 @@ export default defineConfig({
     },
 
     {
+<<<<<<< HEAD
+=======
+      name: 'chromium-pwa',
+      testMatch: /pwa\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+    {
+>>>>>>> main
       name: 'chromium-ux',
       testMatch: /user-experience\.spec\.ts/,
       dependencies: ['setup'],
@@ -120,6 +141,19 @@ export default defineConfig({
       },
     },
 
+<<<<<<< HEAD
+=======
+    {
+      name: 'chromium-profile',
+      testMatch: /profile\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+>>>>>>> main
     {
       name: 'chromium-auth',
       testMatch: /auth\.spec\.ts/,
@@ -131,6 +165,7 @@ export default defineConfig({
     },
   ],
 
+<<<<<<< HEAD
   webServer: {
     command: 'php artisan serve',
     url: 'http://localhost:8000',
@@ -138,4 +173,7 @@ export default defineConfig({
     stdout: 'ignore',
     stderr: 'pipe',
   },
+=======
+  // webServer disabled - server runs separately on localhost:8000
+>>>>>>> main
 });

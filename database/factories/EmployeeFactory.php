@@ -10,7 +10,7 @@ use App\Enums\MaritalStatus;
 use App\Enums\SalaryType;
 use App\Models\Branch;
 use App\Models\Company;
-use App\Models\Department;
+use App\Models\Division;
 use App\Models\Employee;
 use App\Models\Position;
 use App\Models\User;
@@ -32,10 +32,10 @@ class EmployeeFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'company_id' => Company::inRandomOrder()->value('id'),
-            'branch_id' => Branch::inRandomOrder()->value('id'),
-            'department_id' => Department::inRandomOrder()->value('id'),
-            'position_id' => Position::inRandomOrder()->value('id'),
+            'company_id' => Company::factory(),
+            'branch_id' => Branch::factory(),
+            'division_id' => Division::factory(),
+            'position_id' => Position::factory(),
             'nik' => $this->faker->unique()->numerify('3276############'),
             'npwp' => $this->faker->unique()->numerify('##.###.###.#-###.###'),
             'employee_number' => 'EMP-'.$this->faker->unique()->numberBetween(1000, 9999),
@@ -43,6 +43,13 @@ class EmployeeFactory extends Factory
             'phone' => $this->faker->unique()->phoneNumber(),
             'bank_account_number' => $this->faker->unique()->bankAccountNumber(),
             'bank_name' => $this->faker->randomElement(['Bank Central Asia (BCA)', 'Bank Mandiri', 'Bank Rakyat Indonesia (BRI)', 'Bank Negara Indonesia (BNI)', 'Bank Danamon']),
+            'bank_account_name' => $this->faker->unique()->company(),
+            'bank_account_holder' => $this->faker->name(),
+            'basic_salary' => $this->faker->numberBetween(3_000_000, 15_000_000),
+            'ptkp_status' => $this->faker->randomElement(['TK/0', 'K/0', 'K/1', 'K/2', 'K/3']),
+            'nip' => $this->faker->numerify('3276############'),
+            'payslip_password' => $this->faker->password(),
+            'payslip_password_set_at' => now(),
             'gender' => $this->faker->randomElement(Gender::cases()),
             'marital_status' => $this->faker->randomElement(MaritalStatus::cases()),
             'blood_type' => $this->faker->randomElement(BloodType::cases()),

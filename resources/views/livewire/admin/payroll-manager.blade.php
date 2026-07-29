@@ -1,82 +1,12 @@
-<div x-data="{ showGenerateModal: @entangle('showGenerateModal'), showDetailModal: @entangle('showDetailModal'), detailPayroll: @entangle('detailPayroll') }">
-    <x-page-shell :title="__('Manajemen Penggajian')" :description="__('Generate dan kelola pembayaran karyawan.')">
-        <x-slot name="actions">
-            @can('process_payroll')
-            <x-button variant="primary" icon="calculate" wire:click="openGenerateModal">
-                {{ __('Generate Payroll') }}
-            </x-button>
-            @endcan
-        </x-slot>
-
-        <x-slot name="toolbar">
-            <div class="grid gap-3 md:grid-cols-5 lg:grid-cols-12">
-                <div class="md:col-span-2 lg:col-span-5">
-                    <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Cari Karyawan') }}</label>
-                    <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-on-surface-variant/50">
-                            <span class="material-symbols-outlined text-lg">search</span>
-                        </span>
-                        <input
-                            type="search"
-                            wire:model.live.debounce.300ms="search"
-                            placeholder="{{ __('Nama atau NIP...') }}"
-                            class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 pl-11 pr-4 text-sm text-ink placeholder:text-on-surface-variant/40 focus:border-ink focus:ring-1 focus:ring-ink/20"
-                        >
-                    </div>
-                </div>
-
-                <div class="lg:col-span-2">
-                    <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Bulan') }}</label>
-                    <select wire:model.live="month" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 pl-3 pr-10 text-sm text-ink focus:border-ink focus:ring-1 focus:ring-ink/20">
-                        @foreach ([1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $m => $label)
-                            <option value="{{ $m }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="lg:col-span-2">
-                    <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Tahun') }}</label>
-                    <select wire:model.live="year" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 pl-3 pr-10 text-sm text-ink focus:border-ink focus:ring-1 focus:ring-ink/20">
-                        @foreach (range(now()->year - 1, now()->year + 1) as $y)
-                            <option value="{{ $y }}">{{ $y }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="lg:col-span-3">
-                    <label class="mb-1.5 block text-sm font-medium text-on-surface-variant">{{ __('Status') }}</label>
-                    <select wire:model.live="statusFilter" class="w-full rounded-xl border border-outline-variant bg-canvas py-2.5 pl-3 pr-10 text-sm text-ink focus:border-ink focus:ring-1 focus:ring-ink/20">
-                        <option value="all">{{ __('Semua Status') }}</option>
-                        <option value="draft">{{ __('Draft') }}</option>
-                        <option value="published">{{ __('Diterbitkan') }}</option>
-                        <option value="paid">{{ __('Dibayar') }}</option>
-                    </select>
-                </div>
-            </div>
-        </x-slot>
-
-        @if (count($selectedPayrolls) > 0 && $selectedActionState['has_actions'])
-        <div class="flex flex-wrap items-center gap-3 rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3">
-            <span class="text-sm font-medium text-on-surface-variant">
-                {{ trans_choice(':count terpilih', count($selectedPayrolls)) }}
-            </span>
-            <div class="ml-auto flex flex-wrap items-center gap-2">
-                @if ($selectedActionState['can_publish'])
-                    <x-button variant="primary" size="sm" wire:click="bulkPublish" icon="publish"
-                        {{-- wire:confirm="{{ __('Terbitkan semua payroll draft yang dipilih?') }}" --}}>
-                        {{ __('Terbitkan Terpilih') }}
-                    </x-button>
-                @endif
-                @if ($selectedActionState['can_pay'])
-                    <x-button variant="success" size="sm" wire:click="bulkPay" icon="paid"
-                        {{-- wire:confirm="{{ __('Tandai sebagai sudah dibayar?') }}" --}}>
-                        {{ __('Bayar Terpilih') }}
-                    </x-button>
-                @endif
-            </div>
+<div class="p-6 space-y-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight">Kelola Penggajian</h1>
+            <p class="text-sm text-zinc-500">Generate, publish, dan kelola payroll periode.</p>
         </div>
-        @endif
+    </div>
 
+<<<<<<< HEAD
         <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <div class="ess-stat">
                 <dt class="ess-stat__label">{{ __('Bruto') }}</dt>
@@ -290,124 +220,115 @@
                 {{ $payrolls->links() }}
             </div>
             @endif
+=======
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Cari karyawan</label>
+            <input type="text" wire:model.debounce.300ms="search" class="w-full rounded-md border-zinc-300" placeholder="Nama / NIP">
         </div>
-    </x-page-shell>
+        <div>
+            <label class="block text-sm font-medium mb-1">Periode</label>
+            <input type="month" wire:model.live="periodFilter" class="w-full rounded-md border-zinc-300">
+>>>>>>> main
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Status</label>
+            <select wire:model.live="statusFilter" class="w-full rounded-md border-zinc-300">
+                <option value="">Semua</option>
+                @foreach($statuses as $status)
+                    <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
 
-    <x-confirm-modal
-        name="generate-payroll"
-        :title="__('Generate Payroll')"
-        variant="info"
-        icon="calculate"
-        wire:model="showGenerateModal"
-    >
-        <x-slot name="default">
-            <p>{{ __('Generate payroll untuk') }} <strong>{{ \Carbon\Carbon::createFromFormat('!m', $month)->translatedFormat('F') }} {{ $year }}</strong>?</p>
-            <p class="sr-only">{{ __('Ini akan menghitung gaji, lembur, dan potongan untuk semua karyawan yang memenuhi syarat.') }}</p>
-        </x-slot>
-        <x-slot name="footer">
-            <x-button variant="secondary" @click="showGenerateModal = false" wire:loading.attr="disabled">
-                {{ __('Batal') }}
-            </x-button>
-            <x-button variant="primary" wire:click="generate" wire:loading.attr="disabled">
-                <span wire:loading.remove wire:target="generate">{{ __('Generate') }}</span>
-                <span wire:loading wire:target="generate">{{ __('Memproses...') }}</span>
-            </x-button>
-        </x-slot>
-    </x-confirm-modal>
-
-    <template x-teleport="body">
-        <template x-if="showDetailModal && detailPayroll">
-            <div class="fixed inset-0 z-[90] overflow-y-auto" x-transition>
-                <div class="flex min-h-[100dvh] items-start justify-center px-4 py-[calc(1rem+env(safe-area-inset-top))] text-center sm:items-center sm:px-6">
-                    <div class="fixed inset-0 z-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                        @click="showDetailModal = false; $wire.closeDetail()"></div>
-                    <div class="relative z-10 w-full overflow-hidden rounded-2xl bg-canvas text-left shadow-lg transition-all sm:my-8 sm:max-w-lg"
-                        style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
-                        @click.stop
-                        role="dialog" aria-modal="true" aria-labelledby="payroll-detail-title">
-                        <div class="flex items-center justify-between border-b border-outline-variant px-6 py-4">
-                            <div>
-                                <h3 id="payroll-detail-title" class="text-lg font-bold text-ink" x-text="detailPayroll.name"></h3>
-                                <p class="text-sm text-on-surface-variant">
-                                    <span x-text="detailPayroll.employee_number"></span> &middot; <span x-text="detailPayroll.position"></span>
-                                </p>
-                            </div>
-                            <button type="button" @click="showDetailModal = false; $wire.closeDetail()"
-                                class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-dim">
-                                <span class="material-symbols-outlined">close</span>
-                            </button>
-                        </div>
-                        <div class="space-y-4 overflow-y-auto px-6 py-4" style="max-height: calc(100dvh - 12rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-on-surface-variant">{{ __('Periode') }}</span>
-                                <span class="font-medium text-ink" x-text="detailPayroll.period"></span>
-                            </div>
-
-                            <div class="flex justify-between text-sm">
-                                <span class="text-on-surface-variant">{{ __('Gaji Pokok') }}</span>
-                                <span class="font-medium text-ink" x-text="'Rp ' + Number(detailPayroll.basic_salary).toLocaleString('id-ID')"></span>
-                            </div>
-
-                            <div class="flex justify-between text-sm">
-                                <span class="text-on-surface-variant">{{ __('Tunjangan Jabatan') }}</span>
-                                <span class="font-medium text-ink" x-text="'Rp ' + Number(detailPayroll.total_allowance).toLocaleString('id-ID')"></span>
-                            </div>
-
-                            <div class="flex justify-between text-sm">
-                                <span class="text-on-surface-variant">{{ __('Lembur') }}</span>
-                                <span class="font-medium text-ink" x-text="'Rp ' + Number(detailPayroll.overtime_pay).toLocaleString('id-ID')"></span>
-                            </div>
-
-                            <div class="flex justify-between text-sm">
-                                <span class="text-on-surface-variant">{{ __('Penghasilan Bruto') }}</span>
-                                <span class="font-semibold text-ink" x-text="'Rp ' + Number(detailPayroll.gross_salary).toLocaleString('id-ID')"></span>
-                            </div>
-
-                            <div class="border-t border-outline-variant pt-4">
-                                <h4 class="mb-2 text-xs font-bold uppercase tracking-wider text-error">{{ __('Potongan') }}</h4>
-
-                                <div class="flex justify-between py-1 text-sm">
-                                    <span class="text-on-surface-variant">{{ __('PPh21') }}</span>
-                                    <span class="text-error" x-text="'-Rp ' + Number(detailPayroll.pph21).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex justify-between py-1 text-sm">
-                                    <span class="text-on-surface-variant">{{ __('BPJS Kesehatan') }}</span>
-                                    <span class="text-error" x-text="'-Rp ' + Number(detailPayroll.bpjs_health).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex justify-between py-1 text-sm">
-                                    <span class="text-on-surface-variant">{{ __('BPJS Ketenagakerjaan') }}</span>
-                                    <span class="text-error" x-text="'-Rp ' + Number(detailPayroll.bpjs_employment).toLocaleString('id-ID')"></span>
-                                </div>
-                                <div class="flex justify-between py-1 text-sm">
-                                    <span class="text-on-surface-variant">{{ __('Denda Kehadiran') }}</span>
-                                    <span class="text-error" x-text="'-Rp ' + Number(detailPayroll.attendance_penalty).toLocaleString('id-ID')"></span>
-                                </div>
-                                @if (!empty($detailPayroll['loan_deduction']))
-                                <div class="flex justify-between py-1 text-sm">
-                                    <span class="text-on-surface-variant">{{ __('Cicilan Pinjaman') }}</span>
-                                    <span class="text-error" x-text="'-Rp ' + Number(detailPayroll.loan_deduction).toLocaleString('id-ID')"></span>
-                                </div>
+    <div class="rounded-xl border border-zinc-200 overflow-hidden">
+        <table class="min-w-full text-sm">
+            <thead class="bg-zinc-50 text-zinc-600">
+                <tr>
+                    <th class="px-4 py-3 text-left">Periode</th>
+                    <th class="px-4 py-3 text-left">Karyawan</th>
+                    <th class="px-4 py-3 text-right">Gross</th>
+                    <th class="px-4 py-3 text-right">Net</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 bg-white">
+                @forelse($payrolls as $payroll)
+                    <tr>
+                        <td class="px-4 py-3">{{ $payroll->period }}</td>
+                        <td class="px-4 py-3">
+                            <div class="font-medium">{{ $payroll->employee?->full_name }}</div>
+                            <div class="text-xs text-zinc-500">{{ $payroll->employee?->employee_number }}</div>
+                        </td>
+                        <td class="px-4 py-3 text-right">Rp {{ number_format($payroll->gross_salary, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-right">Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+                                {{ match($payroll->status?->value) {
+                                    'draft' => 'bg-zinc-100 text-zinc-800',
+                                    'submitted' => 'bg-amber-100 text-amber-800',
+                                    'verified' => 'bg-blue-100 text-blue-800',
+                                    'approved' => 'bg-emerald-100 text-emerald-800',
+                                    'paid' => 'bg-teal-100 text-teal-800',
+                                    default => 'bg-zinc-100 text-zinc-800'
+                                } }}">
+                                {{ $payroll->status?->label() }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-2">
+                                @if($payroll->status === \App\Enums\PayrollStatus::DRAFT)
+                                    <button wire:click="submit({{ $payroll->id }})" class="text-amber-600 hover:text-amber-700 text-xs font-semibold">Ajukan</button>
                                 @endif
 
-                                <div class="mt-2 flex justify-between border-t border-outline-variant/50 pt-2 text-sm font-bold">
-                                    <span class="text-on-surface-variant">{{ __('Total Potongan') }}</span>
-                                    <span class="text-error" x-text="'-Rp ' + Number(detailPayroll.total_deduction).toLocaleString('id-ID')"></span>
-                                </div>
-                            </div>
+                                @if($payroll->status === \App\Enums\PayrollStatus::SUBMITTED)
+                                    <button wire:click="verify({{ $payroll->id }})" class="text-blue-600 hover:text-blue-700 text-xs font-semibold">Verifikasi</button>
+                                    <button wire:click="confirmReject({{ $payroll->id }})" class="text-red-600 hover:text-red-700 text-xs font-semibold">Tolak</button>
+                                @endif
 
-                            <div class="flex items-center justify-between rounded-2xl border border-success/40 bg-success/5 p-4">
-                                <span class="text-sm font-bold uppercase tracking-wider text-success">{{ __('Gaji Bersih') }}</span>
-                                <span class="text-xl font-bold text-success" x-text="'Rp ' + Number(detailPayroll.net_salary).toLocaleString('id-ID')"></span>
+                                @if($payroll->status === \App\Enums\PayrollStatus::VERIFIED)
+                                    <button wire:click="approve({{ $payroll->id }})" class="text-emerald-600 hover:text-emerald-700 text-xs font-semibold">Setujui</button>
+                                    <button wire:click="confirmReject({{ $payroll->id }})" class="text-red-600 hover:text-red-700 text-xs font-semibold">Tolak</button>
+                                @endif
+
+                                @if($payroll->status === \App\Enums\PayrollStatus::APPROVED)
+                                    <button wire:click="markPaid({{ $payroll->id }})" class="text-teal-600 hover:text-teal-700 text-xs font-semibold">Tandai Ditransfer</button>
+                                    <button wire:click="downloadPayslip({{ $payroll->id }})" class="text-zinc-700 hover:text-black text-xs font-semibold">Payslip</button>
+                                @endif
+
+                                @if($payroll->status === \App\Enums\PayrollStatus::PAID)
+                                    <button wire:click="downloadPayslip({{ $payroll->id }})" class="text-zinc-700 hover:text-black text-xs font-semibold">Payslip</button>
+                                @endif
                             </div>
-                        </div>
-                        <div class="flex justify-end border-t border-outline-variant bg-surface-dim/30 px-6 py-3">
-                            <x-button variant="secondary" @click="showDetailModal = false; $wire.closeDetail()">
-                                {{ __('Tutup') }}
-                            </x-button>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="px-4 py-6 text-center text-zinc-500">Belum ada data payroll.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">
+        {{ $payrolls->links() }}
+    </div>
+
+    @if($rejectingPayrollId)
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md space-y-4">
+                <h3 class="text-lg font-semibold">Tolak Payroll</h3>
+                <p class="text-sm text-zinc-500">Berikan alasan penolakan payroll ini.</p>
+                <textarea wire:model="rejectionReason" rows="3" class="w-full rounded-md border-zinc-300" placeholder="Alasan penolakan..."></textarea>
+                @error('rejectionReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                <div class="flex justify-end gap-2">
+                    <button wire:click="cancelReject" class="px-4 py-2 text-sm rounded-md border border-zinc-300 hover:bg-zinc-50">Batal</button>
+                    <button wire:click="reject" class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">Tolak Payroll</button>
                 </div>
             </div>
-        </template>
-    </template>
+        </div>
+    @endif
 </div>

@@ -38,6 +38,14 @@ return [
     'attendance_penalty_per_day' => (int) env('ATTENDANCE_PENALTY_PER_DAY', 50000),
 
     /*
+     * Super Admin bootstrap credentials.
+     * Digunakan oleh SuperAdminSeeder. Wajib diisi di .env untuk production.
+     */
+    'super_admin_email' => env('SUPER_ADMIN_EMAIL', 'admin@hrconnect.local'),
+    'super_admin_password' => env('SUPER_ADMIN_PASSWORD', null),
+    'super_admin_name' => env('SUPER_ADMIN_NAME', 'Super Admin'),
+
+    /*
      * Password expiry default (days). Can be overridden via CompanySetting.
      */
     'password_expiry_days' => (int) env('PASSWORD_EXPIRY_DAYS', 90),
@@ -45,6 +53,10 @@ return [
     /*
      * PTKP defaults (Penghasilan Tidak Kena Pajak).
      * Overridable via CompanySetting keys ptkp_*.
+     */
+    /*
+     * Enterprise Modules — daftar modul add-on yang tersedia.
+     * Set true di .env untuk mengaktifkan: ENTERPRISE_MODULE_TOKO_POS=true
      */
     'ptkp' => [
         'base_single' => (float) env('PTKP_BASE_SINGLE', 54_000_000),

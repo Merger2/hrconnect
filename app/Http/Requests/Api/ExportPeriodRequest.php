@@ -17,4 +17,12 @@ class ExportPeriodRequest extends FormRequest
             'period' => ['required', 'regex:/^\d{4}-\d{2}$/'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'period.required' => 'Periode wajib diisi.',
+            'period.regex' => 'Format periode harus YYYY-MM (contoh: 2026-07).',
+        ];
+    }
 }

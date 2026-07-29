@@ -10,7 +10,7 @@ use App\Http\Resources\ReimbursementCategoryResource;
 use App\Http\Resources\ReimbursementResource;
 use App\Models\Reimbursement;
 use App\Models\ReimbursementCategory;
-use App\Services\ReimbursementService;
+use App\Services\HR\ReimbursementService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;

@@ -65,7 +65,7 @@ return [
             'title' => 'Lainnya',
             'roles' => ['super-admin', 'hr', 'employee'],
             'items' => [
-                ['label' => 'Basis Pengetahuan', 'route' => 'knowledge-base.index', 'icon' => 'menu_book', 'can' => 'view_knowledgebase'],
+                ['label' => 'Basis Pengetahuan', 'route' => 'knowledge-base.manage', 'icon' => 'menu_book', 'can' => 'manage_knowledgebase'],
             ],
         ],
         [

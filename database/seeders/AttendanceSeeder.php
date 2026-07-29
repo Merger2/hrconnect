@@ -92,6 +92,10 @@ class AttendanceSeeder extends Seeder
             }
         }
 
+<<<<<<< HEAD
         $this->command?->info("AttendanceSeeder: {$seeded} record absensi (1 bulan) untuk " . $employees->count() . ' karyawan.');
+=======
+        $this->command?->info("AttendanceSeeder: {$seeded} record absensi (1 bulan) untuk ".$employees->count().' karyawan.');
+>>>>>>> main
     }
 }

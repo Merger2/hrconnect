@@ -15,17 +15,15 @@ use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 #[Group('Employees')]
 class EmployeeController extends Controller
 {
     #[Endpoint(title: 'List Employees', description: 'Paginated employee directory with search and filter. Flow: Employee Management (directory).')]
     #[QueryParameter(name: 'branch_id', description: 'Filter by branch', type: 'integer')]
-    #[QueryParameter(name: 'department_id', description: 'Filter by department', type: 'integer')]
+    #[QueryParameter(name: 'division_id', description: 'Filter by department', type: 'integer')]
     #[QueryParameter(name: 'status', description: 'Filter by status', type: 'string')]
     #[QueryParameter(name: 'search', description: 'Search by name or employee number (min 2 chars)', type: 'string')]
     #[QueryParameter(name: 'page', description: 'Page number', type: 'integer')]
@@ -48,8 +46,8 @@ class EmployeeController extends Controller
         if (isset($data['branch_id'])) {
             $query->where('branch_id', (int) $data['branch_id']);
         }
-        if (isset($data['department_id'])) {
-            $query->where('department_id', (int) $data['department_id']);
+        if (isset($data['division_id'])) {
+            $query->where('division_id', (int) $data['division_id']);
         }
         if (isset($data['status'])) {
             $query->where('status', $data['status']);
@@ -104,7 +102,7 @@ class EmployeeController extends Controller
     #[BodyParameter(name: 'full_name', description: 'Employee full legal name', required: true, type: 'string')]
     #[BodyParameter(name: 'company_id', description: 'Company ID', required: true, type: 'integer')]
     #[BodyParameter(name: 'branch_id', description: 'Branch ID', required: true, type: 'integer')]
-    #[BodyParameter(name: 'department_id', description: 'Department ID', required: true, type: 'integer')]
+    #[BodyParameter(name: 'division_id', description: 'Division ID', required: true, type: 'integer')]
     #[BodyParameter(name: 'position_id', description: 'Position ID', required: true, type: 'integer')]
     #[BodyParameter(name: 'gender', description: 'Gender (L/P)', required: true, type: 'string')]
     #[BodyParameter(name: 'marital_status', description: 'Marital status', required: true, type: 'string')]
@@ -114,30 +112,51 @@ class EmployeeController extends Controller
     #[BodyParameter(name: 'salary_type', description: 'Salary type (monthly/daily/hourly)', required: true, type: 'string')]
     public function store(StoreEmployeeRequest $request): JsonResponse
     {
+        $this->authorize('create', Employee::class);
+
         $data = $request->validated();
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'password_changed_at' => null,
+            'password' => bcrypt($data['password']),
+            'group' => 'user',
         ]);
 
-        $employee = Employee::create(array_merge(
-            collect($data)->except(['name', 'email', 'password'])->toArray(),
-            ['user_id' => $user->id, 'status' => EmployeeStatus::ACTIVE]
-        ));
+        $employee = Employee::create([
+            'user_id' => $user->id,
+            'employee_number' => $data['employee_number'],
+            'full_name' => $data['full_name'],
+            'company_id' => $data['company_id'],
+            'branch_id' => $data['branch_id'],
+            'division_id' => $data['division_id'],
+            'position_id' => $data['position_id'],
+            'gender' => $data['gender'],
+            'marital_status' => $data['marital_status'],
+            'employment_type' => $data['employment_type'],
+            'birth_date' => $data['birth_date'],
+            'join_date' => $data['join_date'],
+            'salary_type' => $data['salary_type'],
+            'nip' => $data['nip'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'basic_salary' => $data['basic_salary'] ?? 0,
+            'address_detail' => $data['address_detail'] ?? null,
+            'bank_name' => $data['bank_name'] ?? null,
+            'bank_account_number' => $data['bank_account_number'] ?? null,
+            'bank_account_holder' => $data['bank_account_holder'] ?? null,
+        ]);
 
-        $user->assignRole('employee');
-
-        event(new Registered($user));
+        $employee->load([
+            'user:id,email',
+            'branch:id,name',
+            'division:id,name',
+            'position:id,name,grade,basic_salary',
+        ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Karyawan berhasil ditambahkan',
-            'data' => EmployeeResource::make($employee->load([
-                'user', 'branch', 'department', 'position', 'shift', 'manager',
-            ]))->resolve($request),
+            'message' => 'Karyawan berhasil dibuat',
+            'data' => EmployeeResource::make($employee)->resolve($request),
         ], 201);
     }
 
@@ -146,7 +165,7 @@ class EmployeeController extends Controller
     #[BodyParameter(name: 'phone', description: 'Phone number (+62 format)', required: false, type: 'string')]
     #[BodyParameter(name: 'company_id', description: 'Company ID', required: false, type: 'integer')]
     #[BodyParameter(name: 'branch_id', description: 'Branch ID', required: false, type: 'integer')]
-    #[BodyParameter(name: 'department_id', description: 'Department ID', required: false, type: 'integer')]
+    #[BodyParameter(name: 'division_id', description: 'Division ID', required: false, type: 'integer')]
     #[BodyParameter(name: 'position_id', description: 'Position ID', required: false, type: 'integer')]
     #[BodyParameter(name: 'employment_type', description: 'Type of employment', required: false, type: 'string')]
     #[BodyParameter(name: 'status', description: 'Employment status', required: false, type: 'string')]
@@ -204,6 +223,33 @@ class EmployeeController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => EmployeePiiResource::make($employee)->resolve($request),
+        ]);
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
+
+        $employee = $user->employee;
+
+        if (! $employee) {
+            return response()->json(['status' => 'error', 'message' => 'Employee record not found'], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'id' => $employee->id,
+                'name' => $employee->full_name ?? $user->name,
+                'nip' => $employee->nip,
+                'position' => $employee->position?->title,
+                'division' => $employee->division?->name,
+                'email' => $user->email,
+            ],
         ]);
     }
 }

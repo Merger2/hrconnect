@@ -27,4 +27,19 @@ class ChatRequest extends FormRequest
             $this->merge(['question' => $this->input('message')]);
         }
     }
+<<<<<<< HEAD
+=======
+
+    public function messages(): array
+    {
+        return [
+            'question.required_without' => 'Pertanyaan wajib diisi.',
+            'question.min' => 'Pertanyaan minimal 5 karakter.',
+            'question.max' => 'Pertanyaan maksimal 500 karakter.',
+            'message.required_without' => 'Pesan wajib diisi.',
+            'message.min' => 'Pesan minimal 5 karakter.',
+            'message.max' => 'Pesan maksimal 500 karakter.',
+        ];
+    }
+>>>>>>> main
 }

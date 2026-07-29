@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Services\FaceRecognitionService;
+use App\Services\Security\FaceRecognitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,7 +24,7 @@ class ProfileResource extends JsonResource
             'gender' => $this->gender?->value,
             'blood_type' => $this->blood_type?->value,
             'branch' => BranchResource::make($this->whenLoaded('branch')),
-            'department' => DepartmentResource::make($this->whenLoaded('department')),
+            'division' => DivisionResource::make($this->whenLoaded('division')),
             'position' => PositionResource::make($this->whenLoaded('position')),
             'shift' => $this->whenLoaded('shift', fn () => $this->shift ? [
                 'id' => $this->shift->id,

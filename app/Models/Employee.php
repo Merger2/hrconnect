@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravolt\Indonesia\Models\City;
 use Laravolt\Indonesia\Models\District;
@@ -33,18 +34,73 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
  * @mixin IdeHelperEmployee
  */
 #[Fillable([
-    'user_id', 'parent_id', 'company_id', 'branch_id', 'department_id', 'position_id', 'shift_id',
+    'user_id', 'parent_id', 'company_id', 'branch_id', 'division_id', 'position_id', 'shift_id',
     'province_id', 'city_id', 'district_id', 'village_id', 'postal_code', 'address_detail',
-    'employee_number', 'full_name', 'phone', 'bank_account_number', 'bank_name',
+    'employee_number', 'full_name', 'phone', 'bank_account_number', 'bank_name', 'bank_account_holder',
     'npwp', 'nik', 'marital_status', 'blood_type', 'gender', 'status',
     'birth_date', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
     'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'phk_variant', 'photo',
     'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
+    'payslip_password', 'ptkp_status', 'nip', 'basic_salary',
+    'golongan_ptkp_id',
+    // --- LIFECYCLE FIELDS ---
+    'probation_ends_at', 'contract_ends_at', 'resignation_submitted_at', 'resigned_at',
+    'resignation_reason', 'exit_interview_completed_at', 'account_auto_disable_at',
+    'employment_status', 'account_deletion_requested_at', 'account_deletion_reason',
+    'account_deletion_reviewed_at', 'account_deletion_reviewed_by', 'account_deletion_review_notes',
+    'manager_id',
+    'bank_account_name', 'emergency_contact_name', 'emergency_contact_phone',
+    'emergency_contact_relation', 'bpjs_kesehatan', 'bpjs_ketenagakerjaan',
+    'tarif_ter_id', 'kategori_ter_id', 'kode_karyawan',
 ])]
+<<<<<<< HEAD
 #[Hidden(['pin', 'nik', 'phone', 'npwp', 'bank_account_number'])]
+=======
+#[Hidden(['pin', 'nik', 'phone', 'npwp', 'bank_account_number', 'bank_account_name', 'emergency_contact_phone', 'bpjs_kesehatan', 'bpjs_ketenagakerjaan', 'payslip_password'])]
+>>>>>>> main
 class Employee extends Model implements CipherSweetEncrypted
 {
     use HasFactory, HasNeighbors, SoftDeletes, UsesCipherSweet;
+
+    public const EMPLOYMENT_STATUS_ACTIVE = 'active';
+
+    public const EMPLOYMENT_STATUS_INACTIVE = 'inactive';
+
+    public const EMPLOYMENT_STATUS_RESIGNED = 'resigned';
+
+    public const EMPLOYMENT_STATUS_TERMINATED = 'terminated';
+
+    public const EMPLOYMENT_STATUS_DECEASED = 'deceased';
+
+    public const EMPLOYMENT_STATUS_DELETION_REQUESTED = 'deletion_requested';
+
+    public const EMPLOYMENT_STATUS_DELETED = 'deleted';
+
+    public static function employmentStatuses(): array
+    {
+        return [
+            self::EMPLOYMENT_STATUS_ACTIVE => __('Active'),
+            self::EMPLOYMENT_STATUS_INACTIVE => __('Inactive'),
+            self::EMPLOYMENT_STATUS_RESIGNED => __('Resigned'),
+            self::EMPLOYMENT_STATUS_TERMINATED => __('Terminated'),
+            self::EMPLOYMENT_STATUS_DECEASED => __('Deceased'),
+            self::EMPLOYMENT_STATUS_DELETION_REQUESTED => __('Deletion Requested'),
+            self::EMPLOYMENT_STATUS_DELETED => __('Deleted'),
+        ];
+    }
+
+    public static function manuallyManagedEmploymentStatuses(): array
+    {
+        return [
+            self::EMPLOYMENT_STATUS_DELETION_REQUESTED,
+            self::EMPLOYMENT_STATUS_DELETED,
+        ];
+    }
+
+    public function canTransitionEmploymentStatusTo(string $status): bool
+    {
+        return false; // Default: lifecycle-managed statuses cannot be changed via simple edit
+    }
 
     public function scopeActive(Builder $query): void
     {
@@ -70,7 +126,21 @@ class Employee extends Model implements CipherSweetEncrypted
             'termination_type' => TerminationType::class,
             'graduation_year' => 'integer',
             'pin' => 'hashed',
+<<<<<<< HEAD
 
+=======
+            'payslip_password' => 'hashed',
+            // --- LIFECYCLE CASTS ---
+            'probation_ends_at' => 'date',
+            'contract_ends_at' => 'date',
+            'resignation_submitted_at' => 'datetime',
+            'resigned_at' => 'datetime',
+            'exit_interview_completed_at' => 'datetime',
+            'account_auto_disable_at' => 'datetime',
+            'account_deletion_requested_at' => 'datetime',
+            'account_deletion_reviewed_at' => 'datetime',
+            'employment_status' => EmployeeStatus::class,
+>>>>>>> main
         ];
     }
 
@@ -86,7 +156,17 @@ class Employee extends Model implements CipherSweetEncrypted
             ->addOptionalTextField('npwp')
             ->addBlindIndex('npwp', new BlindIndex('npwp_hash'))
 
-            ->addOptionalTextField('bank_account_number');
+            ->addOptionalTextField('bank_account_number')
+            ->addOptionalTextField('bank_account_holder')
+
+            ->addOptionalTextField('bank_account_name')
+            ->addOptionalTextField('emergency_contact_name')
+            ->addOptionalTextField('emergency_contact_phone')
+            ->addBlindIndex('emergency_contact_phone', new BlindIndex('emergency_phone_hash'))
+            ->addOptionalTextField('emergency_contact_relation')
+            ->addOptionalTextField('bpjs_kesehatan')
+            ->addOptionalTextField('bpjs_ketenagakerjaan')
+            ->addOptionalTextField('address_detail');
     }
 
     public function user(): BelongsTo
@@ -104,14 +184,19 @@ class Employee extends Model implements CipherSweetEncrypted
         return $this->belongsTo(Branch::class);
     }
 
-    public function department(): BelongsTo
+    public function division(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Division::class);
     }
 
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
+    }
+
+    public function golonganPtkp(): BelongsTo
+    {
+        return $this->belongsTo(GolonganPtkp::class);
     }
 
     public function shift(): BelongsTo
@@ -127,6 +212,28 @@ class Employee extends Model implements CipherSweetEncrypted
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'parent_id');
+    }
+
+    public function directManager(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'manager_id');
+    }
+
+    public function accountDeletionReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'account_deletion_reviewed_by');
+    }
+
+    public function hrChecklistCases(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            HrChecklistCase::class,
+            User::class,
+            'id',       // Foreign key on users table (local key)
+            'user_id',  // Foreign key on hr_checklist_cases table
+            'user_id',  // Local key on employees table
+            'id'        // Local key on users table
+        );
     }
 
     public function subordinates(): HasMany
@@ -223,6 +330,11 @@ class Employee extends Model implements CipherSweetEncrypted
         return $this->hasMany(Overtime::class);
     }
 
+    public function documentRequests(): HasMany
+    {
+        return $this->hasMany(EmployeeDocumentRequest::class);
+    }
+
     public function reimbursements(): HasMany
     {
         return $this->hasMany(Reimbursement::class);
@@ -287,6 +399,11 @@ class Employee extends Model implements CipherSweetEncrypted
         return $manager;
     }
 
+    public function hasValidPayslipPassword(): bool
+    {
+        return $this->payslip_password !== null;
+    }
+
     public function calculatePtkp(): float
     {
         $base = match ($this->marital_status) {
@@ -306,5 +423,29 @@ class Employee extends Model implements CipherSweetEncrypted
     {
         return $this->hasMany(LeaveBalance::class)
             ->where('year', now()->year);
+    }
+
+    /**
+     * Blade convenience accessor: display name (falls back to linked user name).
+     */
+    public function getNameAttribute(): ?string
+    {
+        return $this->attributes['full_name'] ?? $this->user?->name;
+    }
+
+    /**
+     * Blade convenience accessor: NIP maps to employee_number.
+     */
+    public function getNipAttribute(): ?string
+    {
+        return $this->attributes['employee_number'] ?? null;
+    }
+
+    /**
+     * Blade convenience accessor: email from linked user.
+     */
+    public function getEmailAttribute(): ?string
+    {
+        return $this->user?->email;
     }
 }

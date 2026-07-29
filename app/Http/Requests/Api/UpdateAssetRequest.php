@@ -22,4 +22,17 @@ class UpdateAssetRequest extends FormRequest
             'status' => ['nullable', 'string', 'in:available,assigned,disposed'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.max' => 'Nama aset maksimal 255 karakter.',
+            'serial_number.max' => 'Nomor seri aset maksimal 255 karakter.',
+            'serial_number.unique' => 'Nomor seri aset sudah terdaftar.',
+            'code.max' => 'Kode aset maksimal 255 karakter.',
+            'category.max' => 'Kategori aset maksimal 255 karakter.',
+            'status.in' => 'Status aset harus available, assigned, atau disposed.',
+            'company_id.exists' => 'Perusahaan tidak valid.',
+        ];
+    }
 }

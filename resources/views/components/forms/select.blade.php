@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @props([
     'label' => '',
     'name' => '',
@@ -6,16 +7,16 @@
     'options' => [],
     'placeholder' => 'Pilih...',
 ])
+=======
+@props(['disabled' => false])
+>>>>>>> main
 
 @php
-    $id = $id ?: $name;
-    $base = 'block w-full rounded-md border bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:ring-0';
-    $hasError = $errors->has($name);
-    $classes = $hasError
-        ? $base.' border-error'
-        : $base.' border-outline-variant';
+    $requestPath = '/' . ltrim(request()->path(), '/');
+    $isAdminContext = str_starts_with($requestPath, '/admin') || str_starts_with((request()->headers->get('referer') ?? ''), '/admin');
 @endphp
 
+<<<<<<< HEAD
 @if ($label)
     <x-forms.label for="{{ $id }}" :required="$required">{{ $label }}</x-forms.label>
 @endif
@@ -31,3 +32,14 @@
 </select>
 
 <x-forms.error :name="$name" />
+=======
+@if ($isAdminContext)
+    <x-forms.tom-select :disabled="$disabled" {{ $attributes }}>
+        {{ $slot }}
+    </x-forms.tom-select>
+@else
+    <x-user.tom-select-user :disabled="$disabled" {{ $attributes }}>
+        {{ $slot }}
+    </x-user.tom-select-user>
+@endif
+>>>>>>> main
