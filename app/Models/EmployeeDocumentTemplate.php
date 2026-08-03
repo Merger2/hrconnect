@@ -18,6 +18,12 @@ class EmployeeDocumentTemplate extends Model
         'name',
         'content',
         'variables',
+        'paper_size',
+        'orientation',
+        'header',
+        'footer',
+        'layout_options',
+        'file_path',
         'is_active',
     ];
 
@@ -33,6 +39,6 @@ class EmployeeDocumentTemplate extends Model
 
     public function documents(): HasMany
     {
-        return $this->hasMany(EmployeeDocumentRequest::class, 'template_id');
+        return $this->hasMany(EmployeeDocumentRequest::class, 'generated_template_id');
     }
 }

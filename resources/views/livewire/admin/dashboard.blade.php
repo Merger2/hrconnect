@@ -325,7 +325,7 @@
             <x-admin.insight-panel class="flex h-full flex-col p-4">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Pending Queue') }}</h3>
-                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ $pendingLeavesCount + $pendingAttendanceCorrectionsCount + $pendingReimbursementsCount + $pendingOvertimesCount + $pendingKasbonCount }} {{ __('total') }}</span>
+                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ $actionQueueCount }} {{ __('total') }}</span>
                 </div>
                 <div class="min-h-[120px] flex-1" x-data="pendingQueueChart()" x-init="initChart()" wire:ignore>
                     <canvas x-ref="canvas"></canvas>

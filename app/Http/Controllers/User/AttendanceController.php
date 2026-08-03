@@ -25,6 +25,13 @@ class AttendanceController extends Controller
         protected SecureUploadPolicy $secureUploadPolicy,
     ) {}
 
+    public function scan(): View
+    {
+        $this->authorize('create', Attendance::class);
+
+        return view('attendances.scan');
+    }
+
     public function applyLeave(Request $request): View
     {
         $this->authorize('create', Attendance::class);

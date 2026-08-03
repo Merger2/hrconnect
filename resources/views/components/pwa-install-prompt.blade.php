@@ -38,7 +38,7 @@
                         {{ __('Install') }}
                     </button>
                     <button
-                        @click="show = false"
+                        @click="dismiss()"
                         class="text-xs text-on-surface-variant hover:text-ink dark:hover:text-on-surface transition-colors"
                     >
                         {{ __('Nanti') }}
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <button
-                @click="show = false"
+                @click="dismiss()"
                 class="flex-shrink-0 p-1 text-on-surface-variant hover:text-ink dark:hover:text-on-surface transition-colors"
                 aria-label="{{ __('Tutup') }}"
             >
@@ -76,9 +76,21 @@ function pwaInstall() {
         installed: localStorage.getItem('pwa-installed'),
 
         init() {
+            // JANGAN tampilkan prompt di localhost/development — menyebalkan
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return;
+            }
+
+            // Cek dismissal — kalo pengguna klik "Nanti", jangan munculin lagi selama 7 hari
+            const dismissed = localStorage.getItem('pwa-dismissed-at');
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+            if (dismissed && Date.now() - parseInt(dismissed, 10) < sevenDays) {
+                return;
+            }
+
             // Tampilkan prompt jika belum terinstall dan bukan standalone
             if (!this.isStandalone && !this.installed) {
-                // Tunggu 5 detik sebelum muncul
+                // Tunggu 10 detik sebelum muncul
                 setTimeout(() => { this.show = true; }, 10000);
             }
 
@@ -92,8 +104,14 @@ function pwaInstall() {
                 this.installed = true;
                 this.show = false;
                 localStorage.setItem('pwa-installed', 'true');
+                localStorage.removeItem('pwa-dismissed-at');
                 this.deferredPrompt = null;
             });
+        },
+
+        dismiss() {
+            this.show = false;
+            localStorage.setItem('pwa-dismissed-at', String(Date.now()));
         },
 
         installApp() {
@@ -112,6 +130,7 @@ function pwaInstall() {
         },
 
         showInstallGuide() {
+            this.dismiss();
             alert('{{ __("Buka menu browser, pilih \"Install\" atau \"Add to Home Screen\"") }}');
         }
     };

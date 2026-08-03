@@ -9,7 +9,8 @@
                 :back-href="route('home')"
                 :title="__('Team Chat')"
                 :description="__('Follow project conversations, shared files, and team updates.')"
-                title-id="collaboration-inbox-title">
+                title-id="collaboration-inbox-title"
+                class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-chat-bubble-left-right class="h-5 w-5" />
                 </x-slot>

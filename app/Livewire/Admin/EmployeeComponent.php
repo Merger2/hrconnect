@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Forms\UserForm;
 use App\Models\Employee;
-use App\Models\JobTitle;
 use App\Models\Position;
 use App\Models\User;
 use App\Models\Wilayah;
@@ -201,16 +200,16 @@ class EmployeeComponent extends Component
 
     public function updated($property, $value)
     {
-        if ($property === 'form.job_title_id' && $value) {
-            $jobTitle = JobTitle::find($value);
-            if ($jobTitle && $jobTitle->division_id) {
-                $this->form->division_id = $jobTitle->division_id;
+        if ($property === 'form.position_id' && $value) {
+            $position = Position::find($value);
+            if ($position && $position->division_id) {
+                $this->form->division_id = $position->division_id;
             }
             $this->form->manager_id = null;
         }
 
         if ($property === 'form.division_id') {
-            $this->form->job_title_id = null;
+            $this->form->position_id = null;
             $this->form->manager_id = null;
         }
 
@@ -274,7 +273,7 @@ class EmployeeComponent extends Component
             'pending_deletion' => (int) ($allEmployeeStatuses[Employee::EMPLOYMENT_STATUS_DELETION_REQUESTED] ?? 0),
         ];
 
-        $availableJobTitles = Position::query()
+        $availablePositions = Position::query()
             ->when($this->form->division_id, function ($q) {
                 $q->where('division_id', $this->form->division_id)
                     ->orWhereNull('division_id'); // Include global titles if any
@@ -314,7 +313,7 @@ class EmployeeComponent extends Component
 
         return view('livewire.admin.employees', [
             'users' => $users,
-            'availableJobTitles' => $availableJobTitles,
+            'availablePositions' => $availablePositions,
             'provinces' => $provinces,
             'regencies' => $regencies,
             'districts' => $districts,

@@ -29,7 +29,7 @@
                     <!-- Session Status -->
                     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-                    <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
+                    <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-5">
                         @csrf
 
                         <!-- Email -->

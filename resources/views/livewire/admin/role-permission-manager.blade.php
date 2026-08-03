@@ -76,7 +76,7 @@
 
                                     <div class="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
                                         <span>{{ __('Users assigned: :count', ['count' => $role->users_count]) }}</span>
-                                        <span>{{ __('Permissions: :count', ['count' => count($role->permissions ?? $allPermissions)]) }}</span>
+                                        <span>{{ __('Permissions: :count', ['count' => count($role->grantsFullAdminAccess() ? $allPermissions : ($role->permission_keys ?? []))]) }}</span>
                                     </div>
 
                                     @php

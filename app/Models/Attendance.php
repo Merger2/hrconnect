@@ -205,6 +205,11 @@ class Attendance extends Model
         return $this->belongsTo(Shift::class);
     }
 
+    public function leaveType(): BelongsTo
+    {
+        return $this->belongsTo(LeaveType::class);
+    }
+
     public function overtime(): HasOne
     {
         return $this->hasOne(Overtime::class);

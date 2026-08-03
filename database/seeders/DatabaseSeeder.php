@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             CompanyEmployeesSeeder::class,
             E2eTestSeeder::class,
             IntegrationSampleSeeder::class,
+            KnowledgeBaseSeeder::class,
         ]);
     }
 }

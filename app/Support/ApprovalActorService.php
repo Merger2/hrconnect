@@ -26,10 +26,10 @@ class ApprovalActorService
 
         $divisionReportIds = User::query()
             ->where('id', '!=', $user->id)
-            ->where('division_id', $user->division_id)
+            ->whereHas('employee', fn (Builder $query) => $query->where('division_id', $user->division_id))
             ->whereNull('manager_id')
             ->when($user->company_id !== null, fn (Builder $query) => $query->where('company_id', $user->company_id))
-            ->whereHas('jobTitle.jobLevel', fn (Builder $query) => $query->where('rank', '>', $rank))
+            ->whereHas('employee.position.jobTitle.jobLevel', fn (Builder $query) => $query->where('rank', '>', $rank))
             ->pluck('id');
 
         return $explicitReportIds

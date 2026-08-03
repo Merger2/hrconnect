@@ -100,7 +100,7 @@ class ProcessAttendanceReportExportRun implements ShouldQueue
             ->when($requester, fn (Builder $query) => $query->managedBy($requester))
             ->when($meta['division'] ?? null, fn (Builder $query) => $query->where('division_id', $meta['division']))
             ->when($jobTitleFilter, fn (Builder $query) => $query->where('job_title_id', $jobTitleFilter))
-            ->with(['division', 'jobTitle'])
+            ->with(['employee.division', 'employee.position'])
             ->orderBy('name')
             ->get();
 

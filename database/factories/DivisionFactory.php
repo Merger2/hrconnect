@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Branch;
 use App\Models\Division;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class DivisionFactory extends Factory
 {
@@ -24,7 +25,7 @@ class DivisionFactory extends Factory
                 'Legal & Compliance',
                 'Administration',
             ]),
-            'code' => strtoupper(fake()->unique()->lexify('???')),
+            'code' => 'DIV'.strtoupper(Str::random(8)),
             'description' => fake()->optional()->sentence(),
             'is_active' => true,
         ];

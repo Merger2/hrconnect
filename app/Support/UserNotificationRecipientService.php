@@ -83,7 +83,7 @@ class UserNotificationRecipientService
 
     public function notifyReimbursementRequested(Reimbursement $reimbursement): int
     {
-        $reimbursement->loadMissing('user.division', 'user.jobTitle.jobLevel');
+        $reimbursement->loadMissing('user.employee.division', 'user.employee.position');
         $recipients = $this->reimbursementApprovers($reimbursement->user);
 
         if ($recipients->isNotEmpty()) {
@@ -98,7 +98,7 @@ class UserNotificationRecipientService
 
     public function notifyOvertimeRequested(Overtime $overtime): int
     {
-        $overtime->loadMissing('user.division', 'user.jobTitle.jobLevel');
+        $overtime->loadMissing('user.employee.division', 'user.employee.position');
         $recipients = $this->overtimeApprovers($overtime->user);
 
         if ($recipients->isNotEmpty()) {
@@ -113,7 +113,7 @@ class UserNotificationRecipientService
 
     public function notifyAssetReturnOtp(User $user, CompanyAsset $asset, string $otp): int
     {
-        $user->loadMissing('division', 'jobTitle.jobLevel');
+        $user->loadMissing('employee.division', 'employee.position');
         $recipients = $this->assetReturnApprovers($user);
 
         if ($recipients->isEmpty()) {
@@ -145,7 +145,7 @@ class UserNotificationRecipientService
      */
     protected function cashAdvanceReviewers(CashAdvance $cashAdvance): Collection
     {
-        $cashAdvance->loadMissing('user.jobTitle.jobLevel', 'user.division');
+        $cashAdvance->loadMissing('user.employee.position', 'user.employee.division');
 
         return $this->reviewersWithSupervisor(
             $cashAdvance->user,
@@ -179,7 +179,7 @@ class UserNotificationRecipientService
     protected function usersMatching(callable $filter): Collection
     {
         return User::query()
-            ->with(['roles', 'division', 'jobTitle.jobLevel'])
+            ->with(['roles', 'employee.division', 'employee.position'])
             ->get()
             ->reject(fn (User $user): bool => $user->isDemo)
             ->filter(fn (User $user): bool => $filter($user))
@@ -188,7 +188,7 @@ class UserNotificationRecipientService
 
     protected function supervisor(User $user): ?User
     {
-        $user->loadMissing('division', 'jobTitle.jobLevel');
+        $user->loadMissing('employee.division', 'employee.position');
 
         return $user->supervisor;
     }

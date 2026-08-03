@@ -19,6 +19,7 @@ class Appraisal extends Model
         'meeting_date',
         'final_score',
         'status',
+        'calibration_status',
         'notes',
         'employee_acknowledgement',
         'recommendations',
@@ -29,9 +30,14 @@ class Appraisal extends Model
         'employee_acknowledgement' => 'boolean',
     ];
 
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'evaluator_id');
     }
 
     public function evaluator()
@@ -42,6 +48,11 @@ class Appraisal extends Model
     public function calibrator()
     {
         return $this->belongsTo(User::class, 'calibrator_id');
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(Employee::class, 'reviewer_id');
     }
 
     public function evaluations()

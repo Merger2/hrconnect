@@ -81,7 +81,7 @@
 
                 <x-validation-errors class="mb-4" role="alert" />
 
-                <form method="POST" action="{{ route('login.store') }}" class="space-y-5" x-data="{ show: false }">
+                <form method="POST" action="{{ route('login') }}" class="space-y-5" x-data="{ show: false }">
                     @csrf
 
                     <div class="space-y-1.5">

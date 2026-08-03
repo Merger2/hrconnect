@@ -1,0 +1,4 @@
+app/Http/Controllers/Api/BranchController.php
+app/Http/Controllers/Api/CompanyController.php
+app/Http/Controllers/Api/Device/LocationController.php
+app/Http/Controllers/Api/Device/OfflineAttendanceSyncController.php

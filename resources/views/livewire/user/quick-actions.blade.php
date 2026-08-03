@@ -168,6 +168,17 @@
                 'locked' => \App\Helpers\Editions::appraisalLocked(),
             ],
         ],
+        __('Knowledge Base') => [
+            [
+                'kind' => 'link',
+                'href' => route('knowledge-base.chat'),
+                'label' => __('KB Chat'),
+                'description' => __('Ask questions about company policies and HR.'),
+                'icon' => 'chat',
+                'tone' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
+                'locked' => false,
+            ],
+        ],
     ];
 
     $flattenedMoreItems = [];

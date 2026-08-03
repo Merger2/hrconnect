@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Enums\KnowledgeBaseStatus;
 use App\Models\KnowledgeBase;
 use App\Models\KnowledgeBaseCategory;
+use App\Services\Security\EmbeddingService;
 use Illuminate\Database\Seeder;
 
 class KnowledgeBaseSeeder extends Seeder
@@ -234,5 +235,25 @@ class KnowledgeBaseSeeder extends Seeder
         }
 
         $this->command?->info('Knowledge base seeded: '.count($categories).' categories, '.count($entries).' entries.');
+
+        // ─── Generate embeddings synchronously (no queue worker needed) ───
+        $this->command?->info('Generating embeddings for KB entries...');
+
+        $embeddingService = app(EmbeddingService::class);
+        $kbEntries = KnowledgeBase::whereNull('embedding')
+            ->where('status', KnowledgeBaseStatus::READY)
+            ->get();
+
+        foreach ($kbEntries as $kb) {
+            try {
+                $embeddingService->processKnowledgeBase($kb);
+                $this->command?->line("  ✓ {$kb->title}");
+            } catch (\Throwable $e) {
+                $this->command?->warn("  ✗ Embedding skipped for '{$kb->title}': {$e->getMessage()}");
+            }
+        }
+
+        $indexedCount = KnowledgeBase::whereNotNull('embedding')->count();
+        $this->command?->info('Embeddings generated for '.$indexedCount.'/'.$kbEntries->count().' entries.');
     }
 }

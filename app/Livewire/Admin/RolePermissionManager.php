@@ -109,7 +109,7 @@ class RolePermissionManager extends Component
             'name' => $validated['name'],
             'slug' => $validated['slug'],
             'description' => $validated['description'] ?: null,
-            'permissions' => array_values(array_unique($validated['permissions'] ?? [])),
+            'permission_keys' => array_values(array_unique($validated['permissions'] ?? [])),
         ])->save();
 
         $this->banner($this->editingRole ? __('Role updated successfully.') : __('Role created successfully.'));

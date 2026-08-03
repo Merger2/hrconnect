@@ -71,12 +71,13 @@ class AttendanceHistoryComponent extends Component
 
         $cached = Cache::remember(
             "attendance-$user->id-$date->month-$date->year",
-            now()->addMinutes(5),
-            function () use ($user) {
-                return Attendance::filter(
-                    month: $this->month,
-                    userId: $user->id,
-                )->get(['id', 'status', 'date', 'time_in', 'time_out', 'latitude_in', 'longitude_in', 'latitude_out', 'longitude_out', 'attachment', 'note', 'approval_status'])->toArray();
+            now()->addMinutes(1),
+            function () use ($user, $date) {
+                return Attendance::whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
+                    ->whereYear('date', $date->year)
+                    ->whereMonth('date', $date->month)
+                    ->get(['id', 'status', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'photo_selfie_in', 'photo_selfie_out', 'note', 'approval_status'])
+                    ->toArray();
             }
         ) ?? [];
 

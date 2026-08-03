@@ -4,7 +4,7 @@ use App\Helpers\FeatureToggle;
     $isAdminRoute = request()->routeIs('admin.*');
     $isUserRoute = ! $isAdminRoute;
     $user = Auth::user();
-    $isAdminUser = $user?->can('accessAdminPanel') ?? false;
+    $isAdminUser = $user?->isAdmin ?? false;
     $homeHref = $user?->preferredHomeUrl() ?? route('home');
     $homeLabel = $isAdminUser ? __('Go to admin home') : __('Go to home');
     $profileHref = $isAdminRoute ? route('admin.profile.show') : route('profile.show');
@@ -247,10 +247,11 @@ use App\Helpers\FeatureToggle;
             'type' => 'group',
             'id' => 'knowledge-base',
             'label' => __('Knowledge Base'),
-            'active' => $isRouteActive(['knowledge-base.index', 'knowledge-base.manage']),
+            'active' => $isRouteActive(['knowledge-base.index', 'knowledge-base.manage', 'knowledge-base.chat']),
             'items' => [
                 ['type' => 'heading', 'label' => __('Documents')],
                 ['type' => 'link', 'label' => __('Browse KB'), 'href' => route('knowledge-base.index'), 'active' => $isRouteActive('knowledge-base.index'), 'visible' => $can('view_knowledgebase')],
+                ['type' => 'link', 'label' => __('Chat KB'), 'href' => route('knowledge-base.chat'), 'active' => $isRouteActive('knowledge-base.chat'), 'visible' => $can('view_knowledgebase')],
                 ['type' => 'link', 'label' => __('Manage KB'), 'href' => route('knowledge-base.manage'), 'active' => $isRouteActive('knowledge-base.manage'), 'visible' => $can('manage_knowledgebase')],
             ],
         ],

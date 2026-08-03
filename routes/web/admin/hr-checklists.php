@@ -23,9 +23,9 @@ Route::middleware('feature.lock:hr_checklist,viewEmployees,admin.dashboard')->gr
 
     Route::livewire('/document-requests', 'admin.employee-document-request-manager')->name('admin.document-requests')->can('viewAdminAny', EmployeeDocumentRequest::class);
     Route::livewire('/document-templates', 'admin.document-template-manager')->name('admin.document-templates')->can('manageDocumentTemplates');
-    Route::redirect('/document-templates/library', '/admin/document-templates')
+    Route::livewire('/document-templates/library', 'admin.document-template-library')
         ->name('admin.document-templates.library')
-        ->middleware('can:manageDocumentTemplates');
+        ->can('manageDocumentTemplates');
     Route::get('/document-requests/{documentRequest}/download', [EmployeeDocumentDownloadController::class, 'generated'])
         ->name('admin.document-requests.download')
         ->can('download', 'documentRequest');

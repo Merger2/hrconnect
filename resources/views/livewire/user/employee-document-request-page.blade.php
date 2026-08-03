@@ -81,7 +81,7 @@
 
                                     <p class="document-request-card__purpose">{{ $request->purpose }}</p>
 
-                                    @if ($request->requester && $request->requested_by !== $request->user_id)
+                                    @if ($request->requester && $request->requested_by !== $request->employee?->user_id)
                                         <p class="document-request-card__meta">{{ __('Requested by') }} {{ $request->requester->name }}</p>
                                     @endif
 

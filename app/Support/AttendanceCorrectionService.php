@@ -29,6 +29,7 @@ class AttendanceCorrectionService
             ->first();
 
         return AttendanceCorrection::create([
+            'employee_id' => $user->employee?->id,
             'user_id' => $user->id,
             'attendance_id' => $attendance?->id,
             'attendance_date' => $attendanceDate,
@@ -47,7 +48,7 @@ class AttendanceCorrectionService
     public function managementQuery(User $actor, string $statusFilter = 'pending', string $typeFilter = 'all', string $search = ''): Builder
     {
         return AttendanceCorrection::query()
-            ->with(['user.jobTitle', 'attendance.shift', 'requestedShift', 'headApprover', 'reviewer'])
+            ->with(['user.employee.position', 'attendance.shift', 'requestedShift', 'headApprover', 'reviewer'])
             ->when(! $actor->can('manageAttendanceCorrections'), function (Builder $query) use ($actor) {
                 $query->whereIn('user_id', $this->approvalActors->subordinateIds($actor))
                     ->where('status', AttendanceCorrection::STATUS_PENDING);
@@ -95,7 +96,11 @@ class AttendanceCorrectionService
 
             $correction->loadMissing(['user', 'attendance.shift', 'requestedShift']);
 
-            $employeeId = $correction->user->employee->id
+            // Prefer the stored employee FK directly — a correction can be
+            // created with employee_id but without a linked user (e.g. seeders
+            // or migrated records), in which case the user relation is null.
+            $employeeId = $correction->employee_id
+                ?? $correction->user?->employee?->id
                 ?? Employee::where('user_id', $correction->user_id)->value('id');
 
             $attendance = $correction->attendance ?? Attendance::query()->firstOrNew([
@@ -111,18 +116,18 @@ class AttendanceCorrectionService
             }
 
             if ($correction->requested_time_in) {
-                $attendance->time_in = $correction->requested_time_in;
+                $attendance->clock_in = $correction->requested_time_in;
             }
 
             if ($correction->requested_time_out) {
-                $attendance->time_out = $correction->requested_time_out;
+                $attendance->clock_out = $correction->requested_time_out;
             }
 
             $attendance->status = $this->resolvedStatus(
                 $attendance->time_in ? Carbon::parse($attendance->time_in) : null,
                 $correction->requestedShift ?? $attendance->shift,
                 (int) Setting::getValue('attendance.grace_period', 10),
-                $attendance->status,
+                $attendance->status?->value,
             );
 
             $attendance->save();
@@ -134,8 +139,6 @@ class AttendanceCorrectionService
                 'reviewed_at' => now(),
                 'rejection_note' => null,
             ]);
-
-            Attendance::clearUserAttendanceCache($correction->user, Carbon::parse($correction->attendance_date));
 
             return __('Attendance correction approved and applied.');
         });

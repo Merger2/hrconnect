@@ -28,10 +28,10 @@ class CompanyAndDivisionSeeder extends Seeder
         $branch = Branch::firstOrCreate(
             ['name' => 'Kantor Pusat', 'company_id' => $company->id],
             [
-                'address' => 'Jl. Sudirman No. 123, Jakarta Selatan',
-                'latitude' => -6.2088,
-                'longitude' => 106.8456,
-                'radius' => 100,
+                'address' => 'Jl. Pegambiran No.292 B, RT.15/RW.8, Rawamangun, Kec. Pulo Gadung, Kota Jakarta Timur, DKI Jakarta 13220',
+                'latitude' => -6.2069,
+                'longitude' => 106.8775,
+                'radius' => 200,
                 'is_main' => true,
                 'is_active' => true,
             ]
@@ -54,6 +54,7 @@ class CompanyAndDivisionSeeder extends Seeder
         $itDiv = Division::where('code', 'IT')->first();
         $hrDiv = Division::where('code', 'HR')->first();
         $finDiv = Division::where('code', 'FIN')->first();
+        $opsDiv = Division::where('code', 'OPS')->first();
 
         $positions = [
             ['division_id' => $itDiv->id, 'name' => 'Staff IT', 'code' => 'IT-STAFF', 'grade' => 1, 'basic_salary' => 5_000_000, 'allowance_jabatan' => 500_000, 'is_active' => true],
@@ -62,6 +63,8 @@ class CompanyAndDivisionSeeder extends Seeder
             ['division_id' => $hrDiv->id, 'name' => 'HR Manager', 'code' => 'HR-MGR', 'grade' => 3, 'basic_salary' => 10_000_000, 'allowance_jabatan' => 1_500_000, 'is_active' => true],
             ['division_id' => $finDiv->id, 'name' => 'Staff Finance', 'code' => 'FIN-STAFF', 'grade' => 1, 'basic_salary' => 4_500_000, 'allowance_jabatan' => 500_000, 'is_active' => true],
             ['division_id' => $finDiv->id, 'name' => 'Finance Manager', 'code' => 'FIN-MGR', 'grade' => 3, 'basic_salary' => 10_000_000, 'allowance_jabatan' => 1_500_000, 'is_active' => true],
+            ['division_id' => $opsDiv?->id ?? $itDiv->id, 'name' => 'Staff Operasional', 'code' => 'OPS-STAFF', 'grade' => 1, 'basic_salary' => 4_200_000, 'allowance_jabatan' => 400_000, 'is_active' => true],
+            ['division_id' => $opsDiv?->id ?? $itDiv->id, 'name' => 'Operational Manager', 'code' => 'OPS-MGR', 'grade' => 3, 'basic_salary' => 9_000_000, 'allowance_jabatan' => 1_200_000, 'is_active' => true],
         ];
 
         foreach ($positions as $pos) {

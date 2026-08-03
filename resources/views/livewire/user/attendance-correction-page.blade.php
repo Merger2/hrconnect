@@ -242,7 +242,7 @@
                         class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-200">
                         <p class="font-semibold">{{ __('Current Attendance Snapshot') }}</p>
                         <div class="mt-1 space-y-1 text-xs text-gray-600 dark:text-gray-300">
-                            <div>{{ __('Status') }}: {{ ucfirst($existingAttendance->status) }}</div>
+                            <div>{{ __('Status') }}: {{ $existingAttendance->status?->label() ?? __('Unknown') }}</div>
                             <div>{{ __('Shift') }}: {{ $existingAttendance->shift?->name ?? __('Not assigned') }}
                             </div>
                             <div>{{ __('Check in') }}:

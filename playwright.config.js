@@ -147,7 +147,7 @@ export default defineConfig({
 
     {
       name: 'chromium-auth',
-      testMatch: /auth\.spec\.ts/,
+      testMatch: /(auth|login-flow-test|login-critical)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],

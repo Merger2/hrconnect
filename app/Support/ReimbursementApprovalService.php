@@ -105,12 +105,12 @@ class ReimbursementApprovalService
                     return $query->where(function (Builder $nested) use ($subordinateIds) {
                         $nested->where('status', 'pending_finance')
                             ->orWhere('status', 'pending_matrix')
-                            ->orWhereIn('user_id', $subordinateIds);
+                            ->orWhereHas('user', fn (Builder $q) => $q->whereIn('id', $subordinateIds));
                     });
                 }
 
                 return $query->where(function (Builder $nested) use ($subordinateIds) {
-                    $nested->whereIn('user_id', $subordinateIds)
+                    $nested->whereHas('user', fn (Builder $q) => $q->whereIn('id', $subordinateIds))
                         ->orWhere('status', 'pending_matrix');
                 });
             })
@@ -130,7 +130,7 @@ class ReimbursementApprovalService
     private function approveWithMatrix(Reimbursement $reimbursement, User $actor): ?string
     {
         $reimbursement->loadMissing('user');
-        $steps = $this->approvalMatrix->storedOrResolvedSteps(ApprovalMatrixRule::WORKFLOW_REIMBURSEMENT, $reimbursement);
+        $steps = $this->approvalMatrix->storedOrResolvedSteps(ApprovalMatrixRule::MODULE_REIMBURSEMENT, $reimbursement);
 
         if ($steps === []) {
             return null;
@@ -188,7 +188,7 @@ class ReimbursementApprovalService
     private function rejectWithMatrix(Reimbursement $reimbursement, User $actor): ?string
     {
         $reimbursement->loadMissing('user');
-        $steps = $this->approvalMatrix->storedOrResolvedSteps(ApprovalMatrixRule::WORKFLOW_REIMBURSEMENT, $reimbursement);
+        $steps = $this->approvalMatrix->storedOrResolvedSteps(ApprovalMatrixRule::MODULE_REIMBURSEMENT, $reimbursement);
 
         if ($steps === []) {
             return null;
@@ -206,7 +206,7 @@ class ReimbursementApprovalService
             'status' => 'rejected',
             'approval_steps' => $steps,
             'approval_matrix_rule_id' => $reimbursement->approval_matrix_rule_id
-                ?: $this->approvalMatrix->ruleId(ApprovalMatrixRule::WORKFLOW_REIMBURSEMENT, $reimbursement),
+                ?: $this->approvalMatrix->ruleId(ApprovalMatrixRule::MODULE_REIMBURSEMENT, $reimbursement),
             'approval_current_step' => (string) ($currentStep['key'] ?? ''),
         ];
 
@@ -234,7 +234,7 @@ class ReimbursementApprovalService
         return [
             'status' => $nextStep === null ? 'approved' : $this->approvalMatrix->statusForStep($nextStep),
             'approval_matrix_rule_id' => $reimbursement->approval_matrix_rule_id
-                ?: $this->approvalMatrix->ruleId(ApprovalMatrixRule::WORKFLOW_REIMBURSEMENT, $reimbursement),
+                ?: $this->approvalMatrix->ruleId(ApprovalMatrixRule::MODULE_REIMBURSEMENT, $reimbursement),
             'approval_steps' => $steps,
             'approval_current_step' => $nextStep['key'] ?? null,
             'approval_completed_steps' => $completed,
@@ -254,7 +254,9 @@ class ReimbursementApprovalService
      */
     private function ensureReviewable(Reimbursement $reimbursement, array $allowedStatuses): void
     {
-        if (! in_array((string) $reimbursement->status, $allowedStatuses, true)) {
+        $status = $reimbursement->status?->value ?? $reimbursement->status;
+
+        if (! in_array($status, $allowedStatuses, true)) {
             throw new AuthorizationException(__('This reimbursement has already been reviewed.'));
         }
     }

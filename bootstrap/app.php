@@ -49,6 +49,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Proteksi Host header poisoning.
         $middleware->trustHosts(at: fn () => [config('app.url')]);
 
+        // CSRF exception for MCP browser logger (external debug tool).
+        $middleware->validateCsrfTokens(except: [
+            '_boost/browser-logs',
+        ]);
+
         // Security headers: CSP, HSTS, X-Frame-Options (PasPapan pattern).
         $middleware->web(append: [
             EnsureSecurityHeaders::class,

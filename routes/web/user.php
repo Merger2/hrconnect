@@ -5,6 +5,7 @@ use App\Http\Controllers\User\AppraisalExportPdfController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\EmployeeDocumentDownloadController;
 use App\Http\Controllers\User\HomeController;
+use App\Livewire\User\KnowledgeBaseChat;
 use App\Models\Appraisal;
 use App\Models\Attendance as AttendanceRecord;
 use App\Models\AttendanceCorrection;
@@ -29,6 +30,7 @@ Route::middleware([
     Route::get('/home', HomeController::class)->name('home');
 
     Route::controller(AttendanceController::class)->group(function () {
+        Route::get('/scan', 'scan')->name('scan')->can('create', AttendanceRecord::class);
         Route::get('/apply-leave', 'applyLeave')->name('apply-leave')->can('create', AttendanceRecord::class);
         Route::post('/apply-leave', 'storeLeaveRequest')->name('store-leave-request')->can('create', AttendanceRecord::class);
         Route::get('/attendance-history', 'history')->name('attendance-history')->can('viewAny', AttendanceRecord::class);
@@ -80,10 +82,16 @@ Route::middleware([
         ->middleware('feature.lock:cash_advance,gate:reviewSubordinateRequests,home')
         ->can('reviewSubordinateRequests');
     Route::livewire('/face-enrollment', 'user.face-enrollment')->name('face.enrollment');
+    Route::redirect('/face-registration', '/face-enrollment')->name('attendance.face-registration');
     Route::livewire('/my-assets', 'user.my-assets')->name('my-assets')->middleware('feature.lock:assets,user,home')->can('viewAny', CompanyAsset::class);
     Route::livewire('/my-performance', 'user.my-performance')->name('my-performance')->middleware('feature.lock:appraisal,user,home')->can('viewAny', Appraisal::class);
     Route::get('/appraisal/{appraisal}/export-pdf', AppraisalExportPdfController::class)
         ->name('appraisal.export-pdf')
         ->can('exportPdf', 'appraisal');
+
+    // Knowledge Base Chat
+    Route::livewire('/knowledge-base/chat', KnowledgeBaseChat::class)
+        ->name('knowledge-base.chat')
+        ->can('view_knowledgebase');
     // });
 });

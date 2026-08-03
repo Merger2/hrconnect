@@ -11,3 +11,5 @@ require __DIR__.'/web/files.php';
 require __DIR__.'/web/user.php';
 require __DIR__.'/web/payroll.php';
 require __DIR__.'/web/admin.php';
+
+require __DIR__.'/knowledge-base.php';

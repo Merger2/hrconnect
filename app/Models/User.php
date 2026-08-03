@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasRolePermissions;
+use App\Notifications\QueuedResetPassword;
+use App\Notifications\QueuedVerifyEmail;
 use App\Services\Security\FaceRecognitionService;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
@@ -11,14 +13,15 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -28,8 +31,8 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * @mixin IdeHelperUser
  */
-#[Fillable(['name', 'email', 'password', 'password_changed_at', 'profile_photo_path', 'group', 'company_id', 'email_verified_at', 'manager_id'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'password_changed_at'])]
+#[Fillable(['name', 'email', 'password', 'password_changed_at', 'profile_photo_path', 'group', 'company_id', 'email_verified_at', 'manager_id', 'email_verification_code_hash', 'email_verification_code_expires_at'])]
+#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'password_changed_at', 'email_verification_code_hash'])]
 class User extends Authenticatable implements MustVerifyEmailContract
 {
     /** @use HasFactory<UserFactory> */
@@ -51,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         return [
             'email_verified_at' => 'datetime',
+            'email_verification_code_expires_at' => 'datetime',
             'password' => 'hashed',
             'password_changed_at' => 'datetime',
             'group' => 'string', // Added based on PasPapan
@@ -74,6 +78,89 @@ class User extends Authenticatable implements MustVerifyEmailContract
             ->implode('');
     }
 
+    // ═══════════════════════════════════════════════
+    //  EMAIL VERIFICATION CODE
+    // ═══════════════════════════════════════════════
+    //
+    // Selain link verifikasi Fortify (verification.verify), aplikasi
+    // mendukung verifikasi email via kode 6 digit (POST /email/verify-code).
+    // Hanya hash kode yang disimpan; kolom di tabel `users`:
+    //   email_verification_code_hash / email_verification_code_expires_at.
+    //
+
+    /**
+     * Generate a new 6-digit verification code and persist its hash.
+     * Returns the plain-text code so the caller can include it in the
+     * notification payload.
+     */
+    public function generateEmailVerificationCode(): string
+    {
+        $code = (string) random_int(100000, 999999);
+
+        $this->forceFill([
+            'email_verification_code_hash' => Hash::make($code),
+            'email_verification_code_expires_at' => now()->addMinutes(15),
+        ])->save();
+
+        return $code;
+    }
+
+    /**
+     * Check whether a plain-text code matches the stored hash and is not
+     * expired. Expired codes are cleared so they cannot be reused.
+     */
+    public function hasValidEmailVerificationCode(string $code): bool
+    {
+        $hash = $this->email_verification_code_hash;
+        $expiresAt = $this->email_verification_code_expires_at;
+
+        if (! $hash || ! $expiresAt) {
+            return false;
+        }
+
+        if ($expiresAt->isPast()) {
+            $this->clearEmailVerificationCode();
+
+            return false;
+        }
+
+        return Hash::check($code, $hash);
+    }
+
+    /**
+     * Remove the stored verification code (after successful verification
+     * or when it expires).
+     */
+    public function clearEmailVerificationCode(): void
+    {
+        $this->forceFill([
+            'email_verification_code_hash' => null,
+            'email_verification_code_expires_at' => null,
+        ])->save();
+    }
+
+    /**
+     * Send the email-verification notification. Overrides MustVerifyEmail to
+     * generate a 6-digit code and dispatch QueuedVerifyEmail (instead of the
+     * default VerifyEmail link). The code is embedded in the notification
+     * payload, while only its hash is persisted.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $code = $this->generateEmailVerificationCode();
+
+        $this->notify(new QueuedVerifyEmail($code));
+    }
+
+    /**
+     * Send the password-reset notification. Overrides the Laravel default so
+     * the reset link is delivered via QueuedResetPassword (ShouldQueue).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new QueuedResetPassword($token));
+    }
+
     public function photoUrl(): ?string
     {
         if (! $this->profile_photo_path) {
@@ -86,6 +173,21 @@ class User extends Authenticatable implements MustVerifyEmailContract
     // Method preferredAdminRouteName (Added based on PasPapan)
     public function preferredAdminRouteName(): string
     {
+        $candidates = [
+            'viewAdminDashboard' => 'admin.dashboard',
+            'manageAdminNotifications' => 'admin.notifications',
+            'manageRbac' => 'admin.roles.permissions',
+            'viewEmployees' => 'admin.employees',
+            'manageCashAdvances' => 'admin.manage-kasbon',
+            'viewAdminAppraisals' => 'admin.appraisals',
+        ];
+
+        foreach ($candidates as $ability => $routeName) {
+            if ($this->can($ability)) {
+                return $routeName;
+            }
+        }
+
         return match ($this->group) {
             'superadmin' => 'admin.dashboard',
             'admin' => 'admin.dashboard',
@@ -155,6 +257,16 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasOne(Employee::class);
     }
 
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class);
@@ -173,6 +285,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function notificationPreferences(): HasMany
     {
         return $this->hasMany(UserNotificationPreference::class);
+    }
+
+    public function cashAdvances(): HasMany
+    {
+        return $this->hasMany(CashAdvance::class, 'user_id');
     }
 
     public function hasValidPayslipPassword(): bool
@@ -222,30 +339,6 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function canAuthenticate(): bool
     {
         return true;
-    }
-
-    public function canViewSuperadminAccounts(): bool
-    {
-        return $this->isSuperadmin; // Fallback sederhana
-    }
-
-    public function canManageSuperadminAccounts(): bool
-    {
-        return $this->isSuperadmin; // Fallback sederhana
-    }
-
-    public function canDeleteSuperadminAccounts(): bool
-    {
-        return $this->isSuperadmin; // Fallback sederhana
-    }
-
-    public function allowsAdminPermission(string|array $permissions, bool $legacyFallback = false): bool
-    {
-        if (! $this->canAccessAdminPanel()) {
-            return false;
-        }
-
-        return $this->hasAnyPermission(Arr::wrap($permissions));
     }
 
     // ═══════════════════════════════════════════════
@@ -324,7 +417,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     public function getGenderAttribute(): ?string
     {
-        return $this->employee?->gender?->value;
+        return match ($this->employee?->gender?->value) {
+            'L' => 'male',
+            'P' => 'female',
+            default => null,
+        };
     }
 
     public function getAddressAttribute(): ?string
@@ -347,6 +444,26 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->employee?->hourly_rate;
     }
 
+    public function getProvinsiKodeAttribute(): ?string
+    {
+        return $this->employee?->provinsi_kode;
+    }
+
+    public function getKabupatenKodeAttribute(): ?string
+    {
+        return $this->employee?->kabupaten_kode;
+    }
+
+    public function getKecamatanKodeAttribute(): ?string
+    {
+        return $this->employee?->kecamatan_kode;
+    }
+
+    public function getKelurahanKodeAttribute(): ?string
+    {
+        return $this->employee?->kelurahan_kode;
+    }
+
     // ── Lifecycle proxy accessors ──
 
     public function getAccountDeletionRequestedAtAttribute(): mixed
@@ -366,6 +483,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     // ── Relation proxy accessors (return Model instances from Employee relations) ──
 
+    public function getDivisionIdAttribute(): ?int
+    {
+        return $this->employee?->division_id;
+    }
+
     public function getDivisionAttribute()
     {
         return $this->employee?->division;
@@ -373,7 +495,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     public function getJobTitleAttribute()
     {
-        return $this->employee?->position;
+        return $this->employee?->position?->jobTitle;
     }
 
     public function getEducationAttribute()

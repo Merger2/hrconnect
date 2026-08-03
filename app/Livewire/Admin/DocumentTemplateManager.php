@@ -34,10 +34,59 @@ class DocumentTemplateManager extends Component
 
     public function render(EmployeeDocumentRequestService $service): View
     {
+        $documentTemplates = EmployeeDocumentTemplate::query()->with('documentType')->latest()->get();
+
         return view('livewire.admin.document-template-manager', [
             'documentTypes' => $service->types(),
-            'documentTemplates' => EmployeeDocumentTemplate::query()->with('documentType')->latest()->get(),
+            'documentTemplates' => $documentTemplates,
+            'documentWorkflowTypes' => EmployeeDocumentType::query()->where('is_active', true)->orderBy('name')->get(),
+            'documentWorkflowTemplates' => $documentTemplates,
+            'documentTemplateVariables' => $this->templateVariables(),
+            'templatePreviewHtml' => $this->templatePreviewHtml(),
+            'editingDocumentType' => $this->creating || $this->editing,
+            'templateEditorMode' => $this->editorMode,
+            'documentTypeForm' => $this->documentTypeForm,
+            'documentTemplateForm' => $this->documentTemplateForm,
+            'templateBuilderForm' => $this->templateBuilderForm,
         ]);
+    }
+
+    /**
+     * Available {{ placeholder }} variables shown in the builder.
+     *
+     * @return array<int, array{label:string,placeholder:string}>
+     */
+    private function templateVariables(): array
+    {
+        return [
+            ['label' => __('Employee name'), 'placeholder' => '{{ employee.name }}'],
+            ['label' => __('NIP'), 'placeholder' => '{{ employee.nip }}'],
+            ['label' => __('Position'), 'placeholder' => '{{ employee.position }}'],
+            ['label' => __('Company'), 'placeholder' => '{{ company.name }}'],
+            ['label' => __('Date'), 'placeholder' => '{{ date }}'],
+        ];
+    }
+
+    /**
+     * Safe HTML preview for the live preview panel.
+     */
+    private function templatePreviewHtml(): string
+    {
+        $body = $this->documentTemplateForm['body'] ?? '';
+        $heading = $this->templateBuilderForm['heading'] ?? '';
+        $opening = $this->templateBuilderForm['opening'] ?? '';
+        $closing = $this->templateBuilderForm['closing'] ?? '';
+
+        if ($this->editorMode === 'html' && $body !== '') {
+            return $body;
+        }
+
+        return implode("\n", array_filter([
+            $heading !== '' ? "<h2>{$heading}</h2>" : null,
+            $opening !== '' ? "<p>{$opening}</p>" : null,
+            '<p>{{ employee.name }}</p>',
+            $closing !== '' ? "<p>{$closing}</p>" : null,
+        ]));
     }
 
     public function startNewDocumentType(): void
@@ -115,12 +164,22 @@ class DocumentTemplateManager extends Component
             'documentTemplateForm.document_type_id' => ['required', 'exists:employee_document_types,id'],
         ]);
 
+        $isActive = $this->documentTemplateForm['is_active'] ?? true;
+
+        if ($isActive) {
+            // Pastikan hanya satu template aktif per tipe dokumen.
+            EmployeeDocumentTemplate::query()
+                ->where('document_type_id', $this->documentTemplateForm['document_type_id'])
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
+        }
+
         EmployeeDocumentTemplate::create([
             'name' => $this->documentTemplateForm['name'],
             'document_type_id' => $this->documentTemplateForm['document_type_id'],
             'content' => $this->templateBuilderForm['body'] ?? $this->documentTemplateForm['body'] ?? '',
             'variables' => array_keys(array_filter($this->templateBuilderForm)),
-            'is_active' => $this->documentTemplateForm['is_active'] ?? true,
+            'is_active' => $isActive,
             'paper_size' => $this->documentTemplateForm['paper_size'] ?? 'a4',
             'orientation' => $this->documentTemplateForm['orientation'] ?? 'portrait',
             'layout_options' => $this->documentTemplateForm['layout_options'] ?? [],

@@ -136,6 +136,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Approval queue (user sebagai approver)
     Route::controller(ApprovalController::class)->prefix('approvals')->group(function () {
         Route::get('/', 'index');
+        Route::get('/history', 'history');
         Route::put('/{approval}/approve', 'approve');
         Route::put('/{approval}/reject', 'reject');
     });

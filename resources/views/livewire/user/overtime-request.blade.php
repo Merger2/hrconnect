@@ -7,9 +7,7 @@
                 title-id="overtime-request-title"
                 class="border-b-0">
                 <x-slot name="icon">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-sky-50 text-indigo-700 ring-1 ring-inset ring-indigo-100 shadow-sm dark:from-indigo-900/30 dark:via-gray-800 dark:to-sky-900/20 dark:text-indigo-300 dark:ring-indigo-800/60">
-                        <x-heroicon-o-clock class="h-5 w-5" />
-                    </div>
+                    <x-heroicon-o-clock class="h-5 w-5" />
                 </x-slot>
                 <x-slot name="actions">
                     @if($showModal)
@@ -108,7 +106,7 @@
                                                 {{ $overtime->date->format('d M Y') }}
                                             </h4>
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
-                                                {{ $overtime->start_time->format('H:i') }} - {{ $overtime->end_time->format('H:i') }}
+                                                {{ \Carbon\Carbon::parse($overtime->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($overtime->end_time)->format('H:i') }}
                                                 <span class="mx-1">•</span>
                                                 {{ $overtime->duration_text }}
                                             </p>

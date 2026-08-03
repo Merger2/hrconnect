@@ -22,7 +22,7 @@
         $activeTotal = method_exists($activePaginator, 'total') ? $activePaginator->total() : $activePaginator->count();
         $activeMeta = $tabs[$activeTab] ?? $tabs['leaves'];
 
-        $statusClass = fn (?string $status): string => match ($status) {
+        $statusClass = fn ($status): string => match ($status instanceof \BackedEnum ? $status->value : $status) {
             'approved', 'paid' => 'team-approval-status team-approval-status--success',
             'rejected' => 'team-approval-status team-approval-status--danger',
             'pending_finance' => 'team-approval-status team-approval-status--info',

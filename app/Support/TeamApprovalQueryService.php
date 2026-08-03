@@ -84,7 +84,9 @@ class TeamApprovalQueryService
             ->whereHas('user', fn ($q) => $q->whereIn('id', $subordinateIds));
 
         if ($history) {
-            $query->whereNotIn('status', [AttendanceCorrection::STATUS_PENDING, AttendanceCorrection::STATUS_PENDING_ADMIN]);
+            // Once a supervisor has acted (approved → forwarded to admin), the item
+            // belongs in their history. Only still-awaiting items are excluded.
+            $query->whereNotIn('status', [AttendanceCorrection::STATUS_PENDING]);
         } else {
             $query->whereIn('status', [AttendanceCorrection::STATUS_PENDING, AttendanceCorrection::STATUS_PENDING_ADMIN]);
         }
@@ -123,7 +125,7 @@ class TeamApprovalQueryService
     protected function leaveQuery(array $subordinateIds, string $search, bool $history): mixed
     {
         $query = Attendance::query()->with(['user', 'shift'])
-            ->whereIn('user_id', $subordinateIds)
+            ->whereHas('employee', fn ($q) => $q->whereIn('user_id', $subordinateIds))
             ->whereNotNull('leave_type_id');
 
         if ($history) {
@@ -142,10 +144,10 @@ class TeamApprovalQueryService
     protected function reimbursementQuery(array $subordinateIds, string $search, bool $history): mixed
     {
         $query = Reimbursement::query()->with(['user'])
-            ->whereHas('user', fn ($q) => $q->whereIn('id', $subordinateIds));
+            ->whereHas('user', fn ($q) => $q->whereIn('users.id', $subordinateIds));
 
         if ($history) {
-            $query->whereIn('status', ['approved', 'rejected', 'paid']);
+            $query->whereNotIn('status', ['pending']);
         } else {
             $query->where('status', 'pending');
         }
@@ -163,10 +165,10 @@ class TeamApprovalQueryService
     protected function overtimeQuery(array $subordinateIds, string $search, bool $history): mixed
     {
         $query = Overtime::query()->with(['user'])
-            ->whereHas('user', fn ($q) => $q->whereIn('id', $subordinateIds));
+            ->whereHas('user', fn ($q) => $q->whereIn('users.id', $subordinateIds));
 
         if ($history) {
-            $query->whereIn('status', ['approved', 'rejected', 'paid']);
+            $query->whereNotIn('status', ['pending']);
         } else {
             $query->where('status', 'pending');
         }
@@ -203,7 +205,7 @@ class TeamApprovalQueryService
             ->whereHas('user', fn ($q) => $q->whereIn('id', $subordinateIds));
 
         if ($history) {
-            $query->whereIn('status', ['approved', 'rejected', 'paid']);
+            $query->whereNotIn('status', ['pending']);
         } else {
             $query->where('status', 'pending');
         }
@@ -220,6 +222,6 @@ class TeamApprovalQueryService
 
     protected function subordinateIds(User $user): array
     {
-        return $user->employee?->subordinates()->pluck('users.id')->toArray() ?? [];
+        return $user->employee?->subordinates()->pluck('user_id')->toArray() ?? [];
     }
 }

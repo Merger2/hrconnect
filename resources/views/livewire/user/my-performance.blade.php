@@ -59,7 +59,7 @@
                 @if($appraisals->isEmpty())
                     <div class="user-empty-state">
                         <div class="user-empty-state__icon">
-                            <x-heroicon-o-chart-bar-square class="h-8 w-8" />
+                            <x-heroicon-o-chart-pie class="h-8 w-8" />
                         </div>
                         <h3 class="user-empty-state__title">{{ __('No performance reviews found.') }}</h3>
                         <p class="user-empty-state__copy">{{ __('Your managers have not initiated any appraisals yet.') }}</p>

@@ -46,9 +46,9 @@
 
     @php
         $allLeaves = $groupedLeaves->getCollection();
-        $pendingLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status === 'pending')->count();
-        $approvedLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status === 'approved')->count();
-        $rejectedLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status === 'rejected')->count();
+        $pendingLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status?->value === 'pending')->count();
+        $approvedLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status?->value === 'approved')->count();
+        $rejectedLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status?->value === 'rejected')->count();
         $totalDays = $allLeaves->sum(fn($group) => $group->count());
     @endphp
 
@@ -94,8 +94,8 @@
                             <h3 class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $firstLeave->user->name }}</h3>
                             <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ $firstLeave->user->jobTitle->name ?? '-' }}</p>
                         </div>
-                        <x-admin.status-badge :tone="$firstLeave->status === 'sick' ? 'warning' : 'info'">
-                            {{ $firstLeave->leaveType?->name ?? __(ucfirst($firstLeave->status)) }}
+                        <x-admin.status-badge :tone="($firstLeave->status?->value ?? $firstLeave->status) === 'sick' ? 'warning' : 'info'">
+                            {{ $firstLeave->leaveType?->name ?? __(ucfirst($firstLeave->status?->value ?? $firstLeave->status)) }}
                         </x-admin.status-badge>
                     </div>
 
@@ -118,17 +118,17 @@
                         </div>
                     </dl>
 
-                    @if ($firstLeave->note || ($firstLeave->approval_status === 'rejected' && $firstLeave->rejection_note))
+                    @if ($firstLeave->note || (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'rejected' && $firstLeave->rejection_note))
                         <div class="mt-3 rounded-xl bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-900/40 dark:text-gray-300">
                             {{ $firstLeave->note }}
-                            @if ($firstLeave->approval_status === 'rejected' && $firstLeave->rejection_note)
+                            @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'rejected' && $firstLeave->rejection_note)
                                 <div class="mt-1 text-xs text-red-500">{{ __('Reason') }}: {{ $firstLeave->rejection_note }}</div>
                             @endif
                         </div>
                     @endif
 
                     <div class="mt-4 flex justify-end gap-2">
-                        @if ($firstLeave->approval_status === 'pending')
+                        @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'pending')
                             <x-actions.icon-button wire:click="approve({{ json_encode($leaveIds) }})" variant="success" label="{{ __('Approve leave request') }}">
                                 <x-heroicon-m-check-circle class="h-6 w-6" />
                             </x-actions.icon-button>
@@ -136,8 +136,8 @@
                                 <x-heroicon-m-x-circle class="h-6 w-6" />
                             </x-actions.icon-button>
                         @else
-                            <x-admin.status-badge :tone="$firstLeave->approval_status === 'approved' ? 'success' : 'danger'" pill="true" class="capitalize">
-                                {{ __($firstLeave->approval_status) }}
+                            <x-admin.status-badge :tone="($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'approved' ? 'success' : 'danger'" pill="true" class="capitalize">
+                                {{ __($firstLeave->approval_status?->value ?? $firstLeave->approval_status) }}
                             </x-admin.status-badge>
                         @endif
                     </div>
@@ -212,13 +212,13 @@
                                 {{ $dateDisplay }}
                             </td>
                             <td class="px-4 py-3">
-                                <x-admin.status-badge :tone="$firstLeave->status === 'sick' ? 'warning' : 'info'">
-                                    {{ $firstLeave->leaveType?->name ?? __(ucfirst($firstLeave->status)) }}
+                                <x-admin.status-badge :tone="($firstLeave->status?->value ?? $firstLeave->status) === 'sick' ? 'warning' : 'info'">
+                                    {{ $firstLeave->leaveType?->name ?? __(ucfirst($firstLeave->status?->value ?? $firstLeave->status)) }}
                                 </x-admin.status-badge>
                             </td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-300 max-w-xs truncate">
                                 {{ $firstLeave->note }}
-                                @if ($firstLeave->approval_status === 'rejected' && $firstLeave->rejection_note)
+                                @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'rejected' && $firstLeave->rejection_note)
                                     <div class="text-xs text-red-500 mt-1">{{ __('Reason') }}:
                                         {{ $firstLeave->rejection_note }}</div>
                                 @endif
@@ -236,7 +236,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right">
-                                @if ($firstLeave->approval_status === 'pending')
+                                @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'pending')
                                     <div class="flex justify-end gap-2">
                                         <x-actions.icon-button wire:click="approve({{ json_encode($leaveIds) }})"
                                             variant="success" label="{{ __('Approve leave request') }}">
@@ -248,8 +248,8 @@
                                         </x-actions.icon-button>
                                     </div>
                                 @else
-                                    <x-admin.status-badge :tone="$firstLeave->approval_status === 'approved' ? 'success' : 'danger'" pill="true" class="capitalize">
-                                        {{ __($firstLeave->approval_status) }}
+                                    <x-admin.status-badge :tone="($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'approved' ? 'success' : 'danger'" pill="true" class="capitalize">
+                                        {{ __($firstLeave->approval_status?->value ?? $firstLeave->approval_status) }}
                                     </x-admin.status-badge>
                                 @endif
                             </td>

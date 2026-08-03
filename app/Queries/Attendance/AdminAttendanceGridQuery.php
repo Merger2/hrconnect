@@ -43,7 +43,7 @@ class AdminAttendanceGridQuery
                     };
                 });
             })
-            ->with(['division', 'jobTitle'])
+            ->with(['employee.division', 'employee.position'])
             ->orderBy('name')
             ->paginate(20);
 

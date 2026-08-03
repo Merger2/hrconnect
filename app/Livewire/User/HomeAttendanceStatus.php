@@ -50,7 +50,7 @@ class HomeAttendanceStatus extends Component
         $today = now()->format('Y-m-d');
         $attendanceLocked = false;
         $faceVerificationRequired = ! $attendanceLocked && filter_var(
-            Setting::getValue('attendance.require_face_verification', true),
+            Setting::getValue('attendance.require_face_verification', false),
             FILTER_VALIDATE_BOOLEAN
         );
 

@@ -143,7 +143,7 @@ class TeamApprovals extends Component
     {
         $reimbursement = Reimbursement::find($id);
 
-        if (! $reimbursement || ! $this->isSubordinate($reimbursement->user_id)) {
+        if (! $reimbursement || ! $this->isSubordinate($reimbursement->user?->id)) {
             return;
         }
 
@@ -155,7 +155,7 @@ class TeamApprovals extends Component
     {
         $reimbursement = Reimbursement::find($id);
 
-        if (! $reimbursement || ! $this->isSubordinate($reimbursement->user_id)) {
+        if (! $reimbursement || ! $this->isSubordinate($reimbursement->user?->id)) {
             return;
         }
 

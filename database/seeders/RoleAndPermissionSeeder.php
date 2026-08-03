@@ -72,6 +72,11 @@ class RoleAndPermissionSeeder extends Seeder
             array_map(fn (PermissionEnum $p) => $p->value, $permissions)
         );
 
+        // Also update the permission_keys JSON column used by HasRolePermissions trait.
+        // This is the ACTUAL permission check mechanism — NOT the Spatie pivot table.
+        $role->permission_keys = array_map(fn (PermissionEnum $p) => $p->value, $permissions);
+        $role->save();
+
         return $role;
     }
 

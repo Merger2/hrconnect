@@ -30,7 +30,7 @@ class AppraisalPolicy
     public function view(User $user, Appraisal $appraisal): bool
     {
         return ! false
-            && ($user->can('viewAdminAppraisals') || $appraisal->user_id === $user->id);
+            && ($user->can('viewAdminAppraisals') || ($appraisal->employee?->user_id === $user->id));
     }
 
     public function calibrate(User $user, Appraisal $appraisal): bool
@@ -45,11 +45,11 @@ class AppraisalPolicy
 
     public function selfAssess(User $user, Appraisal $appraisal): bool
     {
-        return $appraisal->user_id === $user->id && $appraisal->status === 'self_assessment';
+        return ($appraisal->employee?->user_id === $user->id) && $appraisal->status === 'self_assessment';
     }
 
     public function acknowledge(User $user, Appraisal $appraisal): bool
     {
-        return $appraisal->user_id === $user->id && $appraisal->status === 'completed';
+        return ($appraisal->employee?->user_id === $user->id) && $appraisal->status === 'completed';
     }
 }

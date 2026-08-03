@@ -1,17 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Apply Leave') }}
-        </h2>
-    </x-slot>
-
     <div class="user-page-shell">
         <div class="user-page-container user-page-container--wide">
             <section aria-labelledby="leave-request-title" class="user-page-surface">
                 <x-user.page-header
                     :back-href="route('home')"
                     :title="__('Leave Request')"
-                    title-id="leave-request-title">
+                    title-id="leave-request-title"
+                    class="border-b-0">
                     <x-slot name="icon">
                         <x-heroicon-o-calendar-days class="h-5 w-5" />
                     </x-slot>

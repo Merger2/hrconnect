@@ -200,13 +200,14 @@
                                             {{-- Icon --}}
                                             <div
                                                 class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110
-                                                @if ($claim->type == 'medical') bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400
-                                                @elseif($claim->type == 'transport') bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400
+                                                @php $claimCategoryCode = $claim->category?->code ?? $claim->title ?? 'other'; @endphp
+                                                @if ($claimCategoryCode == 'medical') bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400
+                                                @elseif($claimCategoryCode == 'transport') bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400
                                                 @else bg-gray-50 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400 @endif">
 
-                                                @if ($claim->type == 'medical')
+                                                @if ($claimCategoryCode == 'medical')
                                                     <x-heroicon-o-heart class="h-5 w-5 sm:h-6 sm:w-6" />
-                                                @elseif($claim->type == 'transport')
+                                                @elseif($claimCategoryCode == 'transport')
                                                     <x-heroicon-o-paper-airplane class="h-5 w-5 sm:h-6 sm:w-6" />
                                                 @else
                                                     <x-heroicon-o-document-text class="h-5 w-5 sm:h-6 sm:w-6" />
@@ -217,13 +218,14 @@
                                                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
                                                     <h4
                                                         class="font-bold text-gray-900 dark:text-white capitalize truncate text-sm sm:text-base">
-                                                        {{ ucfirst($claim->type) }}</h4>
+                                                        {{ $claim->category?->name ?? $claim->title ?? __('Other') }}</h4>
                                                     <span
                                                         class="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide
-                                                        @if ($claim->status === 'approved') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
-                                                        @elseif($claim->status === 'rejected') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                                        @php $statusValue = $claim->status?->value ?? $claim->status; @endphp
+                                                        @if ($statusValue === 'approved' || $statusValue === 'paid') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                                        @elseif($statusValue === 'rejected') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
                                                         @else bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 @endif">
-                                                        {{ ucfirst($claim->status) }}
+                                                        {{ $claim->status?->label() ?? ucfirst($statusValue) }}
                                                     </span>
                                                 </div>
                                                 <p
@@ -232,7 +234,7 @@
                                                 <div
                                                     class="text-[10px] text-gray-400 mt-0.5 sm:mt-1 flex items-center gap-1">
                                                     <x-heroicon-o-calendar-days class="h-3 w-3" />
-                                                    {{ $claim->date->format('d M Y') }}
+                                                    {{ $claim->expense_date?->format('d M Y') ?? $claim->created_at?->format('d M Y') }}
                                                 </div>
                                             </div>
                                         </div>

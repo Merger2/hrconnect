@@ -28,7 +28,7 @@
     ];
 @endphp
 
-<div class="space-y-4">
+<div wire:poll.30s class="space-y-4">
     <section class="user-history-hero" aria-label="{{ __('Attendance summary') }}">
         <div class="min-w-0">
             <p class="user-history-eyebrow">{{ __('Attendance') }}</p>
@@ -78,7 +78,7 @@
                     $holiday = $holidays[$dateKey] ?? null;
                     $isHoliday = filled($holiday);
                     $attendance = $attendances->first(fn ($item) => $item->date->isSameDay($date));
-                    $status = $attendance?->status ?? ($date->isPast() && ! $date->isWeekend() && ! $isHoliday ? 'absent' : '-');
+                    $status = $attendance?->status?->value ?? ($date->isPast() && ! $date->isWeekend() && ! $isHoliday ? 'absent' : '-');
                     $approvalStatus = $attendance?->approval_status;
                     $style = $statusStyles[$status] ?? null;
 

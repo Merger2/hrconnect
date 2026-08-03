@@ -1,6 +1,7 @@
 import "./bootstrap";
 import TomSelect from "tom-select";
 import "tom-select/dist/css/tom-select.css";
+import "../css/vendor/flatpickr-overrides.css";
 import flatpickr from "flatpickr";
 import Swal from "sweetalert2";
 import Chart from "chart.js/auto";
@@ -131,5 +132,50 @@ window.tomSelectInput = (options, placeholder, selected, disabled) => ({
             });
         });
     },
+});
+
+// ─── Flatpickr initializer ─────────────────────────────────────────────
+// Scans for [data-ui-picker] elements and initializes flatpickr on each.
+// Safe to call multiple times (skips already-initialized elements).
+const initFlatpickr = () => {
+    document.querySelectorAll('[data-ui-picker]:not([data-flatpickr-inited])').forEach((el) => {
+        const mode = el.getAttribute('data-ui-picker') || 'date';
+        const minDate = el.getAttribute('min') || null;
+        const maxDate = el.getAttribute('max') || null;
+
+        try {
+            flatpickr(el, {
+                dateFormat: 'd M Y',
+                allowInput: false,
+                enableTime: mode === 'datetime' || mode === 'time',
+                noCalendar: mode === 'time',
+                monthSelectorType: 'dropdown',
+                disableMobile: true,
+                minDate: minDate || undefined,
+                maxDate: maxDate || undefined,
+                onChange: function (selectedDates, dateStr) {
+                    // Trigger Livewire model update
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                },
+            });
+
+            el.setAttribute('data-flatpickr-inited', 'true');
+        } catch (e) {
+            console.warn('Flatpickr init failed for', el, e);
+        }
+    });
+};
+
+// Initial run after DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initFlatpickr, 100);
+});
+
+// Re-init after Livewire updates (component re-renders)
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('morph.updated', () => {
+        setTimeout(initFlatpickr, 50);
+    });
 });
 

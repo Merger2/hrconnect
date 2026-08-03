@@ -51,6 +51,20 @@ class ClockInAction extends Component
 
     public ?string $gpsError = null;
 
+    // --- Branch (office location) ---
+    public ?float $branchLatitude = null;
+
+    public ?float $branchLongitude = null;
+
+    public ?int $branchRadius = null;
+
+    public ?string $branchName = null;
+
+    // --- Clock in/out times (formatted strings for Alpine, avoids deferred model issues) ---
+    public ?string $clockInTime = null;
+
+    public ?string $clockOutTime = null;
+
     // --- PIN modal ---
     public bool $showPinModal = false;
 
@@ -62,6 +76,14 @@ class ClockInAction extends Component
     public bool $showWfaModal = false;
 
     public string $wfaNote = '';
+
+    public string $wfaPin = '';
+
+    /** @var bool Whether WFA has verified via face (vs PIN fallback) */
+    public bool $wfaFaceMode = false;
+
+    /** @var array|null Face descriptor stored after successful face capture */
+    public ?array $wfaFaceDescriptor = null;
 
     protected AttendanceService $attendanceService;
 
@@ -83,7 +105,7 @@ class ClockInAction extends Component
 
         // Face enrollment check
         $faceVerificationRequired = filter_var(
-            Setting::getValue('attendance.require_face_verification', true),
+            Setting::getValue('attendance.require_face_verification', false),
             FILTER_VALIDATE_BOOLEAN
         );
         $shouldRequireEnrollment = filter_var(
@@ -103,6 +125,11 @@ class ClockInAction extends Component
         if ($this->attendance) {
             $this->hasCheckedIn = ! is_null($this->attendance->clock_in);
             $this->hasCheckedOut = ! is_null($this->attendance->clock_out);
+            $this->clockInTime = $this->attendance->clock_in?->format('H:i');
+            $this->clockOutTime = $this->attendance->clock_out?->format('H:i');
+        } else {
+            $this->clockInTime = null;
+            $this->clockOutTime = null;
         }
 
         // Today's schedule/shift
@@ -114,7 +141,8 @@ class ClockInAction extends Component
 
         $shift = $this->attendance?->shift
             ?? $todaySchedule?->shift
-            ?? ($todaySchedule?->is_off ? null : $this->defaultMorningShift());
+            ?? ($todaySchedule?->is_off ? null : $employee?->shift)
+            ?? $this->defaultMorningShift();
 
         $this->todayShiftSummary = [
             'is_off' => (bool) ($todaySchedule?->is_off ?? false),
@@ -124,6 +152,13 @@ class ClockInAction extends Component
             'duration' => $shift?->duration_label,
             'end_time' => $shift?->end_time,
         ];
+
+        // Branch / office location
+        $branch = $employee?->branch;
+        $this->branchLatitude = $branch?->latitude;
+        $this->branchLongitude = $branch?->longitude;
+        $this->branchRadius = $branch?->radius;
+        $this->branchName = $branch?->name;
 
         // Approved overtime
         $approvedOvertime = Overtime::whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
@@ -348,17 +383,56 @@ class ClockInAction extends Component
 
     /**
      * Handle WFA clock-in.
+     *
+     * Primary method: face recognition.
+     * Fallback: PIN (for users who haven't enrolled face).
      */
     public function startWfaClockIn(): void
     {
-        $this->showWfaModal = true;
+        $this->showWfaModal = false;
         $this->wfaNote = '';
+        $this->wfaPin = '';
+        $this->wfaFaceDescriptor = null;
         $this->errorMessage = null;
+
+        $user = Auth::user();
+        $hasFaceEnrolled = $user->hasFaceRegistered();
+
+        if ($hasFaceEnrolled) {
+            // Face mode: trigger face capture FIRST, then show note modal
+            $this->wfaFaceMode = true;
+            $this->isLoading = true;
+            $this->dispatch('trigger-face-capture', action: 'wfa');
+            $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'wfa');
+        } else {
+            // PIN fallback: show modal with PIN input
+            $this->wfaFaceMode = false;
+            $this->showWfaModal = true;
+        }
+    }
+
+    /**
+     * Called after face is captured for WFA.
+     * Stores the descriptor and shows the note modal (without PIN).
+     */
+    public function doWfaClockInWithFace(array $faceDescriptor): void
+    {
+        $this->wfaFaceDescriptor = $faceDescriptor;
+        $this->wfaFaceMode = true;
+        $this->showWfaModal = true;
+        $this->isLoading = false;
     }
 
     public function submitWfaClockIn(): void
     {
-        $this->validate(['wfaNote' => ['required', 'string', 'min:20', 'max:500']]);
+        // Dynamic validation: face mode → note only; PIN mode → note + PIN
+        $rules = ['wfaNote' => ['required', 'string', 'min:20', 'max:500']];
+
+        if (! $this->wfaFaceMode) {
+            $rules['wfaPin'] = ['required', 'string', 'min:4', 'max:8'];
+        }
+
+        $this->validate($rules);
 
         $this->errorMessage = null;
         $this->isLoading = true;
@@ -371,16 +445,27 @@ class ClockInAction extends Component
                 throw new BusinessRuleException(__('Employee record not found.'));
             }
 
-            $this->attendanceService->clockIn($employee, [
+            $data = [
                 'is_wfa' => true,
                 'wfa_note' => $this->wfaNote,
                 'latitude' => $this->latitude,
                 'longitude' => $this->longitude,
                 'accuracy' => $this->accuracy,
-            ]);
+            ];
+
+            if ($this->wfaFaceMode && $this->wfaFaceDescriptor) {
+                $data['face_embedding'] = $this->wfaFaceDescriptor;
+            } else {
+                $data['pin'] = $this->wfaPin;
+            }
+
+            $this->attendanceService->clockIn($employee, $data);
 
             $this->showWfaModal = false;
             $this->wfaNote = '';
+            $this->wfaPin = '';
+            $this->wfaFaceDescriptor = null;
+            $this->wfaFaceMode = false;
             $this->refreshStatus();
             $this->successMessage = __('WFA Check In successful!');
             $this->dispatch('refresh-notifications');
@@ -412,12 +497,8 @@ class ClockInAction extends Component
             ->where('name', 'Shift Pagi')
             ->first()
             ?? Shift::query()
-                ->where('name', 'like', '%Pagi%')
-                ->orderBy('start_time')
-                ->first()
-            ?? Shift::query()
-                ->where('name', 'like', '%Morning%')
-                ->orderBy('start_time')
+                ->whereIn('name', ['Office Hour', 'Flexible', 'Morning'])
+                ->orderByRaw("CASE name WHEN 'Office Hour' THEN 1 WHEN 'Flexible' THEN 2 ELSE 3 END")
                 ->first()
             ?? Shift::query()
                 ->orderBy('start_time')

@@ -105,14 +105,18 @@ class CommunityService implements AttendanceServiceInterface
 
     public function registerFace(User $user, array $descriptor): void
     {
+        // Face descriptor may include a quality score as first element (129 total).
+        // Database vector(128) expects exactly 128 dimensions.
+        $embedding = count($descriptor) === 129 ? array_slice($descriptor, 1) : $descriptor;
+
         FaceDescriptor::updateOrCreate(
-            ['user_id' => $user->id],
-            ['descriptor' => $descriptor]
+            ['employee_id' => $user->employee->id],
+            ['embedding' => $embedding]
         );
     }
 
     public function removeFace(User $user): void
     {
-        $user->faceDescriptor()?->delete();
+        $user->employee?->faceDescriptors()->delete();
     }
 }

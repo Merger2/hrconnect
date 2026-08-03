@@ -27,6 +27,7 @@ final class TeamCashAdvanceManager extends Component
     public function mount(): void
     {
         $this->authorize('reviewSubordinateRequests');
+        $this->activeTab = in_array($this->activeTab, ['requests', 'users'], true) ? $this->activeTab : 'requests';
     }
 
     public function render(): View

@@ -4,12 +4,17 @@ namespace App\Support;
 
 use App\Models\ImportExportRun;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class ImportExportRunRetention
 {
-    public function filterVisible(array $runs): array
+    public function filterVisible(array|Collection $runs): array
     {
         $retentionHours = 12;
+
+        if ($runs instanceof Collection) {
+            $runs = $runs->all();
+        }
 
         return array_filter($runs, function (array $run) use ($retentionHours): bool {
             if ($run['status'] !== 'completed' && $run['status'] !== 'failed') {

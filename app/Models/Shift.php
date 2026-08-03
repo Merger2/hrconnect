@@ -43,6 +43,41 @@ class Shift extends Model
         );
     }
 
+    public function isOvernight(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->start_time && $this->end_time
+                && CarbonImmutable::parse($this->end_time)->lessThan(CarbonImmutable::parse($this->start_time)),
+        );
+    }
+
+    public function formattedStartTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->start_time
+                ? CarbonImmutable::parse($this->start_time)->format('H:i')
+                : null,
+        );
+    }
+
+    public function formattedEndTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->end_time
+                ? CarbonImmutable::parse($this->end_time)->format('H:i')
+                : null,
+        );
+    }
+
+    public function durationLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->duration
+                ? $this->duration.' '.__('hours')
+                : null,
+        );
+    }
+
     public function calculateLateMinutes(CarbonInterface $clockIn): int
     {
         $shiftStart = CarbonImmutable::parse($this->start_time);

@@ -98,14 +98,15 @@ class LeaveEntitlementManager extends Component
             ->get(['id', 'name', 'email', 'company_id']);
 
         $entitlements = LeaveEntitlement::query()
-            ->with(['user.company', 'leaveType'])
-            ->when(! $actor->isSuperadmin && $actor->company_id !== null, fn (Builder $query) => $query->where('company_id', $actor->company_id))
+            ->with(['employee.user.company', 'leaveType', 'leaveBalances'])
+            ->when(! $actor->isSuperadmin && $actor->company_id !== null, fn (Builder $query) => $query->whereHas('employee.user', fn (Builder $userQuery) => $userQuery->where('company_id', $actor->company_id)))
             ->when($this->search !== '', function (Builder $query): void {
-                $query->whereHas('user', function (Builder $userQuery): void {
-                    $userQuery
-                        ->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%')
-                        ->orWhere('nip', 'like', '%'.$this->search.'%');
+                $query->where(function (Builder $query): void {
+                    $query->whereHas('employee.user', function (Builder $userQuery): void {
+                        $userQuery
+                            ->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('email', 'like', '%'.$this->search.'%');
+                    })->orWhereHas('employee', fn (Builder $employeeQuery) => $employeeQuery->where('nip', 'like', '%'.$this->search.'%'));
                 });
             })
             ->latest('year')

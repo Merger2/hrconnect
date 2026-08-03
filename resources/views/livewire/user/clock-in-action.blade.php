@@ -1,4 +1,5 @@
-<div x-data="clockInAction()"
+<div wire:poll.15s="refreshStatus"
+     x-data="clockInAction()"
      @gps-captured.window="onGpsCaptured($event.detail)"
      @face-captured.window="onFaceCaptured($event.detail)"
      class="space-y-4">
@@ -257,16 +258,6 @@
                         </template>
                     </button>
                 </div>
-
-                {{-- Location map card — appears after GPS captured --}}
-                <div x-show="gpsCaptured" x-cloak class="mt-3">
-                    <x-user.location-card
-                        :mapId="'clock-in-map'"
-                        :title="__('Lokasi Anda')"
-                        :latitude="$wire.latitude"
-                        :longitude="$wire.longitude"
-                        icon="true" />
-                </div>
             </div>
 
             {{-- BOTH CHECKED IN AND OUT — DONE STATE --}}
@@ -293,6 +284,21 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    {{-- 🗺️ Location map — shows when GPS is captured (before or after check-in) --}}
+    <div x-show="gpsCaptured" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <x-user.location-card
+            :mapId="'clock-in-map'"
+            :title="__('Lokasi Anda')"
+            :latitude="$latitude"
+            :longitude="$longitude"
+            :branchLatitude="$branchLatitude"
+            :branchLongitude="$branchLongitude"
+            :branchRadius="$branchRadius"
+            :branchName="$branchName"
+            icon="true"
+            :showRefresh="true" />
     </div>
 
     {{-- 🟢 WFA Clock In Modal --}}
@@ -339,6 +345,33 @@
                     @error('wfaNote') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
+                {{-- ✅ Face verified badge (shown when face recognition was used) --}}
+                <div x-show="$wire.wfaFaceMode" x-cloak
+                     class="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+                        <x-heroicon-o-check class="h-4 w-4" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-emerald-800">{{ __('Face Verified') }}</p>
+                        <p class="text-xs text-emerald-600">{{ __('Identity confirmed. Just fill in the reason.') }}</p>
+                    </div>
+                </div>
+
+                {{-- 🔒 PIN fallback (shown when face is not enrolled) --}}
+                <div x-show="!$wire.wfaFaceMode" x-cloak>
+                    <label for="wfa-pin" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('PIN Verification (fallback)') }}</label>
+                    <input id="wfa-pin"
+                           type="password"
+                           x-model="$wire.wfaPin"
+                           inputmode="numeric"
+                           pattern="[0-9]*"
+                           maxlength="8"
+                           autocomplete="off"
+                           class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg font-bold tracking-[0.3em] transition-colors placeholder:text-slate-300 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
+                           placeholder="• • • • • •">
+                    @error('wfaPin') <p class="mt-1 text-center text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="flex gap-3">
                     <button type="button"
                             @click="$wire.set('showWfaModal', false)"
@@ -347,7 +380,7 @@
                     </button>
                     <button type="button"
                             wire:click="submitWfaClockIn"
-                            :disabled="$wire.isLoading"
+                            :disabled="$wire.isLoading || (!$wire.wfaFaceMode && $wire.wfaPin.length < 4)"
                             class="flex-1 rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50">
                         <template x-if="!$wire.isLoading">
                             <span>{{ __('Check In (WFA)') }}</span>
@@ -358,7 +391,7 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span>{{ __('Processing...') }}</span>
+                                <span>{{ __('Verifying...') }}</span>
                             </span>
                         </template>
                     </button>
@@ -459,13 +492,24 @@
          @face-verification-timeout.window="
             if ($event.detail.timeoutMs) {
                 let timer = setTimeout(() => {
-                    const clockInAction = document.querySelector('[x-data^=\'clockInAction\']')?.__x;
-                    if (clockInAction && clockInAction.$wire.isLoading) {
-                        clockInAction.$wire.set('isLoading', false);
-                        clockInAction.$wire.set('pinAction', $event.detail.action || 'clock_in');
-                        clockInAction.$wire.set('pin', '');
-                        clockInAction.$wire.set('showPinModal', true);
-                        clockInAction.$wire.set('errorMessage', '{{ __('Face verification did not respond. Use PIN instead.') }}');
+                    const el = document.querySelector('[x-data^=\'clockInAction\']')?.__x;
+                    if (el && el.$wire.isLoading) {
+                        const action = $event.detail.action || 'clock_in';
+                        if (action === 'wfa') {
+                            // WFA timeout → show WFA modal with PIN fallback
+                            el.$wire.set('isLoading', false);
+                            el.$wire.set('wfaFaceMode', false);
+                            el.$wire.set('wfaPin', '');
+                            el.$wire.set('showWfaModal', true);
+                            el.$wire.set('errorMessage', '{{ __('Face verification did not respond. Use PIN instead.') }}');
+                        } else {
+                            // clock_in / clock_out timeout → show PIN modal
+                            el.$wire.set('isLoading', false);
+                            el.$wire.set('pinAction', action);
+                            el.$wire.set('pin', '');
+                            el.$wire.set('showPinModal', true);
+                            el.$wire.set('errorMessage', '{{ __('Face verification did not respond. Use PIN instead.') }}');
+                        }
                     }
                 }, $event.detail.timeoutMs);
                 // Store the timer reference for cleanup
@@ -481,7 +525,7 @@
         init() {
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
-                    $wire.refreshStatus();
+                    this.$wire.refreshStatus();
                 }
             });
         }
@@ -498,7 +542,7 @@
          aria-hidden="true"
          class="hidden"></div>
 
-    @pushOnce('scripts')
+    @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('clockInAction', () => ({
@@ -580,11 +624,15 @@
 
                 // --- Clock in/out times from attendance ---
                 get clockInTime() {
+                    // Prefer direct string property (fast, no deferred load)
+                    if (this.$wire.clockInTime) return this.$wire.clockInTime;
+                    // Fallback to deferred model
                     return this.$wire.attendance?.clock_in
                         ? new Date(this.$wire.attendance.clock_in).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
                         : '--:--';
                 },
                 get clockOutTime() {
+                    if (this.$wire.clockOutTime) return this.$wire.clockOutTime;
                     return this.$wire.attendance?.clock_out
                         ? new Date(this.$wire.attendance.clock_out).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
                         : '--:--';
@@ -627,7 +675,12 @@
                             this.gpsLoading = false;
 
                             // Send to Livewire component
-                            $wire.setGps(lat, lng, acc);
+                            this.$wire.setGps(lat, lng, acc);
+
+                            // Dispatch event so location-card can update reactively
+                            window.dispatchEvent(new CustomEvent('gps-coordinates-updated', {
+                                detail: { latitude: lat, longitude: lng, accuracy: acc }
+                            }));
                         },
                         (error) => {
                             console.warn('GPS error:', error);
@@ -660,7 +713,12 @@
                         this.gpsCaptured = true;
                         this.gpsAccuracy = detail.accuracy || null;
                         this.gpsLoading = false;
-                        $wire.setGps(detail.latitude, detail.longitude, detail.accuracy);
+                        this.$wire.setGps(detail.latitude, detail.longitude, detail.accuracy);
+
+                        // Dispatch event so location-card can update reactively
+                        window.dispatchEvent(new CustomEvent('gps-coordinates-updated', {
+                            detail: { latitude: detail.latitude, longitude: detail.longitude, accuracy: detail.accuracy }
+                        }));
                     }
                 },
 
@@ -674,9 +732,11 @@
                         }
 
                         if (detail.action === 'clock_in') {
-                            $wire.doClockInWithFace(detail.descriptor);
+                            this.$wire.doClockInWithFace(detail.descriptor);
                         } else if (detail.action === 'clock_out') {
-                            $wire.doClockOutWithFace(detail.descriptor);
+                            this.$wire.doClockOutWithFace(detail.descriptor);
+                        } else if (detail.action === 'wfa') {
+                            this.$wire.doWfaClockInWithFace(detail.descriptor);
                         }
                     }
                 },
@@ -705,5 +765,5 @@
             }));
         });
     </script>
-    @endpushOnce
+    @endpush
 </div>

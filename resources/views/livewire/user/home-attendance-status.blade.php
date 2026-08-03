@@ -1,4 +1,4 @@
-<div>
+<div wire:poll.30s="checkAttendanceStatus">
     @if ($approvedAbsence)
         <section aria-labelledby="attendance-status-date" class="attendance-panel">
             <div class="attendance-panel__header">

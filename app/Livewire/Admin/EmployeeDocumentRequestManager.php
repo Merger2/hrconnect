@@ -183,6 +183,11 @@ class EmployeeDocumentRequestManager extends Component
 
         return view('livewire.admin.employee-document-request-manager', [
             'requests' => $this->requests,
+            'statuses' => $this->statuses,
+            'documentTypes' => $this->documentTypes,
+            'employees' => $this->employees,
+            'adminDocumentTypes' => $this->adminDocumentTypes,
+            'selectedDocumentTypeProfile' => $this->selectedDocumentTypeProfile,
         ]);
     }
 

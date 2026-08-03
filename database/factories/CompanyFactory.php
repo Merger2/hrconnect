@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class CompanyFactory extends Factory
 {
@@ -13,7 +14,7 @@ class CompanyFactory extends Factory
     {
         return [
             'name' => fake()->company(),
-            'code' => strtoupper(fake()->unique()->lexify('???')),
+            'code' => 'CMP'.strtoupper(Str::random(8)),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->companyEmail(),
             'website' => 'https://'.fake()->domainName(),

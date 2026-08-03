@@ -48,7 +48,7 @@ class EmployeeEdit extends Component
 
     public function updated($property, $value)
     {
-        if ($property === 'form.job_title_id' && $value) {
+        if ($property === 'form.position_id' && $value) {
             $position = Position::find($value);
             if ($position && $position->division_id) {
                 $this->form->division_id = $position->division_id;
@@ -57,7 +57,7 @@ class EmployeeEdit extends Component
         }
 
         if ($property === 'form.division_id') {
-            $this->form->job_title_id = null;
+            $this->form->position_id = null;
             $this->form->manager_id = null;
         }
 
@@ -90,7 +90,7 @@ class EmployeeEdit extends Component
             ? Wilayah::where('kode', 'like', $this->form->kecamatan_kode.'.%')->whereRaw('LENGTH(kode) = 13')->orderBy('nama')->get()
             : collect();
 
-        $availableJobTitles = Position::query()
+        $availablePositions = Position::query()
             ->where('is_active', true)
             ->when($this->form->division_id, function ($q) {
                 $q->where('division_id', $this->form->division_id)
@@ -128,7 +128,7 @@ class EmployeeEdit extends Component
             'regencies' => $regencies,
             'districts' => $districts,
             'villages' => $villages,
-            'availableJobTitles' => $availableJobTitles,
+            'availablePositions' => $availablePositions,
             'managerOptions' => $managerOptions,
             'employmentStatuses' => Employee::employmentStatuses(),
             'manualEmploymentStatuses' => Employee::manuallyManagedEmploymentStatuses(),

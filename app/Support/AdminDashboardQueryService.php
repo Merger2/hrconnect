@@ -18,6 +18,7 @@ use App\Models\Reimbursement;
 use App\Models\User;
 use App\Models\WorkFromHomeRequest;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -27,7 +28,7 @@ class AdminDashboardQueryService
     /**
      * @return array<string, mixed>
      */
-    public function build(User $admin, Carbon $selectedDate, string $search = ''): array
+    public function build(User $admin, CarbonInterface $selectedDate, string $search = ''): array
     {
         $selectedDateString = $selectedDate->toDateString();
         $today = now()->startOfDay();
@@ -38,7 +39,7 @@ class AdminDashboardQueryService
 
         $attendances = Attendance::query()
             ->managedBy($admin)
-            ->with(['shift', 'user:id,name'])
+            ->with(['shift', 'user:users.id,users.name'])
             ->where('date', $selectedDateString)
             ->get();
         $attendancesByUser = $attendances->keyBy(fn (Attendance $a) => $a->user?->id);
@@ -168,7 +169,7 @@ class AdminDashboardQueryService
      *
      * @return array{total_employees:int,attendance_rate:float,late_rate:float,avg_daily_attendance:float}
      */
-    public function monthlySummary(User $admin, Carbon $selectedDate, int $employeesCount): array
+    public function monthlySummary(User $admin, CarbonInterface $selectedDate, int $employeesCount): array
     {
         $monthStart = $selectedDate->copy()->startOfMonth();
         $monthEnd = $selectedDate->copy()->endOfMonth();
@@ -219,7 +220,7 @@ class AdminDashboardQueryService
      *
      * @return array{present:int,late:int,sick:int,excused:int,absent:int,alpha:int}
      */
-    public function monthlyMetrics(User $admin, Carbon $selectedDate): array
+    public function monthlyMetrics(User $admin, CarbonInterface $selectedDate): array
     {
         $monthStart = $selectedDate->copy()->startOfMonth();
         $monthEnd = $selectedDate->copy()->endOfMonth();
@@ -286,7 +287,7 @@ class AdminDashboardQueryService
     /**
      * @return array<string, array<int, int|string>>
      */
-    public function chartData(User $admin, Carbon $selectedDate, string $chartFilter): array
+    public function chartData(User $admin, CarbonInterface $selectedDate, string $chartFilter): array
     {
         $chartLabels = [];
         $chartPresent = [];
@@ -343,7 +344,7 @@ class AdminDashboardQueryService
         ];
     }
 
-    public function statDetail(User $admin, Carbon $selectedDate, string $type): Collection
+    public function statDetail(User $admin, CarbonInterface $selectedDate, string $type): Collection
     {
         $selectedDateString = $selectedDate->toDateString();
 
@@ -505,7 +506,7 @@ class AdminDashboardQueryService
     /**
      * @return Collection<int, array<string, mixed>>
      */
-    private function calendarLeaves(User $admin, Carbon $selectedDate): Collection
+    private function calendarLeaves(User $admin, CarbonInterface $selectedDate): Collection
     {
         $today = now()->startOfDay();
         $monthStart = $selectedDate->copy()->startOfMonth();
@@ -533,7 +534,7 @@ class AdminDashboardQueryService
             return $calendarLeaves;
         }
 
-        $grouped = $rawLeaves->groupBy(fn (Attendance $attendance) => $attendance->user?->id.'-'.$attendance->status.'-'.($attendance->leave_type_id ?? 'legacy'));
+        $grouped = $rawLeaves->groupBy(fn (Attendance $attendance) => $attendance->user?->id.'-'.($attendance->status?->value ?? $attendance->status).'-'.($attendance->leave_type_id ?? 'legacy'));
 
         foreach ($grouped as $group) {
             $tempGroup = [];
@@ -587,7 +588,7 @@ class AdminDashboardQueryService
             'title' => $first->user->name,
             'date_display' => $dateDisplay,
             'start_date' => $first->date,
-            'status' => $first->status,
+            'status' => $first->status?->value ?? $first->status,
             'leave_type' => $first->leaveType?->name,
         ];
     }

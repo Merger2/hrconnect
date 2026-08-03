@@ -423,27 +423,7 @@
                         <x-forms.input-error for="form.gender" class="mt-2" message="{{ $message }}" />
                     @enderror
                 </div>
-                @if ($form->supportsCityColumn())
-                    <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:gap-3">
-                        <div class="w-full">
-                            <x-forms.label for="create_city">{{ __('City') }}</x-forms.label>
-                            <x-forms.input id="create_city" class="mt-1 block w-full" type="text" wire:model="form.city"
-                                placeholder="{{ __('Domicile') }}" autocomplete="off" />
-                            @error('form.city')
-                                <x-forms.input-error for="form.city" class="mt-2" message="{{ $message }}" />
-                            @enderror
-                        </div>
-                        <div class="w-full">
-                            <x-forms.label for="create_address">{{ __('Address') }}</x-forms.label>
-                            <x-forms.input id="create_address" class="mt-1 block w-full" type="text"
-                                wire:model="form.address" placeholder="{{ __('Jl. Jend. Sudirman') }}" autocomplete="off" />
-                            @error('form.address')
-                                <x-forms.input-error for="form.address" class="mt-2" message="{{ $message }}" />
-                            @enderror
-                        </div>
-                    </div>
-                @else
-                    <div class="mt-4">
+                <div class="mt-4">
                         <x-forms.label for="create_address">{{ __('Address') }}</x-forms.label>
                         <x-forms.input id="create_address" class="mt-1 block w-full" type="text"
                             wire:model="form.address" placeholder="{{ __('Jl. Jend. Sudirman') }}" autocomplete="off" />
@@ -451,7 +431,6 @@
                             <x-forms.input-error for="form.address" class="mt-2" message="{{ $message }}" />
                         @enderror
                     </div>
-                @endif
                 <div class="mt-4">
                     <x-forms.label for="create_division" value="{{ __('Division') }}" />
                     <x-forms.tom-select id="create_division" wire:model="form.division_id"
@@ -630,27 +609,7 @@
                         <x-forms.input-error for="form.gender" class="mt-2" message="{{ $message }}" />
                     @enderror
                 </div>
-                @if ($form->supportsCityColumn())
-                    <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:gap-3">
-                        <div class="w-full">
-                            <x-forms.label for="edit_city">{{ __('City') }}</x-forms.label>
-                            <x-forms.input id="edit_city" class="mt-1 block w-full" type="text" wire:model="form.city"
-                                placeholder="{{ __('Domicile') }}" autocomplete="off" />
-                            @error('form.city')
-                                <x-forms.input-error for="form.city" class="mt-2" message="{{ $message }}" />
-                            @enderror
-                        </div>
-                        <div class="w-full">
-                            <x-forms.label for="edit_address">{{ __('Address') }}</x-forms.label>
-                            <x-forms.input id="edit_address" class="mt-1 block w-full" type="text"
-                                wire:model="form.address" placeholder="{{ __('Jl. Jend. Sudirman') }}" autocomplete="off" />
-                            @error('form.address')
-                                <x-forms.input-error for="form.address" class="mt-2" message="{{ $message }}" />
-                            @enderror
-                        </div>
-                    </div>
-                @else
-                    <div class="mt-4">
+                <div class="mt-4">
                         <x-forms.label for="edit_address">{{ __('Address') }}</x-forms.label>
                         <x-forms.input id="edit_address" class="mt-1 block w-full" type="text"
                             wire:model="form.address" placeholder="{{ __('Jl. Jend. Sudirman') }}" autocomplete="off" />
@@ -658,7 +617,6 @@
                             <x-forms.input-error for="form.address" class="mt-2" message="{{ $message }}" />
                         @enderror
                     </div>
-                @endif
                 <div class="mt-4">
                     <x-forms.label for="edit_division" value="{{ __('Division') }}" />
                     <x-forms.tom-select id="edit_division" wire:model="form.division_id"
@@ -692,9 +650,9 @@
     <x-overlays.modal wire:model="showDetail">
         @if ($form->user)
             @php
-                $division = $form->user->division ? json_decode($form->user->division)->name : '-';
-                $jobTitle = $form->user->jobTitle ? json_decode($form->user->jobTitle)->name : '-';
-                $education = $form->user->education ? json_decode($form->user->education)->name : '-';
+                $division = $form->user->division?->name ?? '-';
+                $jobTitle = $form->user->jobTitle?->name ?? '-';
+                $education = $form->user->education?->label() ?? '-';
             @endphp
             <div class="px-4 py-3">
                 <div class="my-4 flex items-center justify-center">
@@ -753,17 +711,6 @@
                             <p>{{ $form->user->address }}</p>
                         @endif
                     </div>
-                    @if ($form->supportsCityColumn())
-                        <div class="mt-4">
-                            <span
-                                class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('City') }}</span>
-                            @if (empty($form->user->city))
-                                <p>-</p>
-                            @else
-                                <p>{{ $form->user->city }}</p>
-                            @endif
-                        </div>
-                    @endif
                     <div class="mt-4">
                         <span
                             class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Job Title') }}</span>

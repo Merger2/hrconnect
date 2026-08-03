@@ -101,8 +101,8 @@
                                     </p>
                                     <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
                                         {{ $overtime->date->format('d M Y') }} •
-                                        {{ $overtime->start_time->format('H:i') }} -
-                                        {{ $overtime->end_time->format('H:i') }}
+                                        {{ \Carbon\Carbon::parse($overtime->start_time)->format('H:i') }} -
+                                        {{ \Carbon\Carbon::parse($overtime->end_time)->format('H:i') }}
                                         <span
                                             class="text-indigo-600 dark:text-indigo-400 font-semibold">({{ $overtime->duration_text }})</span>
                                     </p>

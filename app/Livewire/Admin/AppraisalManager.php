@@ -171,6 +171,8 @@ class AppraisalManager extends Component
 
     public function initOrEvaluate(int $userId): void
     {
+        Gate::authorize('manage', Appraisal::class);
+
         $this->evaluatingUser = User::with('employee')->findOrFail($userId);
         $this->activeAppraisal = Appraisal::query()
             ->with(['employee.user', 'evaluations.kpiTemplate.kpiGroup'])
@@ -305,7 +307,10 @@ class AppraisalManager extends Component
         Gate::authorize('calibrate', Appraisal::query()->findOrFail($appraisalId));
 
         $appraisal = Appraisal::query()->findOrFail($appraisalId);
-        $appraisal->update(['calibration_status' => $status]);
+        $appraisal->update([
+            'calibration_status' => $status,
+            'calibrator_id' => auth()->id(),
+        ]);
 
         $this->banner(__('Appraisal calibration status updated.'));
     }
@@ -335,6 +340,7 @@ class AppraisalManager extends Component
             'statuses' => $statuses,
             'evaluatingUser' => $this->evaluatingUser,
             'activeAppraisal' => $this->activeAppraisal,
+            'canManageAppraisals' => Gate::allows('manage', Appraisal::class),
         ]);
     }
 }

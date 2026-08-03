@@ -56,7 +56,8 @@ class MyPerformance extends Component
         $this->authorize('selfAssess', $appraisal);
 
         // Auto-sync missing KPIs (in case HR added new KPI Groups after this appraisal was drafted)
-        $this->appraisalService->initAppraisal(auth()->user(), $appraisal->period_month, $appraisal->period_year);
+        [$periodYear, $periodMonth] = explode('-', $appraisal->period);
+        $this->appraisalService->initAppraisal(auth()->user(), (int) $periodMonth, (int) $periodYear);
 
         // Re-fetch with loaded relations after syncing
         $appraisal = Appraisal::with('evaluations.kpiTemplate.kpiGroup')->find($appraisalId);
@@ -124,16 +125,17 @@ class MyPerformance extends Component
     {
         $this->authorize('viewAny', Appraisal::class);
 
-        $appraisals = Appraisal::where('user_id', auth()->id())
+        $user = auth()->user();
+
+        $appraisals = Appraisal::whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
             ->with('evaluator:id,name')
-            ->orderBy('period_year', 'desc')
-            ->orderBy('period_month', 'desc')
+            ->orderBy('period', 'desc')
             ->get();
 
         $activeAppraisal = $this->activeAppraisalId
             ? Appraisal::query()
                 ->with('evaluations.kpiTemplate.kpiGroup')
-                ->where('user_id', auth()->id())
+                ->whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
                 ->find($this->activeAppraisalId)
             : null;
 

@@ -8,6 +8,7 @@ use App\Jobs\GenerateEmployeeDocumentPdf;
 use App\Models\Employee;
 use App\Models\EmployeeDocumentRequest;
 use App\Models\EmployeeDocumentType;
+use App\Models\User;
 use App\Notifications\DocumentRequestReadyNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,47 @@ final class EmployeeDocumentRequestService
     public function __construct(
         private readonly DocumentTemplateRenderService $renderer,
     ) {}
+
+    /**
+     * Get document types as key-value pairs for select dropdown.
+     */
+    public function types(): array
+    {
+        return EmployeeDocumentType::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+    }
+
+    /**
+     * Simplified request method for the user Livewire component.
+     * Resolves document_type string to ID, creates via createForEmployee.
+     */
+    public function request(User $user, array $data): EmployeeDocumentRequest
+    {
+        $employee = $user->employee;
+
+        if (! $employee) {
+            throw new \RuntimeException('User has no associated employee record.');
+        }
+
+        // Resolve document_type (could be ID or slug/name)
+        $typeId = $data['document_type'];
+        if (! is_numeric($typeId)) {
+            $type = EmployeeDocumentType::where('slug', $typeId)
+                ->orWhere('name', $typeId)
+                ->firstOrFail();
+            $typeId = $type->id;
+        }
+
+        return $this->createForEmployee($employee, [
+            'document_type_id' => (int) $typeId,
+            'purpose' => $data['purpose'] ?? $data['document_type'],
+            'details' => $data['details'] ?? null,
+            'due_date' => $data['due_date'] ?? null,
+        ]);
+    }
 
     /**
      * Employee bikin request baru.

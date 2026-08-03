@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Concerns\ScopesCompanySelection;
 use App\Livewire\Concerns\ValidatesCompanyId;
+use App\Models\Client;
 use App\Models\CompanyBranch;
 use App\Models\Project;
 use App\Models\ProjectTask;
@@ -50,6 +51,8 @@ class OperationalWorkspace extends Component
 
     public string $projectCompanyId = '';
 
+    public string $projectClientId = '';
+
     public string $projectBranchId = '';
 
     public string $projectManagerId = '';
@@ -93,7 +96,7 @@ class OperationalWorkspace extends Component
 
     public function updatedProjectCompanyId(): void
     {
-        $this->reset(['projectBranchId', 'projectManagerId', 'taskProjectId', 'taskAssignedTo']);
+        $this->reset(['projectClientId', 'projectBranchId', 'projectManagerId', 'taskProjectId', 'taskAssignedTo']);
     }
 
     public function updatedTaskProjectId(): void
@@ -162,7 +165,7 @@ class OperationalWorkspace extends Component
         ]);
 
         $this->taskProjectId = (string) $project->id;
-        $this->reset(['projectBranchId', 'projectManagerId', 'projectName', 'projectDescription']);
+        $this->reset(['projectClientId', 'projectBranchId', 'projectManagerId', 'projectName', 'projectDescription']);
         $this->banner(__('Project created.'));
     }
 
@@ -262,6 +265,13 @@ class OperationalWorkspace extends Component
             ->orderBy('name')
             ->get(['id', 'company_id', 'name', 'email']);
 
+        $clients = Client::query()
+            ->with('company:id,name')
+            ->whereIn('company_id', $companyIds)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
         $selectedProjectCompanyId = $this->scopedCompanyId($companyIds, $this->projectCompanyId);
         $selectedTaskProject = $projects->firstWhere('id', (int) $this->taskProjectId);
         $selectedTaskCompanyId = $selectedTaskProject?->company_id;
@@ -270,6 +280,10 @@ class OperationalWorkspace extends Component
             'companies' => $companies,
             'branches' => $branches,
             'projects' => $projects,
+            'clients' => $clients,
+            'projectClientOptions' => $selectedProjectCompanyId === null
+                ? $clients
+                : $clients->where('company_id', $selectedProjectCompanyId)->values(),
             'projectBranchOptions' => $selectedProjectCompanyId === null
                 ? $branches
                 : $branches->where('company_id', $selectedProjectCompanyId)->values(),

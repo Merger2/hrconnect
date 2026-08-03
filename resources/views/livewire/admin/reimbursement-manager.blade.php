@@ -28,9 +28,10 @@
 
     @php
         $allClaims = $reimbursements->getCollection();
-        $pendingClaims = $allClaims->filter(fn($c) => in_array($c->status, ['pending', 'pending_finance']))->count();
-        $approvedClaims = $allClaims->where('status', 'approved')->count();
-        $rejectedClaims = $allClaims->where('status', 'rejected')->count();
+        $claimStatusOf = fn ($c) => $c->status?->value ?? $c->status;
+        $pendingClaims = $allClaims->filter(fn ($c) => in_array($claimStatusOf($c), ['pending', 'pending_finance']))->count();
+        $approvedClaims = $allClaims->filter(fn ($c) => $claimStatusOf($c) === 'approved')->count();
+        $rejectedClaims = $allClaims->filter(fn ($c) => $claimStatusOf($c) === 'rejected')->count();
         $totalAmount = $allClaims->sum('amount');
     @endphp
 
@@ -57,11 +58,12 @@
         <div class="space-y-3 p-4 lg:hidden">
             @forelse($reimbursements as $claim)
                 @php
+                    $claimStatus = $claim->status?->value ?? $claim->status;
                     $employee = $claim->user;
                     $employeeName = $employee?->name ?? __('Deleted employee');
                     $employeeEmail = $employee?->email ?? __('Employee record not found');
-                    $canApprove = in_array($claim->status, ['pending', 'pending_finance'], true)
-                        && Auth::user()->can('approve', $claim);
+                    $canApprove = in_array($claimStatus, ['pending', 'pending_finance'], true)
+                        && Auth::user()?->can('approve', $claim);
                 @endphp
                 <article class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-start gap-3">
@@ -78,8 +80,8 @@
                             <h3 class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $employeeName }}</h3>
                             <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ $employeeEmail }}</p>
                         </div>
-                        <x-admin.status-badge :tone="$claim->status === 'approved' ? 'success' : ($claim->status === 'rejected' ? 'danger' : ($claim->status === 'pending_finance' ? 'accent' : 'warning'))">
-                            {{ __($claim->status === 'pending_finance' ? 'Menunggu Finance' : ucfirst($claim->status)) }}
+                        <x-admin.status-badge :tone="$claimStatus === 'approved' ? 'success' : ($claimStatus === 'rejected' ? 'danger' : ($claimStatus === 'pending_finance' ? 'accent' : 'warning'))">
+                            {{ __($claimStatus === 'pending_finance' ? 'Menunggu Finance' : ucfirst((string) $claimStatus)) }}
                         </x-admin.status-badge>
                     </div>
 
@@ -158,6 +160,7 @@
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($reimbursements as $claim)
                         @php
+                            $claimStatus = $claim->status?->value ?? $claim->status;
                             $employee = $claim->user;
                             $employeeName = $employee?->name ?? __('Deleted employee');
                             $employeeEmail = $employee?->email ?? __('Employee record not found');
@@ -208,15 +211,15 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                <x-admin.status-badge :tone="$claim->status === 'approved' ? 'success' : ($claim->status === 'rejected' ? 'danger' : ($claim->status === 'pending_finance' ? 'accent' : 'warning'))">
-                                    {{ __($claim->status === 'pending_finance' ? 'Menunggu Finance' : ucfirst($claim->status)) }}
+                                <x-admin.status-badge :tone="$claimStatus === 'approved' ? 'success' : ($claimStatus === 'rejected' ? 'danger' : ($claimStatus === 'pending_finance' ? 'accent' : 'warning'))">
+                                    {{ __($claimStatus === 'pending_finance' ? 'Menunggu Finance' : ucfirst((string) $claimStatus)) }}
                                 </x-admin.status-badge>
                                 @if ($claim->accounting_journal_entry_id)
                                     <div class="mt-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-300">
                                         {{ __('Journal #:id', ['id' => $claim->accounting_journal_entry_id]) }}
                                     </div>
                                 @endif
-                                @if ($claim->status !== 'pending')
+                                @if ($claimStatus !== 'pending')
                                     <div class="mt-1 flex flex-col gap-0.5 w-[140px]">
                                         @if ($claim->head_approved_by)
                                             <span
@@ -251,8 +254,8 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 @php
-                                    $canApprove = in_array($claim->status, ['pending', 'pending_finance'], true)
-                                        && Auth::user()->can('approve', $claim);
+                                    $canApprove = in_array($claimStatus, ['pending', 'pending_finance'], true)
+                                        && Auth::user()?->can('approve', $claim);
                                 @endphp
                                 @if ($canApprove)
                                     <div class="flex items-center justify-end gap-2">

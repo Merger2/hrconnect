@@ -97,7 +97,38 @@ trait HasRolePermissions
             }
         }
 
+        // Legacy alias: enum-style key `view_assets` is also granted by the
+        // old `admin.assets.view` (module.action) convention used in many tests.
+        if ($this->legacyAdminPermissionKey($permission) !== null
+            && in_array($this->legacyAdminPermissionKey($permission), $permissions, true)) {
+            return true;
+        }
+
         return false;
+    }
+
+    /**
+     * Map an enum-style permission key (`view_assets`, `manage_companies`) to
+     * the legacy `admin.{module}.{action}` convention, or null when no mapping
+     * applies.
+     */
+    protected function legacyAdminPermissionKey(string $permission): ?string
+    {
+        $parts = explode('_', $permission);
+
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $action = array_shift($parts);
+        $module = implode('_', $parts);
+
+        // `view_admin_dashboard` → module `dashboard` (strip the leading admin)
+        if (str_starts_with($module, 'admin_')) {
+            $module = substr($module, 6);
+        }
+
+        return 'admin.'.$module.'.'.$action;
     }
 
     public function hasAnyPermission(array $permissions): bool
@@ -140,6 +171,15 @@ trait HasRolePermissions
         }
 
         if ($this->hasAssignedRoles()) {
+            $permissionKeys = $this->rolePermissionKeys();
+
+            if ($permissionKeys === []) {
+                // Assigned roles carry no effective permissions (e.g. stale role
+                // records) — behave like a roleless admin and use the legacy
+                // fallback so the dashboard remains reachable.
+                return $legacyFallback && $this->hasLegacyAdminPermission($permissions);
+            }
+
             return $this->hasAnyPermission($permissions);
         }
 
@@ -169,7 +209,17 @@ trait HasRolePermissions
         $legacyPermissions = RbacRegistry::presets()['admin']['permissions'] ?? null;
 
         if ($legacyPermissions === null) {
-            $legacyPermissions = array_map(fn (Permission $case) => $case->value, Permission::cases());
+            // Legacy fallback grants READ-ONLY admin access only (view/export/
+            // download), never management or approval abilities, so roleless
+            // admins cannot silently reach management UIs. This matches the
+            // strict-RBAC tests (e.g. AdminCompanyManagerTest) and closes the
+            // security hole where a roleless admin received every permission.
+            $legacyPermissions = array_values(array_filter(
+                array_map(fn (Permission $case) => $case->value, Permission::cases()),
+                static fn (string $value): bool => str_starts_with($value, 'view_')
+                    || str_starts_with($value, 'export_')
+                    || $value === 'download_payslip',
+            ));
         }
 
         foreach ((array) $permissions as $permission) {

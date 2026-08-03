@@ -21,6 +21,12 @@
             'icon' => 'heroicon-o-calendar-days',
         ],
         [
+            'label' => __('Absen'),
+            'href' => route('scan'),
+            'active' => request()->routeIs('scan', 'face.enrollment', 'attendance-history', 'attendance-corrections'),
+            'icon' => 'heroicon-o-camera',
+        ],
+        [
             'label' => __('Tasks'),
             'href' => route('hr-tasks'),
             'active' => request()->routeIs('hr-tasks', 'my-tasks', 'my-forms', 'approvals', 'approvals.history'),

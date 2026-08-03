@@ -7,9 +7,7 @@
                 title-id="kb-chat-title"
                 class="border-b-0 shrink-0">
                 <x-slot name="icon">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-sky-50 text-emerald-700 ring-1 ring-inset ring-emerald-100 shadow-sm">
-                        <x-heroicon-o-chat-bubble-left-right class="h-5 w-5" />
-                    </div>
+                    <x-heroicon-o-chat-bubble-left-right class="h-5 w-5" />
                 </x-slot>
                 <x-slot name="actions">
                     <button wire:click="startNewChat"
@@ -144,7 +142,8 @@
                 init() {
                     this.$nextTick(() => this.scrollToBottom());
 
-                    this.$watch('$wire.messages', () => {
+                    // Watch Livewire messages property — scoped to this component, no global leak
+                    this.$wire.$watch('messages', () => {
                         this.$nextTick(() => this.scrollToBottom());
                     });
                 },
@@ -165,8 +164,7 @@
                 },
 
                 canSend() {
-                    const input = this.$refs.questionInput;
-                    return input && input.value.trim().length >= 5;
+                    return this.$wire?.question?.trim()?.length >= 5;
                 },
 
                 charCount() {

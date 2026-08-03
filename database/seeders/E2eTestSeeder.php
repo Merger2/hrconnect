@@ -13,6 +13,7 @@ use App\Models\Company;
 use App\Models\Division;
 use App\Models\Employee;
 use App\Models\Position;
+use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -126,7 +127,9 @@ class E2eTestSeeder extends Seeder
                     'major' => 'Teknik Informatika',
                     'graduation_year' => 2018,
                     'salary_type' => SalaryType::MONTHLY,
+                    'shift_id' => Shift::where('name', 'Office Hour')->first()?->id,
                     'address_detail' => 'Jl. Test No. 1, Jakarta',
+                    'pin' => Hash::make('123456'),
                 ]
             );
         }

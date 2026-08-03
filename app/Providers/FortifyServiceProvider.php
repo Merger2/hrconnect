@@ -7,12 +7,14 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Responses\LoginResponse;
+use App\Http\Responses\RegisterResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -23,6 +25,7 @@ class FortifyServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
+        $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
     }
 
     /**
@@ -51,13 +54,13 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn () => view('auth.login'));
-        Fortify::verifyEmailView(fn () => view('auth.verify-email'));
-        Fortify::twoFactorChallengeView(fn () => view('auth.two-factor-challenge'));
-        Fortify::confirmPasswordView(fn () => view('auth.confirm-password'));
-        Fortify::registerView(fn () => view('auth.register'));
-        Fortify::resetPasswordView(fn () => view('auth.reset-password'));
-        Fortify::requestPasswordResetLinkView(fn () => view('auth.forgot-password'));
+        Fortify::loginView(fn (Request $request) => view('auth.login'));
+        Fortify::verifyEmailView(fn (Request $request) => view('auth.verify-email'));
+        Fortify::twoFactorChallengeView(fn (Request $request) => view('auth.two-factor-challenge'));
+        Fortify::confirmPasswordView(fn (Request $request) => view('auth.confirm-password'));
+        Fortify::registerView(fn (Request $request) => view('auth.register'));
+        Fortify::resetPasswordView(fn (Request $request) => view('auth.reset-password', ['request' => $request]));
+        Fortify::requestPasswordResetLinkView(fn (Request $request) => view('auth.forgot-password'));
     }
 
     /**

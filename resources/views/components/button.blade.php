@@ -4,7 +4,7 @@
     'icon' => null,
     'iconRight' => null,
     'href' => null,
-    'type' => 'button',
+    'type' => 'submit',
     'loading' => false,
     'disabled' => false,
 ])

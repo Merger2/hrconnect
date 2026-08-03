@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -93,7 +94,7 @@ class ShiftSwapRequest extends Model
         ];
     }
 
-    public function effectiveScheduleDate(): ?string
+    public function effectiveScheduleDate(): ?CarbonInterface
     {
         return $this->schedule?->date ?? $this->schedule_date;
     }

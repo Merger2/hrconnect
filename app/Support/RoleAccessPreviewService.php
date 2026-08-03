@@ -27,9 +27,12 @@ class RoleAccessPreviewService
      */
     public function forRole(Role $role): array
     {
+        // NOTE: use the custom `permission_keys` JSON column, NOT the Spatie
+        // `permissions` relationship (unused pivot) — `$role->permissions` returns
+        // an Eloquent Collection which breaks array_filter() below.
         $rolePermissions = $role->grantsFullAdminAccess()
             ? RbacRegistry::permissionKeys()
-            : ($role->permissions ?? []);
+            : ($role->permission_keys ?? []);
 
         $rolePermissions = array_values(array_filter($rolePermissions, 'is_string'));
         $modules = [];
