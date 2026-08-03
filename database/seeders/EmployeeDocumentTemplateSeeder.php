@@ -18,9 +18,16 @@ class EmployeeDocumentTemplateSeeder extends Seeder
     private function defaultTypes(): array
     {
         return [
+            // Tipe dari migration awal (upload-type documents).
+            ['code' => 'ktp', 'slug' => 'ktp', 'name' => 'KTP', 'category' => 'document'],
+            ['code' => 'npwp', 'slug' => 'npwp', 'name' => 'NPWP', 'category' => 'finance'],
+            ['code' => 'ijazah', 'slug' => 'ijazah', 'name' => 'Ijazah', 'category' => 'document'],
+            ['code' => 'kk', 'slug' => 'kk', 'name' => 'Kartu Keluarga', 'category' => 'document'],
+            ['code' => 'sertifikat', 'slug' => 'sertifikat', 'name' => 'Sertifikat', 'category' => 'document'],
+            ['code' => 'kontrak_kerja', 'slug' => 'kontrak-kerja', 'name' => 'Kontrak Kerja', 'category' => 'legal'],
+            // Tipe surat auto-generate.
             ['code' => 'employment_certificate', 'slug' => 'employment-certificate', 'name' => 'Surat Keterangan Kerja', 'category' => 'hr'],
             ['code' => 'salary_statement', 'slug' => 'salary-statement', 'name' => 'Surat Keterangan Gaji', 'category' => 'finance'],
-            ['code' => 'npwp', 'slug' => 'npwp', 'name' => 'NPWP', 'category' => 'finance'],
             ['code' => 'bank_letter', 'slug' => 'bank-letter', 'name' => 'Surat Referensi Bank', 'category' => 'finance'],
             ['code' => 'visa_letter', 'slug' => 'visa-letter', 'name' => 'Surat Keterangan Visa', 'category' => 'hr'],
             ['code' => 'referral_letter', 'slug' => 'referral-letter', 'name' => 'Surat Rekomendasi', 'category' => 'hr'],
@@ -38,7 +45,6 @@ class EmployeeDocumentTemplateSeeder extends Seeder
                     'name' => $typeData['name'],
                     'category' => $typeData['category'],
                     'is_active' => true,
-                    'employee_requestable' => true,
                     'admin_requestable' => true,
                     'requires_employee_upload' => false,
                     'auto_generate_enabled' => true,

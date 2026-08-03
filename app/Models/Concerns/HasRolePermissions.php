@@ -216,9 +216,15 @@ trait HasRolePermissions
             // security hole where a roleless admin received every permission.
             $legacyPermissions = array_values(array_filter(
                 array_map(fn (Permission $case) => $case->value, Permission::cases()),
-                static fn (string $value): bool => str_starts_with($value, 'view_')
+                static fn (string $value): bool => (
+                    str_starts_with($value, 'view_')
                     || str_starts_with($value, 'export_')
-                    || $value === 'download_payslip',
+                    || $value === 'download_payslip'
+                )
+                    // Payroll/payslip sangat sensitif — roleless admin tidak
+                    // otomatis berhak melihat data gaji orang lain.
+                    && ! str_contains($value, 'payroll')
+                    && ! str_contains($value, 'payslip'),
             ));
         }
 

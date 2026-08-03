@@ -54,6 +54,7 @@ tests/e2e/.auth/
 /.codex/
 /.gemini/
 /.github/
+/.opencode/
 /docs/**
 !/docs/api/api.json
 /tests/

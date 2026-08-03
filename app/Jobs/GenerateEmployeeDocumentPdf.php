@@ -30,7 +30,7 @@ final class GenerateEmployeeDocumentPdf implements ShouldQueue
 
     public function handle(DocumentTemplateRenderService $renderer): void
     {
-        $request = EmployeeDocumentRequest::with(['documentType.activeTemplate', 'employee'])->findOrFail($this->documentRequestId);
+        $request = EmployeeDocumentRequest::with(['documentType', 'employee'])->findOrFail($this->documentRequestId);
 
         $template = $request->documentType?->activeTemplate();
 

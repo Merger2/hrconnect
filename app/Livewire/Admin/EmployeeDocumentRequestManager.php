@@ -156,13 +156,8 @@ class EmployeeDocumentRequestManager extends Component
         return Employee::query()
             ->with('user')
             ->whereHas('user')
-            ->get()
-            ->map(fn (Employee $e) => [
-                'id' => $e->id,
-                'name' => $e->full_name ?? $e->user?->name ?? '-',
-                'nip' => $e->nip,
-                'email' => $e->user?->email,
-            ]);
+            ->orderBy('full_name')
+            ->get();
     }
 
     #[Computed]

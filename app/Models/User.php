@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -255,6 +256,18 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
+    }
+
+    public function division(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Division::class,
+            Employee::class,
+            'user_id',
+            'id',
+            'id',
+            'division_id',
+        );
     }
 
     public function company(): BelongsTo

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployeeDocumentType extends Model
@@ -40,7 +39,7 @@ class EmployeeDocumentType extends Model
         return $this->hasMany(EmployeeDocumentTemplate::class, 'document_type_id');
     }
 
-    public function activeTemplate(): BelongsTo|HasMany|null
+    public function activeTemplate(): ?EmployeeDocumentTemplate
     {
         return $this->hasMany(EmployeeDocumentTemplate::class, 'document_type_id')
             ->where('is_active', true)

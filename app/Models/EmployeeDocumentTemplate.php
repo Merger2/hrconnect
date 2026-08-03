@@ -29,6 +29,7 @@ class EmployeeDocumentTemplate extends Model
 
     protected $casts = [
         'variables' => 'array',
+        'layout_options' => 'array',
         'is_active' => 'boolean',
     ];
 
