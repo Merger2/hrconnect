@@ -1,26 +1,21 @@
 <?php
 
 use App\Livewire\Admin\Finance\CashAdvanceManager as AdminCashAdvanceManager;
-use App\Livewire\Admin\ReimbursementManager;
 use App\Livewire\User\Finance\TeamCashAdvanceManager;
 use App\Livewire\User\TeamApprovals;
 use App\Livewire\User\TeamApprovalsHistory;
-use App\Models\AccountingAccount;
 use App\Models\ApprovalMatrixRule;
 use App\Models\CashAdvance;
 use App\Models\Division;
 use App\Models\Employee;
 use App\Models\JobLevel;
 use App\Models\JobTitle;
-use App\Models\JournalEntry;
-use App\Models\JournalEntryLine;
 use App\Models\Reimbursement;
 use App\Models\Role;
 use App\Models\User;
 use App\Notifications\CashAdvanceUpdated;
 use App\Notifications\ReimbursementStatusUpdated;
 use App\Support\CashAdvanceApprovalService;
-use App\Support\MultiCompanyService;
 use App\Support\ReimbursementApprovalService;
 use App\Support\TeamApprovalQueryService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -230,55 +225,6 @@ test('supervisor approval forwards cash advance to finance', function () {
         ->and($advance->approved_by)->toBeNull();
 
     Notification::assertSentTo($employee, CashAdvanceUpdated::class);
-});
-
-test('finance head can finalize pending finance reimbursements from manager queue', function () {
-    $this->markTestSkipped('Depends on AccountingAccount/JournalEntry/JournalEntryLine models not present in this build.');
-
-    Notification::fake();
-
-    [, $employee] = createApprovalHierarchy();
-    $financeHead = createFinanceHead(true);
-    $company = app(MultiCompanyService::class)->createCompany('PT Reimbursement Accounting', $financeHead);
-    $employee->forceFill(['company_id' => $company->id])->save();
-
-    $reimbursement = Reimbursement::create([
-        'employee_id' => $employee->employee->id,
-        'expense_date' => now()->toDateString(),
-        'title' => 'Hotel',
-        'amount' => 450000,
-        'description' => 'Site visit stay',
-        'status' => 'pending_finance',
-    ]);
-
-    $this->actingAs($financeHead);
-
-    Livewire::test(ReimbursementManager::class)
-        ->set('statusFilter', 'pending_finance')
-        ->call('approve', $reimbursement->id);
-
-    $reimbursement->refresh();
-
-    expect($reimbursement->status->value)->toBe('approved')
-        ->and($reimbursement->finance_approved_by)->toBe($financeHead->id)
-        ->and($reimbursement->finance_approved_at)->not->toBeNull()
-        ->and($reimbursement->approved_by)->toBe($financeHead->id)
-        ->and($reimbursement->accounting_journal_entry_id)->not->toBeNull()
-        ->and($reimbursement->accounting_posted_at)->not->toBeNull();
-
-    $journal = JournalEntry::query()
-        ->with('lines.account')
-        ->where('source_type', Reimbursement::class)
-        ->where('source_id', $reimbursement->id)
-        ->firstOrFail();
-
-    expect(AccountingAccount::query()->where('company_id', $company->id)->whereIn('code', ['1100', '5200'])->count())->toBe(2)
-        ->and((float) JournalEntryLine::query()->where('journal_entry_id', $journal->id)->sum('debit'))->toBe(450000.0)
-        ->and((float) JournalEntryLine::query()->where('journal_entry_id', $journal->id)->sum('credit'))->toBe(450000.0)
-        ->and($journal->lines->firstWhere('account.code', '5200'))->not->toBeNull()
-        ->and($journal->lines->firstWhere('account.code', '1100'))->not->toBeNull();
-
-    Notification::assertSentTo($employee, ReimbursementStatusUpdated::class);
 });
 
 test('approval matrix can require manager finance and hr role for high value reimbursement', function () {
