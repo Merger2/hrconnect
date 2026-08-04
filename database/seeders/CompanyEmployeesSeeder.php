@@ -22,7 +22,7 @@ class CompanyEmployeesSeeder extends Seeder
     public function run(): void
     {
         // 1. Company & Branch (menggunakan yang sudah ada dari CompanyAndDivisionSeeder)
-        $company = Company::where('code', 'HRCONNECT')->firstOrFail();
+        $company = Company::where('code', 'DKMS-2025')->firstOrFail();
         $branch = Branch::where('company_id', $company->id)->where('is_main', true)->firstOrFail();
 
         // 2. Divisions & Positions (menggunakan yang sudah ada)

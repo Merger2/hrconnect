@@ -10,10 +10,10 @@ class BranchSeeder extends Seeder
 {
     public function run(): void
     {
-        $company = Company::where('code', 'HRCONNECT')->first();
+        $company = Company::where('code', 'DKMS-2025')->first();
 
         if (! $company) {
-            $this->command?->warn('BranchSeeder: Company HRCONNECT belum ada, skip.');
+            $this->command?->warn('BranchSeeder: Company DKMS-2025 belum ada, skip.');
 
             return;
         }

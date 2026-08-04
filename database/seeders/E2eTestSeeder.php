@@ -51,7 +51,7 @@ class E2eTestSeeder extends Seeder
             ['email' => 'finance@hrconnect.test',   'name' => 'Test Finance',  'role' => 'finance',    'password' => 'password'],
         ];
 
-        $company = Company::where('code', 'HRCONNECT')->firstOrFail();
+        $company = Company::where('code', 'DKMS-2025')->firstOrFail();
         $branch = Branch::where('company_id', $company->id)->where('is_main', true)->firstOrFail();
 
         $divMap = [

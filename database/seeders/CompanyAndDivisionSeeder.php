@@ -15,12 +15,12 @@ class CompanyAndDivisionSeeder extends Seeder
     public function run(): void
     {
         $company = Company::firstOrCreate(
-            ['code' => 'HRCONNECT'],
+            ['code' => 'DKMS-2025'],
             [
-                'name' => 'HRConnect Indonesia',
-                'phone' => '021-5551234',
-                'email' => 'info@hrconnect.local',
-                'website' => 'https://hrconnect.local',
+                'name' => 'PT Daya Cipta Mandiri Solusi',
+                'phone' => '+62 21 38859238',
+                'email' => 'contact@dayaciptamandiri.com',
+                'website' => 'https://dayaciptamandiri.com',
                 'npwp' => '12.345.678.9-012.000',
                 'logo' => 'logos/hrconnect.png',
                 'is_active' => true,
