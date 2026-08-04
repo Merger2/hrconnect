@@ -63,11 +63,14 @@ class SystemBackupRun extends Model
 
             $service = app(BackupSecurityService::class);
 
-            $wasCompleted = $backupRun->status === 'completed';
-
             $service->enforceSizeLimit($backupRun);
 
-            if ($wasCompleted && $backupRun->status === 'failed') {
+            if ($backupRun->status === 'completed') {
+                $service->auditCompleted($backupRun);
+            } elseif ($backupRun->status === 'failed') {
+                // Mencakup downgrade size-limit (completed→failed) DAN kegagalan
+                // job biasa (running→failed, mis. pg_dump error) — audit trail
+                // backup lengkap untuk semua jalur kegagalan.
                 $service->auditFailed($backupRun);
             }
         });

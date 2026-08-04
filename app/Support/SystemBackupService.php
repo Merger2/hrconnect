@@ -57,6 +57,8 @@ class SystemBackupService
 
                 throw new RuntimeException('Database dump failed: '.implode("\n", array_slice($output, -10)));
             }
+
+            $this->signDatabaseBackup($absolutePath);
         } finally {
             File::delete($pgpassFile);
         }
@@ -66,6 +68,28 @@ class SystemBackupService
             'path' => $path,
             'size_bytes' => (int) Storage::disk('local')->size($path),
         ];
+    }
+
+    /**
+     * Append an HMAC-SHA256 signature line to a freshly dumped SQL backup so
+     * that SystemMaintenance::verifiedBackupSql() can authenticate it during
+     * restore. The signature covers the dump content WITHOUT the signature
+     * line itself (mirror of the verification regex in SystemMaintenance).
+     */
+    protected function signDatabaseBackup(string $absolutePath): void
+    {
+        $content = file_get_contents($absolutePath);
+
+        if ($content === false) {
+            throw new RuntimeException("Could not read database dump at {$absolutePath} to sign it.");
+        }
+
+        $signature = hash_hmac('sha256', $content, (string) config('app.key'));
+
+        file_put_contents(
+            $absolutePath,
+            $content."\n-- APP_BACKUP_SIGNATURE: {$signature}\n"
+        );
     }
 
     /**

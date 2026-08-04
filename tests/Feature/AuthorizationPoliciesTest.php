@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AttendanceStatus;
 use App\Models\Announcement;
 use App\Models\Appraisal;
 use App\Models\Attendance;
@@ -11,6 +12,7 @@ use App\Models\Holiday;
 use App\Models\JobLevel;
 use App\Models\JobTitle;
 use App\Models\Payroll;
+use App\Models\Position;
 use App\Models\Reimbursement;
 use App\Models\Role;
 use App\Models\SystemBackupRun;
@@ -36,17 +38,41 @@ test('policies cover attendance appraisal reimbursement asset and payslip access
         'name' => 'Asset Payroll Viewer_'.uniqid(),
         'slug' => 'asset_payroll_viewer__'.uniqid().uniqid(),
         'description' => 'Can access payroll and company asset administration.',
+        // view_payrolls → legacy alias 'admin.payrolls.view' (plural, sesuai
+        // legacyAdminPermissionKey) — 'admin.payroll.view' singular tidak match.
         'permission_keys' => [
             'admin.assets.view',
-            'admin.payroll.view',
+            'admin.payrolls.view',
         ],
     ]);
 
-    $limitedAdmin->roles()->detach();
+    // admin = admin dengan role berpermission eksplisit (strict RBAC, bukan
+    // superadmin bypass & bukan roleless read-only fallback).
+    $adminRole = Role::create([
+        'name' => 'Policy Attendance Admin_'.uniqid(),
+        'slug' => 'policy_attendance_admin_'.uniqid(),
+        'description' => 'Can view attendance and reimbursement records.',
+        'permission_keys' => ['view_attendances', 'view_reimbursements'],
+    ]);
+    $admin->roles()->sync([$adminRole->id]);
+
+    // limitedAdmin = admin dengan role tapi TANPA akses appraisal (roleless admin
+    // justru dapat read-only legacy fallback → export appraisal bocor).
+    $limitedAdminRole = Role::create([
+        'name' => 'Policy Dashboard Only_'.uniqid(),
+        'slug' => 'policy_dashboard_only_'.uniqid(),
+        'description' => 'No appraisal access.',
+        'permission_keys' => ['admin.dashboard.view'],
+    ]);
+    $limitedAdmin->roles()->sync([$limitedAdminRole->id]);
     $appraisalAdmin->roles()->sync([$appraisalRole->id]);
     $assetPayrollAdmin->roles()->sync([$assetPayrollRole->id]);
 
     $ownerEmployee = Employee::factory()->create(['user_id' => $owner->id]);
+
+    // appraisals.reviewer_id → constrained('employees') — pakai employee id,
+    // bukan user id (evaluator_id → users, reviewer_id → employees).
+    $adminEmployee = Employee::factory()->create(['user_id' => $admin->id]);
 
     $attendance = Attendance::create([
         'employee_id' => $ownerEmployee->id,
@@ -69,7 +95,7 @@ test('policies cover attendance appraisal reimbursement asset and payslip access
     $selfAssessment = Appraisal::create([
         'employee_id' => $ownerEmployee->id,
         'evaluator_id' => $admin->id,
-        'reviewer_id' => $admin->id,
+        'reviewer_id' => $adminEmployee->id,
         'period' => '2026-01',
         'review_date' => now(),
         'status' => 'self_assessment',
@@ -78,7 +104,7 @@ test('policies cover attendance appraisal reimbursement asset and payslip access
     $completedAppraisal = Appraisal::create([
         'employee_id' => $ownerEmployee->id,
         'evaluator_id' => $admin->id,
-        'reviewer_id' => $admin->id,
+        'reviewer_id' => $adminEmployee->id,
         'period' => '2026-02',
         'review_date' => now(),
         'status' => 'completed',
@@ -155,6 +181,16 @@ test('announcement and holiday policies only allow admins to manage records', fu
     $user = User::factory()->create();
     $admin = User::factory()->admin()->create();
 
+    // Roleless admin hanya read-only (fix P0) — admin yang bisa manage harus
+    // punya role dengan permission eksplisit (strict RBAC).
+    $adminRole = Role::create([
+        'name' => 'Policy Announcement Admin_'.uniqid(),
+        'slug' => 'policy_announcement_admin_'.uniqid(),
+        'description' => 'Can manage announcements and holidays.',
+        'permission_keys' => ['manage_announcements', 'manage_holidays'],
+    ]);
+    $admin->roles()->sync([$adminRole->id]);
+
     $announcement = Announcement::create([
         'title' => 'Office Update',
         'content' => 'Please check the new schedule.',
@@ -191,6 +227,7 @@ test('attachment and appraisal export routes deny unrelated users', function () 
     $otherUser = User::factory()->create();
     $admin = User::factory()->admin()->create();
     $ownerEmployee = Employee::factory()->create(['user_id' => $owner->id]);
+    $adminEmployee = Employee::factory()->create(['user_id' => $admin->id]);
 
     $attendance = Attendance::create([
         'employee_id' => $ownerEmployee->id,
@@ -213,7 +250,7 @@ test('attachment and appraisal export routes deny unrelated users', function () 
     $appraisal = Appraisal::create([
         'employee_id' => $ownerEmployee->id,
         'evaluator_id' => $admin->id,
-        'reviewer_id' => $admin->id,
+        'reviewer_id' => $adminEmployee->id,
         'period' => '2026-03',
         'review_date' => now(),
         'status' => 'completed',
@@ -267,14 +304,18 @@ test('attendance approval policy allows supervisors to review subordinate reques
     Employee::factory()->create([
         'user_id' => $subordinate->id,
         'division_id' => $division->id,
+        // canReview() memeriksa subordinates via employees.parent_id.
+        'parent_id' => $manager->employee->id,
     ]);
 
     $unrelated = User::factory()->create();
 
     $attendance = Attendance::create([
+        'employee_id' => $subordinate->employee->id,
         'user_id' => $subordinate->id,
         'date' => now()->toDateString(),
-        'status' => 'leave',
+        // 'late' termasuk Attendance::REQUEST_STATUSES (yang bisa di-approve).
+        'status' => AttendanceStatus::LATE->value,
         'approval_status' => Attendance::STATUS_PENDING,
         'note' => 'Family event',
     ]);
@@ -311,22 +352,37 @@ test('cash advance policy matches approver scope and keeps delete admin only', f
         'division_id' => $division->id,
     ]);
 
+    // Employee::factory() membuat Position default tapi job_title_id null →
+    // user->jobTitle (employee->position->jobTitle) null → rank null → policy
+    // canManage() menolak. Assign JobTitle ke Position agar hierarki resolvable.
+    $managerPosition = Position::factory()->create(['division_id' => $division->id]);
+    $managerPosition->forceFill(['job_title_id' => $managerTitle->id])->save();
+
+    $financePosition = Position::factory()->create(['division_id' => $financeDivision->id]);
+    $financePosition->forceFill(['job_title_id' => $financeTitle->id])->save();
+
+    $staffPosition = Position::factory()->create(['division_id' => $division->id]);
+    $staffPosition->forceFill(['job_title_id' => $staffTitle->id])->save();
+
     $manager = User::factory()->create();
     Employee::factory()->create([
         'user_id' => $manager->id,
         'division_id' => $division->id,
+        'position_id' => $managerPosition->id,
     ]);
 
     $financeHead = User::factory()->create();
     Employee::factory()->create([
         'user_id' => $financeHead->id,
         'division_id' => $financeDivision->id,
+        'position_id' => $financePosition->id,
     ]);
 
     $subordinate = User::factory()->create(['manager_id' => $manager->id]);
     Employee::factory()->create([
         'user_id' => $subordinate->id,
         'division_id' => $division->id,
+        'position_id' => $staffPosition->id,
     ]);
 
     $unrelated = User::factory()->create();

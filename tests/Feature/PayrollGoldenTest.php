@@ -127,6 +127,45 @@ it('fixture payroll golden cases valid', function () use ($goldenCases) {
         ->and($goldenCases['component_cases'])->not->toBeEmpty();
 });
 
+it('ytd gross income does not double count overtime and excludes reimbursements', function () {
+    $service = app(PayrollCalculatorService::class);
+
+    $employee = goldenEmployee([
+        'employment_type' => 'PERMANENT',
+        'marital_status' => 'single',
+        'children_count' => 0,
+        'join_date' => '2024-01-15',
+        'resign_date' => null,
+        'phk_variant' => null,
+        'position' => ['basic_salary' => 10000000, 'allowance_jabatan' => 1000000],
+    ]);
+
+    // Bulan lalu: gross_salary tersimpan SUDAH mencakup lembur (audit M1).
+    // Reimbursement 500.000 ikut masuk gross_salary tapi TIDAK dipajaki.
+    $previous = Payroll::factory()->create([
+        'employee_id' => $employee->id,
+        'period' => '2026-11-01',
+        'gross_salary' => 12_500_000, // = prorata 11.000.000 + lembur 1.000.000 + reimburse 500.000
+        'overtime_pay' => 1_000_000,
+        'status' => PayrollStatus::DRAFT,
+    ]);
+
+    Reimbursement::factory()->create([
+        'employee_id' => $employee->id,
+        'expense_date' => '2026-11-10',
+        'amount' => 500_000,
+        'status' => ReimbursementStatus::PAID,
+        'payroll_id' => $previous->id,
+    ]);
+
+    $method = new ReflectionMethod(PayrollCalculatorService::class, 'getYtdGrossIncome');
+    $method->setAccessible(true);
+
+    // Sebelum fix: 12.500.000 + 1.000.000 (lembur dobel) = 13.500.000.
+    // Setelah fix: gross_salary − reimburse = 12.000.000 (lembur tidak dihitung 2×).
+    expect((float) $method->invoke($service, $employee, '2026-12'))->toBe(12_000_000.0);
+});
+
 foreach ($goldenCases['payroll_cases'] as $case) {
     it("payroll golden case {$case['id']}: {$case['title']}", function () use ($case) {
         $service = app(PayrollCalculatorService::class);

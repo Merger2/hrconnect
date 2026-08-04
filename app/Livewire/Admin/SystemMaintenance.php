@@ -223,6 +223,16 @@ class SystemMaintenance extends Component
         } catch (\Throwable $e) {
             $this->reset(['backupFile', 'restoreConfirmation']);
 
+            // Jangan biarkan run restore menggantung di status 'running' tanpa
+            // jejak audit — tandai failed + alasan (temuan code-review).
+            if (isset($backupRun)) {
+                $backupRun->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                    'failed_at' => now(),
+                ]);
+            }
+
             $this->dispatch('error', message: $e->getMessage());
         }
     }
