@@ -1,3 +1,9 @@
+# Audit HRConnect — SATU-SATUNYA file audit (canonical)
+
+> **Konsolidasi 2026-08-04:** file ini menggantikan `AUDIT-2026-07-30.md` (root + docs/), `docs/audit-checklist.md`, `docs/AUDIT-MAP.md`, `docs/UI-AUDIT.md` — semuanya dihapus. Temuan lama yang masih relevan sudah terserap di ledger di bawah ini. Jangan buat file audit baru — update file ini.
+
+---
+
 # Audit Findings — 2026-08-04 (Full Codebase Read + Test Triage)
 
 **Generated:** 2026-08-04 | **Method:** 18 codemap lanes (1.146 file produksi dibaca) + 4 triage lanes (128 kegagalan test) + verifikasi langsung (grep/read/route:list) | **Status skor readiness: ~50-55%**

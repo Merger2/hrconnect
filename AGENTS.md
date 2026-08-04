@@ -24,8 +24,8 @@
 
 - **92 Livewire components** · **101 models** · **72 controllers** (~104 features)
 - Progress/status: `docs/PROGRESS.md` + `docs/FEATURE-INVENTORY.md` (di-update per session)
-- Audit terbaru: `AUDIT-2026-07-30.md` (root, git-tracked) — jangan re-fix issue yang sudah tercatat
-- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon`, `codemap.md` (semua level), `/.slim/` — gitignored, **local-only** (branch main produksi hanya berisi kode + folder penting). `tests/` + `PRD.md` **TRACKED sejak 2026-08-04** (commit `5e2f953`) — ikut CI/checkout fresh. `.github/` masih **local-only** (di-ignore global rule — belum pernah di-commit). `AUDIT-*.md` root TETAP di-commit; `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang; ⚠️ password asli pernah ada di history commit `6a24cc4` — sudah ter-push, repo saat ini PRIVATE + DB testing lokal, rotasi password baru wajib sebelum repo dipublikasikan); `phpunit.pgsql.xml` sudah ter-commit.
+- Audit terbaru: `AUDIT.md` (root, git-tracked, SATU-SATUNYA file audit) — jangan re-fix issue yang sudah tercatat
+- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon`, `codemap.md` (semua level), `/.slim/` — gitignored, **local-only** (branch main produksi hanya berisi kode + folder penting). `tests/` + `PRD.md` **TRACKED sejak 2026-08-04** (commit `5e2f953`) — ikut CI/checkout fresh. `.github/` masih **local-only** (di-ignore global rule — belum pernah di-commit). `AUDIT.md` root TETAP di-commit (SATU-SATUNYA file audit — jangan buat file audit lain); `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang; ⚠️ password asli pernah ada di history commit `6a24cc4` — sudah ter-push, repo saat ini PRIVATE + DB testing lokal, rotasi password baru wajib sebelum repo dipublikasikan); `phpunit.pgsql.xml` sudah ter-commit.
 
 ---
 
@@ -207,7 +207,7 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 ## Sebelum Nulis Kode
 
 1. Baca **CONVENTIONS.md** — ikuti pola yang ada.
-2. Cek **AUDIT-2026-07-30.md + docs/PROGRESS.md** — jangan re-fix known issues.
+2. Cek **AUDIT.md + docs/PROGRESS.md** — jangan re-fix known issues.
 3. Cari **1-2 contoh existing** dengan pola yang sama. Referensi eksplisit.
 4. Kalau **tidak ada** pola existing → **tanya Fikih** — jangan improvisasi.
 5. **Prioritas:** CONVENTIONS.md > CLAUDE.md (Boost guidelines) > guidance Laravel generik.
