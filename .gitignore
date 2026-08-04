@@ -72,3 +72,8 @@ storage/framework/views/*.php
 # Codemap skill (local-only maps — jangan commit, branch main tetap ramping)
 /.slim/
 codemap.md
+
+# Graphify cache & local state — jangan commit (konvensi "delete cache folder")
+graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_root
