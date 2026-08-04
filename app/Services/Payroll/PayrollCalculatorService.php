@@ -241,8 +241,13 @@ class PayrollCalculatorService
      */
     public function calculateAnnualPPh21Progressive(Employee $employee, float $annualGrossIncome): float
     {
+        // Biaya jabatan PMK 168/2023: 5% × bruto, maks Rp6.000.000/tahun,
+        // dikurangkan sebelum PTKP (keputusan compliance P0 2026-08-05).
+        $biayaJabatan = min(0.05 * $annualGrossIncome, 6_000_000);
+        $netto = max(0, $annualGrossIncome - $biayaJabatan);
+
         $ptkp = $this->getPtkpAmount($employee);
-        $pkp = max(0, $annualGrossIncome - $ptkp);
+        $pkp = max(0, $netto - $ptkp);
 
         if ($pkp <= 0) {
             return 0.0;
@@ -290,15 +295,31 @@ class PayrollCalculatorService
 
     /**
      * Akumulasi penghasilan bruto year-to-date.
+     *
+     * Temuan audit M1: `gross_salary` yang tersimpan SUDAH mencakup
+     * `overtime_pay` (generatePayroll menyimpan taxableIncome = prorata +
+     * lembur, kemudian ditambah reimbursement). Menjumlahkan keduanya lagi
+     * double-count lembur di true-up Desember/terminasi. Reimbursement juga
+     * tidak dipajaki di basis TER bulanan, jadi harus dikeluarkan dari basis
+     * annual agar konsisten.
      */
     private function getYtdGrossIncome(Employee $employee, string $currentPeriod): float
     {
         $year = substr($currentPeriod, 0, 4);
 
-        return (float) Payroll::where('employee_id', $employee->id)
+        $payrolls = Payroll::where('employee_id', $employee->id)
             ->where('period', 'like', "$year-%")
             ->where('period', '<', $currentPeriod)
-            ->sum(DB::raw('gross_salary + COALESCE(overtime_pay, 0)'));
+            ->get(['id', 'gross_salary']);
+
+        $gross = (float) $payrolls->sum('gross_salary');
+
+        // gross_salary sudah termasuk reimbursement — kurangi agar konsisten
+        // dengan basis TER bulanan (reimbursement tidak masuk dasar pajak).
+        $reimbursementInYtd = (float) Reimbursement::whereIn('payroll_id', $payrolls->pluck('id'))
+            ->sum('amount');
+
+        return $gross - $reimbursementInYtd;
     }
 
     /**
@@ -346,11 +367,12 @@ class PayrollCalculatorService
     }
 
     /**
-     * Menghitung pesangon berdasarkan UU Cipta Kerja (PRD Appendix C + §26.3).
+     * Menghitung pesangon berdasarkan PP 35/2021 Pasal 40 Ayat 2.
      *
-     * Tabel pesangon:
-     *   < 1 thn = 0, 1 thn = 1, 2 thn = 2, 3 thn = 3, 4 thn = 4,
-     *   5 thn = 5, ≥ 6 thn = 6 bulan gaji.
+     * Tabel pesangon (PP 35/2021):
+     *   < 1 thn = 1, 1 thn = 2, 2 thn = 3, 3 thn = 4, 4 thn = 5,
+     *   5 thn = 6, 6 thn = 7, 7 thn = 8, ≥ 8 thn = 9 bulan gaji.
+     *   (Sebelumnya UU 13/2003 — disesuaikan 2026-08-05, keputusan compliance P0.)
      *
      * Multiplier variant (phk_variant):
      *   dismissed       = 1.0×
@@ -367,18 +389,16 @@ class PayrollCalculatorService
         $years = (int) ($employee->join_date->diffInMonths(now()) / 12);
 
         $monthMultiplier = match (true) {
-            $years < 1 => 0,
-            $years === 1 => 1,
-            $years === 2 => 2,
-            $years === 3 => 3,
-            $years === 4 => 4,
-            $years === 5 => 5,
-            default => 6,
+            $years < 1 => 1,
+            $years === 1 => 2,
+            $years === 2 => 3,
+            $years === 3 => 4,
+            $years === 4 => 5,
+            $years === 5 => 6,
+            $years === 6 => 7,
+            $years === 7 => 8,
+            default => 9,
         };
-
-        if ($monthMultiplier === 0) {
-            return 0.0;
-        }
 
         $monthlySalary = $this->getMonthlySalary($employee);
         $variantMultiplier = $this->getPhkVariantMultiplier($employee->phk_variant);

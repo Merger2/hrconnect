@@ -68,6 +68,7 @@
 | 42 | **Seeder demo konsolidasi PT DCMS** (M12) — company utama → `DKMS-2025` PT Daya Cipta Mandiri Solusi di 4 seeder (CompanyAndDivision, CompanySetting, CompanyEmployees, E2eTest, Branch, IntegrationSample); 4 seeder `PTDayaciptaMandiri*` duplikat dihapus; **terverifikasi `migrate:fresh --seed`**: 1 company PT DCMS, 56 employees, 1050 attendance, 31 KB + embeddings | ✅ |
 | 43 | ~~UI overlap bottom-nav~~ **KOREKSI (2026-08-05)**: analisis awal salah — clearance 6.5rem SUDAH ada di `layouts/app.blade.php:92` (wrapper semua non-admin); fix `63c8350` membuat double clearance (~13.25rem) → **di-revert**. Akar "UI menimpa" yang sebenarnya: modal lock DEAD (feature-lock/addon-lock tidak pernah di-include → klik fitur terkunci silent-fail), payroll-manager modal inline z-50, dark-mode key mismatch (`isDark` vs `dark`), pwa-install-prompt overlap nav | ✅ di-revert |
 | 44 | **Audit UI menyeluruh 2026-08-05** (4 lane: admin/user blades + components/layouts + Livewire PHP — detail di `docs/UI-AUDIT-2026-08-05.md`): **4 P1 wire-call mismatch** (DocumentTemplateManager 3 method hilang · SystemMaintenance saveBackupAutomationSettings · OperationalWorkspace createClient · MasterData/Admin `form.job_title_id` vs `position_id` — UI error "Method not found"); **3 modal lock mati** (feature-lock/addon-lock/high-priority-announcement tidak pernah di-include → silent-fail); 5+ modal inline tanpa teleport; dark-mode key mismatch; 15+ dead/stub; duplikasi komponen root vs namespaced. Terverifikasi OK: 0 double header, semua 83 render() view ada, `$watch('$wire.` bersih, clearance bottom-nav benar | ⚠️ open (P1) |
+| 45 | **P0 compliance payroll — ADOPSI REGULASI BENAR (keputusan Fikih 2026-08-05)**: (a) pesangon UU 13/2003 → **PP 35/2021 Pasal 40(2)** (<1=1 … ≥8=9, hapus tier 0); (b) **biaya jabatan 5% × bruto cap 6jt/thn** (PMK 168/2023) dikurangkan sebelum PTKP di `calculateAnnualPPh21Progressive`; (c) cap JP 9.559.600 → **11.086.300** (Maret 2026) di PayrollConfigSeeder. **Golden test: 20 pass / 7 skip** — 7 case menunggu angka referensi ulang (CP-03, CP-04 pesangon; PR-03, PR-11, PR-15 cap JP; PR-14, CP-08 biaya jabatan) | ✅ kode · ⏳ 7 case ref |
 
 ---
 
@@ -90,9 +91,9 @@
 ### Payroll & Pajak
 | # | Temuan | Verifikasi |
 |---|--------|:----------:|
-| M1 | True-up PPh21: lembur dobel hitung (`gross_salary + overtime_pay` padahal gross sudah termasuk lembur) + reimburse ikut annual tapi tidak di basis TER bulanan | ✅ (baca kode penuh) |
-| M2 | `calculateAnnualPPh21Progressive` tanpa biaya jabatan (deviasi PMK 168/2023) | ✅ |
-| M3 | Tabel pesangon = UU 13/2003 (bukan PP 35/2021: <1thn=0, 1-6, ≥6=6) + variant `dismissed_severe` 2× ≠ standar | ✅ |
+| M1 | True-up PPh21: lembur dobel hitung (`gross_salary + overtime_pay` padahal gross sudah termasuk lembur) + reimburse ikut annual tapi tidak di basis TER bulanan | ✅ | ✅ **FIXED (2026-08-05)** — `getYtdGrossIncome()` kini SUM(gross_salary) − reimburse ter-link (payroll_id); verifikasi PayrollGoldenTest 27/27 + regression test M1 |
+| M2 | `calculateAnnualPPh21Progressive` tanpa biaya jabatan (deviasi PMK 168/2023) | ✅ | ⚠️ **OPEN** — butuh keputusan Fikih (mengubah angka pajak semua karyawan) |
+| M3 | Tabel pesangon = UU 13/2003 (bukan PP 35/2021: <1thn=0, 1-6, ≥6=6) + variant `dismissed_severe` 2× ≠ standar | ✅ | ⚠️ **OPEN** — variant multiplier kebijakan internal, butuh keputusan Fikih |
 | M4 | Cap JP seeder 9.559.600 (regulasi Maret 2026 ≈ 11jt) | ✅ |
 | M5 | `app.timezone` = UTC (HRIS Indonesia tanpa Asia/Jakarta) | ⚠️ fix-22 |
 | M6 | `config/payroll.php` mati total (0 pembaca) | ⚠️ fix-22 |
@@ -131,7 +132,7 @@
 | M27 | **Scheduler gap**: detect-alpha, detect-chronic-late, reset-leave-quota, cache:warm klaim schedule tapi tidak di routes/console.php | ⚠️ fix-17 |
 | M28 | `hrconnect.face_distance_threshold` dead (hardcode 85.0 di FaceRecognitionService) | ⚠️ fix-22 |
 | M29 | `laravolt` cache store default redis ≠ CACHE_STORE=database | ⚠️ fix-22 |
-| M30 | Backup cluster (8 app-bug, P1): job pg_dump tanpa kredensial, SystemBackupRun tanpa security hooks, SystemMaintenance UI rusak (downloadExistingBackup/restore/queueBackup) | ✅ (triage) |
+| M30 | Backup cluster (8 app-bug, P1): job pg_dump tanpa kredensial, SystemBackupRun tanpa security hooks, SystemMaintenance UI rusak (downloadExistingBackup/restore/queueBackup) | ✅ (triage) | ✅ **SEBAGIAN FIXED (2026-08-05)** — signature HMAC kini ditulis saat backup (`signDatabaseBackup`) sehingga restore berfungsi; `auditCompleted` + audit failed di semua jalur (incl. job failure + restore gagal — tak lagi stuck `running`); regression test roundtrip signature. Sisa: drill command `maintenance:backup-restore-drill` belum diimplementasi (test di-skip, Q6) |
 | M31 | 6 FormRequest tanpa konsumen (ClockInRequest, ClockOutRequest, ListAttendanceRequest, ForgotPasswordRequest, LoginRequest, TwoFactorChallengeRequest) | ⚠️ fix-14 |
 | M32 | 4 JS dead: pwa-install.js, location.service.js, mock-location.js, CapacitorDeviceManager.js | ⚠️ fix-25 |
 

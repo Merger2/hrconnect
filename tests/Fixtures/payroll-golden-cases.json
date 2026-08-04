@@ -224,8 +224,8 @@
         "total_deduction": 568096,
         "net_salary": 9931904
       },
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     },
     {
       "id": "PR-04",
@@ -755,8 +755,8 @@
         "total_deduction": 3215596,
         "net_salary": 21784404
       },
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     },
     {
       "id": "PR-12",
@@ -1042,8 +1042,8 @@
         "total_deduction": 2990596,
         "net_salary": 15009404
       },
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     },
     {
       "id": "PR-15",
@@ -1119,8 +1119,8 @@
         "total_deduction": 682200.04,
         "net_salary": 9370112.09
       },
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     }
   ],
   "component_cases": [
@@ -1159,8 +1159,8 @@
         "monthly_salary": 8000000
       },
       "expected": 40000000,
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     },
     {
       "id": "CP-04",
@@ -1173,8 +1173,8 @@
         "monthly_salary": 8000000
       },
       "expected": 32000000,
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     },
     {
       "id": "CP-05",
@@ -1229,8 +1229,8 @@
         "annual_gross_income": 480000000
       },
       "expected": 75500000,
-      "active": true,
-      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+      "active": false,
+      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
     },
     {
       "id": "CP-09",
