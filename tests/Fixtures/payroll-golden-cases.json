@@ -1,0 +1,690 @@
+{
+  "_meta": {
+    "description": "Golden test dataset PayrollCalculatorService — angka referensi diisi dari perhitungan manual/konsultan pajak Fikih. Jangan isi expected dengan angka tebakan; setiap case harus diverifikasi dari sumber referensi.",
+    "sumber_referensi": "excel perhitungan manual Fikih / konsultan pajak / contoh resmi pajak.go.id",
+    "cara_mengisi": "1) isi expected (angka per komponen) 2) set active=true 3) catat sumber di reference 4) jalankan vendor/bin/pest tests/Feature/PayrollGoldenTest.php",
+    "catatan_kalkulasi": [
+      "prorated_salary = (hari_kerja_aktual / hari_kerja_bulan) x (basic_salary + allowance_jabatan), kalender 5 hari kerja (ManagesWorkDays)",
+      "overtime weekday: jam-1 = 1.5x, jam-2+ = 2x hourly; holiday/weekend: 1-8 = 2x, 9-10 = 3x, 11+ = 4x; hourly = (basic+allowance)/173",
+      "late_penalty = jumlah_hari_late x penalty_per_day (default 50000, CompanySetting attendance_penalty_per_day)",
+      "alpha_penalty = jumlah_alpha x (basic_salary / hari_kerja_bulan)",
+      "bpjs dihitung dari taxable_income = prorata + lembur (reimbursement TIDAK kena pajak/BPJS)",
+      "pph21 TER bulanan = bruto kena pajak x tarif TER (tabel tarif_ter, kategori A/B/C)",
+      "Desember/bulan terminasi: true-up annual progressive Pasal 17 (PP 58/2023), pph21 = max(0, annual_pph21 - ytd)",
+      "net_salary = gross_salary - (attendance_penalty + bpjs_health_employee + bpjs_jht_employee + bpjs_jp_employee + pph21)",
+      "gross_salary = prorated_salary + overtime_pay + reimbursement"
+    ],
+    "periode_referensi": "2026-07 (harus periode non-Desember untuk kasus TER bulanan)",
+    "data_yang_harus_ter-seed_sebelum_test": "TarifTerSeeder + PayrollConfigSeeder (BpjsConfig) + CompanySetting attendance_penalty_per_day",
+    "referensi_tarif_bpjs_2025": [
+      "Kesehatan: employer 4%, employee 1%, ceiling 12.000.000 (dihitung dari min(gross, ceiling))",
+      "JHT: employer 3.7%, employee 2%, tanpa ceiling",
+      "JP: employer 2%, employee 1%, ceiling 9.559.600",
+      "JKK: employer 0.24%, employee 0%, tanpa ceiling",
+      "JKM: employer 0.3%, employee 0%, tanpa ceiling",
+      "Sumber: database/seeders/PayrollConfigSeeder.php"
+    ],
+    "referensi_tarif_ter": "Tabel TER bulanan PP 58/2023 kategori A/B/C ada di database/seeders/TarifTerSeeder.php (kategori_ter di-seed migration). Kategori A: 0% s/d bruto 5.400.000, dst; B: 0% s/d 6.200.000; C: 0% s/d 6.600.000. Contoh untuk PR-01 (bruto 7.000.000, kategori A): bracket 6.750.001-7.500.000 = 1.25%.",
+    "formula_dari_payrollcalculator": [
+      "prorated = round((hari_kerja_aktual/hari_kerja_bulan) x (basic+allowance), 2)",
+      "hourly_rate = (basic+allowance)/173; lembur weekday jam-1 1.5x jam-2+ 2x; weekend/holiday 1-8 2x, 9-10 3x, 11+ 4x",
+      "late_penalty = late_days x penalty_per_day; alpha_penalty = alpha_days x (basic/hari_kerja_bulan)",
+      "taxable_income = prorata + lembur (reimbursement TIDAK dipajaki/tidak kena BPJS)",
+      "pph21_ter = (taxable - attendance_penalty) x tarif_ter",
+      "Desember/bulan terminasi: pph21 = max(0, annual_progressive(ytd_gross + gross) - ytd_pph21)",
+      "bpjs dihitung dari taxable_income; deductions = attendance_penalty + kesehatan(1%) + jht(2%) + jp(1%) + pph21",
+      "net = gross - deductions; gross = prorata + lembur + reimbursement"
+    ]
+  },
+  "payroll_cases": [
+    {
+      "id": "PR-01",
+      "title": "Full month, TER A, tanpa lembur/denda/reimburse",
+      "scenario": "full_month_clean",
+      "notes": "Kasus baseline: karyawan tetap, lajang, kerja penuh sebulan.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-02",
+      "title": "Full month, TER B (menikah 1 tanggungan)",
+      "scenario": "full_month_ter_b",
+      "notes": "marital_status=married, children_count=1 -> kategori TER B.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 1,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-03",
+      "title": "Full month, TER C (menikah 3+ tanggungan)",
+      "scenario": "full_month_ter_c",
+      "notes": "children_count max 3 untuk PTKP; kategori C.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 4,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 9000000, "allowance_jabatan": 1500000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-04",
+      "title": "Intern — tanpa BPJS & PPh21",
+      "scenario": "intern",
+      "notes": "employment_type=INTERN -> calculatePPh21=0, calculateBPJS semua 0.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "INTERN",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2026-06-01",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 2000000, "allowance_jabatan": 0 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-05",
+      "title": "Prorata masuk tengah bulan (join 2026-07-15)",
+      "scenario": "prorata_join_mid_month",
+      "notes": "Hitung hari kerja aktual dari join_date s/d akhir bulan (kalender 5 hari, excl weekend+holiday).",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2026-07-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-06",
+      "title": "Prorata resign tengah bulan (resign 2026-07-20)",
+      "scenario": "prorata_resign_mid_month",
+      "notes": "Resign bulan berjalan -> prorata s/d resign_date; cek guard resign < join.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": "2026-07-20",
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-07",
+      "title": "Lembur weekday 3 jam (1.5x jam-1, 2x jam-2+)",
+      "scenario": "overtime_weekday",
+      "notes": "Overtime tanggal kerja biasa (bukan weekend/holiday), 3 jam, status approved.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [ { "date": "2026-07-08", "hours": 3 } ],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-08",
+      "title": "Lembur weekend 12 jam (2x/3x/4x tiered)",
+      "scenario": "overtime_weekend",
+      "notes": "Sabtu 12 jam: 8 jam x 2x, 2 jam x 3x, 2 jam x 4x.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [ { "date": "2026-07-11", "hours": 12 } ],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-09",
+      "title": "Denda: 2 hari late + 1 hari alpha",
+      "scenario": "penalties",
+      "notes": "late_penalty = 2 x 50000; alpha_penalty = 1 x (basic/working_days).",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 2, "absent_days": 1 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-10",
+      "title": "Reimbursement approved masuk gross (tidak kena BPJS/PPh21)",
+      "scenario": "reimbursement",
+      "notes": "Reimbursement 500000 status APPROVED periode berjalan -> gross +500000, TIDAK masuk basis BPJS/PPh21.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [ { "amount": 500000 } ],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-11",
+      "title": "BPJS ceiling cap (gaji di atas batas atas)",
+      "scenario": "bpjs_ceiling",
+      "notes": "Gross income > ceiling BpjsConfig -> base = ceiling. Gaji 25jt untuk menguji cap.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 22000000, "allowance_jabatan": 3000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-12",
+      "title": "Desember: true-up annual progressive (ytd PPh21)",
+      "scenario": "december_true_up",
+      "notes": "Period 2026-12 + payroll Jan-Nov existing (ytd). pph21 = max(0, annual - ytd). Perlu kasus ytd: [gross bulanan Jan-Nov, pph21 bulanan Jan-Nov].",
+      "input": {
+        "period": "2026-12",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 6000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "ytd_payrolls": [ { "period": "2026-11", "gross_salary": 7000000, "pph21": 0 } ]
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-13",
+      "title": "Terminasi bulan berjalan: true-up progressive",
+      "scenario": "termination_true_up",
+      "notes": "resign_date di periode berjalan -> pph21 = max(0, annual_pph21 - ytd_pph21).",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 2,
+          "join_date": "2024-01-15",
+          "resign_date": "2026-07-20",
+          "phk_variant": null,
+          "position": { "basic_salary": 10000000, "allowance_jabatan": 2000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "ytd_payrolls": [ { "period": "2026-06", "gross_salary": 12000000, "pph21": 0 } ]
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-14",
+      "title": "Bruto tinggi multi-bracket progressive (Desember)",
+      "scenario": "december_high_income",
+      "notes": "Gaji 40jt, Desember -> annual progressive lintas bracket 5%/15%/25%.",
+      "input": {
+        "period": "2026-12",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 3,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 35000000, "allowance_jabatan": 5000000 }
+        },
+        "attendance": { "late_days": 0, "absent_days": 0 },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "PR-15",
+      "title": "Kombinasi lengkap: lembur + denda + reimburse + TER B",
+      "scenario": "combined",
+      "notes": "Uji kombinasi semua komponen sekaligus.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 1,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": { "basic_salary": 8000000, "allowance_jabatan": 1000000 }
+        },
+        "attendance": { "late_days": 3, "absent_days": 0 },
+        "overtimes": [ { "date": "2026-07-08", "hours": 2 }, { "date": "2026-07-11", "hours": 5 } ],
+        "reimbursements": [ { "amount": 350000 } ],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "prorated_salary": null,
+        "overtime_pay": null,
+        "reimbursement": null,
+        "late_penalty": null,
+        "alpha_penalty": null,
+        "gross_salary": null,
+        "bpjs": { "health_employee": null, "jht_employee": null, "jp_employee": null, "jkk_employer": null, "jkm_employer": null },
+        "pph21": null,
+        "total_deduction": null,
+        "net_salary": null
+      },
+      "active": false,
+      "reference": ""
+    }
+  ],
+  "component_cases": [
+    {
+      "id": "CP-01",
+      "method": "calculateThrProrated",
+      "title": "THR prorata 6 bulan kerja",
+      "input": { "monthly_salary": 7000000, "months_worked": 6 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-02",
+      "method": "calculateThrProrated",
+      "title": "THR masa kerja < 1 bulan = 0",
+      "input": { "monthly_salary": 7000000, "months_worked": 0 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-03",
+      "method": "calculatePesangon",
+      "title": "Pesangon 5 tahun kerja, PHK biasa (1x)",
+      "input": { "join_date": "2021-07-01", "phk_variant": "dismissed", "monthly_salary": 8000000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-04",
+      "method": "calculatePesangon",
+      "title": "Pesangon PHK severe 2x, 2 tahun",
+      "input": { "join_date": "2024-07-01", "phk_variant": "dismissed_severe", "monthly_salary": 8000000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-05",
+      "method": "calculateUangPenghargaanMasaKerja",
+      "title": "PMK 8 tahun = 3 bulan gaji",
+      "input": { "join_date": "2018-07-01", "phk_variant": "dismissed", "monthly_salary": 8000000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-06",
+      "method": "calculateUangKompensasi",
+      "title": "PKWT kontrak habis, 18 bulan kerja",
+      "input": { "employment_type": "CONTRACT", "join_date": "2025-01-01", "contract_end_date": "2026-06-30", "monthly_salary": 6000000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-07",
+      "method": "calculateLeaveCashOut",
+      "title": "Sisa cuti 5 hari di-cash-out (divisor 21)",
+      "input": { "leave_quota": 12, "leave_used": 7, "monthly_salary": 6300000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-08",
+      "method": "calculateAnnualPPh21Progressive",
+      "title": "Annual progressive lintas bracket (TK/0)",
+      "input": { "marital_status": "single", "children_count": 0, "annual_gross_income": 480000000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-09",
+      "method": "calculateAnnualPPh21Progressive",
+      "title": "Annual bruto di bawah PTKP = 0 (K/3)",
+      "input": { "marital_status": "married", "children_count": 3, "annual_gross_income": 60000000 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    },
+    {
+      "id": "CP-10",
+      "method": "calculateOvertimePay",
+      "title": "Lembur 0.5 jam dibulatkan ke 0.5 terdekat",
+      "input": { "overtime_hours": 0.5, "overtime_date": "2026-07-08", "monthly_salary": 7000000, "monthly_working_hours": 173 },
+      "expected": null,
+      "active": false,
+      "reference": ""
+    }
+  ]
+}
