@@ -26,8 +26,10 @@ beforeEach(function () {
  */
 test('createApprovalWorkflow creates L1 and L2 when employee has supervisor', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $supervisor = Employee::factory()->create();
@@ -52,8 +54,10 @@ test('createApprovalWorkflow creates L1 and L2 when employee has supervisor', fu
 
 test('createApprovalWorkflow creates only L2 when employee has no supervisor', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create(['parent_id' => null]);
@@ -73,8 +77,10 @@ test('createApprovalWorkflow creates only L2 when employee has no supervisor', f
 
 test('approve marks approval as approved and sets approved_at', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $leaveType = LeaveType::factory()->create(['deducts_from_quota' => false]);
@@ -100,8 +106,10 @@ test('approve marks approval as approved and sets approved_at', function () {
 
 test('approve sets request to APPROVED when all approvals complete', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $leaveType = LeaveType::factory()->create(['deducts_from_quota' => false]);
@@ -126,8 +134,10 @@ test('approve sets request to APPROVED when all approvals complete', function ()
 
 test('approve sets APPROVED_L1 when L1 approved but L2 pending', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $supervisor = Employee::factory()->create();
@@ -151,8 +161,10 @@ test('approve sets APPROVED_L1 when L1 approved but L2 pending', function () {
 
 test('approve throws exception when trying to approve L2 before L1', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $supervisor = Employee::factory()->create();
@@ -181,8 +193,10 @@ test('approve throws exception when trying to approve L2 before L1', function ()
 
 test('approve deducts leave quota when fully approved and leave deducts quota', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $leaveType = LeaveType::factory()->create(['deducts_from_quota' => true, 'quota' => 12]);
@@ -220,8 +234,10 @@ test('approve deducts leave quota when fully approved and leave deducts quota', 
 
 test('reject sets approval to REJECTED with notes and approvable to REJECTED', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $leaveType = LeaveType::factory()->create(['deducts_from_quota' => false]);
@@ -250,8 +266,10 @@ test('reject sets approval to REJECTED with notes and approvable to REJECTED', f
 
 test('reject prevents further approvals on same request', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    $adminRole = SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $adminRole->slug = 'admin'; // User::role('admin') mencocokkan slug (pola seeder)
+    $adminRole->save();
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $leaveType = LeaveType::factory()->create(['deducts_from_quota' => false]);

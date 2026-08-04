@@ -31,8 +31,8 @@ test('approvals pending endpoint requires authenticated user with employee', fun
 
 test('approvals pending returns pending approvals for approver', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();
@@ -57,8 +57,8 @@ test('approvals pending returns pending approvals for approver', function () {
 
 test('approvals pending filters by type', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();
@@ -90,8 +90,8 @@ test('approvals pending filters by type', function () {
 
 test('approve endpoint enforces approver ownership (403 for non-approver)', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $otherUser = User::factory()->create();
@@ -116,8 +116,8 @@ test('approve endpoint enforces approver ownership (403 for non-approver)', func
 
 test('approve endpoint rejects already-processed approval (409)', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();
@@ -141,8 +141,8 @@ test('approve endpoint rejects already-processed approval (409)', function () {
 
 test('approve endpoint successfully approves pending approval', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();
@@ -169,8 +169,8 @@ test('approve endpoint successfully approves pending approval', function () {
 
 test('reject endpoint enforces approver ownership (403 for non-approver)', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $otherUser = User::factory()->create();
@@ -195,8 +195,8 @@ test('reject endpoint enforces approver ownership (403 for non-approver)', funct
 
 test('reject endpoint requires minimum 10 chars reason (422)', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();
@@ -218,8 +218,8 @@ test('reject endpoint requires minimum 10 chars reason (422)', function () {
 
 test('reject endpoint successfully rejects pending approval', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();
@@ -247,8 +247,8 @@ test('reject endpoint successfully rejects pending approval', function () {
 
 test('approvals history returns processed approvals only', function () {
     $hr = User::factory()->create();
-    SpatieRole::firstOrCreate(['name' => 'hr-manager', 'guard_name' => 'web']);
-    $hr->assignRole('hr-manager');
+    SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $hr->assignRole('admin');
     $hrEmployee = Employee::factory()->create(['user_id' => $hr->id]);
 
     $employee = Employee::factory()->create();

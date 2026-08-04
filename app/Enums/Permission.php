@@ -16,9 +16,9 @@ namespace App\Enums;
  * - `process_*`  → operasi khusus (mis. process_payroll oleh Finance)
  * - `download_*` → export/download dengan re-auth password
  *
- * Mapping ke 5 role di RoleAndPermissionSeeder:
- * - super-admin : semua permission (executive override)
- * - hr-manager  : view all + manage employees/HR + approve L2 leaves/OT + KB
+ * Mapping ke 5 role di RoleAndPermissionSeeder (selaras struktur PT DCMS):
+ * - super-admin : semua permission (executive override) — Owner & IT Support
+ * - admin       : full HR + admin panel + system settings + RBAC + payroll — HRD
  * - finance     : process payroll + approve L2 reimbursement + view payslip + tax/bpjs
  * - manager     : approve L1 + view team data
  * - employee    : view own data + dashboard

@@ -297,8 +297,8 @@ test('admin superadmin and hr can open shift swap approvals page', function () {
     $admin = User::factory()->admin()->create();
     $superadmin = User::factory()->admin(true)->create();
     $hr = User::factory()->admin()->create();
-    // The role seeder names this role 'hr-manager' (slug), not 'hr' — create it
-    // if missing so the test is self-contained regardless of seed state.
+    // Role teknis 'hr' dibuat self-contained — test tidak bergantung pada seed.
+    // (Role hr-manager sudah dihapus dari seeder; HRD memakai role admin.)
     $hrRole = Role::query()->firstOrCreate(
         ['name' => 'hr', 'guard_name' => 'web'],
         ['slug' => 'hr', 'permission_keys' => ['manage_shift_swap_approvals']],

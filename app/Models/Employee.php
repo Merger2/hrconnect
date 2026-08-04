@@ -352,7 +352,7 @@ class Employee extends Model implements CipherSweetEncrypted
 
     public function getHrApprover(): ?Employee
     {
-        return User::role('hr-manager')->first()?->employee;
+        return User::role('admin')->first()?->employee;
     }
 
     public function hasClockedInToday(): bool

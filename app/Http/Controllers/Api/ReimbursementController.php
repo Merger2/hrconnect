@@ -111,7 +111,7 @@ class ReimbursementController extends Controller
         $query = Reimbursement::with('employee:id,employee_number,full_name', 'category:id,name')
             ->orderBy('created_at', 'desc');
 
-        if (! $user->hasRole(['super-admin', 'hr-manager', 'finance'])) {
+        if (! $user->hasRole(['super-admin', 'admin', 'finance'])) {
             if ($user->can('approve_reimbursements_l1') && $user->employee) {
                 $query->where(function ($q) use ($user) {
                     $q->where('employee_id', $user->employee->id)

@@ -12,7 +12,7 @@ class SendPayrollSubmittedNotification
     {
         $payroll = $event->payroll;
 
-        User::role('hr-manager')->each(function (User $user) use ($payroll): void {
+        User::role('admin')->each(function (User $user) use ($payroll): void {
             $user->notify(new PayrollSubmittedNotification($payroll));
         });
     }

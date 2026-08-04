@@ -99,8 +99,8 @@ class LeaveController extends Controller
         $query = Leave::with(['leaveType:id,name,code'])
             ->orderBy('created_at', 'desc');
 
-        // Filter ownership: HR Manager all, Manager team, Employee self
-        if (! $user->hasRole(['super-admin', 'hr-manager'])) {
+        // Filter ownership: HR all (role admin), Manager team, Employee self
+        if (! $user->hasRole(['super-admin', 'admin'])) {
             if ($user->can('approve_leaves_l1') && $user->employee) {
                 $query->where(function ($q) use ($user) {
                     $q->where('employee_id', $user->employee->id)
@@ -119,7 +119,7 @@ class LeaveController extends Controller
             $query->whereYear('start_date', (int) $request->input('year'));
         }
 
-        if ($request->filled('employee_id') && $user->hasRole(['super-admin', 'hr-manager'])) {
+        if ($request->filled('employee_id') && $user->hasRole(['super-admin', 'admin'])) {
             $query->where('employee_id', $request->input('employee_id'));
         }
 

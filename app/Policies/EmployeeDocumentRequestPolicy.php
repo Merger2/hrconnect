@@ -143,8 +143,8 @@ final class EmployeeDocumentRequestPolicy
             return true;
         }
 
-        // Elevated roles: super-admin, admin, hr-manager, manager
-        $elevatedRoles = ['super-admin', 'admin', 'hr-manager', 'manager'];
+        // Elevated roles: super-admin, admin, manager (hr-manager dihapus — HRD memakai role admin)
+        $elevatedRoles = ['super-admin', 'admin', 'manager'];
 
         if ($actor->hasAnyRole($elevatedRoles)) {
             return true;

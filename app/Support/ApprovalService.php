@@ -111,8 +111,8 @@ class ApprovalService
             }
         }
 
-        // L2: HR Manager
-        $hrUsers = User::role('hr-manager')->get();
+        // L2: HR (role admin — HRD; role hr-manager dihapus)
+        $hrUsers = User::role('admin')->get();
         foreach ($hrUsers as $hrUser) {
             if ($hrUser->employee) {
                 $approvers[] = ['employee' => $hrUser->employee, 'level' => ApprovalLevel::L2_MANAGER];

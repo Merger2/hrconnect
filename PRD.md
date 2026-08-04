@@ -72,13 +72,18 @@ Membangun **HRIS internal terintegrasi** untuk satu perusahaan yang:
 
 ### Target User
 
-| Role | Kegunaan utama Release 1 |
-|------|--------------------------|
-| **Employee** | Lihat profil, absen, ajukan cuti/izin, lihat payslip, tanya AI KB. |
-| **Manager** | Setujui cuti/izin, lihat laporan tim, absen tim. |
-| **HR** | Kelola master data, jadwal, dokumen, laporan, dan checklist. |
-| **Finance** | Verifikasi payroll, akses laporan payroll, payslip. |
-| **Admin/IT** | Kelola user, role, RBAC, monitoring, backup. |
+Pemetaan peran PT DCMS ke role teknis di sistem (sumber: `database/seeders/RoleAndPermissionSeeder.php` — 5 role):
+
+| Peran PT DCMS | Role di sistem | Kegunaan utama Release 1 |
+|---------------|----------------|--------------------------|
+| **Owner** | `super-admin` (flag per-user) | Akses penuh, executive override, lihat semua data termasuk payroll. |
+| **IT Support** | `super-admin` (flag per-user) | Teknis: backup/restore, RBAC, monitoring, maintenance. |
+| **HRD** | `admin` | Kelola master data, jadwal, dokumen, laporan, checklist, payroll, approve L2. |
+| **Finance** | `finance` | Verifikasi payroll, tax/BPJS, approve L2 reimbursement, payslip. |
+| **Manager** | `manager` | Setujui cuti/izin L1, lihat laporan tim, absen tim. |
+| **Employee** | `employee` | Lihat profil, absen, ajukan cuti/izin, lihat payslip, tanya AI KB. |
+
+> **Catatan:** `super-admin` bukan role eksklusif — di-set sebagai flag `is_super_admin` per user, sehingga Owner dan IT Support bisa sama-sama superadmin. Role `hr-manager` sudah dihapus (HRD memakai `admin`).
 
 ### Asumsi
 
