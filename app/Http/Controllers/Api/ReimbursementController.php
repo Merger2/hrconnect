@@ -188,6 +188,8 @@ class ReimbursementController extends Controller
     #[Endpoint(title: 'List Reimbursement Categories', description: 'Get active reimbursement categories.')]
     public function categories(): JsonResponse
     {
+        $this->authorize('viewAny', Reimbursement::class);
+
         $categories = ReimbursementCategory::where('is_active', true)
             ->orderBy('name')
             ->get();
