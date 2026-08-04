@@ -137,8 +137,8 @@ window.tomSelectInput = (options, placeholder, selected, disabled) => ({
 // ─── Flatpickr initializer ─────────────────────────────────────────────
 // Scans for [data-ui-picker] elements and initializes flatpickr on each.
 // Safe to call multiple times (skips already-initialized elements).
-const initFlatpickr = () => {
-    document.querySelectorAll('[data-ui-picker]:not([data-flatpickr-inited])').forEach((el) => {
+const initFlatpickr = (root = document) => {
+    root.querySelectorAll('[data-ui-picker]:not([data-flatpickr-inited])').forEach((el) => {
         const mode = el.getAttribute('data-ui-picker') || 'date';
         const minDate = el.getAttribute('min') || null;
         const maxDate = el.getAttribute('max') || null;
@@ -178,4 +178,29 @@ document.addEventListener('livewire:init', () => {
         setTimeout(initFlatpickr, 50);
     });
 });
+
+// ─── UI pickers initializer (modal-aware) ─────────────────────────────
+// Initializes flatpickr ([data-ui-picker]) and tom-select fields inside a
+// container that may have been rendered after the initial page load
+// (e.g. modal content opened via x-teleport). Follows the same init
+// pattern as initFlatpickr / tomSelectInput: already-initialized
+// elements are skipped, so calling this repeatedly is safe.
+const initUiPickers = (root = document) => {
+    const container = root instanceof Element ? root : document;
+
+    initFlatpickr(container);
+
+    container.querySelectorAll('[x-data^="tomSelectInput"]').forEach((wrapper) => {
+        const select = wrapper.querySelector('select');
+        if (!select || select.tomselect) return;
+
+        new TomSelect(select, {
+            placeholder: select.getAttribute('placeholder') || 'Select an option',
+            maxOptions: null,
+            allowEmptyOption: true,
+        });
+    });
+};
+
+window.initUiPickers = initUiPickers;
 

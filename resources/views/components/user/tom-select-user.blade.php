@@ -158,12 +158,7 @@
         @js($options), 
         @js($placeholder),
         @if(isset($__livewire) && $attributes->wire('model')->value()) @entangle($attributes->wire('model')) @else @js($selected) @endif,
-        {{ $disabled ? 'true' : 'false' }},
-        null,
-        false,
-        false,
-        'auto',
-        @js($dropdownParent)
+        {{ $disabled ? 'true' : 'false' }}
      )"
      class="w-full ts-wrapper-user relative">
     

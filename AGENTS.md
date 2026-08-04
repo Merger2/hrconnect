@@ -25,7 +25,7 @@
 - **92 Livewire components** · **101 models** · **72 controllers** (~104 features)
 - Progress/status: `docs/PROGRESS.md` + `docs/FEATURE-INVENTORY.md` (di-update per session)
 - Audit terbaru: `AUDIT-2026-07-30.md` (root, git-tracked) — jangan re-fix issue yang sudah tercatat
-- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon` — gitignored, **local-only**. `PRD.md`, `tests/`, `.github/` — **untracked** (belum pernah di-commit): jangan commit, jangan harap ada di CI/checkout fresh. `AUDIT-*.md` root TETAP di-commit; `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang); `phpunit.pgsql.xml` sedang staged.
+- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon`, `codemap.md` (semua level), `/.slim/` — gitignored, **local-only** (branch main produksi hanya berisi kode + folder penting). `PRD.md`, `tests/`, `.github/` — **untracked** (belum pernah di-commit): jangan commit, jangan harap ada di CI/checkout fresh. `AUDIT-*.md` root TETAP di-commit; `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang); `phpunit.pgsql.xml` sedang staged.
 
 ---
 

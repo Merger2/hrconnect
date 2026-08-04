@@ -265,11 +265,7 @@
     @js($options),
     @js($placeholder),
     @if (isset($__livewire) && $wireModel) @entangle($attributes->wire('model')) @else @js($selected) @endif,
-    @js((bool) $disabled),
-    @js($wireModel),
-    @js((bool) $submitOnChange),
-    @js((bool) $livewireSetLive),
-    @js($dropdownDirection)
+    @js((bool) $disabled)
 )" class="{{ $wrapperClass }}" @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
 
     <select

@@ -454,6 +454,11 @@
     "ast_hash": "009e4df68da913e6ef014113b23506d2",
     "semantic_hash": "009e4df68da913e6ef014113b23506d2"
   },
+  "app/Http/Controllers/Admin/ImportExport/AttendancesPageController.php": {
+    "mtime": 1785287043.0189111,
+    "ast_hash": "d2502279efa86fccd255a1ba607e3d06",
+    "semantic_hash": "d2502279efa86fccd255a1ba607e3d06"
+  },
   "app/Http/Controllers/Admin/ImportExport/DownloadImportExportRunController.php": {
     "mtime": 1785287043.0190344,
     "ast_hash": "fdb4ad850f39761507e9eda04525eb0b",
@@ -488,6 +493,11 @@
     "mtime": 1785287043.0190344,
     "ast_hash": "90df13a19333843c75d5eda7408e7f25",
     "semantic_hash": "90df13a19333843c75d5eda7408e7f25"
+  },
+  "app/Http/Controllers/Admin/ImportExport/UsersPageController.php": {
+    "mtime": 1785287043.0190344,
+    "ast_hash": "b47ad8b89273c648fbb298ea82f2a541",
+    "semantic_hash": "b47ad8b89273c648fbb298ea82f2a541"
   },
   "app/Http/Controllers/Admin/MasterData/AdminController.php": {
     "mtime": 1785287043.0190344,
@@ -1608,6 +1618,11 @@
     "mtime": 1785287043.0249615,
     "ast_hash": "749302b67535d9f6c98865dea6fc06e2",
     "semantic_hash": "749302b67535d9f6c98865dea6fc06e2"
+  },
+  "app/Livewire/Shared/NotificationsPage.php": {
+    "mtime": 1785287043.0249615,
+    "ast_hash": "971909c16b210ccd762ff102536549ec",
+    "semantic_hash": "971909c16b210ccd762ff102536549ec"
   },
   "app/Livewire/Traits/AttendanceDetailTrait.php": {
     "mtime": 1785287043.0249615,
@@ -3105,9 +3120,9 @@
     "semantic_hash": "18601a927b48d38337ba2077426a7d60"
   },
   "config/navigation.php": {
-    "mtime": 1785811510.9707267,
-    "ast_hash": "d8a6a2a73325b341616ac6cbe182d5b0",
-    "semantic_hash": ""
+    "mtime": 1785324920.873492,
+    "ast_hash": "53f5fb9f916c93eff03c53fdde7f959c",
+    "semantic_hash": "53f5fb9f916c93eff03c53fdde7f959c"
   },
   "config/payroll.php": {
     "mtime": 1785287043.0322282,
@@ -4670,9 +4685,9 @@
     "semantic_hash": "cf457ab6e64a2d65bb242b1d3b477c02"
   },
   "resources/views/attendances/history.blade.php": {
-    "mtime": 1785815258.0393322,
-    "ast_hash": "2140a2e5aa995398bd73b9840c8cae21",
-    "semantic_hash": ""
+    "mtime": 1785350926.8717475,
+    "ast_hash": "15e5425c24ebe0a5cdcb148acff9527a",
+    "semantic_hash": "15e5425c24ebe0a5cdcb148acff9527a"
   },
   "resources/views/attendances/scan.blade.php": {
     "mtime": 1785345112.99429,
@@ -5544,6 +5559,11 @@
     "ast_hash": "1178fdf248a7a9f3d9c0580a32524942",
     "semantic_hash": "1178fdf248a7a9f3d9c0580a32524942"
   },
+  "resources/views/livewire/it-support/monitoring-dashboard.blade.php": {
+    "mtime": 1785287195.2619245,
+    "ast_hash": "fb04aaf765eb7830401eeb82b5a7290e",
+    "semantic_hash": "fb04aaf765eb7830401eeb82b5a7290e"
+  },
   "resources/views/livewire/shared/finance/cash-advance-manager-content.blade.php": {
     "mtime": 1785287043.0926507,
     "ast_hash": "ec9de18d7d9760f54f83bf34b3183390",
@@ -5775,9 +5795,9 @@
     "semantic_hash": "cfe92770cdee2f48eda4afc5eabf8bfc"
   },
   "resources/views/profile/show.blade.php": {
-    "mtime": 1785814868.1330075,
-    "ast_hash": "0489dbe68ba0f70fb6169fbf877866e2",
-    "semantic_hash": ""
+    "mtime": 1785351759.4409604,
+    "ast_hash": "b0674148243ec64f26747bd8506bf93f",
+    "semantic_hash": "b0674148243ec64f26747bd8506bf93f"
   },
   "resources/views/profile/two-factor-authentication-form.blade.php": {
     "mtime": 1785350540.6705596,
@@ -6190,8 +6210,8 @@
     "semantic_hash": "67a87b7ffbff4c25e76092081e964d30"
   },
   "AGENTS.md": {
-    "mtime": 1785817038.6746767,
-    "ast_hash": "19428c01dcd97b8cfb26ceeae7b8ddf4",
+    "mtime": 1785702911.6029892,
+    "ast_hash": "09352e266ecd1ba47b3c391dfc545f37",
     "semantic_hash": ""
   },
   "AUDIT-2026-07-30.md": {
@@ -6218,6 +6238,11 @@
     "mtime": 1785355251.9438026,
     "ast_hash": "97f725729e7087172fe2fa461119029b",
     "semantic_hash": "97f725729e7087172fe2fa461119029b"
+  },
+  "all_routes.txt": {
+    "mtime": 1785287043.0166397,
+    "ast_hash": "2c21c9d5c15a93fd0bbaac0680ed9d70",
+    "semantic_hash": "2c21c9d5c15a93fd0bbaac0680ed9d70"
   },
   "design.md": {
     "mtime": 1785287043.0362282,
@@ -7013,160 +7038,5 @@
     "mtime": 1784595269.1539116,
     "ast_hash": "9becf32ccce817a112ab0344a33aff43",
     "semantic_hash": "9becf32ccce817a112ab0344a33aff43"
-  },
-  ".github/skills/ai-sdk-development/SKILL.md": {
-    "mtime": 1784840159.527779,
-    "ast_hash": "affdc1a0edefe2134fcbe8078cb4c364",
-    "semantic_hash": ""
-  },
-  ".github/skills/echo-development/SKILL.md": {
-    "mtime": 1784840159.5575967,
-    "ast_hash": "9ba5e91f9da4e91cc13d90d06b1d184c",
-    "semantic_hash": ""
-  },
-  ".github/skills/fortify-development/SKILL.md": {
-    "mtime": 1784840159.527996,
-    "ast_hash": "6f858756a7cbd5e1e8e8706c92b287f1",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/SKILL.md": {
-    "mtime": 1784840159.5439842,
-    "ast_hash": "3a12cbbd15e9ec8a88b1e9a7b3726046",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/advanced-queries.md": {
-    "mtime": 1784840159.5419064,
-    "ast_hash": "0fc2f39a053ef6e3d99512dd99e10f3f",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/architecture.md": {
-    "mtime": 1784840159.5391529,
-    "ast_hash": "2b37131c88c9e71d3054f720bc1a5909",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/blade-views.md": {
-    "mtime": 1784840159.5393264,
-    "ast_hash": "89fe634e274347614654396c417c75a1",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/caching.md": {
-    "mtime": 1784840159.5377717,
-    "ast_hash": "bc86568d69d91a57e127129885e53f6c",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/collections.md": {
-    "mtime": 1784840159.5389795,
-    "ast_hash": "493fa2ba2b545ee012ce6e526887d6ee",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/config.md": {
-    "mtime": 1784840159.539534,
-    "ast_hash": "8c4dc261c9497ec45d49959d172d31de",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/db-performance.md": {
-    "mtime": 1784840159.5394063,
-    "ast_hash": "b88f15c0ab91d04972c4afc28e1d8750",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/eloquent.md": {
-    "mtime": 1784840159.5377192,
-    "ast_hash": "e4dd213c79889bc7c480414583315117",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/error-handling.md": {
-    "mtime": 1784840159.5419412,
-    "ast_hash": "a97fb3e9e7dc1c90aee4ab62bbd23d33",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/events-notifications.md": {
-    "mtime": 1784840159.5393653,
-    "ast_hash": "64aec17faca1fd32ecbc0f635f44129f",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/http-client.md": {
-    "mtime": 1784840159.5391917,
-    "ast_hash": "61636e1994dee62579eb34d6870d674b",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/mail.md": {
-    "mtime": 1784840159.5392554,
-    "ast_hash": "6587c4297c2db03f43ab713cc27b6ad1",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/migrations.md": {
-    "mtime": 1784840159.5392246,
-    "ast_hash": "1234ab9623b446d02964712fa4ca9f54",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/queue-jobs.md": {
-    "mtime": 1784840159.5394924,
-    "ast_hash": "96a1b1005111d9450e8956a52c448ed5",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/routing.md": {
-    "mtime": 1784840159.5391064,
-    "ast_hash": "e8af9eaad72cce206c0de3726c0a093f",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/scheduling.md": {
-    "mtime": 1784840159.5394518,
-    "ast_hash": "657c066d81706efff4fd1df2721ba129",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/security.md": {
-    "mtime": 1784840159.5418372,
-    "ast_hash": "c7e66199f3ca5170907e1de811846140",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/style.md": {
-    "mtime": 1784840159.539291,
-    "ast_hash": "65c90863670a1b0fd4c40dc850a41fd7",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/testing.md": {
-    "mtime": 1784840159.5395715,
-    "ast_hash": "e98f80b925ab9cdb5b27df30bf036c8b",
-    "semantic_hash": ""
-  },
-  ".github/skills/laravel-best-practices/rules/validation.md": {
-    "mtime": 1784840159.5390253,
-    "ast_hash": "c842cc29171c7e10ab702628dfe25977",
-    "semantic_hash": ""
-  },
-  ".github/skills/livewire-development/SKILL.md": {
-    "mtime": 1784840159.5515492,
-    "ast_hash": "e53126ce0a9f06b85ed655184ac4edb3",
-    "semantic_hash": ""
-  },
-  ".github/skills/livewire-development/reference/javascript-hooks.md": {
-    "mtime": 1784840159.5517159,
-    "ast_hash": "f61a7707563ecea39a932f6b9f64c2f5",
-    "semantic_hash": ""
-  },
-  ".github/skills/pest-testing/SKILL.md": {
-    "mtime": 1784840159.5555131,
-    "ast_hash": "8063edef41d88dc1736f0196b27060c2",
-    "semantic_hash": ""
-  },
-  ".github/skills/tailwindcss-development/SKILL.md": {
-    "mtime": 1784840159.566577,
-    "ast_hash": "cab1d01b164fcd1e7d6e7c210f06a483",
-    "semantic_hash": ""
-  },
-  ".github/workflows/lint.yml": {
-    "mtime": 1783877058.0888703,
-    "ast_hash": "531b0ef5a9f2adcee24b7f8e2be377c9",
-    "semantic_hash": ""
-  },
-  ".github/workflows/tests.yml": {
-    "mtime": 1783877058.0893154,
-    "ast_hash": "625e01b621c7be1f98f3b9386c317877",
-    "semantic_hash": ""
-  },
-  "PRD.md": {
-    "mtime": 1785774841.2069478,
-    "ast_hash": "13de1b1c27567713400d8beace950545",
-    "semantic_hash": ""
   }
 }

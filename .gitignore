@@ -52,6 +52,7 @@ tests/e2e/.auth/
 /.agents/
 /.claude/
 /.codex/
+/.github/
 /.gemini/
 /.opencode/
 /docs/**
@@ -67,3 +68,7 @@ storage/framework/views/*.php
 
 # Testing env berisi kredensial DB asli — local-only, JANGAN commit
 .env.testing
+
+# Codemap skill (local-only maps — jangan commit, branch main tetap ramping)
+/.slim/
+codemap.md

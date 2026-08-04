@@ -5,11 +5,10 @@
                 <x-user.page-header
                     :back-href="route('home')"
                     :title="__('Attendance History')"
-                    title-id="attendance-history-title">
+                    title-id="attendance-history-title"
+                    class="border-b-0">
                     <x-slot name="icon">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
+                        <x-heroicon-o-clock class="h-5 w-5" />
                     </x-slot>
                 </x-user.page-header>
 
