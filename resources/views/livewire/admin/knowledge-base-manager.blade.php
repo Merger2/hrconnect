@@ -10,7 +10,7 @@
             <div class="md:col-span-2 xl:col-span-4">
                 <x-forms.label for="kb-search" value="{{ __('Cari dokumen') }}" class="mb-1.5 block" />
                 <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z" clip-rule="evenodd" />
                         </svg>
@@ -46,40 +46,40 @@
         @if ($documents->isEmpty())
             <div class="px-6 py-8">
                 <div class="flex flex-col items-center justify-center text-center">
-                    <x-heroicon-o-document-text class="h-12 w-12 text-gray-300 dark:text-gray-600" />
-                    <h3 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">{{ __('Belum ada dokumen') }}</h3>
+                    <x-heroicon-o-document-text class="h-12 w-12 text-gray-300" />
+                    <h3 class="mt-4 text-lg font-bold text-gray-900">{{ __('Belum ada dokumen') }}</h3>
                     <p class="sr-only">{{ __('Upload PDF pertama untuk memulai knowledge base.') }}</p>
                 </div>
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Judul') }}</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Kategori') }}</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Status') }}</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Chunk') }}</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Diupload') }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Judul') }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Kategori') }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Status') }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Chunk') }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{{ __('Diupload') }}</th>
                             <th scope="col" class="relative px-4 py-3"><span class="sr-only">{{ __('Aksi') }}</span></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-900">
+                    <tbody class="divide-y divide-gray-100 bg-white">
                         @foreach ($documents as $doc)
                             @php
                                 $statusStyles = match($doc->status?->value) {
-                                    'completed' => ['bg' => 'bg-emerald-50 dark:bg-emerald-900/20', 'text' => 'text-emerald-700 dark:text-emerald-400', 'ring' => 'ring-emerald-600/20'],
-                                    'processing' => ['bg' => 'bg-amber-50 dark:bg-amber-900/20', 'text' => 'text-amber-700 dark:text-amber-400', 'ring' => 'ring-amber-600/20'],
-                                    'failed' => ['bg' => 'bg-rose-50 dark:bg-rose-900/20', 'text' => 'text-rose-700 dark:text-rose-400', 'ring' => 'ring-rose-600/20'],
-                                    default => ['bg' => 'bg-slate-50 dark:bg-slate-900/20', 'text' => 'text-slate-700 dark:text-slate-400', 'ring' => 'ring-slate-600/20'],
+                                    'completed' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'ring' => 'ring-emerald-600/20'],
+                                    'processing' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'ring' => 'ring-amber-600/20'],
+                                    'failed' => ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'ring' => 'ring-rose-600/20'],
+                                    default => ['bg' => 'bg-slate-50', 'text' => 'text-slate-700', 'ring' => 'ring-slate-600/20'],
                                 };
                             @endphp
-                            <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <tr class="transition-colors hover:bg-gray-50">
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <div class="flex items-center gap-3">
                                         <x-heroicon-o-document-text class="h-5 w-5 shrink-0 text-gray-400" />
                                         <div>
-                                            <div class="font-medium text-gray-900 dark:text-white">{{ $doc->title }}</div>
+                                            <div class="font-medium text-gray-900">{{ $doc->title }}</div>
                                             @if($doc->source_document)
                                                 <div class="text-xs text-gray-500">{{ $doc->source_document }}</div>
                                             @endif
@@ -87,7 +87,7 @@
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20 dark:bg-sky-900/20 dark:text-sky-400">
+                                    <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20">
                                         {{ $doc->category?->value ?? '-' }}
                                     </span>
                                 </td>
@@ -102,10 +102,10 @@
                                         {{ __(ucfirst($doc->status?->value ?? 'unknown')) }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
                                     {{ $doc->chunk_count ?? '-' }}
                                 </td>
-                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
                                     {{ $doc->created_at?->translatedFormat('d M Y') }}
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
@@ -129,7 +129,7 @@
                 </table>
             </div>
 
-            <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5 dark:border-gray-700/60 dark:bg-gray-900/40">
+            <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
                 {{ $documents->links() }}
             </div>
         @endif
@@ -157,7 +157,7 @@
                 <div>
                     <x-forms.label for="uploadFile" value="{{ __('File PDF (max 10MB)') }}" />
                     <input id="uploadFile" type="file" accept="application/pdf" wire:model="uploadFile"
-                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-primary-900/20 dark:file:text-primary-400" />
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100" />
                     <x-forms.input-error for="uploadFile" class="mt-2" />
                     <p class="mt-1 text-xs text-gray-400">Format: PDF, maksimal 10 MB</p>
                 </div>
@@ -179,41 +179,41 @@
         <x-slot name="content">
             @if($detailDoc)
                 <div class="mb-4 grid grid-cols-2 gap-4">
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div class="text-xs text-gray-500">{{ __('Kategori') }}</div>
-                        <div class="mt-0.5 font-medium text-gray-900 dark:text-white">{{ $detailDoc->category?->value ?? '-' }}</div>
+                        <div class="mt-0.5 font-medium text-gray-900">{{ $detailDoc->category?->value ?? '-' }}</div>
                     </div>
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div class="text-xs text-gray-500">{{ __('Status') }}</div>
-                        <div class="mt-0.5 font-medium text-gray-900 dark:text-white">{{ __(ucfirst($detailDoc->status?->value ?? 'unknown')) }}</div>
+                        <div class="mt-0.5 font-medium text-gray-900">{{ __(ucfirst($detailDoc->status?->value ?? 'unknown')) }}</div>
                     </div>
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div class="text-xs text-gray-500">{{ __('Total Chunk') }}</div>
-                        <div class="mt-0.5 font-medium text-gray-900 dark:text-white">{{ $detailDoc->chunk_count ?? '-' }}</div>
+                        <div class="mt-0.5 font-medium text-gray-900">{{ $detailDoc->chunk_count ?? '-' }}</div>
                     </div>
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div class="text-xs text-gray-500">{{ __('Diindex') }}</div>
-                        <div class="mt-0.5 font-medium text-gray-900 dark:text-white">{{ $detailDoc->is_indexed ? __('Ya') : __('Tidak') }}</div>
+                        <div class="mt-0.5 font-medium text-gray-900">{{ $detailDoc->is_indexed ? __('Ya') : __('Tidak') }}</div>
                     </div>
                 </div>
-                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                     <div class="text-xs text-gray-500">{{ __('Nama File') }}</div>
-                    <div class="mt-0.5 font-medium text-gray-900 dark:text-white">{{ $detailDoc->source_document ?? '-' }}</div>
+                    <div class="mt-0.5 font-medium text-gray-900">{{ $detailDoc->source_document ?? '-' }}</div>
                 </div>
 
                 @if($detailDoc->relationLoaded('chunks') && $detailDoc->chunks->isNotEmpty())
                     <div class="mt-6">
-                        <h4 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{{ __('Daftar Chunk') }} ({{ $detailDoc->chunks->count() }})</h4>
+                        <h4 class="mb-3 text-sm font-semibold text-gray-900">{{ __('Daftar Chunk') }} ({{ $detailDoc->chunks->count() }})</h4>
                         <div class="max-h-80 space-y-2 overflow-y-auto">
                             @foreach($detailDoc->chunks as $chunk)
-                                <div class="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-700 dark:bg-gray-800/50">
+                                <div class="rounded-lg border border-gray-100 bg-white p-3">
                                     <div class="mb-1 flex items-center gap-2">
-                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
                                             #{{ $chunk->page_number ?? $loop->iteration }}
                                         </span>
                                         <span class="text-xs text-gray-400">{{ $chunk->created_at?->diffForHumans() }}</span>
                                     </div>
-                                    <p class="line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{{ $chunk->content }}</p>
+                                    <p class="line-clamp-3 text-sm text-gray-600">{{ $chunk->content }}</p>
                                 </div>
                             @endforeach
                         </div>

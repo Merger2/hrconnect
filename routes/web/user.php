@@ -5,7 +5,6 @@ use App\Http\Controllers\User\AppraisalExportPdfController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\EmployeeDocumentDownloadController;
 use App\Http\Controllers\User\HomeController;
-use App\Livewire\User\KnowledgeBaseChat;
 use App\Models\Appraisal;
 use App\Models\Attendance as AttendanceRecord;
 use App\Models\AttendanceCorrection;
@@ -90,7 +89,7 @@ Route::middleware([
             ->can('exportPdf', 'appraisal');
 
         // Knowledge Base Chat
-        Route::livewire('/knowledge-base/chat', KnowledgeBaseChat::class)
+        Route::livewire('/knowledge-base/chat', 'user.knowledge-base-chat')
             ->name('knowledge-base.chat')
             ->can('view_knowledgebase');
     });

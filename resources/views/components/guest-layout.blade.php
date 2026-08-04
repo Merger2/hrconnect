@@ -59,14 +59,6 @@
         }
     </script>
 
-    <script>
-        if (localStorage.getItem('isDark') === 'true' || (!('isDark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

@@ -7,7 +7,7 @@
 
 @php
     $baseClass = $framed
-        ? 'mx-auto max-w-xl rounded-xl border border-gray-200 bg-white p-3 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-4'
+        ? 'mx-auto max-w-xl rounded-xl border border-gray-200 bg-white p-3 text-center shadow-sm sm:p-4'
         : 'mx-auto max-w-xl px-4 py-4 text-center sm:py-5';
 @endphp
 
@@ -18,10 +18,10 @@
         </div>
     @endisset
 
-    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
+    <h3 class="text-sm font-semibold text-gray-900">{{ $title }}</h3>
 
     @if ($description)
-        <p class="{{ $showDescription ? 'mt-1.5 text-sm text-gray-500 dark:text-gray-400' : 'sr-only' }}">{{ $description }}</p>
+        <p class="{{ $showDescription ? 'mt-1.5 text-sm text-gray-500' : 'sr-only' }}">{{ $description }}</p>
     @endif
 
     @isset($actions)

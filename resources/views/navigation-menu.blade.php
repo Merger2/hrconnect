@@ -1,4 +1,4 @@
-{{-- <nav x-data="{ open: false }" class="border-b border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800"> --}}
+{{-- <nav x-data="{ open: false }" class="border-b border-gray-100 bg-white"> --}}
 @php
 use App\Helpers\FeatureToggle;
     $isAdminRoute = request()->routeIs('admin.*');
@@ -326,7 +326,7 @@ use App\Helpers\FeatureToggle;
 
 <nav x-data="{ open: false }" @keydown.escape.window="open = false" aria-label="{{ $isAdminRoute ? __('Primary navigation') : __('User navigation') }}"
     data-app-top-nav
-    class="fixed top-0 left-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/95 pt-[env(safe-area-inset-top)]">
+    class="fixed top-0 left-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top)]">
     <!-- Primary Navigation Menu -->
     <div
         class="{{ $isAdminRoute ? 'w-full px-4 sm:px-6 lg:px-8 2xl:px-10' : 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8' }}">
@@ -335,7 +335,7 @@ use App\Helpers\FeatureToggle;
                 <!-- Logo -->
                 <div class="flex shrink-0 items-center">
                     <a href="{{ $homeHref }}"
-                        class="rounded-xl p-1 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 dark:hover:bg-gray-800 dark:focus-visible:ring-primary-300 dark:focus-visible:ring-offset-gray-900"
+                        class="rounded-xl p-1 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
                         aria-label="{{ $homeLabel }}">
                         <x-branding.application-mark
                             class="block {{ $isAdminRoute ? 'h-9 w-auto' : 'h-10 w-10 sm:h-11 sm:w-11' }}" />
@@ -354,16 +354,16 @@ use App\Helpers\FeatureToggle;
                                 <x-navigation.nav-dropdown id="desktop-admin-{{ $menuItem['id'] }}" :active="$menuItem['active']" triggerClasses="text-nowrap" :dropdownClasses="$menuItem['id'] === 'operations' ? 'w-72' : 'w-48'">
                                     <x-slot name="trigger">
                                         {{ $menuItem['label'] }}
-                                        <x-heroicon-o-chevron-down class="ms-2 h-5 w-5 text-gray-500 dark:text-gray-300" />
+                                        <x-heroicon-o-chevron-down class="ms-2 h-5 w-5 text-gray-500" />
                                     </x-slot>
                                     <x-slot name="content">
                                         @foreach ($menuItem['items'] as $navItem)
                                             @if ($navItem['type'] === 'heading')
-                                                <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                                                <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
                                                     {{ $navItem['label'] }}
                                                 </div>
                                             @elseif ($navItem['type'] === 'divider')
-                                                <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+                                                <div class="my-1 border-t border-gray-200"></div>
                                             @elseif (($navItem['type'] ?? 'link') === 'tree')
                                                 @php($addonFlag = isset($navItem['addonFlag']) ? value($navItem['addonFlag']) : null)
                                                 <div
@@ -373,12 +373,12 @@ use App\Helpers\FeatureToggle;
                                                     <button
                                                         type="button"
                                                         @click.stop="treeExpanded = !treeExpanded"
-                                                        class="flex w-full items-center justify-between rounded-md px-2 py-2 text-start text-xs font-semibold uppercase tracking-wide text-gray-600 transition hover:bg-gray-100 hover:text-gray-950 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                                                        class="flex w-full items-center justify-between rounded-md px-2 py-2 text-start text-xs font-semibold uppercase tracking-wide text-gray-600 transition hover:bg-gray-100 hover:text-gray-950"
                                                         :aria-expanded="treeExpanded.toString()"
                                                         aria-controls="desktop-admin-subtree-{{ $menuItem['id'] }}-{{ $navItem['id'] }}">
                                                         <span class="inline-flex items-center gap-1.5">
                                                             <x-heroicon-o-chevron-right
-                                                                class="h-4 w-4 transform text-gray-400 transition-transform duration-200 dark:text-gray-500"
+                                                                class="h-4 w-4 transform text-gray-400 transition-transform duration-200"
                                                                 x-bind:class="{ 'rotate-90': treeExpanded }"
                                                                 />
                                                             <span>{{ $navItem['label'] }}</span>
@@ -386,7 +386,7 @@ use App\Helpers\FeatureToggle;
                                                         @if ($addonFlag)
                                                             <span
                                                                 data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                                class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-200"
+                                                                class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
                                                             >{{ $addonFlag }}</span>
                                                         @endif
                                                     </button>
@@ -394,7 +394,7 @@ use App\Helpers\FeatureToggle;
                                                         id="desktop-admin-subtree-{{ $menuItem['id'] }}-{{ $navItem['id'] }}"
                                                         x-show="treeExpanded"
                                                         style="display: none;"
-                                                        class="ms-3 border-s border-gray-200 py-1 ps-2 dark:border-gray-700">
+                                                        class="ms-3 border-s border-gray-200 py-1 ps-2">
                                                         @foreach ($navItem['items'] as $treeItem)
                                                             <x-navigation.dropdown-link
                                                                 href="{{ $treeItem['href'] }}"
@@ -411,7 +411,7 @@ use App\Helpers\FeatureToggle;
                                                 <button
                                                     type="button"
                                                     @click.prevent="$dispatch('feature-lock', { title: @js($navItem['lockTitle']), message: @js($navItem['lockMessage']) })"
-                                                    class="wcag-touch-target block w-full rounded-md px-4 py-2.5 text-start text-sm leading-5 text-gray-800 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-white"
+                                                    class="wcag-touch-target block w-full rounded-md px-4 py-2.5 text-start text-sm leading-5 text-gray-800 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950"
                                                     aria-label="{{ $navItem['label'] }}. {{ __('Locked feature') }}">
                                                     <span class="flex items-center justify-between gap-3">
                                                         <span class="inline-flex items-center gap-1.5">
@@ -421,7 +421,7 @@ use App\Helpers\FeatureToggle;
                                                         @if ($addonFlag)
                                                             <span
                                                                 data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                                class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-200"
+                                                                class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
                                                             >{{ $addonFlag }}</span>
                                                         @endif
                                                     </span>
@@ -436,7 +436,7 @@ use App\Helpers\FeatureToggle;
                                                             @if ($addonFlag)
                                                                 <span
                                                                     data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                                    class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-200"
+                                                                    class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
                                                                 >{{ $addonFlag }}</span>
                                                             @endif
                                                             @if ($badge)
@@ -480,7 +480,7 @@ use App\Helpers\FeatureToggle;
                                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                         <button
                                             type="button"
-                                            class="wcag-touch-target flex items-center justify-center rounded-full border-2 border-transparent text-sm transition hover:border-gray-300 focus:outline-none dark:hover:border-gray-600"
+                                            class="wcag-touch-target flex items-center justify-center rounded-full border-2 border-transparent text-sm transition hover:border-gray-300 focus:outline-none"
                                             aria-label="{{ __('Open account menu') }}">
                                             <img class="h-8 w-8 rounded-full object-cover"
                                                 src="{{ $user->profile_photo_url }}"
@@ -490,7 +490,7 @@ use App\Helpers\FeatureToggle;
                                         <span class="inline-flex rounded-md">
                                             <button type="button"
                                                 title="{{ __('Open account menu') }}"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:bg-gray-50 focus:outline-none active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 dark:focus:bg-gray-700 dark:active:bg-gray-700">
+                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:bg-gray-50 focus:outline-none active:bg-gray-50">
                                                 {{ $user->name }}
 
                                                 <x-heroicon-o-chevron-down class="-me-0.5 ms-2 h-4 w-4" />
@@ -515,7 +515,7 @@ use App\Helpers\FeatureToggle;
                                         </x-navigation.dropdown-link>
                                     @endif
 
-                                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                    <div class="border-t border-gray-200"></div>
 
                                     <!-- Authentication -->
                                     <form method="POST" action="{{ route('logout') }}" x-data>
@@ -540,7 +540,7 @@ use App\Helpers\FeatureToggle;
                 @if ($user && $isAdminRoute)
                     <div class="-me-2 flex items-center sm:hidden">
                         <button type="button" @click="open = ! open"
-                            class="wcag-touch-target inline-flex items-center justify-center rounded-md p-2 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:text-white"
+                            class="wcag-touch-target inline-flex items-center justify-center rounded-md p-2 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950"
                             :aria-expanded="open.toString()" aria-controls="mobile-navigation"
                             aria-label="{{ __('Toggle navigation menu') }}">
                             <x-heroicon-o-bars-3 x-show="!open" class="h-6 w-6" />
@@ -566,11 +566,11 @@ use App\Helpers\FeatureToggle;
                     @else
                         <div
                             x-data="{ expanded: {{ $menuItem['active'] ? 'true' : 'false' }} }"
-                            class="border-t border-gray-200 dark:border-gray-700">
+                            class="border-t border-gray-200">
                             <button
                                 type="button"
                                 @click="expanded = !expanded"
-                                class="wcag-touch-target flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white"
+                                class="wcag-touch-target flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 hover:text-gray-950"
                                 title="{{ __('Toggle menu section') }}"
                                 :aria-expanded="expanded.toString()"
                                 aria-controls="mobile-admin-group-{{ $menuItem['id'] }}">
@@ -585,30 +585,30 @@ use App\Helpers\FeatureToggle;
                                 id="mobile-admin-group-{{ $menuItem['id'] }}"
                                 x-show="expanded"
                                 style="display: none;"
-                                class="bg-gray-50/80 pb-2 dark:bg-gray-950/30">
+                                class="bg-gray-50/80 pb-2">
                                 @foreach ($menuItem['items'] as $navItem)
                                     @if ($navItem['type'] === 'heading')
-                                        <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                                        <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
                                             {{ $navItem['label'] }}
                                         </div>
                                     @elseif ($navItem['type'] === 'divider')
-                                        <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+                                        <div class="my-1 border-t border-gray-200"></div>
                                     @elseif (($navItem['type'] ?? 'link') === 'tree')
                                         @php($addonFlag = isset($navItem['addonFlag']) ? value($navItem['addonFlag']) : null)
                                         <div
                                             x-data="{ subtreeExpanded: {{ $navItem['active'] ? 'true' : 'false' }} }"
-                                            class="border-t border-gray-200/70 dark:border-gray-800"
+                                            class="border-t border-gray-200/70"
                                             data-nav-tree="{{ $navItem['id'] ?? 'tree' }}">
                                             <button
                                                 type="button"
                                                 @click="subtreeExpanded = !subtreeExpanded"
-                                                class="wcag-touch-target flex w-full items-center justify-between py-2.5 pe-4 ps-3 text-start text-base font-semibold text-gray-800 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white"
+                                                class="wcag-touch-target flex w-full items-center justify-between py-2.5 pe-4 ps-3 text-start text-base font-semibold text-gray-800 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950"
                                                 title="{{ __('Toggle menu section') }}"
                                                 :aria-expanded="subtreeExpanded.toString()"
                                                 aria-controls="mobile-admin-subtree-{{ $menuItem['id'] }}-{{ $navItem['id'] }}">
                                                 <span class="inline-flex items-center gap-2">
                                                     <x-heroicon-o-chevron-down
-                                                        class="h-4 w-4 transform text-gray-500 transition-transform duration-200 dark:text-gray-400"
+                                                        class="h-4 w-4 transform text-gray-500 transition-transform duration-200"
                                                         x-bind:class="{ 'rotate-180': subtreeExpanded }"
                                                         />
                                                     <span>{{ $navItem['label'] }}</span>
@@ -616,7 +616,7 @@ use App\Helpers\FeatureToggle;
                                                 @if ($addonFlag)
                                                     <span
                                                         data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                        class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-200"
+                                                        class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
                                                     >{{ $addonFlag }}</span>
                                                 @endif
                                             </button>
@@ -625,7 +625,7 @@ use App\Helpers\FeatureToggle;
                                                 id="mobile-admin-subtree-{{ $menuItem['id'] }}-{{ $navItem['id'] }}"
                                                 x-show="subtreeExpanded"
                                                 style="display: none;"
-                                                class="ms-5 border-s border-gray-200 bg-gray-50/70 py-1 ps-2 dark:border-gray-700 dark:bg-gray-950/40">
+                                                class="ms-5 border-s border-gray-200 bg-gray-50/70 py-1 ps-2">
                                                 @foreach ($navItem['items'] as $treeItem)
                                                     <x-navigation.responsive-nav-link
                                                         href="{{ $treeItem['href'] }}"
@@ -642,7 +642,7 @@ use App\Helpers\FeatureToggle;
                                         <button
                                             type="button"
                                             @click.prevent="$dispatch('feature-lock', { title: @js($navItem['lockTitle']), message: @js($navItem['lockMessage']) })"
-                                            class="wcag-touch-target block w-full border-l-4 border-transparent py-2.5 pe-4 ps-3 text-start text-base font-medium text-gray-700 transition duration-150 ease-in-out hover:border-gray-400 hover:bg-gray-100 hover:text-gray-950 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
+                                            class="wcag-touch-target block w-full border-l-4 border-transparent py-2.5 pe-4 ps-3 text-start text-base font-medium text-gray-700 transition duration-150 ease-in-out hover:border-gray-400 hover:bg-gray-100 hover:text-gray-950"
                                             aria-label="{{ $navItem['label'] }}. {{ __('Locked feature') }}">
                                             <span class="flex items-center justify-between gap-3">
                                                 <span class="inline-flex items-center gap-1.5">
@@ -652,7 +652,7 @@ use App\Helpers\FeatureToggle;
                                                 @if ($addonFlag)
                                                     <span
                                                         data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                        class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-200"
+                                                        class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
                                                     >{{ $addonFlag }}</span>
                                                 @endif
                                             </span>
@@ -667,7 +667,7 @@ use App\Helpers\FeatureToggle;
                                                     @if ($addonFlag)
                                                         <span
                                                             data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                            class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-200"
+                                                            class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
                                                         >{{ $addonFlag }}</span>
                                                     @endif
                                                     @if ($badge)
@@ -698,7 +698,7 @@ use App\Helpers\FeatureToggle;
 
         <!-- Responsive Settings Options -->
         @if ($user)
-            <div class="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600">
+            <div class="border-t border-gray-200 pb-1 pt-4">
                 <div class="flex items-center px-4">
                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                         <div class="me-3 shrink-0">
@@ -708,9 +708,9 @@ use App\Helpers\FeatureToggle;
                     @endif
 
                     <div>
-                        <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ $user->name }}
+                        <div class="text-base font-medium text-gray-800">{{ $user->name }}
                         </div>
-                        <div class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ $user->email }}</div>
+                        <div class="text-sm font-medium text-gray-600">{{ $user->email }}</div>
                     </div>
                 </div>
 

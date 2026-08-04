@@ -17,8 +17,8 @@
     $shortChecksum = fn (?string $value): string => $value ? substr($value, 0, 12).'...' : __('Not recorded');
     $statusLabel = $health['status'] === 'ok' ? __('Operational') : __('Needs Attention');
     $statusTone = $health['status'] === 'ok'
-        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300'
-        : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300';
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+        : 'border-amber-200 bg-amber-50 text-amber-700';
     $backupLabel = $health['backup']['checksum_matches_meta'] === false
         ? __('Checksum Mismatch')
         : ($health['backup']['file_present'] ? __('File Present') : __('No File'));
@@ -116,7 +116,7 @@
                     {{ __('Maintenance') }}
                 </a>
                 <a href="{{ route('admin.operational-health') }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950">
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2">
                     <x-heroicon-m-arrow-path class="h-4 w-4" />
                     {{ __('Refresh') }}
                 </a>
@@ -124,12 +124,12 @@
         </x-slot>
 
     <div class="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
-        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90">
+        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white/90">
             <div class="px-4 pb-2 pt-4">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Current State') }}</p>
-                        <h2 class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ __('Operational Readiness Snapshot') }}</h2>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Current State') }}</p>
+                        <h2 class="mt-1 text-base font-bold text-slate-950">{{ __('Operational Readiness Snapshot') }}</h2>
                     </div>
                     <span class="inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-bold {{ $statusTone }}">
                         {{ $statusLabel }}
@@ -138,22 +138,22 @@
             </div>
 
             <dl class="grid gap-2 p-3 md:grid-cols-3">
-                <div class="rounded-xl bg-slate-50/80 p-3 dark:bg-white/[0.035]">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Database') }}</dt>
-                    <dd class="mt-1 text-xl font-bold text-slate-950 dark:text-white">
+                <div class="rounded-xl bg-slate-50/80 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Database') }}</dt>
+                    <dd class="mt-1 text-xl font-bold text-slate-950">
                         {{ $health['database']['latency_ms'] !== null ? $health['database']['latency_ms'].' ms' : __('Attention') }}
                     </dd>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $health['database']['ok'] ? __('Connectivity check passed') : __('Connectivity check failed') }}</p>
+                    <p class="mt-1 text-xs text-slate-500">{{ $health['database']['ok'] ? __('Connectivity check passed') : __('Connectivity check failed') }}</p>
                 </div>
-                <div class="rounded-xl bg-slate-50/80 p-3 dark:bg-white/[0.035]">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Queue') }}</dt>
-                    <dd class="mt-1 text-xl font-bold text-slate-950 dark:text-white">{{ $health['queue_backlog_count'] }}</dd>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('pending jobs') }} · {{ $health['failed_jobs_count'] }} {{ __('failed') }}</p>
+                <div class="rounded-xl bg-slate-50/80 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Queue') }}</dt>
+                    <dd class="mt-1 text-xl font-bold text-slate-950">{{ $health['queue_backlog_count'] }}</dd>
+                    <p class="mt-1 text-xs text-slate-500">{{ __('pending jobs') }} · {{ $health['failed_jobs_count'] }} {{ __('failed') }}</p>
                 </div>
-                <div class="rounded-xl bg-slate-50/80 p-3 dark:bg-white/[0.035]">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Disk Free') }}</dt>
-                    <dd class="mt-1 text-xl font-bold text-slate-950 dark:text-white">{{ $health['disk_free_human'] }}</dd>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <div class="rounded-xl bg-slate-50/80 p-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Disk Free') }}</dt>
+                    <dd class="mt-1 text-xl font-bold text-slate-950">{{ $health['disk_free_human'] }}</dd>
+                    <p class="mt-1 text-xs text-slate-500">
                         {{ $health['storage_writable'] ? __('storage/app writable') : __('storage/app not writable') }}
                         @if($health['disk_used_percent'] !== null)
                             · {{ $health['disk_used_percent'] }}% {{ __('used') }}
@@ -163,10 +163,10 @@
             </dl>
         </x-admin.insight-panel>
 
-        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90">
+        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white/90">
             <div class="px-4 pb-2 pt-4">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Alerts') }}</p>
-                <h2 class="mt-1 text-base font-bold text-slate-950 dark:text-white">{{ count($health['alerts']) }} {{ __('active') }}</h2>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Alerts') }}</p>
+                <h2 class="mt-1 text-base font-bold text-slate-950">{{ count($health['alerts']) }} {{ __('active') }}</h2>
             </div>
 
             @if(! empty($health['alerts']))
@@ -177,19 +177,19 @@
                                 ? 'bg-rose-500'
                                 : ($alert['level'] === 'warning' ? 'bg-amber-500' : 'bg-slate-400');
                         @endphp
-                        <li class="rounded-xl bg-slate-50/80 p-3 dark:bg-white/[0.035]">
+                        <li class="rounded-xl bg-slate-50/80 p-3">
                             <div class="flex items-start gap-3">
                                 <span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $alertTone }}"></span>
                                 <div class="min-w-0">
-                                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ $alert['level'] }} · {{ $alert['code'] }}</p>
-                                    <p class="mt-1 text-sm font-medium text-slate-900 dark:text-white">{{ __($alert['message']) }}</p>
+                                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $alert['level'] }} · {{ $alert['code'] }}</p>
+                                    <p class="mt-1 text-sm font-medium text-slate-900">{{ __($alert['message']) }}</p>
                                 </div>
                             </div>
                         </li>
                     @endforeach
                 </ul>
             @else
-                <div class="px-4 py-5 text-sm text-slate-600 dark:text-slate-300">
+                <div class="px-4 py-5 text-sm text-slate-600">
                     {{ __('No active operational alerts. Queue, scheduler, storage, database, and backup checks are within the configured thresholds.') }}
                 </div>
             @endif
@@ -198,19 +198,19 @@
 
     <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.45fr)]">
         <x-admin.insight-panel class="overflow-hidden">
-            <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Subsystem Checks') }}</h2>
+            <div class="border-b border-slate-200/70 px-4 py-3">
+                <h2 class="text-sm font-bold text-slate-950">{{ __('Subsystem Checks') }}</h2>
             </div>
-            <div class="divide-y divide-slate-200/70 dark:divide-slate-800">
+            <div class="divide-y divide-slate-200/70">
                 @foreach($subsystemChecks as $check)
                     <div class="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(12rem,0.35fr)_minmax(0,1fr)]">
                         <div class="flex items-center gap-2">
                             <span class="h-2.5 w-2.5 rounded-full {{ $checkToneClasses[$check['tone']] ?? $checkToneClasses['neutral'] }}"></span>
-                            <span class="text-sm font-semibold text-slate-950 dark:text-white">{{ $check['label'] }}</span>
+                            <span class="text-sm font-semibold text-slate-950">{{ $check['label'] }}</span>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $check['value'] }}</p>
-                            <p class="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-400">{{ $check['detail'] }}</p>
+                            <p class="text-sm font-semibold text-slate-800">{{ $check['value'] }}</p>
+                            <p class="mt-0.5 text-xs leading-5 text-slate-500">{{ $check['detail'] }}</p>
                         </div>
                     </div>
                 @endforeach
@@ -219,28 +219,28 @@
 
         <div class="space-y-3">
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                    <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Runtime Posture') }}</h2>
+                <div class="border-b border-slate-200/70 px-4 py-3">
+                    <h2 class="text-sm font-bold text-slate-950">{{ __('Runtime Posture') }}</h2>
                 </div>
-                <dl class="divide-y divide-slate-200/70 dark:divide-slate-800">
+                <dl class="divide-y divide-slate-200/70">
                     @foreach($runtimeRows as $label => $value)
                         <div class="flex items-center justify-between gap-3 px-4 py-2.5">
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ $label }}</dt>
-                            <dd class="truncate text-right text-xs font-bold text-slate-900 dark:text-white">{{ $value }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $label }}</dt>
+                            <dd class="truncate text-right text-xs font-bold text-slate-900">{{ $value }}</dd>
                         </div>
                     @endforeach
                 </dl>
             </x-admin.insight-panel>
 
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                    <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Feature Locks') }}</h2>
+                <div class="border-b border-slate-200/70 px-4 py-3">
+                    <h2 class="text-sm font-bold text-slate-950">{{ __('Feature Locks') }}</h2>
                 </div>
-                <dl class="divide-y divide-slate-200/70 dark:divide-slate-800">
+                <dl class="divide-y divide-slate-200/70">
                     @foreach($licenseRows as $label => $value)
                         <div class="flex items-center justify-between gap-3 px-4 py-2.5">
-                            <dt class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }}</dt>
-                            <dd class="text-sm font-bold text-slate-950 dark:text-white">{{ $value }}</dd>
+                            <dt class="text-sm font-medium text-slate-700">{{ $label }}</dt>
+                            <dd class="text-sm font-bold text-slate-950">{{ $value }}</dd>
                         </div>
                     @endforeach
                 </dl>
@@ -250,38 +250,38 @@
 
     <div class="grid gap-3 xl:grid-cols-[minmax(0,0.7fr)_minmax(20rem,0.3fr)]">
         <x-admin.insight-panel class="overflow-hidden">
-            <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Operational Workload') }}</h2>
+            <div class="border-b border-slate-200/70 px-4 py-3">
+                <h2 class="text-sm font-bold text-slate-950">{{ __('Operational Workload') }}</h2>
             </div>
-            <dl class="grid divide-y divide-slate-200/70 dark:divide-slate-800 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+            <dl class="grid divide-y divide-slate-200/70 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
                 <div class="px-4 py-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Queue Backlog') }}</dt>
-                    <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['queue_backlog_count'] }}</dd>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Queue Backlog') }}</dt>
+                    <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['queue_backlog_count'] }}</dd>
                 </div>
                 <div class="px-4 py-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Import/Export Queued') }}</dt>
-                    <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['import_export']['queued'] }}</dd>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Import/Export Queued') }}</dt>
+                    <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['import_export']['queued'] }}</dd>
                 </div>
                 <div class="px-4 py-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Import/Export Running') }}</dt>
-                    <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['import_export']['running'] }}</dd>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Import/Export Running') }}</dt>
+                    <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['import_export']['running'] }}</dd>
                 </div>
                 <div class="px-4 py-3">
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Last Export Done') }}</dt>
-                    <dd class="mt-1 text-sm font-bold text-slate-950 dark:text-white">{{ $health['import_export']['last_completed_at'] ? $formatTime($health['import_export']['last_completed_at']) : __('None recorded') }}</dd>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Last Export Done') }}</dt>
+                    <dd class="mt-1 text-sm font-bold text-slate-950">{{ $health['import_export']['last_completed_at'] ? $formatTime($health['import_export']['last_completed_at']) : __('None recorded') }}</dd>
                 </div>
             </dl>
         </x-admin.insight-panel>
 
         <x-admin.insight-panel class="overflow-hidden">
-            <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Storage Usage') }}</h2>
+            <div class="border-b border-slate-200/70 px-4 py-3">
+                <h2 class="text-sm font-bold text-slate-950">{{ __('Storage Usage') }}</h2>
             </div>
             <div class="px-4 py-3">
-                <div class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div class="h-2 overflow-hidden rounded-full bg-slate-100">
                     <div class="h-full rounded-full bg-primary-600" style="width: {{ min(100, max(0, $health['disk_used_percent'] ?? 0)) }}%"></div>
                 </div>
-                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <p class="mt-2 text-xs text-slate-500">
                     {{ __('Used') }}: {{ $health['disk_used_percent'] ?? 0 }}% · {{ __('Total') }}: {{ $health['disk_total_human'] }}
                 </p>
             </div>
@@ -289,85 +289,85 @@
     </div>
 
     <x-admin.insight-panel class="overflow-hidden">
-        <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-            <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Backup Integrity Detail') }}</h2>
+        <div class="border-b border-slate-200/70 px-4 py-3">
+            <h2 class="text-sm font-bold text-slate-950">{{ __('Backup Integrity Detail') }}</h2>
         </div>
-        <dl class="grid divide-y divide-slate-200/70 dark:divide-slate-800 md:grid-cols-4 md:divide-x md:divide-y-0">
+        <dl class="grid divide-y divide-slate-200/70 md:grid-cols-4 md:divide-x md:divide-y-0">
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Last Success') }}</dt>
-                <dd class="mt-1 text-sm font-bold text-slate-950 dark:text-white">{{ $health['backup']['last_success_at'] ? $formatTime($health['backup']['last_success_at']) : __('No completed backup') }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Last Success') }}</dt>
+                <dd class="mt-1 text-sm font-bold text-slate-950">{{ $health['backup']['last_success_at'] ? $formatTime($health['backup']['last_success_at']) : __('No completed backup') }}</dd>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Last Failure') }}</dt>
-                <dd class="mt-1 text-sm font-bold text-slate-950 dark:text-white">{{ $health['backup']['last_failed_at'] ? $formatTime($health['backup']['last_failed_at']) : __('None recorded') }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Last Failure') }}</dt>
+                <dd class="mt-1 text-sm font-bold text-slate-950">{{ $health['backup']['last_failed_at'] ? $formatTime($health['backup']['last_failed_at']) : __('None recorded') }}</dd>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Checksum') }}</dt>
-                <dd class="mt-1 text-sm font-bold text-slate-950 dark:text-white">{{ $health['backup']['checksum_matches_meta'] === null ? __('Not available') : ($health['backup']['checksum_matches_meta'] ? __('OK') : __('Mismatch')) }}</dd>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $shortChecksum($health['backup']['checksum_sha256']) }}</p>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Checksum') }}</dt>
+                <dd class="mt-1 text-sm font-bold text-slate-950">{{ $health['backup']['checksum_matches_meta'] === null ? __('Not available') : ($health['backup']['checksum_matches_meta'] ? __('OK') : __('Mismatch')) }}</dd>
+                <p class="mt-1 text-xs text-slate-500">{{ $shortChecksum($health['backup']['checksum_sha256']) }}</p>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('File') }}</dt>
-                <dd class="mt-1 text-sm font-bold text-slate-950 dark:text-white">{{ $health['backup']['file_present'] ? __('Present') : __('Missing') }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('File') }}</dt>
+                <dd class="mt-1 text-sm font-bold text-slate-950">{{ $health['backup']['file_present'] ? __('Present') : __('Missing') }}</dd>
             </div>
         </dl>
     </x-admin.insight-panel>
 
     <x-admin.insight-panel class="overflow-hidden">
-        <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-            <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('HR Compliance Reminders') }}</h2>
+        <div class="border-b border-slate-200/70 px-4 py-3">
+            <h2 class="text-sm font-bold text-slate-950">{{ __('HR Compliance Reminders') }}</h2>
         </div>
-        <dl class="grid divide-y divide-slate-200/70 dark:divide-slate-800 sm:grid-cols-5 sm:divide-x sm:divide-y-0">
+        <dl class="grid divide-y divide-slate-200/70 sm:grid-cols-5 sm:divide-x sm:divide-y-0">
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Probation') }}</dt>
-                <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['hr_compliance']['probation_due'] }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Probation') }}</dt>
+                <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['hr_compliance']['probation_due'] }}</dd>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Contracts') }}</dt>
-                <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['hr_compliance']['contract_due'] }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Contracts') }}</dt>
+                <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['hr_compliance']['contract_due'] }}</dd>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Profiles') }}</dt>
-                <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['hr_compliance']['incomplete_profiles'] }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Profiles') }}</dt>
+                <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['hr_compliance']['incomplete_profiles'] }}</dd>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('HR Tasks') }}</dt>
-                <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['hr_compliance']['overdue_hr_tasks'] }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('HR Tasks') }}</dt>
+                <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['hr_compliance']['overdue_hr_tasks'] }}</dd>
             </div>
             <div class="px-4 py-3">
-                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Auto Disable') }}</dt>
-                <dd class="mt-1 text-lg font-bold text-slate-950 dark:text-white">{{ $health['hr_compliance']['auto_disable_due'] }}</dd>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Auto Disable') }}</dt>
+                <dd class="mt-1 text-lg font-bold text-slate-950">{{ $health['hr_compliance']['auto_disable_due'] }}</dd>
             </div>
         </dl>
     </x-admin.insight-panel>
 
     <x-admin.insight-panel class="overflow-hidden">
-        <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-            <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Database Table Summary') }}</h2>
+        <div class="border-b border-slate-200/70 px-4 py-3">
+            <h2 class="text-sm font-bold text-slate-950">{{ __('Database Table Summary') }}</h2>
         </div>
         @if(! empty($health['tables']))
             <div class="md:overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
-                    <thead class="bg-slate-50 dark:bg-slate-900">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Table') }}</th>
-                            <th class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Rows') }}</th>
-                            <th class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Size') }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Table') }}</th>
+                            <th class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Rows') }}</th>
+                            <th class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Size') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
+                    <tbody class="divide-y divide-slate-200 bg-white">
                         @foreach($health['tables'] as $table)
                             <tr>
-                                <td class="px-4 py-2 font-medium text-slate-900 dark:text-white">{{ $table['name'] }}</td>
-                                <td class="px-4 py-2 text-right text-slate-600 dark:text-slate-300">{{ $table['rows'] === null ? __('Unknown') : number_format($table['rows']) }}</td>
-                                <td class="px-4 py-2 text-right font-semibold text-slate-900 dark:text-white">{{ $table['size'] }}</td>
+                                <td class="px-4 py-2 font-medium text-slate-900">{{ $table['name'] }}</td>
+                                <td class="px-4 py-2 text-right text-slate-600">{{ $table['rows'] === null ? __('Unknown') : number_format($table['rows']) }}</td>
+                                <td class="px-4 py-2 text-right font-semibold text-slate-900">{{ $table['size'] }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
         @else
-            <div class="px-4 py-4 text-sm text-slate-600 dark:text-slate-300">
+            <div class="px-4 py-4 text-sm text-slate-600">
                 {{ __('Table size summary is available on MySQL-compatible databases when information_schema access is allowed.') }}
             </div>
         @endif

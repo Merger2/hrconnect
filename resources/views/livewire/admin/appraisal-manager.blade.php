@@ -17,7 +17,7 @@
                     </div>
                     <x-forms.input id="appraisal-search" wire:model.live.debounce.300ms="search" type="text"
                         placeholder="{{ __('Search name, NIP...') }}"
-                        class="block w-full border-0 py-2.5 pl-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6" />
+                        class="block w-full border-0 py-2.5 pl-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" />
                 </div>
             </div>
 
@@ -43,15 +43,15 @@
                     @if ($periodOpen)
                         <x-heroicon-m-lock-open class="h-5 w-5 text-green-600" />
                         <span
-                            class="text-sm font-bold text-green-700 dark:text-green-400">{{ __('Appraisal Window: OPEN') }}</span>
+                            class="text-sm font-bold text-green-700">{{ __('Appraisal Window: OPEN') }}</span>
                         @if ($periodLabel)
                             <span
-                                class="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-800 px-2 py-0.5 rounded-full">{{ $periodLabel }}</span>
+                                class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full">{{ $periodLabel }}</span>
                         @endif
                     @else
                         <x-heroicon-m-lock-closed class="h-5 w-5 text-red-600" />
                         <span
-                            class="text-sm font-bold text-red-700 dark:text-red-400">{{ __('Appraisal Window: CLOSED — New evaluations are locked.') }}</span>
+                            class="text-sm font-bold text-red-700">{{ __('Appraisal Window: CLOSED — New evaluations are locked.') }}</span>
                     @endif
                 </div>
             </div>
@@ -60,7 +60,7 @@
         <!-- Bell Curve Score Distribution -->
         @if (array_sum($bellCurve) > 0)
             <x-admin.panel class="mb-6 p-4">
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">📊
+                <h3 class="text-sm font-bold text-gray-700 mb-4">📊
                     {{ __('Score Distribution (Bell Curve)') }} — {{ __(date('F', mktime(0, 0, 0, $month, 10))) }}
                     {{ $year }}</h3>
                 <div class="grid grid-cols-5 gap-3 items-end" style="height: 120px;">
@@ -83,10 +83,10 @@
                     @endphp
                     @foreach ($bellCurve as $grade => $count)
                     <div class="flex flex-col items-center justify-end h-full">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{{ $count }}</span>
+                        <span class="text-xs font-bold text-gray-700 mb-1">{{ $count }}</span>
                         <div class="{{ $colors[$grade] }} rounded-t-md w-full transition-all duration-500" style="height: {{ ($count / $maxCount) * 100 }}%; min-height: 4px;"></div>
                         <div class="mt-2 text-center">
-                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $grade }}</span>
+                            <span class="text-sm font-bold text-gray-900">{{ $grade }}</span>
                             <div class="text-[10px] text-gray-500 leading-tight">{{ $labels[$grade] }}</div>
                         </div>
                     </div> @endforeach
@@ -99,7 +99,7 @@
             <!-- Desktop Table -->
             <div class="hidden lg:block overflow-x-auto">
                 <table class="w-full whitespace-nowrap text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                    <thead class="bg-gray-50 text-gray-500">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Employee') }}</th>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Department') }}</th>
@@ -111,32 +111,32 @@
                             <th scope="col" class="px-4 py-3 text-right font-medium">{{ __('Action') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-100">
                         @forelse($appraisals as $appraisal)
-                            <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <tr class="group hover:bg-gray-50 transition-colors">
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-4">
                                         <div
-                                            class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700 ring-2 ring-white dark:ring-gray-800">
+                                            class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-100 ring-2 ring-white">
                                             <img class="h-full w-full object-cover"
                                                 src="{{ $appraisal->employee->user->profile_photo_url }}" alt="{{ $appraisal->employee->user->name }}">
                                         </div>
                                         <div>
-                                            <div class="font-medium text-gray-900 dark:text-white">{{ $appraisal->employee->user->name }}
+                                            <div class="font-medium text-gray-900">{{ $appraisal->employee->user->name }}
                                             </div>
                                             <div class="text-xs text-gray-500">{{ $appraisal->employee->nip ?? __('No NIP') }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="text-sm text-gray-700">
                                         {{ $appraisal->employee->division->name ?? '-' }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     @if ($appraisal->final_score)
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $appraisal->attendance_score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ($appraisal->attendance_score >= 60 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400') }}">
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $appraisal->attendance_score >= 80 ? 'bg-green-100 text-green-800' : ($appraisal->attendance_score >= 60 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                                             {{ number_format($appraisal->attendance_score, 0) }}
                                         </span>
                                     @else
@@ -146,7 +146,7 @@
                                 <td class="px-4 py-3 text-center">
                                     @if ($appraisal->final_score)
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             {{ number_format($appraisal->subjective_score, 0) }}
                                         </span>
                                     @else
@@ -156,7 +156,7 @@
                                 <td class="px-4 py-3 text-center">
                                     @if ($appraisal->final_score)
                                         <div
-                                            class="font-bold {{ $appraisal->final_score >= 80 ? 'text-green-600 dark:text-green-400' : ($appraisal->final_score >= 60 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400') }}">
+                                            class="font-bold {{ $appraisal->final_score >= 80 ? 'text-green-600' : ($appraisal->final_score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
                                             {{ number_format($appraisal->final_score, 0) }}
                                         </div>
                                     @else
@@ -200,16 +200,16 @@
                                         @endcan
                                         @if ($appraisal->calibration_status === 'pending')
                                             <span
-                                                class="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                                                class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                                                 {{ __('Pending Calibration') }}
                                             </span>
                                         @elseif($appraisal->calibration_status === 'approved')
                                             <span
-                                                class="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">✓
+                                                class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓
                                                 {{ __('Calibrated') }}</span>
                                         @elseif($appraisal->calibration_status === 'rejected')
                                             <span
-                                                class="text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded-full">✗
+                                                class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">✗
                                                 {{ __('Rejected') }}</span>
                                         @endif
                                     </div>
@@ -217,10 +217,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
                                     <div class="flex flex-col items-center">
                                         <x-heroicon-o-clipboard-document-list
-                                            class="h-12 w-12 mb-3 text-gray-300 dark:text-gray-600" />
+                                            class="h-12 w-12 mb-3 text-gray-300" />
                                         <p>{{ __('No employees found for evaluation.') }}</p>
                                     </div>
                                 </td>
@@ -231,18 +231,18 @@
             </div>
 
             <!-- Mobile Cards -->
-            <div class="lg:hidden divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="lg:hidden divide-y divide-gray-100">
                 @forelse($appraisals as $appraisal)
                     <div class="p-4 space-y-3">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700 ring-2 ring-white dark:ring-gray-800">
+                                    class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-100 ring-2 ring-white">
                                     <img class="h-full w-full object-cover" src="{{ $appraisal->employee->user->profile_photo_url }}"
                                         alt="{{ $appraisal->employee->user->name }}">
                                 </div>
                                 <div>
-                                    <div class="font-medium text-gray-900 dark:text-white text-sm">{{ $appraisal->employee->user->name }}
+                                    <div class="font-medium text-gray-900 text-sm">{{ $appraisal->employee->user->name }}
                                     </div>
                                     <div class="text-xs text-gray-500">{{ $appraisal->employee->division->name ?? '-' }}</div>
                                 </div>
@@ -257,18 +257,18 @@
                         </div>
                         @if ($appraisal->final_score)
                             <div class="grid grid-cols-3 gap-2 text-center">
-                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Attend.') }}</div>
+                                <div class="bg-gray-50 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500">{{ __('Attend.') }}</div>
                                     <div
                                         class="font-bold text-sm {{ $appraisal->attendance_score >= 80 ? 'text-green-600' : ($appraisal->attendance_score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
                                         {{ number_format($appraisal->attendance_score, 0) }}</div>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Subj.') }}</div>
+                                <div class="bg-gray-50 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500">{{ __('Subj.') }}</div>
                                     <div class="font-bold text-sm text-blue-600">{{ number_format($appraisal->subjective_score, 0) }}</div>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Final') }}</div>
+                                <div class="bg-gray-50 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500">{{ __('Final') }}</div>
                                     <div
                                         class="font-bold text-sm {{ $appraisal->final_score >= 80 ? 'text-green-600' : ($appraisal->final_score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
                                         {{ number_format($appraisal->final_score, 0) }}</div>
@@ -281,15 +281,15 @@
                         @endif
                     </div>
                 @empty
-                    <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                    <div class="p-4 text-center text-gray-500">
                         <x-heroicon-o-clipboard-document-list
-                            class="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                            class="h-12 w-12 mx-auto mb-3 text-gray-300" />
                         <p>{{ __('No employees found for evaluation.') }}</p>
                     </div>
                 @endforelse
             </div>
 
-            <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+            <div class="px-4 py-3 border-t border-gray-100">
                 {{ $appraisals->links() }}
             </div>
         </x-admin.panel>
@@ -306,16 +306,16 @@
                             {{ strtoupper(substr($evaluatingUser->name ?? '?', 0, 1)) }}
                         </div>
                         <div>
-                            <div class="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                            <div class="text-base font-bold text-gray-900 leading-tight">
                                 {{ $evaluatingUser->name }}</div>
-                            <div class="text-[11px] text-gray-500 dark:text-gray-400">
+                            <div class="text-[11px] text-gray-500">
                                 {{ $evaluatingUser->nip ?? '' }} · {{ __(date('F', mktime(0, 0, 0, $month, 10))) }}
                                 {{ $year }}
                             </div>
                         </div>
                     @else
                         <span
-                            class="text-base font-bold text-gray-900 dark:text-white">{{ __('Evaluation Form') }}</span>
+                            class="text-base font-bold text-gray-900">{{ __('Evaluation Form') }}</span>
                     @endif
                 </div>
             </x-slot>
@@ -329,11 +329,11 @@
 
                         <!-- ── Section 1: Status & Attendance ─────────────── -->
                         <div
-                            class="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800/60 dark:to-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+                            class="bg-gradient-to-r from-gray-50 to-white rounded-xl p-5 border border-gray-100">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label
-                                        class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
+                                        class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">
                                         <x-heroicon-m-signal class="h-3.5 w-3.5" />
                                         {{ __('Appraisal Status') }}
                                     </label>
@@ -351,17 +351,17 @@
                                 </div>
                                 <div>
                                     <label
-                                        class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
+                                        class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">
                                         <x-heroicon-m-clock class="h-3.5 w-3.5" />
                                         {{ __('Attendance Score') }}
                                         <span
-                                            class="ml-auto font-mono text-[10px] bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-500 normal-case">{{ \App\Models\Setting::getValue('appraisal.attendance_weight', 30) }}%
+                                            class="ml-auto font-mono text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-500 normal-case">{{ \App\Models\Setting::getValue('appraisal.attendance_weight', 30) }}%
                                             {{ __('Weight') }}</span>
                                     </label>
                                     <div class="relative">
                                         <x-forms.input type="text" disabled readonly
                                             value="{{ number_format((float) $attendanceScore, 2) }}"
-                                            class="block w-full border-gray-200 bg-gray-100 pr-14 text-lg font-bold text-gray-700 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-300" />
+                                            class="block w-full border-gray-200 bg-gray-100 pr-14 text-lg font-bold text-gray-700" />
                                         <div
                                             class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 text-sm font-medium">
                                             / 100</div>
@@ -390,14 +390,14 @@
                             <div>
                                 <div class="flex items-center gap-2 mb-3">
                                     <div
-                                        class="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                        class="h-7 w-7 rounded-lg bg-indigo-100 flex items-center justify-center">
                                         <x-heroicon-m-rectangle-stack
-                                            class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                            class="h-4 w-4 text-indigo-600" />
                                     </div>
-                                    <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex-1">
+                                    <h3 class="text-sm font-bold text-gray-900 flex-1">
                                         {{ $group ? $group->name : __('General') }}</h3>
                                     <span
-                                        class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold px-2.5 py-1 rounded-full border border-indigo-100 dark:border-indigo-800/50">
+                                        class="bg-indigo-50 text-indigo-600 text-[11px] font-bold px-2.5 py-1 rounded-full border border-indigo-100">
                                         {{ $group ? $group->weight : 100 }}%
                                     </span>
                                 </div>
@@ -405,25 +405,25 @@
                                 <div class="space-y-3">
                                     @foreach ($groupEvals as $eval)
                                         <div
-                                            class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800 transition hover:shadow-md">
+                                            class="rounded-xl border border-gray-200 overflow-hidden bg-white transition hover:shadow-md">
                                             <div
-                                                class="px-4 py-3 flex items-center justify-between bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                                                class="px-4 py-3 flex items-center justify-between bg-white border-b border-gray-100">
                                                 <div class="flex items-center gap-2 min-w-0">
                                                     <span
                                                         class="shrink-0 h-2 w-2 rounded-full bg-primary-400"></span>
                                                     <h4
-                                                        class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                                                        class="text-sm font-semibold text-gray-800 truncate">
                                                         {{ $eval->kpiTemplate->name ?? __('KPI') }}</h4>
                                                 </div>
                                                 <span
-                                                    class="shrink-0 text-[11px] font-mono font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{{ $eval->kpiTemplate->weight ?? 0 }}%</span>
+                                                    class="shrink-0 text-[11px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ $eval->kpiTemplate->weight ?? 0 }}%</span>
                                             </div>
 
                                             @if ($eval->kpiTemplate && $eval->kpiTemplate->indicator_description)
                                                 <div
-                                                    class="px-4 py-2.5 bg-sky-50/70 dark:bg-sky-900/10 border-b border-sky-100/70 dark:border-sky-900/20">
+                                                    class="px-4 py-2.5 bg-sky-50/70 border-b border-sky-100/70">
                                                     <div
-                                                        class="text-xs text-sky-700 dark:text-sky-400 leading-relaxed">
+                                                        class="text-xs text-sky-700 leading-relaxed">
                                                         @foreach (explode("\n", $eval->kpiTemplate->indicator_description) as $line)
                                                             @php $line = trim($line); @endphp
                                                             @if (str_starts_with($line, '- '))
@@ -442,19 +442,19 @@
                                             <div class="p-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
                                                 <div class="lg:col-span-3">
                                                     <label
-                                                        class="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">{{ __('Evidence of Achievement') }}</label>
+                                                        class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">{{ __('Evidence of Achievement') }}</label>
                                                     <x-forms.textarea
                                                         wire:model="evidenceDescriptions.{{ $eval->kpiTemplate->id }}"
                                                         rows="2"
-                                                        class="block w-full border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 resize-none"
+                                                        class="block w-full border-gray-200 bg-gray-50 placeholder-gray-300 resize-none"
                                                         placeholder="{{ __('Describe the achievements...') }}" />
                                                 </div>
                                                 <div>
                                                     <label
-                                                        class="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">{{ __('Score') }}</label>
+                                                        class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">{{ __('Score') }}</label>
                                                     <x-forms.select id="ms_{{ $eval->kpiTemplate->id }}"
                                                         wire:model="managerScores.{{ $eval->kpiTemplate->id }}"
-                                                        class="block w-full border-gray-200 bg-white font-semibold dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                                                        class="block w-full border-gray-200 bg-white font-semibold">
                                                         <option value="">— {{ __('Select Scale') }} —</option>
                                                         <option value="1">1 · {{ __('Very Poor') }}</option>
                                                         <option value="2">2 · {{ __('Poor') }}</option>
@@ -472,10 +472,10 @@
 
                         <!-- ── Section 3: Meeting Schedule ─────────────── -->
                         <div
-                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                             <div
-                                class="px-5 py-3 bg-gray-50 dark:bg-gray-700/40 border-b border-gray-100 dark:border-gray-700">
-                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                class="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                                <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
                                     <x-heroicon-m-calendar-days class="h-4 w-4 text-gray-400" />
                                     {{ __('1-on-1 Meeting Schedule') }}
                                 </h3>
@@ -499,10 +499,10 @@
 
                         <!-- ── Section 4: Notes & Recommendations ──────── -->
                         <div
-                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                             <div
-                                class="px-5 py-3 bg-gray-50 dark:bg-gray-700/40 border-b border-gray-100 dark:border-gray-700">
-                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                class="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                                <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
                                     <x-heroicon-m-chat-bubble-bottom-center-text class="h-4 w-4 text-gray-400" />
                                     {{ __('Notes & Recommendations') }}
                                 </h3>
@@ -513,10 +513,10 @@
                                         class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider mb-1.5">
                                         <span class="h-3 w-1 rounded-full bg-blue-500"></span>
                                         <span
-                                            class="text-blue-600 dark:text-blue-400">{{ __('Employee Notes') }}</span>
+                                            class="text-blue-600">{{ __('Employee Notes') }}</span>
                                     </label>
                                     <x-forms.textarea id="employeeNotes" wire:model="employeeNotes" rows="2"
-                                        class="block w-full border-gray-200 bg-gray-50 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 resize-none"
+                                        class="block w-full border-gray-200 bg-gray-50 focus:border-primary-500 focus:ring-primary-500 placeholder-gray-300 resize-none"
                                         placeholder="{{ __('Employee\'s opinion on performance achievements and expectations...') }}" />
                                 </div>
                                 <div>
@@ -524,10 +524,10 @@
                                         class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider mb-1.5">
                                         <span class="h-3 w-1 rounded-full bg-emerald-500"></span>
                                         <span
-                                            class="text-emerald-600 dark:text-emerald-400">{{ __('Evaluator Notes') }}</span>
+                                            class="text-emerald-600">{{ __('Evaluator Notes') }}</span>
                                     </label>
                                     <x-forms.textarea id="generalNotes" wire:model="generalNotes" rows="2"
-                                        class="block w-full border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 resize-none"
+                                        class="block w-full border-gray-200 bg-gray-50 focus:border-emerald-500 focus:ring-emerald-500 placeholder-gray-300 resize-none"
                                         placeholder="{{ __('Evaluator\'s opinion on employee performance...') }}" />
                                 </div>
                                 <div>
@@ -535,11 +535,11 @@
                                         class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider mb-1.5">
                                         <span class="h-3 w-1 rounded-full bg-amber-500"></span>
                                         <span
-                                            class="text-amber-600 dark:text-amber-400">{{ __('Development Recommendations') }}</span>
+                                            class="text-amber-600">{{ __('Development Recommendations') }}</span>
                                     </label>
                                     <x-forms.textarea id="developmentRecommendations"
                                         wire:model="developmentRecommendations" rows="2"
-                                        class="block w-full border-gray-200 bg-gray-50 focus:border-amber-500 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 resize-none"
+                                        class="block w-full border-gray-200 bg-gray-50 focus:border-amber-500 focus:ring-amber-500 placeholder-gray-300 resize-none"
                                         placeholder="{{ __('Example: AWS Training, PMP Certification, Leadership Mentoring...') }}" />
                                 </div>
                             </div>
@@ -551,7 +551,7 @@
 
             <x-slot name="footer">
                 <div class="flex items-center justify-between w-full">
-                    <p class="text-[11px] text-gray-400 dark:text-gray-500 hidden lg:block">
+                    <p class="text-[11px] text-gray-400 hidden lg:block">
                         <x-heroicon-m-information-circle class="h-3.5 w-3.5 inline -mt-0.5" />
                         {{ __('All changes are saved after clicking the Save button.') }}
                     </p>

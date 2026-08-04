@@ -13,14 +13,14 @@
             grid-class="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-6"
         >
             <x-slot name="summary">
-                <div class="rounded-xl bg-slate-100 px-3 py-2 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                <div class="rounded-xl bg-slate-100 px-3 py-2 text-sm text-slate-600">
                     {{ trans_choice(':count log listed|:count logs listed', $logs->total(), ['count' => $logs->total()]) }}
                 </div>
             </x-slot>
 
             <x-slot name="actions">
                 @if (! $canExportActivityLogs)
-                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
                         {{ __('Read-only audit access') }}
                     </span>
                 @elseif(false)
@@ -49,19 +49,19 @@
             </x-slot>
 
             <div class="lg:col-span-3">
-                <label for="activity-log-search" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Search audit logs') }}</label>
+                <label for="activity-log-search" class="mb-1 block text-sm font-medium text-gray-700">{{ __('Search audit logs') }}</label>
                 <div class="relative">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <x-heroicon-o-magnifying-glass class="h-4 w-4 text-gray-400" />
                     </div>
                     <x-forms.input id="activity-log-search" type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('Search user, action, or detail...') }}"
-                        class="block w-full pl-10 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:placeholder-gray-400" />
+                        class="block w-full pl-10" />
                 </div>
             </div>
 
             <div class="lg:col-span-1">
-                <label for="activity-log-actor-group" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Actor') }}</label>
-                <x-forms.select id="activity-log-actor-group" wire:model.live="actorGroup" class="block w-full dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                <label for="activity-log-actor-group" class="mb-1 block text-sm font-medium text-gray-700">{{ __('Actor') }}</label>
+                <x-forms.select id="activity-log-actor-group" wire:model.live="actorGroup" class="block w-full">
                     <option value="all">{{ __('All') }}</option>
                     <option value="user">{{ __('Users') }}</option>
                     <option value="admin">{{ __('Admins') }}</option>
@@ -70,20 +70,20 @@
             </div>
 
             <div class="lg:col-span-1">
-                <label for="activity-log-start-date" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Start Date') }}</label>
+                <label for="activity-log-start-date" class="mb-1 block text-sm font-medium text-gray-700">{{ __('Start Date') }}</label>
                 <div wire:ignore>
                     <x-forms.input id="activity-log-start-date" type="date" wire:model.live="dateStart"
                         value="{{ $dateStart }}"
-                        class="block w-full dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300" />
+                        class="block w-full" />
                 </div>
             </div>
 
             <div class="lg:col-span-1">
-                <label for="activity-log-end-date" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('End Date') }}</label>
+                <label for="activity-log-end-date" class="mb-1 block text-sm font-medium text-gray-700">{{ __('End Date') }}</label>
                 <div wire:ignore>
                     <x-forms.input id="activity-log-end-date" type="date" wire:model.live="dateEnd"
                         value="{{ $dateEnd }}"
-                        class="block w-full dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300" />
+                        class="block w-full" />
                 </div>
             </div>
         </x-admin.page-tools>
@@ -98,49 +98,49 @@
         />
     </div>
 
-    <x-admin.panel class="ring-1 ring-gray-950/5 dark:ring-white/10">
+    <x-admin.panel class="ring-1 ring-gray-950/5">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     {{ __('User') }}
                                 </th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     {{ __('Action') }}
                                 </th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     {{ __('IP Address') }}
                                 </th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     {{ __('Time') }}
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                        <tbody class="divide-y divide-gray-200 bg-white">
                             @forelse($logs as $log)
-                                <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <tr class="transition-colors hover:bg-gray-50">
                                     <td class="whitespace-nowrap px-4 py-3">
                                         <div class="flex items-center">
-                                            <div class="h-8 w-8 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs dark:bg-blue-900/30 dark:text-blue-400">
+                                            <div class="h-8 w-8 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
                                                 {{ substr($log->user->name ?? '?', 0, 1) }}
                                             </div>
                                             <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $log->user->name ?? __('Unknown') }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $log->user->nip ?? '-' }}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $log->user->name ?? __('Unknown') }}</div>
+                                                <div class="text-xs text-gray-500">{{ $log->user->nip ?? '-' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="text-sm text-gray-900 dark:text-white font-medium">{{ $log->action }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $log->description }}</div>
+                                        <div class="text-sm text-gray-900 font-medium">{{ $log->action }}</div>
+                                        <div class="text-xs text-gray-500">{{ $log->description }}</div>
                                     </td>
-                                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-700/30 dark:text-gray-400 dark:ring-gray-400/20">
+                                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                                             {{ $log->ip_address ?? '-' }}
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                                         <div class="flex flex-col">
                                             <span>{{ $log->created_at->diffForHumans() }}</span>
                                             <span class="text-xs text-gray-400">{{ $log->created_at->format('d M Y H:i') }}</span>
@@ -149,10 +149,10 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-                                        <x-admin.empty-state :title="__('No activity logs found.')" class="border-0 bg-transparent p-0 shadow-none dark:bg-transparent">
+                                    <td colspan="4" class="px-4 py-6 text-center text-gray-500">
+                                        <x-admin.empty-state :title="__('No activity logs found.')" class="border-0 bg-transparent p-0 shadow-none">
                                             <x-slot name="icon">
-                                                <x-heroicon-o-exclamation-circle class="h-12 w-12 text-gray-300 dark:text-gray-600" />
+                                                <x-heroicon-o-exclamation-circle class="h-12 w-12 text-gray-300" />
                                             </x-slot>
                                         </x-admin.empty-state>
                                     </td>
@@ -162,7 +162,7 @@
                     </table>
                 </div>
                 
-        <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3 dark:border-gray-700/60 dark:bg-gray-900/40">
+        <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3">
             {{ $logs->links() }}
         </div>
     </x-admin.panel>

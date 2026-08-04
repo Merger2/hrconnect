@@ -23,7 +23,7 @@
                         </button>
                     @else
                         <button wire:click="openCreateModal" aria-label="{{ __('Request Kasbon') }}" title="{{ __('Request Kasbon') }}"
-                            class="user-header-icon-action bg-primary-600 text-white hover:bg-primary-700 hover:text-white dark:bg-primary-400 dark:text-slate-950 dark:hover:bg-primary-300">
+                            class="user-header-icon-action bg-primary-600 text-white hover:bg-primary-700 hover:text-white">
                             <x-heroicon-m-plus class="h-5 w-5" />
                         </button>
                     @endif

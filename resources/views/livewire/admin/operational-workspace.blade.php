@@ -8,7 +8,7 @@
             <div class="lg:col-span-7">
                 <x-forms.label for="operations-search" value="{{ __('Search workspace') }}" class="mb-1.5 block" />
                 <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                     </span>
                     <x-forms.input id="operations-search" type="search" wire:model.live.debounce.300ms="search" class="w-full pl-11" placeholder="{{ __('Search clients, branches, or projects...') }}" />
@@ -16,7 +16,7 @@
             </div>
 
             <div class="lg:col-span-5">
-                <div class="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1 text-xs font-semibold dark:bg-slate-800 sm:text-sm md:grid-cols-4">
+                <div class="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1 text-xs font-semibold sm:text-sm md:grid-cols-4">
                     @foreach ([
                         'projects' => __('Projects'),
                         'tasks' => __('Tasks'),
@@ -26,7 +26,7 @@
                         <button
                             type="button"
                             wire:click="$set('activeTab', '{{ $tab }}')"
-                            class="rounded-lg px-2.5 py-2 transition sm:px-3 {{ $activeTab === $tab ? 'bg-white text-primary-700 shadow-sm dark:bg-slate-950 dark:text-primary-300' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' }}"
+                            class="rounded-lg px-2.5 py-2 transition sm:px-3 {{ $activeTab === $tab ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}"
                         >
                             {{ $label }}
                         </button>
@@ -40,8 +40,8 @@
         <div class="order-2 space-y-4 xl:order-1">
             @if ($activeTab === 'projects')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Projects') }}</h2>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Projects') }}</h2>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 p-4">
@@ -55,14 +55,14 @@
                                     'estimated_margin' => 0,
                                 ];
                             @endphp
-                            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                                     <div class="min-w-0">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ $project->name }}</h3>
+                                            <h3 class="text-base font-semibold text-slate-950">{{ $project->name }}</h3>
                                             <x-admin.status-badge tone="success">{{ __(str($project->status)->headline()->toString()) }}</x-admin.status-badge>
                                         </div>
-                                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        <p class="mt-1 text-sm text-slate-500">
                                             {{ $project->company?->name }}
                                             @if ($project->client)
                                                 · {{ $project->client->name }}
@@ -72,29 +72,29 @@
                                             @endif
                                         </p>
                                         @if ($project->description)
-                                            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ $project->description }}</p>
+                                            <p class="mt-2 text-sm text-slate-600">{{ $project->description }}</p>
                                         @endif
                                     </div>
-                                    <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                    <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
                                         {{ __('Tasks: :count', ['count' => $project->tasks_count]) }}
                                     </div>
                                 </div>
                                 <dl class="mt-4 grid grid-cols-2 gap-2 text-sm lg:grid-cols-4">
-                                    <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950/50">
+                                    <div class="rounded-lg bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Pipeline') }}</dt>
-                                        <dd class="mt-1 font-semibold text-slate-900 dark:text-white">Rp{{ number_format($financial['pipeline'], 0, ',', '.') }}</dd>
+                                        <dd class="mt-1 font-semibold text-slate-900">Rp{{ number_format($financial['pipeline'], 0, ',', '.') }}</dd>
                                     </div>
-                                    <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950/50">
+                                    <div class="rounded-lg bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Invoiced') }}</dt>
-                                        <dd class="mt-1 font-semibold text-slate-900 dark:text-white">Rp{{ number_format($financial['invoiced'], 0, ',', '.') }}</dd>
+                                        <dd class="mt-1 font-semibold text-slate-900">Rp{{ number_format($financial['invoiced'], 0, ',', '.') }}</dd>
                                     </div>
-                                    <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950/50">
+                                    <div class="rounded-lg bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Paid') }}</dt>
-                                        <dd class="mt-1 font-semibold text-emerald-600 dark:text-emerald-300">Rp{{ number_format($financial['paid'], 0, ',', '.') }}</dd>
+                                        <dd class="mt-1 font-semibold text-emerald-600">Rp{{ number_format($financial['paid'], 0, ',', '.') }}</dd>
                                     </div>
-                                    <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-950/50">
+                                    <div class="rounded-lg bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Outstanding') }}</dt>
-                                        <dd class="mt-1 font-semibold {{ $financial['outstanding'] > 0 ? 'text-amber-600 dark:text-amber-300' : 'text-slate-900 dark:text-white' }}">
+                                        <dd class="mt-1 font-semibold {{ $financial['outstanding'] > 0 ? 'text-amber-600' : 'text-slate-900' }}">
                                             Rp{{ number_format($financial['outstanding'], 0, ',', '.') }}
                                         </dd>
                                     </div>
@@ -103,7 +103,7 @@
                         @empty
                             <x-admin.empty-state :title="__('No projects yet')" :description="__('Create your first project from the active action panel.')" class="border-0 bg-transparent shadow-none">
                                 <x-slot name="icon">
-                                    <x-heroicon-o-rectangle-stack class="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                                    <x-heroicon-o-rectangle-stack class="h-12 w-12 text-slate-300" />
                                 </x-slot>
                             </x-admin.empty-state>
                         @endforelse
@@ -111,23 +111,23 @@
                 </x-admin.panel>
             @elseif ($activeTab === 'tasks')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Tasks & Checklists') }}</h2>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Tasks & Checklists') }}</h2>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 p-4">
                         @forelse ($projects as $project)
                             @foreach ($project->tasks as $task)
-                                <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                                <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                                     <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                         <div class="min-w-0">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ $task->title }}</h3>
+                                                <h3 class="text-base font-semibold text-slate-950">{{ $task->title }}</h3>
                                                 <x-admin.status-badge :tone="$task->status === \App\Models\ProjectTask::STATUS_DONE ? 'success' : ($task->status === \App\Models\ProjectTask::STATUS_IN_PROGRESS ? 'primary' : 'neutral')">
                                                     {{ __(str($task->status)->replace('_', ' ')->headline()->toString()) }}
                                                 </x-admin.status-badge>
                                             </div>
-                                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            <p class="mt-1 text-sm text-slate-500">
                                                 {{ $project->name }}
                                                 @if ($task->assignee)
                                                     · {{ __('Assigned to :name', ['name' => $task->assignee->name]) }}
@@ -153,40 +153,40 @@
                                                     type="button"
                                                     wire:click="toggleChecklistItem({{ $item->id }})"
                                                     @disabled(! $canManage)
-                                                    class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-left text-sm ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-950 dark:ring-slate-800 dark:hover:bg-slate-900"
+                                                    class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-left text-sm ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
                                                 >
                                                     @if ($item->is_done)
                                                         <x-heroicon-m-check-circle class="h-5 w-5 shrink-0 text-emerald-500" />
                                                     @else
                                                         <x-heroicon-m-circle-stack class="h-5 w-5 shrink-0 text-slate-400" />
                                                     @endif
-                                                    <span class="{{ $item->is_done ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-200' }}">{{ $item->title }}</span>
+                                                    <span class="{{ $item->is_done ? 'text-slate-400 line-through' : 'text-slate-700' }}">{{ $item->title }}</span>
                                                 </button>
                                             @endforeach
                                         </div>
                                     @endif
 
                                     @if ($task->visitEvidences->isNotEmpty())
-                                        <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/40">
+                                        <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
                                             <div class="flex items-center justify-between gap-3">
-                                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Visit Evidence') }}</h4>
-                                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $task->visitEvidences->count() }}</span>
+                                                <h4 class="text-sm font-semibold text-slate-900">{{ __('Visit Evidence') }}</h4>
+                                                <span class="text-xs font-semibold text-slate-500">{{ $task->visitEvidences->count() }}</span>
                                             </div>
                                             <div class="mt-3 space-y-2">
                                                 @foreach ($task->visitEvidences->take(3) as $evidence)
-                                                    <div class="flex flex-col gap-2 rounded-lg bg-white p-3 text-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 md:flex-row md:items-center md:justify-between">
+                                                    <div class="flex flex-col gap-2 rounded-lg bg-white p-3 text-sm ring-1 ring-slate-200 md:flex-row md:items-center md:justify-between">
                                                         <div class="min-w-0">
-                                                            <p class="font-semibold text-slate-800 dark:text-slate-100">
+                                                            <p class="font-semibold text-slate-800">
                                                                 {{ $evidence->user?->name ?? __('Unknown user') }}
                                                                 · {{ $evidence->visited_at?->format('d M Y H:i') }}
                                                             </p>
-                                                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">
+                                                            <p class="truncate text-xs text-slate-500">
                                                                 {{ $evidence->notes ?: __('No notes') }}
                                                             </p>
                                                         </div>
                                                         @can('downloadPhoto', $evidence)
                                                             @if ($evidence->photo_path)
-                                                                <a href="{{ route('operations.visit-evidence.photo', $evidence) }}" class="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-primary-700 ring-1 ring-primary-200 hover:bg-primary-50 dark:text-primary-200 dark:ring-primary-800 dark:hover:bg-primary-950/40">
+                                                                <a href="{{ route('operations.visit-evidence.photo', $evidence) }}" class="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-primary-700 ring-1 ring-primary-200 hover:bg-primary-50">
                                                                     <x-heroicon-m-arrow-down-tray class="h-4 w-4" />
                                                                     <span>{{ __('Photo') }}</span>
                                                                 </a>
@@ -202,7 +202,7 @@
                         @empty
                             <x-admin.empty-state :title="__('No tasks yet')" :description="__('Create a project and add tasks from the active action panel.')" class="border-0 bg-transparent shadow-none">
                                 <x-slot name="icon">
-                                    <x-heroicon-o-check-badge class="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                                    <x-heroicon-o-check-badge class="h-12 w-12 text-slate-300" />
                                 </x-slot>
                             </x-admin.empty-state>
                         @endforelse
@@ -210,17 +210,17 @@
                 </x-admin.panel>
             @elseif ($activeTab === 'clients')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Clients') }}</h2>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Clients') }}</h2>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
                         @forelse ($clients as $client)
-                            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                                <h3 class="font-semibold text-slate-950 dark:text-white">{{ $client->name }}</h3>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $client->company?->name }}</p>
+                            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                                <h3 class="font-semibold text-slate-950">{{ $client->name }}</h3>
+                                <p class="mt-1 text-sm text-slate-500">{{ $client->company?->name }}</p>
                                 @if ($client->contact_name || $client->contact_phone)
-                                    <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ $client->contact_name }} {{ $client->contact_phone ? '· '.$client->contact_phone : '' }}</p>
+                                    <p class="mt-3 text-sm text-slate-600">{{ $client->contact_name }} {{ $client->contact_phone ? '· '.$client->contact_phone : '' }}</p>
                                 @endif
                             </article>
                         @empty
@@ -230,20 +230,20 @@
                 </x-admin.panel>
             @else
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Branches & Locations') }}</h2>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Branches & Locations') }}</h2>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
                         @forelse ($branches as $branch)
-                            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="font-semibold text-slate-950 dark:text-white">{{ $branch->name }}</h3>
+                                    <h3 class="font-semibold text-slate-950">{{ $branch->name }}</h3>
                                     <x-admin.status-badge tone="primary">{{ __(str($branch->type)->headline()->toString()) }}</x-admin.status-badge>
                                 </div>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $branch->company?->name }}</p>
+                                <p class="mt-1 text-sm text-slate-500">{{ $branch->company?->name }}</p>
                                 @if ($branch->address)
-                                    <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{{ $branch->address }}</p>
+                                    <p class="mt-3 text-sm text-slate-600">{{ $branch->address }}</p>
                                 @endif
                             </article>
                         @empty
@@ -256,10 +256,10 @@
 
         <div class="order-1 space-y-4 xl:order-2">
             @if ($canManage)
-                <x-admin.panel class="border-primary-200 bg-primary-50/60 dark:border-primary-900/60 dark:bg-primary-950/20">
+                <x-admin.panel class="border-primary-200 bg-primary-50/60">
                     <div class="space-y-1 p-3.5">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-primary-800 dark:text-primary-200">{{ __('Quick action') }}</p>
-                        <p class="text-sm leading-5 text-primary-700 dark:text-primary-100">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-primary-800">{{ __('Quick action') }}</p>
+                        <p class="text-sm leading-5 text-primary-700">
                             {{ __('The operations form follows the selected tab so each workflow stays focused.') }}
                         </p>
                     </div>
@@ -267,9 +267,9 @@
 
                 @if ($activeTab === 'projects')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Create Project') }}</h2>
-                        <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ __('Start from company, client, location, and manager so tasks have clear ownership.') }}</p>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Create Project') }}</h2>
+                        <p class="mt-1 text-sm leading-5 text-slate-500">{{ __('Start from company, client, location, and manager so tasks have clear ownership.') }}</p>
                     </div>
                     <form wire:submit.prevent="createProject" class="space-y-4 p-4">
                         <div class="space-y-1.5">
@@ -339,9 +339,9 @@
 
                 @elseif ($activeTab === 'tasks')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Create Task') }}</h2>
-                        <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ __('Assign work, priority, due date, and checklist items without leaving the task tab.') }}</p>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Create Task') }}</h2>
+                        <p class="mt-1 text-sm leading-5 text-slate-500">{{ __('Assign work, priority, due date, and checklist items without leaving the task tab.') }}</p>
                     </div>
                     <form wire:submit.prevent="createTask" class="space-y-4 p-4">
                         <div class="space-y-1.5">
@@ -405,9 +405,9 @@
 
                 @elseif ($activeTab === 'clients')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Create Client') }}</h2>
-                        <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ __('Save client contacts once so projects, quotations, and invoices can reuse them.') }}</p>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Create Client') }}</h2>
+                        <p class="mt-1 text-sm leading-5 text-slate-500">{{ __('Save client contacts once so projects, quotations, and invoices can reuse them.') }}</p>
                     </div>
                     <form wire:submit.prevent="createClient" class="space-y-4 p-4">
                         <div class="space-y-1.5">
@@ -446,9 +446,9 @@
 
                 @elseif ($activeTab === 'branches')
                 <x-admin.panel>
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Create Branch') }}</h2>
-                        <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ __('Add stores, offices, warehouses, or field locations for scoped operations.') }}</p>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-base font-semibold text-slate-950">{{ __('Create Branch') }}</h2>
+                        <p class="mt-1 text-sm leading-5 text-slate-500">{{ __('Add stores, offices, warehouses, or field locations for scoped operations.') }}</p>
                     </div>
                     <form wire:submit.prevent="createBranch" class="space-y-4 p-4">
                         <div class="space-y-1.5">

@@ -77,7 +77,7 @@
     x-on:hris-update.window="updateHrisCharts($event.detail)">
     <x-slot name="actions">
         <span
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
             <x-heroicon-o-banknotes class="h-4 w-4" />
             {{ __('Work Standard') }}: {{ $workHoursPerDay }} {{ __('Hours / Day') }}
         </span>
@@ -135,11 +135,11 @@
         <!-- Finance & HR Banner -->
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
             @foreach ($summaryCards as $card)
-                <div class="group relative flex flex-col justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow dark:border-slate-800 dark:bg-slate-900">
-                    <p class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <div class="group relative flex flex-col justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow">
+                    <p class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-500">
                         {{ $card['label'] }}
                     </p>
-                    <p class="mt-1 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                    <p class="mt-1 text-2xl font-black tracking-tight text-slate-900">
                         {{ $card['value'] }}
                     </p>
                 </div>
@@ -151,12 +151,12 @@
             <x-admin.insight-panel class="relative flex flex-col overflow-hidden p-5 h-full">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
                             <x-heroicon-s-chart-bar class="h-4 w-4" />
                         </div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Attendance Trend') }}</h3>
+                        <h3 class="text-sm font-bold text-slate-900">{{ __('Attendance Trend') }}</h3>
                     </div>
-                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ $selectedPeriod }}</span>
+                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{{ $selectedPeriod }}</span>
                 </div>
                 <div class="h-[200px] w-full relative z-10">
                     <canvas x-ref="trendChart" class="!h-full !w-full" role="img" aria-label="{{ __('Attendance trend line chart') }}"></canvas>
@@ -166,24 +166,24 @@
             <x-admin.insight-panel class="relative flex flex-col overflow-hidden p-5 h-full">
                 <div class="flex items-center justify-between mb-5">
                     <div class="flex items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
                             <x-heroicon-s-chart-pie class="h-4 w-4" />
                         </div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Attendance Mix') }}</h3>
+                        <h3 class="text-sm font-bold text-slate-900">{{ __('Attendance Mix') }}</h3>
                     </div>
-                    <span class="text-3xl font-black text-slate-900 dark:text-white">{{ $attendanceMixTotal }}</span>
+                    <span class="text-3xl font-black text-slate-900">{{ $attendanceMixTotal }}</span>
                 </div>
                 <div class="flex-1 flex flex-col justify-center space-y-3">
                     @foreach ([['label' => __('Present'), 'value' => $presentTotal, 'color' => 'primary', 'bar' => 'bg-primary-500'], ['label' => __('Late'), 'value' => $lateTotal, 'color' => 'amber', 'bar' => 'bg-amber-500'], ['label' => __('Leave'), 'value' => $sickTotal + $excusedTotal, 'color' => 'sky', 'bar' => 'bg-sky-500'], ['label' => __('Alpha'), 'value' => $alphaTotal, 'color' => 'rose', 'bar' => 'bg-rose-500']] as $row)
                         <div class="group">
                             <div class="mb-1.5 flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-2">
-                                    <span class="h-2.5 w-2.5 rounded-full {{ $row['bar'] }} shadow-[0_0_8px_rgba(0,0,0,0.1)] shadow-{{ $row['color'] }}-500/50 ring-2 ring-white dark:ring-slate-900"></span>
-                                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $row['label'] }}</span>
+                                    <span class="h-2.5 w-2.5 rounded-full {{ $row['bar'] }} shadow-[0_0_8px_rgba(0,0,0,0.1)] shadow-{{ $row['color'] }}-500/50 ring-2 ring-white"></span>
+                                    <span class="font-semibold text-slate-700">{{ $row['label'] }}</span>
                                 </div>
-                                <span class="font-bold text-slate-900 dark:text-white group-hover:text-{{ $row['color'] }}-600 transition-colors text-sm">{{ $row['value'] }}</span>
+                                <span class="font-bold text-slate-900 group-hover:text-{{ $row['color'] }}-600 transition-colors text-sm">{{ $row['value'] }}</span>
                             </div>
-                            <div class="h-2.5 overflow-hidden rounded-full bg-slate-100/80 shadow-inner dark:bg-slate-800/80" role="progressbar" aria-valuenow="{{ $row['value'] }}" aria-valuemax="{{ $attendanceMixTotal }}" aria-label="{{ $row['label'] }}">
+                            <div class="h-2.5 overflow-hidden rounded-full bg-slate-100/80 shadow-inner" role="progressbar" aria-valuenow="{{ $row['value'] }}" aria-valuemax="{{ $attendanceMixTotal }}" aria-label="{{ $row['label'] }}">
                                 <div class="h-full rounded-full {{ $row['bar'] }} transition-all duration-1000 ease-out" style="width: {{ round(($row['value'] / $attendanceMixTotal) * 100, 1) }}%"></div>
                             </div>
                         </div>
@@ -195,68 +195,68 @@
         <!-- Operations & HR Overview -->
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <!-- Pending Reimbursements -->
-            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg dark:hover:shadow-indigo-900/20">
+            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Pending Reimbursements') }}</p>
-                        <h4 class="mt-2 text-3xl font-black text-slate-900 dark:text-white">{{ $operationsMetrics['pending_reimbursements'] ?? 0 }}</h4>
+                        <p class="text-sm font-medium text-slate-500">{{ __('Pending Reimbursements') }}</p>
+                        <h4 class="mt-2 text-3xl font-black text-slate-900">{{ $operationsMetrics['pending_reimbursements'] ?? 0 }}</h4>
                     </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 dark:bg-indigo-900/30 dark:text-indigo-400">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                         <x-heroicon-o-banknotes class="h-6 w-6" />
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-indigo-600">
                     <span>{{ __('Requires approval') }}</span>
                     <x-heroicon-s-arrow-right class="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
             </x-admin.insight-panel>
 
             <!-- Pending Cash Advances -->
-            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg dark:hover:shadow-emerald-900/20">
+            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Pending Cash Advances') }}</p>
-                        <h4 class="mt-2 text-3xl font-black text-slate-900 dark:text-white">{{ $operationsMetrics['pending_cash_advances'] ?? 0 }}</h4>
+                        <p class="text-sm font-medium text-slate-500">{{ __('Pending Cash Advances') }}</p>
+                        <h4 class="mt-2 text-3xl font-black text-slate-900">{{ $operationsMetrics['pending_cash_advances'] ?? 0 }}</h4>
                     </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
                         <x-heroicon-o-wallet class="h-6 w-6" />
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-600">
                     <span>{{ __('Needs finance review') }}</span>
                     <x-heroicon-s-arrow-right class="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
             </x-admin.insight-panel>
 
             <!-- Pending Document Requests -->
-            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg dark:hover:shadow-amber-900/20">
+            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Document Requests') }}</p>
-                        <h4 class="mt-2 text-3xl font-black text-slate-900 dark:text-white">{{ $operationsMetrics['pending_document_requests'] ?? 0 }}</h4>
+                        <p class="text-sm font-medium text-slate-500">{{ __('Document Requests') }}</p>
+                        <h4 class="mt-2 text-3xl font-black text-slate-900">{{ $operationsMetrics['pending_document_requests'] ?? 0 }}</h4>
                     </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 dark:bg-amber-900/30 dark:text-amber-400">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                         <x-heroicon-o-document-text class="h-6 w-6" />
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-amber-600">
                     <span>{{ __('Pending issuance') }}</span>
                     <x-heroicon-s-arrow-right class="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
             </x-admin.insight-panel>
 
             <!-- Pending HR Tasks -->
-            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg dark:hover:shadow-rose-900/20">
+            <x-admin.insight-panel class="group relative overflow-hidden p-5 transition-all duration-300 hover:shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Active HR Tasks') }}</p>
-                        <h4 class="mt-2 text-3xl font-black text-slate-900 dark:text-white">{{ $operationsMetrics['pending_hr_tasks'] ?? 0 }}</h4>
+                        <p class="text-sm font-medium text-slate-500">{{ __('Active HR Tasks') }}</p>
+                        <h4 class="mt-2 text-3xl font-black text-slate-900">{{ $operationsMetrics['pending_hr_tasks'] ?? 0 }}</h4>
                     </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 dark:bg-rose-900/30 dark:text-rose-400">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
                         <x-heroicon-o-clipboard-document-check class="h-6 w-6" />
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-rose-600 dark:text-rose-400">
+                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-rose-600">
                     <span>{{ __('Checklist to complete') }}</span>
                     <x-heroicon-s-arrow-right class="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
@@ -266,27 +266,27 @@
         <!-- Map & Headcount -->
         <div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <x-admin.insight-panel class="flex flex-col overflow-hidden p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ __('Geographical Distribution') }}</h3>
+                <h3 class="text-sm font-bold text-slate-900 mb-3">{{ __('Geographical Distribution') }}</h3>
                 <div class="min-h-[280px] w-full flex-1">
-                    <div id="employeeOriginsMap" x-ref="employeeOriginsMap" wire:ignore class="h-full w-full rounded-xl border border-slate-200 dark:border-slate-800/55 z-0"></div>
+                    <div id="employeeOriginsMap" x-ref="employeeOriginsMap" wire:ignore class="h-full w-full rounded-xl border border-slate-200 z-0"></div>
                 </div>
             </x-admin.insight-panel>
 
             <div class="grid gap-4">
                 <x-admin.insight-panel class="p-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ __('Headcount Distribution') }}</h3>
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">{{ __('Headcount Distribution') }}</h3>
                     <div class="h-[200px]"><canvas x-ref="headcountChart" role="img" aria-label="{{ __('Headcount distribution chart') }}"></canvas></div>
                 </x-admin.insight-panel>
                 <x-admin.insight-panel class="p-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ __('Top Performing Divisions') }}</h3>
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">{{ __('Top Performing Divisions') }}</h3>
                     <div class="space-y-2">
                         @forelse ($divisionLeaders as $index => $division)
-                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/45 border border-slate-100 dark:border-slate-700/35">
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-100">
                                 <div class="flex items-center gap-2">
-                                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">{{ $index + 1 }}</span>
-                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ $division['label'] }}</span>
+                                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700">{{ $index + 1 }}</span>
+                                    <span class="text-xs font-semibold text-slate-700">{{ $division['label'] }}</span>
                                 </div>
-                                <span class="text-xs font-bold text-slate-900 dark:text-white">{{ $division['value'] }}</span>
+                                <span class="text-xs font-bold text-slate-900">{{ $division['value'] }}</span>
                             </div>
                         @empty
                             <p class="text-xs text-slate-500">{{ __('No data') }}</p>
@@ -299,23 +299,23 @@
         <!-- Micro Charts -->
         <div class="grid gap-4 grid-cols-2 xl:grid-cols-5">
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-3">{{ __('Division Performance') }}</h3>
+                <h3 class="text-xs font-bold text-slate-900 mb-3">{{ __('Division Performance') }}</h3>
                 <div class="h-48"><canvas x-ref="divisionChart" role="img" aria-label="{{ __('Division performance chart') }}"></canvas></div>
             </x-admin.insight-panel>
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-3">{{ __('Status Distribution') }}</h3>
+                <h3 class="text-xs font-bold text-slate-900 mb-3">{{ __('Status Distribution') }}</h3>
                 <div class="h-48"><canvas x-ref="statusChart" role="img" aria-label="{{ __('Status distribution chart') }}"></canvas></div>
             </x-admin.insight-panel>
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-3">{{ __('Late Analysis') }}</h3>
+                <h3 class="text-xs font-bold text-slate-900 mb-3">{{ __('Late Analysis') }}</h3>
                 <div class="h-48"><canvas x-ref="lateChart" role="img" aria-label="{{ __('Late analysis chart') }}"></canvas></div>
             </x-admin.insight-panel>
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-3">{{ __('Gender Split') }}</h3>
+                <h3 class="text-xs font-bold text-slate-900 mb-3">{{ __('Gender Split') }}</h3>
                 <div class="h-48"><canvas x-ref="genderChart" role="img" aria-label="{{ __('Gender split chart') }}"></canvas></div>
             </x-admin.insight-panel>
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-3">{{ __('Absence Reasons') }}</h3>
+                <h3 class="text-xs font-bold text-slate-900 mb-3">{{ __('Absence Reasons') }}</h3>
                 <div class="h-48"><canvas x-ref="absentChart" role="img" aria-label="{{ __('Absence reasons chart') }}"></canvas></div>
             </x-admin.insight-panel>
         </div>
@@ -324,20 +324,20 @@
         <div class="grid gap-4 md:grid-cols-3">
             <x-admin.insight-panel class="p-5">
                 <div class="mb-4 flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
-                        <x-heroicon-s-star class="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
+                        <x-heroicon-s-star class="h-5 w-5 text-emerald-600" />
                     </div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Early Birds') }}</h3>
+                    <h3 class="text-sm font-bold text-slate-900">{{ __('Early Birds') }}</h3>
                 </div>
                 <div class="space-y-3">
                     @forelse ($topDiligent as $employee)
-                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow dark:border-slate-700/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/80">
-                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-xs uppercase">
+                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs uppercase">
                                 {{ substr($employee->name, 0, 2) }}
                             </div>
                             <div class="flex flex-1 items-center justify-between">
-                                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate pr-2">{{ $employee->name }}</span>
-                                <span class="shrink-0 rounded-full bg-emerald-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 shadow-sm">{{ gmdate('H:i', $employee->avg_check_in) }}</span>
+                                <span class="text-sm font-semibold text-slate-700 truncate pr-2">{{ $employee->name }}</span>
+                                <span class="shrink-0 rounded-full bg-emerald-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-emerald-700 shadow-sm">{{ gmdate('H:i', $employee->avg_check_in) }}</span>
                             </div>
                         </div>
                     @empty
@@ -348,20 +348,20 @@
 
             <x-admin.insight-panel class="p-5">
                 <div class="mb-4 flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50">
-                        <x-heroicon-s-exclamation-triangle class="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
+                        <x-heroicon-s-exclamation-triangle class="h-5 w-5 text-amber-600" />
                     </div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Frequent Late') }}</h3>
+                    <h3 class="text-sm font-bold text-slate-900">{{ __('Frequent Late') }}</h3>
                 </div>
                 <div class="space-y-3">
                     @forelse ($topLate as $employee)
-                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow dark:border-slate-700/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/80">
-                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 text-xs uppercase">
+                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 text-xs uppercase">
                                 {{ substr($employee->name, 0, 2) }}
                             </div>
                             <div class="flex flex-1 items-center justify-between">
-                                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate pr-2">{{ $employee->name }}</span>
-                                <span class="shrink-0 rounded-full bg-amber-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 shadow-sm">{{ $employee->late_count }}x</span>
+                                <span class="text-sm font-semibold text-slate-700 truncate pr-2">{{ $employee->name }}</span>
+                                <span class="shrink-0 rounded-full bg-amber-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-amber-700 shadow-sm">{{ $employee->late_count }}x</span>
                             </div>
                         </div>
                     @empty
@@ -372,20 +372,20 @@
 
             <x-admin.insight-panel class="p-5">
                 <div class="mb-4 flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/50">
-                        <x-heroicon-s-arrow-right-end-on-rectangle class="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100">
+                        <x-heroicon-s-arrow-right-end-on-rectangle class="h-5 w-5 text-rose-600" />
                     </div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Early Runners') }}</h3>
+                    <h3 class="text-sm font-bold text-slate-900">{{ __('Early Runners') }}</h3>
                 </div>
                 <div class="space-y-3">
                     @forelse ($topEarlyLeavers as $employee)
-                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow dark:border-slate-700/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/80">
-                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 font-bold text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 text-xs uppercase">
+                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 font-bold text-rose-700 text-xs uppercase">
                                 {{ substr($employee->name, 0, 2) }}
                             </div>
                             <div class="flex flex-1 items-center justify-between">
-                                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate pr-2">{{ $employee->name }}</span>
-                                <span class="shrink-0 rounded-full bg-rose-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 shadow-sm">{{ $employee->early_leave_count }}x</span>
+                                <span class="text-sm font-semibold text-slate-700 truncate pr-2">{{ $employee->name }}</span>
+                                <span class="shrink-0 rounded-full bg-rose-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-rose-700 shadow-sm">{{ $employee->early_leave_count }}x</span>
                             </div>
                         </div>
                     @empty
@@ -399,16 +399,16 @@
         <div class="grid gap-4 md:grid-cols-2">
             <!-- Top Regions -->
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ __('Top Employee Regions') }}</h3>
+                <h3 class="text-sm font-bold text-slate-900 mb-3">{{ __('Top Employee Regions') }}</h3>
                 <div class="space-y-2.5">
                     @forelse ($topRegions as $region => $count)
                         @php $regionPct = round(($count / max($topRegions->sum(), 1)) * 100, 1); @endphp
                         <div>
                             <div class="mb-1 flex items-center justify-between text-xs">
-                                <span class="font-medium text-slate-700 dark:text-slate-200">{{ $region }}</span>
-                                <span class="font-bold text-slate-900 dark:text-white">{{ $count }}</span>
+                                <span class="font-medium text-slate-700">{{ $region }}</span>
+                                <span class="font-bold text-slate-900">{{ $count }}</span>
                             </div>
-                            <div class="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div class="h-1.5 overflow-hidden rounded-full bg-slate-100">
                                 <div class="h-full rounded-full bg-teal-500" style="width: {{ $regionPct }}%"></div>
                             </div>
                         </div>
@@ -420,7 +420,7 @@
 
             <!-- Attendance Rate Gauge -->
             <x-admin.insight-panel class="p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ __('Attendance Rate') }}</h3>
+                <h3 class="text-sm font-bold text-slate-900 mb-3">{{ __('Attendance Rate') }}</h3>
                 <div class="flex items-center gap-4">
                     <div class="relative shrink-0 drop-shadow-md">
                         <svg viewBox="0 0 120 120" class="w-24 h-24">
@@ -430,7 +430,7 @@
                                     <stop offset="100%" stop-color="#059669" />
                                 </linearGradient>
                             </defs>
-                            <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" class="stroke-slate-100/80 dark:stroke-slate-800/80" />
+                            <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" class="stroke-slate-100/80" />
                             <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round"
                                 stroke="url(#gaugeGradient)"
                                 stroke-dasharray="{{ 2 * 3.14159 * 52 }}"
@@ -439,19 +439,19 @@
                                 class="transition-all duration-1000 ease-out" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-br from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 drop-shadow-sm">{{ $summary['attendance_rate'] ?? 0 }}%</span>
+                            <span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-br from-emerald-600 to-teal-500 drop-shadow-sm">{{ $summary['attendance_rate'] ?? 0 }}%</span>
                         </div>
                     </div>
                     <div class="flex-1 space-y-2 text-xs">
-                        <div class="flex justify-between rounded-lg bg-emerald-50/80 p-2.5 backdrop-blur-sm dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">
+                        <div class="flex justify-between rounded-lg bg-emerald-50/80 p-2.5 backdrop-blur-sm text-emerald-700">
                             <span class="font-medium">{{ __('Avg Daily') }}</span>
                             <span class="font-bold">{{ $summary['avg_daily_attendance'] ?? 0 }}</span>
                         </div>
-                        <div class="flex justify-between rounded-lg bg-amber-50/80 p-2.5 backdrop-blur-sm dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                        <div class="flex justify-between rounded-lg bg-amber-50/80 p-2.5 backdrop-blur-sm text-amber-700">
                             <span class="font-medium">{{ __('Late Rate') }}</span>
                             <span class="font-bold">{{ $summary['late_rate'] ?? 0 }}%</span>
                         </div>
-                        <div class="flex justify-between rounded-lg bg-slate-50/80 p-2.5 backdrop-blur-sm dark:bg-slate-800/40 text-slate-700 dark:text-slate-300">
+                        <div class="flex justify-between rounded-lg bg-slate-50/80 p-2.5 backdrop-blur-sm text-slate-700">
                             <span class="font-medium">{{ __('Workforce') }}</span>
                             <span class="font-bold">{{ $summary['total_employees'] }}</span>
                         </div>
@@ -484,12 +484,10 @@
                 },
 
                 chartTheme() {
-                    const dark = document.documentElement.classList.contains('dark');
-
                     return {
-                        grid: dark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(226, 232, 240, 0.9)',
-                        tick: dark ? 'rgba(203, 213, 225, 0.74)' : 'rgba(71, 85, 105, 0.82)',
-                        legend: dark ? 'rgba(226, 232, 240, 0.84)' : 'rgba(51, 65, 85, 0.86)',
+                        grid: 'rgba(226, 232, 240, 0.9)',
+                        tick: 'rgba(71, 85, 105, 0.82)',
+                        legend: 'rgba(51, 65, 85, 0.86)',
                     };
                 },
 
@@ -989,10 +987,7 @@
                             zoomAnimation: false,
                         }).setView([-2.548926, 118.0148634], 5);
 
-                        const isDark = document.documentElement.classList.contains('dark');
-                        const tileUrl = isDark 
-                            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+                        const tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
                         L.tileLayer(tileUrl, {
                             attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -1009,7 +1004,7 @@
                             iconCreateFunction: function(cluster) {
                                 const markers = cluster.getAllChildMarkers();
                                 return new L.DivIcon({
-                                    html: `<div class="bg-primary-600 text-white font-bold rounded-full w-full h-full flex items-center justify-center border-[3px] border-white dark:border-slate-800 shadow-md"><span>${markers.length}</span></div>`,
+                                    html: `<div class="bg-primary-600 text-white font-bold rounded-full w-full h-full flex items-center justify-center border-[3px] border-white shadow-md"><span>${markers.length}</span></div>`,
                                     className: 'custom-clean-cluster bg-transparent',
                                     iconSize: new L.Point(38, 38)
                                 });
@@ -1050,7 +1045,7 @@
                                 const customIcon = L.divIcon({
                                     className: 'custom-div-icon',
                                     html: `
-                                        <div class="relative flex items-center justify-center rounded-full border-[3px] border-white dark:border-slate-800 shadow-sm text-white bg-primary-500 w-8 h-8">
+                                        <div class="relative flex items-center justify-center rounded-full border-[3px] border-white shadow-sm text-white bg-primary-500 w-8 h-8">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                                         </div>
                                     `,

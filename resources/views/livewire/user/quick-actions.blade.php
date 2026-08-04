@@ -12,7 +12,7 @@
             'label' => __('History'),
             'description' => __('Review attendance records.'),
             'icon' => 'history',
-            'tone' => 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200',
+            'tone' => 'bg-sky-100 text-sky-700',
         ],
         [
             'kind' => 'link',
@@ -20,7 +20,7 @@
             'label' => __('Correction'),
             'description' => __('Fix missing or wrong attendance.'),
             'icon' => 'correction',
-            'tone' => 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200',
+            'tone' => 'bg-violet-100 text-violet-700',
         ],
         [
             'kind' => 'link',
@@ -28,7 +28,7 @@
             'label' => __('Leave'),
             'description' => __('Send leave requests.'),
             'icon' => 'leave',
-            'tone' => 'bg-teal-100 text-teal-700 dark:bg-teal-950/40 dark:text-teal-200',
+            'tone' => 'bg-teal-100 text-teal-700',
         ],
         [
             'kind' => 'link',
@@ -36,7 +36,7 @@
             'label' => __('Claim'),
             'description' => __('Submit reimbursement.'),
             'icon' => 'reimbursement',
-            'tone' => 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-200',
+            'tone' => 'bg-rose-100 text-rose-700',
         ],
         [
             'kind' => 'link',
@@ -44,7 +44,7 @@
             'label' => __('Overtime'),
             'description' => __('Track overtime requests.'),
             'icon' => 'clock',
-            'tone' => 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200',
+            'tone' => 'bg-amber-100 text-amber-700',
         ],
     ];
 
@@ -56,7 +56,7 @@
                 'label' => __('My Schedule'),
                 'description' => __('Check shifts and work hours.'),
                 'icon' => 'calendar',
-                'tone' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-200',
+                'tone' => 'bg-cyan-100 text-cyan-700',
                 'locked' => false,
             ],
             [
@@ -65,7 +65,7 @@
                 'label' => __('Shift Swap'),
                 'description' => __('Request schedule changes.'),
                 'icon' => 'swap',
-                'tone' => 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200',
+                'tone' => 'bg-sky-100 text-sky-700',
                 'locked' => false,
             ],
             [
@@ -74,7 +74,7 @@
                 'label' => __('WFH'),
                 'description' => __('Request work-from-home approval.'),
                 'icon' => 'home',
-                'tone' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
+                'tone' => 'bg-emerald-100 text-emerald-700',
                 'locked' => false,
             ],
         ],
@@ -85,7 +85,7 @@
                 'label' => __('HR Tasks'),
                 'description' => __('Complete onboarding and offboarding follow-ups.'),
                 'icon' => 'tasks',
-                'tone' => 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/40 dark:text-fuchsia-200',
+                'tone' => 'bg-fuchsia-100 text-fuchsia-700',
                 'locked' => false,
             ],
             [
@@ -94,7 +94,7 @@
                 'label' => __('Operational Tasks'),
                 'description' => __('Follow client, project, and field-work tasks.'),
                 'icon' => 'tasks',
-                'tone' => 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200',
+                'tone' => 'bg-blue-100 text-blue-700',
                 'locked' => false,
             ],
             [
@@ -103,7 +103,7 @@
                 'label' => __('Team Chat'),
                 'description' => __('Open conversations and shared files.'),
                 'icon' => 'chat',
-                'tone' => 'bg-teal-100 text-teal-700 dark:bg-teal-950/40 dark:text-teal-200',
+                'tone' => 'bg-teal-100 text-teal-700',
                 'locked' => false,
             ],
             [
@@ -112,7 +112,7 @@
                 'label' => __('Forms'),
                 'description' => __('Submit HR and operations forms.'),
                 'icon' => 'forms',
-                'tone' => 'bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-200',
+                'tone' => 'bg-purple-100 text-purple-700',
                 'locked' => false,
             ],
         ],
@@ -123,7 +123,7 @@
                 'label' => __('Payslip'),
                 'description' => __('Open salary statements.'),
                 'icon' => 'payslip',
-                'tone' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
+                'tone' => 'bg-emerald-100 text-emerald-700',
                 'locked' => \App\Helpers\Editions::payrollLocked(),
             ],
             [
@@ -133,8 +133,8 @@
                 'description' => __('Track cash advance requests.'),
                 'icon' => 'kasbon',
                 'tone' => !$canRequestKasbon
-                    ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
-                    : 'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-200',
+                    ? 'bg-gray-100 text-gray-400'
+                    : 'bg-orange-100 text-orange-700',
                 'locked' => $cashAdvanceLocked,
                 'disabledMessage' => __('Kasbon is available after your basic salary has been updated.'),
             ],
@@ -144,7 +144,7 @@
                 'label' => __('Assets'),
                 'description' => __('Review assigned company assets.'),
                 'icon' => 'assets',
-                'tone' => 'bg-stone-100 text-stone-700 dark:bg-stone-900/50 dark:text-stone-200',
+                'tone' => 'bg-stone-100 text-stone-700',
                 'locked' => \App\Helpers\Editions::assetLocked(),
             ],
         ],
@@ -155,7 +155,7 @@
                 'label' => __('Documents'),
                 'description' => __('Request and upload HR documents.'),
                 'icon' => 'document',
-                'tone' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-200',
+                'tone' => 'bg-indigo-100 text-indigo-700',
                 'locked' => \App\Helpers\Editions::documentRequestsLocked(),
             ],
             [
@@ -164,7 +164,7 @@
                 'label' => __('Performance'),
                 'description' => __('Check KPI and appraisal results.'),
                 'icon' => 'performance',
-                'tone' => 'bg-lime-100 text-lime-700 dark:bg-lime-950/40 dark:text-lime-200',
+                'tone' => 'bg-lime-100 text-lime-700',
                 'locked' => \App\Helpers\Editions::appraisalLocked(),
             ],
         ],
@@ -175,7 +175,7 @@
                 'label' => __('KB Chat'),
                 'description' => __('Ask questions about company policies and HR.'),
                 'icon' => 'chat',
-                'tone' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
+                'tone' => 'bg-emerald-100 text-emerald-700',
                 'locked' => false,
             ],
         ],
@@ -197,7 +197,7 @@
                 'label' => __('Team Approvals'),
                 'description' => __('Review pending team requests.'),
                 'icon' => 'approvals',
-                'tone' => 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200',
+                'tone' => 'bg-blue-100 text-blue-700',
                 'locked' => false,
             ],
             [
@@ -206,7 +206,7 @@
                 'label' => __('Team Attendance'),
                 'description' => __('Review attendance corrections and leave requests.'),
                 'icon' => 'attendance',
-                'tone' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-200',
+                'tone' => 'bg-cyan-100 text-cyan-700',
                 'locked' => false,
             ],
             [
@@ -215,7 +215,7 @@
                 'label' => __('Team Kasbon'),
                 'description' => __('Follow team cash advance requests.'),
                 'icon' => 'team',
-                'tone' => 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-200',
+                'tone' => 'bg-green-100 text-green-700',
                 'locked' => $cashAdvanceLocked,
             ],
         ];
@@ -254,7 +254,7 @@
                 <button type="button" class="quick-wallet-action" :aria-expanded="showMore.toString()"
                     aria-haspopup="dialog" aria-controls="quick-access-more-panel" @click="showMore = !showMore">
                     <div
-                        class="quick-wallet-action__icon bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200">
+                        class="quick-wallet-action__icon bg-blue-100 text-blue-700">
                         <x-user.quick-menu-icon name="more" />
                     </div>
                     <div class="quick-wallet-action__label">{{ __('More') }}</div>
@@ -283,7 +283,7 @@
                                         <strong>{{ $item['label'] }}</strong>
                                         <span>{{ $item['description'] }}</span>
                                     </span>
-                                    <x-heroicon-o-chevron-right class="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                                    <x-heroicon-o-chevron-right class="h-4 w-4 text-slate-400" aria-hidden="true" />
                                 </a>
                             @else
                                 <button type="button" class="quick-wallet-team-card"
@@ -296,7 +296,7 @@
                                         <strong>{{ $item['label'] }}</strong>
                                         <span>{{ $item['description'] }}</span>
                                     </span>
-                                    <x-heroicon-o-lock-closed class="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                                    <x-heroicon-o-lock-closed class="h-4 w-4 text-slate-400" aria-hidden="true" />
                                 </button>
                             @endif
                         </li>

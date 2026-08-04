@@ -1,9 +1,9 @@
 @php
     $color = $iconColor ?? 'blue';
     $iconClasses = [
-        'green' => 'bg-primary-100 text-primary-700 dark:bg-primary-900/45 dark:text-primary-200',
-        'blue' => 'bg-sky-100 text-sky-700 dark:bg-sky-900/45 dark:text-sky-200',
-    ][$color] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200';
+        'green' => 'bg-primary-100 text-primary-700',
+        'blue' => 'bg-sky-100 text-sky-700',
+    ][$color] ?? 'bg-slate-100 text-slate-700';
 @endphp
 
 <div x-data="locationCard('{{ $mapId }}')"
@@ -16,7 +16,7 @@
                     <x-heroicon-o-map-pin class="h-5 w-5" />
                 </div>
             @endif
-            <h3 class="truncate text-sm font-semibold text-slate-950 dark:text-white">{{ $title }}</h3>
+            <h3 class="truncate text-sm font-semibold text-slate-950">{{ $title }}</h3>
         </div>
 
         <div class="flex shrink-0 items-center gap-2">
@@ -56,7 +56,7 @@
             </div>
         </template>
         <template x-if="!lat || !lng">
-            <span class="mt-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span class="mt-1 block text-xs font-medium text-slate-500">
                 {{ __('No location data') }}
             </span>
         </template>
@@ -69,7 +69,7 @@
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         class="map-container relative z-10 mt-4 overflow-hidden rounded-xl border border-slate-200 shadow-inner dark:border-slate-800"
+         class="map-container relative z-10 mt-4 overflow-hidden rounded-xl border border-slate-200 shadow-inner"
          x-ref="mapContainer"
          style="height: 300px;"
          id="{{ $mapId }}"></div>

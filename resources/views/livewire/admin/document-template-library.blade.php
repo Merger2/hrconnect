@@ -15,22 +15,22 @@
 
         <div class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
             <x-admin.panel class="p-4">
-                <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Saved Templates') }}</h2>
+                <h2 class="text-base font-semibold text-gray-900">{{ __('Saved Templates') }}</h2>
                 <p class="sr-only">{{ __('Select a template to preview or manage it.') }}</p>
 
-                <div class="mt-5 overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700">
-                    <table class="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <div class="mt-5 overflow-hidden rounded-xl border border-gray-100">
+                    <table class="min-w-full divide-y divide-gray-100 text-sm">
+                        <tbody class="divide-y divide-gray-100">
                             @forelse ($templates as $template)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60">
+                                <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3">
                                         <button type="button" wire:click="selectTemplate({{ $template->id }})" class="block w-full text-left">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <span class="font-semibold text-gray-900 dark:text-white">{{ $template->name }}</span>
+                                                <span class="font-semibold text-gray-900">{{ $template->name }}</span>
                                                 @if ($template->is_active)
-                                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{{ __('Active') }}</span>
+                                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">{{ __('Active') }}</span>
                                                 @else
-                                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-300">{{ __('Draft') }}</span>
+                                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">{{ __('Draft') }}</span>
                                                 @endif
                                             </div>
                                             <div class="mt-1 text-xs text-gray-500">
@@ -76,8 +76,8 @@
                 @if ($selectedTemplate)
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                            <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ $selectedTemplate->name }}</h2>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            <h2 class="text-base font-semibold text-gray-900">{{ $selectedTemplate->name }}</h2>
+                            <p class="mt-1 text-sm text-gray-500">
                                 {{ $selectedTemplate->documentType?->name }} · {{ strtoupper($selectedTemplate->paper_size) }} · {{ $selectedTemplate->orientation }}
                             </p>
                         </div>
@@ -87,11 +87,11 @@
                         </x-actions.button>
                     </div>
 
-                    <div class="mt-5 overflow-hidden rounded-xl border border-gray-200 bg-slate-900 shadow-sm dark:border-gray-700 dark:bg-slate-950">
+                    <div class="mt-5 overflow-hidden rounded-xl border border-gray-200 bg-slate-900 shadow-sm">
                         {!! clean($templatePreviewHtml) !!}
                     </div>
                 @else
-                    <div class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div class="py-8 text-center text-sm text-gray-500">
                         {{ __('No template selected.') }}
                     </div>
                 @endif

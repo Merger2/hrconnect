@@ -34,7 +34,7 @@
             <div class="sm:col-span-2 lg:col-span-2">
                 <x-forms.label for="admin-search" value="{{ __('Search admins') }}" class="mb-1.5 block" />
                 <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z" clip-rule="evenodd" />
                         </svg>
@@ -71,10 +71,10 @@
     </x-slot>
 
     <x-admin.panel>
-        <div class="flex flex-col gap-2 border-b border-gray-200/70 px-4 py-3 dark:border-gray-700/70 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-2 border-b border-gray-200/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Admin Directory') }}</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <h2 class="text-lg font-semibold text-slate-950">{{ __('Admin Directory') }}</h2>
+                <p class="mt-1 text-sm text-slate-500">
                     @if ($users->count())
                         {{ __('Showing :from-:to of :total admins.', ['from' => $users->firstItem(), 'to' => $users->lastItem(), 'total' => $users->total()]) }}
                     @else
@@ -89,9 +89,9 @@
         @if ($users->count())
             <div class="grid grid-cols-1 gap-4 p-4 lg:hidden">
                 @foreach ($users as $user)
-                    <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                         <button type="button" wire:click="show('{{ $user->id }}')"
-                            class="w-full rounded-xl text-left transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:hover:bg-gray-700/60 dark:focus:ring-offset-gray-900"
+                            class="w-full rounded-xl text-left transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2"
                             aria-label="{{ __('View admin') }}: {{ $user->name }}">
                             <div class="mb-4 flex items-start gap-4">
                                 <div class="shrink-0">
@@ -100,26 +100,26 @@
                                             alt="{{ $user->name }}" />
                                     @else
                                         <div
-                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-500 dark:bg-gray-700">
+                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-500">
                                             {{ substr($user->name, 0, 1) }}
                                         </div>
                                     @endif
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <h4 class="truncate text-base font-semibold text-gray-900 dark:text-white">
+                                    <h4 class="truncate text-base font-semibold text-gray-900">
                                         {{ $user->name }}
                                     </h4>
-                                    <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="truncate text-xs text-gray-500">
                                         {{ $user->email }}
                                     </p>
                                     <span
-                                        class="mt-1 inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                        class="mt-1 inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
                                         {{ $user->group }}
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                            <div class="mb-4 text-sm text-gray-600">
                                 <div class="flex justify-between">
                                     <span class="text-gray-500">{{ __('Phone') }}</span>
                                     <span class="font-medium">{{ $user->phone ?? '-' }}</span>
@@ -127,7 +127,7 @@
                             </div>
                         </button>
 
-                        <div class="flex flex-wrap justify-end gap-3 border-t border-gray-100 pt-3 dark:border-gray-700">
+                        <div class="flex flex-wrap justify-end gap-3 border-t border-gray-100 pt-3">
                             <x-actions.button type="button" wire:click="show('{{ $user->id }}')" variant="soft-primary" size="sm" label="{{ __('View admin') }}: {{ $user->name }}">
                                 <x-heroicon-o-eye class="h-4 w-4" />
                                 <span>{{ __('View') }}</span>
@@ -151,45 +151,45 @@
 
             <div class="hidden overflow-x-auto lg:block">
                 <table class="w-full whitespace-nowrap text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                    <thead class="bg-gray-50 text-gray-500">
                         <tr>
                             <th scope="col"
-                                class="relative px-2 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-300">
+                                class="relative px-2 py-2 text-center text-xs font-medium text-gray-500">
                                 {{ __('No.') }}
                             </th>
-                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-300">
+                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500">
                                 {{ __('Name') }}
                             </th>
-                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-300">
+                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500">
                                 {{ __('Email') }}
                             </th>
-                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-300">
+                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500">
                                 {{ __('Group') }}
                             </th>
-                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-300">
+                            <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium text-gray-500">
                                 {{ __('Phone Number') }}
                             </th>
-                            <th scope="col" class="px-4 py-2.5 text-right text-xs font-medium text-gray-500 dark:text-gray-300">
+                            <th scope="col" class="px-4 py-2.5 text-right text-xs font-medium text-gray-500">
                                 {{ __('Actions') }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-100">
                         @foreach ($users as $user)
-                            <tr wire:key="{{ $user->id }}" class="group transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="p-2 text-center text-sm font-medium text-gray-900 dark:text-white">
+                            <tr wire:key="{{ $user->id }}" class="group transition-colors hover:bg-gray-50">
+                                <td class="p-2 text-center text-sm font-medium text-gray-900">
                                     {{ ($users->firstItem() ?? 1) + $loop->index }}
                                 </td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
                                     {{ $user->name }}
                                 </td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
                                     {{ $user->email }}
                                 </td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
                                     {{ $user->group }}
                                 </td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
                                     {{ $user->phone }}
                                 </td>
                                 <td class="px-4 py-3 text-right">
@@ -219,7 +219,7 @@
             </div>
 
             @if ($users->hasPages())
-                <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5 dark:border-gray-700/60 dark:bg-gray-900/40">
+                <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
                     {{ $users->links() }}
                 </div>
             @endif
@@ -229,10 +229,10 @@
                 :description="filled($search) || $groupFilter !== 'all'
                     ? __('Try changing the keyword or group filter to see more results.')
                     : __('Create admin accounts to manage access, monitoring, and operational settings.')"
-                class="m-4 border-0 bg-transparent p-4 shadow-none dark:bg-transparent"
+                class="m-4 border-0 bg-transparent p-4 shadow-none"
             >
                 <x-slot name="icon">
-                    <x-heroicon-o-users class="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                    <x-heroicon-o-users class="h-12 w-12 text-slate-300" />
                 </x-slot>
 
                 @if ($this->canCreateAdmin())
@@ -297,7 +297,7 @@
 
                         <!-- Current Profile Photo -->
                         <div class="mt-2" x-show="! photoPreview">
-                            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-2xl font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-300">
+                            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-2xl font-semibold text-gray-400">
                                 {{ strtoupper(substr($form->name ?: 'A', 0, 1)) }}
                             </div>
                         </div>
@@ -310,7 +310,7 @@
                         </div>
 
                         <label for="create_photo"
-                            class="me-2 mt-2 inline-flex min-h-9 cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:focus-within:ring-offset-gray-900">
+                            class="me-2 mt-2 inline-flex min-h-9 cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2">
                             {{ __('Select A New Photo') }}
                         </label>
 
@@ -351,7 +351,7 @@
                         <x-forms.input id="create_password" class="mt-1 block w-full" type="password"
                             wire:model="credential" placeholder="{{ __('New Password') }}" required
                             autocomplete="new-password" />
-                        <p class="text-sm dark:text-gray-400">{{ __('Default password admin') }}</p>
+                        <p class="text-sm">{{ __('Default password admin') }}</p>
                         @error('form.password')
                             <x-forms.input-error for="form.password" class="mt-2" message="{{ $message }}" />
                         @enderror
@@ -377,11 +377,11 @@
                         </p>
                         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             @foreach ($assignableAdminRoles as $role)
-                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700 dark:border-gray-700 dark:bg-gray-900/60 dark:text-slate-200">
+                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700">
                                     <x-forms.radio wire:model.live="form.role_id" value="{{ $role->id }}" class="mt-0.5 h-5 w-5" />
                                     <span>
-                                        <span class="block font-medium text-slate-900 dark:text-white">{{ $role->name }}</span>
-                                        <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">{{ $role->description }}</span>
+                                        <span class="block font-medium text-slate-900">{{ $role->name }}</span>
+                                        <span class="mt-1 block text-xs text-slate-500">{{ $role->description }}</span>
                                     </span>
                                 </label>
                             @endforeach
@@ -504,7 +504,7 @@
                         </div>
 
                         <label for="edit_photo"
-                            class="me-2 mt-2 inline-flex min-h-9 cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:focus-within:ring-offset-gray-900">
+                            class="me-2 mt-2 inline-flex min-h-9 cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2">
                             {{ __('Select A New Photo') }}
                         </label>
 
@@ -563,11 +563,11 @@
                         </p>
                         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             @foreach ($assignableAdminRoles as $role)
-                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700 dark:border-gray-700 dark:bg-gray-900/60 dark:text-slate-200">
+                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700">
                                     <x-forms.radio wire:model.live="form.role_id" value="{{ $role->id }}" class="mt-0.5 h-5 w-5" />
                                     <span>
-                                        <span class="block font-medium text-slate-900 dark:text-white">{{ $role->name }}</span>
-                                        <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">{{ $role->description }}</span>
+                                        <span class="block font-medium text-slate-900">{{ $role->name }}</span>
+                                        <span class="mt-1 block text-xs text-slate-500">{{ $role->description }}</span>
                                     </span>
                                 </label>
                             @endforeach
@@ -660,37 +660,37 @@
                         alt="{{ $form->user->name }}" title="{{ $form->user->name }}" />
                 </div>
 
-                <div class="text-center text-lg font-medium text-gray-900 dark:text-gray-100">
+                <div class="text-center text-lg font-medium text-gray-900">
                     {{ $form->user->name }}
                 </div>
 
-                <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                <div class="mt-4 text-sm text-gray-600">
                     <div class="mt-4">
-                        <span class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('NIP') }}</span>
+                        <span class="block font-medium text-sm text-gray-700">{{ __('NIP') }}</span>
                         <p>{{ $form->user->nip }}</p>
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Email') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Email') }}</span>
                         <p>{{ $form->user->email }}</p>
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Phone') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Phone') }}</span>
                         <p>{{ $form->user->phone }}</p>
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Group') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Group') }}</span>
                         <p>{{ __($form->user->group) }}</p>
                     </div>
                     <div class="mt-4">
-                        <span class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Access Roles') }}</span>
+                        <span class="block font-medium text-sm text-gray-700">{{ __('Access Roles') }}</span>
                         <p>{{ $form->user->roles->pluck('name')->join(', ') ?: __('No roles assigned') }}</p>
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Birth Date') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Birth Date') }}</span>
                         @if ($form->user->birth_date)
                             <p>{{ \Illuminate\Support\Carbon::parse($form->user->birth_date)->format('D d M Y') }}</p>
                         @else
@@ -699,12 +699,12 @@
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Birth Place') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Birth Place') }}</span>
                         <p>{{ $form->user->birth_place ?? '-' }}</p>
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Address') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Address') }}</span>
                         @if (empty($form->user->address))
                             <p>-</p>
                         @else
@@ -713,12 +713,12 @@
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Position') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Position') }}</span>
                         <p>{{ $position }}</p>
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Division') }}</span>
+                            class="block font-medium text-sm text-gray-700">{{ __('Division') }}</span>
                         <p>{{ $division }}</p>
                     </div>
                     <div class="mt-4">

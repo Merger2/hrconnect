@@ -12,7 +12,7 @@
                 <x-forms.label for="holiday-search" value="{{ __('Search holidays') }}" class="mb-1.5 block" />
                 <div class="relative">
                     <span
-                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd"
                                 d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z"
@@ -51,7 +51,7 @@
         <!-- Desktop Table -->
         <div class="hidden lg:block overflow-x-auto">
             <table class="w-full whitespace-nowrap text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                <thead class="bg-gray-50 text-gray-500">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium">{{ __('Date') }}</th>
                         <th scope="col" class="px-4 py-3 font-medium">{{ __('Name') }}</th>
@@ -60,16 +60,16 @@
                         <th scope="col" class="px-4 py-3 text-right font-medium">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100">
                     @forelse($holidays as $holiday)
-                        <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                        <tr class="group hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 font-medium text-gray-900">
                                 {{ $holiday->date->translatedFormat('d M Y') }}
                             </td>
-                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                            <td class="px-4 py-3 font-medium text-gray-900">
                                 {{ $holiday->name }}
                             </td>
-                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                            <td class="px-4 py-3 text-gray-500 max-w-xs truncate">
                                 {{ $holiday->description ?? '-' }}
                             </td>
                             <td class="px-4 py-3">
@@ -95,10 +95,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="5" class="px-4 py-6 text-center text-gray-500">
                                 <div class="flex flex-col items-center justify-center">
                                     <x-heroicon-o-calendar-days
-                                        class="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                                        class="h-12 w-12 text-gray-300 mb-3" />
                                     <p class="font-medium">{{ __('No holidays found') }}</p>
                                     <p class="sr-only">{{ __('Add holidays to manage work schedules.') }}</p>
                                 </div>
@@ -110,12 +110,12 @@
         </div>
 
         <!-- Mobile List -->
-        <div class="grid grid-cols-1 lg:hidden divide-y divide-gray-200 dark:divide-gray-700">
+        <div class="grid grid-cols-1 lg:hidden divide-y divide-gray-200">
             @foreach ($holidays as $holiday)
                 <div class="p-4 space-y-2">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h4 class="font-medium text-gray-900 dark:text-white">{{ $holiday->name }}</h4>
+                            <h4 class="font-medium text-gray-900">{{ $holiday->name }}</h4>
                             <p class="text-sm text-gray-500">{{ $holiday->date->translatedFormat('d M Y') }}</p>
                         </div>
                         @if ($holiday->is_recurring)
@@ -123,10 +123,10 @@
                         @endif
                     </div>
                     @if ($holiday->description)
-                        <p class="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
+                        <p class="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                             {{ $holiday->description }}</p>
                     @endif
-                    <div class="flex justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-700/50 mt-2">
+                    <div class="flex justify-end gap-3 pt-2 border-t border-gray-100 mt-2">
                         <x-actions.button type="button" wire:click="edit({{ $holiday->id }})" variant="soft-primary"
                             size="sm"
                             label="{{ __('Edit holiday') }}: {{ $holiday->name }}">{{ __('Edit') }}</x-actions.button>
@@ -138,7 +138,7 @@
             @endforeach
         </div>
 
-        <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5 dark:border-gray-700/60 dark:bg-gray-900/40">
+        <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
             {{ $holidays->links() }}
         </div>
     </x-admin.panel>

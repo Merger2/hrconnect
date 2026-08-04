@@ -29,31 +29,31 @@
 
         <div class="grid gap-3 md:hidden">
             @forelse ($corrections as $correction)
-                <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <h3 class="truncate text-sm font-semibold text-slate-950 dark:text-white">{{ $correction->user?->name ?? __('Deleted User') }}</h3>
-                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $correction->attendance_date->translatedFormat('d M Y') }} · {{ $correction->requestTypeLabel() }}</p>
+                            <h3 class="truncate text-sm font-semibold text-slate-950">{{ $correction->user?->name ?? __('Deleted User') }}</h3>
+                            <p class="mt-0.5 text-xs text-slate-500">{{ $correction->attendance_date->translatedFormat('d M Y') }} · {{ $correction->requestTypeLabel() }}</p>
                         </div>
                         <span class="shrink-0 rounded-full px-2 py-1 text-[11px] font-medium
                             {{ $correction->status === 'approved'
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                ? 'bg-emerald-100 text-emerald-700'
                                 : ($correction->status === 'rejected'
-                                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300') }}">
+                                    ? 'bg-rose-100 text-rose-700'
+                                    : 'bg-amber-100 text-amber-700') }}">
                             {{ $correction->statusLabel() }}
                         </span>
                     </div>
 
-                    <div class="mt-3 grid gap-2 text-xs text-slate-600 dark:text-slate-300">
-                        <div class="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/70">
-                            <div class="font-medium text-slate-500 dark:text-slate-400">{{ __('Current') }}</div>
+                    <div class="mt-3 grid gap-2 text-xs text-slate-600">
+                        <div class="rounded-lg bg-slate-50 p-2">
+                            <div class="font-medium text-slate-500">{{ __('Current') }}</div>
                             <div>{{ __('Shift') }}: {{ data_get($correction->current_snapshot, 'shift_name', __('Not assigned')) }}</div>
                             <div>{{ __('Check in') }}: {{ data_get($correction->current_snapshot, 'time_in', __('None')) }}</div>
                             <div>{{ __('Check out') }}: {{ data_get($correction->current_snapshot, 'time_out', __('None')) }}</div>
                         </div>
-                        <div class="rounded-lg bg-primary-50/70 p-2 text-primary-900 dark:bg-primary-950/30 dark:text-primary-100">
-                            <div class="font-medium text-primary-700 dark:text-primary-200">{{ __('Requested') }}</div>
+                        <div class="rounded-lg bg-primary-50/70 p-2 text-primary-900">
+                            <div class="font-medium text-primary-700">{{ __('Requested') }}</div>
                             @if ($correction->requestedShift)
                                 <div>{{ __('Shift') }}: {{ $correction->requestedShift->name }}</div>
                             @endif
@@ -70,7 +70,7 @@
                     </div>
 
                     @if ($correction->reason)
-                        <p class="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{{ $correction->reason }}</p>
+                        <p class="mt-3 text-xs leading-5 text-slate-500">{{ $correction->reason }}</p>
                     @endif
 
                     @if (in_array($correction->status, ['pending', 'pending_admin'], true))
@@ -89,11 +89,11 @@
             @endforelse
         </div>
 
-        <div class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/80 md:block">
+        <div class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
             <div class="md:overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                    <thead class="bg-slate-50 dark:bg-slate-900/40">
-                        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <th class="px-4 py-3">{{ __('Employee') }}</th>
                             <th class="px-4 py-3">{{ __('Date') }}</th>
                             <th class="px-4 py-3">{{ __('Type') }}</th>
@@ -103,29 +103,29 @@
                             <th class="px-4 py-3">{{ __('Action') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody class="divide-y divide-slate-100">
                         @forelse ($corrections as $correction)
                             <tr class="align-top">
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="font-semibold">{{ $correction->user?->name ?? __('Deleted User') }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $correction->user?->nip ?? '-' }}</div>
+                                    <div class="text-xs text-slate-500">{{ $correction->user?->nip ?? '-' }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="font-semibold">{{ $correction->attendance_date->translatedFormat('d M Y') }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $correction->created_at->diffForHumans() }}</div>
+                                    <div class="text-xs text-slate-500">{{ $correction->created_at->diffForHumans() }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="font-semibold">{{ $correction->requestTypeLabel() }}</div>
-                                    <div class="mt-1 max-w-sm whitespace-pre-line text-xs text-slate-500 dark:text-slate-400">{{ $correction->reason }}</div>
+                                    <div class="mt-1 max-w-sm whitespace-pre-line text-xs text-slate-500">{{ $correction->reason }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="space-y-1 text-xs">
                                         <div>{{ __('Shift') }}: {{ data_get($correction->current_snapshot, 'shift_name', __('Not assigned')) }}</div>
                                         <div>{{ __('Check in') }}: {{ data_get($correction->current_snapshot, 'time_in', __('None')) }}</div>
                                         <div>{{ __('Check out') }}: {{ data_get($correction->current_snapshot, 'time_out', __('None')) }}</div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="space-y-1 text-xs">
                                         @if ($correction->requestedShift)
                                             <div>{{ __('Shift') }}: {{ $correction->requestedShift->name }}</div>
@@ -141,23 +141,23 @@
                                 <td class="px-4 py-3 text-sm">
                                     <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
                                         {{ $correction->status === 'approved'
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                            ? 'bg-emerald-100 text-emerald-700'
                                             : ($correction->status === 'rejected'
-                                                ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300') }}">
+                                                ? 'bg-rose-100 text-rose-700'
+                                                : 'bg-amber-100 text-amber-700') }}">
                                         {{ $correction->statusLabel() }}
                                     </span>
                                     @if ($correction->reviewer)
-                                        <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                        <div class="mt-2 text-xs text-slate-500">
                                             {{ __('By :name', ['name' => $correction->reviewer->name]) }}
                                         </div>
                                     @elseif ($correction->headApprover)
-                                        <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                        <div class="mt-2 text-xs text-slate-500">
                                             {{ __('Supervisor: :name', ['name' => $correction->headApprover->name]) }}
                                         </div>
                                     @endif
                                     @if ($correction->rejection_note)
-                                        <div class="mt-2 text-xs text-rose-600 dark:text-rose-300">{{ $correction->rejection_note }}</div>
+                                        <div class="mt-2 text-xs text-rose-600">{{ $correction->rejection_note }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm">
@@ -171,13 +171,13 @@
                                             </x-actions.secondary-button>
                                         </div>
                                     @else
-                                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ __('Completed') }}</span>
+                                        <span class="text-xs text-slate-500">{{ __('Completed') }}</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                                <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">
                                     {{ __('No attendance correction requests found.') }}
                                 </td>
                             </tr>

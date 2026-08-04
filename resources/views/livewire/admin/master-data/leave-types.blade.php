@@ -27,8 +27,8 @@
         </x-slot>
 
         <x-admin.panel>
-            <div class="border-b border-gray-200/70 px-4 py-3 dark:border-gray-700/70">
-                <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Leave Type Directory') }}</h2>
+            <div class="border-b border-gray-200/70 px-4 py-3">
+                <h2 class="text-lg font-semibold text-slate-950">{{ __('Leave Type Directory') }}</h2>
                 <p class="sr-only">
                     {{ __('Annual leave can use quota. Sick and special leave types do not reduce sick quota because sick quota is no longer enforced.') }}
                 </p>
@@ -36,7 +36,7 @@
 
             <div class="hidden overflow-x-auto lg:block">
                 <table class="w-full whitespace-nowrap text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                    <thead class="bg-gray-50 text-gray-500">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Name') }}</th>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Behavior') }}</th>
@@ -44,14 +44,14 @@
                             <th scope="col" class="px-4 py-3 text-right font-medium">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-100">
                         @forelse ($leaveTypes as $leaveType)
-                            <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                            <tr class="transition-colors hover:bg-gray-50">
                                 <td class="px-4 py-3">
-                                    <div class="font-semibold text-slate-900 dark:text-white">{{ $leaveType->name }}</div>
-                                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $leaveType->code }}</div>
+                                    <div class="font-semibold text-slate-900">{{ $leaveType->name }}</div>
+                                    <div class="mt-1 text-xs text-slate-500">{{ $leaveType->code }}</div>
                                     @if ($leaveType->description)
-                                        <div class="mt-1 max-w-md truncate text-xs text-slate-500 dark:text-slate-400">{{ $leaveType->description }}</div>
+                                        <div class="mt-1 max-w-md truncate text-xs text-slate-500">{{ $leaveType->description }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3">
@@ -74,7 +74,7 @@
                                         {{ $leaveType->is_active ? __('Active') : __('Inactive') }}
                                     </x-admin.status-badge>
                                     @if ($leaveType->is_system)
-                                        <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ __('System default') }}</div>
+                                        <div class="mt-2 text-xs text-slate-500">{{ __('System default') }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
@@ -94,7 +94,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="4" class="px-4 py-6 text-center text-gray-500">
                                     {{ __('No leave types found.') }}
                                 </td>
                             </tr>
@@ -103,13 +103,13 @@
                 </table>
             </div>
 
-            <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-700 lg:hidden">
+            <div class="grid grid-cols-1 divide-y divide-gray-200 lg:hidden">
                 @foreach ($leaveTypes as $leaveType)
                     <div class="p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <h3 class="truncate text-base font-semibold text-slate-950 dark:text-white">{{ $leaveType->name }}</h3>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $categories[$leaveType->category] ?? $leaveType->category }}</p>
+                                <h3 class="truncate text-base font-semibold text-slate-950">{{ $leaveType->name }}</h3>
+                                <p class="mt-1 text-xs text-slate-500">{{ $categories[$leaveType->category] ?? $leaveType->category }}</p>
                             </div>
                             <x-admin.status-badge :tone="$leaveType->is_active ? 'success' : 'neutral'">
                                 {{ $leaveType->is_active ? __('Active') : __('Inactive') }}
@@ -130,7 +130,7 @@
             </div>
 
             @if ($leaveTypes->hasPages())
-                <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5 dark:border-gray-700/60 dark:bg-gray-900/40">
+                <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
                     {{ $leaveTypes->onEachSide(1)->links() }}
                 </div>
             @endif

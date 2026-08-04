@@ -52,7 +52,7 @@
                         <div class="mb-4">
                             <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Password') }}</label>
                             <input id="password" type="password" name="password" required autocomplete="current-password" autofocus
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-200" />
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20" />
                         </div>
 
                         <div class="mt-6 flex items-center justify-end gap-4">

@@ -362,18 +362,18 @@
 
                 statusToneClass() {
                     if (this.status === 'ready-to-capture') {
-                        return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100';
+                        return 'bg-emerald-100 text-emerald-900';
                     }
 
                     if (['turn-face', 'turn-opposite-face', 'arming-liveness', 'recenter-face'].includes(this.status)) {
-                        return 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-700/20 dark:bg-emerald-950/40 dark:text-emerald-100 dark:ring-emerald-300/30';
+                        return 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-700/20';
                     }
 
                     if (this.status === 'error') {
-                        return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300';
+                        return 'bg-red-50 text-red-700';
                     }
 
-                    return 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100';
+                    return 'bg-slate-100 text-slate-900';
                 },
 
                 buttonLabel() {

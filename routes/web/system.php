@@ -3,9 +3,11 @@
 use App\Http\Controllers\Auth\VerifyEmailCodeController;
 use App\Http\Controllers\SseNotificationController;
 use App\Http\Controllers\System\AuthDebugController;
+use App\Http\Controllers\System\BoostBrowserLogsController;
 use App\Http\Controllers\System\E2eDocumentUploadController;
 use App\Http\Controllers\System\E2eLoginController;
 use App\Http\Controllers\System\LanguageController;
+use App\Http\Controllers\System\LegacyRedirectController;
 use App\Http\Controllers\System\ResetServiceWorkerController;
 use App\Http\Controllers\System\RootRedirectController;
 use App\Http\Controllers\System\TestErrorController;
@@ -16,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 
 // Boost MCP browser logger endpoint — required to prevent infinite error loop
-Route::post('/_boost/browser-logs', fn () => response()->json(['status' => 'ok']))->name('boost.browser-logs');
+Route::post('/_boost/browser-logs', BoostBrowserLogsController::class)->name('boost.browser-logs');
 
 // Test Error Views. Keep this helper out of production so arbitrary users cannot
 // trigger dedicated error responses on demand.
@@ -79,8 +81,10 @@ Route::controller(LanguageController::class)->group(function () {
     Route::post('/user/language', 'update')->name('user.language.update');
 });
 
-Route::get('/enterprise-support', fn () => redirect('https://wa.me/628123456789'))
-    ->name('enterprise-support.whatsapp');
+Route::controller(LegacyRedirectController::class)->group(function () {
+    Route::get('/enterprise-support', 'enterpriseSupport')
+        ->name('enterprise-support.whatsapp');
 
-Route::get('/admin/commercial', fn () => redirect()->route('admin.dashboard'))
-    ->name('admin.commercial');
+    Route::get('/admin/commercial', 'commercial')
+        ->name('admin.commercial');
+});

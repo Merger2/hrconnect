@@ -39,15 +39,15 @@
                     </div>
                     
                     @if ($attendance && ($attendance->time_in || $attendance->time_out))
-                        <div class="mb-6 flex gap-3 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm dark:border-orange-800/50 dark:bg-orange-900/20" role="status" aria-live="polite">
-                            <div class="p-1.5 bg-orange-100 dark:bg-orange-900/50 rounded-lg shrink-0 h-fit">
-                                <x-heroicon-o-exclamation-triangle class="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                        <div class="mb-6 flex gap-3 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm" role="status" aria-live="polite">
+                            <div class="p-1.5 bg-orange-100 rounded-lg shrink-0 h-fit">
+                                <x-heroicon-o-exclamation-triangle class="h-4 w-4 text-orange-600" />
                             </div>
                             <div>
-                                <h3 class="font-bold text-orange-800 dark:text-orange-300">
+                                <h3 class="font-bold text-orange-800">
                                     {{ __('Attendance Detected') }}
                                 </h3>
-                                <p class="text-xs text-orange-700 dark:text-orange-400 leading-snug mt-0.5">
+                                <p class="text-xs text-orange-700 leading-snug mt-0.5">
                                     {{ __('You have already clocked in/out today.') }}
                                 </p>
                             </div>
@@ -62,7 +62,7 @@
                             <legend class="sr-only">{{ __('Leave Type') }}</legend>
 
                             @if ($leaveTypes->isNotEmpty())
-                                <x-forms.label for="leave_type_id" value="{{ __('Leave Type') }}" class="mb-2 font-bold text-gray-700 dark:text-gray-300" />
+                                <x-forms.label for="leave_type_id" value="{{ __('Leave Type') }}" class="mb-2 font-bold text-gray-700" />
                                 <div class="relative z-20">
                                     <x-user.tom-select-user
                                         id="leave_type_id"
@@ -84,8 +84,8 @@
                                     </x-user.tom-select-user>
                                 </div>
                             @else
-                                <x-forms.label for="status" value="{{ __('Leave Type') }}" class="mb-2 font-bold text-gray-700 dark:text-gray-300" />
-                                <x-forms.select id="status" name="status" class="block w-full rounded-xl border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50" required>
+                                <x-forms.label for="status" value="{{ __('Leave Type') }}" class="mb-2 font-bold text-gray-700" />
+                                <x-forms.select id="status" name="status" class="block w-full rounded-xl border-gray-200 bg-gray-50" required>
                                     <option value="excused" @selected(old('status', 'excused') === 'excused')>{{ __('Annual Leave') }}</option>
                                 </x-forms.select>
                             @endif
@@ -125,7 +125,7 @@
                                 >
                             </div>
 
-                            <p class="mt-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <p class="mt-1.5 text-xs font-medium text-slate-500">
                                 {{ __('Tap one date for a single-day leave, or choose another date for a range.') }}
                             </p>
 
@@ -134,8 +134,8 @@
                         </div>
 
                         <div>
-                            <x-forms.label for="note" value="{{ __('Description / Reason') }}" class="mb-2 font-bold text-gray-700 dark:text-gray-300" />
-                            <x-forms.textarea name="note" id="note" class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 dark:border-gray-700 dark:bg-gray-900/50" rows="3" placeholder="{{ __('Explain your detailed reason here...') }}" required>{{ old('note') }}</x-forms.textarea>
+                            <x-forms.label for="note" value="{{ __('Description / Reason') }}" class="mb-2 font-bold text-gray-700" />
+                            <x-forms.textarea name="note" id="note" class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3" rows="3" placeholder="{{ __('Explain your detailed reason here...') }}" required>{{ old('note') }}</x-forms.textarea>
                             <x-forms.input-error for="note" class="mt-2" />
                         </div>
 
@@ -157,20 +157,20 @@
 
                             <label
                                 for="attachment"
-                                class="flex min-h-[4.75rem] w-full cursor-pointer items-center justify-between gap-4 text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-900"
+                                class="flex min-h-[4.75rem] w-full cursor-pointer items-center justify-between gap-4 text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2"
                             >
-                                <span class="flex min-w-0 items-center gap-3 font-bold text-gray-700 dark:text-gray-300">
-                                    <x-heroicon-o-paper-clip class="h-5 w-5 shrink-0 text-gray-600 dark:text-gray-300" />
+                                <span class="flex min-w-0 items-center gap-3 font-bold text-gray-700">
+                                    <x-heroicon-o-paper-clip class="h-5 w-5 shrink-0 text-gray-600" />
                                     <span class="min-w-0">
                                         <span class="block">{{ __('Attachment') }}</span>
-                                        <span id="attachment-help" class="mt-1 block truncate text-xs font-medium text-gray-500 dark:text-gray-400" x-text="fileName || @js(__('Choose image or PDF'))"></span>
+                                        <span id="attachment-help" class="mt-1 block truncate text-xs font-medium text-gray-500" x-text="fileName || @js(__('Choose image or PDF'))"></span>
                                     </span>
                                 </span>
                                 <span
                                     id="attachment-required-badge"
-                                    class="{{ ($requireAttachment ?? false) ? 'shrink-0 rounded bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/20 dark:text-rose-200' : 'shrink-0 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300' }}"
-                                    data-required-class="shrink-0 rounded bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/20 dark:text-rose-200"
-                                    data-optional-class="shrink-0 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                    class="{{ ($requireAttachment ?? false) ? 'shrink-0 rounded bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700' : 'shrink-0 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700' }}"
+                                    data-required-class="shrink-0 rounded bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700"
+                                    data-optional-class="shrink-0 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700"
                                 >
                                     {{ ($requireAttachment ?? false) ? __('Required') : __('Optional') }}
                                 </span>
@@ -186,7 +186,7 @@
                                 {{ __('Submit Request') }}
                             </button>
                             <div class="mt-4 text-center">
-                                <a href="{{ route('home') }}" class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                                <a href="{{ route('home') }}" class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">
                                     {{ __('Cancel and Return Home') }}
                                 </a>
                             </div>

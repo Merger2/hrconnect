@@ -18,7 +18,7 @@
                 </x-slot>
             </x-user.page-header>
 
-            <div class="user-page-body bg-gray-50/50 dark:bg-gray-900/20">
+            <div class="user-page-body bg-gray-50/50">
                 <x-feedback.alert-messages />
 
                 <div class="wfh-request-summary" aria-label="{{ __('WFH request summary') }}">

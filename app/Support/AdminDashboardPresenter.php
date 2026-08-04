@@ -113,12 +113,12 @@ class AdminDashboardPresenter
     private function humanizeActivityBadgeClass(string $action): string
     {
         return match ($action) {
-            'Login Successful' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
-            'Check In', 'Check Out' => 'bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300',
-            'Leave Request' => 'bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-300',
-            'Notification Sent' => 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
-            'Deleted Data' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300',
-            default => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+            'Login Successful' => 'bg-emerald-50 text-emerald-700',
+            'Check In', 'Check Out' => 'bg-sky-50 text-sky-700',
+            'Leave Request' => 'bg-violet-50 text-violet-700',
+            'Notification Sent' => 'bg-amber-50 text-amber-700',
+            'Deleted Data' => 'bg-rose-50 text-rose-700',
+            default => 'bg-slate-100 text-slate-700',
         };
     }
 

@@ -5,7 +5,7 @@
                 <x-forms.label for="overtime-search" value="{{ __('Search overtime requests') }}" class="mb-1.5 block" />
                 <div class="relative">
                     <span
-                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd"
                                 d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z"
@@ -37,17 +37,17 @@
     @endphp
 
     <dl class="flex flex-wrap gap-2 mb-4" role="region" aria-label="{{ __('Overtime Summary') }}">
-        <div class="rounded-xl border border-amber-300/70 bg-amber-50/60 px-3 py-1.5 dark:border-amber-800 dark:bg-amber-900/15 flex items-center gap-2">
-            <dt class="text-xs font-semibold uppercase text-amber-700 dark:text-amber-300">{{ __('Pending') }}</dt>
-            <dd class="text-sm font-bold text-amber-800 dark:text-amber-200">{{ $pendingOT }}</dd>
+        <div class="rounded-xl border border-amber-300/70 bg-amber-50/60 px-3 py-1.5 flex items-center gap-2">
+            <dt class="text-xs font-semibold uppercase text-amber-700">{{ __('Pending') }}</dt>
+            <dd class="text-sm font-bold text-amber-800">{{ $pendingOT }}</dd>
         </div>
-        <div class="rounded-xl border border-emerald-300/70 bg-emerald-50/60 px-3 py-1.5 dark:border-emerald-800 dark:bg-emerald-900/15 flex items-center gap-2">
-            <dt class="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-300">{{ __('Approved') }}</dt>
-            <dd class="text-sm font-bold text-emerald-800 dark:text-emerald-200">{{ $approvedOT }}</dd>
+        <div class="rounded-xl border border-emerald-300/70 bg-emerald-50/60 px-3 py-1.5 flex items-center gap-2">
+            <dt class="text-xs font-semibold uppercase text-emerald-700">{{ __('Approved') }}</dt>
+            <dd class="text-sm font-bold text-emerald-800">{{ $approvedOT }}</dd>
         </div>
-        <div class="rounded-xl border border-rose-300/70 bg-rose-50/60 px-3 py-1.5 dark:border-rose-800 dark:bg-rose-900/15 flex items-center gap-2">
-            <dt class="text-xs font-semibold uppercase text-rose-700 dark:text-rose-300">{{ __('Rejected') }}</dt>
-            <dd class="text-sm font-bold text-rose-800 dark:text-rose-200">{{ $rejectedOT }}</dd>
+        <div class="rounded-xl border border-rose-300/70 bg-rose-50/60 px-3 py-1.5 flex items-center gap-2">
+            <dt class="text-xs font-semibold uppercase text-rose-700">{{ __('Rejected') }}</dt>
+            <dd class="text-sm font-bold text-rose-800">{{ $rejectedOT }}</dd>
         </div>
     </dl>
 
@@ -57,11 +57,11 @@
             @if ($overtimes->isEmpty())
                 <div class="p-4">
                     <x-admin.empty-state :title="__('No Overtime Requests')" :description="__('No overtime requests found for this filter.')"
-                        class="border-0 bg-transparent shadow-none dark:bg-transparent">
+                        class="border-0 bg-transparent shadow-none">
                         <x-slot name="icon">
                             <div
-                                class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-700/50">
-                                <svg class="h-6 w-6 text-gray-300 dark:text-gray-500" fill="none"
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
+                                <svg class="h-6 w-6 text-gray-300" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -71,17 +71,17 @@
                     </x-admin.empty-state>
                 </div>
             @else
-                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                <div class="divide-y divide-gray-100">
                     @foreach ($overtimes as $overtime)
                         @php($employee = $overtime->user)
                         <div
-                            class="flex flex-col gap-2.5 p-3 transition hover:bg-gray-50 dark:hover:bg-gray-700/50 sm:flex-row sm:items-center sm:justify-between">
+                            class="flex flex-col gap-2.5 p-3 transition hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between">
                             <div class="flex items-center gap-2.5">
                                 <div
                                     class="flex h-8 w-8 items-center justify-center rounded-lg
-                                        @if ($overtime->status === 'approved') bg-green-100 dark:bg-green-900/30
-                                        @elseif($overtime->status === 'rejected') bg-red-100 dark:bg-red-900/30
-                                        @else bg-yellow-100 dark:bg-yellow-900/30 @endif">
+                                        @if ($overtime->status === 'approved') bg-green-100
+                                        @elseif($overtime->status === 'rejected') bg-red-100
+                                        @else bg-yellow-100 @endif">
                                     <span class="h-2.5 w-2.5 rounded-full
                                         @if ($overtime->status === 'approved')
                                             bg-green-600
@@ -92,19 +92,19 @@
                                         @endif"></span>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <h4 class="text-sm font-semibold text-gray-900">
                                         {{ $employee?->name ?? __('Deleted employee') }}
                                     </h4>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="text-xs text-gray-500">
                                         {{ $employee?->division?->name ?? '-' }} •
                                         {{ $employee?->jobTitle?->name ?? '-' }}
                                     </p>
-                                    <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
+                                    <p class="mt-0.5 text-xs text-gray-600">
                                         {{ $overtime->date->format('d M Y') }} •
                                         {{ \Carbon\Carbon::parse($overtime->start_time)->format('H:i') }} -
                                         {{ \Carbon\Carbon::parse($overtime->end_time)->format('H:i') }}
                                         <span
-                                            class="text-indigo-600 dark:text-indigo-400 font-semibold">({{ $overtime->duration_text }})</span>
+                                            class="text-indigo-600 font-semibold">({{ $overtime->duration_text }})</span>
                                     </p>
                                     @if ($overtime->reason)
                                         <p class="sr-only">
@@ -144,7 +144,7 @@
                 </div>
 
                 <div
-                    class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3 dark:border-gray-700/60 dark:bg-gray-900/40">
+                    class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3">
                     {{ $overtimes->links() }}
                 </div>
             @endif

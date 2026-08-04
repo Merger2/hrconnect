@@ -66,37 +66,18 @@
 
         <!-- Styles -->
         @livewireStyles
-
-        <!-- Global Alpine dark mode store -->
-        <script>
-            document.addEventListener('alpine:init', () => {
-                const isDark = localStorage.getItem('dark') === 'true';
-                if (isDark) {
-                    document.documentElement.classList.add('dark');
-                }
-
-                Alpine.store('darkMode', {
-                    on: isDark,
-                    toggle() {
-                        this.on = !this.on;
-                        localStorage.setItem('dark', this.on ? 'true' : 'false');
-                        document.documentElement.classList.toggle('dark', this.on);
-                    },
-                });
-            });
-        </script>
     </head>
     @php $isAdminRoute = request()->routeIs('admin.*'); @endphp
     <body class="font-sans antialiased {{ $isAdminRoute ? 'admin-ui' : 'user-ui' }}">
 
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900 {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))]' : '' }}">
+        <div class="min-h-screen bg-gray-100 {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))]' : '' }}">
             @if ($isAdminRoute)
                 @livewire('navigation-menu')
             @endif
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white dark:bg-gray-800 shadow">
+                <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

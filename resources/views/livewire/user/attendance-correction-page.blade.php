@@ -21,16 +21,16 @@
                     <div class="user-filter-grid">
                         <div>
                             <label
-                                class="mb-2 block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Search') }}</label>
+                                class="mb-2 block text-[11px] font-bold uppercase tracking-wider text-gray-500">{{ __('Search') }}</label>
                             <x-forms.input id="correction-search" type="search" wire:model.live.debounce.300ms="search"
-                                class="block w-full rounded-xl border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100"
+                                class="block w-full rounded-xl border-gray-200 bg-gray-50"
                                 placeholder="{{ __('Reason or type') }}" />
                         </div>
                         <div>
                             <label
-                                class="mb-2 block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Status') }}</label>
+                                class="mb-2 block text-[11px] font-bold uppercase tracking-wider text-gray-500">{{ __('Status') }}</label>
                             <x-forms.select id="correction-status" wire:model.live="statusFilter"
-                                class="block w-full rounded-xl border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+                                class="block w-full rounded-xl border-gray-200 bg-gray-50">
                                 <option value="all">{{ __('All statuses') }}</option>
                                 <option value="pending">{{ __('Pending Supervisor Review') }}</option>
                                 <option value="pending_admin">{{ __('Waiting Admin Review') }}</option>
@@ -41,12 +41,12 @@
                     </div>
                 </div>
 
-                <div class="hidden overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 md:block">
+                <div class="hidden overflow-hidden rounded-2xl border border-gray-200 md:block">
                     <div class="user-desktop-table-scroll">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-900/40">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr
-                                    class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                    class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                                     <th class="px-4 py-3">{{ __('Date') }}</th>
                                     <th class="px-4 py-3">{{ __('Type') }}</th>
                                     <th class="px-4 py-3">{{ __('Requested Change') }}</th>
@@ -54,19 +54,19 @@
                                     <th class="px-4 py-3">{{ __('Reason') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-950/30">
+                            <tbody class="divide-y divide-gray-100 bg-white">
                                 @forelse ($corrections as $correction)
                                     <tr class="align-top">
-                                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="px-4 py-3 text-sm text-gray-700">
                                             <div class="font-semibold">
                                                 {{ $correction->attendance_date->translatedFormat('d M Y') }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            <div class="text-xs text-gray-500">
                                                 {{ $correction->created_at->diffForHumans() }}</div>
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="px-4 py-3 text-sm text-gray-700">
                                             {{ $correction->requestTypeLabel() }}
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="px-4 py-3 text-sm text-gray-700">
                                             <div class="space-y-1">
                                                 @if ($correction->requested_time_in)
                                                     <div>{{ __('Check in') }}:
@@ -83,7 +83,7 @@
                                                     </div>
                                                 @endif
                                                 @if (!$correction->requested_time_in && !$correction->requested_time_out && !$correction->requestedShift)
-                                                    <div class="text-gray-500 dark:text-gray-400">
+                                                    <div class="text-gray-500">
                                                         {{ __('No detailed change recorded.') }}</div>
                                                 @endif
                                             </div>
@@ -92,30 +92,30 @@
                                             <span
                                                 class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
                                                 {{ $correction->status === 'approved'
-                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                                    ? 'bg-emerald-100 text-emerald-700'
                                                     : ($correction->status === 'rejected'
-                                                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-                                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300') }}">
+                                                        ? 'bg-rose-100 text-rose-700'
+                                                        : 'bg-amber-100 text-amber-700') }}">
                                                 {{ $correction->statusLabel() }}
                                             </span>
                                             @if ($correction->rejection_note)
-                                                <div class="mt-2 text-xs text-rose-600 dark:text-rose-300">
+                                                <div class="mt-2 text-xs text-rose-600">
                                                     {{ $correction->rejection_note }}</div>
                                             @endif
                                             @if ($correction->headApprover && $correction->status === 'pending_admin')
-                                                <div class="mt-2 text-xs text-sky-600 dark:text-sky-300">
+                                                <div class="mt-2 text-xs text-sky-600">
                                                     {{ __('Forwarded by :name', ['name' => $correction->headApprover->name]) }}
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="px-4 py-3 text-sm text-gray-700">
                                             <div class="line-clamp-2 max-w-md whitespace-pre-line">{{ $correction->reason }}</div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="5"
-                                            class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            class="px-4 py-8 text-center text-sm text-gray-500">
                                             {{ __('No attendance correction requests found.') }}
                                         </td>
                                     </tr>
@@ -131,33 +131,33 @@
                             class="user-list-card">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <div class="text-sm font-semibold text-gray-900">
                                         {{ $correction->attendance_date->translatedFormat('d M Y') }}
                                     </div>
-                                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="mt-1 text-xs text-gray-500">
                                         {{ $correction->created_at->diffForHumans() }}
                                     </div>
                                 </div>
                                 <span
                                     class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $correction->status === 'approved'
-                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                        ? 'bg-emerald-100 text-emerald-700'
                                         : ($correction->status === 'rejected'
-                                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300') }}">
+                                            ? 'bg-rose-100 text-rose-700'
+                                            : 'bg-amber-100 text-amber-700') }}">
                                     {{ $correction->statusLabel() }}
                                 </span>
                             </div>
 
                             <div class="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                                 <div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Type') }}</p>
-                                    <p class="font-medium text-gray-900 dark:text-white">
+                                    <p class="text-xs text-gray-500">{{ __('Type') }}</p>
+                                    <p class="font-medium text-gray-900">
                                         {{ $correction->requestTypeLabel() }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Requested Change') }}
+                                    <p class="text-xs text-gray-500">{{ __('Requested Change') }}
                                     </p>
-                                    <div class="space-y-1 text-sm text-gray-700 dark:text-gray-200">
+                                    <div class="space-y-1 text-sm text-gray-700">
                                         @if ($correction->requested_time_in)
                                             <div>{{ __('Check in') }}:
                                                 {{ $correction->requested_time_in->translatedFormat('d M Y H:i') }}
@@ -172,7 +172,7 @@
                                             <div>{{ __('Shift') }}: {{ $correction->requestedShift->name }}</div>
                                         @endif
                                         @if (!$correction->requested_time_in && !$correction->requested_time_out && !$correction->requestedShift)
-                                            <div class="text-gray-500 dark:text-gray-400">
+                                            <div class="text-gray-500">
                                                 {{ __('No detailed change recorded.') }}</div>
                                         @endif
                                     </div>
@@ -180,8 +180,8 @@
                             </div>
 
                             <div
-                                class="mt-3 rounded-xl bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-900/40 dark:text-gray-200">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Reason') }}</p>
+                                class="mt-3 rounded-xl bg-gray-50 p-3 text-sm text-gray-700">
+                                <p class="text-xs text-gray-500">{{ __('Reason') }}</p>
                                 <div class="mt-1 line-clamp-2 whitespace-pre-line">{{ $correction->reason }}</div>
                             </div>
 
@@ -189,13 +189,13 @@
                                 <div class="mt-3 space-y-2 text-xs">
                                     @if ($correction->rejection_note)
                                         <div
-                                            class="rounded-xl bg-rose-50 p-3 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
+                                            class="rounded-xl bg-rose-50 p-3 text-rose-700">
                                             {{ $correction->rejection_note }}
                                         </div>
                                     @endif
                                     @if ($correction->headApprover && $correction->status === 'pending_admin')
                                         <div
-                                            class="rounded-xl bg-sky-50 p-3 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300">
+                                            class="rounded-xl bg-sky-50 p-3 text-sky-700">
                                             {{ __('Forwarded by :name', ['name' => $correction->headApprover->name]) }}
                                         </div>
                                     @endif
@@ -239,9 +239,9 @@
 
                 @if ($existingAttendance)
                     <div
-                        class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-200">
+                        class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
                         <p class="font-semibold">{{ __('Current Attendance Snapshot') }}</p>
-                        <div class="mt-1 space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                        <div class="mt-1 space-y-1 text-xs text-gray-600">
                             <div>{{ __('Status') }}: {{ $existingAttendance->status?->label() ?? __('Unknown') }}</div>
                             <div>{{ __('Shift') }}: {{ $existingAttendance->shift?->name ?? __('Not assigned') }}
                             </div>
@@ -260,7 +260,7 @@
 
                 <div class="space-y-4">
                     <div>
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                        <p class="text-sm font-semibold text-gray-900">
                             {{ __('What needs to be corrected?') }}</p>
                         <p class="sr-only">
                             {{ __('Choose one or more items below. You can request check in and check out corrections together.') }}
@@ -273,14 +273,14 @@
                             class="user-soft-panel relative z-[30]">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <h3 class="text-sm font-semibold text-gray-900">
                                         {{ __('Requested Check In Time') }}</h3>
                                     <p class="sr-only">
                                         {{ __('Fill this if your check in was missing or recorded incorrectly.') }}
                                     </p>
                                 </div>
                                 <label
-                                    class="inline-flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    class="inline-flex items-center gap-3 text-sm font-medium text-gray-700">
                                     <x-forms.checkbox wire:model.live="includeRequestedTimeIn" />
                                     <span>{{ __('Enable') }}</span>
                                 </label>
@@ -288,12 +288,12 @@
 
                             @if ($includeRequestedTimeIn)
                                 <div
-                                    class="mt-4 rounded-[1rem] border border-emerald-100 bg-emerald-50/50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+                                    class="mt-4 rounded-[1rem] border border-emerald-100 bg-emerald-50/50 p-4">
                                     <div class="mb-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <div class="text-xs font-medium text-emerald-800 dark:text-emerald-200">
+                                        <div class="text-xs font-medium text-emerald-800">
                                             {{ __('Base date: :date', ['date' => \Illuminate\Support\Carbon::parse($attendanceDate)->translatedFormat('d M Y')]) }}
                                         </div>
-                                        <div class="whitespace-nowrap rounded-full bg-emerald-100/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                        <div class="whitespace-nowrap rounded-full bg-emerald-100/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                                             {{ __('Date & time') }}
                                         </div>
                                     </div>
@@ -314,14 +314,14 @@
                             class="user-soft-panel relative z-[20]">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <h3 class="text-sm font-semibold text-gray-900">
                                         {{ __('Requested Check Out Time') }}</h3>
                                     <p class="sr-only">
                                         {{ __('Fill this if your check out was missing or recorded incorrectly.') }}
                                     </p>
                                 </div>
                                 <label
-                                    class="inline-flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    class="inline-flex items-center gap-3 text-sm font-medium text-gray-700">
                                     <x-forms.checkbox wire:model.live="includeRequestedTimeOut" />
                                     <span>{{ __('Enable') }}</span>
                                 </label>
@@ -329,12 +329,12 @@
 
                             @if ($includeRequestedTimeOut)
                                 <div
-                                    class="mt-4 rounded-[1rem] border border-amber-100 bg-amber-50/50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+                                    class="mt-4 rounded-[1rem] border border-amber-100 bg-amber-50/50 p-4">
                                     <div class="mb-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <div class="text-xs font-medium text-amber-800 dark:text-amber-200">
+                                        <div class="text-xs font-medium text-amber-800">
                                             {{ __('Base date: :date', ['date' => \Illuminate\Support\Carbon::parse($attendanceDate)->translatedFormat('d M Y')]) }}
                                         </div>
-                                        <div class="whitespace-nowrap rounded-full bg-amber-100/80 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                                        <div class="whitespace-nowrap rounded-full bg-amber-100/80 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                                             {{ __('Date & time') }}
                                         </div>
                                     </div>
@@ -355,14 +355,14 @@
                             class="user-soft-panel relative z-[10]">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <h3 class="text-sm font-semibold text-gray-900">
                                         {{ __('Correct Shift') }}</h3>
                                     <p class="sr-only">
                                         {{ __('Enable this if the assigned shift for that day was wrong.') }}
                                     </p>
                                 </div>
                                 <label
-                                    class="inline-flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    class="inline-flex items-center gap-3 text-sm font-medium text-gray-700">
                                     <x-forms.checkbox wire:model.live="includeRequestedShift" />
                                     <span>{{ __('Enable') }}</span>
                                 </label>

@@ -9,7 +9,7 @@
                 <div class="md:col-span-4 xl:col-span-6">
                     <x-forms.label for="payroll-search" value="{{ __('Search Payroll Records') }}" class="mb-1.5 block" />
                     <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                             <x-heroicon-o-magnifying-glass class="h-5 w-5" />
                         </span>
                         <x-forms.input id="payroll-search" type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('Search by employee name or NIP...') }}" class="w-full pl-11" />
@@ -42,8 +42,8 @@
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-800">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-4 py-3 text-left">{{ __('Employee') }}</th>
                                     <th scope="col" class="px-4 py-3 text-left">{{ __('Period') }}</th>
@@ -54,7 +54,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-900">
+                            <tbody class="divide-y divide-gray-200 bg-white">
                                 @forelse ($payrolls as $payroll)
                                     <tr>
                                         <td class="px-4 py-3">
@@ -63,7 +63,7 @@
                                                     <img class="h-10 w-10 rounded-full object-cover" src="{{ $payroll->employee->user->profile_photo_url }}" alt="">
                                                 </div>
                                                 <div class="ml-4">
-                                                    <div class="font-medium text-gray-900 dark:text-white">{{ $payroll->employee->full_name }}</div>
+                                                    <div class="font-medium text-gray-900">{{ $payroll->employee->full_name }}</div>
                                                     <div class="text-gray-500">{{ $payroll->employee->employee_number }}</div>
                                                 </div>
                                             </div>
@@ -101,13 +101,13 @@
         </div>
 
         <div class="mt-16">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('Recent Adjustments') }}</h2>
+            <h2 class="text-xl font-semibold text-gray-900">{{ __('Recent Adjustments') }}</h2>
 
             <div class="mt-4 flow-root">
                 <div class="inline-block min-w-full py-2 align-middle">
                     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-800">
+                         <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-4 py-3 text-left">{{ __('Employee') }}</th>
                                     <th scope="col" class="px-4 py-3 text-left">{{ __('Amount') }}</th>
@@ -116,7 +116,7 @@
                                     <th scope="col" class="px-4 py-3 text-left">{{ __('Date') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-900">
+                            <tbody class="divide-y divide-gray-200 bg-white">
                                 @forelse ($adjustments as $adjustment)
                                     <tr>
                                         <td class="px-4 py-3">{{ $adjustment->payroll->employee->full_name }}</td>

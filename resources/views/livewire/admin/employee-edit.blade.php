@@ -2,7 +2,7 @@
     <x-admin.page-shell :title="__('Edit Employee')" :description="__('Update employee information and settings.')">
         <form wire:submit="update">
             @csrf
-            <div class="space-y-6 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700/50 dark:bg-slate-800/50">
+            <div class="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <x-forms.label for="edit_name" value="{{ __('Full Name') }}" />
@@ -205,7 +205,7 @@
                     @endif
                 </div>
 
-                <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-700/50">
+                <div class="flex items-center gap-3 border-t border-slate-200 pt-6">
                     <x-actions.button type="submit" wire:loading.attr="disabled">
                         {{ __('Update Employee') }}
                     </x-actions.button>

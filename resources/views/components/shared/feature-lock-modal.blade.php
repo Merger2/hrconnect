@@ -236,10 +236,10 @@
     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
     <div class="fixed inset-0 z-0 transform transition-all" x-on:click="show = false" aria-hidden="true">
-        <div class="absolute inset-0 z-0 bg-slate-950/70 backdrop-blur-sm dark:bg-slate-950/80"></div>
+        <div class="absolute inset-0 z-0 bg-slate-950/70 backdrop-blur-sm"></div>
     </div>
 
-    <div class="relative z-10 mx-auto w-full max-w-md overflow-y-auto rounded-xl bg-white shadow-xl transform transition-all dark:bg-gray-800"
+    <div class="relative z-10 mx-auto w-full max-w-md overflow-y-auto rounded-xl bg-white shadow-xl transform transition-all"
         style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -268,33 +268,33 @@
                 {{-- Nama --}}
                 <div>
                     <label
-                        class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Your Name') }}
+                        class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Your Name') }}
                         <span class="text-red-500">*</span></label>
                     <x-forms.input x-model="nama" x-on:blur="touch('nama')" x-on:input.debounce.300ms="validate(false)"
                         x-bind:aria-invalid="showError('nama') ? 'true' : 'false'"
                         x-bind:class="showError('nama') ?
-                            'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                            'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="text" required minlength="2" maxlength="100" autocomplete="name"
                         placeholder="{{ __('Full name') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                     <p x-cloak x-show="showError('nama')" x-text="errors.nama"
-                        class="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400"></p>
+                        class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
 
                 {{-- Email --}}
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Email') }}
+                    <label class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Email') }}
                         <span class="text-red-500">*</span></label>
                     <x-forms.input x-model="email" x-on:blur="touch('email')"
                         x-on:input.debounce.300ms="validate(false)"
                         x-bind:aria-invalid="showError('email') ? 'true' : 'false'"
                         x-bind:class="showError('email') ?
-                            'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                            'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="email" required maxlength="160" autocomplete="email"
                         placeholder="{{ __('name@company.com') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                     <p x-cloak x-show="showError('email')" x-text="errors.email"
-                        class="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400"></p>
+                        class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
             </div>
 
@@ -302,35 +302,35 @@
                 {{-- Perusahaan --}}
                 <div>
                     <label
-                        class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Company Name') }}
+                        class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Company Name') }}
                         <span class="text-red-500">*</span></label>
                     <x-forms.input x-model="perusahaan" x-on:blur="touch('perusahaan')"
                         x-on:input.debounce.300ms="validate(false)"
                         x-bind:aria-invalid="showError('perusahaan') ? 'true' : 'false'"
                         x-bind:class="showError('perusahaan') ?
-                            'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                            'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="text" required minlength="2" maxlength="140" autocomplete="organization"
                         placeholder="{{ __('PT / CV / Organization') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                     <p x-cloak x-show="showError('perusahaan')" x-text="errors.perusahaan"
-                        class="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400"></p>
+                        class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
 
                 {{-- WhatsApp --}}
                 <div>
                     <label
-                        class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('WhatsApp Contact') }}
+                        class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('WhatsApp Contact') }}
                         <span class="text-red-500">*</span></label>
                     <x-forms.input x-model="whatsapp" x-on:blur="touch('whatsapp')"
                         x-on:input.debounce.300ms="validate(false)"
                         x-bind:aria-invalid="showError('whatsapp') ? 'true' : 'false'"
                         x-bind:class="showError('whatsapp') ?
-                            'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                            'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="tel" required inputmode="tel" autocomplete="tel"
                         placeholder="{{ __('08xxxxxxxxxx') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                     <p x-cloak x-show="showError('whatsapp')" x-text="errors.whatsapp"
-                        class="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400"></p>
+                        class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
             </div>
 
@@ -338,69 +338,69 @@
                 {{-- Domain (editable) --}}
                 <div>
                     <label
-                        class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Domain') }}</label>
+                        class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Domain') }}</label>
                     <x-forms.input x-model="domain" x-on:blur="touch('domain')"
                         x-on:input.debounce.300ms="validate(false)"
                         x-bind:aria-invalid="showError('domain') ? 'true' : 'false'"
                         x-bind:class="showError('domain') ?
-                            'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                            'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="text" required maxlength="253" inputmode="url" autocomplete="url"
                         placeholder="{{ __('example.com') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                     <p x-cloak x-show="showError('domain')" x-text="errors.domain"
-                        class="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400"></p>
+                        class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
 
                 {{-- Jumlah Karyawan --}}
                 <div>
                     <label
-                        class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Number of Employees') }}
+                        class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Number of Employees') }}
                         <span class="text-red-500">*</span></label>
                     <x-forms.input x-model="jumlahKaryawan" x-on:blur="touch('jumlahKaryawan')"
                         x-on:input.debounce.300ms="validate(false)"
                         x-bind:aria-invalid="showError('jumlahKaryawan') ? 'true' : 'false'"
                         x-bind:class="showError('jumlahKaryawan') ?
-                            'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                            'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="number" required min="1" max="1000000" inputmode="numeric"
                         placeholder="{{ __('50') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                     <p x-cloak x-show="showError('jumlahKaryawan')" x-text="errors.jumlahKaryawan"
-                        class="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400"></p>
+                        class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
             </div>
 
             {{-- HWID (readonly, full width) --}}
             <div>
                 <label
-                    class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Server HWID') }}</label>
+                    class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Server HWID') }}</label>
                 <x-forms.input x-model="hwid" type="text" readonly
-                    class="block w-full rounded-md border-gray-300 bg-gray-100 py-1.5 px-2.5 font-mono text-xs dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+                    class="block w-full rounded-md border-gray-300 bg-gray-100 py-1.5 px-2.5 font-mono text-xs" />
             </div>
 
             {{-- Catatan --}}
             <div>
                 <label
-                    class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-0.5">{{ __('Notes (optional)') }}</label>
+                    class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Notes (optional)') }}</label>
                 <x-forms.textarea x-model="catatan" x-on:blur="touch('catatan')"
                     x-on:input.debounce.300ms="validate(false)"
                     x-bind:aria-invalid="showError('catatan') ? 'true' : 'false'"
                     x-bind:class="showError('catatan') ?
-                        'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : ''"
+                        'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                     rows="2" maxlength="500" placeholder="{{ __('Additional requirements or questions...') }}"
-                    class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                    class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
                 <div class="mt-1 flex items-center justify-between gap-2">
                     <p x-cloak x-show="showError('catatan')" x-text="errors.catatan"
-                        class="text-[11px] font-medium text-red-600 dark:text-red-400"></p>
-                    <p class="ml-auto text-[11px] text-gray-400 dark:text-gray-500"><span
+                        class="text-[11px] font-medium text-red-600"></p>
+                    <p class="ml-auto text-[11px] text-gray-400"><span
                             x-text="catatan.length"></span>/500</p>
                 </div>
             </div>
 
             {{-- Unlocks Info (compact) --}}
-            <div class="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-100 dark:border-gray-700">
-                <p class="font-semibold text-gray-800 dark:text-gray-200 text-xs mb-1">🚀
+            <div class="p-2.5 bg-gray-50 rounded-md border border-gray-100">
+                <p class="font-semibold text-gray-800 text-xs mb-1">🚀
                     {{ __('Enterprise unlocks:') }}</p>
-                <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px] text-gray-500 dark:text-gray-400 ml-1">
+                <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px] text-gray-500 ml-1">
                     <span>• {{ __('Payroll Generation & Payslips') }}</span>
                     <span>• {{ __('Cash Advance / Kasbon Flow') }}</span>
                     <span>• {{ __('KPI & Performance Appraisals') }}</span>
@@ -417,9 +417,9 @@
 
         {{-- Footer (compact) --}}
         <div
-            class="flex flex-row justify-end gap-2 px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700">
+            class="flex flex-row justify-end gap-2 px-5 py-3 bg-gray-50 border-t border-gray-100">
             <button x-on:click="show = false" type="button"
-                class="inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition">
+                class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 transition">
                 {{ __('Close') }}
             </button>
             <button x-on:click="submitToWhatsApp()" type="button" title="{{ __('Send via WhatsApp') }}"

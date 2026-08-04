@@ -29,19 +29,19 @@
 
     <x-admin.panel class="overflow-hidden">
         {{-- Calendar --}}
-        <div class="bg-white dark:bg-gray-800">
+        <div class="bg-white">
             {{-- Days Header --}}
-            <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div class="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
                 @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $index => $day)
                     <div
-                        class="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 py-3 {{ $index === 0 ? 'text-red-500' : '' }}">
+                        class="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 py-3 {{ $index === 0 ? 'text-red-500' : '' }}">
                         {{ __($day) }}
                     </div>
                 @endforeach
             </div>
 
             {{-- Grid --}}
-            <div class="grid grid-cols-7 border-l border-gray-200 dark:border-gray-700">
+            <div class="grid grid-cols-7 border-l border-gray-200">
                 @foreach ($calendar as $date)
                     @php
                         $dateKey = $date->toDateString();
@@ -49,24 +49,24 @@
                         $isCurrentMonth = $date->month == $currentMonth;
                         $isToday = $date->isToday();
 
-                        $bgClass = $isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900/50';
+                        $bgClass = $isCurrentMonth ? 'bg-white' : 'bg-gray-50';
                         $textClass = $isCurrentMonth
-                            ? 'text-gray-900 dark:text-white'
-                            : 'text-gray-400 dark:text-gray-600';
+                            ? 'text-gray-900'
+                            : 'text-gray-400';
 
                         // Shift Style
-                        $shiftColor = 'bg-gray-100 dark:bg-gray-700 text-gray-500';
+                        $shiftColor = 'bg-gray-100 text-gray-500';
                         if ($schedule) {
                             if ($schedule->is_off) {
-                                $shiftColor = 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';
+                                $shiftColor = 'bg-red-100 text-red-700';
                             } else {
-                                $shiftColor = 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';
+                                $shiftColor = 'bg-blue-100 text-blue-700';
                             }
                         }
                     @endphp
 
                     <button type="button"
-                        class="{{ $bgClass }} group relative min-h-[100px] cursor-pointer border-b border-r border-gray-200 text-left transition hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-inset dark:border-gray-700"
+                        class="{{ $bgClass }} group relative min-h-[100px] cursor-pointer border-b border-r border-gray-200 text-left transition hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-inset"
                         wire:click="openModal('{{ $dateKey }}')"
                         aria-label="{{ __('Edit schedule for') }} {{ $date->translatedFormat('d F Y') }}">
 

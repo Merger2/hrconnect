@@ -19,7 +19,7 @@
                         </div>
                         <x-forms.input id="employee-search" wire:model.live.debounce.300ms="search" type="text"
                             placeholder="{{ __('Search name, NIP...') }}"
-                            class="block w-full border-0 py-2.5 pl-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6" />
+                            class="block w-full border-0 py-2.5 pl-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" />
                     </div>
                 </div>
 
@@ -53,15 +53,15 @@
 
         <!-- Content -->
         <x-admin.panel>
-            <div class="border-b border-emerald-100 bg-emerald-50/50 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/10 sm:px-5">
+            <div class="border-b border-emerald-100 bg-emerald-50/50 px-4 py-3 sm:px-5">
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100/80 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100/80 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                                 <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                                 {{ __('Employee Directory') }}
                             </span>
-                            <h2 class="text-sm font-semibold text-slate-950 dark:text-white">
+                            <h2 class="text-sm font-semibold text-slate-950">
                                 {{ __('Visible employee records') }}
                             </h2>
                         </div>
@@ -71,25 +71,25 @@
                     </div>
 
                     <dl class="grid grid-cols-2 gap-2 sm:grid-cols-5 xl:min-w-[40rem]">
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 dark:border-emerald-900/40 dark:bg-gray-900/70">
-                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700 dark:text-emerald-300">{{ __('Total') }}</dt>
-                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950 dark:text-white">{{ $users->total() }}</dd>
+                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Total') }}</dt>
+                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $users->total() }}</dd>
                         </div>
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 dark:border-emerald-900/40 dark:bg-gray-900/70">
-                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700 dark:text-emerald-300">{{ __('Showing') }}</dt>
-                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950 dark:text-white">{{ $users->count() }}</dd>
+                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Showing') }}</dt>
+                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $users->count() }}</dd>
                         </div>
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 dark:border-emerald-900/40 dark:bg-gray-900/70">
-                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700 dark:text-emerald-300">{{ __('Active') }}</dt>
-                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950 dark:text-white">{{ $statusSummary['active'] }}</dd>
+                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Active') }}</dt>
+                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $statusSummary['active'] }}</dd>
                         </div>
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 dark:border-emerald-900/40 dark:bg-gray-900/70">
-                            <dt class="truncate text-[0.68rem] font-semibold uppercase text-emerald-700 dark:text-emerald-300">{{ __('Deletion Requests') }}</dt>
-                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950 dark:text-white">{{ $statusSummary['pending_deletion'] }}</dd>
+                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                            <dt class="truncate text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Deletion Requests') }}</dt>
+                            <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $statusSummary['pending_deletion'] }}</dd>
                         </div>
-                        <div class="col-span-2 rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 dark:border-emerald-900/40 dark:bg-gray-900/70 sm:col-span-1">
-                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700 dark:text-emerald-300">{{ __('Filters') }}</dt>
-                            <dd class="mt-0.5 truncate text-sm font-medium leading-5 text-slate-700 dark:text-slate-200">
+                        <div class="col-span-2 rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 sm:col-span-1">
+                            <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Filters') }}</dt>
+                            <dd class="mt-0.5 truncate text-sm font-medium leading-5 text-slate-700">
                                 {{ collect([$division, $jobTitle, $education, $employmentStatus, filled($search) ? $search : null])->filter()->count() ?: __('None') }}
                             </dd>
                         </div>
@@ -100,7 +100,7 @@
             <!-- Desktop Table -->
             <div class="hidden overflow-x-auto lg:block">
                 <table class="w-full whitespace-nowrap text-left text-sm">
-                    <thead class="bg-emerald-50/80 text-gray-500 dark:bg-emerald-950/20 dark:text-gray-300">
+                    <thead class="bg-emerald-50/80 text-gray-500">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Employee') }}</th>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Role & Unit') }}</th>
@@ -108,20 +108,20 @@
                             <th scope="col" class="px-4 py-3 text-right font-medium">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-100">
                         @forelse ($users as $user)
-                            <tr class="group transition-colors hover:bg-emerald-50/60 dark:hover:bg-emerald-950/10">
+                            <tr class="group transition-colors hover:bg-emerald-50/60">
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-4">
                                         <div
-                                            class="h-12 w-12 overflow-hidden rounded-full bg-emerald-100 ring-2 ring-emerald-100 dark:bg-emerald-950/40 dark:ring-emerald-900/40">
+                                            class="h-12 w-12 overflow-hidden rounded-full bg-emerald-100 ring-2 ring-emerald-100">
                                             <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
                                                 class="h-full w-full object-cover">
                                         </div>
                                         <div class="min-w-0">
-                                            <div class="font-semibold text-gray-900 dark:text-white">{{ $user->name }}
+                                            <div class="font-semibold text-gray-900">{{ $user->name }}
                                             </div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}
+                                            <div class="text-xs text-gray-500">{{ $user->email }}
                                             </div>
                                             <div class="mt-2">
                                                 <x-admin.status-badge :tone="$user->employmentStatusTone()" pill>
@@ -129,7 +129,7 @@
                                                 </x-admin.status-badge>
                                             </div>
                                             @if ($user->nip)
-                                                <div class="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                                <div class="mt-2 text-xs font-medium text-emerald-700">
                                                     {{ __('NIP') }}: {{ $user->nip }}
                                                 </div>
                                             @endif
@@ -141,17 +141,17 @@
                                         <x-admin.status-badge tone="success" class="w-fit">
                                             {{ $user->jobTitle?->name ?: __('No job title') }}
                                         </x-admin.status-badge>
-                                        <div class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                        <div class="text-sm font-medium text-slate-700">
                                             {{ $user->division?->name ?: __('No division') }}
                                         </div>
-                                        <div class="text-xs text-slate-500 dark:text-slate-400">
+                                        <div class="text-xs text-slate-500">
                                             {{ __('Direct Manager') }}:
-                                            <span class="font-medium text-slate-700 dark:text-slate-200">
+                                            <span class="font-medium text-slate-700">
                                                 {{ $user->directManager?->name ?: __('Not assigned') }}
                                             </span>
                                         </div>
                                         @if ($user->hasPendingAccountDeletionRequest())
-                                            <div class="text-xs text-red-600 dark:text-red-300">
+                                            <div class="text-xs text-red-600">
                                                 {{ __('Deletion requested by employee') }}
                                             </div>
                                         @endif
@@ -159,8 +159,8 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="space-y-1">
-                                        <div class="font-medium text-gray-900 dark:text-white">{{ $user->phone ?: '-' }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        <div class="font-medium text-gray-900">{{ $user->phone ?: '-' }}</div>
+                                        <div class="text-xs text-gray-500">
                                             {{ __('Gender') }}: {{ $user->gender ? __(ucfirst($user->gender)) : '-' }}
                                         </div>
                                     </div>
@@ -199,9 +199,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="4" class="px-4 py-6 text-center text-gray-500">
                                     <div class="flex flex-col items-center justify-center">
-                                        <x-heroicon-o-users class="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" />
+                                        <x-heroicon-o-users class="mb-3 h-12 w-12 text-gray-300" />
                                         <p class="font-medium">{{ __('No employees found') }}</p>
                                         <p class="text-sm">{{ __('Try adjusting your filters or search.') }}</p>
                                     </div>
@@ -213,16 +213,16 @@
             </div>
 
             <!-- Mobile List -->
-            <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-700 lg:hidden">
+            <div class="grid grid-cols-1 divide-y divide-gray-200 lg:hidden">
                 @foreach ($users as $user)
-                    <div class="space-y-4 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 p-4 dark:from-emerald-950/15 dark:via-gray-900 dark:to-slate-950">
+                    <div class="space-y-4 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 p-4">
                         <div class="flex items-start gap-3">
-                            <img class="h-14 w-14 rounded-xl border-2 border-emerald-100 object-cover shadow-sm dark:border-emerald-900/40"
+                            <img class="h-14 w-14 rounded-xl border-2 border-emerald-100 object-cover shadow-sm"
                                 src="{{ $user->profile_photo_url }}"
                                 alt="{{ $user->name }}" />
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-start justify-between gap-3">
-                                    <h4 class="truncate pr-2 text-sm font-semibold leading-5 text-gray-900 dark:text-white">
+                                    <h4 class="truncate pr-2 text-sm font-semibold leading-5 text-gray-900">
                                         {{ $user->name }}</h4>
                                     <div class="flex flex-col items-end gap-2">
                                         <x-admin.status-badge tone="success" class="shrink-0">
@@ -233,20 +233,20 @@
                                         </x-admin.status-badge>
                                     </div>
                                 </div>
-                                <p class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
-                                <p class="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                <p class="mt-1 truncate text-xs text-gray-500">{{ $user->email }}</p>
+                                <p class="mt-1 text-xs font-medium text-emerald-700">
                                     {{ $user->division?->name ?: __('No division') }}
                                 </p>
-                                <p class="mt-1 truncate text-[11px] font-medium tracking-wide text-slate-500 dark:text-slate-400">
+                                <p class="mt-1 truncate text-[11px] font-medium tracking-wide text-slate-500">
                                     {{ __('Manager') }}: {{ $user->directManager?->name ?: __('Not assigned') }}
                                 </p>
                                 @if ($user->hasPendingAccountDeletionRequest())
-                                    <p class="mt-1 text-[11px] font-medium tracking-wide text-red-600 dark:text-red-300">
+                                    <p class="mt-1 text-[11px] font-medium tracking-wide text-red-600">
                                         {{ __('Deletion requested by employee') }}
                                     </p>
                                 @endif
                                 @if ($user->nip)
-                                    <p class="mt-1 text-[11px] font-medium tracking-wide text-slate-500 dark:text-slate-400">
+                                    <p class="mt-1 text-[11px] font-medium tracking-wide text-slate-500">
                                         {{ __('NIP') }}: {{ $user->nip }}
                                     </p>
                                 @endif
@@ -254,13 +254,13 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
-                            <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                            <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm">
                                 <span class="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{{ __('Phone') }}</span>
-                                <div class="mt-1 text-sm font-medium text-slate-900 dark:text-white">{{ $user->phone ?: '-' }}</div>
+                                <div class="mt-1 text-sm font-medium text-slate-900">{{ $user->phone ?: '-' }}</div>
                             </div>
-                            <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                            <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm">
                                 <span class="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{{ __('Gender') }}</span>
-                                <div class="mt-1 text-sm font-medium text-slate-900 dark:text-white">
+                                <div class="mt-1 text-sm font-medium text-slate-900">
                                     {{ $user->gender ? __(ucfirst($user->gender)) : '-' }}
                                 </div>
                             </div>
@@ -294,7 +294,7 @@
             </div>
 
             @if ($users->hasPages())
-                <div class="border-t border-gray-200 bg-gray-50 px-4 py-2.5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-t border-gray-200 bg-gray-50 px-4 py-2.5">
                     {{ $users->links() }}
                 </div>
             @endif
@@ -321,13 +321,13 @@
         </x-slot>
         <x-slot name="content">
             <div class="space-y-4">
-                <p class="text-sm text-slate-600 dark:text-slate-300">
-                    {{ __('Employee') }}: <span class="font-semibold text-slate-950 dark:text-white">{{ $deletionReviewEmployeeName }}</span>
+                <p class="text-sm text-slate-600">
+                    {{ __('Employee') }}: <span class="font-semibold text-slate-950">{{ $deletionReviewEmployeeName }}</span>
                 </p>
 
                 <div>
-                    <div class="text-sm font-medium text-slate-950 dark:text-white">{{ __('Request reason') }}</div>
-                    <div class="mt-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                    <div class="text-sm font-medium text-slate-950">{{ __('Request reason') }}</div>
+                    <div class="mt-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                         {{ $deletionReviewReason ?: '-' }}
                     </div>
                 </div>
@@ -842,32 +842,32 @@
     <!-- Detail Modal -->
     <x-overlays.modal wire:model="showDetail" max-width="5xl">
         @if ($form->user)
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md dark:border-slate-800 dark:bg-slate-950">
-                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 sm:px-6">
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
+                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur sm:px-6">
                     <div class="flex items-start justify-between gap-4">
                         <div class="flex min-w-0 items-start gap-4">
-                            <img class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover dark:border-slate-800 dark:bg-slate-900 sm:h-20 sm:w-20"
+                            <img class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover sm:h-20 sm:w-20"
                                 src="{{ $form->user->profile_photo_url }}" alt="{{ $form->user->name }}">
                             <div class="min-w-0">
-                                <div class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-emerald-700">
                                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                     {{ __('Employee Profile') }}
                                 </div>
-                                <h3 class="mt-2 truncate text-xl font-semibold text-slate-950 dark:text-white sm:text-2xl">
+                                <h3 class="mt-2 truncate text-xl font-semibold text-slate-950 sm:text-2xl">
                                     {{ $form->user->name }}
                                 </h3>
-                                <p class="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">{{ $form->user->email }}</p>
+                                <p class="mt-1 truncate text-sm text-slate-500">{{ $form->user->email }}</p>
                                 <div class="mt-3 flex flex-wrap gap-2">
                                     <x-admin.status-badge :tone="$form->user->employmentStatusTone()" pill>
                                         {{ $form->user->employmentStatusLabel() }}
                                     </x-admin.status-badge>
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
                                         {{ $form->user->jobTitle?->name ?: __('No job title') }}
                                     </span>
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
                                         {{ $form->user->division?->name ?: __('No division') }}
                                     </span>
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
                                         {{ __('Manager') }}: {{ $form->user->directManager?->name ?? __('Not assigned') }}
                                     </span>
                                 </div>
@@ -880,85 +880,85 @@
                     </div>
 
                     <div class="mt-4 grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-                            <div class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('NIP') }}</div>
-                            <div class="mt-1 break-words text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->nip ?: '-' }}</div>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <div class="text-[11px] font-semibold uppercase text-slate-500">{{ __('NIP') }}</div>
+                            <div class="mt-1 break-words text-sm font-semibold text-slate-950">{{ $form->user->nip ?: '-' }}</div>
                         </div>
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-                            <div class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('Phone') }}</div>
-                            <div class="mt-1 break-words text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->phone ?: '-' }}</div>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <div class="text-[11px] font-semibold uppercase text-slate-500">{{ __('Phone') }}</div>
+                            <div class="mt-1 break-words text-sm font-semibold text-slate-950">{{ $form->user->phone ?: '-' }}</div>
                         </div>
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-                            <div class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('Education') }}</div>
-                            <div class="mt-1 break-words text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->education?->name ?? '-' }}</div>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <div class="text-[11px] font-semibold uppercase text-slate-500">{{ __('Education') }}</div>
+                            <div class="mt-1 break-words text-sm font-semibold text-slate-950">{{ $form->user->education?->name ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 px-5 py-5 dark:bg-slate-950 sm:px-6">
+                <div class="bg-slate-50 px-5 py-5 sm:px-6">
                     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                        <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                        <section class="rounded-xl border border-slate-200 bg-white p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-sm font-semibold text-slate-950 dark:text-white">{{ __('Professional') }}</div>
+                                <div class="text-sm font-semibold text-slate-950">{{ __('Professional') }}</div>
                                 <span class="text-[11px] font-semibold uppercase text-slate-400">{{ __('Work profile') }}</span>
                             </div>
-                            <dl class="mt-4 divide-y divide-slate-200 dark:divide-slate-800">
+                            <dl class="mt-4 divide-y divide-slate-200">
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Job Title') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">{{ $form->user->jobTitle?->name ?? '-' }}</dd>
+                                    <dt class="text-sm text-slate-500">{{ __('Job Title') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">{{ $form->user->jobTitle?->name ?? '-' }}</dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Division') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">{{ $form->user->division?->name ?? '-' }}</dd>
+                                    <dt class="text-sm text-slate-500">{{ __('Division') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">{{ $form->user->division?->name ?? '-' }}</dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Direct Manager') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">{{ $form->user->directManager?->name ?? '-' }}</dd>
+                                    <dt class="text-sm text-slate-500">{{ __('Direct Manager') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">{{ $form->user->directManager?->name ?? '-' }}</dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Education') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">{{ $form->user->education?->name ?? '-' }}</dd>
+                                    <dt class="text-sm text-slate-500">{{ __('Education') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">{{ $form->user->education?->name ?? '-' }}</dd>
                                 </div>
                             </dl>
                         </section>
 
-                        <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                        <section class="rounded-xl border border-slate-200 bg-white p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-sm font-semibold text-slate-950 dark:text-white">{{ __('Personal') }}</div>
+                                <div class="text-sm font-semibold text-slate-950">{{ __('Personal') }}</div>
                                 <span class="text-[11px] font-semibold uppercase text-slate-400">{{ __('Identity') }}</span>
                             </div>
-                            <dl class="mt-4 divide-y divide-slate-200 dark:divide-slate-800">
+                            <dl class="mt-4 divide-y divide-slate-200">
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Gender') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">
+                                    <dt class="text-sm text-slate-500">{{ __('Gender') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">
                                         {{ $form->user->gender ? __(\Illuminate\Support\Str::headline($form->user->gender)) : '-' }}
                                     </dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Birth Place') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">{{ $form->user->birth_place ?: '-' }}</dd>
+                                    <dt class="text-sm text-slate-500">{{ __('Birth Place') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">{{ $form->user->birth_place ?: '-' }}</dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Birth Date') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">
+                                    <dt class="text-sm text-slate-500">{{ __('Birth Date') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">
                                         {{ $form->user->birth_date ? \Illuminate\Support\Carbon::parse($form->user->birth_date)->translatedFormat('d M Y') : '-' }}
                                     </dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Phone') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">{{ $form->user->phone ?: '-' }}</dd>
+                                    <dt class="text-sm text-slate-500">{{ __('Phone') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">{{ $form->user->phone ?: '-' }}</dd>
                                 </div>
                             </dl>
                         </section>
 
-                        <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                        <section class="rounded-xl border border-slate-200 bg-white p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-sm font-semibold text-slate-950 dark:text-white">{{ __('Account Lifecycle') }}</div>
+                                <div class="text-sm font-semibold text-slate-950">{{ __('Account Lifecycle') }}</div>
                                 <span class="text-[11px] font-semibold uppercase text-slate-400">{{ __('Status & review') }}</span>
                             </div>
-                            <dl class="mt-4 divide-y divide-slate-200 dark:divide-slate-800">
+                            <dl class="mt-4 divide-y divide-slate-200">
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Employment Status') }}</dt>
+                                    <dt class="text-sm text-slate-500">{{ __('Employment Status') }}</dt>
                                     <dd class="sm:text-right">
                                         <x-admin.status-badge :tone="$form->user->employmentStatusTone()" pill>
                                             {{ $form->user->employmentStatusLabel() }}
@@ -966,56 +966,56 @@
                                     </dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Deletion Requested At') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">
+                                    <dt class="text-sm text-slate-500">{{ __('Deletion Requested At') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">
                                         {{ $form->user->account_deletion_requested_at?->translatedFormat('d M Y H:i') ?? '-' }}
                                     </dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Deletion Reason') }}</dt>
-                                    <dd class="whitespace-pre-line text-sm font-semibold text-slate-950 dark:text-white sm:text-right">
+                                    <dt class="text-sm text-slate-500">{{ __('Deletion Reason') }}</dt>
+                                    <dd class="whitespace-pre-line text-sm font-semibold text-slate-950 sm:text-right">
                                         {{ $form->user->account_deletion_reason ?: '-' }}
                                     </dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Reviewed By') }}</dt>
-                                    <dd class="text-sm font-semibold text-slate-950 dark:text-white sm:text-right">
+                                    <dt class="text-sm text-slate-500">{{ __('Reviewed By') }}</dt>
+                                    <dd class="text-sm font-semibold text-slate-950 sm:text-right">
                                         {{ $form->user->reviewedAccountDeletionBy?->name ?? '-' }}
                                     </dd>
                                 </div>
                                 <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
-                                    <dt class="text-sm text-slate-500 dark:text-slate-400">{{ __('Admin Notes') }}</dt>
-                                    <dd class="whitespace-pre-line text-sm font-semibold text-slate-950 dark:text-white sm:text-right">
+                                    <dt class="text-sm text-slate-500">{{ __('Admin Notes') }}</dt>
+                                    <dd class="whitespace-pre-line text-sm font-semibold text-slate-950 sm:text-right">
                                         {{ $form->user->account_deletion_review_notes ?: '-' }}
                                     </dd>
                                 </div>
                             </dl>
                         </section>
 
-                        <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                        <section class="rounded-xl border border-slate-200 bg-white p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-sm font-semibold text-slate-950 dark:text-white">{{ __('Address') }}</div>
+                                <div class="text-sm font-semibold text-slate-950">{{ __('Address') }}</div>
                                 <span class="text-[11px] font-semibold uppercase text-slate-400">{{ __('Location details') }}</span>
                             </div>
-                            <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                            <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
                                 {{ $form->user->address ?: __('No address saved.') }}
                             </div>
                             <dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-                                    <dt class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('Province') }}</dt>
-                                    <dd class="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->provinsi?->nama ?? '-' }}</dd>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                    <dt class="text-[11px] font-semibold uppercase text-slate-500">{{ __('Province') }}</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-slate-950">{{ $form->user->provinsi?->nama ?? '-' }}</dd>
                                 </div>
-                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-                                    <dt class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('City') }}</dt>
-                                    <dd class="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->kabupaten?->nama ?? '-' }}</dd>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                    <dt class="text-[11px] font-semibold uppercase text-slate-500">{{ __('City') }}</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-slate-950">{{ $form->user->kabupaten?->nama ?? '-' }}</dd>
                                 </div>
-                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-                                    <dt class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('District') }}</dt>
-                                    <dd class="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->kecamatan?->nama ?? '-' }}</dd>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                    <dt class="text-[11px] font-semibold uppercase text-slate-500">{{ __('District') }}</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-slate-950">{{ $form->user->kecamatan?->nama ?? '-' }}</dd>
                                 </div>
-                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-                                    <dt class="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400">{{ __('Village') }}</dt>
-                                    <dd class="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{{ $form->user->kelurahan?->nama ?? '-' }}</dd>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                    <dt class="text-[11px] font-semibold uppercase text-slate-500">{{ __('Village') }}</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-slate-950">{{ $form->user->kelurahan?->nama ?? '-' }}</dd>
                                 </div>
                             </dl>
                         </section>

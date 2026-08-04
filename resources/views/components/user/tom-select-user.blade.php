@@ -92,36 +92,6 @@
         color: #111827;
     }
 
-    /* Dark Mode */
-    .dark .ts-wrapper-user .ts-control {
-        background-color: rgba(2, 6, 23, 0.45) !important;
-        border-color: #1e293b !important;
-        color: #f8fafc !important;
-    }
-
-    .dark .ts-wrapper-user .ts-control input {
-        color: #f8fafc !important;
-    }
-
-    .dark .ts-wrapper-user .ts-wrapper.focus .ts-control,
-    .dark .ts-wrapper-user .ts-wrapper.input-active .ts-control,
-    .dark .ts-wrapper-user .ts-wrapper.dropdown-active .ts-control {
-        border-color: #6ab45b !important; /* primary-500 */
-        background-color: #020617 !important;
-        box-shadow: 0 0 0 4px rgba(106, 180, 91, 0.24) !important;
-    }
-
-    .dark .ts-wrapper-user .ts-dropdown {
-        background-color: #0f172a !important;
-        border-color: #1e293b !important;
-        color: #e2e8f0 !important;
-    }
-
-    .dark .ts-wrapper-user .ts-dropdown .active {
-        background-color: #374151 !important;
-        color: #ffffff !important;
-    }
-
     .user-ui .ts-wrapper-user .ts-control,
     .user-ui .profile-modal .ts-wrapper .ts-control {
         background-color: var(--user-native-surface) !important;

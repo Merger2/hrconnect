@@ -10,12 +10,12 @@
     <x-slot name="form">
         <div class="col-span-6 space-y-4">
             @foreach($preferences as $id => $data)
-                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/50">
+                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50">
                     <div>
-                        <h4 class="font-medium text-slate-900 dark:text-slate-100">
+                        <h4 class="font-medium text-slate-900">
                             {{ Str::headline($data['event_key']) }}
                         </h4>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">
+                        <p class="text-sm text-slate-500">
                             {{ __('Receive alerts across different channels.') }}
                         </p>
                     </div>
@@ -23,15 +23,15 @@
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2">
                             <x-forms.checkbox wire:model="preferences.{{ $id }}.in_app" />
-                            <span class="text-sm text-slate-700 dark:text-slate-300">{{ __('In-App') }}</span>
+                            <span class="text-sm text-slate-700">{{ __('In-App') }}</span>
                         </label>
                         <label class="flex items-center gap-2">
                             <x-forms.checkbox wire:model="preferences.{{ $id }}.email" />
-                            <span class="text-sm text-slate-700 dark:text-slate-300">{{ __('Email') }}</span>
+                            <span class="text-sm text-slate-700">{{ __('Email') }}</span>
                         </label>
                         <label class="flex items-center gap-2">
                             <x-forms.checkbox wire:model="preferences.{{ $id }}.whatsapp" />
-                            <span class="text-sm text-slate-700 dark:text-slate-300">{{ __('WhatsApp') }}</span>
+                            <span class="text-sm text-slate-700">{{ __('WhatsApp') }}</span>
                         </label>
                     </div>
                 </div>

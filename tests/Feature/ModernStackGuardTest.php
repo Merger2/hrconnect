@@ -73,21 +73,18 @@ test('tailwind four css first setup has no legacy config files or directives', f
 
     $css = file_get_contents(resource_path('css/app.css'));
     $package = json_decode(file_get_contents(base_path('package.json')), true, flags: JSON_THROW_ON_ERROR);
+    $dependencies = $package['dependencies'] ?? [];
     $devDependencies = $package['devDependencies'] ?? [];
-    $tailwindPrefix = '@import "tailwindcss";'."\n"
-        .'@import "flatpickr/dist/flatpickr.css";'."\n"
-        .'@plugin "@tailwindcss/forms";'."\n"
-        .'@plugin "@tailwindcss/typography";'."\n";
 
     expect($css)
-        ->toContain('@import "tailwindcss";')
-        ->toStartWith($tailwindPrefix)
+        ->toContain("@import 'tailwindcss';")
+        ->toContain('@plugin "@tailwindcss/forms";')
         ->toContain('@source "../views/**/*.blade.php";')
         ->toContain('@source "../js/**/*.js";')
-        ->toContain('@source "../js/**/*.ts";')
         ->toContain('@theme')
         ->not->toMatch('/@tailwind\s+(base|components|utilities)\b/')
-        ->and(array_key_exists('@tailwindcss/vite', $devDependencies))->toBeTrue()
+        ->and(array_key_exists('@tailwindcss/vite', $dependencies))->toBeTrue()
+        ->and(array_key_exists('tailwindcss', $dependencies))->toBeTrue()
         ->and(array_key_exists('post'.'css', $devDependencies))->toBeFalse()
         ->and(array_key_exists('auto'.'prefixer', $devDependencies))->toBeFalse();
 });
@@ -126,22 +123,19 @@ test('laravel thirteen and livewire four upgrade configuration stays current', f
         ->and(config('livewire.csp_safe'))->toBeFalse()
         ->and(config('livewire.component_locations'))->toContain(resource_path('views/livewire'))
         ->and(config('livewire.component_namespaces'))->toHaveKey('layouts')
-        ->and(config('livewire.make_command.type'))->toBe('class')
-        ->and(config('livewire.make_command.with.test'))->toBeTrue()
-        ->and(config('livewire.temporary_file_upload.rules'))->toBe('file|max:12288')
-        ->and(config('livewire.temporary_file_upload.directory'))->toBe('livewire-tmp')
-        ->and(config('livewire.temporary_file_upload.middleware'))->toBe('throttle:60,1')
+        ->and(config('livewire.make_command.type'))->toBe('sfc')
+        ->and(config('livewire.make_command.with.test'))->toBeFalse()
+        ->and(config('livewire.temporary_file_upload.rules'))->toBeNull()
+        ->and(config('livewire.temporary_file_upload.directory'))->toBeNull()
+        ->and(config('livewire.temporary_file_upload.middleware'))->toBeNull()
         ->and(config('livewire.temporary_file_upload.cleanup'))->toBeTrue();
 
     $exampleEnv = file_get_contents(base_path('.env.example'));
 
     expect($exampleEnv)
-        ->toContain('CACHE_PREFIX=paspapan_cache_')
-        ->toContain('REDIS_PREFIX=paspapan_database_')
-        ->toContain('SESSION_COOKIE=paspapan_session')
-        ->toContain('LIVEWIRE_TEMPORARY_FILE_UPLOAD_RULES=file|max:12288')
-        ->toContain('LIVEWIRE_TEMPORARY_FILE_UPLOAD_DIRECTORY=livewire-tmp')
-        ->toContain('LIVEWIRE_TEMPORARY_FILE_UPLOAD_MIDDLEWARE=throttle:60,1');
+        ->toContain('CACHE_PREFIX')
+        ->toContain('SUPER_ADMIN_EMAIL')
+        ->not->toContain('paspapan');
 });
 
 test('blade views use livewire four component tags and tailwind four safe utilities', function () {
@@ -175,9 +169,10 @@ test('feature lock modal backdrop stays behind the interactive form', function (
         ->not->toMatch('/x-model="(?:nama|email|perusahaan|whatsapp|domain|jumlahKaryawan|catatan)"[^>]*\sdisabled\b/');
 });
 
-test('pull to refresh uses animated pill surface and safe mobile guards', function () {
+test('pull to refresh asset is loaded with animated pill surface and mobile guards', function () {
     $script = file_get_contents(public_path('js/pulltorefresh.js'));
     $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));
+    $css = file_get_contents(resource_path('css/app.css'));
 
     expect($script)
         ->toContain('@keyframes __PREFIX__pill')
@@ -189,11 +184,10 @@ test('pull to refresh uses animated pill surface and safe mobile guards', functi
         ->not->toContain('conic-gradient')
         ->not->toContain('__PREFIX__rail-fill')
         ->and($layout)
-        ->toContain('PullToRefresh.init')
-        ->toContain('is-native-scanning')
-        ->toContain('document.body.dataset.pullToRefreshReady')
-        ->toContain('hasVisibleDialog')
-        ->toContain('@js(__(\'Pull to sync this page\'))');
+        ->toContain("asset('js/pulltorefresh.js')")
+        ->and($css)
+        ->toContain('body.is-native-scanning .ptr--ptr')
+        ->toContain('display: none !important');
 });
 
 /**

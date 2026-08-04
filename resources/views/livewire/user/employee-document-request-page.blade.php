@@ -7,7 +7,7 @@
                 title-id="document-request-title"
                 class="border-b-0">
                 <x-slot name="actions">
-                    <button type="button" wire:click="create" class="wcag-touch-target inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-none transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-primary-400 dark:text-slate-950 dark:hover:bg-primary-300 dark:focus-visible:ring-offset-slate-950" aria-label="{{ __('New Request') }}">
+                    <button type="button" wire:click="create" class="wcag-touch-target inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-none transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white" aria-label="{{ __('New Request') }}">
                         <x-heroicon-o-plus class="h-5 w-5" />
                     </button>
                 </x-slot>
@@ -226,8 +226,8 @@
                             <input id="document-upload-file" wire:model="attachment" type="file" data-e2e="document-upload-file" class="sr-only" />
                         </label>
                         <x-forms.input-error for="attachment" class="mt-1" />
-                        <p class="text-sm font-semibold text-sky-700 dark:text-sky-300" wire:loading wire:target="attachment">{{ __('Uploading file...') }}</p>
-                        <p class="text-sm font-semibold text-sky-700 dark:text-sky-300" wire:loading wire:target="upload">{{ __('Processing upload...') }}</p>
+                        <p class="text-sm font-semibold text-sky-700" wire:loading wire:target="attachment">{{ __('Uploading file...') }}</p>
+                        <p class="text-sm font-semibold text-sky-700" wire:loading wire:target="upload">{{ __('Processing upload...') }}</p>
                     </div>
 
                     <div class="document-request-modal__footer">

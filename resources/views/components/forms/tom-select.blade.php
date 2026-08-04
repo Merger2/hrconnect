@@ -133,50 +133,6 @@
             color: #111827;
         }
 
-        /* Dark Mode - Root selector to ensure specificity */
-        .dark .ts-control {
-            background-color: rgba(2, 6, 23, 0.45) !important;
-            box-shadow: inset 0 0 0 1px #1e293b !important;
-            color: #f8fafc !important;
-        }
-
-        .dark .ts-control input {
-            color: #f8fafc !important;
-        }
-
-        .dark .ts-wrapper.focus .ts-control,
-        .dark .ts-wrapper.input-active .ts-control,
-        .dark .ts-wrapper.dropdown-active .ts-control {
-            background-color: #020617 !important;
-            box-shadow: inset 0 0 0 1px #6ab45b, 0 0 0 4px rgba(106, 180, 91, 0.24) !important;
-        }
-
-        .dark .ts-dropdown {
-            background-color: #0f172a !important;
-            border-color: #1e293b !important;
-            color: #e2e8f0 !important;
-        }
-
-        .dark .ts-dropdown .ts-dropdown-content {
-            background-color: #0f172a !important;
-        }
-
-        .dark .ts-dropdown .option {
-            color: #e2e8f0 !important;
-        }
-
-        .dark .ts-dropdown .active {
-            background-color: #374151 !important;
-            /* bg-gray-700 */
-            color: #ffffff !important;
-        }
-
-        .dark .ts-dropdown .option:hover,
-        .dark .ts-dropdown .option.active {
-            background-color: #374151 !important;
-            color: #ffffff !important;
-        }
-
         .user-ui .ts-wrapper-user .ts-control,
         .user-ui .profile-modal .ts-wrapper .ts-control {
             background-color: var(--user-native-surface) !important;
@@ -206,11 +162,6 @@
             color: inherit !important;
         }
 
-        /* Input placeholder color in dark mode */
-        .dark .ts-control ::placeholder {
-            color: #64748b !important;
-        }
-
         /* Chevron Arrow */
         .ts-wrapper {
             position: relative;
@@ -230,11 +181,6 @@
             /* Heroicons Chevron Down - Gray 500 */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9' /%3E%3C/svg%3E");
             background-size: contain;
-        }
-
-        .dark .ts-wrapper::after {
-            /* Heroicons Chevron Down - Gray 400 */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%239ca3af' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9' /%3E%3C/svg%3E");
         }
 
         /* High Z-Index for Dropdown */

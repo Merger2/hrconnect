@@ -9,7 +9,7 @@
                 <x-slot name="actions">
                     @if ($isCreating)
                         <button type="button" wire:click="cancel" aria-label="{{ __('Back') }}"
-                            class="wcag-touch-target inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                            class="wcag-touch-target inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50">
                             <x-heroicon-o-arrow-left class="h-5 w-5" />
                             <span>{{ __('Back') }}</span>
                         </button>
@@ -45,7 +45,7 @@
                                 {{-- Type --}}
                                 <div>
                                     <label
-                                        class="mb-2 block font-bold text-gray-700 dark:text-gray-300">{{ __('Claim Type') }}</label>
+                                        class="mb-2 block font-bold text-gray-700">{{ __('Claim Type') }}</label>
                                     <div wire:ignore>
                                         <x-user.tom-select-user id="type" wire:model="type"
                                             placeholder="{{ __('Select Type') }}" class="block w-full">
@@ -65,13 +65,13 @@
                             {{-- Amount --}}
                             <div>
                                 <label
-                                    class="mb-2 block font-bold text-gray-700 dark:text-gray-300">{{ __('Amount') }}</label>
+                                    class="mb-2 block font-bold text-gray-700">{{ __('Amount') }}</label>
                                 <div class="relative rounded-xl shadow-sm">
                                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                        <span class="text-gray-500 dark:text-gray-400 font-bold">{{ __('Rp') }}</span>
+                                        <span class="text-gray-500 font-bold">{{ __('Rp') }}</span>
                                     </div>
                                     <x-forms.input type="text"
-                                        class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-12 text-lg font-bold dark:border-gray-700 dark:bg-gray-900/50"
+                                        class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-12 text-lg font-bold"
                                         x-data x-mask:dynamic="$money($input, '.', ',')" wire:model="amount"
                                         placeholder="0" />
                                 </div>
@@ -81,9 +81,9 @@
                             {{-- Description --}}
                             <div>
                                 <label
-                                    class="mb-2 block font-bold text-gray-700 dark:text-gray-300">{{ __('Description') }}</label>
+                                    class="mb-2 block font-bold text-gray-700">{{ __('Description') }}</label>
                                 <x-forms.textarea wire:model="description" rows="3"
-                                    class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 dark:border-gray-700 dark:bg-gray-900/50"
+                                    class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3"
                                     placeholder="{{ __('Explain details...') }}" />
                                 <x-forms.input-error for="description" class="mt-2" />
                             </div>
@@ -91,7 +91,7 @@
                             {{-- Attachment --}}
                             <div
                                 class="user-upload-dropzone">
-                                <label class="mb-3 font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <label class="mb-3 font-bold text-gray-700 flex items-center gap-2">
                                     <x-heroicon-o-paper-clip class="h-5 w-5 text-gray-400" />
                                     {{ __('Attachment (Recall/Bill)') }}
                                 </label>
@@ -100,13 +100,13 @@
                                     <div class="space-y-1 text-center">
                                         @if ($attachment)
                                             <div
-                                                class="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 font-bold bg-green-50 dark:bg-green-900/20 py-2 px-4 rounded-full inline-block break-all max-w-full">
+                                                class="flex items-center justify-center gap-2 text-green-600 font-bold bg-green-50 py-2 px-4 rounded-full inline-block break-all max-w-full">
                                                 <x-heroicon-o-check class="h-4 w-4 shrink-0" />
                                                 <span
                                                     class="truncate">{{ $attachment->getClientOriginalName() }}</span>
                                             </div>
                                         @else
-                                            <div class="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
+                                            <div class="flex text-sm text-gray-600 justify-center">
                                                 <label for="reimbursement-attachment-upload"
                                                     class="relative cursor-pointer rounded-md font-bold text-primary-600 hover:text-primary-500 focus-within:outline-none">
                                                     <span>{{ __('Upload a file') }}</span>
@@ -184,7 +184,7 @@
                     @if ($claims->isEmpty())
                         <div class="user-empty-state">
                             <div class="user-empty-state__icon">
-                                <x-heroicon-o-document-text class="h-8 w-8 text-gray-300 dark:text-gray-600" />
+                                <x-heroicon-o-document-text class="h-8 w-8 text-gray-300" />
                             </div>
                             <h3 class="user-empty-state__title">{{ __('No Claims Found') }}</h3>
                             <p class="user-empty-state__copy">
@@ -201,9 +201,9 @@
                                             <div
                                                 class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110
                                                 @php $claimCategoryCode = $claim->category?->code ?? $claim->title ?? 'other'; @endphp
-                                                @if ($claimCategoryCode == 'medical') bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400
-                                                @elseif($claimCategoryCode == 'transport') bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400
-                                                @else bg-gray-50 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400 @endif">
+                                                @if ($claimCategoryCode == 'medical') bg-blue-50 text-blue-600
+                                                @elseif($claimCategoryCode == 'transport') bg-amber-50 text-amber-600
+                                                @else bg-gray-50 text-gray-600 @endif">
 
                                                 @if ($claimCategoryCode == 'medical')
                                                     <x-heroicon-o-heart class="h-5 w-5 sm:h-6 sm:w-6" />
@@ -217,14 +217,14 @@
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
                                                     <h4
-                                                        class="font-bold text-gray-900 dark:text-white capitalize truncate text-sm sm:text-base">
+                                                        class="font-bold text-gray-900 capitalize truncate text-sm sm:text-base">
                                                         {{ $claim->category?->name ?? $claim->title ?? __('Other') }}</h4>
                                                     <span
                                                         class="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide
                                                         @php $statusValue = $claim->status?->value ?? $claim->status; @endphp
-                                                        @if ($statusValue === 'approved' || $statusValue === 'paid') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
-                                                        @elseif($statusValue === 'rejected') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
-                                                        @else bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 @endif">
+                                                        @if ($statusValue === 'approved' || $statusValue === 'paid') bg-green-100 text-green-700
+                                                        @elseif($statusValue === 'rejected') bg-red-100 text-red-700
+                                                        @else bg-yellow-100 text-yellow-700 @endif">
                                                         {{ $claim->status?->label() ?? ucfirst($statusValue) }}
                                                     </span>
                                                 </div>
@@ -241,7 +241,7 @@
 
                                         <div class="shrink-0 pl-0 text-left sm:pl-4 sm:text-right">
                                             <p
-                                                class="text-sm sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">
+                                                class="text-sm sm:text-lg font-black text-gray-900 tracking-tight">
                                                 <span
                                                     class="text-[10px] sm:text-xs text-gray-400 font-normal mr-0.5">{{ __('Rp') }}</span>{{ number_format($claim->amount, 0, ',', '.') }}
                                             </p>
@@ -255,7 +255,7 @@
                         @if ($totalClaims > $limit)
                             <div class="mt-6 text-center">
                                 <button wire:click="loadMore"
-                                    class="px-6 py-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600 transition shadow-sm">
+                                    class="px-6 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 transition shadow-sm">
                                     {{ __('View Older History') }} ({{ $totalClaims - $limit }} {{ __('more') }})
                                 </button>
                             </div>

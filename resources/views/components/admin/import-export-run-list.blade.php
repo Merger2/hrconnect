@@ -11,22 +11,22 @@
 @endphp
 
 @if (!empty($visibleRuns))
-<x-admin.panel class="ring-1 ring-gray-950/5 dark:ring-white/10">
-    <div class="border-b border-gray-100 bg-gray-50/70 {{ $compact ? 'px-3 py-2.5' : 'px-4 py-3' }} dark:border-gray-700 dark:bg-gray-700/20">
+<x-admin.panel class="ring-1 ring-gray-950/5">
+    <div class="border-b border-gray-100 bg-gray-50/70 {{ $compact ? 'px-3 py-2.5' : 'px-4 py-3' }}">
         <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
-                <h4 class="{{ $compact ? 'truncate text-sm font-bold normal-case tracking-normal text-slate-900 dark:text-white' : 'text-sm font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400' }}">
+                <h4 class="{{ $compact ? 'truncate text-sm font-bold normal-case tracking-normal text-slate-900' : 'text-sm font-semibold uppercase tracking-[0.2em] text-gray-500' }}">
                     {{ $title }}
                 </h4>
                 <p class="sr-only">{{ $description }}</p>
             </div>
-            <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                 {{ count($visibleRuns) }} {{ __('jobs') }}
             </span>
         </div>
     </div>
 
-    <div class="divide-y divide-gray-100 dark:divide-gray-800">
+    <div class="divide-y divide-gray-100">
         @foreach ($visibleRuns as $run)
             @php
                 $runModel = \App\Models\ImportExportRun::query()->find($run['id']);
@@ -51,10 +51,10 @@
                 $errorRows = (int) ($meta['skipped_rows'] ?? $rawErrors->count());
                 $hasImportSummary = $run['operation'] === 'import' && ($successfulRows > 0 || $errorRows > 0 || $run['status'] === 'completed');
                 $statusClass = match ($run['status']) {
-                    'completed' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
-                    'failed' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300',
-                    'running' => 'bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300',
-                    default => 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
+                    'completed' => 'bg-emerald-50 text-emerald-700',
+                    'failed' => 'bg-rose-50 text-rose-700',
+                    'running' => 'bg-sky-50 text-sky-700',
+                    default => 'bg-amber-50 text-amber-700',
                 };
             @endphp
 
@@ -62,14 +62,14 @@
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                            <p class="text-sm font-semibold text-slate-900">
                                 {{ $run['label'] }}
                             </p>
                             <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">
                                 {{ __(ucfirst($run['status'])) }}
                             </span>
                         </div>
-                        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
                             <span>#{{ $run['id'] }}</span>
                             <span>{{ __('Updated') }} {{ $run['updated_at_human'] ?? '-' }}</span>
                             @if ($run['status'] === 'queued')
@@ -94,27 +94,27 @@
 
                 @if ($hasImportSummary)
                     <div class="flex flex-wrap gap-2 text-xs font-semibold">
-                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
                             {{ __('Success') }} {{ number_format($successfulRows) }}
                         </span>
-                        <span class="rounded-full {{ $errorRows > 0 ? 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }} px-3 py-1">
+                        <span class="rounded-full {{ $errorRows > 0 ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600' }} px-3 py-1">
                             {{ __('Errors') }} {{ number_format($errorRows) }}
                         </span>
                     </div>
                 @endif
 
                 <div>
-                    <div class="mb-2 flex items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+                    <div class="mb-2 flex items-center justify-between gap-4 text-xs text-slate-500">
                         <span>{{ __('Progress') }}</span>
                         <span>{{ $run['progress_percentage'] }}%</span>
                     </div>
-                    <div class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div class="h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
                             class="h-2 rounded-full transition-all duration-300 {{ $run['status'] === 'failed' ? 'bg-rose-500' : ($run['status'] === 'completed' ? 'bg-emerald-500' : 'bg-primary-600') }}"
                             style="width: {{ max(4, (int) $run['progress_percentage']) }}%;"
                         ></div>
                     </div>
-                    <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div class="mt-2 text-xs text-slate-500">
                         @if ($run['total_rows'] !== null)
                             {{ number_format((int) $run['processed_rows']) }} / {{ number_format((int) $run['total_rows']) }} {{ __('rows processed') }}
                         @elseif ($run['status'] === 'queued')
@@ -126,13 +126,13 @@
                 </div>
 
                 @if (!empty($run['error_message']))
-                    <div class="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/30 dark:bg-rose-900/10 dark:text-rose-300">
+                    <div class="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                         {{ $run['error_message'] }}
                     </div>
                 @endif
 
                 @if ($rawErrors->isNotEmpty())
-                    <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/30 dark:bg-amber-900/10 dark:text-amber-200">
+                    <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                         <p class="font-semibold">{{ __('Error details') }}</p>
                         <ul class="mt-2 space-y-1">
                             @foreach ($rawErrors->take(3) as $error)

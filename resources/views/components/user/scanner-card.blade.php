@@ -2,7 +2,7 @@
     <div class="scanner-header relative flex flex-col gap-3">
         <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
-                <h3 class="flex items-center gap-2 text-base font-semibold text-slate-950 dark:text-white">
+                <h3 class="flex items-center gap-2 text-base font-semibold text-slate-950">
                     <span class="scanner-title-icon">
                         <x-heroicon-o-qr-code class="h-5 w-5" />
                     </span>
@@ -54,8 +54,8 @@
         </span>
     </div>
 
-    <div id="scanner-result" class="mt-3 hidden text-center text-sm font-medium text-green-600 dark:text-green-400"></div>
-    <div id="scanner-error" class="mt-3 hidden text-center text-sm font-medium text-red-600 dark:text-red-400"></div>
+    <div id="scanner-result" class="mt-3 hidden text-center text-sm font-medium text-green-600"></div>
+    <div id="scanner-error" class="mt-3 hidden text-center text-sm font-medium text-red-600"></div>
 
     @if (isset($slot) && $slot->isNotEmpty())
         <div class="scanner-footer">

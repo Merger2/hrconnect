@@ -13,7 +13,7 @@
                     <x-forms.label for="payroll-search" value="{{ __('Search components') }}" class="mb-1.5 block" />
                     <div class="relative">
                         <span
-                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd"
                                     d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z"
@@ -57,11 +57,11 @@
         <x-admin.panel>
             <div class="grid gap-3 p-3 lg:hidden">
                 @forelse ($components as $payrollComponent)
-                    <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <h3 class="truncate text-sm font-bold text-slate-950 dark:text-white">{{ $payrollComponent->name }}</h3>
-                                <p class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                                <h3 class="truncate text-sm font-bold text-slate-950">{{ $payrollComponent->name }}</h3>
+                                <p class="mt-1 text-xs font-medium text-slate-500">
                                     {{ str_replace('_', ' ', ucfirst($payrollComponent->calculation_type)) }}
                                 </p>
                             </div>
@@ -73,8 +73,8 @@
 
                         <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ __('Value') }}</dt>
-                                <dd class="mt-1 font-mono font-bold text-slate-950 dark:text-white">
+                                <dt class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{{ __('Value') }}</dt>
+                                <dd class="mt-1 font-mono font-bold text-slate-950">
                                     @if ($payrollComponent->calculation_type == 'percentage_basic')
                                         {{ $payrollComponent->percentage }}%
                                     @else
@@ -86,11 +86,11 @@
                                 </dd>
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ __('Status') }}</dt>
+                                <dt class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{{ __('Status') }}</dt>
                                 <dd class="mt-1 flex items-center gap-2">
                                     <x-forms.switch wire:click="toggleActive({{ $payrollComponent->id }})"
                                         :checked="$payrollComponent->is_active" :label="__('Toggle payroll component') . ': ' . $payrollComponent->name" />
-                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    <span class="text-xs font-bold text-slate-600">
                                         {{ $payrollComponent->is_active ? __('Active') : __('Inactive') }}
                                     </span>
                                 </dd>
@@ -126,34 +126,34 @@
             </div>
 
             <div class="hidden lg:block">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50/50 dark:bg-gray-700/50">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50/50">
                         <tr>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                 {{ __('Name') }}</th>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                 {{ __('Type') }}</th>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                 {{ __('Calculation') }}</th>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                 {{ __('Value') }}</th>
                             <th
-                                class="px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                class="px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
                                 {{ __('Active') }}</th>
                             <th
-                                class="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                class="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                                 {{ __('Actions') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-transparent dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-200 bg-transparent">
                         @forelse ($components as $payrollComponent)
-                            <tr class="transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/50">
+                            <tr class="transition-colors hover:bg-gray-50/50">
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    <div class="text-sm font-medium text-gray-900">
                                         {{ $payrollComponent->name }}</div>
                                     @if ($payrollComponent->is_taxable)
                                         <x-admin.status-badge tone="warning" class="mt-2">
@@ -166,11 +166,11 @@
                                         {{ __(ucfirst($payrollComponent->type)) }}
                                     </x-admin.status-badge>
                                 </td>
-                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                                     {{ str_replace('_', ' ', ucfirst($payrollComponent->calculation_type)) }}
                                 </td>
                                 <td
-                                    class="whitespace-nowrap px-4 py-3 font-mono text-sm text-gray-900 dark:text-gray-200">
+                                    class="whitespace-nowrap px-4 py-3 font-mono text-sm text-gray-900">
                                     @if ($payrollComponent->calculation_type == 'percentage_basic')
                                         {{ $payrollComponent->percentage }}%
                                     @else
@@ -202,7 +202,7 @@
                         @empty
                             <tr>
                                 <td colspan="6"
-                                    class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    class="px-4 py-6 text-center text-sm text-gray-500">
                                     <div class="flex justify-center">
                                         <x-admin.empty-state :title="filled($search) || $typeFilter !== 'all' || $activeFilter !== 'all' ? __('No matching components found.') : __('No components found.')">
                                             <x-slot name="icon">
@@ -219,7 +219,7 @@
 
             @if ($components->hasPages())
                 <div
-                    class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3 dark:border-gray-700/60 dark:bg-gray-900/40">
+                    class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3">
                     {{ $components->links() }}
                 </div>
             @endif

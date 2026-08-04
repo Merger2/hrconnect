@@ -77,24 +77,24 @@ enum AttendanceStatus: string
     public function badge(): string
     {
         return match ($this) {
-            self::ON_TIME, self::PRESENT, self::HOLIDAY, self::PERMISSION => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-300',
-            self::LATE, self::EARLY => 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-300',
-            self::EXCUSED => 'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-900/20 dark:text-sky-300',
-            self::SICK => 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-900/20 dark:text-purple-300',
-            self::ABSENT, self::MISSED_CLOCK_IN, self::MISSED_CLOCK_OUT => 'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-900/20 dark:text-rose-300',
-            default => 'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400',
+            self::ON_TIME, self::PRESENT, self::HOLIDAY, self::PERMISSION => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+            self::LATE, self::EARLY => 'bg-amber-50 text-amber-700 ring-amber-600/20',
+            self::EXCUSED => 'bg-sky-50 text-sky-700 ring-sky-600/20',
+            self::SICK => 'bg-purple-50 text-purple-700 ring-purple-600/20',
+            self::ABSENT, self::MISSED_CLOCK_IN, self::MISSED_CLOCK_OUT => 'bg-rose-50 text-rose-700 ring-rose-600/20',
+            default => 'bg-slate-50 text-slate-600 ring-slate-500/10',
         };
     }
 
     public function cell(): string
     {
         return match ($this) {
-            self::ON_TIME, self::PRESENT, self::HOLIDAY, self::PERMISSION => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-300',
-            self::LATE, self::EARLY => 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300',
-            self::EXCUSED => 'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-900/30 dark:text-sky-300',
-            self::SICK => 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-900/30 dark:text-purple-300',
-            self::ABSENT, self::MISSED_CLOCK_IN, self::MISSED_CLOCK_OUT => 'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-900/30 dark:text-rose-300',
-            default => 'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400',
+            self::ON_TIME, self::PRESENT, self::HOLIDAY, self::PERMISSION => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+            self::LATE, self::EARLY => 'bg-amber-50 text-amber-700 ring-amber-600/20',
+            self::EXCUSED => 'bg-sky-50 text-sky-700 ring-sky-600/20',
+            self::SICK => 'bg-purple-50 text-purple-700 ring-purple-600/20',
+            self::ABSENT, self::MISSED_CLOCK_IN, self::MISSED_CLOCK_OUT => 'bg-rose-50 text-rose-700 ring-rose-600/20',
+            default => 'bg-slate-50 text-slate-600 ring-slate-500/10',
         };
     }
 

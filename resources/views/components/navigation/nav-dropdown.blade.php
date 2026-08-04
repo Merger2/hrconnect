@@ -1,7 +1,7 @@
 @props([
     'active' => false,
     'align' => 'left',
-    'contentClasses' => 'py-1 bg-white dark:bg-gray-800',
+    'contentClasses' => 'py-1 bg-white',
     'dropdownClasses' => 'w-48',
     'id' => null,
     'triggerClasses' => '',
@@ -27,8 +27,8 @@
           break;
   }
   $classes = $active
-      ? 'wcag-touch-target inline-flex items-center border-b-2 border-primary-700 px-2 py-1 text-sm font-semibold leading-5 text-gray-950 transition duration-150 ease-in-out dark:border-primary-400 dark:text-white'
-      : 'wcag-touch-target inline-flex items-center border-b-2 border-transparent px-2 py-1 text-sm font-medium leading-5 text-gray-700 transition duration-150 ease-in-out hover:border-gray-400 hover:text-gray-950 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white';
+      ? 'wcag-touch-target inline-flex items-center border-b-2 border-primary-700 px-2 py-1 text-sm font-semibold leading-5 text-gray-950 transition duration-150 ease-in-out'
+      : 'wcag-touch-target inline-flex items-center border-b-2 border-transparent px-2 py-1 text-sm font-medium leading-5 text-gray-700 transition duration-150 ease-in-out hover:border-gray-400 hover:text-gray-950';
 @endphp
 
 <div {{ $attributes->merge(['class' => 'relative inline-flex h-full items-center']) }} x-data="{ open: false }" @click.away="open = false"
@@ -50,7 +50,7 @@
       x-transition:leave-end="transform opacity-0 scale-95"
       class="{{ $alignmentClasses }} {{ $dropdownClasses }} absolute z-50 mt-2 rounded-md shadow-lg"
       style="display: none;" @click="open = false">
-      <div class="{{ $contentClasses }} rounded-md ring-1 ring-black/10 dark:ring-white/10">
+      <div class="{{ $contentClasses }} rounded-md ring-1 ring-black/10">
         {{ $content }}
       </div>
     </div>

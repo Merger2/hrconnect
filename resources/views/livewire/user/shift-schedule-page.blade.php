@@ -11,7 +11,7 @@
                 </x-slot>
                 <x-slot name="actions">
                     <a href="{{ route('shift-swap-requests') }}"
-                        class="wcag-touch-target inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white sm:w-auto">
+                        class="wcag-touch-target inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-primary-700 sm:w-auto">
                         <x-heroicon-o-arrows-right-left class="h-5 w-5" />
                         <span>{{ __('Shift Swap') }}</span>
                     </a>
@@ -25,44 +25,44 @@
                             <li class="user-list-card group relative">
                                 <div class="flex items-center gap-4">
                                      {{-- Date Box --}}
-                                    <div class="flex h-12 w-12 flex-col items-center justify-center rounded-xl border border-slate-200/70 bg-white/72 shadow-none dark:border-slate-800/80 dark:bg-slate-950/35">
+                                    <div class="flex h-12 w-12 flex-col items-center justify-center rounded-xl border border-slate-200/70 bg-white/72 shadow-none">
                                         <span class="text-[10px] font-bold text-red-500 uppercase leading-none mb-0.5">{{ $schedule->date->format('M') }}</span>
-                                        <span class="text-lg font-black text-gray-800 dark:text-white leading-none">{{ $schedule->date->format('d') }}</span>
+                                        <span class="text-lg font-black text-gray-800 leading-none">{{ $schedule->date->format('d') }}</span>
                                     </div>
 
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">
+                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">
                                             {{ $schedule->date->format('l') }}
                                         </div>
                                         <div class="flex items-center justify-between">
-                                            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                            <h3 class="text-sm font-bold text-gray-900">
                                                 {{ $schedule->is_off ? __('Off Day') : ($schedule->shift->name ?? '-') }}
                                             </h3>
                                             @if($schedule->date->isToday())
-                                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 rounded text-[10px] font-bold uppercase tracking-wide border border-emerald-100 dark:border-emerald-800">
+                                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase tracking-wide border border-emerald-100">
                                                     {{ __('Today') }}
                                                 </span>
                                             @endif
                                         </div>
                                         
                                         @if(!$schedule->is_off && $schedule->shift)
-                                            <div class="flex items-center gap-2 mt-1.5 text-xs text-gray-600 dark:text-gray-300">
-                                                <span class="bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 px-1.5 py-0.5 rounded font-mono font-medium">
+                                            <div class="flex items-center gap-2 mt-1.5 text-xs text-gray-600">
+                                                <span class="bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded font-mono font-medium">
                                                     {{ \Carbon\Carbon::parse($schedule->shift->start_time)->format('H:i') }}
                                                 </span>
-                                                <span class="text-gray-300 dark:text-gray-600">➜</span>
-                                                <span class="bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 px-1.5 py-0.5 rounded font-mono font-medium">
+                                                <span class="text-gray-300">➜</span>
+                                                <span class="bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded font-mono font-medium">
                                                     {{ \Carbon\Carbon::parse($schedule->shift->end_time)->format('H:i') }}
                                                 </span>
                                             </div>
                                             <div class="mt-3">
                                                 @if (in_array($schedule->id, $pendingSwapScheduleIds, true))
-                                                    <span class="inline-flex rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                                    <span class="inline-flex rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">
                                                         {{ __('Swap request pending') }}
                                                     </span>
                                                 @else
                                                     <a href="{{ route('shift-swap-requests', ['schedule' => $schedule->id]) }}"
-                                                        class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-primary-800 dark:hover:bg-primary-900/20 dark:hover:text-primary-300">
+                                                        class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700">
                                                         <x-heroicon-o-arrows-right-left class="h-4 w-4" />
                                                         {{ __('Request swap') }}
                                                     </a>

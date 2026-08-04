@@ -7,8 +7,8 @@
                 title-id="face-registration-title" />
 
             <div class="user-page-body pt-0">
-                <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700/50 dark:bg-slate-800/50">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Face registration feature coming soon.') }}</p>
+                <div class="rounded-xl border border-slate-200 bg-white p-6">
+                    <p class="text-sm text-slate-500">{{ __('Face registration feature coming soon.') }}</p>
                 </div>
             </div>
         </section>
