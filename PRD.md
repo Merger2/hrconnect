@@ -328,6 +328,14 @@ Keputusan berikut harus ditetapkan sebelum finalisasi PRD dan go-live:
 | 7 | **AI provider & quota:** Gemini dengan konfigurasi saat ini sudah dipilih; quota, budget, model final, dan rate limit masih harus ditetapkan. | AI KB gagal atau over-budget. | Tech Lead + Finance |
 | 8 | **Privacy policy internal:** data mana yang boleh masuk AI embedding, retensi data. | Risiko pelanggaran privasi. | HR + Legal |
 
+### Keputusan Terealisasi (2026-08-05)
+
+| # | Keputusan | Status |
+|---|-----------|--------|
+| 1 | **Payroll (parsial):** pesangon = PP 35/2021 Pasal 40(2); cap JP = 11.086.300 (efektif Maret 2026); biaya jabatan **tidak diterapkan** (deviasi terdokumentasi, keputusan ditangguhkan) | Realized — golden test 27/27 (commit `6f9e9cb`) |
+| 2 | **Absensi face-only ditegakkan:** PIN fallback **dihapus** dari seluruh alur (web + API + WFA); face gagal/tidak terdaftar → clock-in/out **ditolak** + alur koreksi HR | Realized (keputusan Fikih 2026-08-05) |
+| — | **Feature-lock dipertahankan:** middleware `feature.lock` yang tadinya no-op diaktifkan = dianggap bug-fix stub pre-existing (sudah ter-wire di 29 route), **bukan** feature-lock baru; non-goal tetap dijaga | Realized (keputusan Fikih 2026-08-05) |
+
 ### Risiko Utama
 
 - **Scope creep:** penambahan fitur kecil di tengah jalan bisa menunda gate.  

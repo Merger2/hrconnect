@@ -81,3 +81,6 @@ graphify-out/.graphify_root
 # Runtime artifacts (test output) — jangan commit
 /storage/app/private/attachments/
 /storage/app/private/import-export/
+
+# Laravel Excel / framework cache (runtime artifacts)
+/storage/framework/cache/

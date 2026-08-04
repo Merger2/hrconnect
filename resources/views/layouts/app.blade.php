@@ -109,6 +109,8 @@
             </main>
         </div>
 
+<x-shared.feature-lock-modal />
+
 @stack('modals')
 
 @livewireScripts

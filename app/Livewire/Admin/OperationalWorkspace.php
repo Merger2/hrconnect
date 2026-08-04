@@ -14,6 +14,7 @@ use App\Support\Contracts\ScopesCompanies;
 use App\Support\OperationalWorkspaceService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Jetstream\InteractsWithBanner;
@@ -30,7 +31,7 @@ class OperationalWorkspace extends Component
 
     private const BRANCH_TYPES = ['branch', 'store', 'office', 'warehouse', 'site'];
 
-    private const TABS = ['projects', 'tasks', 'branches'];
+    private const TABS = ['projects', 'tasks', 'clients', 'branches'];
 
     private const DEFAULT_TAB = 'projects';
 
@@ -60,6 +61,14 @@ class OperationalWorkspace extends Component
     public string $projectName = '';
 
     public string $projectDescription = '';
+
+    public string $clientCompanyId = '';
+
+    public string $clientName = '';
+
+    public string $clientContactName = '';
+
+    public string $clientContactPhone = '';
 
     public string $taskProjectId = '';
 
@@ -92,6 +101,7 @@ class OperationalWorkspace extends Component
 
         $this->branchCompanyId = $companyId;
         $this->projectCompanyId = $companyId;
+        $this->clientCompanyId = $companyId;
     }
 
     public function updatedProjectCompanyId(): void
@@ -139,6 +149,11 @@ class OperationalWorkspace extends Component
 
         $validated = $this->validate([
             'projectCompanyId' => $this->companyIdRules(),
+            'projectClientId' => [
+                'nullable',
+                'integer',
+                Rule::exists('clients', 'id')->where('company_id', (int) $this->projectCompanyId),
+            ],
             'projectBranchId' => [
                 'nullable',
                 'integer',
@@ -157,6 +172,7 @@ class OperationalWorkspace extends Component
 
         $project = $this->operations->createProject(auth()->user(), [
             'company_id' => (int) $validated['projectCompanyId'],
+            'client_id' => $this->projectClientId !== '' ? $this->projectClientId : null,
             'branch_id' => $validated['projectBranchId'] !== '' ? $validated['projectBranchId'] : null,
             'manager_id' => $validated['projectManagerId'] ?: null,
             'name' => $validated['projectName'],
@@ -167,6 +183,30 @@ class OperationalWorkspace extends Component
         $this->taskProjectId = (string) $project->id;
         $this->reset(['projectClientId', 'projectBranchId', 'projectManagerId', 'projectName', 'projectDescription']);
         $this->banner(__('Project created.'));
+    }
+
+    public function createClient(): void
+    {
+        Gate::authorize('manageOperationsWorkspace');
+
+        $validated = $this->validate([
+            'clientCompanyId' => $this->companyIdRules(),
+            'clientName' => ['required', 'string', 'max:255'],
+            'clientContactName' => ['nullable', 'string', 'max:255'],
+            'clientContactPhone' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $this->operations->createClient(auth()->user(), [
+            'company_id' => (int) $validated['clientCompanyId'],
+            'name' => $validated['clientName'],
+            'code' => $this->uniqueClientCode($validated['clientName']),
+            'contact_name' => $validated['clientContactName'] ?: null,
+            'contact_phone' => $validated['clientContactPhone'] ?: null,
+            'is_active' => Client::STATUS_ACTIVE,
+        ]);
+
+        $this->reset(['clientName', 'clientContactName', 'clientContactPhone']);
+        $this->banner(__('Client created.'));
     }
 
     public function createTask(): void
@@ -317,5 +357,23 @@ class OperationalWorkspace extends Component
                 ->whereNull('company_id')
                 ->orWhere('company_id', $project->company_id))
             ->exists();
+    }
+
+    /**
+     * Unique slug-style code for a new client, following the pattern used by
+     * LeaveTypeManager::uniqueCode().
+     */
+    private function uniqueClientCode(string $name): string
+    {
+        $base = Str::slug($name, '_') ?: 'client';
+        $code = $base;
+        $suffix = 2;
+
+        while (Client::query()->where('code', $code)->exists()) {
+            $code = "{$base}_{$suffix}";
+            $suffix++;
+        }
+
+        return $code;
     }
 }

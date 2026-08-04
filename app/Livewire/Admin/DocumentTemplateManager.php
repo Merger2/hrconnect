@@ -7,6 +7,7 @@ use App\Models\EmployeeDocumentType;
 use App\Services\EmployeeDocumentRequestService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -116,13 +117,59 @@ class DocumentTemplateManager extends Component
     {
         $this->validate([
             'documentTypeForm.name' => ['required', 'string', 'max:255'],
-            'documentTypeForm.code' => ['required', 'string', 'max:50', 'unique:employee_document_types,code'],
+            'documentTypeForm.code' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('employee_document_types', 'code')->ignore($this->documentTypeForm['id'] ?? null),
+            ],
             'documentTypeForm.category' => ['required', 'string'],
         ]);
 
-        EmployeeDocumentType::create($this->documentTypeForm);
+        $typeId = $this->documentTypeForm['id'] ?? null;
+
+        if ($typeId !== null) {
+            EmployeeDocumentType::query()->findOrFail($typeId)->update($this->documentTypeForm);
+            $message = __('Document type updated.');
+        } else {
+            EmployeeDocumentType::create($this->documentTypeForm);
+            $message = __('Document type created.');
+        }
+
         $this->cancelDocumentTypeEditor();
-        $this->dispatch('banner', message: __('Document type created.'));
+        $this->dispatch('banner', message: $message);
+    }
+
+    /**
+     * Populate the type editor with the document type currently selected in
+     * the "Choose Document" step (blade: editSelectedDocumentType).
+     */
+    public function editSelectedDocumentType(): void
+    {
+        $typeId = (int) ($this->documentTemplateForm['document_type_id'] ?? 0);
+
+        if ($typeId < 1) {
+            $this->dispatch('notify', message: __('Select a document type first.'));
+
+            return;
+        }
+
+        $type = EmployeeDocumentType::query()->findOrFail($typeId);
+
+        $this->documentTypeForm = [
+            'id' => $type->id,
+            'name' => $type->name,
+            'code' => $type->code,
+            'category' => $type->category,
+            'description' => $type->description,
+            'employee_requestable' => (bool) ($type->employee_requestable ?? false),
+            'admin_requestable' => (bool) $type->admin_requestable,
+            'requires_employee_upload' => (bool) $type->requires_employee_upload,
+            'auto_generate_enabled' => (bool) $type->auto_generate_enabled,
+            'is_active' => (bool) $type->is_active,
+        ];
+        $this->creating = false;
+        $this->editing = true;
     }
 
     public function startNewDocumentTemplate(): void
@@ -174,10 +221,14 @@ class DocumentTemplateManager extends Component
                 ->update(['is_active' => false]);
         }
 
+        $content = $this->editorMode === 'html'
+            ? ($this->documentTemplateForm['body'] ?? '')
+            : $this->composeBuilderContent();
+
         EmployeeDocumentTemplate::create([
             'name' => $this->documentTemplateForm['name'],
             'document_type_id' => $this->documentTemplateForm['document_type_id'],
-            'content' => $this->templateBuilderForm['body'] ?? $this->documentTemplateForm['body'] ?? '',
+            'content' => $content,
             'variables' => array_keys(array_filter($this->templateBuilderForm)),
             'is_active' => $isActive,
             'paper_size' => $this->documentTemplateForm['paper_size'] ?? 'a4',
@@ -195,6 +246,7 @@ class DocumentTemplateManager extends Component
         $template = EmployeeDocumentTemplate::query()->findOrFail($id);
         $this->selectedId = $id;
         $this->editing = true;
+        $this->editorMode = 'html';
 
         $this->documentTemplateForm = [
             'document_type_id' => (string) $template->document_type_id,
@@ -206,6 +258,80 @@ class DocumentTemplateManager extends Component
             'footer' => '',
             'body' => $template->content ?? '',
         ];
+    }
+
+    /**
+     * Fill a fresh template draft with starter content for the given preset
+     * (blade: useTemplatePreset('letter'|'salary'|'upload')).
+     */
+    public function useTemplatePreset(string $preset): void
+    {
+        $typeId = $this->documentTemplateForm['document_type_id'] ?? '';
+        $this->startNewDocumentTemplate();
+        $this->documentTemplateForm['document_type_id'] = $typeId;
+
+        $defaults = match ($preset) {
+            'letter' => [
+                'heading' => __('SURAT KETERANGAN KERJA'),
+                'opening' => __('Yang bertanda tangan di bawah ini,'),
+                'main_paragraph' => __('Dengan ini menerangkan bahwa {{ employee.name }} (NIP: {{ employee.nip }}) adalah karyawan aktif pada {{ company.name }}.'),
+                'details_paragraph' => __('Surat keterangan ini diterbitkan untuk keperluan resmi yang bersangkutan.'),
+                'closing' => __('Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.'),
+                'signature_title' => __('Direktur'),
+                'signature_name' => __('HRD'),
+            ],
+            'salary' => [
+                'heading' => __('SURAT KETERANGAN PENGHASILAN'),
+                'opening' => __('Yang bertanda tangan di bawah ini,'),
+                'main_paragraph' => __('Dengan ini menerangkan bahwa {{ employee.name }} (NIP: {{ employee.nip }}) bekerja pada {{ company.name }} dengan penghasilan sebagaimana tercantum pada slip gaji.'),
+                'details_paragraph' => __('Surat keterangan penghasilan ini diterbitkan untuk keperluan pengajuan kredit atau keperluan keuangan lainnya.'),
+                'closing' => __('Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.'),
+                'signature_title' => __('Finance'),
+                'signature_name' => __('HRD'),
+            ],
+            'upload' => [
+                'body' => "<p>{{ employee.name }}</p>\n<p>{{ __('Lampiran dokumen asli — unggah berkas pada saat permintaan dokumen.') }}</p>",
+            ],
+            default => [],
+        };
+
+        if ($preset === 'upload') {
+            $this->documentTemplateForm['body'] = $defaults['body'];
+            $this->editorMode = 'html';
+        } else {
+            $this->templateBuilderForm = array_merge($this->templateBuilderForm, $defaults);
+        }
+
+        $this->dispatch('notify', message: __('Template preset applied.'));
+    }
+
+    public function setTemplateEditorMode(string $mode): void
+    {
+        if (! in_array($mode, ['builder', 'html'], true)) {
+            return;
+        }
+
+        $this->editorMode = $mode;
+    }
+
+    /**
+     * Compose the saved document body from the guided builder fields.
+     */
+    private function composeBuilderContent(): string
+    {
+        $heading = $this->templateBuilderForm['heading'] ?? '';
+        $opening = $this->templateBuilderForm['opening'] ?? '';
+        $main = $this->templateBuilderForm['main_paragraph'] ?? '';
+        $details = $this->templateBuilderForm['details_paragraph'] ?? '';
+        $closing = $this->templateBuilderForm['closing'] ?? '';
+
+        return implode("\n", array_filter([
+            $heading !== '' ? "<h2>{$heading}</h2>" : null,
+            $opening !== '' ? "<p>{$opening}</p>" : null,
+            $main !== '' ? "<p>{$main}</p>" : null,
+            $details !== '' ? "<p>{$details}</p>" : null,
+            $closing !== '' ? "<p>{$closing}</p>" : null,
+        ]));
     }
 
     public function resetDocumentTemplateForm(): void

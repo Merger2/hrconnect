@@ -440,11 +440,11 @@
                     @enderror
                 </div>
                 <div class="mt-4">
-                    <x-forms.label for="create_jobTitle" value="{{ __('Job Title') }}" />
-                    <x-forms.tom-select id="create_jobTitle" wire:model="form.job_title_id"
-                        placeholder="{{ __('Select Job Title') }}" :options="App\Models\JobTitle::all()->map(fn($j) => ['id' => $j->id, 'name' => $j->name])" />
-                    @error('form.job_title_id')
-                        <x-forms.input-error for="form.job_title_id" class="mt-2" message="{{ $message }}" />
+                    <x-forms.label for="create_positionTitle" value="{{ __('Position') }}" />
+                    <x-forms.tom-select id="create_positionTitle" wire:model="form.position_id"
+                        placeholder="{{ __('Select Position') }}" :options="App\Models\Position::all()->map(fn($p) => ['id' => $p->id, 'name' => $p->name])" />
+                    @error('form.position_id')
+                        <x-forms.input-error for="form.position_id" class="mt-2" message="{{ $message }}" />
                     @enderror
                 </div>
             </form>
@@ -626,11 +626,11 @@
                     @enderror
                 </div>
                 <div class="mt-4">
-                    <x-forms.label for="edit_jobTitle" value="{{ __('Job Title') }}" />
-                    <x-forms.tom-select id="edit_jobTitle" wire:model="form.job_title_id"
-                        placeholder="{{ __('Select Job Title') }}" :options="App\Models\JobTitle::all()->map(fn($j) => ['id' => $j->id, 'name' => $j->name])" />
-                    @error('form.job_title_id')
-                        <x-forms.input-error for="form.job_title_id" class="mt-2" message="{{ $message }}" />
+                    <x-forms.label for="edit_positionTitle" value="{{ __('Position') }}" />
+                    <x-forms.tom-select id="edit_positionTitle" wire:model="form.position_id"
+                        placeholder="{{ __('Select Position') }}" :options="App\Models\Position::all()->map(fn($p) => ['id' => $p->id, 'name' => $p->name])" />
+                    @error('form.position_id')
+                        <x-forms.input-error for="form.position_id" class="mt-2" message="{{ $message }}" />
                     @enderror
                 </div>
             </form>
@@ -651,7 +651,7 @@
         @if ($form->user)
             @php
                 $division = $form->user->division?->name ?? '-';
-                $jobTitle = $form->user->jobTitle?->name ?? '-';
+                $position = $form->user->employee?->position?->name ?? '-';
                 $education = $form->user->education?->label() ?? '-';
             @endphp
             <div class="px-4 py-3">
@@ -713,8 +713,8 @@
                     </div>
                     <div class="mt-4">
                         <span
-                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Job Title') }}</span>
-                        <p>{{ $jobTitle }}</p>
+                            class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('Position') }}</span>
+                        <p>{{ $position }}</p>
                     </div>
                     <div class="mt-4">
                         <span

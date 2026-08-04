@@ -3,13 +3,16 @@
 namespace App\Livewire\Admin;
 
 use App\Jobs\RunSystemBackup;
+use App\Models\Setting;
 use App\Models\SystemBackupRun;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use RuntimeException;
@@ -22,7 +25,7 @@ class SystemMaintenance extends Component
 
     public bool $backupScheduleEnabled = false;
 
-    public string $backupScheduleType = 'db';
+    public string $backupScheduleType = 'database';
 
     public string $backupScheduleFrequency = 'daily';
 
@@ -39,6 +42,71 @@ class SystemMaintenance extends Component
     public function boot(): void
     {
         Gate::authorize('viewAny', SystemBackupRun::class);
+    }
+
+    public function mount(): void
+    {
+        $this->backupScheduleEnabled = (bool) Setting::getValue('backup.automation_enabled', false);
+        $this->backupScheduleType = (string) Setting::getValue('backup.schedule_type', 'database');
+        $this->backupScheduleFrequency = (string) Setting::getValue('backup.schedule_frequency', 'daily');
+        $this->backupScheduleDay = (string) Setting::getValue('backup.schedule_day', 'monday');
+        $this->backupScheduleTime = (string) Setting::getValue('backup.schedule_time', '02:00');
+        $this->backupRetentionDays = (int) Setting::getValue('backup.retention_days', 7);
+    }
+
+    /**
+     * Persist the backup automation policy (blade: saveBackupAutomationSettings).
+     */
+    public function saveBackupAutomationSettings(): void
+    {
+        if (! Gate::allows('create', SystemBackupRun::class)) {
+            $this->dispatch('error', message: __('You do not have permission to manage backup automation.'));
+
+            return;
+        }
+
+        $this->validate([
+            'backupScheduleEnabled' => ['boolean'],
+            'backupScheduleType' => ['required', Rule::in(['database', 'application', 'both'])],
+            'backupScheduleFrequency' => ['required', Rule::in(['daily', 'weekly'])],
+            'backupScheduleDay' => ['required', Rule::in(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])],
+            'backupScheduleTime' => ['required', 'date_format:H:i'],
+            'backupRetentionDays' => ['required', 'integer', 'min:1', 'max:365'],
+        ]);
+
+        $this->updateSetting('backup.automation_enabled', $this->backupScheduleEnabled ? '1' : '0');
+        $this->updateSetting('backup.schedule_type', $this->backupScheduleType);
+        $this->updateSetting('backup.schedule_frequency', $this->backupScheduleFrequency);
+        $this->updateSetting('backup.schedule_day', $this->backupScheduleDay);
+        $this->updateSetting('backup.schedule_time', $this->backupScheduleTime);
+        $this->updateSetting('backup.retention_days', (string) $this->backupRetentionDays);
+
+        $this->dispatch('success', message: __('Backup automation settings saved.'));
+    }
+
+    private function updateSetting(string $key, string $value): void
+    {
+        Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        Setting::flushCache($key);
+    }
+
+    private function nextBackupRun(string $frequency, string $day, string $time): ?Carbon
+    {
+        [$hour, $minute] = array_map('intval', explode(':', $time ?: '02:00'));
+
+        if ($frequency === 'weekly') {
+            $next = Carbon::parse($day)->setTime($hour, $minute);
+
+            while ($next->isPast()) {
+                $next->addWeek();
+            }
+
+            return $next;
+        }
+
+        $next = Carbon::today()->setTime($hour, $minute);
+
+        return $next->isPast() ? $next->addDay() : $next;
     }
 
     public function render(): View
@@ -112,16 +180,35 @@ class SystemMaintenance extends Component
                 'completed_at_human' => $latest->completed_at?->diffForHumans() ?? '—',
             ] : null,
             'backupJobSummary' => $jobSummary,
-            'backupScheduleSummary' => [
-                'enabled' => false,
-                'next_run_human' => null,
-                'type_label' => null,
-                'frequency_label' => null,
-                'time' => null,
-                'retention_days' => null,
-                'next_run_relative' => null,
-            ],
+            'backupScheduleSummary' => $this->backupScheduleSummary(),
         ]);
+    }
+
+    /**
+     * Summary shown in the Backup Automation panel; reads the persisted
+     * policy so the "next run" card reflects what was actually saved.
+     *
+     * @return array<string, mixed>
+     */
+    private function backupScheduleSummary(): array
+    {
+        $enabled = (bool) Setting::getValue('backup.automation_enabled', false);
+        $type = (string) Setting::getValue('backup.schedule_type', 'database');
+        $frequency = (string) Setting::getValue('backup.schedule_frequency', 'daily');
+        $day = (string) Setting::getValue('backup.schedule_day', 'monday');
+        $time = (string) Setting::getValue('backup.schedule_time', '02:00');
+        $retentionDays = (int) Setting::getValue('backup.retention_days', 7);
+        $nextRun = $this->nextBackupRun($frequency, $day, $time);
+
+        return [
+            'enabled' => $enabled,
+            'next_run_human' => $enabled && $nextRun !== null ? $nextRun->format('l, d M Y H:i') : null,
+            'type_label' => $enabled ? Str::headline($type) : null,
+            'frequency_label' => $enabled ? Str::headline($frequency) : null,
+            'time' => $enabled ? $time : null,
+            'retention_days' => $enabled ? $retentionDays : null,
+            'next_run_relative' => $enabled && $nextRun !== null ? $nextRun->diffForHumans() : null,
+        ];
     }
 
     public function toggleMaintenanceMode(): void
