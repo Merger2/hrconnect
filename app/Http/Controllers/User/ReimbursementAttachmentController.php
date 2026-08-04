@@ -17,7 +17,7 @@ class ReimbursementAttachmentController extends Controller
     {
         $this->authorize('view', $reimbursement);
 
-        $path = $reimbursement->attachment;
+        $path = $reimbursement->attachment_path;
 
         if (! $path) {
             abort(404);

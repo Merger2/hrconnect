@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReimbursementController;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Middleware\EnsureEmployeeDeviceApiAccount;
+use App\Models\Payroll;
 use App\Support\ApiTokenPermission;
 use Illuminate\Support\Facades\Route;
 
@@ -183,9 +184,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     });
 
     Route::controller(PayrollController::class)->prefix('payrolls')->group(function () {
-        Route::get('/', 'index')->can('view_payrolls');
+        Route::get('/', 'index')->can('viewAny', Payroll::class);
         Route::post('/generate', 'generate')->can('process_payroll');
-        Route::get('/{payroll}', 'show')->can('view_payrolls');
+        Route::get('/{payroll}', 'show')->can('view', 'payroll');
         Route::get('/{payroll}/payslip', 'payslip')->can('view_payslip');
         Route::post('/{payroll}/export-monthly', 'exportMonthly')->can('process_payroll');
         Route::post('/{payroll}/export-1721a1', 'export1721A1')->can('process_payroll');

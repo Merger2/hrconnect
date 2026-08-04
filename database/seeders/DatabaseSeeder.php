@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             TarifTerSeeder::class,
             BranchSeeder::class,
             CompanyEmployeesSeeder::class,
+            DemoAttendanceSeeder::class,
             E2eTestSeeder::class,
             IntegrationSampleSeeder::class,
             KnowledgeBaseSeeder::class,

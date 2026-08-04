@@ -53,11 +53,9 @@ tests/e2e/.auth/
 /.claude/
 /.codex/
 /.gemini/
-/.github/
 /.opencode/
 /docs/**
 !/docs/api/api.json
-/tests/
 /_ide_helper.php
 /_ide_helper_models.php
 /phpstan.neon
@@ -66,3 +64,6 @@ tests/e2e/.auth/
 storage/logs/*.log
 storage/logs/
 storage/framework/views/*.php
+
+# Testing env berisi kredensial DB asli — local-only, JANGAN commit
+.env.testing

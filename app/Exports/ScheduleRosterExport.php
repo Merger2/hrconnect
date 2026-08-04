@@ -28,7 +28,7 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
     public function collection(): Collection
     {
         $query = ShiftSchedule::query()
-            ->with(['employee.user', 'employee.department', 'employee.position', 'shift'])
+            ->with(['employee.user', 'employee.division', 'employee.position', 'shift'])
             ->whereHas('employee', fn ($q) => $q->whereNull('resign_date'));
 
         if (! empty($this->filters['start_date'])) {
@@ -38,7 +38,7 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
             $query->where('date', '<=', $this->filters['end_date']);
         }
         if (! empty($this->filters['division'])) {
-            $query->whereHas('employee', fn ($q) => $q->where('department_id', $this->filters['division']));
+            $query->whereHas('employee', fn ($q) => $q->where('division_id', $this->filters['division']));
         }
         if (! empty($this->filters['shift_id'])) {
             $query->where('shift_id', $this->filters['shift_id']);
@@ -75,7 +75,7 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
         return [
             $employee?->employee_number ?? '-',
             $employee?->user?->name ?? $employee?->full_name ?? '-',
-            $employee?->department?->name ?? '-',
+            $employee?->division?->name ?? '-',
             $employee?->position?->name ?? '-',
             $schedule->date?->format('Y-m-d') ?? '-',
             $shift?->name ?? '-',

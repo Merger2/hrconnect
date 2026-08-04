@@ -105,27 +105,47 @@ class CompanyEmployeesSeeder extends Seeder
             $posCode = $posCodes[array_rand($posCodes)];
             $position = $positions[$posCode];
 
-            $user = User::factory()->create([
-                'email' => "employee{$i}@hrconnect.local",
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]);
-            $user->assignRole('employee');
+            $user = User::firstOrCreate(
+                ['email' => "employee{$i}@hrconnect.local"],
+                [
+                    'name' => "Employee {$i}",
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ]
+            );
 
-            Employee::factory()->create([
-                'user_id' => $user->id,
-                'company_id' => $company->id,
-                'branch_id' => $branch->id,
-                'division_id' => $div->id,
-                'position_id' => $position->id,
-                'employee_number' => sprintf('EMP-%04d', $i + 1),
-                'nik' => '32760123456789'.str_pad($i, 2, '0', STR_PAD_LEFT),
-                'npwp' => $this->generateNpwp($i),
-                'phone' => '081'.str_pad($i, 9, '0', STR_PAD_LEFT),
-                'full_name' => "Employee {$i}",
-            ]);
+            if (! $user->hasRole('employee')) {
+                $user->assignRole('employee');
+            }
 
-            $created++;
+            $employee = Employee::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'company_id' => $company->id,
+                    'branch_id' => $branch->id,
+                    'division_id' => $div->id,
+                    'position_id' => $position->id,
+                    'employee_number' => sprintf('EMP-%04d', $i + 1),
+                    'nik' => '32760123456789'.str_pad($i, 2, '0', STR_PAD_LEFT),
+                    'npwp' => $this->generateNpwp($i),
+                    'phone' => '081'.str_pad($i, 9, '0', STR_PAD_LEFT),
+                    'full_name' => "Employee {$i}",
+                    'gender' => Gender::LAKI_LAKI,
+                    'marital_status' => MaritalStatus::SINGLE,
+                    'status' => EmployeeStatus::ACTIVE,
+                    'birth_date' => '1995-01-01',
+                    'join_date' => '2024-01-01',
+                    'education_level' => EducationLevel::BACHELOR,
+                    'institution_name' => 'Universitas Indonesia',
+                    'major' => 'Manajemen',
+                    'graduation_year' => 2018,
+                    'salary_type' => SalaryType::MONTHLY,
+                ]
+            );
+
+            if ($employee->wasRecentlyCreated) {
+                $created++;
+            }
         }
 
         $this->command?->info("Seeded: 1 Owner + {$created} Employees = ".($created + 1).' total people');

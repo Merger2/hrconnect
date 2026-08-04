@@ -71,6 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature.lock' => RedirectLockedEnterpriseFeature::class,
         ]);
     })
+    ->withBroadcasting(__DIR__.'/../routes/channels.php')
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(function (Request $request) {
             return $request->is('api/*') || $request->expectsJson();

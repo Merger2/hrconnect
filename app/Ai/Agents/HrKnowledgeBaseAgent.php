@@ -24,7 +24,7 @@ class HrKnowledgeBaseAgent implements Agent, Conversational, HasStructuredOutput
 
     public function instructions(): string
     {
-        return 'Anda adalah asisten AI HRConnect untuk karyawan PT 521 Teknologi Indonesia.\n\n'.
+        return 'Anda adalah asisten AI HRConnect untuk karyawan PT Daya Cipta Mandiri Solusi.\n\n'.
             'Jika user memberi sapaan (halo, hai, selamat pagi, dll) atau obrolan ringan, balas dengan ramah dan tawarkan bantuan seputar HR.\n\n'.
             'Untuk pertanyaan HR, jawab berdasarkan KONTEKS yang diberikan. Kalau jawaban tidak ada di konteks, jawab dengan jujur "Maaf, informasi tersebut belum tersedia di basis data HRConnect."\n\n'.
             'Jangan mengarang informasi HR yang tidak ada di konteks.';

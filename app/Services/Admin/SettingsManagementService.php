@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Admin;
 
 use App\Models\Setting;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -31,14 +32,13 @@ class SettingsManagementService
         ];
     }
 
-    public function groupedSettings(): array
+    public function groupedSettings(): Collection
     {
         return Setting::query()
             ->orderBy('group')
             ->orderBy('id')
             ->get()
-            ->groupBy('group')
-            ->toArray();
+            ->groupBy('group');
     }
 
     public function hardwareId(): string

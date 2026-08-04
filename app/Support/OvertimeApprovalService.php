@@ -44,7 +44,7 @@ class OvertimeApprovalService
 
             $overtime->update([
                 'status' => 'approved',
-                'approved_by' => $actor->id,
+                'approved_by' => $actor->employee?->id,
             ]);
         });
 
@@ -59,7 +59,7 @@ class OvertimeApprovalService
 
             $overtime->update([
                 'status' => 'rejected',
-                'approved_by' => $actor->id,
+                'approved_by' => $actor->employee?->id,
                 'rejection_reason' => $rejectionReason,
             ]);
         });

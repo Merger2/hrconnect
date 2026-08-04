@@ -353,8 +353,8 @@ class UserHomeCommandCenterService
                 'label' => __('Claim'),
                 'description' => __(ucfirst((string) $item->type)).' · '.number_format((float) $item->amount, 0, ',', '.'),
                 'href' => route('reimbursement'),
-                'status' => __(str((string) $item->status)->headline()->toString()),
-                'tone' => $this->statusTone((string) $item->status),
+                'status' => __(str($this->statusValue($item->status))->headline()->toString()),
+                'tone' => $this->statusTone($this->statusValue($item->status)),
                 'sort_at' => $item->updated_at ?? $item->created_at,
             ]);
     }
@@ -370,8 +370,8 @@ class UserHomeCommandCenterService
                 'label' => __('Overtime'),
                 'description' => $item->date?->translatedFormat('d M Y') ?? __('No date'),
                 'href' => route('overtime'),
-                'status' => __(str((string) $item->status)->headline()->toString()),
-                'tone' => $this->statusTone((string) $item->status),
+                'status' => __(str($this->statusValue($item->status))->headline()->toString()),
+                'tone' => $this->statusTone($this->statusValue($item->status)),
                 'sort_at' => $item->updated_at ?? $item->created_at,
             ]);
     }
@@ -387,8 +387,8 @@ class UserHomeCommandCenterService
                 'label' => __('Kasbon'),
                 'description' => 'Rp '.number_format((float) $item->amount, 0, ',', '.'),
                 'href' => route('my-kasbon'),
-                'status' => __(str((string) $item->status)->headline()->toString()),
-                'tone' => $this->statusTone((string) $item->status),
+                'status' => __(str($this->statusValue($item->status))->headline()->toString()),
+                'tone' => $this->statusTone($this->statusValue($item->status)),
                 'sort_at' => $item->updated_at ?? $item->created_at,
             ]);
     }
@@ -404,8 +404,8 @@ class UserHomeCommandCenterService
                 'label' => __('WFH'),
                 'description' => $item->date?->translatedFormat('d M Y') ?? __('No date'),
                 'href' => route('wfh-requests'),
-                'status' => __(str((string) $item->status)->headline()->toString()),
-                'tone' => $this->statusTone((string) $item->status),
+                'status' => __(str($this->statusValue($item->status))->headline()->toString()),
+                'tone' => $this->statusTone($this->statusValue($item->status)),
                 'sort_at' => $item->updated_at ?? $item->created_at,
             ]);
     }
@@ -422,7 +422,7 @@ class UserHomeCommandCenterService
                 'description' => $item->attendance_date?->translatedFormat('d M Y') ?? __('No date'),
                 'href' => route('attendance-corrections'),
                 'status' => $item->statusLabel(),
-                'tone' => $this->statusTone((string) $item->status),
+                'tone' => $this->statusTone($this->statusValue($item->status)),
                 'sort_at' => $item->updated_at ?? $item->created_at,
             ]);
     }
@@ -439,9 +439,14 @@ class UserHomeCommandCenterService
                 'description' => $item->documentTypeLabel(),
                 'href' => route('document-requests'),
                 'status' => $item->statusLabel(),
-                'tone' => $this->statusTone((string) $item->status),
+                'tone' => $this->statusTone($this->statusValue($item->status)),
                 'sort_at' => $item->updated_at ?? $item->created_at,
             ]);
+    }
+
+    private function statusValue(mixed $status): string
+    {
+        return $status instanceof \BackedEnum ? $status->value : (string) $status;
     }
 
     private function statusTone(string $status): string

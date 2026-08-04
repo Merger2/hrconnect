@@ -131,7 +131,7 @@
                                     </div>
                                 @else
                                     <x-admin.status-badge :tone="$overtime->status === 'approved' ? 'success' : 'danger'" pill="true">
-                                        {{ __(ucfirst($overtime->status)) }}
+                                        {{ __(ucfirst($overtime->status?->value ?? $overtime->status)) }}
                                     </x-admin.status-badge>
                                     @if ($overtime->approvedBy)
                                         <span class="text-[10px] text-gray-400">{{ __('by') }}

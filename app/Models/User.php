@@ -172,7 +172,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     }
 
     // Method preferredAdminRouteName (Added based on PasPapan)
-    public function preferredAdminRouteName(): string
+    public function preferredAdminRouteName(): ?string
     {
         $candidates = [
             'viewAdminDashboard' => 'admin.dashboard',
@@ -181,6 +181,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'viewEmployees' => 'admin.employees',
             'manageCashAdvances' => 'admin.manage-kasbon',
             'viewAdminAppraisals' => 'admin.appraisals',
+            'viewAdminSettings' => 'admin.settings',
         ];
 
         foreach ($candidates as $ability => $routeName) {
@@ -192,7 +193,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return match ($this->group) {
             'superadmin' => 'admin.dashboard',
             'admin' => 'admin.dashboard',
-            default => 'home',
+            default => null,
         };
     }
 

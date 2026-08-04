@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\ImportExport;
 
+use App\Enums\EducationLevel;
 use App\Models\Attendance;
 use App\Models\Division;
-use App\Models\Education;
 use App\Models\ImportExportRun;
 use App\Models\JobTitle;
 use App\Support\ImportExportRunService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Component as LivewireComponent;
@@ -67,7 +68,10 @@ final class AttendanceImportExport extends LivewireComponent
             'attendances' => $attendances,
             'divisions' => Division::orderBy('name')->get(['id', 'name']),
             'jobTitles' => JobTitle::orderBy('name')->get(['id', 'name']),
-            'educations' => Education::orderBy('name')->get(['id', 'name']),
+            'educations' => collect(EducationLevel::cases())->map(fn (EducationLevel $level) => (object) [
+                'id' => $level->value,
+                'name' => $level->label(),
+            ]),
             'recentRuns' => ImportExportRun::query()
                 ->where('resource', 'attendance')
                 ->where('requested_by_user_id', auth()->id())
@@ -95,7 +99,7 @@ final class AttendanceImportExport extends LivewireComponent
             'end_date' => 'required|date|after_or_equal:start_date',
             'division' => ['nullable', 'integer'],
             'job_title' => ['nullable', 'integer'],
-            'education' => ['nullable', 'integer'],
+            'education' => ['nullable', Rule::in(array_column(EducationLevel::cases(), 'value'))],
         ]);
 
         $run = app(ImportExportRunService::class)->queueAttendanceExport(auth()->user(), [
@@ -139,7 +143,7 @@ final class AttendanceImportExport extends LivewireComponent
             ->whereBetween('date', [$this->start_date, $this->end_date])
             ->when($this->division, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('division_id', $v)))
             ->when($this->job_title, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('job_title_id', $v)))
-            ->when($this->education, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('education_id', $v)))
+            ->when($this->education, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('education_level', $v)))
             ->orderBy('date', 'desc');
     }
 }

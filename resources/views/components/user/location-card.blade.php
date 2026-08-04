@@ -109,8 +109,9 @@
                 this.branchName = this.$wire.branchName || '';
                 this.calcDistance();
 
-                // Watch Livewire props for reactive updates
-                this.$watch('$wire.latitude', (val) => {
+                // Watch Livewire props for reactive updates.
+                // NB: pakai $wire.$watch (Livewire), bukan Alpine $watch('$wire.x') yang tidak pernah fire.
+                this.$wire.$watch('latitude', (val) => {
                     const parsed = this.safeFloat(val);
                     if (parsed !== null && parsed !== this.lat) {
                         this.lat = parsed;
@@ -118,7 +119,7 @@
                         this.updateMap();
                     }
                 });
-                this.$watch('$wire.longitude', (val) => {
+                this.$wire.$watch('longitude', (val) => {
                     const parsed = this.safeFloat(val);
                     if (parsed !== null && parsed !== this.lng) {
                         this.lng = parsed;

@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Division;
+use App\Models\JobLevel;
+use App\Models\JobTitle;
 use App\Models\Position;
 use Illuminate\Database\Seeder;
 
@@ -74,6 +76,41 @@ class CompanyAndDivisionSeeder extends Seeder
             );
         }
 
-        $this->command?->info("Company seeded: {$company->name} with ".count($divisions).' divisions and '.count($positions).' positions');
+        $jobLevels = [
+            ['name' => 'Top Management', 'rank' => 1],
+            ['name' => 'Managerial', 'rank' => 2],
+            ['name' => 'Senior', 'rank' => 3],
+            ['name' => 'Officer', 'rank' => 4],
+            ['name' => 'Staff', 'rank' => 5],
+        ];
+
+        foreach ($jobLevels as $level) {
+            JobLevel::firstOrCreate(
+                ['name' => $level['name']],
+                $level
+            );
+        }
+
+        $jobTitles = [
+            ['name' => 'Head', 'job_level' => 'Top Management'],
+            ['name' => 'Manager', 'job_level' => 'Managerial'],
+            ['name' => 'Senior', 'job_level' => 'Senior'],
+            ['name' => 'Officer', 'job_level' => 'Officer'],
+            ['name' => 'Staff', 'job_level' => 'Staff'],
+        ];
+
+        foreach ($jobTitles as $title) {
+            $jobLevel = JobLevel::where('name', $title['job_level'])->firstOrFail();
+
+            JobTitle::firstOrCreate(
+                ['name' => $title['name']],
+                [
+                    'job_level_id' => $jobLevel->id,
+                    'is_active' => true,
+                ]
+            );
+        }
+
+        $this->command?->info('Company seeded: '.$company->name.' with '.count($divisions).' divisions, '.count($positions).' positions and '.count($jobTitles).' job titles');
     }
 }

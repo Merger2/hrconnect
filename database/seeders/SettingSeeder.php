@@ -26,13 +26,13 @@ class SettingSeeder extends Seeder
 
         // Branding settings — also used by MailBranding, payslip PDF, and email templates
         Setting::updateOrCreate(['key' => 'app.company_name'], [
-            'value' => config('app.name', 'HRConnect Enterprise'),
+            'value' => 'PT Daya Cipta Mandiri Solusi',
             'group' => 'general',
             'type' => 'text',
             'description' => 'Nama perusahaan untuk tampilan di email, payslip, dan dokumen',
         ]);
         Setting::updateOrCreate(['key' => 'app.company_address'], [
-            'value' => '',
+            'value' => 'Jl. Pegambiran No.292 B, RT.15/RW.8, Rawamangun, Kec. Pulo Gadung, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13220',
             'group' => 'general',
             'type' => 'textarea',
             'description' => 'Alamat perusahaan',

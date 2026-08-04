@@ -2,7 +2,14 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Attendance;
+use App\Models\AttendanceCorrection;
+use App\Models\Employee;
+use App\Models\Schedule;
 use App\Models\Shift;
+use App\Models\ShiftSchedule;
+use App\Models\ShiftSwapRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
@@ -60,7 +67,24 @@ class ShiftForm extends Form
     public function delete()
     {
         Gate::authorize('manageMasterData');
-        $this->shift->delete();
+
+        DB::transaction(function () {
+            // Detach referensi ke shift yang di-soft-delete supaya tidak menggantung
+            // (MasterDataDeleteFlowTest: attendances.shift_id harus null).
+            Attendance::query()->where('shift_id', $this->shift->id)->update(['shift_id' => null]);
+            Employee::query()->where('shift_id', $this->shift->id)->update(['shift_id' => null]);
+            AttendanceCorrection::query()->where('requested_shift_id', $this->shift->id)->update(['requested_shift_id' => null]);
+            ShiftSwapRequest::query()->where('current_shift_id', $this->shift->id)->update(['current_shift_id' => null]);
+            ShiftSwapRequest::query()->where('requested_shift_id', $this->shift->id)->update(['requested_shift_id' => null]);
+
+            // schedules dihapus (ekspektasi MasterDataDeleteFlowTest), dan
+            // shift_schedules.shift_id NOT NULL + restrictOnDelete → wajib dihapus.
+            Schedule::query()->where('shift_id', $this->shift->id)->delete();
+            ShiftSchedule::query()->where('shift_id', $this->shift->id)->delete();
+
+            $this->shift->delete();
+        });
+
         $this->reset();
     }
 

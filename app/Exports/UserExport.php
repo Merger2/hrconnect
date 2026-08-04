@@ -53,7 +53,7 @@ class UserExport implements FromCollection, WithColumnWidths, WithHeadings, With
             $user->getRoleNames()->implode(', '),
             $employee->employee_number ?? '-',
             $employee->full_name ?? '-',
-            $employee->department?->name ?? '-',
+            $employee->division?->name ?? '-',
             $employee->position?->name ?? '-',
             $employee->status ?? '-',
             $user->email_verified_at ? 'Yes' : 'No',

@@ -45,19 +45,19 @@
                         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <x-admin.tables.th>{{ __('Employee') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Period') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Net Salary') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Status') }}</x-admin.tables.th>
-                                    <x-admin.tables.th class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Employee') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Period') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Net Salary') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Status') }}</th>
+                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 text-left sm:pr-6">
                                         <span class="sr-only">Actions</span>
-                                    </x-admin.tables.th>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-900">
                                 @forelse ($payrolls as $payroll)
                                     <tr>
-                                        <x-admin.tables.td>
+                                        <td class="px-4 py-3">
                                             <div class="flex items-center">
                                                 <div class="h-10 w-10 flex-shrink-0">
                                                     <img class="h-10 w-10 rounded-full object-cover" src="{{ $payroll->employee->user->profile_photo_url }}" alt="">
@@ -67,25 +67,25 @@
                                                     <div class="text-gray-500">{{ $payroll->employee->employee_number }}</div>
                                                 </div>
                                             </div>
-                                        </x-admin.tables.td>
-                                        <x-admin.tables.td>{{ $payroll->period }}</x-admin.tables.td>
-                                        <x-admin.tables.td>
+                                        </td>
+                                        <td class="px-4 py-3">{{ $payroll->period }}</td>
+                                        <td class="px-4 py-3">
                                             <span class="font-mono">{{ money($payroll->net_salary, 'IDR') }}</span>
-                                        </x-admin.tables.td>
-                                        <x-admin.tables.td>
-                                            <x-admin.badge :variant="$payroll->status->color()">{{ $payroll->status->label() }}</x-admin.badge>
-                                        </x-admin.tables.td>
-                                        <x-admin.tables.td-actions>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <x-admin.status-badge :tone="match ($payroll->status->color()) { 'zinc' => 'neutral', 'emerald' => 'success', default => $payroll->status->color() }">{{ $payroll->status->label() }}</x-admin.status-badge>
+                                        </td>
+                                        <td class="relative whitespace-nowrap py-3.5 pl-3 pr-4 text-right sm:pr-6">
                                             <x-actions.button wire:click="openAdjustmentModal({{ $payroll->id }})">
                                                 {{ __('Adjust') }}
                                             </x-actions.button>
-                                        </x-admin.tables.td-actions>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <x-admin.tables.td colspan="5">
+                                        <td colspan="5" class="px-4 py-3">
                                             <x-admin.empty-state :title="__('No Payroll Data')" :description="__('No payroll records found for the selected period.')" />
-                                        </x-admin.tables.td>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -109,31 +109,31 @@
                          <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <x-admin.tables.th>{{ __('Employee') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Amount') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Reason') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Created By') }}</x-admin.tables.th>
-                                    <x-admin.tables.th>{{ __('Date') }}</x-admin.tables.th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Employee') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Amount') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Reason') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Created By') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-left">{{ __('Date') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-900">
                                 @forelse ($adjustments as $adjustment)
                                     <tr>
-                                        <x-admin.tables.td>{{ $adjustment->payroll->employee->full_name }}</x-admin.tables.td>
-                                        <x-admin.tables.td>
+                                        <td class="px-4 py-3">{{ $adjustment->payroll->employee->full_name }}</td>
+                                        <td class="px-4 py-3">
                                             <span class="font-mono {{ $adjustment->kind === 'allowance' ? 'text-green-600' : 'text-red-600' }}">
                                                 {{ $adjustment->kind === 'allowance' ? '+' : '-' }} {{ money($adjustment->amount, 'IDR') }}
                                             </span>
-                                        </x-admin.tables.td>
-                                        <x-admin.tables.td>{{ $adjustment->reason }}</x-admin.tables.td>
-                                        <x-admin.tables.td>{{ $adjustment->creator->name }}</x-admin.tables.td>
-                                        <x-admin.tables.td>{{ $adjustment->created_at->translatedFormat('d M Y') }}</x-admin.tables.td>
+                                        </td>
+                                        <td class="px-4 py-3">{{ $adjustment->reason }}</td>
+                                        <td class="px-4 py-3">{{ $adjustment->creator->name }}</td>
+                                        <td class="px-4 py-3">{{ $adjustment->created_at->translatedFormat('d M Y') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <x-admin.tables.td colspan="5">
+                                        <td colspan="5" class="px-4 py-3">
                                             <x-admin.empty-state :title="__('No Adjustments')" :description="__('No recent payroll adjustments found.')" />
-                                        </x-admin.tables.td>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -151,7 +151,7 @@
     </x-admin.page-shell>
 
     {{-- Adjustment Modal --}}
-    <x-admin.modal-dialog wire:model="showAdjustmentModal" max-width="lg">
+    <x-overlays.dialog-modal wire:model="showAdjustmentModal" maxWidth="lg">
         <x-slot name="title">{{ __('Add Payroll Adjustment') }}</x-slot>
 
         <x-slot name="content">
@@ -185,5 +185,5 @@
             <x-actions.secondary-button wire:click="closeAdjustmentModal">{{ __('Cancel') }}</x-actions.secondary-button>
             <x-actions.button wire:click="saveAdjustment" class="ml-3">{{ __('Save Adjustment') }}</x-actions.button>
         </x-slot>
-    </x-admin.modal-dialog>
+    </x-overlays.dialog-modal>
 </div>

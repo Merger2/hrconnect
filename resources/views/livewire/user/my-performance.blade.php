@@ -28,7 +28,7 @@
                     <div class="performance-hero__content">
                         <p class="performance-eyebrow">{{ __('Performance') }}</p>
                         <h2 class="performance-hero__title">
-                            {{ $latestAppraisal ? \Carbon\Carbon::createFromDate($latestAppraisal->period_year, $latestAppraisal->period_month, 1)->translatedFormat('F Y') : __('No review period yet') }}
+                            {{ $latestAppraisal ? \Carbon\Carbon::createFromFormat('Y-m', $latestAppraisal->period)->translatedFormat('F Y') : __('No review period yet') }}
                         </h2>
                         <p class="performance-hero__copy">
                             {{ __('Track review progress, self assessment, 1-on-1 schedule, and final score from one place.') }}
@@ -68,7 +68,7 @@
                     <div class="performance-timeline">
                         @foreach($appraisals as $appraisal)
                             @php
-                                $period = \Carbon\Carbon::createFromDate($appraisal->period_year, $appraisal->period_month, 1);
+                                $period = \Carbon\Carbon::createFromFormat('Y-m', $appraisal->period);
                                 $statusTone = match ($appraisal->status) {
                                     'completed' => 'performance-status--success',
                                     'manager_review', '1on1_scheduled' => 'performance-status--info',

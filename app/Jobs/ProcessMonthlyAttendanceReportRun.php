@@ -46,7 +46,7 @@ class ProcessMonthlyAttendanceReportRun implements ShouldQueue
     private function exportData(ImportExportRun $run, array $meta): array
     {
         $query = Attendance::query()
-            ->with(['employee.user', 'employee.position', 'employee.department'])
+            ->with(['employee.user', 'employee.position', 'employee.division'])
             ->orderBy('date', 'desc');
 
         if (! empty($meta['month'])) {

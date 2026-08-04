@@ -43,14 +43,14 @@ class EmployeeObserver
             ActivityLogDetail::create([
                 'activity_log_id' => $activityLog->id,
                 'entity_type' => Employee::class,
-                'entity_id' => (string) $employee->id,
+                'entity_id' => $employee->id,
                 'field' => $field,
                 'old_value' => ['value' => $oldValue],
                 'new_value' => ['value' => $newValue],
                 'integrity_hash' => hash_hmac('sha256', json_encode([
                     'activity_log_id' => $activityLog->id,
                     'entity_type' => Employee::class,
-                    'entity_id' => (string) $employee->id,
+                    'entity_id' => $employee->id,
                     'field' => $field,
                     'old_value' => ['value' => $oldValue],
                     'new_value' => ['value' => $newValue],

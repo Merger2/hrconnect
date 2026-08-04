@@ -1,16 +1,31 @@
 # AGENTS.md — HRConnect
 
-**Stack:** Laravel 13 / PHP 8.5+ / PostgreSQL 15+ (pgvector, pg_trgm, pgcrypto) / Livewire 4 / Tailwind v4 / Alpine.js / PWA  
+**Stack:** Laravel 13 / PHP 8.5+ / PostgreSQL 15+ (pgvector, pg_trgm, pgcrypto) / Livewire 4 / Tailwind v4 / Alpine.js / PWA
 **Dev:** Fikih (solo) — HRIS enterprise: face recognition, GPS geofencing, payroll PPh21, RAG KB
+**Perusahaan utama:** PT Daya Cipta Mandiri Solusi — Jl. Pegambiran No.292 B, RT.15/RW.8, Rawamangun, Kec. Pulo Gadung, Kota Jakarta Timur, DKI Jakarta 13220 (branding: `app.company_name`/`app.company_address` di tabel `settings`; jangan ganti ke nama lain)
+
+---
+
+## 📌 Product Scope & PRD (Release 1)
+
+**`PRD.md` (root) adalah scope contract.** Baca sebelum implement fitur/change apa pun:
+
+- **Hanya 7 modul Release 1:** master data karyawan, absensi & jadwal, cuti & approval, payroll & payslip, dokumen & HR checklist, reports & import/export, AI Knowledge Base.
+- **Change-control gate:** selama Release 1 belum lolos production gate, **jangan tambah fitur di luar 7 modul** (recruitment, training, performance review, marketplace, dll = out of scope). Bug/security boleh diperbaiki; fitur baru tidak.
+- **Production gate = 0 open P0/P1** (P0: data leak/rusak, payroll salah, gagal login; P1: fitur core mati, queue/mail mati, backup gagal, AI silent failure).
+- **No silent degradation / no placeholder:** tiap kegagalan (AI, queue, embedding, import) harus terlihat di log + UI. Jangan jawab AI dengan respons palsu/fake embedding.
+- **AI KB hard gate:** embedding **768D nyata** (jangan fake/random), **citation pada setiap jawaban**, timeout/retry/cost limit, eval dataset ≥20 Q&A, kualitas ≥90% relevan.
+- **Policy tetap:** absensi face-only (tanpa PIN fallback), geofence radius 50 m + toleransi 15 menit, approval default Manager → HR, payroll gross bulanan + PPh21 TER, kalender kerja 5 hari, RPO 24 jam / RTO 4 jam.
+- **Non-goal:** SaaS multi-tenant, layer edition/license, feature-lock baru di luar yang sudah ada.
 
 ---
 
 ## Status & Progress
 
-- **~104 features** · **89 Livewire components** · **92 models** · **72 controllers**
+- **92 Livewire components** · **101 models** · **72 controllers** (~104 features)
 - Progress/status: `docs/PROGRESS.md` + `docs/FEATURE-INVENTORY.md` (di-update per session)
-- Audit terbaru: `AUDIT-2026-07-30.md` (root) — jangan re-fix issue yang sudah tercatat
-- ⚠️ **`docs/**`, `AUDIT-*.md` (root), `.audit-cache/` — gitignored/untracked.** Isi lokal doang: jangan commit, jangan harap ada di CI/checkout fresh.
+- Audit terbaru: `AUDIT-2026-07-30.md` (root, git-tracked) — jangan re-fix issue yang sudah tercatat
+- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon` — gitignored, **local-only**. `PRD.md`, `tests/`, `.github/` — **untracked** (belum pernah di-commit): jangan commit, jangan harap ada di CI/checkout fresh. `AUDIT-*.md` root TETAP di-commit; `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang); `phpunit.pgsql.xml` sedang staged.
 
 ---
 
@@ -18,15 +33,17 @@
 
 | Perintah | Fungsi |
 |----------|--------|
+| `composer run setup` | Bootstrap penuh: install deps, copy `.env`, `key:generate`, migrate, npm build |
 | `composer run dev` | Server + queue + logs + Vite concurrently |
-| `composer run test` | `config:clear` → `lint:check` → `php artisan test` |
-| `composer run ci:check` | Alias `composer run test` (script-nya sama persis) |
+| `composer run test` | `config:clear` → `lint:check` → `php artisan test` (butuh pgsql lokal: DB `hris_testing`, user `postgres`/`password`) |
+| `composer run ci:check` | `disableProcessTimeout` + `@test` (tanpa `config:clear`/lint — beda tipis dari `test`) |
 | `composer run lint` | `pint --parallel` (auto-fix) |
 | `composer run lint:check` | `pint --parallel --test` (dry-run) |
 | `vendor/bin/pint --dirty --format agent` | **Wajib** setelah tiap perubahan PHP |
 | `vendor/bin/pest` | Direct test runner (bypasses config:clear — lebih cepat buat iterasi) |
 | `php artisan test --compact --filter=X` | Test spesifik (filter sesuai modul yang diubah) |
-| `vendor/bin/phpstan analyse` | PHPStan level 5 (scans `app/`, baseline di `phpstan-baseline.neon`) |
+| `composer run test:pgsql` | `@php artisan test --configuration=phpunit.pgsql.xml` (dipakai CI job postgres) |
+| `vendor/bin/phpstan analyse` | PHPStan level 5 (scans `app/`, baseline di `phpstan-baseline.neon`) — ⚠️ kedua config gitignored, hilang di checkout fresh |
 | `npx playwright test --project=chromium-employee` | E2E role employee |
 | `npx playwright test` | Full E2E suite (semua project) |
 | `npm run test:e2e:headed` / `:debug` / `:report` | Playwright headed / debug / HTML report |
@@ -38,10 +55,12 @@
 ## Arsitektur
 
 - `routes/web.php` require **6 file**: `web/system.php`, `web/files.php`, `web/user.php`, `web/payroll.php`, `web/admin.php` + `routes/knowledge-base.php` (prefix route `knowledge-base.`). Semua route didefinisikan di file-file ini, bukan inline di `web.php`.
+- `routes/api.php` — REST API (middleware `auth:sanctum` + `throttle:api`).
 - `app/Livewire/` → komponen. `app/Services/` → business logic. `app/Support/` → helper. `app/Domain/` → domain logic.
+- `scripts/` — helper dev (erd-generator, check-blade-js-syntax, check-enterprise-boundary, screenshot dll).
 - `app/helpers.php` — auto-loaded via `composer.json` `files`.
 - `design.md` — locked design system. **Baca sebelum ngerjain UI.**
-- `CLAUDE.md` — Laravel Boost guidelines (aktif via MCP `laravel-boost` di `opencode.json`). Untuk hal Laravel generik, ikuti ini.
+- `CLAUDE.md` / `GEMINI.md` — Laravel Boost guidelines (aktif via MCP `laravel-boost` di `opencode.json`). Untuk hal Laravel generik, ikuti ini.
 
 ---
 
@@ -91,7 +110,7 @@ Tailwind v4 JIT tree-shake utility class yang cuma dipanggil di `@apply` dalam C
 }
 ```
 
-`resources/css/app.css` hybrid HRConnect + PasPapan (~6700 baris). Kalo nambah style, taro di `@layer components` yang udah ada.
+`resources/css/app.css` hybrid HRConnect + PasPapan (~6200 baris). Kalo nambah style, taro di `@layer components` yang udah ada (mulai baris ~128).
 
 ---
 
@@ -99,8 +118,8 @@ Tailwind v4 JIT tree-shake utility class yang cuma dipanggil di `@apply` dalam C
 
 - `$wire` di Alpine `init()` → pake **`this.$wire`**, bukan `$wire`
 - `config/livewire.php`: `max_components` = 200, `max_size` = 5MB
-- `@stack('scripts')` WAJIB ada di `layouts/app.blade.php` — kalo gak, semua `@push('scripts')` gak ke-render (face-enrollment JS dll)
-- `ClockInAction` dulu orphaned → skrg di route `/scan`
+- `@stack('scripts')` WAJIB ada di `layouts/app.blade.php` (baris ~120) — kalo gak, semua `@push('scripts')` gak ke-render (face-enrollment JS dll)
+- `ClockInAction` → `app/Livewire/User/ClockInAction.php`, route `/scan` (`web/user.php`)
 
 ### ⚠️ Alpine $watch dengan $wire
 
@@ -126,7 +145,7 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 
 ## ⚠️ Fixed Bugs (jangan di-fix ulang)
 
-1. **`CommunityService::registerFace()`** — pake `employee_id` + `embedding`, bukan `user_id` + `descriptor`. Strips 129→128 dimensi.
+1. **`CommunityService::registerFace()`** (`app/Services/Attendance/CommunityService.php`) — pake `employee_id` + `embedding`, bukan `user_id` + `descriptor`. Strips 129→128 dimensi.
 2. **Face descriptor 129 elements** — quality score di index[0] harus di-`array_slice()` sebelum disimpan. Kolom `face_descriptors.embedding` adalah `vector(128)`.
 3. **Fortify config** — butuh `Features::updateProfileInformation()` dan `Features::updatePasswords()` di `config/fortify.php` `features` array.
 4. **KB Chat sendMessage** — Alpine crash `$watch('$wire.messages', ...)` → `$wire.$watch('messages', ...)`. `canSend()` DOM ref → `$wire.question`.
@@ -140,28 +159,31 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 
 ## E2E Playwright
 
-- Auth state pake `storageState` (5 role states): employee, hr, manager, finance, admin — di `tests/e2e/.auth/`
-- Employee creds: `employee@hrconnect.test` / `password`
-- E2eTestSeeder bikin user: `E2eTestSeeder.php`
-- Bottom nav: Beranda, Jadwal, Absen (`/scan`), Tasks, Profil
-- Auth setup di `auth.setup.ts`; konfig di `playwright.config.js` (camera + geolocation permissions)
-- Project lain: `chromium-hr`, `chromium-manager`, `chromium-finance`, `chromium-admin`, `chromium-audit`, `chromium-pwa`, `chromium-ux`, `chromium-profile`, `chromium-auth` — pilih sesuai role yang disentuh
+- Auth state pake `storageState` (5 role states: employee, hr, manager, finance, admin) di `tests/e2e/.auth/`.
+- Employee creds: `employee@hrconnect.test` / `password` (dibuat `E2eTestSeeder.php`).
+- ⚠️ `playwright.config.js` mereferensikan **`auth.setup.ts` yang TIDAK ADA di repo** — storage states `.auth/*.json` hasil generate lokal & **gitignored**. Jangan hapus `.auth/` (semua project E2E butuh state-nya) dan jangan heran `setup` project tidak match file apa pun.
+- Bottom nav: Beranda, Jadwal, Absen (`/scan`), Tasks, Profil.
+- Project lain: `chromium-hr`, `chromium-manager`, `chromium-finance`, `chromium-admin`, `chromium-audit`, `chromium-pwa`, `chromium-ux`, `chromium-profile`, `chromium-auth` — pilih sesuai role yang disentuh. Semua butuh `permissions: ['camera','geolocation']` (sudah di config).
 
 ---
 
 ## Env Quirks
 
 - `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`
-- `CIPHERSWEET_KEY` (64-char hex) **wajib**. Test: `0123456789abcdef0123456789abcdef`.
+- `CIPHERSWEET_KEY` **wajib** (hex; generate via `php artisan ciphersweet:generate-key`). Nilai test/dev di semua config: `0123456789abcdef0123456789abcdef` (phpunit.xml, phpunit.pgsql.xml, .env.testing).
 - `GEMINI_API_KEY` prefer dari `GOOGLE_AI_API_KEY`; model RAG di `.env.example`: `GEMINI_MODEL=gemini-2.5-flash`, embedding `text-embedding-004` 768D.
-- `docs/**`, `.audit-cache/`, `AUDIT-*.md` root, `/.agents/`, `/.claude/` — gitignored.
+- ⚠️ `package.json` `overrides` pin **`@tensorflow/tfjs-core` ke 2.4.0** — jangan upgrade (face-api.js butuh API v2).
+- `docs/**`, `/.agents/`, `/.claude/`, `/.opencode/`, `phpstan.*` — gitignored.
 
 ---
 
 ## Testing Quirks
 
-- **`phpunit.xml` hardcode PostgreSQL** (`DB_DATABASE=hris_payroll`, `postgres`/`password`) — `composer run test` butuh pgsql lokal jalan. Tidak ada `.env.testing` lokal.
-- `phpunit.pgsql.xml` cuma ada di CI. CI punya 2 job: sqlite + postgres (extension `vector`, `pg_trgm`, `pgcrypto` wajib dibuat).
+- **`phpunit.xml` hardcode PostgreSQL** (`DB_DATABASE=hris_testing`, `postgres`/`password`) — `composer run test` butuh pgsql lokal jalan dengan DB+user itu.
+- `phpunit.pgsql.xml` = copy identik `phpunit.xml` (sama-sama `hris_testing`/`postgres`/`password`), dipakai job postgres di CI (`tests.yml`).
+- **`tests/bootstrap.php` JANGAN dihapus** — force env testing ke `putenv`+`$_ENV`+`$_SERVER`. PHPUnit `<env force="true">` cuma nulis `$_ENV`, host env (mis. `DB_DATABASE` di shell) menang dan bisa bikin suite nyasar ke dev DB.
+- `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang). DB `hris_testing`, user `hrconnect_app`.
+- ⚠️ CI (`tests.yml`, untracked): job sqlite jalanin `./vendor/bin/pest` padahal phpunit.xml tetap pgsql; job postgres bikin DB `hrconnect_testing` padahal config ngacu `hris_testing` — **mismatch laten**, belum bisa hijau sampai `tests/` + `.github/` di-commit.
 - `vendor/bin/pest` langsung jalan tanpa `config:clear` prefix (lebih cepet buat iterasi).
 - **Feature lock middleware** — pake `middleware('feature.lock:{module},{user|gate:ability},{fallback_route}')` (contoh: `cash_advance`, `assets`, `appraisal`).
 
@@ -178,6 +200,7 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 | **spatie/laravel-backup** | Automated backups |
 | **sentry/sentry-laravel** | Error tracking |
 | **laravel/ai** | AI SDK (RAG KB, agents — lihat skill `ai-sdk-development`) |
+| **maatwebsite/excel** (4.x-dev) + openspout | Import/export module (modul 6) |
 
 ---
 

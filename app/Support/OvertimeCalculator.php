@@ -41,8 +41,11 @@ class OvertimeCalculator
     public function hasOverlap(Collection $existingOvertimes, Carbon $start, Carbon $end): bool
     {
         foreach ($existingOvertimes as $existing) {
-            $existingStart = Carbon::parse($existing->start_time);
-            $existingEnd = Carbon::parse($existing->end_time);
+            // Kolom start_time/end_time bertipe `time` — tanpa tanggal. Gabungkan
+            // dengan tanggal `date` dari record biar perbandingan interval benar
+            // (kalau tidak, Carbon::parse('18:00:00') memakai tanggal hari ini).
+            $existingStart = Carbon::parse($existing->date)->setTimeFromTimeString((string) $existing->start_time);
+            $existingEnd = Carbon::parse($existing->date)->setTimeFromTimeString((string) $existing->end_time);
 
             if ($start->lessThan($existingEnd) && $end->greaterThan($existingStart)) {
                 return true;

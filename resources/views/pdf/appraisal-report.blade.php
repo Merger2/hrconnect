@@ -1,7 +1,7 @@
 @php
     $logoSrc = \App\Support\MailBranding::logoPdfSource();
     $companyAddress = \App\Models\Setting::getValue('app.company_address', '');
-    $periodLabel = \Carbon\Carbon::createFromDate((int) $appraisal->period_year, (int) $appraisal->period_month, 1)->translatedFormat('F Y');
+    $periodLabel = \Carbon\Carbon::createFromFormat('Y-m', $appraisal->period)->translatedFormat('F Y');
     $documentId = 'APR-'.str_pad((string) $appraisal->id, 5, '0', STR_PAD_LEFT);
     $scoreClass = fn ($score) => (float) $score >= 80 ? 'score-good' : ((float) $score >= 60 ? 'score-watch' : 'score-risk');
     $gradeLabel = function ($score): string {

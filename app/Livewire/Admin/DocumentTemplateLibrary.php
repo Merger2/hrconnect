@@ -23,7 +23,7 @@ class DocumentTemplateLibrary extends Component
 
     public function boot(): void
     {
-        Gate::authorize('manageDocumentTemplates');
+        Gate::authorize('view_admin_document_requests');
     }
 
     public function render(DocumentTemplateRenderService $renderer): View

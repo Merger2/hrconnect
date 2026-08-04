@@ -224,7 +224,13 @@ trait HasRolePermissions
                     // Payroll/payslip sangat sensitif — roleless admin tidak
                     // otomatis berhak melihat data gaji orang lain.
                     && ! str_contains($value, 'payroll')
-                    && ! str_contains($value, 'payslip'),
+                    && ! str_contains($value, 'payslip')
+                    // Operasional sensitif (custom forms & operations workspace)
+                    // juga tidak boleh bocor ke roleless admin via fallback.
+                    && ! in_array($value, [
+                        'view_custom_forms',
+                        'view_operations_workspace',
+                    ], true),
             ));
         }
 

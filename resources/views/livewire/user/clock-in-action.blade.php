@@ -477,7 +477,7 @@
     {{-- ⚡ Face capture + timeout hidden triggers --}}
     <div x-data="{}"
          x-init="
-            $watch('$wire.isLoading', val => {
+            this.$wire.$watch('isLoading', val => {
                 if (val === false) scrollTo({ top: 0, behavior: 'smooth' });
             });
          "
@@ -565,9 +565,9 @@
                     this.updateShiftEnd();
 
                     // 2. Watch attendance changes for reactive countdown
-                    this.$watch('$wire.attendance', () => this.updateShiftEnd(), { deep: true });
-                    this.$watch('$wire.todayShiftSummary', () => this.updateShiftEnd(), { deep: true });
-                    this.$watch('$wire.hasApprovedOvertime', (val) => {
+                    this.$wire.$watch('attendance', () => this.updateShiftEnd());
+                    this.$wire.$watch('todayShiftSummary', () => this.updateShiftEnd());
+                    this.$wire.$watch('hasApprovedOvertime', (val) => {
                         this.hasApprovedOvertime = val;
                     });
 

@@ -54,7 +54,7 @@ class Project extends Model
 
     public function branch(): BelongsTo
     {
-        return $this->belongsTo(Branch::class, 'branch_id');
+        return $this->belongsTo(CompanyBranch::class, 'branch_id');
     }
 
     public function manager(): BelongsTo

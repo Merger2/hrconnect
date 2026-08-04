@@ -98,7 +98,7 @@
                                         {{ $announcement->title }}
                                     </h3>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                        {{ __('By') }} {{ $announcement->creator?->name ?? 'System' }} &bull; {{ $announcement->publish_date->translatedFormat('d M Y') }}
+                                        {{ __('By') }} {{ $announcement->creator?->name ?? 'System' }} &bull; {{ $announcement->published_at?->translatedFormat('d M Y') ?? __('Draft') }}
                                     </p>
                                 </div>
                                 <div class="shrink-0">

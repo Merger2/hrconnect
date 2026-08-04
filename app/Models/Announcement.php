@@ -74,6 +74,7 @@ class Announcement extends Model
 
     public function scopeVisibleForUser($query, $userId)
     {
-        return $query->visible();
+        return $query->visible()
+            ->whereDoesntHave('dismissedByUsers', fn ($q) => $q->where('user_id', $userId));
     }
 }
