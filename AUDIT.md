@@ -66,6 +66,7 @@
 | 40 | **Golden test payroll 26/26 PASS** — harness disesuaikan schema fixture (nested bpjs, travelTo freeze, for-loop fix `range(1,0)`, assertEqualsWithDelta); angka referensi Claude tervalidasi terhadap kode nyata | ✅ |
 | 41 | Payroll bug ditemukan golden test: (a) ytd `sum()` pgsql → string vs `: float` = **TypeError Desember/terminasi 500** (cast float); (b) L606 denda kehadiran mengurangi dasar PPh21 — **bukan pengurang pajak** (PMK 168/2023), konsisten dgn annual true-up (hapus `- attendancePenalty`); (c) L441 `diffInMonths` Carbon 3 float → cast `(int)` konsisten calculatePesangon (kompensasi PKWT bulan penuh) | ✅ |
 | 42 | **Seeder demo konsolidasi PT DCMS** (M12) — company utama → `DKMS-2025` PT Daya Cipta Mandiri Solusi di 4 seeder (CompanyAndDivision, CompanySetting, CompanyEmployees, E2eTest, Branch, IntegrationSample); 4 seeder `PTDayaciptaMandiri*` duplikat dihapus; **terverifikasi `migrate:fresh --seed`**: 1 company PT DCMS, 56 employees, 1050 attendance, 31 KB + embeddings | ✅ |
+| 43 | **UI overlap bottom-nav (akibat nyata)** — `user-bottom-navigation` fixed ~4.15rem+safe-area, clearance 6.75rem hanya di home → **31/39 halaman user kontennya tertimpa nav**. Fix: clearance `padding-bottom: calc(var(--home-bottom-nav-height,6.75rem)+env(safe-area))` di `.user-page-shell` + override home (anti dobel). BUILD OK | ✅ |
 
 ---
 

@@ -583,9 +583,11 @@
     }
 
     .user-page-shell {
-        @apply pb-4 lg:pb-6;
         min-height: 100dvh;
         padding-top: max(1rem, calc(env(safe-area-inset-top) + 1rem));
+        /* FIX 2026-08-05: clearance untuk .user-bottom-navigation (fixed, ~4.15rem + safe-area).
+           31/39 halaman user tertimpa nav — clearance 6.75rem sebelumnya hanya di home. */
+        padding-bottom: calc(var(--home-bottom-nav-height, 6.75rem) + env(safe-area-inset-bottom));
     }
 
     body.platform-ios .user-page-shell {
@@ -1875,7 +1877,8 @@
 
     .user-home-content--command {
         @apply mt-6 space-y-3 sm:space-y-4;
-        padding-bottom: calc(var(--home-bottom-nav-height, 6.75rem) + env(safe-area-inset-bottom));
+        /* Clearance kini dari .user-page-shell — hindari dobel */
+        padding-bottom: 0;
     }
 
     .user-home-content--command .home-section--spaced {
