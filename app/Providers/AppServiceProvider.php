@@ -13,6 +13,7 @@ use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Payroll;
+use App\Models\Role;
 use App\Observers\AttendanceObserver;
 use App\Observers\BpjsConfigObserver;
 use App\Observers\CompanySettingObserver;
@@ -20,6 +21,7 @@ use App\Observers\EmployeeObserver;
 use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
 use App\Observers\PayrollObserver;
+use App\Observers\RoleObserver;
 use App\Services\Attendance\CommunityService;
 use App\Services\Attendance\GeofenceService;
 use App\Services\Audit\CommunityAuditService;
@@ -138,6 +140,7 @@ class AppServiceProvider extends ServiceProvider
         CompanySetting::observe(CompanySettingObserver::class);
         Leave::observe(LeaveObserver::class);
         Payroll::observe(PayrollObserver::class);
+        Role::observe(RoleObserver::class);
     }
 
     /**

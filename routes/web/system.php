@@ -23,18 +23,21 @@ Route::post('/_boost/browser-logs', fn () => response()->json(['status' => 'ok']
 Route::get('/test-error/{code}', TestErrorController::class)->whereNumber('code');
 Route::get('/reset-sw', ResetServiceWorkerController::class);
 
-Route::get('/__auth-debug', AuthDebugController::class)->middleware([
+// config('jetstream.auth_session') is null in this app; Route::middleware() does
+// not filter null entries (unlike RouteRegistrar groups), which would resolve
+// the empty string to a non-existent middleware class. Filter them explicitly.
+Route::get('/__auth-debug', AuthDebugController::class)->middleware(array_filter([
     'auth:sanctum',
     config('jetstream.auth_session'),
-]);
+]));
 
 Route::get('/__e2e-login', E2eLoginController::class);
 
-Route::post('/__e2e-document-upload', E2eDocumentUploadController::class)->middleware([
+Route::post('/__e2e-document-upload', E2eDocumentUploadController::class)->middleware(array_filter([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-]);
+]));
 
 Route::post('/email/verify-code', VerifyEmailCodeController::class)
     ->middleware(['auth', 'throttle:6,1'])

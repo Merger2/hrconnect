@@ -96,6 +96,7 @@ test('backup runs can require mfa for superadmins', function () {
 
     $superadmin->forceFill([
         'two_factor_secret' => encrypt('otp-secret'),
+        'two_factor_confirmed_at' => now(),
     ])->save();
 
     $backupRun = SystemBackupRun::create([

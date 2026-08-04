@@ -14,6 +14,15 @@ class EmployeeObserver
      */
     protected array $auditedFields = [
         'basic_salary',
+        'payslip_password',
+    ];
+
+    /**
+     * Field yang nilainya diredaksi di audit detail (secrets/PII).
+     * Disimpan sebagai {redacted: true} — nilai asli TIDAK pernah ditulis.
+     */
+    protected array $redactedFields = [
+        'payslip_password',
     ];
 
     public function updated(Employee $employee): void
@@ -37,23 +46,28 @@ class EmployeeObserver
         ]);
 
         foreach ($changed as $field) {
-            $oldValue = $employee->getOriginal($field);
-            $newValue = $employee->$field;
+            if (in_array($field, $this->redactedFields, true)) {
+                $oldValue = ['redacted' => true];
+                $newValue = ['redacted' => true];
+            } else {
+                $oldValue = ['value' => $employee->getOriginal($field)];
+                $newValue = ['value' => $employee->$field];
+            }
 
             ActivityLogDetail::create([
                 'activity_log_id' => $activityLog->id,
                 'entity_type' => Employee::class,
                 'entity_id' => $employee->id,
                 'field' => $field,
-                'old_value' => ['value' => $oldValue],
-                'new_value' => ['value' => $newValue],
+                'old_value' => $oldValue,
+                'new_value' => $newValue,
                 'integrity_hash' => hash_hmac('sha256', json_encode([
                     'activity_log_id' => $activityLog->id,
                     'entity_type' => Employee::class,
                     'entity_id' => $employee->id,
                     'field' => $field,
-                    'old_value' => ['value' => $oldValue],
-                    'new_value' => ['value' => $newValue],
+                    'old_value' => $oldValue,
+                    'new_value' => $newValue,
                 ], JSON_THROW_ON_ERROR), (string) config('app.key')),
             ]);
         }

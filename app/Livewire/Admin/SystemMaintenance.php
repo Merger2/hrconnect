@@ -2,13 +2,18 @@
 
 namespace App\Livewire\Admin;
 
+use App\Jobs\RunSystemBackup;
 use App\Models\SystemBackupRun;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Layout('layouts.app')]
 class SystemMaintenance extends Component
@@ -141,8 +146,154 @@ class SystemMaintenance extends Component
 
     public function queueDatabaseBackupJob(): void
     {
-        Artisan::call('backup:run', ['--only-db' => true]);
-        $this->dispatch('notify', message: __('Database backup queued.'));
+        if (! Gate::allows('create', SystemBackupRun::class)) {
+            $this->dispatch('error', message: __('You do not have permission to queue database backups.'));
+
+            return;
+        }
+
+        $backupRun = SystemBackupRun::create([
+            'type' => 'database',
+            'status' => 'queued',
+            'requested_by_user_id' => auth()->id(),
+            'queue' => 'maintenance',
+            'file_disk' => 'local',
+        ]);
+
+        RunSystemBackup::dispatch($backupRun->id);
+
+        $this->dispatch('success', message: __('Database backup queued.'));
+    }
+
+    public function queueApplicationBackupJob(): void
+    {
+        if (! Gate::allows('create', SystemBackupRun::class)) {
+            $this->dispatch('error', message: __('You do not have permission to queue application backups.'));
+
+            return;
+        }
+
+        $backupRun = SystemBackupRun::create([
+            'type' => 'application',
+            'status' => 'queued',
+            'requested_by_user_id' => auth()->id(),
+            'queue' => 'maintenance',
+            'file_disk' => 'local',
+        ]);
+
+        RunSystemBackup::dispatch($backupRun->id);
+
+        $this->dispatch('success', message: __('Application backup queued.'));
+    }
+
+    public function restoreDatabase(): void
+    {
+        if (! Gate::allows('restore', SystemBackupRun::class)) {
+            $this->dispatch('error', message: __('You do not have permission to restore the database.'));
+
+            return;
+        }
+
+        $this->validate([
+            'restoreConfirmation' => ['required', 'in:RESTORE'],
+            'backupFile' => ['required', 'file', 'max:102400'],
+        ]);
+
+        try {
+            $sql = $this->verifiedBackupSql($this->backupFile->get());
+
+            $backupRun = SystemBackupRun::create([
+                'type' => 'restore',
+                'status' => 'running',
+                'requested_by_user_id' => auth()->id(),
+                'queue' => 'maintenance',
+                'file_disk' => 'local',
+            ]);
+
+            $this->executePsqlRestore($sql);
+
+            $backupRun->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
+
+            $this->reset(['backupFile', 'restoreConfirmation']);
+
+            $this->dispatch('success', message: __('Database restored successfully.'));
+        } catch (\Throwable $e) {
+            $this->reset(['backupFile', 'restoreConfirmation']);
+
+            $this->dispatch('error', message: $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify the HMAC signature appended to an application-generated SQL
+     * backup and return the SQL content without the signature line.
+     *
+     * @throws RuntimeException when the signature line is missing or invalid.
+     */
+    protected function verifiedBackupSql(string $sql): string
+    {
+        $pattern = "/\n-- APP_BACKUP_SIGNATURE: ([0-9a-f]{64})\s*$/";
+
+        if (! preg_match($pattern, $sql, $matches)) {
+            throw new RuntimeException('Unsigned or malformed backup: missing APP_BACKUP_SIGNATURE.');
+        }
+
+        $content = preg_replace($pattern, '', $sql);
+
+        if (! hash_equals(hash_hmac('sha256', $content, (string) config('app.key')), $matches[1])) {
+            throw new RuntimeException('Backup signature verification failed; the file may have been tampered with.');
+        }
+
+        return $content;
+    }
+
+    /**
+     * Replay verified SQL into the PostgreSQL database using the app's
+     * configured credentials (password passed via a 0600 .pgpass file).
+     *
+     * @throws RuntimeException when psql fails.
+     */
+    protected function executePsqlRestore(string $sql): void
+    {
+        $dbUser = (string) config('database.connections.pgsql.username');
+        $dbHost = (string) config('database.connections.pgsql.host');
+        $dbPort = (string) config('database.connections.pgsql.port');
+        $dbName = (string) config('database.connections.pgsql.database');
+        $dbPass = (string) config('database.connections.pgsql.password');
+
+        $tmpDir = sys_get_temp_dir().'/hrconnect-restore-'.bin2hex(random_bytes(6));
+        $sqlFile = $tmpDir.'/restore.sql';
+        $pgpassFile = $tmpDir.'/.pgpass';
+
+        try {
+            File::ensureDirectoryExists($tmpDir, 0700);
+            file_put_contents($sqlFile, $sql);
+            file_put_contents($pgpassFile, "{$dbHost}:{$dbPort}:{$dbName}:{$dbUser}:{$dbPass}");
+            chmod($pgpassFile, 0600);
+
+            $command = sprintf(
+                'PGPASSFILE=%s psql -v ON_ERROR_STOP=1 -U %s -h %s -p %s -d %s -f %s 2>&1',
+                escapeshellarg($pgpassFile),
+                escapeshellarg($dbUser),
+                escapeshellarg($dbHost),
+                escapeshellarg($dbPort),
+                escapeshellarg($dbName),
+                escapeshellarg($sqlFile)
+            );
+
+            $output = [];
+            $exitCode = 0;
+            exec($command, $output, $exitCode);
+
+            if ($exitCode !== 0) {
+                throw new RuntimeException('Database restore failed: '.implode("\n", array_slice($output, -10)));
+            }
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
     }
 
     public function downloadBackup(int $id): void
@@ -151,9 +302,40 @@ class SystemMaintenance extends Component
         $this->dispatch('notify', message: __('Backup download is not available yet.'));
     }
 
+    public function downloadExistingBackup(int $id): Response
+    {
+        $backup = SystemBackupRun::query()->findOrFail($id);
+
+        if (! Gate::allows('download', $backup)) {
+            $this->dispatch('error', message: __('You do not have permission to download this backup artifact.'));
+
+            return response()->noContent();
+        }
+
+        $disk = Storage::disk($backup->file_disk ?: config('filesystems.default'));
+
+        if (! $backup->file_path || ! $disk->exists($backup->file_path)) {
+            $this->dispatch('error', message: __('Backup artifact is no longer available on disk.'));
+
+            return response()->noContent();
+        }
+
+        $this->dispatch('notify', message: __('Backup download started.'));
+
+        return $disk->download($backup->file_path, $backup->file_name ?: basename($backup->file_path));
+    }
+
     public function deleteBackup(int $id): void
     {
-        SystemBackupRun::query()->whereKey($id)->delete();
+        $backup = SystemBackupRun::query()->find($id);
+
+        if (! $backup || ! Gate::allows('delete', $backup)) {
+            $this->dispatch('error', message: __('Tidak memiliki izin untuk menghapus backup.'));
+
+            return;
+        }
+
+        $backup->delete();
         $this->dispatch('notify', message: __('Backup deleted.'));
     }
 }

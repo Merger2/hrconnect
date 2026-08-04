@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Actions\AuthenticateLoginAttempt;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
@@ -43,6 +44,11 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureActions(): void
     {
+        // Single-session login gate: resolve credentials, verify the password
+        // and reject logins while another active session exists (session
+        // driver = database). See tests/Feature/ConcurrentLoginRestrictionTest.php.
+        Fortify::authenticateUsing(fn (Request $request) => app(AuthenticateLoginAttempt::class)($request));
+
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);

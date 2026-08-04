@@ -10,7 +10,7 @@
         {{-- Profile Photo --}}
         @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
             <div x-data="{photoName: null, photoPreview: null}" class="mb-5">
-                <input type="file" id="photo" class="hidden"
+                <input type="file" id="profile-photo-input" class="sr-only"
                     wire:model.live="photo"
                     x-ref="photo"
                     x-on:change="
@@ -20,7 +20,7 @@
                         reader.readAsDataURL($refs.photo.files[0]);
                     " />
 
-                <label class="profile-field__label" for="photo">{{ __('Photo') }}</label>
+                <label class="profile-field__label" for="profile-photo-input">{{ __('Photo') }}</label>
 
                 <div class="mt-2 flex items-end gap-4">
                     <div class="shrink-0">
@@ -33,11 +33,10 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button type="button"
-                            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                            x-on:click.prevent="$refs.photo.click()">
+                        <label for="profile-photo-input"
+                            class="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                             {{ __('Select A New Photo') }}
-                        </button>
+                        </label>
                         @if ($this->user->profile_photo_path)
                             <button type="button"
                                 class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
