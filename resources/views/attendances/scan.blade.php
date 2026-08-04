@@ -168,9 +168,7 @@
                     } catch (e) {
                         console.error('Face capture init error:', e);
                         this.captureStatus = 'error';
-                        this.statusText = '{{ __('Camera not available. Use PIN instead.') }}';
-                        // Fallback to PIN after error
-                        setTimeout(() => this.fallbackToPin(), 2000);
+                        this.statusText = '{{ __('Kamera tidak tersedia. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.') }}';
                     }
                 },
 
@@ -407,18 +405,12 @@
                     }
                     this.showCamera = false;
                     this.captureStatus = 'idle';
+                    this.captureAction = 'clock_in';
+                    this.statusText = '';
 
-                    // Fallback to PIN
-                    this.fallbackToPin();
-                },
-
-                fallbackToPin() {
-                    window.dispatchEvent(new CustomEvent('face-verification-timeout', {
-                        detail: {
-                            timeoutMs: 1,
-                            action: this.captureAction,
-                        },
-                    }));
+                    // Face-only: cancel = batalkan saja (tanpa fallback PIN).
+                    // Timer face-verification-timeout dari ClockInAction yang
+                    // menampilkan pesan error jika verifikasi tidak selesai.
                 },
             };
         }                // No bridge needed — Alpine @begin-scan-capture.window handles it

@@ -20,7 +20,6 @@ class ClockOutRequest extends FormRequest
             'is_mocked' => ['nullable', 'boolean'],
             'embedding' => ['nullable', 'array', 'size:128'],
             'embedding.*' => ['numeric', 'between:-1.5,1.5'],
-            'pin' => ['nullable', 'string', 'digits:6'],
             'verification_method' => ['nullable', 'in:face_verified,pin_verified,manual'],
             'photo_selfie' => ['nullable', 'string'],
         ];
@@ -38,7 +37,6 @@ class ClockOutRequest extends FormRequest
             'is_mocked.boolean' => 'Status GPS palsu tidak valid.',
             'embedding.size' => 'Data wajah harus 128 dimensi.',
             'embedding.*.between' => 'Nilai embedding wajah tidak valid.',
-            'pin.digits' => 'PIN harus terdiri dari 6 digit angka.',
             'verification_method.in' => 'Metode verifikasi tidak valid.',
         ];
     }

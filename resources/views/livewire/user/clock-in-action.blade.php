@@ -345,9 +345,8 @@
                     @error('wfaNote') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- ✅ Face verified badge (shown when face recognition was used) --}}
-                <div x-show="$wire.wfaFaceMode" x-cloak
-                     class="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
+                {{-- ✅ Face verified badge (face-only — selalu ditampilkan) --}}
+                <div class="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
                     <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
                         <x-heroicon-o-check class="h-4 w-4" />
                     </div>
@@ -355,21 +354,6 @@
                         <p class="text-sm font-semibold text-emerald-800">{{ __('Face Verified') }}</p>
                         <p class="text-xs text-emerald-600">{{ __('Identity confirmed. Just fill in the reason.') }}</p>
                     </div>
-                </div>
-
-                {{-- 🔒 PIN fallback (shown when face is not enrolled) --}}
-                <div x-show="!$wire.wfaFaceMode" x-cloak>
-                    <label for="wfa-pin" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('PIN Verification (fallback)') }}</label>
-                    <input id="wfa-pin"
-                           type="password"
-                           x-model="$wire.wfaPin"
-                           inputmode="numeric"
-                           pattern="[0-9]*"
-                           maxlength="8"
-                           autocomplete="off"
-                           class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg font-bold tracking-[0.3em] transition-colors placeholder:text-slate-300 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
-                           placeholder="• • • • • •">
-                    @error('wfaPin') <p class="mt-1 text-center text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="flex gap-3">
@@ -380,84 +364,10 @@
                     </button>
                     <button type="button"
                             wire:click="submitWfaClockIn"
-                            :disabled="$wire.isLoading || (!$wire.wfaFaceMode && $wire.wfaPin.length < 4)"
+                            :disabled="$wire.isLoading"
                             class="flex-1 rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50">
                         <template x-if="!$wire.isLoading">
                             <span>{{ __('Check In (WFA)') }}</span>
-                        </template>
-                        <template x-if="$wire.isLoading">
-                            <span class="flex items-center justify-center gap-2">
-                                <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>{{ __('Verifying...') }}</span>
-                            </span>
-                        </template>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- 🟢 PIN Verification Modal --}}
-    <div x-show="$wire.showPinModal"
-         x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
-         @click.self="$wire.set('showPinModal', false)"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="pin-modal-title">
-        <div x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="w-full max-w-sm rounded-t-2xl bg-white p-6 shadow-2xl sm:rounded-2xl">
-            <div class="mb-6 text-center">
-                <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                    <x-heroicon-o-lock-closed class="h-7 w-7 text-slate-600" />
-                </div>
-                <h3 id="pin-modal-title" class="text-lg font-bold text-slate-900">
-                    <span x-text="$wire.pinAction === 'clock_in' ? '{{ __('Verify Check In') }}' : '{{ __('Verify Check Out') }}'"></span>
-                </h3>
-                <p class="mt-1 text-sm text-slate-500">{{ __('Enter your PIN to confirm identity.') }}</p>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label for="pin-input" class="sr-only">{{ __('PIN') }}</label>
-                    <input id="pin-input"
-                           type="password"
-                           x-model="$wire.pin"
-                           inputmode="numeric"
-                           pattern="[0-9]*"
-                           maxlength="8"
-                           autocomplete="off"
-                           class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-bold tracking-[0.5em] transition-colors placeholder:text-slate-300 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
-                           placeholder="• • • • • •">
-                    @error('pin') <p class="mt-1 text-center text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="flex gap-3">
-                    <button type="button"
-                            @click="$wire.set('showPinModal', false); $wire.set('pin', '')"
-                            class="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
-                        {{ __('Cancel') }}
-                    </button>
-                    <button type="button"
-                            x-on:click="$wire.pinAction === 'clock_in' ? $wire.doClockInWithPin() : $wire.doClockOutWithPin()"
-                            :disabled="$wire.isLoading || $wire.pin.length < 4"
-                            class="flex-1 rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50">
-                        <template x-if="!$wire.isLoading">
-                            <span>{{ __('Verify') }}</span>
                         </template>
                         <template x-if="$wire.isLoading">
                             <span class="flex items-center justify-center gap-2">
@@ -494,22 +404,9 @@
                 let timer = setTimeout(() => {
                     const el = document.querySelector('[x-data^=\'clockInAction\']')?.__x;
                     if (el && el.$wire.isLoading) {
-                        const action = $event.detail.action || 'clock_in';
-                        if (action === 'wfa') {
-                            // WFA timeout → show WFA modal with PIN fallback
-                            el.$wire.set('isLoading', false);
-                            el.$wire.set('wfaFaceMode', false);
-                            el.$wire.set('wfaPin', '');
-                            el.$wire.set('showWfaModal', true);
-                            el.$wire.set('errorMessage', '{{ __('Face verification did not respond. Use PIN instead.') }}');
-                        } else {
-                            // clock_in / clock_out timeout → show PIN modal
-                            el.$wire.set('isLoading', false);
-                            el.$wire.set('pinAction', action);
-                            el.$wire.set('pin', '');
-                            el.$wire.set('showPinModal', true);
-                            el.$wire.set('errorMessage', '{{ __('Face verification did not respond. Use PIN instead.') }}');
-                        }
+                        // Face-only: timeout = tolak; arahkan ke koreksi HR (tanpa PIN fallback)
+                        el.$wire.set('isLoading', false);
+                        el.$wire.set('errorMessage', '{{ __('Verifikasi wajah tidak merespons. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.') }}');
                     }
                 }, $event.detail.timeoutMs);
                 // Store the timer reference for cleanup

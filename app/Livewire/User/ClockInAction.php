@@ -65,22 +65,10 @@ class ClockInAction extends Component
 
     public ?string $clockOutTime = null;
 
-    // --- PIN modal ---
-    public bool $showPinModal = false;
-
-    public string $pin = '';
-
-    public string $pinAction = ''; // 'clock_in' or 'clock_out'
-
     // --- WFA modal ---
     public bool $showWfaModal = false;
 
     public string $wfaNote = '';
-
-    public string $wfaPin = '';
-
-    /** @var bool Whether WFA has verified via face (vs PIN fallback) */
-    public bool $wfaFaceMode = false;
 
     /** @var array|null Face descriptor stored after successful face capture */
     public ?array $wfaFaceDescriptor = null;
@@ -180,8 +168,8 @@ class ClockInAction extends Component
     }
 
     /**
-     * Attempt clock in. If face is enrolled, trigger face verification.
-     * Otherwise show PIN modal.
+     * Attempt clock in. Face-only (PRD §1/§4): jika wajah belum terdaftar,
+     * tampilkan error yang mengarahkan ke HRD — tidak ada fallback PIN.
      */
     public function startClockIn(): void
     {
@@ -199,23 +187,18 @@ class ClockInAction extends Component
             return;
         }
 
-        $hasFaceEnrolled = $user->hasFaceRegistered();
-
-        if ($hasFaceEnrolled) {
-            // Face-verified: trigger face capture via Alpine
-            // isLoading stays true until doClockInWithFace() is called
-            $this->dispatch('trigger-face-capture', action: 'clock_in');
-            // Face timeout: if FaceEnrollment doesn't respond within 20s, offer PIN fallback
-            $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'clock_in');
+        if (! $user->hasFaceRegistered()) {
+            $this->errorMessage = __('Wajah Anda belum terdaftar. Hubungi HRD untuk registrasi wajah.');
+            $this->isLoading = false;
 
             return;
         }
 
-        // No face enrolled: show PIN modal
-        $this->pinAction = 'clock_in';
-        $this->pin = '';
-        $this->showPinModal = true;
-        $this->isLoading = false;
+        // Face-only: trigger face capture via Alpine
+        // isLoading stays true until doClockInWithFace() is called
+        $this->dispatch('trigger-face-capture', action: 'clock_in');
+        // Face timeout: jika verifikasi tidak merespons dalam 20s, tampilkan error (bukan PIN)
+        $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'clock_in');
     }
 
     /**
@@ -229,31 +212,7 @@ class ClockInAction extends Component
         try {
             $this->doClockIn(['face_embedding' => $faceDescriptor]);
         } catch (\Throwable $e) {
-            // If face fails, fallback to PIN
-            $this->pinAction = 'clock_in';
-            $this->pin = '';
-            $this->showPinModal = true;
-            $this->errorMessage = $e->getMessage();
-        } finally {
-            $this->isLoading = false;
-        }
-    }
-
-    /**
-     * Complete clock-in with PIN (called from PIN modal).
-     */
-    public function doClockInWithPin(): void
-    {
-        $this->validate(['pin' => ['required', 'string', 'min:4', 'max:8']]);
-
-        $this->errorMessage = null;
-        $this->isLoading = true;
-
-        try {
-            $this->doClockIn(['pin' => $this->pin]);
-            $this->showPinModal = false;
-            $this->pin = '';
-        } catch (\Throwable $e) {
+            // Face-only: tidak ada fallback PIN — tampilkan error & arahkan ke koreksi HR
             $this->errorMessage = $e->getMessage();
         } finally {
             $this->isLoading = false;
@@ -283,7 +242,8 @@ class ClockInAction extends Component
     }
 
     /**
-     * Start clock-out with face or PIN.
+     * Start clock-out. Face-only: jika wajah belum terdaftar, tampilkan error
+     * yang mengarahkan ke HRD — tidak ada fallback PIN.
      */
     public function startClockOut(): void
     {
@@ -301,21 +261,17 @@ class ClockInAction extends Component
             return;
         }
 
-        $hasFaceEnrolled = $user->hasFaceRegistered();
-
-        if ($hasFaceEnrolled) {
-            // Face-verified: trigger face capture via Alpine
-            $this->dispatch('trigger-face-capture', action: 'clock_out');
-            // Face timeout: if FaceEnrollment doesn't respond within 20s, offer PIN fallback
-            $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'clock_out');
+        if (! $user->hasFaceRegistered()) {
+            $this->errorMessage = __('Wajah Anda belum terdaftar. Hubungi HRD untuk registrasi wajah.');
+            $this->isLoading = false;
 
             return;
         }
 
-        $this->pinAction = 'clock_out';
-        $this->pin = '';
-        $this->showPinModal = true;
-        $this->isLoading = false;
+        // Face-only: trigger face capture via Alpine
+        $this->dispatch('trigger-face-capture', action: 'clock_out');
+        // Face timeout: jika verifikasi tidak merespons dalam 20s, tampilkan error (bukan PIN)
+        $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'clock_out');
     }
 
     /**
@@ -329,30 +285,7 @@ class ClockInAction extends Component
         try {
             $this->doClockOut(['face_embedding' => $faceDescriptor]);
         } catch (\Throwable $e) {
-            $this->pinAction = 'clock_out';
-            $this->pin = '';
-            $this->showPinModal = true;
-            $this->errorMessage = $e->getMessage();
-        } finally {
-            $this->isLoading = false;
-        }
-    }
-
-    /**
-     * Complete clock-out with PIN.
-     */
-    public function doClockOutWithPin(): void
-    {
-        $this->validate(['pin' => ['required', 'string', 'min:4', 'max:8']]);
-
-        $this->errorMessage = null;
-        $this->isLoading = true;
-
-        try {
-            $this->doClockOut(['pin' => $this->pin]);
-            $this->showPinModal = false;
-            $this->pin = '';
-        } catch (\Throwable $e) {
+            // Face-only: tidak ada fallback PIN — tampilkan error & arahkan ke koreksi HR
             $this->errorMessage = $e->getMessage();
         } finally {
             $this->isLoading = false;
@@ -384,31 +317,29 @@ class ClockInAction extends Component
     /**
      * Handle WFA clock-in.
      *
-     * Primary method: face recognition.
-     * Fallback: PIN (for users who haven't enrolled face).
+     * Primary (satu-satunya) method: face recognition — tanpa fallback PIN.
+     * Jika wajah belum terdaftar → error yang mengarahkan ke HRD.
      */
     public function startWfaClockIn(): void
     {
         $this->showWfaModal = false;
         $this->wfaNote = '';
-        $this->wfaPin = '';
         $this->wfaFaceDescriptor = null;
         $this->errorMessage = null;
 
         $user = Auth::user();
-        $hasFaceEnrolled = $user->hasFaceRegistered();
 
-        if ($hasFaceEnrolled) {
-            // Face mode: trigger face capture FIRST, then show note modal
-            $this->wfaFaceMode = true;
-            $this->isLoading = true;
-            $this->dispatch('trigger-face-capture', action: 'wfa');
-            $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'wfa');
-        } else {
-            // PIN fallback: show modal with PIN input
-            $this->wfaFaceMode = false;
-            $this->showWfaModal = true;
+        if (! $user->hasFaceRegistered()) {
+            $this->errorMessage = __('Wajah Anda belum terdaftar. Hubungi HRD untuk registrasi wajah.');
+            $this->isLoading = false;
+
+            return;
         }
+
+        // Face mode: trigger face capture FIRST, then show note modal
+        $this->isLoading = true;
+        $this->dispatch('trigger-face-capture', action: 'wfa');
+        $this->dispatch('face-verification-timeout', timeoutMs: 20000, action: 'wfa');
     }
 
     /**
@@ -418,21 +349,14 @@ class ClockInAction extends Component
     public function doWfaClockInWithFace(array $faceDescriptor): void
     {
         $this->wfaFaceDescriptor = $faceDescriptor;
-        $this->wfaFaceMode = true;
         $this->showWfaModal = true;
         $this->isLoading = false;
     }
 
     public function submitWfaClockIn(): void
     {
-        // Dynamic validation: face mode → note only; PIN mode → note + PIN
-        $rules = ['wfaNote' => ['required', 'string', 'min:20', 'max:500']];
-
-        if (! $this->wfaFaceMode) {
-            $rules['wfaPin'] = ['required', 'string', 'min:4', 'max:8'];
-        }
-
-        $this->validate($rules);
+        // Face-only: verifikasi wajah sudah dilakukan sebelum modal dibuka (note saja yang divalidasi)
+        $this->validate(['wfaNote' => ['required', 'string', 'min:20', 'max:500']]);
 
         $this->errorMessage = null;
         $this->isLoading = true;
@@ -445,27 +369,24 @@ class ClockInAction extends Component
                 throw new BusinessRuleException(__('Employee record not found.'));
             }
 
+            if (empty($this->wfaFaceDescriptor)) {
+                throw new BusinessRuleException('Verifikasi wajah diperlukan untuk absensi WFA.');
+            }
+
             $data = [
                 'is_wfa' => true,
                 'wfa_note' => $this->wfaNote,
+                'face_embedding' => $this->wfaFaceDescriptor,
                 'latitude' => $this->latitude,
                 'longitude' => $this->longitude,
                 'accuracy' => $this->accuracy,
             ];
 
-            if ($this->wfaFaceMode && $this->wfaFaceDescriptor) {
-                $data['face_embedding'] = $this->wfaFaceDescriptor;
-            } else {
-                $data['pin'] = $this->wfaPin;
-            }
-
             $this->attendanceService->clockIn($employee, $data);
 
             $this->showWfaModal = false;
             $this->wfaNote = '';
-            $this->wfaPin = '';
             $this->wfaFaceDescriptor = null;
-            $this->wfaFaceMode = false;
             $this->refreshStatus();
             $this->successMessage = __('WFA Check In successful!');
             $this->dispatch('refresh-notifications');

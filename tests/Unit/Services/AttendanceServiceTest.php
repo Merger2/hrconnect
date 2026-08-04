@@ -9,7 +9,6 @@ use App\Exceptions\AlreadyClockedInException;
 use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\FaceNotRegisteredException;
-use App\Exceptions\InvalidPinException;
 use App\Exceptions\NotClockedInException;
 use App\Models\Attendance;
 use App\Models\Branch;
@@ -21,7 +20,6 @@ use App\Services\Attendance\GeofenceService;
 use App\Services\Security\FaceRecognitionService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -243,26 +241,14 @@ test('clockIn throws BusinessRuleException when face not enrolled and no PIN', f
         ->toThrow(BusinessRuleException::class, 'Wajah Anda belum terdaftar');
 });
 
-test('clockIn throws InvalidPinException when PIN is sent but wrong', function () {
+test('clockIn throws BusinessRuleException when PIN is sent but wrong (PIN ignored, face-only)', function () {
     $emp = attSvcMakeEmployee($this->masterData);
     attSvcSetPin($emp, '123456');
 
-    // Face not enrolled → PIN fallback → verify PIN with wrong PIN
+    // Face not enrolled → PIN tidak lagi diproses (face-only policy, PRD §1/§4)
     expect(fn () => $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
         'pin' => 'wrong-pin',
-    ])))->toThrow(InvalidPinException::class, 'PIN yang Anda masukkan salah');
-});
-
-test('clockIn throws BusinessRuleException when PIN streak exceeds 5 consecutive days', function () {
-    $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
-
-    // Set PIN streak to 5 (the limit is >= 5)
-    Cache::put("pin_streak:{$emp->id}", 5, now()->addWeek());
-
-    expect(fn () => $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
-    ])))->toThrow(BusinessRuleException::class, '5 hari berturut-turut');
+    ])))->toThrow(BusinessRuleException::class, 'Wajah Anda belum terdaftar');
 });
 
 // ─── WFA validation ───────────────────────────────────────────────────
@@ -299,44 +285,21 @@ test('clockIn succeeds with face verification', function () {
     expect($attendance->risk_score)->not->toBeNull();
 });
 
-// ─── Success: PIN Fallback ────────────────────────────────────────────
+// ─── Face-only: PIN tidak lagi menjadi fallback ───────────────────────
 
-test('clockIn succeeds with PIN fallback when face not enrolled', function () {
+test('clockIn throws BusinessRuleException when face not enrolled even with valid PIN', function () {
     $emp = attSvcMakeEmployee($this->masterData);
     attSvcSetPin($emp, '123456');
 
-    $attendance = $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
+    // Face-only: PIN tidak menyelamatkan; wajah wajib terdaftar
+    expect(fn () => $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
         'pin' => '123456',
-    ]));
-
-    expect($attendance)->toBeInstanceOf(Attendance::class);
-    expect($attendance->employee_id)->toBe($emp->id);
-    expect($attendance->verification_method)->toBe(VerificationMethod::PIN_VERIFIED);
-    expect($attendance->face_similarity_score)->toBeNull();
-    expect($attendance->clock_in)->not->toBeNull();
-
-    // PIN streak should be 1 (first use)
-    expect(Cache::get("pin_streak:{$emp->id}"))->toBe(1);
+    ])))->toThrow(BusinessRuleException::class, 'Wajah Anda belum terdaftar');
 });
 
-test('clockIn PIN fallback resets streak on face verification', function () {
-    $emp = attSvcMakeEmployee($this->masterData);
-    attSvcEnrollFace($emp);
+// ─── Success: Face fails → tolak (bukan PIN fallback) ─────────────────
 
-    // Set a prior PIN streak
-    Cache::put("pin_streak:{$emp->id}", 3, now()->addWeek());
-
-    $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'face_embedding' => attSvcFaceEmbedding(),
-    ]));
-
-    // Face verification should reset PIN streak
-    expect(Cache::get("pin_streak:{$emp->id}"))->toBeNull();
-});
-
-// ─── Success: Face fails → PIN fallback ───────────────────────────────
-
-test('clockIn falls back to PIN when face does not match', function () {
+test('clockIn throws BusinessRuleException when face does not match', function () {
     $emp = attSvcMakeEmployee($this->masterData);
     attSvcEnrollFace($emp);
     attSvcSetPin($emp, '123456');
@@ -347,25 +310,23 @@ test('clockIn falls back to PIN when face does not match', function () {
         $different[] = $i % 2 === 0 ? 1.0 : -1.0;
     }
 
-    $attendance = $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
+    // PIN ikut dikirim tapi diabaikan — face gagal = tolak
+    expect(fn () => $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
         'face_embedding' => $different,
         'pin' => '123456',
-    ]));
-
-    expect($attendance->verification_method)->toBe(VerificationMethod::PIN_VERIFIED);
-    expect($attendance->face_similarity_score)->toBeNull();
+    ])))->toThrow(BusinessRuleException::class, 'Verifikasi wajah gagal');
 });
 
 // ─── Success: WFA ─────────────────────────────────────────────────────
 
 test('clockIn succeeds with WFA', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
+    attSvcEnrollFace($emp);
 
     $attendance = $this->attendanceService->clockIn($emp, [
         'is_wfa' => true,
         'wfa_note' => 'Bekerja dari rumah karena ada perbaikan AC di kantor',
-        'pin' => '123456',
+        'face_embedding' => attSvcFaceEmbedding(),
     ]);
 
     expect($attendance)->toBeInstanceOf(Attendance::class);
@@ -423,32 +384,28 @@ test('clockOut succeeds with face verification', function () {
     expect($attendance->long_out)->toEqual(106.8);
 });
 
-// ─── Success: PIN Fallback ────────────────────────────────────────────
+// ─── Face-only: PIN tidak lagi menjadi fallback ───────────────────────
 
-test('clockOut succeeds with PIN fallback', function () {
+test('clockOut throws BusinessRuleException when face not enrolled even with valid PIN', function () {
     $emp = attSvcMakeEmployee($this->masterData);
     attSvcSetPin($emp, '123456');
     attSvcCreateClockIn($emp);
 
-    $attendance = $this->attendanceService->clockOut($emp, array_merge(attSvcValidGps(), [
+    expect(fn () => $this->attendanceService->clockOut($emp, array_merge(attSvcValidGps(), [
         'pin' => '123456',
-    ]));
-
-    expect($attendance->clock_out)->not->toBeNull();
-    expect($attendance->clock_out_verification_method)->toBe(VerificationMethod::PIN_VERIFIED);
-    expect($attendance->clock_out_face_similarity_score)->toBeNull();
+    ])))->toThrow(BusinessRuleException::class, 'Wajah Anda belum terdaftar');
 });
 
 // ─── Success: WFA clock-out skips geofence ────────────────────────────
 
 test('clockOut succeeds with WFA clock-out skipping geofence', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
+    attSvcEnrollFace($emp);
     attSvcCreateClockIn($emp, ['is_wfa' => true]);
 
     // No GPS data needed — WFA skips geofence
     $attendance = $this->attendanceService->clockOut($emp, [
-        'pin' => '123456',
+        'face_embedding' => attSvcFaceEmbedding(),
     ]);
 
     expect($attendance->is_wfa)->toBeTrue();
@@ -461,16 +418,16 @@ test('clockOut succeeds with WFA clock-out skipping geofence', function () {
 
 test('clockIn twice in rapid succession handles unique constraint gracefully', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
+    attSvcEnrollFace($emp);
 
     // First clock-in succeeds
     $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
+        'face_embedding' => attSvcFaceEmbedding(),
     ]));
 
     // Second clock-in should throw AlreadyClockedInException
     expect(fn () => $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
+        'face_embedding' => attSvcFaceEmbedding(),
     ])))->toThrow(AlreadyClockedInException::class);
 });
 
@@ -487,7 +444,7 @@ test('clockIn with face enrolled but face fails and no PIN throws', function () 
     expect(fn () => $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
         'face_embedding' => $different,
         // no pin
-    ])))->toThrow(BusinessRuleException::class, 'gunakan PIN sebagai fallback');
+    ])))->toThrow(BusinessRuleException::class, 'Verifikasi wajah gagal');
 });
 
 test('clockOut throws BusinessRuleException when face not enrolled and no PIN', function () {
@@ -495,41 +452,15 @@ test('clockOut throws BusinessRuleException when face not enrolled and no PIN', 
     attSvcCreateClockIn($emp);
 
     expect(fn () => $this->attendanceService->clockOut($emp, attSvcValidGps()))
-        ->toThrow(BusinessRuleException::class, 'Wajah belum terdaftar');
-});
-
-test('clockIn with face not enrolled but valid PIN sets pin_streak to 1', function () {
-    $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
-
-    Cache::forget("pin_streak:{$emp->id}");
-
-    $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
-    ]));
-
-    expect(Cache::get("pin_streak:{$emp->id}"))->toBe(1);
-});
-
-test('clockIn increments PIN streak on consecutive PIN use', function () {
-    $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
-
-    Cache::put("pin_streak:{$emp->id}", 4, now()->addWeek());
-
-    $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
-    ]));
-
-    expect(Cache::get("pin_streak:{$emp->id}"))->toBe(5);
+        ->toThrow(BusinessRuleException::class, 'Wajah Anda belum terdaftar');
 });
 
 test('clockIn stores photo_selfie when provided', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
+    attSvcEnrollFace($emp);
 
     $attendance = $this->attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
+        'face_embedding' => attSvcFaceEmbedding(),
         'photo_selfie' => 'data:image/jpeg;base64,/9j/4AAQ...',
     ]));
 
@@ -538,11 +469,11 @@ test('clockIn stores photo_selfie when provided', function () {
 
 test('clockOut stores photo_selfie when provided', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
+    attSvcEnrollFace($emp);
     attSvcCreateClockIn($emp);
 
     $attendance = $this->attendanceService->clockOut($emp, array_merge(attSvcValidGps(), [
-        'pin' => '123456',
+        'face_embedding' => attSvcFaceEmbedding(),
         'photo_selfie' => 'data:image/jpeg;base64,/9j/4AAQ...out',
     ]));
 
@@ -553,9 +484,8 @@ test('clockOut stores photo_selfie when provided', function () {
 // Race condition: descriptor deleted between hasFaceEnrolled and verifyFace
 // ═══════════════════════════════════════════════════════════════════════
 
-test('clockIn falls back to PIN when descriptor is deleted between hasFaceEnrolled and verifyFace (race condition)', function () {
+test('clockIn throws BusinessRuleException when descriptor is deleted between hasFaceEnrolled and verifyFace (race condition)', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
 
     // Mock FaceRecognitionService to simulate race condition:
     //   hasFaceEnrolled → true  (descriptor exists at check time)
@@ -571,13 +501,10 @@ test('clockIn falls back to PIN when descriptor is deleted between hasFaceEnroll
         $this->riskScorer,
     );
 
-    $attendance = $attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
+    // Face-only: face hilang = tolak (bukan PIN fallback)
+    expect(fn () => $attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
         'face_embedding' => attSvcFaceEmbedding(),
-        'pin' => '123456',
-    ]));
-
-    expect($attendance->verification_method)->toBe(VerificationMethod::PIN_VERIFIED);
-    expect($attendance->face_similarity_score)->toBeNull();
+    ])))->toThrow(BusinessRuleException::class, 'Verifikasi wajah gagal');
 });
 
 test('clockIn throws BusinessRuleException when descriptor deleted between hasFaceEnrolled and verifyFace and no PIN', function () {
@@ -597,12 +524,11 @@ test('clockIn throws BusinessRuleException when descriptor deleted between hasFa
     expect(fn () => $attendanceService->clockIn($emp, array_merge(attSvcValidGps(), [
         'face_embedding' => attSvcFaceEmbedding(),
         // no pin
-    ])))->toThrow(BusinessRuleException::class, 'gunakan PIN sebagai fallback');
+    ])))->toThrow(BusinessRuleException::class, 'Verifikasi wajah gagal');
 });
 
-test('clockOut falls back to PIN when descriptor is deleted between hasFaceEnrolled and verifyFace (race condition)', function () {
+test('clockOut throws BusinessRuleException when descriptor is deleted between hasFaceEnrolled and verifyFace (race condition)', function () {
     $emp = attSvcMakeEmployee($this->masterData);
-    attSvcSetPin($emp, '123456');
     attSvcCreateClockIn($emp);
 
     $mockFaceService = $this->createMock(FaceRecognitionService::class);
@@ -616,13 +542,10 @@ test('clockOut falls back to PIN when descriptor is deleted between hasFaceEnrol
         $this->riskScorer,
     );
 
-    $attendance = $attendanceService->clockOut($emp, array_merge(attSvcValidGps(), [
+    // Face-only: face hilang = tolak (bukan PIN fallback)
+    expect(fn () => $attendanceService->clockOut($emp, array_merge(attSvcValidGps(), [
         'face_embedding' => attSvcFaceEmbedding(),
-        'pin' => '123456',
-    ]));
-
-    expect($attendance->clock_out_verification_method)->toBe(VerificationMethod::PIN_VERIFIED);
-    expect($attendance->clock_out_face_similarity_score)->toBeNull();
+    ])))->toThrow(BusinessRuleException::class, 'Verifikasi wajah gagal');
 });
 
 test('clockOut throws BusinessRuleException when descriptor deleted between hasFaceEnrolled and verifyFace and no PIN', function () {
@@ -643,5 +566,5 @@ test('clockOut throws BusinessRuleException when descriptor deleted between hasF
     expect(fn () => $attendanceService->clockOut($emp, array_merge(attSvcValidGps(), [
         'face_embedding' => attSvcFaceEmbedding(),
         // no pin
-    ])))->toThrow(BusinessRuleException::class, 'Verifikasi clock-out gagal');
+    ])))->toThrow(BusinessRuleException::class, 'Verifikasi wajah gagal');
 });
