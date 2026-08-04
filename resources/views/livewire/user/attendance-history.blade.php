@@ -171,6 +171,4 @@
     </section>
 
     <x-shared.attendance-detail-modal :current-attendance="$currentAttendance" />
-
-    @stack('attendance-detail-scripts')
 </div>

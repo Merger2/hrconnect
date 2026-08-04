@@ -6,7 +6,7 @@
     {{-- Loading overlay --}}
     <div x-show="$wire.isLoading"
          x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center bg-white/80"
+         class="fixed inset-0 z-[90] flex items-center justify-center bg-white/80"
          role="status"
          aria-live="polite">
         <div class="flex flex-col items-center gap-3">
@@ -302,26 +302,8 @@
     </div>
 
     {{-- 🟢 WFA Clock In Modal --}}
-    <div x-show="$wire.showWfaModal"
-         x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
-         @click.self="$wire.set('showWfaModal', false)"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="wfa-modal-title">
-        <div x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="w-full max-w-md rounded-t-2xl bg-white p-6 shadow-2xl sm:rounded-2xl">
+    <x-overlays.modal wire:model.live="showWfaModal" maxWidth="md" onclose="$wire.set('showWfaModal', false)">
+        <div class="p-6">
             <div class="mb-5 flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
                     <x-heroicon-o-home-modern class="h-5 w-5" />
@@ -382,7 +364,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </x-overlays.modal>
 
     {{-- ⚡ Face capture + timeout hidden triggers --}}
     <div x-data="{}"

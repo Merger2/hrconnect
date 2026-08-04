@@ -14,7 +14,7 @@
     x-data="pwaInstall()"
     x-show="show"
     x-cloak
-    class="fixed bottom-6 right-6 z-50 max-w-sm"
+    class="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-4 z-40 max-w-sm"
     role="alert"
     aria-live="polite"
 >

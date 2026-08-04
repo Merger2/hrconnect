@@ -506,5 +506,4 @@
     </x-admin.panel>
 
     <x-shared.attendance-detail-modal :current-attendance="$currentAttendance" />
-    @stack('attendance-detail-scripts')
 </x-admin.page-shell>

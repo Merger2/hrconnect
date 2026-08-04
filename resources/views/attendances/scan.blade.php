@@ -28,10 +28,11 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-50 flex flex-col bg-black/90"
+             class="fixed inset-0 z-[90] flex flex-col bg-black/90"
              role="dialog"
              aria-modal="true"
-             aria-labelledby="face-capture-title">
+             aria-labelledby="face-capture-title"
+             x-trap.inert.noscroll="showCamera">
             <div class="flex items-center justify-between px-4 py-3">
                 <h2 id="face-capture-title" class="text-lg font-bold text-white">
                     <span x-text="captureAction === 'clock_in' ? '{{ __('Face Verification') }}' : '{{ __('Face Verification') }}'"></span>

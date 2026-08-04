@@ -79,7 +79,7 @@
 
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
-                <x-validation-errors class="mb-4" role="alert" />
+                <x-forms.validation-errors class="mb-4" />
 
                 <form method="POST" action="{{ route('login') }}" class="space-y-5" x-data="{ show: false }">
                     @csrf

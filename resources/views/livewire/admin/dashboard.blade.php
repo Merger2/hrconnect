@@ -857,8 +857,6 @@
         </x-slot>
     </x-overlays.dialog-modal>
 
-    @stack('attendance-detail-scripts')
-
     <script>
         window.dashboardChartData = @json($chartData);
 

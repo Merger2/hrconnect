@@ -82,35 +82,41 @@
     </div>
 
     @if($selectedEvent)
-        <div class="fixed inset-0 z-[80] flex items-end justify-center bg-slate-950/45 px-4 py-5 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="upcoming-event-detail-title" wire:click.self="closeEvent">
-            <div class="w-full max-w-md overflow-hidden rounded-[1.5rem] border border-white/70 bg-white shadow-2xl">
-                <div class="flex items-start gap-3 border-b border-slate-200/80 p-5">
-                    <span @class([
-                        'grid h-11 w-11 shrink-0 place-items-center rounded-full',
-                        'bg-amber-50 text-amber-700' => $selectedEvent['tone'] === 'warning',
-                        'bg-rose-50 text-rose-700' => $selectedEvent['tone'] === 'danger',
-                        'bg-sky-50 text-sky-700' => $selectedEvent['tone'] === 'info',
-                    ])>
-                        <x-heroicon-o-calendar-days class="h-5 w-5" />
-                    </span>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ $selectedEvent['type'] }}</p>
-                        <h4 id="upcoming-event-detail-title" class="mt-1 text-lg font-bold leading-tight text-slate-950">{{ $selectedEvent['title'] }}</h4>
-                        @if($selectedEvent['subtitle'])
-                            <p class="mt-1 text-sm font-medium text-slate-500">{{ $selectedEvent['subtitle'] }}</p>
-                        @endif
+        <template x-teleport="body">
+            <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]">
+                <div class="fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-sm" wire:click.self="closeEvent"></div>
+                <div class="relative z-10 w-full transform overflow-y-auto rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:max-w-md"
+                    style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
+                    role="dialog" aria-modal="true" aria-labelledby="upcoming-event-detail-title"
+                    x-trap.inert.noscroll="true">
+                    <div class="flex items-start gap-3 border-b border-slate-200/80 p-5">
+                        <span @class([
+                            'grid h-11 w-11 shrink-0 place-items-center rounded-full',
+                            'bg-amber-50 text-amber-700' => $selectedEvent['tone'] === 'warning',
+                            'bg-rose-50 text-rose-700' => $selectedEvent['tone'] === 'danger',
+                            'bg-sky-50 text-sky-700' => $selectedEvent['tone'] === 'info',
+                        ])>
+                            <x-heroicon-o-calendar-days class="h-5 w-5" />
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ $selectedEvent['type'] }}</p>
+                            <h4 id="upcoming-event-detail-title" class="mt-1 text-lg font-bold leading-tight text-slate-950">{{ $selectedEvent['title'] }}</h4>
+                            @if($selectedEvent['subtitle'])
+                                <p class="mt-1 text-sm font-medium text-slate-500">{{ $selectedEvent['subtitle'] }}</p>
+                            @endif
+                        </div>
+                        <button type="button" wire:click="closeEvent" class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('Close') }}">
+                            <x-heroicon-o-x-mark class="h-5 w-5" />
+                        </button>
                     </div>
-                    <button type="button" wire:click="closeEvent" class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('Close') }}">
-                        <x-heroicon-o-x-mark class="h-5 w-5" />
-                    </button>
-                </div>
 
-                @if($selectedEvent['body'])
-                    <div class="p-5">
-                        <p class="whitespace-pre-line text-sm leading-6 text-slate-600">{{ $selectedEvent['body'] }}</p>
-                    </div>
-                @endif
+                    @if($selectedEvent['body'])
+                        <div class="p-5">
+                            <p class="whitespace-pre-line text-sm leading-6 text-slate-600">{{ $selectedEvent['body'] }}</p>
+                        </div>
+                    @endif
+                </div>
             </div>
-        </div>
+        </template>
     @endif
 </div>

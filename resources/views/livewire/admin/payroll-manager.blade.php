@@ -102,17 +102,22 @@
     </div>
 
     @if($rejectingPayrollId)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div class="bg-white rounded-xl p-6 w-full max-w-md space-y-4">
-                <h3 class="text-lg font-semibold">Tolak Payroll</h3>
-                <p class="text-sm text-zinc-500">Berikan alasan penolakan payroll ini.</p>
-                <textarea wire:model="rejectionReason" rows="3" class="w-full rounded-md border-zinc-300" placeholder="Alasan penolakan..."></textarea>
-                @error('rejectionReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                <div class="flex justify-end gap-2">
-                    <button wire:click="cancelReject" class="px-4 py-2 text-sm rounded-md border border-zinc-300 hover:bg-zinc-50">Batal</button>
-                    <button wire:click="reject" class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">Tolak Payroll</button>
+        <template x-teleport="body">
+            <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]" role="dialog" aria-modal="true" aria-labelledby="payroll-reject-title">
+                <div class="fixed inset-0 z-0 bg-gray-500 opacity-75" wire:click="cancelReject"></div>
+                <div class="relative z-10 w-full transform rounded-xl bg-white p-6 shadow-xl transition-all sm:mx-auto sm:max-w-md"
+                    style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
+                    x-trap.inert.noscroll="true">
+                    <h3 id="payroll-reject-title" class="text-lg font-semibold">Tolak Payroll</h3>
+                    <p class="text-sm text-zinc-500">Berikan alasan penolakan payroll ini.</p>
+                    <textarea wire:model="rejectionReason" rows="3" class="w-full rounded-md border-zinc-300" placeholder="Alasan penolakan..."></textarea>
+                    @error('rejectionReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                    <div class="flex justify-end gap-2">
+                        <button wire:click="cancelReject" class="px-4 py-2 text-sm rounded-md border border-zinc-300 hover:bg-zinc-50">Batal</button>
+                        <button wire:click="reject" class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">Tolak Payroll</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
     @endif
 </div>

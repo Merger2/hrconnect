@@ -19,20 +19,8 @@
     </div>
 
     {{-- Confirmation Modal --}}
-    <div x-data="{ show: window.Livewire.find('{{ $__livewire->getId() }}').entangle('confirmingUserDeletion').live }"
-         x-show="show" x-cloak
-         class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
-         @keydown.escape.window="show = false"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         role="dialog" aria-modal="true">
-        <div x-show="show" x-cloak
-             @click.away="show = false"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             class="w-full max-w-md rounded-t-2xl bg-white p-6 shadow-2xl sm:rounded-2xl">
+    <x-overlays.modal wire:model.live="confirmingUserDeletion" maxWidth="md">
+        <div class="p-6">
             <h3 class="text-lg font-bold text-red-800">{{ __('Delete Account') }}</h3>
             <p class="mt-2 text-sm text-slate-600">{{ __('Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}</p>
 
@@ -60,5 +48,5 @@
                 </button>
             </div>
         </div>
-    </div>
+    </x-overlays.modal>
 </div>

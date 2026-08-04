@@ -306,22 +306,28 @@
         @endif
     </section>
 
-    <div id="quick-access-more-panel" x-cloak x-show="showMore" x-trap.inert.noscroll="showMore"
-        x-on:keydown.escape.window="showMore = false" class="quick-wallet-modal" role="dialog" aria-modal="true"
-        aria-labelledby="quick-access-more-title" style="display: none;">
-        <div class="quick-wallet-modal__backdrop" x-on:click="showMore = false"></div>
+    <template x-teleport="body">
+    <div id="quick-access-more-panel" x-show="showMore"
+        x-on:keydown.escape.window="showMore = false"
+        class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
+        style="display: none;">
+        <div x-show="showMore" class="fixed inset-0 z-0 transform transition-all" x-on:click="showMore = false"
+            x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
 
-        <div class="quick-wallet-modal__frame" x-show="showMore"
-            x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-150"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-            <div class="quick-wallet-modal__panel" x-show="showMore" x-transition:enter="ease-out duration-200"
-                x-transition:enter-start="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100"
-                x-transition:leave="ease-in duration-150"
-                x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
-                x-transition:leave-end="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95">
-                <div class="quick-wallet-modal__header">
+        <div x-show="showMore"
+            class="relative z-10 w-full transform overflow-y-auto rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:max-w-2xl"
+            style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
+            role="dialog" aria-modal="true" aria-labelledby="quick-access-more-title"
+            x-on:click.stop x-trap.inert.noscroll="showMore"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="quick-wallet-modal__header">
                     <div>
                         <h4 id="quick-access-more-title" class="quick-wallet-modal__title">{{ __('More Menu') }}</h4>
                         <p class="quick-wallet-modal__copy">
@@ -361,4 +367,5 @@
             </div>
         </div>
     </div>
+    </template>
 </div>
