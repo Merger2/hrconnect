@@ -1,16 +1,16 @@
-# Graph Report - hrconnect  (2026-08-05)
+# Graph Report - hrconnect  (2026-08-04)
 
 ## Corpus Check
-- 1380 files · ~467,871 words
+- 1417 files · ~479,403 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 7115 nodes · 15012 edges · 743 communities (481 shown, 262 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 1384 edges (avg confidence: 0.76)
+- 7101 nodes · 14954 edges · 757 communities (488 shown, 269 thin omitted)
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 1372 edges (avg confidence: 0.76)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ca25511e`
+- Built from commit: `436634d7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,55 +21,55 @@
 - Illuminate\Foundation\Http\FormRequest
 - Employee
 - Controller
-- Illuminate\Notifications\Notification
+- Illuminate\Contracts\Queue\ShouldQueue
 - Illuminate\Database\Eloquent\Relations\BelongsTo
 - Illuminate\Http\Request
 - .schema
 - e
-- Employee.php
+- Company
 - CollaborationWorkspaceService
-- LeaveBalance
-- Illuminate\Foundation\Events\Dispatchable
+- Employee.php
+- Illuminate\Queue\SerializesModels
 - Symfony\Component\HttpFoundation\Response
-- AppraisalManager
+- Appraisal
 - MultiCompanyService
 - CompanyAsset
-- CustomFormBuilderService
 - Illuminate\Database\Eloquent\Builder
+- Laravel\Jetstream\InteractsWithBanner
 - ios-page-screenshots.mjs
 - Setting.php
-- Illuminate\Database\Seeder
+- PayrollSettings
 - Illuminate\Database\Migrations\Migration
 - Illuminate\Http\JsonResponse
-- HrChecklistService
-- AttendanceServiceTest.php
-- TerminationType.php
+- HrChecklistCase
+- Illuminate\Database\Seeder
+- Carbon\CarbonInterface
 - Attendance
-- PayrollManager
+- AppraisalExportPdfController.php
 - FileAccessService
 - AGENTS.md — HRConnect Agent Guidance
-- UserNotificationRecipientService
+- Illuminate\Support\Collection
 - CashAdvance
 - dependencies
-- HrChecklistCase
+- KnowledgeBaseController.php
 - AttendanceCorrection
 - ProjectVisitEvidence
-- ReimbursementApprovalService
-- HealthController
+- CompanySetting
+- Leave
 - Loan
 - RbacRegistry
 - Shift
-- Illuminate\Contracts\Queue\ShouldQueue
+- GenerateEmployeeDocumentPdf
 - HRConnect Brand Identity
 - PRD — HRConnect Release 1
 - AttendanceComponentImport
 - Division
-- OvertimeController.php
+- StoreOvertimeRequest
 - EmployeeDocumentRequestManager
 - Illuminate\Database\Eloquent\Factories\Factory
 - AttendanceServiceInterface.php
 - le
-- Reimbursement.php
+- EmployeeDocumentRequest.php
 - Pest.php
 - UpdateUserProfileInformation.php
 - IntegrationAttendanceEvent
@@ -77,13 +77,13 @@
 - require
 - Asset
 - Basic Usage Examples
-- Illuminate\Contracts\View\View
+- Position
 - ProjectTask
 - oi
 - Wp
 - pulltorefresh.js
 - ImportExportRun
-- SystemBackupRun.php
+- OvertimeRequest
 - app.js
 - Illuminate\Database\Eloquent\Collection
 - ProfileController.php
@@ -103,7 +103,7 @@
 - Payroll
 - Carbon\Carbon
 - Announcement
-- CustomFormSubmission
+- CashAdvancePolicy
 - CommandCenterService
 - Admin
 - Overtime
@@ -125,7 +125,7 @@
 - composer.json
 - KnowledgeBaseService
 - EmployeeDocumentType
-- Audit Findings — 2026-08-04 (Full Codebase Read + Test Triage)
+- WorkFromHomeRequest
 - UserNotificationPreference
 - DashboardComponent
 - EmployeeComponent
@@ -136,14 +136,14 @@
 - What's Possible
 - ProcessEmployeeDocumentUpload.php
 - DocumentTemplateManager
-- LeaveEntitlementService
+- LeaveBalance
 - AttendanceService
 - require-dev
 - CdpSocket
-- DivisionComponent
+- LeaveService
 - ImportExportRunViewService
 - EducationComponent
-- AttendanceFaceEnforcementTest.php
+- Schedule
 - ApprovalActorService
 - optionalDependencies
 - CdpSocket
@@ -155,9 +155,9 @@
 - Setting
 - helpers.php
 - DeviceOfflineAttendanceSyncRequest
-- BroadcastRuntime
-- WilayahController
-- CollaborationWorkspaceUpdated
+- AnnouncementRefresh
+- EmployeeDocumentRequestPolicy
+- AttendancePolicy
 - ReimbursementPolicy
 - JetstreamServiceProvider.php
 - TeamApprovalQueryService
@@ -183,11 +183,11 @@
 - livewire/admin/master-data/admin.blade.php
 - document-template-library.blade.php
 - DeleteUserForm.php
-- UserReimbursementService
-- LeaveApproval
+- ApiResponse
+- LeaveApprovalService
 - InteractsWithNotificationInbox.php
-- Illuminate\Support\Collection
-- TeamApprovalsHistory
+- AdminDashboardQueryService
+- ApprovalService
 - payroll-manager.blade.php
 - hr-checklist-manager.blade.php
 - system-maintenance.blade.php
@@ -199,7 +199,7 @@
 - Architecture Best Practices
 - UserSessionManager
 - Security Best Practices
-- MyCashAdvances
+- RegisterFaceRequest
 - AppServiceProvider
 - role-permission-manager.blade.php
 - asset-manager.blade.php
@@ -210,10 +210,9 @@
 - announcement-manager.blade.php
 - package.json
 - go
-- PayrollCalculatorService.php
+- PayrollCalculatorService
 - Editions
-- CheckoutReminderMail.php
-- AnnouncementBroadcastTest.php
+- PayslipPdfService
 - RolePermissionManager.php
 - Encryptable.php
 - manager-inbox.blade.php
@@ -230,8 +229,8 @@
 - HighPriorityAnnouncementModal
 - Illuminate\Contracts\Pagination\LengthAwarePaginator
 - Database Performance Best Practices
-- AttendanceHistoryComponent
-- QueuedVerifyEmail
+- Illuminate\Database\Eloquent\Relations\BelongsToMany
+- QueuedVerifyEmail.php
 - FortifyServiceProvider.php
 - PayrollExportService
 - reimbursement-page.blade.php
@@ -244,12 +243,12 @@
 - LoginPage
 - my-performance.blade.php
 - Events & Notifications Best Practices
-- UpcomingEventsWidget
+- SystemMaintenance
 - Caching Best Practices
 - Eloquent Best Practices
 - Migration Best Practices
-- LoanInstallmentFactory
-- Appraisal
+- DeviceLocationRequest
+- MyPerformance
 - Blade & Views Best Practices
 - ManagerHierarchyGuard
 - settings.blade.php
@@ -262,7 +261,7 @@
 - livewire/admin/dashboard.blade.php
 - Error Handling Best Practices
 - ci:check
-- test
+- ApprovalFactory
 - Task Scheduling Best Practices
 - AttendanceFactory
 - Testing Best Practices
@@ -285,6 +284,8 @@
 - user/notifications-page.blade.php
 - home.blade.php
 - Validation & Forms Best Practices
+- BroadcastRuntime
+- ReimbursementCategory
 - face-enrollment.blade.php
 - my-payslips.blade.php
 - payroll-adjustment-manager.blade.php
@@ -305,6 +306,7 @@
 - fix-ui-tokens.py
 - EnterpriseHwId
 - overtime-request.blade.php
+- post-autoload-dump
 - 2026_08_04_000003_make_company_asset_histories_created_by_nullable.php
 - 0001_01_01_000000_create_users_table.php
 - 2026_01_01_140536_create_activity_logs_table.php
@@ -450,7 +452,10 @@
 - employee-pages.spec.ts
 - vite.config.js
 - admin.attendance-component
+- admin.dashboard-component
 - admin.employee-component
+- admin.import-export.attendance
+- admin.import-export.user
 - admin.master-data.admin
 - admin.master-data.division-component
 - admin.master-data.education-component
@@ -499,12 +504,12 @@
 - config.md
 
 ## God Nodes (most connected - your core abstractions)
-1. `User` - 610 edges
+1. `User` - 609 edges
 2. `Employee` - 234 edges
 3. `Attendance` - 151 edges
 4. `Controller` - 137 edges
 5. `Payroll` - 103 edges
-6. `Reimbursement` - 77 edges
+6. `Reimbursement` - 76 edges
 7. `EmployeeDocumentRequest` - 71 edges
 8. `Overtime` - 60 edges
 9. `Division` - 58 edges
@@ -513,59 +518,60 @@
 ## Surprising Connections (you probably didn't know these)
 - `HRConnect — Enterprise HRIS Platform` --semantically_similar_to--> `AGENTS.md — HRConnect Agent Guidance`  [INFERRED] [semantically similar]
   README.md → AGENTS.md
+- `seedLeaveRequestSettings()` --calls--> `Setting`  [INFERRED]
+  tests/Feature/LeaveRequestValidationTest.php → app/Models/Setting.php
+- `initFlatpickr()` --indirect_call--> `e()`  [INFERRED]
+  resources/js/app.js → public/assets/js/face-api.min.js
 - `CLAUDE.md — Laravel Boost Guidelines` --semantically_similar_to--> `GEMINI.md — Laravel Boost Guidelines`  [INFERRED] [semantically similar]
   CLAUDE.md → GEMINI.md
 - `PWA Mobile-First Employee Self-Service` --semantically_similar_to--> `offline.html — PWA Offline Page`  [INFERRED] [semantically similar]
   README.md → public/offline.html
-- `AI Face Recognition Clock-In` --semantically_similar_to--> `Fixed Bugs Registry`  [INFERRED] [semantically similar]
-  README.md → AGENTS.md
-- `AI-Powered Knowledge Base (RAG)` --semantically_similar_to--> `Livewire Quirks`  [INFERRED] [semantically similar]
-  README.md → AGENTS.md
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
 - **HRConnect Core Platform Features** — readme_hrconnect, readme_face_recognition_clock_in, readme_rag_knowledge_base, readme_payroll_engine, readme_approval_workflow, readme_pwa_employee_self_service, readme_anti_fake_gps_geofencing [INFERRED 0.85]
+- **Developer Guidance Documents** — agents_agents_md, conventions_conventions_md, audit_2026_07_30_audit_md, design_design_md [INFERRED 0.85]
 - **UI/UX Redesign Effort** — design_design_system, redesign_readme_ui_ux_redesign, redesign_dashboard_dashboard_design, redesign_login_login_design [INFERRED 0.85]
 
-## Communities (743 total, 262 thin omitted)
+## Communities (757 total, 269 thin omitted)
 
 ### Community 0 - "face-api.min.js"
 Cohesion: 0.01
 Nodes (27): ad(), bn(), bu(), Cf(), dm(), Do(), ed(), en() (+19 more)
 
 ### Community 1 - "Livewire\Component"
-Cohesion: 0.04
-Nodes (15): NotificationsPage, PayrollSettings, ActivityLogViewer, NotificationsPage, OvertimeRequest, FaceRegistration, QuickActions, ShiftSchedulePage (+7 more)
+Cohesion: 0.05
+Nodes (11): NotificationsPage, ActivityLogViewer, NotificationsPage, FaceRegistration, QuickActions, ShiftSchedulePage, Illuminate\Contracts\View\View, Illuminate\Database\Eloquent\Relations\HasOneThrough (+3 more)
 
 ### Community 2 - "User"
 Cohesion: 0.02
-Nodes (19): FeatureToggle, User, AnnouncementPolicy, AppraisalPolicy, AttendanceCorrectionPolicy, EmployeeDocumentRequestPolicy, EmployeePolicy, HolidayPolicy (+11 more)
+Nodes (21): AuthenticateLoginAttempt, SyncUserRoles, FeatureToggle, User, AnnouncementPolicy, AppraisalPolicy, AttendanceCorrectionPolicy, EmployeePolicy (+13 more)
 
 ### Community 3 - "Illuminate\Foundation\Http\FormRequest"
 Cohesion: 0.03
-Nodes (17): PayrollController, ChatRequest, ChatStreamRequest, ClockInRequest, ClockOutRequest, ExportMonthlyRequest, ExportPeriodRequest, ForgotPasswordRequest (+9 more)
+Nodes (17): PayrollController, ClockInRequest, ClockOutRequest, ExportMonthlyRequest, ExportPeriodRequest, ForgotPasswordRequest, GeneratePayrollRequest, ListAttendanceRequest (+9 more)
 
 ### Community 4 - "Employee"
-Cohesion: 0.04
-Nodes (11): EmployeeEdit, Employee, PayrollCalculatorService, Illuminate\Database\Eloquent\Relations\HasMany, Illuminate\Database\Eloquent\Relations\HasManyThrough, TerCategory, createFinanceHead(), deletionReviewEmployee() (+3 more)
+Cohesion: 0.03
+Nodes (15): EmployeeEdit, Employee, ProfileService, Illuminate\Database\Eloquent\Relations\HasMany, Illuminate\Database\Eloquent\Relations\HasManyThrough, createDashboardEmployee(), makeLeaveApprovalEmployee(), deletionReviewEmployee() (+7 more)
 
 ### Community 5 - "Controller"
 Cohesion: 0.04
-Nodes (31): AdminRootRedirectController, EmployeeController, ExportActivityLogsController, ExportAttendancesController, ExportReportPdfController, ExportUsersController, ImportAttendancesController, ImportUsersController (+23 more)
+Nodes (28): AdminRootRedirectController, EmployeeController, ExportActivityLogsController, ExportAttendancesController, ExportReportPdfController, ExportUsersController, ImportAttendancesController, ImportUsersController (+20 more)
 
-### Community 6 - "Illuminate\Notifications\Notification"
-Cohesion: 0.07
-Nodes (12): AssetReturnOtpRequested, AssetReturnOtpRequestedEmail, AttendanceReminder, CashAdvanceRequested, CashAdvanceRequestedEmail, CashAdvanceUpdatedEmail, ReimbursementRequested, ReimbursementRequestedMail (+4 more)
+### Community 6 - "Illuminate\Contracts\Queue\ShouldQueue"
+Cohesion: 0.04
+Nodes (24): AppraisalActionNotification, AssetReturnOtpRequested, AssetReturnOtpRequestedEmail, AttendanceCorrectionStatusUpdated, AttendanceReminder, CashAdvanceRequested, CashAdvanceRequestedEmail, ChronicLateWarning (+16 more)
 
 ### Community 7 - "Illuminate\Database\Eloquent\Relations\BelongsTo"
 Cohesion: 0.02
-Nodes (38): PgVector, AnnouncementUserView, AppraisalEvaluation, AttendanceOfflineSubmission, ChatMessageRag, Client, Community, CompanyAssetHistory (+30 more)
+Nodes (38): AnnouncementUserView, AttendanceOfflineSubmission, ChatMessageRag, ChatSession, Community, CompanyAssetHistory, CompanyBranch, Device (+30 more)
 
 ### Community 8 - "Illuminate\Http\Request"
-Cohesion: 0.04
-Nodes (28): AuthenticatedUserController, BranchController, CompanyController, DivisionController, EmployeeController, PositionController, PrivacyPolicyController, TermsOfServiceController (+20 more)
+Cohesion: 0.06
+Nodes (22): BranchController, DivisionController, EmployeeController, PositionController, PrivacyPolicyController, TermsOfServiceController, ApprovalResource, AssetHandoverResource (+14 more)
 
 ### Community 9 - ".schema"
 Cohesion: 0.04
@@ -575,117 +581,125 @@ Nodes (50): down(), up(), down(), up(), down(), up(), down(), up() (+42 more)
 Cohesion: 0.07
 Nodes (75): a(), ag(), Av(), bo(), Cg(), d(), e(), eg() (+67 more)
 
-### Community 11 - "Employee.php"
-Cohesion: 0.04
-Nodes (20): allowedTransitions(), canTransitionTo(), self, Company, FamilyDetail, Site, BranchFactory, static (+12 more)
+### Community 11 - "Company"
+Cohesion: 0.07
+Nodes (12): Branch, Company, FamilyDetail, Site, BranchFactory, static, CompanyEmployeesSeeder, E2eTestSeeder (+4 more)
 
 ### Community 12 - "CollaborationWorkspaceService"
-Cohesion: 0.10
-Nodes (6): ChatMessage, ChatThread, CloudFile, CloudFilePolicy, CollaborationWorkspaceService, scopeCompanies()
+Cohesion: 0.06
+Nodes (10): CollaborationWorkspaceUpdated, CollaborationWorkspace, CollaborationInbox, ChatMessage, ChatThread, CloudFile, CloudFilePolicy, CollaborationRealtime (+2 more)
 
-### Community 13 - "LeaveBalance"
-Cohesion: 0.04
-Nodes (16): ResetLeaveQuotaCommand, Leave, LeaveBalance, LeaveEntitlement, LeaveObserver, LeaveService, OvertimeService, ApprovalService (+8 more)
+### Community 13 - "Employee.php"
+Cohesion: 0.05
+Nodes (5): fromLegacy(), self, ApprovalMatrixRule, AttendanceSeeder, DemoAttendanceSeeder
 
-### Community 14 - "Illuminate\Foundation\Events\Dispatchable"
-Cohesion: 0.08
-Nodes (14): PayrollApproved, PayrollPaid, PayrollRejected, PayrollSubmitted, PayrollVerified, SendPayrollPaidNotification, SendPayrollPublishedNotification, SendPayrollRejectedNotification (+6 more)
+### Community 14 - "Illuminate\Queue\SerializesModels"
+Cohesion: 0.09
+Nodes (18): AnnouncementsChanged, PayrollApproved, PayrollPaid, PayrollRejected, PayrollSubmitted, PayrollVerified, SendPayrollPaidNotification, SendPayrollPublishedNotification (+10 more)
 
 ### Community 15 - "Symfony\Component\HttpFoundation\Response"
 Cohesion: 0.04
-Nodes (25): AuthenticateLoginAttempt, EnsureNoOtherActiveSessions, AdminMiddleware, CheckMaintenanceMode, CheckPasswordExpired, DeviceDetection, EnsureActiveAccount, EnsureEmployeeDeviceApiAccount (+17 more)
+Nodes (24): EnsureNoOtherActiveSessions, AdminMiddleware, CheckMaintenanceMode, CheckPasswordExpired, DeviceDetection, EnsureActiveAccount, EnsureEmployeeDeviceApiAccount, EnsureSecurityHeaders (+16 more)
+
+### Community 16 - "Appraisal"
+Cohesion: 0.13
+Nodes (4): AppraisalManager, AppraisalForm, Appraisal, Livewire\Form
 
 ### Community 17 - "MultiCompanyService"
-Cohesion: 0.06
-Nodes (5): CompanyManager, AttendancePolicy, CompanyAssetPolicy, ImportExportRunPolicy, MultiCompanyService
+Cohesion: 0.05
+Nodes (6): CompanyManager, CompanyAssetPolicy, ImportExportRunPolicy, PayrollPolicy, WorkFromHomeRequestPolicy, MultiCompanyService
 
 ### Community 18 - "CompanyAsset"
 Cohesion: 0.08
 Nodes (5): AssetManager, CompanyAssetForm, MyAssets, CompanyAsset, UserAssetService
 
-### Community 19 - "CustomFormBuilderService"
-Cohesion: 0.10
-Nodes (4): CustomFormManager, MyCustomForms, CustomFormTemplate, CustomFormBuilderService
-
-### Community 20 - "Illuminate\Database\Eloquent\Builder"
+### Community 19 - "Illuminate\Database\Eloquent\Builder"
 Cohesion: 0.06
-Nodes (11): CollaborationWorkspace, OperationalWorkspace, companyOptions(), companyScopeService(), defaultCompanyId(), scopedCompanyIds(), CollaborationInbox, CollaborationRealtime (+3 more)
+Nodes (12): CustomFormManager, companyOptions(), companyScopeService(), defaultCompanyId(), scopedCompanyIds(), MyCustomForms, CustomFormSubmission, CustomFormTemplate (+4 more)
+
+### Community 20 - "Laravel\Jetstream\InteractsWithBanner"
+Cohesion: 0.14
+Nodes (3): ProjectTaskChecklistItem, Laravel\Jetstream\InteractsWithBanner, Livewire\Features\SupportFileUploads\TemporaryUploadedFile
 
 ### Community 21 - "ios-page-screenshots.mjs"
 Cohesion: 0.06
 Nodes (35): captured, captureDeviceScreenshot(), capturePage(), cdp, cdpPort, CdpSocket, delay(), manifestPath (+27 more)
 
 ### Community 22 - "Setting.php"
-Cohesion: 0.05
-Nodes (14): AttendanceSendReminders, AutoApproveWfaCommand, DetectAlphaAttendanceCommand, DetectChronicLateCommand, DetectMissedClockCommand, GeneratePayrollCommand, BpjsConfig, CompanySetting (+6 more)
-
-### Community 23 - "Illuminate\Database\Seeder"
-Cohesion: 0.06
-Nodes (14): fromLegacy(), self, AttendanceSeeder, CompanyEmployeesSeeder, DatabaseSeeder, DemoAttendanceSeeder, HolidaySeeder, LeaveTypeSeeder (+6 more)
+Cohesion: 0.04
+Nodes (9): PgVector, AppraisalEvaluation, BpjsConfig, BpjsConfigObserver, Application, PayrollConfigSeeder, Illuminate\Contracts\Database\Eloquent\CastsAttributes, Pgvector\Laravel\HasNeighbors (+1 more)
 
 ### Community 24 - "Illuminate\Database\Migrations\Migration"
 Cohesion: 0.05
 Nodes (18): CreateProvincesTable, down(), up(), down(), up(), up(), down(), up() (+10 more)
 
 ### Community 25 - "Illuminate\Http\JsonResponse"
-Cohesion: 0.04
-Nodes (19): ApiResponse, LocationController, PermissionsStatusController, EmailVerificationController, EmployeeTerminationController, FaceController, AttendanceEventController, KnowledgeBaseController (+11 more)
-
-### Community 26 - "HrChecklistService"
-Cohesion: 0.09
-Nodes (4): CreateChecklistCaseForEmployeeStatus, HrChecklistManager, HrTasksPage, HrChecklistService
-
-### Community 27 - "AttendanceServiceTest.php"
 Cohesion: 0.06
-Nodes (20): AlreadyClockedInException, AntiFakeGPSException, BusinessRuleException, Throwable, FaceNotRecognizedException, FaceNotRegisteredException, GeofenceViolationException, InvalidPinException (+12 more)
+Nodes (15): PermissionsStatusController, EmailVerificationController, EmployeeTerminationController, AttendanceEventController, OvertimeController, WilayahController, SseNotificationController, AuthDebugController (+7 more)
+
+### Community 26 - "HrChecklistCase"
+Cohesion: 0.06
+Nodes (7): CreateChecklistCaseForEmployeeStatus, HrChecklistManager, HrTasksPage, HrChecklistCase, HrChecklistCasePolicy, HrChecklistService, Carbon
+
+### Community 27 - "Illuminate\Database\Seeder"
+Cohesion: 0.03
+Nodes (34): allowedTransitions(), canTransitionTo(), self, AlreadyClockedInException, AntiFakeGPSException, BusinessRuleException, Throwable, FaceNotRecognizedException (+26 more)
+
+### Community 28 - "Carbon\CarbonInterface"
+Cohesion: 0.08
+Nodes (6): EmployeeTerminationService, countUnpaidLeaveDays(), countWorkingDays(), getHolidaysFlat(), Carbon\CarbonInterface, TerminationType
 
 ### Community 29 - "Attendance"
-Cohesion: 0.09
-Nodes (9): BackupRunCommand, AttendanceController, Attendance, Attribute, AttendanceObserver, Command, Illuminate\Database\Eloquent\Casts\Attribute, goldenAttendance() (+1 more)
-
-### Community 30 - "PayrollManager"
-Cohesion: 0.08
-Nodes (4): SendPayrollPayslipEmail, PayrollManager, Event, PayslipPdfService
+Cohesion: 0.11
+Nodes (7): AttendanceController, Attendance, Attribute, AttendanceObserver, Illuminate\Database\Eloquent\Casts\Attribute, goldenAttendance(), attSvcCreateClockIn()
 
 ### Community 31 - "FileAccessService"
 Cohesion: 0.07
-Nodes (11): DownloadCloudFileController, DownloadImportExportRunController, AttendanceController, AttendancePhotoController, EmployeeDocumentDownloadController, HrChecklistTaskAttachmentController, ProjectVisitEvidenceAttachmentController, ReimbursementAttachmentController (+3 more)
+Nodes (12): DownloadCloudFileController, DownloadImportExportRunController, AttendanceController, AttendancePhotoController, EmployeeDocumentDownloadController, HrChecklistTaskAttachmentController, ProjectVisitEvidenceAttachmentController, ReimbursementAttachmentController (+4 more)
 
 ### Community 32 - "AGENTS.md — HRConnect Agent Guidance"
-Cohesion: 0.07
-Nodes (34): AGENTS.md — HRConnect Agent Guidance, Fixed Bugs Registry, HasRolePermissions Trait, Livewire Quirks, No @apply CSS Rule, permission_keys JSON Column, Schema FK Pattern, CipherSweet PII Encryption (+26 more)
+Cohesion: 0.06
+Nodes (39): AGENTS.md — HRConnect Agent Guidance, Fixed Bugs Registry, HasRolePermissions Trait, Livewire Quirks, No @apply CSS Rule, permission_keys JSON Column, Schema FK Pattern, API Controller Issues (+31 more)
+
+### Community 33 - "Illuminate\Support\Collection"
+Cohesion: 0.18
+Nodes (4): ImportExportRunRetention, PayrollPaymentInstructionService, UserNotificationRecipientService, Illuminate\Support\Collection
 
 ### Community 34 - "CashAdvance"
-Cohesion: 0.15
-Nodes (3): CashAdvance, CashAdvancePolicy, CashAdvanceApprovalService
+Cohesion: 0.07
+Nodes (7): CashAdvanceManager, MyCashAdvances, TeamCashAdvanceManager, CashAdvance, CashAdvanceUpdated, CashAdvanceUpdatedEmail, CashAdvanceApprovalService
 
 ### Community 35 - "dependencies"
 Cohesion: 0.04
 Nodes (45): alpinejs, autoprefixer, axios, @capacitor/app, @capacitor/browser, @capacitor/core, @capacitor/status-bar, chart.js (+37 more)
 
-### Community 36 - "HrChecklistCase"
-Cohesion: 0.12
-Nodes (3): HrChecklistCase, HrChecklistCasePolicy, Carbon
+### Community 36 - "KnowledgeBaseController.php"
+Cohesion: 0.09
+Nodes (4): KnowledgeBaseController, ChatRequest, ChatStreamRequest, UploadDocumentRequest
 
 ### Community 37 - "AttendanceCorrection"
 Cohesion: 0.10
 Nodes (4): AttendanceCorrectionManager, AttendanceCorrection, AttendanceCorrectionService, Carbon
 
-### Community 39 - "ReimbursementApprovalService"
-Cohesion: 0.18
-Nodes (3): ReviewReimbursement, ReimbursementManager, ReimbursementApprovalService
+### Community 39 - "CompanySetting"
+Cohesion: 0.07
+Nodes (15): AttendanceSendReminders, AuditUi, AutoApproveWfaCommand, BackupRunCommand, DetectAlphaAttendanceCommand, DetectChronicLateCommand, DetectMissedClockCommand, GeneratePayrollCommand (+7 more)
+
+### Community 40 - "Leave"
+Cohesion: 0.07
+Nodes (8): HealthController, LeaveController, ListLeaveRequest, StoreLeaveRequest, LeaveResource, Leave, LeaveObserver, Throwable
 
 ### Community 41 - "Loan"
-Cohesion: 0.09
-Nodes (7): LoanController, ListLoanRequest, StoreLoanRequest, UpdateLoanRequest, LoanResource, Loan, LoanService
+Cohesion: 0.07
+Nodes (9): LoanController, ListLoanRequest, StoreLoanRequest, UpdateLoanRequest, LoanResource, Loan, LoanService, LoanInstallmentFactory (+1 more)
 
 ### Community 43 - "Shift"
-Cohesion: 0.09
-Nodes (4): ShiftComponent, ShiftForm, Attribute, Shift
+Cohesion: 0.07
+Nodes (5): AttendanceRiskScorer, ShiftComponent, ShiftForm, Attribute, Shift
 
-### Community 44 - "Illuminate\Contracts\Queue\ShouldQueue"
-Cohesion: 0.06
-Nodes (21): GenerateEmployeeDocumentPdf, GenerateEmployeePayrollJob, Throwable, GeneratePayslipPdfJob, Throwable, Throwable, ProcessKnowledgeBaseEmbedding, RecordQueueHeartbeat (+13 more)
+### Community 44 - "GenerateEmployeeDocumentPdf"
+Cohesion: 0.13
+Nodes (10): GenerateEmployeeDocumentPdf, GenerateEmployeePayrollJob, Throwable, GeneratePayslipPdfJob, Throwable, Throwable, ProcessKnowledgeBaseEmbedding, RecordQueueHeartbeat (+2 more)
 
 ### Community 45 - "HRConnect Brand Identity"
 Cohesion: 0.08
@@ -700,28 +714,24 @@ Cohesion: 0.11
 Nodes (10): AttendanceComponentImport, Carbon, AttendanceImport, Carbon, UserComponentImport, UserImport, Maatwebsite\Excel\Concerns\SkipsEmptyRows, Maatwebsite\Excel\Concerns\ToCollection (+2 more)
 
 ### Community 48 - "Division"
-Cohesion: 0.04
-Nodes (19): EmployeeCreate, JobTitleComponent, Division, JobLevel, JobTitle, Position, EnterpriseRuntime, EmployeeFactory (+11 more)
-
-### Community 49 - "OvertimeController.php"
-Cohesion: 0.13
-Nodes (4): OvertimeController, ListOvertimeRequest, StoreOvertimeRequest, OvertimeResource
+Cohesion: 0.06
+Nodes (15): ReportCenterController, DivisionComponent, JobTitleComponent, Division, JobLevel, JobTitle, EnterpriseRuntime, Illuminate\Database\Eloquent\Concerns\HasTimestamps (+7 more)
 
 ### Community 51 - "Illuminate\Database\Eloquent\Factories\Factory"
 Cohesion: 0.03
-Nodes (32): ChatSession, AssetFactory, static, AssetHandoverFactory, static, BpjsConfigFactory, ChatMessageFactory, ChatSessionFactory (+24 more)
+Nodes (29): AssetFactory, static, AssetHandoverFactory, static, BpjsConfigFactory, CompanyFactory, CompanySettingFactory, static (+21 more)
 
 ### Community 52 - "AttendanceServiceInterface.php"
-Cohesion: 0.08
-Nodes (7): getAttachmentUrl(), registerFace(), removeFace(), storeAttachment(), FaceEnrollment, HomeAttendanceStatus, CommunityService
+Cohesion: 0.06
+Nodes (12): getAttachmentUrl(), registerFace(), removeFace(), storeAttachment(), FaceEnrollment, HomeAttendanceStatus, CommunityService, Illuminate\Http\UploadedFile (+4 more)
 
 ### Community 53 - "le"
 Cohesion: 0.07
 Nodes (32): ba(), be(), ce(), de(), ea(), Ee(), fa(), fe() (+24 more)
 
-### Community 54 - "Reimbursement.php"
-Cohesion: 0.10
-Nodes (3): HrChecklistTemplate, HrChecklistTemplateItem, Illuminate\Database\Eloquent\Relations\HasOneThrough
+### Community 54 - "EmployeeDocumentRequest.php"
+Cohesion: 0.17
+Nodes (3): EmployeeDocumentTemplateFactory, screenshotEnterpriseLicense(), screenshotEnterprisePrivateKey()
 
 ### Community 56 - "UpdateUserProfileInformation.php"
 Cohesion: 0.23
@@ -736,20 +746,20 @@ Cohesion: 0.07
 Nodes (30): require, ballen/distical, barryvdh/laravel-dompdf, blade-ui-kit/blade-heroicons, blade-ui-kit/blade-icons, endroid/qr-code, intervention/image, laravel/ai (+22 more)
 
 ### Community 60 - "Asset"
-Cohesion: 0.05
-Nodes (11): AssetController, HandoverAssetRequest, ListAssetRequest, ReturnAssetRequest, StoreAssetRequest, UpdateAssetRequest, AssetHandoverResource, AssetResource (+3 more)
+Cohesion: 0.06
+Nodes (10): AssetController, HandoverAssetRequest, ListAssetRequest, ReturnAssetRequest, StoreAssetRequest, UpdateAssetRequest, AssetResource, Asset (+2 more)
 
 ### Community 61 - "Basic Usage Examples"
 Cohesion: 0.07
 Nodes (26): Agent Configuration, Agents, Audio, Basic Usage Examples, Common Pitfalls, Conversation Context, Conversation Memory, Decision Workflow (+18 more)
 
-### Community 62 - "Illuminate\Contracts\View\View"
+### Community 62 - "Position"
 Cohesion: 0.05
-Nodes (9): CashAdvanceManager, AttendanceImportExport, UserImportExport, NotificationPreferencesForm, UpdateProfileInformationForm, TeamCashAdvanceManager, Illuminate\Contracts\View\View, Livewire\Attributes\Component (+1 more)
+Nodes (11): EmployeeCreate, AttendanceImportExport, UserImportExport, UpdateProfileInformationForm, Position, EmployeeFactory, PTDayaciptaMandiriPositionSeeder, Livewire\Attributes\Component (+3 more)
 
 ### Community 63 - "ProjectTask"
-Cohesion: 0.11
-Nodes (4): MyOperationalTasks, ProjectTask, ProjectTaskChecklistItem, OperationalWorkspaceService
+Cohesion: 0.06
+Nodes (7): OperationalWorkspace, MyOperationalTasks, Client, Project, ProjectTask, OperationalWorkspaceService, createAssignedOperationalTask()
 
 ### Community 64 - "oi"
 Cohesion: 0.08
@@ -765,14 +775,14 @@ Nodes (22): beginRefresh(), buildStyleId(), clamp(), collapse(), createEventBind
 
 ### Community 67 - "ImportExportRun"
 Cohesion: 0.07
-Nodes (12): ImportExportRunsPruneExpired, ProcessActivityLogExportRun, ProcessAttendanceExportRun, ProcessAttendanceImportRun, ProcessAttendanceReportExportRun, ProcessMonthlyAttendanceReportRun, ProcessUserExportRun, ProcessUserImportRun (+4 more)
+Nodes (11): ProcessActivityLogExportRun, ProcessAttendanceExportRun, ProcessAttendanceImportRun, ProcessAttendanceReportExportRun, ProcessMonthlyAttendanceReportRun, ProcessUserExportRun, ProcessUserImportRun, RunSystemBackup (+3 more)
 
 ### Community 69 - "app.js"
 Cohesion: 0.11
-Nodes (17): createPasPapanToast(), initFlatpickr(), initUiPickers(), modal(), normalizeSweetAlertIcon(), pasPapanAlertLabels(), sweetAlertBaseClasses, toast() (+9 more)
+Nodes (16): createPasPapanToast(), initFlatpickr(), modal(), normalizeSweetAlertIcon(), pasPapanAlertLabels(), sweetAlertBaseClasses, toast(), CapacitorDeviceManager (+8 more)
 
 ### Community 70 - "Illuminate\Database\Eloquent\Collection"
-Cohesion: 0.12
+Cohesion: 0.14
 Nodes (7): CoretaxPph21Sheet, PaymentInstructionsSheet, PayrollSummarySheet, PayrollWorkbookExport, Illuminate\Database\Eloquent\Collection, Maatwebsite\Excel\Concerns\WithMultipleSheets, Maatwebsite\Excel\Concerns\WithTitle
 
 ### Community 71 - "ProfileController.php"
@@ -788,16 +798,16 @@ Cohesion: 0.13
 Nodes (3): DocumentTemplateLibrary, EmployeeDocumentTemplate, DocumentTemplateRenderService
 
 ### Community 74 - "LeaveType"
-Cohesion: 0.08
-Nodes (5): ReportCenterController, LeaveTypeManager, LeaveType, LeaveFactory, static
+Cohesion: 0.09
+Nodes (4): LeaveTypeManager, LeaveType, LeaveFactory, static
 
 ### Community 75 - "SystemBackupRun"
-Cohesion: 0.10
-Nodes (4): RunSystemBackup, SystemMaintenance, SystemBackupRun, BackupSecurityService
+Cohesion: 0.15
+Nodes (3): SystemBackupRun, SystemBackupRunPolicy, BackupSecurityService
 
 ### Community 76 - "ShiftSwapRequest"
-Cohesion: 0.05
-Nodes (7): ScheduleComponent, ShiftSwapApprovalManager, ShiftSwapRequestPage, Schedule, ShiftSwapRequest, ShiftSwapRequestPolicy, ShiftSwapRequestService
+Cohesion: 0.10
+Nodes (3): ShiftSwapApprovalManager, ShiftSwapRequest, ShiftSwapRequestService
 
 ### Community 77 - "check-ui-rules.php"
 Cohesion: 0.15
@@ -806,6 +816,10 @@ Nodes (19): addCappedWarning(), clipText(), collectFormAccessibilityWarnings(), 
 ### Community 78 - "Maatwebsite\Excel\Concerns\FromCollection"
 Cohesion: 0.08
 Nodes (13): ActivityLogExport, AttendanceExport, AttendanceReportExport, LeaveRequestsExport, OvertimeRequestsExport, ScheduleRosterExport, UserExport, Maatwebsite\Excel\Concerns\FromCollection (+5 more)
+
+### Community 79 - "ReimbursementPage"
+Cohesion: 0.10
+Nodes (3): ReimbursementPage, MoneyInput, UserReimbursementService
 
 ### Community 80 - "cn"
 Cohesion: 0.12
@@ -820,60 +834,48 @@ Cohesion: 0.07
 Nodes (4): ManagerInbox, HrChecklistTask, HrChecklistTaskPolicy, ManagerInboxService
 
 ### Community 83 - "count"
-Cohesion: 0.13
-Nodes (4): AuditUi, count(), FaceRecognitionService, LeaveApprovalService
+Cohesion: 0.16
+Nodes (4): count(), FaceDescriptor, FaceRecognitionService, attSvcEnrollFace()
 
 ### Community 84 - "Approval"
-Cohesion: 0.11
-Nodes (5): ApprovalController, ApproveRequest, PendingApprovalsRequest, RejectRequest, Approval
+Cohesion: 0.09
+Nodes (9): ApprovalController, ApproveRequest, PendingApprovalsRequest, RejectRequest, Approval, approvals(), getPendingApprovalFor(), isAllApproved() (+1 more)
 
 ### Community 85 - "Payroll"
 Cohesion: 0.04
-Nodes (11): MyPayslips, Payroll, PayrollStatus, PayrollPaid, PayrollPublished, PayrollRejected, PayrollSubmitted, PayrollVerified (+3 more)
+Nodes (10): PayrollManager, MyPayslips, Event, Payroll, PayrollStatus, PayrollPaid, PayrollPublished, PayrollRejected (+2 more)
 
 ### Community 86 - "Carbon\Carbon"
-Cohesion: 0.19
-Nodes (5): AnalyticsDashboard, Carbon, OvertimeCalculator, Carbon, Carbon\Carbon
-
-### Community 87 - "Announcement"
-Cohesion: 0.12
-Nodes (3): AnnouncementManager, Announcement, Illuminate\Database\Eloquent\Relations\BelongsToMany
-
-### Community 88 - "CustomFormSubmission"
 Cohesion: 0.17
-Nodes (3): CustomFormSubmission, CustomFormSubmittedForReview, ProjectTaskAssignedFromForm
+Nodes (5): AnalyticsDashboard, Carbon, OvertimeCalculator, Carbon, Carbon\Carbon
 
 ### Community 89 - "CommandCenterService"
 Cohesion: 0.16
 Nodes (3): CommandCenter, CommandCenterService, CommercialWorkspaceService
 
 ### Community 91 - "Overtime"
-Cohesion: 0.08
-Nodes (7): OvertimeManager, Overtime, OvertimeRequested, OvertimeRequestedEmail, OvertimeStatusUpdated, OvertimeApprovalService, goldenOvertime()
-
-### Community 93 - "TeamApprovals"
-Cohesion: 0.08
-Nodes (4): TeamApprovals, WorkFromHomeRequest, WorkFromHomeRequestPolicy, WorkFromHomeRequestService
+Cohesion: 0.13
+Nodes (4): OvertimeManager, Overtime, OvertimeApprovalService, goldenOvertime()
 
 ### Community 94 - "Reimbursement"
-Cohesion: 0.12
-Nodes (3): Reimbursement, ReimbursementService, goldenReimbursement()
+Cohesion: 0.08
+Nodes (6): ReviewReimbursement, ReimbursementManager, Reimbursement, ReimbursementService, ReimbursementApprovalService, goldenReimbursement()
 
 ### Community 95 - "KpiSettings"
 Cohesion: 0.14
 Nodes (3): KpiSettings, KpiGroup, KpiTemplate
 
 ### Community 96 - "Illuminate\Support\Carbon"
-Cohesion: 0.13
-Nodes (7): LeaveRequestResult, self, LeaveRequested, LeaveRequestedEmail, LeaveRequestService, Carbon, Illuminate\Support\Carbon
+Cohesion: 0.16
+Nodes (6): LeaveRequestResult, self, LeaveRequested, LeaveRequestService, Carbon, Illuminate\Support\Carbon
 
 ### Community 97 - "Quick Reference"
 Cohesion: 0.08
 Nodes (23): 10. Routing & Controllers → `rules/routing.md`, 11. HTTP Client → `rules/http-client.md`, 12. Events, Notifications & Mail → `rules/events-notifications.md`, `rules/mail.md`, 13. Error Handling → `rules/error-handling.md`, 14. Task Scheduling → `rules/scheduling.md`, 15. Architecture → `rules/architecture.md`, 16. Migrations → `rules/migrations.md`, 17. Collections → `rules/collections.md` (+15 more)
 
 ### Community 98 - "Holiday"
-Cohesion: 0.13
-Nodes (3): HolidayManager, Holiday, HolidayObserver
+Cohesion: 0.11
+Nodes (4): HolidayManager, UpcomingEventsWidget, Holiday, HolidayObserver
 
 ### Community 100 - "HasRolePermissions.php"
 Cohesion: 0.17
@@ -881,7 +883,7 @@ Nodes (14): allowsAdminPermission(), canAssignRoles(), canDeleteSuperadminAccoun
 
 ### Community 101 - "scripts"
 Cohesion: 0.09
-Nodes (23): scripts, lint, lint:check, post-autoload-dump, post-root-package-install, post-update-cmd, pre-package-uninstall, setup (+15 more)
+Nodes (24): scripts, lint, lint:check, post-root-package-install, post-update-cmd, pre-package-uninstall, setup, test (+16 more)
 
 ### Community 102 - "employee-document-request-manager.blade.php"
 Cohesion: 0.11
@@ -903,13 +905,17 @@ Nodes (4): KnowledgeBaseIndex, KnowledgeBaseChat, KnowledgeBaseService, Generato
 Cohesion: 0.18
 Nodes (3): EmployeeDocumentType, EmployeeDocumentTemplateSeeder, makeDocType()
 
-### Community 110 - "Audit Findings — 2026-08-04 (Full Codebase Read + Test Triage)"
-Cohesion: 0.12
-Nodes (15): Audit Findings — 2026-08-04 (Full Codebase Read + Test Triage), Audit HRConnect — SATU-SATUNYA file audit (canonical), 📌 Catatan PROGRESS yang Terbukti STALE, ✅ Fix Terapan Sesi Ini (2026-08-04, commit `436634d` + working tree), Infra & Reliabilitas, 🔴 Kritis (belum di-fix), 🟡 Medium (dikelompokkan per modul), ⚪ Minor / Dead Code (ringkas) (+7 more)
+### Community 110 - "WorkFromHomeRequest"
+Cohesion: 0.17
+Nodes (3): WorkFromHomeRequestPage, WorkFromHomeRequest, WorkFromHomeRequestService
 
-### Community 112 - "DashboardComponent"
-Cohesion: 0.18
-Nodes (3): DashboardComponent, Carbon, AdminDashboardActionService
+### Community 111 - "UserNotificationPreference"
+Cohesion: 0.16
+Nodes (3): NotificationPreferencesForm, UserNotificationPreference, NotificationPreferenceService
+
+### Community 115 - ".request"
+Cohesion: 0.11
+Nodes (5): LogoutOtherBrowserSessionsForm, ActivityLogDetail, EmployeeObserver, PayrollObserver, Laravel\Jetstream\Agent
 
 ### Community 117 - "team-approvals.blade.php"
 Cohesion: 0.12
@@ -919,9 +925,9 @@ Nodes (15): approveAttendanceCorrection(, approveKasbon(, approveLeave(, approve
 Cohesion: 0.10
 Nodes (19): Authorizing Channels, Basic Usage, Broadcasting Helpers, Broadcasting Interfaces, Channel Authorization, Channel Types, Client-Side Features, Client-Side Setup (+11 more)
 
-### Community 122 - "AttendanceService"
-Cohesion: 0.17
-Nodes (3): AttendanceRiskScorer, AttendanceService, GeofenceService
+### Community 121 - "LeaveBalance"
+Cohesion: 0.10
+Nodes (5): LeaveEntitlementManager, LeaveBalance, LeaveEntitlement, LeaveEntitlementService, seedLeaveQuota()
 
 ### Community 123 - "require-dev"
 Cohesion: 0.13
@@ -931,13 +937,13 @@ Nodes (15): require-dev, barryvdh/laravel-ide-helper, fakerphp/faker, larastan/l
 Cohesion: 0.18
 Nodes (5): cdp, cdpPort, CdpSocket, latitude, longitude
 
-### Community 126 - "ImportExportRunViewService"
-Cohesion: 0.11
-Nodes (4): ActivityLogs, AttendanceComponent, show(), ImportExportRunViewService
+### Community 125 - "LeaveService"
+Cohesion: 0.24
+Nodes (3): ResetLeaveQuotaCommand, LeaveService, DayType
 
-### Community 128 - "AttendanceFaceEnforcementTest.php"
-Cohesion: 0.18
-Nodes (4): getAttachmentUrl(), registerFace(), removeFace(), storeAttachment()
+### Community 128 - "Schedule"
+Cohesion: 0.14
+Nodes (3): ScheduleComponent, ShiftSwapRequestPage, Schedule
 
 ### Community 130 - "optionalDependencies"
 Cohesion: 0.29
@@ -961,19 +967,11 @@ Nodes (12): createGroup, createTemplate({{ $group->id }}), delete({{ $kpi->id }}
 
 ### Community 138 - "Setting"
 Cohesion: 0.19
-Nodes (5): Setting, SettingsManagementService, seedLeaveRequestSettings(), seedUserApprovalCoverageSettings(), seedUserMenuSmokeSettings()
+Nodes (4): Setting, SettingsManagementService, seedUserApprovalCoverageSettings(), seedUserMenuSmokeSettings()
 
 ### Community 140 - "DeviceOfflineAttendanceSyncRequest"
 Cohesion: 0.21
 Nodes (3): OfflineAttendanceSyncController, DeviceOfflineAttendanceSyncRequest, OfflineAttendanceSyncService
-
-### Community 141 - "BroadcastRuntime"
-Cohesion: 0.12
-Nodes (3): NotificationsDropdown, AnnouncementRefresh, BroadcastRuntime
-
-### Community 143 - "CollaborationWorkspaceUpdated"
-Cohesion: 0.32
-Nodes (3): CollaborationWorkspaceUpdated, Illuminate\Broadcasting\PrivateChannel, Illuminate\Contracts\Broadcasting\ShouldBroadcast
 
 ### Community 145 - "JetstreamServiceProvider.php"
 Cohesion: 0.13
@@ -996,8 +994,8 @@ Cohesion: 0.17
 Nodes (12): ao(), Co(), ig(), Ip(), kn(), mp(), O(), Ro() (+4 more)
 
 ### Community 153 - "ActivityLog"
-Cohesion: 0.09
-Nodes (7): ActivityLog, ActivityLogDetail, EmployeeObserver, PayrollObserver, RoleObserver, CommunityAuditService, createDashboardEmployee()
+Cohesion: 0.17
+Nodes (3): ActivityLog, CommunityAuditService, AdminDashboardActionService
 
 ### Community 154 - "Laravel Fortify Development"
 Cohesion: 0.12
@@ -1043,13 +1041,13 @@ Nodes (8): activateTemplate({{ $template->id }}), cancelDeleteTemplate, confirmD
 Cohesion: 0.28
 Nodes (3): DeleteUser, DeleteUserForm, Laravel\Jetstream\Contracts\DeletesUsers
 
+### Community 169 - "ApiResponse"
+Cohesion: 0.24
+Nodes (3): ApiResponse, CompanyController, NotificationController
+
 ### Community 171 - "InteractsWithNotificationInbox.php"
 Cohesion: 0.25
 Nodes (4): dismissAnnouncement(), getNotificationInboxViewData(), markAllAsRead(), markAsRead()
-
-### Community 172 - "Illuminate\Support\Collection"
-Cohesion: 0.17
-Nodes (6): AdminDashboardQueryService, countUnpaidLeaveDays(), countWorkingDays(), getHolidaysFlat(), Carbon\CarbonInterface, Illuminate\Support\Collection
 
 ### Community 174 - "payroll-manager.blade.php"
 Cohesion: 0.22
@@ -1119,13 +1117,13 @@ Nodes (14): overrides, node-fetch, @tensorflow/tfjs-core, private, $schema, scri
 Cohesion: 0.25
 Nodes (8): cr(), di(), et(), fi(), go(), hi(), li(), pi()
 
-### Community 196 - "PayrollCalculatorService.php"
-Cohesion: 0.06
-Nodes (9): WarmCacheCommand, self, ptkpLabel(), resolveFromStatus(), KategoriTer, TarifTer, TarifTerSeeder, MaritalStatus (+1 more)
+### Community 196 - "PayrollCalculatorService"
+Cohesion: 0.10
+Nodes (6): self, ptkpLabel(), resolveFromStatus(), PayrollItem, PayrollCalculatorService, TerCategory
 
-### Community 198 - "CheckoutReminderMail.php"
-Cohesion: 0.21
-Nodes (6): CheckoutReminderMail, PayrollPayslipPdfMail, self, Illuminate\Mail\Mailable, Illuminate\Mail\Mailables\Content, Illuminate\Mail\Mailables\Envelope
+### Community 198 - "PayslipPdfService"
+Cohesion: 0.12
+Nodes (8): SendPayrollPayslipEmail, CheckoutReminderMail, PayrollPayslipPdfMail, self, PayslipPdfService, Illuminate\Mail\Mailable, Illuminate\Mail\Mailables\Content, Illuminate\Mail\Mailables\Envelope
 
 ### Community 201 - "Encryptable.php"
 Cohesion: 0.43
@@ -1168,12 +1166,16 @@ Cohesion: 0.20
 Nodes (9): Advanced Query Patterns, Create Dynamic Relationships via Subquery FK, Prefer `whereIn` + Subquery Over `whereHas`, Sometimes Two Simple Queries Beat One Complex Query, Use `addSelect()` Subqueries for Single Values from Has-Many, Use Compound Indexes Matching `orderBy` Column Order, Use Conditional Aggregates Instead of Multiple Count Queries, Use Correlated Subqueries for Has-Many Ordering (+1 more)
 
 ### Community 214 - "Illuminate\Contracts\Pagination\LengthAwarePaginator"
-Cohesion: 0.15
-Nodes (4): AdminAttendanceGridQuery, UserOvertimeService, Illuminate\Contracts\Pagination\LengthAwarePaginator, makeLeaveApprovalEmployee()
+Cohesion: 0.11
+Nodes (5): AttendanceComponent, show(), AttendanceHistoryComponent, AdminAttendanceGridQuery, Illuminate\Contracts\Pagination\LengthAwarePaginator
 
 ### Community 215 - "Database Performance Best Practices"
 Cohesion: 0.20
 Nodes (9): Add Database Indexes, Always Eager Load Relationships, Chunk Large Datasets, Database Performance Best Practices, No Queries in Blade Templates, Prevent Lazy Loading in Development, Select Only Needed Columns, Use `cursor()` for Memory-Efficient Iteration (+1 more)
+
+### Community 217 - "QueuedVerifyEmail.php"
+Cohesion: 0.18
+Nodes (3): QueuedResetPassword, QueuedVerifyEmail, Illuminate\Auth\Notifications\ResetPassword
 
 ### Community 218 - "FortifyServiceProvider.php"
 Cohesion: 0.15
@@ -1227,10 +1229,6 @@ Nodes (8): Apply Global Scopes Sparingly, Avoid Hardcoded Table Names in Queries
 Cohesion: 0.22
 Nodes (8): Add Indexes in the Migration, Generate Migrations with Artisan, Keep Migrations Focused, Migration Best Practices, Mirror Defaults in Model `$attributes`, Never Modify Deployed Migrations, Use `constrained()` for Foreign Keys, Write Reversible `down()` Methods by Default
 
-### Community 235 - "Appraisal"
-Cohesion: 0.13
-Nodes (7): AppraisalExportPdfController, AppraisalForm, MyPerformance, Appraisal, AppraisalService, Barryvdh\DomPDF\Facade\Pdf, Livewire\Form
-
 ### Community 236 - "Blade & Views Best Practices"
 Cohesion: 0.25
 Nodes (7): Blade & Views Best Practices, Prefer Blade Components Over `@include`, Use `$attributes->merge()` in Component Templates, Use `@aware` for Deeply Nested Component Props, Use Blade Fragments for Partial Re-Renders (htmx/Turbo), Use `@pushOnce` for Per-Component Scripts, Use View Composers for Shared View Data
@@ -1274,10 +1272,6 @@ Nodes (7): Add Context to Exception Classes, Enable `dontReportDuplicates()`, Er
 ### Community 247 - "ci:check"
 Cohesion: 0.40
 Nodes (5): ci:check, dev, Composer\\Config::disableProcessTimeout, npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others, @test
-
-### Community 248 - "test"
-Cohesion: 0.50
-Nodes (4): test, @lint:check, @php artisan config:clear --ansi, @php artisan test
 
 ### Community 249 - "Task Scheduling Best Practices"
 Cohesion: 0.25
@@ -1399,37 +1393,41 @@ Nodes (3): close, create, store
 Cohesion: 0.83
 Nodes (3): main(), replace_classes(), strip_dark()
 
+### Community 294 - "post-autoload-dump"
+Cohesion: 0.67
+Nodes (3): post-autoload-dump, Illuminate\\Foundation\\ComposerScripts::postAutoloadDump, @php artisan package:discover --ansi
+
 ### Community 424 - "HRConnect App Icon (192x192 SVG)"
 Cohesion: 0.67
 Nodes (3): HRConnect App Icon (192x192 SVG), HRConnect Application Icon, Icon Design: Three Abstract People
 
 ### Community 496 - "Role"
-Cohesion: 0.13
-Nodes (10): SyncUserRoles, assignRole(), static, Role, Spatie\Permission\Models\Role, adminDirectorySuperadmin(), assetAdmin(), cleanupTestRoles() (+2 more)
+Cohesion: 0.16
+Nodes (9): assignRole(), static, Role, Spatie\Permission\Models\Role, adminDirectorySuperadmin(), assetAdmin(), cleanupTestRoles(), makeAdminRole() (+1 more)
 
 ### Community 756 - "config.md"
-Cohesion: 0.13
-Nodes (7): MaintenanceScheduledBackups, Application, Configuration Best Practices, `env()` Only in Config Files, Use `App::environment()` for Environment Checks, Use Constants and Language Files, Use Encrypted Env or External Secrets
+Cohesion: 0.20
+Nodes (5): Configuration Best Practices, `env()` Only in Config Files, Use `App::environment()` for Environment Checks, Use Constants and Language Files, Use Encrypted Env or External Secrets
 
 ## Knowledge Gaps
-- **894 isolated node(s):** `php`, `config`, `$schema`, `name`, `type` (+889 more)
+- **888 isolated node(s):** `php`, `config`, `$schema`, `name`, `type` (+883 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **262 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **269 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `User` connect `User` to `Livewire\Component`, `Employee`, `Controller`, `Illuminate\Notifications\Notification`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Http\Request`, `Employee.php`, `CollaborationWorkspaceService`, `LeaveBalance`, `Illuminate\Foundation\Events\Dispatchable`, `Symfony\Component\HttpFoundation\Response`, `AppraisalManager`, `MultiCompanyService`, `CompanyAsset`, `CustomFormBuilderService`, `Illuminate\Database\Eloquent\Builder`, `Setting.php`, `Illuminate\Database\Seeder`, `Illuminate\Http\JsonResponse`, `HrChecklistService`, `AttendanceServiceTest.php`, `Attendance`, `UserNotificationRecipientService`, `CashAdvance`, `HrChecklistCase`, `AttendanceCorrection`, `ProjectVisitEvidence`, `ReimbursementApprovalService`, `Illuminate\Contracts\Queue\ShouldQueue`, `AttendanceComponentImport`, `Division`, `AttendanceServiceInterface.php`, `Reimbursement.php`, `UpdateUserProfileInformation.php`, `EmployeeDocumentRequest`, `Illuminate\Contracts\View\View`, `ProjectTask`, `ImportExportRun`, `Illuminate\Database\Eloquent\Collection`, `LeaveType`, `SystemBackupRun`, `ShiftSwapRequest`, `Maatwebsite\Excel\Concerns\FromCollection`, `HrChecklistTask`, `count`, `Payroll`, `Carbon\Carbon`, `Announcement`, `CustomFormSubmission`, `CommandCenterService`, `Admin`, `Overtime`, `TeamApprovals`, `Reimbursement`, `KpiSettings`, `Illuminate\Support\Carbon`, `Holiday`, `HasRolePermissions.php`, `KnowledgeBaseService`, `EmployeeDocumentType`, `UserNotificationPreference`, `EmployeeComponent`, `UserForm`, `.request`, `UserHomeCommandCenterService`, `LeaveEntitlementService`, `ImportExportRunViewService`, `AttendanceFaceEnforcementTest.php`, `ApprovalActorService`, `KnowledgeBaseService.php`, `LoanFactory`, `DeviceOfflineAttendanceSyncRequest`, `ReimbursementPolicy`, `TeamApprovalQueryService`, `ActivityLog`, `UpdatePasswordForm`, `ApprovalMatrixService`, `DeleteUserForm.php`, `UserReimbursementService`, `Illuminate\Support\Collection`, `EmployeeDocumentRequestFactory`, `UserSessionManager`, `PayrollCalculatorService.php`, `CheckoutReminderMail.php`, `Illuminate\Contracts\Pagination\LengthAwarePaginator`, `PayrollAdjustmentFactory`, `UpcomingEventsWidget`, `Appraisal`, `ManagerHierarchyGuard`, `Role`?**
-  _High betweenness centrality (0.106) - this node is a cross-community bridge._
+- **Why does `User` connect `User` to `Livewire\Component`, `Illuminate\Foundation\Http\FormRequest`, `Employee`, `Controller`, `Illuminate\Contracts\Queue\ShouldQueue`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Company`, `CollaborationWorkspaceService`, `Employee.php`, `Illuminate\Queue\SerializesModels`, `Symfony\Component\HttpFoundation\Response`, `Appraisal`, `MultiCompanyService`, `CompanyAsset`, `Illuminate\Database\Eloquent\Builder`, `Laravel\Jetstream\InteractsWithBanner`, `Setting.php`, `Illuminate\Http\JsonResponse`, `HrChecklistCase`, `Illuminate\Database\Seeder`, `Carbon\CarbonInterface`, `Illuminate\Support\Collection`, `CashAdvance`, `AttendanceCorrection`, `ProjectVisitEvidence`, `AttendanceComponentImport`, `Division`, `Illuminate\Database\Eloquent\Factories\Factory`, `AttendanceServiceInterface.php`, `UpdateUserProfileInformation.php`, `EmployeeDocumentRequest`, `Position`, `ProjectTask`, `ImportExportRun`, `OvertimeRequest`, `Illuminate\Database\Eloquent\Collection`, `SystemBackupRun`, `ShiftSwapRequest`, `Maatwebsite\Excel\Concerns\FromCollection`, `ReimbursementPage`, `HrChecklistTask`, `count`, `Carbon\Carbon`, `Announcement`, `CashAdvancePolicy`, `CommandCenterService`, `Admin`, `Overtime`, `Reimbursement`, `KpiSettings`, `Illuminate\Support\Carbon`, `Holiday`, `HasRolePermissions.php`, `KnowledgeBaseService`, `EmployeeDocumentType`, `WorkFromHomeRequest`, `UserNotificationPreference`, `EmployeeComponent`, `UserForm`, `.request`, `UserHomeCommandCenterService`, `LeaveBalance`, `ImportExportRunViewService`, `Schedule`, `ApprovalActorService`, `KnowledgeBaseService.php`, `LoanFactory`, `Setting`, `DeviceOfflineAttendanceSyncRequest`, `EmployeeDocumentRequestPolicy`, `AttendancePolicy`, `ReimbursementPolicy`, `TeamApprovalQueryService`, `UpdatePasswordForm`, `ApprovalMatrixService`, `DeleteUserForm.php`, `LeaveApprovalService`, `AdminDashboardQueryService`, `ApprovalService`, `EmployeeDocumentRequestFactory`, `UserSessionManager`, `PayslipPdfService`, `Illuminate\Contracts\Pagination\LengthAwarePaginator`, `Illuminate\Database\Eloquent\Relations\BelongsToMany`, `PayrollAdjustmentFactory`, `MyPerformance`, `ManagerHierarchyGuard`, `Role`?**
+  _High betweenness centrality (0.108) - this node is a cross-community bridge._
+- **Why does `Employee` connect `Employee` to `Livewire\Component`, `User`, `Illuminate\Foundation\Http\FormRequest`, `LoanFactory`, `Illuminate\Contracts\Queue\ShouldQueue`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Http\Request`, `Company`, `Employee.php`, `EmployeeDocumentRequestPolicy`, `Appraisal`, `MultiCompanyService`, `ReimbursementCategory`, `Illuminate\Database\Eloquent\Builder`, `Setting.php`, `Illuminate\Http\JsonResponse`, `Illuminate\Database\Seeder`, `Carbon\CarbonInterface`, `Attendance`, `CashAdvance`, `AttendanceCorrection`, `CompanySetting`, `Loan`, `Shift`, `GenerateEmployeeDocumentPdf`, `ApprovalService`, `AttendanceComponentImport`, `Division`, `EmployeeDocumentRequestManager`, `EmployeeDocumentRequestFactory`, `IntegrationAttendanceEvent`, `AppServiceProvider`, `EmployeeDocumentRequest`, `Asset`, `Position`, `PayrollCalculatorService`, `EmployeeDocumentTemplate`, `LeaveType`, `count`, `Approval`, `Payroll`, `Overtime`, `Reimbursement`, `Holiday`, `AttendanceFactory`, `EmployeeDocumentType`, `Role`, `EmployeeComponent`, `UserForm`, `.request`, `ApprovalFactory`, `AttendanceService`, `LeaveService`?**
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Why does `HrKnowledgeBaseAgent` connect `HrKnowledgeBaseAgent` to `KnowledgeBaseService`, `.schema`, `KnowledgeBaseService.php`?**
-  _High betweenness centrality (0.050) - this node is a cross-community bridge._
-- **Why does `Employee` connect `Employee` to `Livewire\Component`, `User`, `Illuminate\Foundation\Http\FormRequest`, `LoanFactory`, `Illuminate\Notifications\Notification`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Http\Request`, `Employee.php`, `LeaveBalance`, `AppraisalManager`, `MultiCompanyService`, `Setting.php`, `Illuminate\Database\Seeder`, `Illuminate\Http\JsonResponse`, `ActivityLog`, `AttendanceServiceTest.php`, `TerminationType.php`, `Attendance`, `AttendanceCorrection`, `Loan`, `Shift`, `Illuminate\Contracts\Queue\ShouldQueue`, `AttendanceComponentImport`, `Division`, `EmployeeDocumentRequestManager`, `Illuminate\Database\Eloquent\Factories\Factory`, `EmployeeDocumentRequestFactory`, `Reimbursement.php`, `MyCashAdvances`, `AppServiceProvider`, `IntegrationAttendanceEvent`, `Asset`, `EmployeeDocumentRequest`, `Illuminate\Contracts\View\View`, `PayrollCalculatorService.php`, `Illuminate\Database\Eloquent\Collection`, `EmployeeDocumentTemplate`, `LeaveType`, `count`, `Payroll`, `Illuminate\Contracts\Pagination\LengthAwarePaginator`, `Overtime`, `Reimbursement`, `Holiday`, `AttendanceFactory`, `EmployeeDocumentType`, `Role`, `EmployeeComponent`, `UserForm`, `.request`, `AttendanceService`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
-- **Are the 67 inferred relationships involving `User` (e.g. with `.handle()` and `.verify()`) actually correct?**
-  _`User` has 67 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Are the 66 inferred relationships involving `User` (e.g. with `.handle()` and `.verify()`) actually correct?**
+  _`User` has 66 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 63 inferred relationships involving `Employee` (e.g. with `.handle()` and `.handle()`) actually correct?**
   _`Employee` has 63 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `php`, `config`, `$schema` to the rest of the system?**
-  _894 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _888 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `face-api.min.js` be split into smaller, more focused modules?**
   _Cohesion score 0.013664596273291925 - nodes in this community are weakly interconnected._

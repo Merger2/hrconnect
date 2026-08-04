@@ -281,7 +281,8 @@ class PayrollCalculatorService
     {
         $year = substr($currentPeriod, 0, 4);
 
-        return Payroll::where('employee_id', $employee->id)
+        // pgsql SUM() mengembalikan string — cast float (golden test PR-12/13/14 menemukan TypeError).
+        return (float) Payroll::where('employee_id', $employee->id)
             ->where('period', 'like', "$year-%")
             ->where('period', '<', $currentPeriod)
             ->sum('pph21');
@@ -294,7 +295,7 @@ class PayrollCalculatorService
     {
         $year = substr($currentPeriod, 0, 4);
 
-        return Payroll::where('employee_id', $employee->id)
+        return (float) Payroll::where('employee_id', $employee->id)
             ->where('period', 'like', "$year-%")
             ->where('period', '<', $currentPeriod)
             ->sum(DB::raw('gross_salary + COALESCE(overtime_pay, 0)'));
@@ -437,7 +438,10 @@ class PayrollCalculatorService
             return 0.0;
         }
 
-        $bulanKerja = $employee->join_date->diffInMonths($endDate);
+        // Cast (int) konsisten dengan calculatePesangon — Carbon 3 diffInMonths
+        // mengembalikan float; kompensasi PKWT dihitung per bulan penuh (PP 35/2021).
+        // Temuan golden test CP-06.
+        $bulanKerja = (int) $employee->join_date->diffInMonths($endDate);
 
         if ($bulanKerja < 1) {
             return 0.0;
@@ -603,7 +607,11 @@ class PayrollCalculatorService
                 $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
                 $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
                 $terCategory = $this->getTERCategory($employee);
-                $pph21Deduction = $this->calculatePPh21($employee, ($taxableIncome - $attendancePenalty), $terCategory);
+                // Denda kehadiran BUKAN pengurang penghasilan bruto pajak (PMK 168/2023:
+                // pengurang terbatas pada biaya jabatan/iuran pensiun/JHT). Konsisten dengan
+                // annual true-up (getYtdGrossIncome) yang juga tidak mengurangi denda.
+                // Temuan golden test PR-09/PR-15 — sebelum: taxableIncome - attendancePenalty.
+                $pph21Deduction = $this->calculatePPh21($employee, $taxableIncome, $terCategory);
 
                 // PP 58/2023: Desember/bulan terminasi wajib true-up progresif Pasal 17
                 $isTerminationMonth = $employee->resign_date && CarbonImmutable::parse($employee->resign_date)->format('Y-m') === $period;

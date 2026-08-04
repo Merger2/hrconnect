@@ -27,6 +27,9 @@ uses(RefreshDatabase::class);
 $goldenCases = json_decode(file_get_contents(__DIR__.'/../Fixtures/payroll-golden-cases.json'), true);
 
 beforeEach(function () {
+    // Freeze waktu sesuai angka referensi (pesangon/PMK/terminasi sensitif now()).
+    $this->travelTo(Carbon::parse('2026-08-04 12:00:00'));
+
     // kategori_ter di-seed oleh migration (A/B/C/D); di sini hanya tarif + BPJS.
     (new TarifTerSeeder)->run();
     (new PayrollConfigSeeder)->run();
@@ -74,7 +77,8 @@ function goldenAttendance(Employee $employee, string $period, array $spec): void
     $month = Carbon::createFromFormat('Y-m', $period);
     $day = 1;
 
-    foreach (range(1, $spec['late_days'] ?? 0) as $_) {
+    // CATATAN: jangan pakai range(1, $n) — range(1, 0) menghasilkan [1, 0] (2 elemen!)
+    for ($i = 0; $i < ($spec['late_days'] ?? 0); $i++) {
         Attendance::factory()->create([
             'employee_id' => $employee->id,
             'date' => $month->copy()->setDay($day++)->format('Y-m-d'),
@@ -85,7 +89,7 @@ function goldenAttendance(Employee $employee, string $period, array $spec): void
         ]);
     }
 
-    foreach (range(1, $spec['absent_days'] ?? 0) as $_) {
+    for ($i = 0; $i < ($spec['absent_days'] ?? 0); $i++) {
         Attendance::factory()->create([
             'employee_id' => $employee->id,
             'date' => $month->copy()->setDay($day++)->format('Y-m-d'),
@@ -144,32 +148,35 @@ foreach ($goldenCases['payroll_cases'] as $case) {
         $payroll = $service->generatePayroll($employee, $case['input']['period']);
         $expected = $case['expected'];
 
-        expect($service->getTERCategory($employee)->value)->toBe($expected['ter_category'])
-            ->and($payroll->gross_salary)->toBeWithDelta((float) $expected['gross_salary'], 0.01)
-            ->and($payroll->overtime_pay)->toBeWithDelta((float) $expected['overtime_pay'], 0.01)
-            ->and($payroll->pph21)->toBeWithDelta((float) $expected['pph21'], 0.01)
-            ->and($payroll->bpjs_health)->toBeWithDelta((float) $expected['bpjs']['health_employee'], 0.01)
-            ->and($payroll->bpjs_employment)->toBeWithDelta(
-                (float) (($expected['bpjs']['jht_employee'] ?? 0) + ($expected['bpjs']['jp_employee'] ?? 0)),
-                0.01
-            )
-            ->and($payroll->attendance_penalty)->toBeWithDelta(
-                (float) (($expected['late_penalty'] ?? 0) + ($expected['alpha_penalty'] ?? 0)),
-                0.01
-            )
-            ->and($payroll->total_deduction)->toBeWithDelta((float) $expected['total_deduction'], 0.01)
-            ->and($payroll->net_salary)->toBeWithDelta((float) $expected['net_salary'], 0.01);
+        if ($expected['ter_category'] !== null) {
+            expect($service->getTERCategory($employee)->value)->toBe($expected['ter_category']);
+        }
+        $this->assertEqualsWithDelta((float) $expected['gross_salary'], $payroll->gross_salary, 0.01);
+        $this->assertEqualsWithDelta((float) $expected['overtime_pay'], $payroll->overtime_pay, 0.01);
+        $this->assertEqualsWithDelta((float) $expected['pph21'], $payroll->pph21, 0.01);
+        $this->assertEqualsWithDelta((float) $expected['bpjs']['kesehatan']['employee'], $payroll->bpjs_health, 0.01);
+        $this->assertEqualsWithDelta(
+            (float) ($expected['bpjs']['jht']['employee'] + $expected['bpjs']['jp']['employee']),
+            $payroll->bpjs_employment,
+            0.01
+        );
+        $this->assertEqualsWithDelta(
+            (float) ($expected['late_penalty'] + $expected['alpha_penalty']),
+            $payroll->attendance_penalty,
+            0.01
+        );
+        $this->assertEqualsWithDelta((float) $expected['total_deduction'], $payroll->total_deduction, 0.01);
+        $this->assertEqualsWithDelta((float) $expected['net_salary'], $payroll->net_salary, 0.01);
 
-        // Employer shares tidak tersimpan di Payroll — hitung ulang via service.
-        $reimbursementTotal = array_sum(array_column($case['input']['reimbursements'], 'amount'));
-        $taxableIncome = $payroll->gross_salary - $reimbursementTotal;
-        $bpjs = $service->calculateBPJS($employee, (float) $taxableIncome);
+        // Employer shares tidak tersimpan di Payroll — hitung ulang via service,
+        // basis taxable_income dari fixture (prorata + lembur, tanpa reimburse).
+        $bpjs = $service->calculateBPJS($employee, (float) $expected['taxable_income']);
 
-        expect($bpjs['bpjs_kesehatan']['employer'])->toBeWithDelta((float) $expected['bpjs']['health_employer'], 0.01)
-            ->and($bpjs['bpjs_jht']['employer'])->toBeWithDelta((float) $expected['bpjs']['jht_employer'], 0.01)
-            ->and($bpjs['bpjs_jp']['employer'])->toBeWithDelta((float) $expected['bpjs']['jp_employer'], 0.01)
-            ->and($bpjs['bpjs_jkk']['employer'])->toBeWithDelta((float) $expected['bpjs']['jkk_employer'], 0.01)
-            ->and($bpjs['bpjs_jkm']['employer'])->toBeWithDelta((float) $expected['bpjs']['jkm_employer'], 0.01);
+        $this->assertEqualsWithDelta((float) $expected['bpjs']['kesehatan']['employer'], $bpjs['bpjs_kesehatan']['employer'], 0.01);
+        $this->assertEqualsWithDelta((float) $expected['bpjs']['jht']['employer'], $bpjs['bpjs_jht']['employer'], 0.01);
+        $this->assertEqualsWithDelta((float) $expected['bpjs']['jp']['employer'], $bpjs['bpjs_jp']['employer'], 0.01);
+        $this->assertEqualsWithDelta((float) $expected['bpjs']['jkk']['employer'], $bpjs['bpjs_jkk']['employer'], 0.01);
+        $this->assertEqualsWithDelta((float) $expected['bpjs']['jkm']['employer'], $bpjs['bpjs_jkm']['employer'], 0.01);
     })->skip(! $case['active'], 'Menunggu angka referensi dari Fikih');
 }
 
@@ -261,6 +268,6 @@ foreach ($goldenCases['component_cases'] as $case) {
 
         $result = $actual instanceof Closure ? $actual() : $actual;
 
-        expect($result)->toBeWithDelta((float) $case['expected'], 0.01);
+        $this->assertEqualsWithDelta((float) $case['expected'], $result, 0.01);
     })->skip(! $case['active'], 'Menunggu angka referensi dari Fikih');
 }
