@@ -65,15 +65,6 @@ return [
                 'view' => ['label' => 'View', 'permission' => 'admin.dashboard.view'],
             ],
         ],
-        'command_center' => [
-            'label' => 'Command Center',
-            'section' => 'overview',
-            'enterprise' => true,
-            'description' => 'Enterprise command center overview.',
-            'actions' => [
-                'view' => ['label' => 'View', 'permission' => 'admin.command_center.view'],
-            ],
-        ],
         'analytics_dashboard' => [
             'label' => 'Analytics Dashboard',
             'section' => 'overview',

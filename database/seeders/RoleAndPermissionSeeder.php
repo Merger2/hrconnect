@@ -102,7 +102,6 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::ACCESS_ADMIN_PANEL,
             PermissionEnum::VIEW_ADMIN_DASHBOARD,
             PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
             PermissionEnum::VIEW_ADMIN_DOCUMENT_REQUESTS,
             // Master data (full CRUD)
             PermissionEnum::VIEW_BRANCHES,
@@ -187,7 +186,6 @@ class RoleAndPermissionSeeder extends Seeder
     {
         return [
             PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
             // View context
             PermissionEnum::VIEW_EMPLOYEES,
             PermissionEnum::VIEW_ATTENDANCES,
@@ -224,7 +222,6 @@ class RoleAndPermissionSeeder extends Seeder
     {
         return [
             PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
             PermissionEnum::VIEW_EMPLOYEES,
             PermissionEnum::VIEW_KNOWLEDGEBASE,
             PermissionEnum::VIEW_HR_CHECKLISTS,

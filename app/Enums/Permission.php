@@ -31,9 +31,6 @@ enum Permission: string
     // – Dashboard (1) –
     case VIEW_DASHBOARD = 'view_dashboard';
 
-    // – Command Center / Overview (1) –
-    case VIEW_COMMAND_CENTER = 'view_command_center';
-
     // – Document Requests (1) — admin panel visibility –
     case VIEW_ADMIN_DOCUMENT_REQUESTS = 'view_admin_document_requests';
 
@@ -210,7 +207,6 @@ enum Permission: string
         return [
             'Document Requests' => [self::VIEW_ADMIN_DOCUMENT_REQUESTS],
             'Dashboard' => [self::VIEW_DASHBOARD],
-            'Command Center' => [self::VIEW_COMMAND_CENTER],
             'Company' => [self::VIEW_COMPANIES, self::MANAGE_COMPANIES],
             'Branch' => [self::VIEW_BRANCHES, self::MANAGE_BRANCHES],
             'Division' => [self::VIEW_DIVISIONS, self::MANAGE_DIVISIONS],

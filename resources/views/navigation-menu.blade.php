@@ -30,11 +30,10 @@ use App\Helpers\FeatureToggle;
             'type' => 'group',
             'id' => 'overview',
             'label' => __('Overview'),
-            'active' => $isRouteActive(['admin.dashboard', 'admin.command-center', 'admin.inbox']),
+            'active' => $isRouteActive(['admin.dashboard', 'admin.inbox']),
             'items' => [
                 ['type' => 'heading', 'label' => __('Daily Command')],
                 ['type' => 'link', 'label' => __('Dashboard'), 'href' => route('admin.dashboard'), 'active' => $isRouteActive('admin.dashboard'), 'visible' => $can('viewAdminDashboard')],
-                ['type' => 'link', 'label' => __('Command Center'), 'href' => route('admin.command-center'), 'active' => $isRouteActive('admin.command-center'), 'visible' => $can('viewCommandCenter')],
                 [
                     'type' => 'link',
                     'label' => __('Manager Inbox'),
