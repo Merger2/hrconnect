@@ -25,7 +25,7 @@
 - **92 Livewire components** · **101 models** · **72 controllers** (~104 features)
 - Progress/status: `docs/PROGRESS.md` + `docs/FEATURE-INVENTORY.md` (di-update per session)
 - Audit terbaru: `AUDIT-2026-07-30.md` (root, git-tracked) — jangan re-fix issue yang sudah tercatat
-- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon`, `codemap.md` (semua level), `/.slim/` — gitignored, **local-only** (branch main produksi hanya berisi kode + folder penting). `tests/` + `PRD.md` **TRACKED sejak 2026-08-04** (commit `5e2f953`) — ikut CI/checkout fresh. `.github/` masih **local-only** (di-ignore global rule — belum pernah di-commit). `AUDIT-*.md` root TETAP di-commit; `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang; ⚠️ password asli pernah ada di history commit `6a24cc4` — sudah ter-push, rotasi password wajib); `phpunit.pgsql.xml` sudah ter-commit.
+- ⚠️ **Git hygiene:** `docs/**`, `.agents/`, `.claude/`, `.opencode/`, `phpstan.neon.dist`, `phpstan-baseline.neon`, `codemap.md` (semua level), `/.slim/` — gitignored, **local-only** (branch main produksi hanya berisi kode + folder penting). `tests/` + `PRD.md` **TRACKED sejak 2026-08-04** (commit `5e2f953`) — ikut CI/checkout fresh. `.github/` masih **local-only** (di-ignore global rule — belum pernah di-commit). `AUDIT-*.md` root TETAP di-commit; `.env.testing` **local-only** (berisi kredensial DB asli — di-untrack 2026-08-04, jangan commit ulang; ⚠️ password asli pernah ada di history commit `6a24cc4` — sudah ter-push, repo saat ini PRIVATE + DB testing lokal, rotasi password baru wajib sebelum repo dipublikasikan); `phpunit.pgsql.xml` sudah ter-commit.
 
 ---
 
