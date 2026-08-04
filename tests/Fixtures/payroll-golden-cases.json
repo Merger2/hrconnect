@@ -16,14 +16,14 @@
       "Desember ATAU bulan resign_date: bypass TER, pakai true-up: ytd_gross = SUM(gross_salary+overtime_pay bulan sebelumnya dari DB) + gross bulan ini; annual_pph21 = calculateAnnualPPh21Progressive(ytd_gross); ytd_pph21 = SUM(pph21 bulan sebelumnya dari DB); pph21_bulan_ini = max(0, round(annual_pph21 - ytd_pph21, 2)).",
       "calculateAnnualPPh21Progressive: PKP = max(0, annual_gross - PTKP) -- TIDAK ada pengurang biaya jabatan (deviasi dari standar resmi, dicatat sebagai temuan audit terpisah). Bracket: 0-60jt=5%, 60-250jt=15%, 250-500jt=25%, 500jt-5M=30%, >5M=35%.",
       "PTKP: basis 54.000.000 (semua status) + 4.500.000 jika married (K) + min(children,3) x 4.500.000.",
-      "BPJS (round per komponen, 2 desimal): Kesehatan 1%/4%, cap 12.000.000. JHT 2%/3.7%, tanpa cap. JP 1%/2%, cap 9.559.600. JKK 0%/0.24%, tanpa cap. JKM 0%/0.3%, tanpa cap. employment_type=INTERN -> semua 0.",
       "THR prorata = round((bulan_kerja/12) x gaji_bulanan, 2).",
-      "Pesangon: multiplier per tahun masa kerja (<1=0, 1=1, 2=2, 3=3, 4=4, 5=5, >=6=6 [CAP]) x monthlySalary x variantMultiplier. TIDAK sesuai PP 35/2021 (temuan audit -- skema mengikuti UU 13/2003 lama). Tanpa cap rupiah.",
       "PMK (calculateUangPenghargaanMasaKerja): <3thn=0, 3-6=2, 6-9=3, 9-12=4, 12-15=5 (bulan gaji) x variantMultiplier. Sesuai PP 35/2021 Pasal 40(3).",
       "Kompensasi PKWT: hanya CONTRACT. bulanKerja = join_date->diffInMonths(resign_date ?? contract_end_date ?? now()). round((bulanKerja/12) x monthlySalary, 2).",
       "Cash-out cuti: remaining = max(0, quota-used). dailyRate = monthlySalary / divisor (21 utk 5 hari kerja). round(remaining x dailyRate, 2).",
       "variantMultiplier (phk_variant, dipakai pesangon & PMK): dismissed/default=1.0x, dismissed_severe=2.0x, mutual=0.5x. CATATAN AUDIT: dismissed_severe=2x dan resign=1x TIDAK sesuai UU 13/2003 Pasal 158 / PP 35/2021 (perlu validasi kebijakan internal perusahaan).",
-      "net_salary = gross_salary - total_deduction -- TIDAK di-round eksplisit oleh kode. Gunakan assertEqualsWithDelta(..., 0.01) di semua assertion float."
+      "net_salary = gross_salary - total_deduction -- TIDAK di-round eksplisit oleh kode. Gunakan assertEqualsWithDelta(..., 0.01) di semua assertion float.",
+      "Pesangon PP 35/2021 Pasal 40(2): <1=1, 1=2, 2=3, 3=4, 4=5, 5=6, 6=7, 7=8, >=8=9 bulan gaji x variantMultiplier.",
+      "BPJS JP cap 11.086.300 (Maret 2026)."
     ],
     "temuan_audit_terkait_test": [
       "BUG: getYtdGrossIncome() menjumlahkan gross_salary + overtime_pay untuk bulan-bulan sebelumnya, padahal gross_salary yang tersimpan SUDAH termasuk overtime_pay -- lembur ter-double-count di true-up Desember/terminasi kalau ada lembur di bulan-bulan sebelumnya. PR-12/PR-13/PR-14 di dataset ini sengaja TIDAK punya lembur di ytd_payrolls sehingga tidak kena bug ini -- rekomendasi: tambah case terpisah (mis. PR-16) khusus untuk expose bug ini di test suite.",
@@ -32,7 +32,10 @@
       "calculateAnnualPPh21Progressive tidak mengurangi biaya jabatan (5% bruto, cap 6jt/tahun sesuai PMK 168/2023) -- deviasi dari standar resmi, worth dikonfirmasi apakah disengaja (simplifikasi skripsi) atau perlu diperbaiki sebelum sidang."
     ],
     "periode_referensi": "2026-07 (kasus TER bulanan) / 2026-12 (kasus true-up Desember) / termination di 2026-07-20 (true-up terminasi)",
-    "data_yang_harus_di_seed_sebelum_test": "TarifTerSeeder + PayrollConfigSeeder (BpjsConfig) + CompanySetting attendance_penalty_per_day=50000 (fallback default, tidak wajib di-seed eksplisit) + Carbon freeze 2026-08-04 (lihat freeze_time) + untuk PR-12/13/14: seed record Payroll historis sesuai ytd_payrolls sebelum generatePayroll() dipanggil untuk periode yang diuji."
+    "data_yang_harus_di_seed_sebelum_test": "TarifTerSeeder + PayrollConfigSeeder (BpjsConfig) + CompanySetting attendance_penalty_per_day=50000 (fallback default, tidak wajib di-seed eksplisit) + Carbon freeze 2026-08-04 (lihat freeze_time) + untuk PR-12/13/14: seed record Payroll historis sesuai ytd_payrolls sebelum generatePayroll() dipanggil untuk periode yang diuji.",
+    "changelog": [
+      "2026-08-05 (final): pesangon PP 35/2021 (CP-03=48jt, CP-04=48jt); cap JP 11.086.300 (PR-03/11/14/15); biaya jabatan TIDAK diterapkan (revert M2) — PR-14 pph21 kembali 2.415.000, CP-08 75.500.000."
+    ]
   },
   "payroll_cases": [
     {
@@ -210,8 +213,8 @@
             "employer": 388500
           },
           "jp": {
-            "employee": 95596,
-            "employer": 191192
+            "employee": 105000,
+            "employer": 210000
           },
           "jkk": {
             "employer": 25200
@@ -221,11 +224,11 @@
           }
         },
         "pph21": 157500,
-        "total_deduction": 568096,
-        "net_salary": 9931904
+        "total_deduction": 577500,
+        "net_salary": 9922500
       },
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
     },
     {
       "id": "PR-04",
@@ -741,8 +744,8 @@
             "employer": 925000
           },
           "jp": {
-            "employee": 95596,
-            "employer": 191192
+            "employee": 110863,
+            "employer": 221726
           },
           "jkk": {
             "employer": 60000
@@ -752,11 +755,11 @@
           }
         },
         "pph21": 2500000,
-        "total_deduction": 3215596,
-        "net_salary": 21784404
+        "total_deduction": 3230863,
+        "net_salary": 21769137
       },
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
     },
     {
       "id": "PR-12",
@@ -1028,8 +1031,8 @@
             "employer": 666000
           },
           "jp": {
-            "employee": 95596,
-            "employer": 191192
+            "employee": 110863,
+            "employer": 221726
           },
           "jkk": {
             "employer": 43200
@@ -1039,11 +1042,11 @@
           }
         },
         "pph21": 2415000,
-        "total_deduction": 2990596,
-        "net_salary": 15009404
+        "total_deduction": 3005863,
+        "net_salary": 14994137
       },
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
     },
     {
       "id": "PR-15",
@@ -1105,8 +1108,8 @@
             "employer": 358985.55
           },
           "jp": {
-            "employee": 95596,
-            "employer": 191192
+            "employee": 97023.12,
+            "employer": 194046.24
           },
           "jkk": {
             "employer": 23285.55
@@ -1116,11 +1119,11 @@
           }
         },
         "pph21": 145534.68,
-        "total_deduction": 682200.04,
-        "net_salary": 9370112.09
+        "total_deduction": 683627.16,
+        "net_salary": 9368684.97
       },
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
     }
   ],
   "component_cases": [
@@ -1152,29 +1155,29 @@
       "id": "CP-03",
       "method": "calculatePesangon",
       "title": "Pesangon 5 tahun kerja, PHK biasa (1x)",
-      "notes": "Freeze time 2026-08-04: join 2021-07-01 -> diffInMonths=61 -> 5 tahun -> multiplier 5.",
+      "notes": "PP 35/2021: join 2021-07-01 freeze 2026-08-04 = 5 thn -> multiplier 6 (sebelumnya UU13 = 5).",
       "input": {
         "join_date": "2021-07-01",
         "phk_variant": "dismissed",
         "monthly_salary": 8000000
       },
-      "expected": 40000000,
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "expected": 48000000,
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (PP 35/2021 Pasal 40(2) — keputusan P0)"
     },
     {
       "id": "CP-04",
       "method": "calculatePesangon",
       "title": "Pesangon PHK severe 2x, 2 tahun",
-      "notes": "Freeze time 2026-08-04: join 2024-07-01 -> diffInMonths=25 -> 2 tahun -> multiplier 2 x variant 2.0.",
+      "notes": "PP 35/2021: 2 thn -> 3x, severe 2.0x = 3x2x8jt = 48jt.",
       "input": {
         "join_date": "2024-07-01",
         "phk_variant": "dismissed_severe",
         "monthly_salary": 8000000
       },
-      "expected": 32000000,
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "expected": 48000000,
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (PP 35/2021 Pasal 40(2) — keputusan P0)"
     },
     {
       "id": "CP-05",
@@ -1229,8 +1232,8 @@
         "annual_gross_income": 480000000
       },
       "expected": 75500000,
-      "active": false,
-      "reference": "MENUNGGU ANGKA REFERENSI ULANG (Fikih/Claude): PP 35/2021 pesangon / cap JP 2026 / biaya jabatan PMK 168"
+      "active": true,
+      "reference": "angka Claude asli (tanpa biaya jabatan — keputusan M2 biarkan dulu)"
     },
     {
       "id": "CP-09",

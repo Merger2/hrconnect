@@ -241,13 +241,10 @@ class PayrollCalculatorService
      */
     public function calculateAnnualPPh21Progressive(Employee $employee, float $annualGrossIncome): float
     {
-        // Biaya jabatan PMK 168/2023: 5% × bruto, maks Rp6.000.000/tahun,
-        // dikurangkan sebelum PTKP (keputusan compliance P0 2026-08-05).
-        $biayaJabatan = min(0.05 * $annualGrossIncome, 6_000_000);
-        $netto = max(0, $annualGrossIncome - $biayaJabatan);
-
+        // CATATAN (keputusan Fikih 2026-08-05 "biarkan dulu"): biaya jabatan 5%/cap 6jt
+        // (PMK 168/2023) TIDAK diterapkan — deviasi terdokumentasi di AUDIT.md, revisit later.
         $ptkp = $this->getPtkpAmount($employee);
-        $pkp = max(0, $netto - $ptkp);
+        $pkp = max(0, $annualGrossIncome - $ptkp);
 
         if ($pkp <= 0) {
             return 0.0;
