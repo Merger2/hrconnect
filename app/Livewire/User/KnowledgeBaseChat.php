@@ -58,7 +58,6 @@ class KnowledgeBaseChat extends Component
         ];
 
         // Add placeholder for assistant response (streaming)
-        $responseIndex = count($this->messages);
         $this->messages[] = [
             'role' => 'assistant',
             'text' => '',
@@ -67,6 +66,26 @@ class KnowledgeBaseChat extends Component
         ];
 
         $this->isLoading = true;
+
+        // NOTE: deliberately NO AI call here — this action must return fast so the
+        // browser renders the user message + "Thinking..." placeholder immediately.
+        // The AI call happens in processAnswer() (called from the frontend after
+        // this render completes), so the UI never looks frozen while Gemini thinks.
+    }
+
+    public function processAnswer(): void
+    {
+        $this->authorize('view_knowledgebase');
+
+        $responseIndex = count($this->messages) - 1;
+
+        if ($responseIndex < 0 || ($this->messages[$responseIndex]['role'] ?? null) !== 'assistant') {
+            $this->isLoading = false;
+
+            return;
+        }
+
+        $question = (string) ($this->messages[$responseIndex - 1]['text'] ?? '');
 
         try {
             $answer = '';

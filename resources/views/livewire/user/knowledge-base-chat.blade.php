@@ -32,19 +32,7 @@
                                         : 'bg-gray-50 text-gray-900 border border-gray-100 rounded-bl-md' }}">
                                     @if(($msg['is_streaming'] ?? false))
                                         {{-- Streaming in progress — wire:stream always present in DOM --}}
-                                        <div class="whitespace-pre-wrap" wire:stream="kb-response">
-                                            @if(empty($msg['text']))
-                                                {{-- Initial loading indicator before first chunk arrives --}}
-                                                <span class="flex items-center gap-2 py-1">
-                                                    <span class="flex gap-1">
-                                                        <span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 0ms"></span>
-                                                        <span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 150ms"></span>
-                                                        <span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 300ms"></span>
-                                                    </span>
-                                                    <span class="text-xs text-gray-500">{{ __('Thinking...') }}</span>
-                                                </span>
-                                            @endif
-                                        </div>
+                                        <div class="whitespace-pre-wrap" wire:stream="kb-response"></div>
                                     @else
                                         <div class="whitespace-pre-wrap">{{ $msg['text'] }}</div>
 
@@ -101,12 +89,23 @@
 
                 {{-- Input Area --}}
                 <div class="shrink-0 border-t border-gray-100 bg-white/80 backdrop-blur-sm px-4 sm:px-5 py-3">
-                    <form wire:submit.prevent="sendMessage" class="flex items-end gap-2">
+                    {{-- Real-time loading indicator — request lifecycle, bukan nunggu render --}}
+                    <div wire:loading wire:target="sendMessage, processAnswer"
+                         class="mb-2 flex items-center gap-2 text-sm text-gray-500"
+                         role="status" aria-live="polite">
+                        <span class="flex gap-1">
+                            <span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 0ms"></span>
+                            <span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 150ms"></span>
+                            <span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 300ms"></span>
+                        </span>
+                        <span>{{ __('Thinking...') }}</span>
+                    </div>
+                    <form @submit.prevent="submitMessage()" class="flex items-end gap-2">
                         <div class="flex-1 relative">
                             <textarea
                                 wire:model="question"
                                 x-ref="questionInput"
-                                @keydown.enter.prevent="if(!$event.shiftKey) $wire.sendMessage()"
+                                @keydown.enter.prevent="if(!$event.shiftKey) submitMessage()"
                                 rows="1"
                                 style="field-sizing: content"
                                 maxlength="500"
@@ -118,11 +117,19 @@
                         </div>
                         <button type="submit"
                             wire:loading.attr="disabled"
-                            wire:target="sendMessage"
-                            :disabled="!canSend()"
+                            wire:target="sendMessage, processAnswer"
+                            :disabled="!canSend() || $wire.isLoading"
                             class="wcag-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="{{ __('Send') }}">
-                            <x-heroicon-o-paper-airplane class="h-5 w-5" />
+                            <template x-if="!$wire.isLoading">
+                                <x-heroicon-o-paper-airplane class="h-5 w-5" />
+                            </template>
+                            <template x-if="$wire.isLoading">
+                                <svg class="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </template>
                         </button>
                     </form>
                     <p class="mt-1.5 text-xs text-gray-400 px-1">
@@ -170,6 +177,23 @@
                 charCount() {
                     const input = this.$refs.questionInput;
                     return input ? `${input.value.length}/500` : '0/500';
+                },
+
+                async submitMessage() {
+                    if (!this.canSend() || this.$wire.isLoading) return;
+
+                    try {
+                        // Phase 1: fast render — user message + "Thinking..." placeholder
+                        await this.$wire.sendMessage();
+                        this.$nextTick(() => this.scrollToBottom());
+
+                        // Phase 2: AI call + streaming (placeholder already in DOM)
+                        await this.$wire.processAnswer();
+                    } catch (e) {
+                        // Validation error or server exception — Livewire renders the error
+                    } finally {
+                        this.$nextTick(() => this.scrollToBottom());
+                    }
                 },
             };
         }
