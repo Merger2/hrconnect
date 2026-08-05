@@ -198,6 +198,13 @@ function trackedProjectFiles(?string $prefix = null): array
     $output = shell_exec('git ls-files');
     $files = $output === null ? [] : array_values(array_filter(explode("\n", $output)));
 
+    // Entri index bisa menunjuk file yang sudah dihapus di working tree
+    // (mis. tes yang di-retire belum di-stage) — jangan di-scan.
+    $files = array_values(array_filter(
+        $files,
+        fn (string $file): bool => is_file(base_path($file)),
+    ));
+
     if ($prefix === null) {
         return $files;
     }

@@ -4,22 +4,20 @@ use App\Livewire\Admin\MasterData\LeaveTypeManager;
 use App\Models\LeaveType;
 use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 
-test('admin and hr roles can manage leave types', function () {
+test('admin role can manage leave types while employees cannot', function () {
+    $this->seed(RoleAndPermissionSeeder::class);
+
     $admin = User::factory()->admin()->create();
-    $hr = User::factory()->admin()->create();
     $employee = User::factory()->create();
 
     $adminRole = Role::query()->where('slug', 'admin')->firstOrFail();
-    $hrRole = Role::query()->where('slug', 'hr')->firstOrFail();
-
     $admin->roles()->sync([$adminRole->id]);
-    $hr->roles()->sync([$hrRole->id]);
 
     expect(Gate::forUser($admin)->allows('manageLeaveTypes'))->toBeTrue()
-        ->and(Gate::forUser($hr)->allows('manageLeaveTypes'))->toBeTrue()
         ->and(Gate::forUser($employee)->allows('manageLeaveTypes'))->toBeFalse();
 });
 

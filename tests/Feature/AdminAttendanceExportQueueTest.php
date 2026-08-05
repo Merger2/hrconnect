@@ -2,6 +2,7 @@
 
 use App\Jobs\ProcessAttendanceExportRun;
 use App\Models\Attendance;
+use App\Models\Employee;
 use App\Models\ImportExportRun;
 use App\Models\User;
 use Illuminate\Support\Carbon;
@@ -12,11 +13,13 @@ test('attendance export run uses attendance filters and completes', function () 
     Storage::fake('local');
 
     $user = User::factory()->create(['group' => 'user']);
+    $employee = Employee::factory()->create(['user_id' => $user->id]);
+
     Attendance::query()->create([
-        'user_id' => $user->id,
+        'employee_id' => $employee->id,
         'date' => '2026-04-20',
-        'time_in' => Carbon::parse('2026-04-20 08:00:00'),
-        'time_out' => Carbon::parse('2026-04-20 17:00:00'),
+        'clock_in' => Carbon::parse('2026-04-20 08:00:00'),
+        'clock_out' => Carbon::parse('2026-04-20 17:00:00'),
         'status' => 'present',
     ]);
 
@@ -36,7 +39,7 @@ test('attendance export run uses attendance filters and completes', function () 
     $run->refresh();
 
     expect($run->status)->toBe('completed')
-        ->and($run->progress_percentage)->toBe(100)
+        ->and($run->progress_percentage)->toBe(100.0)
         ->and($run->processed_rows)->toBe(1)
         ->and($run->file_path)->not->toBeNull();
 

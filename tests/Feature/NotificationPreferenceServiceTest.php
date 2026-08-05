@@ -33,6 +33,8 @@ test('notification preferences fall back to in app channel', function () {
     $user = User::factory()->create();
     $service = app(NotificationPreferenceService::class);
 
-    expect($service->channelsFor($user, 'attendance.risk'))->toBe(['database'])
+    // Kanal fallback = CHANNEL_IN_APP (in_app); laravelChannelsFor memetakannya
+    // ke kanal Laravel 'database'.
+    expect($service->channelsFor($user, 'attendance.risk'))->toBe([UserNotificationPreference::CHANNEL_IN_APP])
         ->and($service->laravelChannelsFor($user, 'attendance.risk'))->toBe(['database']);
 });

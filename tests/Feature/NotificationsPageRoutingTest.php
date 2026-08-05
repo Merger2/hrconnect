@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Str;
@@ -48,6 +49,17 @@ test('notifications page normalizes absolute notification urls to internal paths
 
 test('admin notifications route uses dedicated admin page', function () {
     $admin = User::factory()->admin()->create();
+
+    // Route admin.notifications digate manage_admin_notifications; halaman user
+    // redirect ke admin saat user punya view_notifications.
+    $role = Role::create([
+        'name' => 'Notification Admin_'.uniqid(),
+        'slug' => 'notification_admin_'.uniqid(),
+        'description' => 'Can view admin notifications.',
+        'permission_keys' => ['manage_admin_notifications', 'view_notifications'],
+    ]);
+    $admin->roles()->sync([$role->id]);
+
     $this->actingAs($admin);
 
     DatabaseNotification::create([

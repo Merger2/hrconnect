@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\PayrollStatus;
+use App\Events\PayrollApproved;
+use App\Events\PayrollPaid as PayrollPaidEvent;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Employee;
 use App\Models\Payroll;
@@ -55,14 +57,42 @@ test('payroll index returns paginated list with correct structure', function () 
         ->assertJsonPath('status', 'success');
 });
 
-test('payroll index is denied for users without payroll_locked edition', function () {
-    config(['hrconnect.editions.payroll_locked' => true]);
-    Gate::define('viewAny', fn () => false);
-
+test('payroll index is scoped to the authenticated employee', function () {
     $user = User::factory()->create();
-    $this->actingAs($user)
-        ->getJson('/api/v1/payrolls')
-        ->assertForbidden();
+    $employee = Employee::factory()->create(['user_id' => $user->id]);
+    $otherEmployee = Employee::factory()->create();
+
+    Payroll::create([
+        'employee_id' => $employee->id,
+        'period' => '2026-07',
+        'basic_salary' => 5000000,
+        'total_allowance' => 500000,
+        'gross_salary' => 5500000,
+        'total_deduction' => 500000,
+        'net_salary' => 5000000,
+        'status' => PayrollStatus::DRAFT,
+    ]);
+    Payroll::create([
+        'employee_id' => $otherEmployee->id,
+        'period' => '2026-07',
+        'basic_salary' => 5000000,
+        'total_allowance' => 500000,
+        'gross_salary' => 5500000,
+        'total_deduction' => 500000,
+        'net_salary' => 5000000,
+        'status' => PayrollStatus::DRAFT,
+    ]);
+
+    // viewAny selalu true (PayrollPolicy) — tetapi index dibatasi ke payroll
+    // milik employee sendiri (non finance/admin).
+    $response = $this->actingAs($user)->getJson('/api/v1/payrolls');
+
+    $response->assertOk();
+
+    $employeeIds = collect($response->json('data'))->pluck('employee_id')->all();
+
+    expect($employeeIds)->toContain($employee->id)
+        ->not->toContain($otherEmployee->id);
 });
 
 test('payroll show returns full detail with items', function () {
@@ -485,11 +515,13 @@ test('full payroll lifecycle: generate -> publish -> pay', function () {
         'status' => PayrollStatus::DRAFT,
     ]);
 
-    // Publish
+    // Publish — notifikasi dikirim via event PayrollApproved (bukan model event).
     $payroll->updateQuietly(['status' => PayrollStatus::APPROVED]);
+    event(new PayrollApproved($payroll));
     Notification::assertSentTo($employee->user, PayrollPublished::class);
 
     // Pay
     $payroll->updateQuietly(['status' => PayrollStatus::PAID]);
+    event(new PayrollPaidEvent($payroll));
     Notification::assertSentTo($employee->user, PayrollPaid::class);
 });

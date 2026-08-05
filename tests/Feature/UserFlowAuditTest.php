@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\Editions;
 use App\Livewire\User\AttendanceHistoryComponent;
 use App\Livewire\User\NotificationsPage;
 use App\Livewire\User\ReimbursementPage;
@@ -13,10 +12,11 @@ use App\Models\FaceDescriptor;
 use App\Models\JobLevel;
 use App\Models\JobTitle;
 use App\Models\Reimbursement;
+use App\Models\ReimbursementCategory;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkFromHomeRequest;
 use App\Support\ApprovalActorService;
-use App\Support\EnterpriseRuntime;
 use App\Support\UserHomeCommandCenterService;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
@@ -86,8 +86,23 @@ test('reimbursement page filters claims by status and type', function () {
     $this->actingAs($user);
     $employee = Employee::factory()->create(['user_id' => $user->id]);
 
+    // Type filter memakai relasi category (code) — fixture wajib punya kategori.
+    $medical = ReimbursementCategory::create([
+        'company_id' => $user->company_id,
+        'name' => 'Medical',
+        'code' => 'medical',
+        'is_active' => true,
+    ]);
+    $transport = ReimbursementCategory::create([
+        'company_id' => $user->company_id,
+        'name' => 'Transport',
+        'code' => 'transport',
+        'is_active' => true,
+    ]);
+
     Reimbursement::create([
         'employee_id' => $employee->id,
+        'category_id' => $medical->id,
         'title' => 'Medical',
         'expense_date' => now()->toDateString(),
         'amount' => 150000,
@@ -97,6 +112,7 @@ test('reimbursement page filters claims by status and type', function () {
 
     Reimbursement::create([
         'employee_id' => $employee->id,
+        'category_id' => $transport->id,
         'title' => 'Transport',
         'expense_date' => now()->subDay()->toDateString(),
         'amount' => 50000,
@@ -180,6 +196,9 @@ test('reimbursement page stores uploaded attachments on private disk', function 
     $user = User::factory()->create();
     $this->actingAs($user);
 
+    // createClaim memerlukan employee record (UserReimbursementService).
+    Employee::factory()->create(['user_id' => $user->id]);
+
     Livewire::test(ReimbursementPage::class)
         ->set('date', now()->toDateString())
         ->set('type', 'medical')
@@ -190,14 +209,17 @@ test('reimbursement page stores uploaded attachments on private disk', function 
 
     $claim = Reimbursement::firstOrFail();
 
-    expect($claim->attachment)->not->toBeNull()
-        ->and(Storage::disk('local')->exists($claim->attachment))->toBeTrue()
-        ->and(Storage::disk('public')->exists($claim->attachment))->toBeFalse();
+    expect($claim->attachment_path)->not->toBeNull()
+        ->and(Storage::disk('local')->exists($claim->attachment_path))->toBeTrue()
+        ->and(Storage::disk('public')->exists($claim->attachment_path))->toBeFalse();
 });
 
 test('reimbursement page accepts masked rupiah amount', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
+
+    // createClaim memerlukan employee record (UserReimbursementService).
+    Employee::factory()->create(['user_id' => $user->id]);
 
     Livewire::test(ReimbursementPage::class)
         ->set('date', now()->toDateString())
@@ -264,7 +286,7 @@ test('attendance history summary counts inferred absences for past working days'
         ->set('selectedYear', '2026')
         ->set('selectedMonth', '04')
         ->assertViewHas('counts', function ($counts) {
-            return ($counts['present'] ?? null) === 1
+            return ($counts['on_time'] ?? null) === 1
                 && ($counts['absent'] ?? null) === 1;
         });
 
@@ -296,6 +318,16 @@ test('manager home shows complete team shortcuts', function () {
     ]);
     Employee::factory()->create(['user_id' => $manager->id, 'division_id' => $division->id]);
 
+    // Manager tools (Team Approvals, Team Attendance, Team Kasbon) digate oleh
+    // permission review_subordinate_requests — fixture harus punya role-nya.
+    $managerRole = Role::create([
+        'name' => 'Manager Audit',
+        'slug' => 'manager_audit_'.uniqid(),
+        'description' => 'Can review subordinate requests.',
+        'permission_keys' => ['review_subordinate_requests'],
+    ]);
+    $manager->roles()->sync([$managerRole->id]);
+
     User::factory()->create([
         'company_id' => $company->id,
         'manager_id' => $manager->id,
@@ -307,10 +339,7 @@ test('manager home shows complete team shortcuts', function () {
         ->assertSee(__('Manager tools'))
         ->assertSee(__('Team Approvals'))
         ->assertSee(__('Team Attendance'))
-        ->when(
-            EnterpriseRuntime::sourceAvailable() && ! Editions::cashAdvanceLocked(),
-            fn ($r) => $r->assertSee(__('Team Kasbon'))
-        );
+        ->assertSee(__('Team Kasbon'));
 });
 
 test('head subordinate lookup is company scoped and includes lower division roles', function () {

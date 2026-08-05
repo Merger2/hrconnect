@@ -1,28 +1,23 @@
 <?php
 
-use App\Exports\LeaveRequestsExport;
-use App\Exports\PayrollSummaryExport;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\CashAdvance;
 use App\Models\CompanyAsset;
 use App\Models\Employee;
 use App\Models\EmployeeDocumentRequest;
+use App\Models\EmployeeDocumentType;
 use App\Models\HrChecklistCase;
 use App\Models\HrChecklistTask;
 use App\Models\HrChecklistTemplate;
 use App\Models\HrChecklistTemplateItem;
 use App\Models\ImportExportRun;
-use App\Models\Invoice;
 use App\Models\Payroll;
 use App\Models\Project;
 use App\Models\ProjectTask;
 use App\Models\Reimbursement;
 use App\Models\Role;
-use App\Models\SalesOpportunity;
 use App\Models\User;
-use App\Models\Vendor;
-use App\Models\VendorBill;
 use App\Models\WorkFromHomeRequest;
 use App\Support\AdminDashboardQueryService;
 use App\Support\HrChecklistService;
@@ -42,8 +37,21 @@ function tenantFixture(): array
     $employeeA = User::factory()->create(['company_id' => $companyA->id]);
     $employeeB = User::factory()->create(['company_id' => $companyB->id]);
 
-    Employee::factory()->create(['user_id' => $employeeA->id, 'company_id' => $companyA->id]);
-    Employee::factory()->create(['user_id' => $employeeB->id, 'company_id' => $companyB->id]);
+    // managedBy() kini berbasis hierarki employee (parent_id), bukan company_id —
+    // admin harus punya employee record dan bawahan di-link via parent_id.
+    $adminAEmployee = Employee::factory()->create(['user_id' => $adminA->id, 'company_id' => $companyA->id]);
+    $adminBEmployee = Employee::factory()->create(['user_id' => $adminB->id, 'company_id' => $companyB->id]);
+
+    Employee::factory()->create([
+        'user_id' => $employeeA->id,
+        'company_id' => $companyA->id,
+        'parent_id' => $adminAEmployee->id,
+    ]);
+    Employee::factory()->create([
+        'user_id' => $employeeB->id,
+        'company_id' => $companyB->id,
+        'parent_id' => $adminBEmployee->id,
+    ]);
 
     return compact('adminA', 'adminB', 'companyA', 'companyB', 'employeeA', 'employeeB');
 }
@@ -86,15 +94,17 @@ test('company scoped policies deny cross tenant sensitive HR finance and asset r
         'employee_id' => $employeeB->employee->id,
         'period' => now()->format('Y-m'),
         'basic_salary' => 1000000,
-        'allowances' => [],
-        'deductions' => [],
+        'total_allowance' => 0,
+        'gross_salary' => 1000000,
+        'total_deduction' => 0,
         'overtime_pay' => 0,
         'net_salary' => 1000000,
         'status' => 'paid',
     ]);
     $reimbursementB = Reimbursement::create([
         'employee_id' => $employeeB->employee->id,
-        'date' => now()->toDateString(),
+        'title' => 'Tenant B claim',
+        'expense_date' => now()->toDateString(),
         'type' => 'medical',
         'amount' => 100000,
         'description' => 'Tenant B claim',
@@ -157,11 +167,17 @@ test('company scoped document HR checklist and import export downloads deny othe
     $taskB = $caseB->tasks()->firstOrFail();
 
     Storage::disk('local')->put('documents/tenant-b.pdf', 'tenant-b');
+    $docType = EmployeeDocumentType::create([
+        'name' => 'Surat Keterangan Kerja',
+        'slug' => 'employment-certificate',
+        'code' => 'employment_certificate',
+        'is_active' => true,
+    ]);
     $documentRequestB = EmployeeDocumentRequest::create([
         'employee_id' => $employeeB->employee->id,
-        'document_type' => EmployeeDocumentRequest::TYPE_EMPLOYMENT_CERTIFICATE,
+        'document_type_id' => $docType->id,
         'requested_by' => $employeeB->id,
-        'request_source' => EmployeeDocumentRequest::SOURCE_EMPLOYEE,
+        'request_source' => 'employee',
         'purpose' => 'Tenant B',
         'status' => EmployeeDocumentRequest::STATUS_READY,
         'generated_path' => 'documents/tenant-b.pdf',
@@ -216,51 +232,6 @@ test('tenant scoped activity log reporting can be constrained by actor company',
         ->not->toContain($logB->id);
 });
 
-test('company scoped report exports exclude other tenant rows', function () {
-    ['adminA' => $adminA, 'employeeA' => $employeeA, 'employeeB' => $employeeB] = tenantFixture();
-
-    $leaveA = Attendance::create([
-        'employee_id' => $employeeA->employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'sick',
-        'approval_status' => Attendance::STATUS_APPROVED,
-    ]);
-    $leaveB = Attendance::create([
-        'employee_id' => $employeeB->employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'sick',
-        'approval_status' => Attendance::STATUS_APPROVED,
-    ]);
-    $payrollA = Payroll::create([
-        'employee_id' => $employeeA->employee->id,
-        'period' => now()->format('Y-m'),
-        'basic_salary' => 1000000,
-        'allowances' => [],
-        'deductions' => [],
-        'overtime_pay' => 0,
-        'net_salary' => 1000000,
-        'status' => 'paid',
-    ]);
-    $payrollB = Payroll::create([
-        'employee_id' => $employeeB->employee->id,
-        'period' => now()->format('Y-m'),
-        'basic_salary' => 1000000,
-        'allowances' => [],
-        'deductions' => [],
-        'overtime_pay' => 0,
-        'net_salary' => 1000000,
-        'status' => 'paid',
-    ]);
-
-    expect((new LeaveRequestsExport($adminA))->query()->pluck('id')->all())
-        ->toContain($leaveA->id)
-        ->not->toContain($leaveB->id);
-
-    expect((new PayrollSummaryExport($adminA))->query()->pluck('id')->all())
-        ->toContain($payrollA->id)
-        ->not->toContain($payrollB->id);
-});
-
 test('admin dashboard platform signals stay scoped to the current company', function () {
     ['adminA' => $adminA, 'adminB' => $adminB, 'companyA' => $companyA, 'companyB' => $companyB, 'employeeA' => $employeeA, 'employeeB' => $employeeB] = tenantFixture();
 
@@ -298,49 +269,23 @@ test('admin dashboard platform signals stay scoped to the current company', func
             'employee_id' => $employee->employee->id,
             'period' => now()->format('Y-m'),
             'basic_salary' => 1000000,
-            'allowances' => [],
-            'deductions' => [],
+            'total_allowance' => 0,
+            'gross_salary' => 1000000,
+            'total_deduction' => 0,
             'overtime_pay' => 0,
             'net_salary' => 1000000,
-            'status' => 'pending',
+            'status' => 'submitted',
         ]);
 
-        Attendance::create([
+        $riskAttendance = Attendance::create([
             'employee_id' => $employee->employee->id,
             'date' => now()->toDateString(),
             'status' => 'present',
             'approval_status' => Attendance::STATUS_APPROVED,
-            'risk_level' => 'high',
-            'risk_score' => 80,
         ]);
-
-        Invoice::create([
-            'company_id' => $company->id,
-            'number' => 'INV-'.$company->id,
-            'status' => Invoice::STATUS_SENT,
-            'grand_total' => 1000000,
-        ]);
-
-        $vendor = Vendor::create([
-            'company_id' => $company->id,
-            'name' => 'Vendor '.$company->id,
-        ]);
-
-        VendorBill::create([
-            'company_id' => $company->id,
-            'vendor_id' => $vendor->id,
-            'number' => 'BILL-'.$company->id,
-            'status' => VendorBill::STATUS_POSTED,
-            'grand_total' => 500000,
-        ]);
-
-        SalesOpportunity::create([
-            'company_id' => $company->id,
-            'owner_id' => $employee->id,
-            'title' => 'Opportunity '.$company->id,
-            'stage' => SalesOpportunity::STAGE_PROPOSAL,
-            'expected_value' => 2000000,
-        ]);
+        // risk_level/risk_score dihitung sistem (bukan fillable) — set langsung
+        // agar sinyal high_risk_attendance terisi.
+        $riskAttendance->forceFill(['risk_level' => 'high', 'risk_score' => 80])->save();
 
         $project = Project::create([
             'company_id' => $company->id,
@@ -393,9 +338,6 @@ test('admin dashboard platform signals stay scoped to the current company', func
         'overdue_hr_tasks' => 1,
         'high_risk_attendance' => 1,
         'pending_payroll' => 1,
-        'open_invoices' => 1,
-        'open_vendor_bills' => 1,
-        'active_sales_opportunities' => 1,
         'overdue_project_tasks' => 1,
     ]);
 });

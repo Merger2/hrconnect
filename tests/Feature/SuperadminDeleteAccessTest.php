@@ -46,6 +46,8 @@ test('admin manager without superadmin delete permission cannot delete superadmi
             'admin.admin_accounts.manage',
             'admin.admin_accounts.superadmin_view',
             'admin.admin_accounts.superadmin_manage',
+            // Route admin.masters.admin digate view_admin_accounts.
+            'view_admin_accounts',
         ],
     ]);
 
@@ -74,7 +76,8 @@ test('superadmin can delete admin account from admin directory', function () {
         ->call('delete')
         ->assertHasNoErrors();
 
-    $this->assertDatabaseMissing('users', ['id' => $admin->id]);
+    // User memakai SoftDeletes — penghapusan lunak (row tetap ada).
+    $this->assertSoftDeleted('users', ['id' => $admin->id]);
 });
 
 test('admin directory clears delete modal state after deleting an admin account', function () {
@@ -130,6 +133,14 @@ test('superadmin can delete announcements', function () {
 
 test('admin can delete announcements', function () {
     $admin = User::factory()->admin()->create();
+    // Roleless admin tidak lolos Gate::authorize('manageAnnouncements') di
+    // boot() — beri role eksplisit (key kanonik rbac).
+    $announcementRole = Role::create([
+        'name' => 'Announcement Manager_'.uniqid(),
+        'slug' => 'announcement_manager_'.uniqid(),
+        'permission_keys' => ['admin.announcements.manage'],
+    ]);
+    $admin->roles()->sync([$announcementRole->id]);
     $announcement = Announcement::create([
         'title' => 'Admin Announcement',
         'content' => 'The app is available.',
@@ -169,6 +180,13 @@ test('superadmin can delete holidays', function () {
 
 test('admin can delete holidays', function () {
     $admin = User::factory()->admin()->create();
+    // Roleless admin tidak lolos Gate::authorize('manageHolidays') di boot().
+    $holidayRole = Role::create([
+        'name' => 'Holiday Manager_'.uniqid(),
+        'slug' => 'holiday_manager_'.uniqid(),
+        'permission_keys' => ['admin.holidays.manage'],
+    ]);
+    $admin->roles()->sync([$holidayRole->id]);
     $holiday = Holiday::create([
         'date' => now()->addWeek()->toDateString(),
         'name' => 'Admin Holiday',

@@ -40,8 +40,9 @@ test('EmployeeDocumentRequestPage [scenario] [close action]', function () {
         ->set('documentType', 'ktp')
         ->set('showModal', true)
         ->call('close')
+        // close() hanya menutup modal — draft form (documentType) dipertahankan.
         ->assertSet('showModal', false)
-        ->assertSet('documentType', null);
+        ->assertSet('documentType', 'ktp');
 });
 
 test('EmployeeDocumentRequestPage [scenario] [form validation]', function () {

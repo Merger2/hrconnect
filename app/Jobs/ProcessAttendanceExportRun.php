@@ -33,13 +33,16 @@ class ProcessAttendanceExportRun implements ShouldQueue
         $fileName = "attendance-export-{$run->id}.xlsx";
         $path = "exports/{$fileName}";
 
+        $run->markRunning([
+            'progress_percentage' => $rowCount > 0 ? 20 : 80,
+            'total_rows' => $rowCount,
+        ]);
+
         Excel::store(new AttendanceExport($data), $path, 'local');
 
-        $run->update([
-            'status' => 'completed',
+        $run->markCompleted([
             'file_path' => $path,
-            'row_count' => $rowCount,
-            'completed_at' => now(),
+            'processed_rows' => $rowCount,
         ]);
     }
 

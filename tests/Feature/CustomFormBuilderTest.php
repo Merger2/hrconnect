@@ -103,9 +103,10 @@ test('custom form submission can automatically create operational task', functio
         ->and($task->assigned_to)->toBe($employee->id)
         ->and($task->priority)->toBe(ProjectTask::PRIORITY_HIGH)
         ->and($task->metadata['custom_form_submission_id'])->toBe($submission->id)
-        ->and($notification->data['type'])->toBe('project_task_assigned_from_form')
+        ->and($notification->data['type'])->toBe('task_assigned_from_form')
         ->and($notification->data['task_id'])->toBe($task->id)
-        ->and($notification->data['url'])->toBe(route('my-tasks', absolute: false));
+        ->and($notification->data['submission_id'])->toBe($submission->id)
+        ->and($notification->data['title'])->toBe($task->title);
 });
 
 test('custom form submission notifies company scoped reviewers', function () {
@@ -143,12 +144,16 @@ test('custom form submission notifies company scoped reviewers', function () {
         ->call('submit')
         ->assertHasNoErrors();
 
+    $submission = CustomFormSubmission::query()->firstOrFail();
     $reviewerNotification = $reviewerA->notifications()->firstOrFail();
 
-    expect($reviewerNotification->data['type'])->toBe('custom_form_submitted_for_review')
-        ->and($reviewerNotification->data['url'])->toBe(route('admin.custom-forms', absolute: false))
+    expect($reviewerNotification->data['type'])->toBe('custom_form_submitted')
+        ->and($reviewerNotification->data['submission_id'])->toBe($submission->id)
         ->and($reviewerB->notifications()->count())->toBe(0)
-        ->and($employee->notifications()->where('data->type', 'custom_form_submitted_for_review')->count())->toBe(0);
+        // notifications.data kolom text (bukan jsonb) — filter JSON di PHP, bukan SQL ->>
+        ->and($employee->notifications()->get()->contains(
+            fn ($n) => ($n->data['type'] ?? null) === 'custom_form_submitted'
+        ))->toBeFalse();
 });
 
 test('custom forms are company scoped for template creation and submission', function () {

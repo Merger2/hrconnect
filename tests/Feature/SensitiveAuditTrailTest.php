@@ -91,6 +91,10 @@ test('payroll amount and status changes create field level audit details', funct
 
     $this->actingAs($actor);
 
+    // Transisi status wajib melalui rantai draft→submitted→verified→approved
+    // (Payroll model guard — draft langsung ke approved ditolak).
+    $payroll->update(['status' => 'submitted']);
+    $payroll->update(['status' => 'verified']);
     $payroll->update([
         'net_salary' => 5750000,
         'status' => 'approved',
@@ -99,14 +103,17 @@ test('payroll amount and status changes create field level audit details', funct
     $details = ActivityLogDetail::query()
         ->where('entity_type', Payroll::class)
         ->where('entity_id', (string) $payroll->id)
-        ->orderBy('field')
+        ->orderBy('id')
         ->get();
 
-    expect($details)->toHaveCount(2)
-        ->and($details->pluck('field')->all())->toBe(['net_salary', 'status'])
-        ->and((string) data_get($details->firstWhere('field', 'net_salary')->new_value, 'value'))->toContain('5750000')
-        ->and(data_get($details->firstWhere('field', 'status')->old_value, 'value'))->toBe('draft')
-        ->and(data_get($details->firstWhere('field', 'status')->new_value, 'value'))->toBe('approved');
+    $statusDetails = $details->where('field', 'status')->values();
+
+    expect($details)->toHaveCount(4)
+        ->and($statusDetails)->toHaveCount(3)
+        ->and(data_get($statusDetails[0]->old_value, 'value'))->toBe('draft')
+        ->and(data_get($statusDetails[2]->old_value, 'value'))->toBe('verified')
+        ->and(data_get($statusDetails[2]->new_value, 'value'))->toBe('approved')
+        ->and(data_get($details->firstWhere('field', 'net_salary')->new_value, 'value'))->toContain('5750000');
 });
 
 test('role permission changes create field level audit details', function () {

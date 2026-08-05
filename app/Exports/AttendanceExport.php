@@ -59,7 +59,7 @@ class AttendanceExport implements FromCollection, WithColumnWidths, WithHeadings
             $attendance->date?->format('Y-m-d') ?? '-',
             $clockIn,
             $clockOut,
-            ucfirst($attendance->status ?? 'present'),
+            ucfirst((string) ($attendance->status?->value ?? 'present')),
             $totalHours,
             $attendance->overtime_hours ?? 0,
             $attendance->notes ?? '-',

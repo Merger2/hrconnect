@@ -24,7 +24,9 @@ test('approval matrix resolves role-based approval for overtime workflow', funct
         'date' => now()->toDateString(),
         'start_time' => now()->setTime(18, 0),
         'end_time' => now()->setTime(21, 0),
-        'duration' => 180,
+        // Kolom durasi tidak ada di overtimes — kondisi min_amount dievaluasi
+        // terhadap atribut 'amount' (ApprovalMatrixService::amount()).
+        'amount' => 150,
         'reason' => 'Release support',
         'status' => 'pending',
     ]);
