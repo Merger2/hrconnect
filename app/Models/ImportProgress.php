@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperImportProgress
+ */
 #[Fillable(['user_id', 'type', 'file_path', 'status', 'total_rows', 'processed_rows', 'failed_rows', 'errors', 'completed_at'])]
 class ImportProgress extends Model
 {

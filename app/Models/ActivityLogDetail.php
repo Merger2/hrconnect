@@ -6,6 +6,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperActivityLogDetail
+ */
 class ActivityLogDetail extends Model
 {
     use HasFactory;

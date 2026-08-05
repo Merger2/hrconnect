@@ -10,6 +10,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
+/**
+ * @mixin IdeHelperIntegrationClient
+ */
 class IntegrationClient extends Model
 {
     use HasFactory, HasUlids;

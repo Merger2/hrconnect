@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin IdeHelperLeaveEntitlement
+ */
 #[Fillable(['employee_id', 'leave_type_id', 'year', 'total_days', 'used_days', 'remaining_days'])]
 class LeaveEntitlement extends Model
 {

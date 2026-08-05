@@ -83,7 +83,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $time_in
  * @property-read mixed $time_out
  * @property-read User|null $user
- *
  * @method static \Database\Factories\AttendanceFactory factory($count = null, $state = [])
  * @method static Builder<static>|Attendance managedBy(\App\Models\User $admin)
  * @method static Builder<static>|Attendance newModelQuery()
@@ -139,8 +138,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Attendance whereWfaNote($value)
  * @method static Builder<static>|Attendance withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Attendance withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperAttendance
  */
 #[Fillable(['employee_id', 'shift_id', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'clock_in_is_mocked', 'clock_in_accuracy', 'clock_out_is_mocked', 'clock_out_accuracy', 'device_fingerprint', 'face_similarity_score', 'clock_out_face_similarity_score', 'status', 'is_wfa', 'status_wfa', 'approval_status', 'exception_type', 'exception_notes', 'approved_late_by', 'photo_selfie_in', 'photo_selfie_out', 'late_minutes', 'verification_method', 'clock_out_verification_method', 'wfa_note', 'leave_type_id', 'note'])]
 class Attendance extends Model

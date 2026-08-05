@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @mixin IdeHelperActivityLog
+ */
 class ActivityLog extends Model
 {
     use HasFactory;

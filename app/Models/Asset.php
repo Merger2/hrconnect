@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperAsset
+ */
 #[Fillable(['company_id', 'name', 'serial_number', 'code', 'category', 'is_available', 'status'])]
 class Asset extends Model
 {
