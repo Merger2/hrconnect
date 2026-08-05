@@ -99,7 +99,7 @@
 | M2 | `calculateAnnualPPh21Progressive` tanpa biaya jabatan (deviasi PMK 168/2023) | ✅ | ⚠️ **OPEN** — butuh keputusan Fikih (mengubah angka pajak semua karyawan) |
 | M3 | Tabel pesangon = UU 13/2003 (bukan PP 35/2021: <1thn=0, 1-6, ≥6=6) + variant `dismissed_severe` 2× ≠ standar | ✅ | ⚠️ **OPEN** — variant multiplier kebijakan internal, butuh keputusan Fikih |
 | M4 | Cap JP seeder 9.559.600 (regulasi Maret 2026 ≈ 11jt) | ✅ |
-| M5 | `app.timezone` = UTC (HRIS Indonesia tanpa Asia/Jakarta) | ⚠️ fix-22 |
+| M5 | `app.timezone` = UTC (HRIS Indonesia tanpa Asia/Jakarta) | ⚠️ fix-22 | ✅ **FIXED (2026-08-05)** — `config/app.php` → `Asia/Jakarta`; PayrollGoldenTest 27/27 PASS (freeze 2026-08-04 tetap konsisten) |
 | M6 | `config/payroll.php` mati total (0 pembaca) | ⚠️ fix-22 |
 | M7 | Mismatch embedding model: config default `gemini-embedding-001` vs `text-embedding-004` | ⚠️ fix-22 |
 
@@ -107,7 +107,7 @@
 | # | Temuan | Verifikasi |
 |---|--------|:----------:|
 | M8 | Dual tabel PTKP: `golongan_ptkp` vs `golongan_ptkps` (FK/model tidak nyambung) | ⚠️ fix-21 |
-| M9 | Dual implementasi absensi: `CommunityService` vs `AttendanceService` — interface hanya di-binding ke yang lama | ⚠️ fix-15 |
+| M9 | Dual implementasi absensi: `CommunityService` vs `AttendanceService` — interface hanya di-binding ke yang lama | ⚠️ fix-15 | ✅ **BUKAN DUP (2026-08-05, diverifikasi)** — dua service peran BERBEDA: `CommunityService` = contract attachment/photo/face-enrollment (`AttendanceServiceInterface`, dipakai LeaveRequestService/FaceEnrollment/HomeAttendanceStatus); `AttendanceService` = core clock-in/out + geofence + face verification (dipakai ClockInAction). 0 method overlap. Interface utk skripsi/community contract — by design; tidak perlu konsolidasi |
 | M10 | lat/long dobel di attendances (`lat_in/long_in` vs `latitude_in/longitude_in`) | ⚠️ fix-21 |
 | M11 | Dual scheduling (`Schedule` user_id vs `ShiftSchedule` employee_id) + dual leave quota (`LeaveBalance` vs `LeaveEntitlement`) | ⚠️ fix-8 |
 | M12 | **Seeder `PTDayaciptaMandiri*` tidak ter-wire ke DatabaseSeeder** (6 seeder orphan — perusahaan utama tidak ter-seed otomatis) | ⚠️ fix-21 |
@@ -133,7 +133,7 @@
 |---|--------|:----------:|
 | M25 | **8 middleware dead** (0 referensi): CheckMaintenanceMode, DeviceDetection, EnsureActiveAccount, LogUserActivity, SetLocale, SetUserLocale, ThrottleRequestsByIP, TrackRedisSessions + `User::canAuthenticate()` hardcoded true | ⚠️ fix-14 |
 | M26 | **4 jobs dead** (tidak pernah di-dispatch): GeneratePayslipPdfJob, ProcessMonthlyAttendanceReportRun, ProcessEmployeeDocumentUpload, RunSystemBackup | ⚠️ fix-17 |
-| M27 | **Scheduler gap**: detect-alpha, detect-chronic-late, reset-leave-quota, cache:warm klaim schedule tapi tidak di routes/console.php | ⚠️ fix-17 |
+| M27 | **Scheduler gap**: detect-alpha, detect-chronic-late, reset-leave-quota, cache:warm klaim schedule tapi tidak di routes/console.php | ⚠️ fix-17 | ✅ **FIXED (2026-08-05)** — 4 command didaftarkan: `attendance:detect-alpha` dailyAt 20:00, `attendance:detect-chronic-late` dailyAt 23:30, `cache:warm` hourly, `leave:reset-quota` yearlyOn 1 Jan (semua `withoutOverlapping`); verified `php artisan schedule:list` 10 jadwal tampil |
 | M28 | `hrconnect.face_distance_threshold` dead (hardcode 85.0 di FaceRecognitionService) | ⚠️ fix-22 |
 | M29 | `laravolt` cache store default redis ≠ CACHE_STORE=database | ⚠️ fix-22 |
 | M30 | Backup cluster (8 app-bug, P1): job pg_dump tanpa kredensial, SystemBackupRun tanpa security hooks, SystemMaintenance UI rusak (downloadExistingBackup/restore/queueBackup) | ✅ (triage) | ✅ **SEBAGIAN FIXED (2026-08-05)** — signature HMAC kini ditulis saat backup (`signDatabaseBackup`) sehingga restore berfungsi; `auditCompleted` + audit failed di semua jalur (incl. job failure + restore gagal — tak lagi stuck `running`); regression test roundtrip signature. Sisa: drill command `maintenance:backup-restore-drill` belum diimplementasi (test di-skip, Q6) |
