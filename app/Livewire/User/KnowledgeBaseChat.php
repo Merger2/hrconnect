@@ -92,6 +92,7 @@ class KnowledgeBaseChat extends Component
             $finalSources = [];
             $newConversationId = null;
             $isFallback = false;
+            $noResults = false;
 
             // Stream via chatStream() generator — pushes chunks to browser progressively
             foreach ($this->kbService->chatStream(
@@ -126,6 +127,10 @@ class KnowledgeBaseChat extends Component
                 if (isset($yield['fallback'])) {
                     $isFallback = (bool) $yield['fallback'];
                 }
+
+                if (isset($yield['no_results'])) {
+                    $noResults = (bool) $yield['no_results'];
+                }
             }
 
             $this->conversationId = $newConversationId;
@@ -136,6 +141,7 @@ class KnowledgeBaseChat extends Component
                 'text' => $answer,
                 'sources' => $finalSources,
                 'fallback' => $isFallback,
+                'no_results' => $noResults,
                 'is_streaming' => false,
             ];
         } catch (\Throwable $e) {

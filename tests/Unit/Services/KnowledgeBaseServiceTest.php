@@ -23,6 +23,7 @@ use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -292,6 +293,93 @@ test('searchByKeyword returns only READY records', function () {
 });
 
 // ═══════════════════════════════════════════════════════════════════════
+// searchByKeyword — tokenization & scoring (fix bug 2026-08-05)
+// ═══════════════════════════════════════════════════════════════════════
+
+test('searchByKeyword tokenizes natural long questions and finds matching chunks', function () {
+    KnowledgeBase::create([
+        'title' => 'Sanksi Keterlambatan',
+        'content' => 'Keterlambatan lebih dari 15 menit tanpa pemberitahuan akan dicatat sebagai late. Akumulasi keterlambatan dapat mempengaruhi penilaian kinerja bulanan.',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+
+    // Kalimat penuh user (bug report) — sebelumnya ILIKE %kalimat utuh% tidak pernah match.
+    $results = $this->embeddingService->searchByKeyword('bagaimana keterlambatan kerja di perusahaan ini', topK: 5);
+
+    expect($results->count())->toBe(1);
+    expect($results->first()->title)->toBe('Sanksi Keterlambatan');
+    expect($results->first()->content)->toContain('Keterlambatan');
+});
+
+test('searchByKeyword drops short tokens and common stopwords', function () {
+    KnowledgeBase::create([
+        'title' => 'Doc A',
+        'content' => 'isi kebijakan yang sudah lama',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+    KnowledgeBase::create([
+        'title' => 'Doc B',
+        'content' => 'isi kebijakan lembur malam',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+
+    // "di" (< 3 char), "yang"/"sudah" (stopword) dibuang → token "kebijakan" tetap dicari.
+    $results = $this->embeddingService->searchByKeyword('di yang sudah kebijakan', topK: 5);
+
+    expect($results->count())->toBe(2);
+
+    // Hanya stopword/short token → tidak ada token yang layak → hasil kosong (bukan error).
+    $empty = $this->embeddingService->searchByKeyword('di yang', topK: 5);
+
+    expect($empty)->toBeEmpty();
+});
+
+test('searchByKeyword strips punctuation from tokens', function () {
+    KnowledgeBase::create([
+        'title' => 'Aturan Lembur',
+        'content' => 'Lembur maksimal 3 jam per hari dan 14 jam per minggu.',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+
+    $results = $this->embeddingService->searchByKeyword('lembur?', topK: 5);
+
+    expect($results->count())->toBe(1);
+    expect($results->first()->title)->toBe('Aturan Lembur');
+});
+
+test('searchByKeyword ranks chunks by number of matched tokens', function () {
+    KnowledgeBase::create([
+        'title' => 'Dokumen Gaji dan Keterlambatan',
+        'content' => 'gaji pokok dan keterlambatan karyawan',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+    KnowledgeBase::create([
+        'title' => 'Dokumen Gaji',
+        'content' => 'gaji pokok karyawan saja',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+
+    // Token: gaji, keterlambatan, karyawan → Doc A match 3, Doc B match 2.
+    $results = $this->embeddingService->searchByKeyword('gaji keterlambatan karyawan', topK: 5);
+
+    expect($results->count())->toBe(2);
+    expect($results->first()->title)->toBe('Dokumen Gaji dan Keterlambatan');
+    expect($results->last()->title)->toBe('Dokumen Gaji');
+});
+
+// ═══════════════════════════════════════════════════════════════════════
 // KnowledgeBaseService — chat() validation
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -442,4 +530,52 @@ test('EmbeddingService has expected public methods', function () {
     expect($reflection->hasMethod('searchSimilar'))->toBeTrue();
     expect($reflection->hasMethod('searchByKeyword'))->toBeTrue();
     expect($reflection->hasMethod('extractTextFromPdf'))->toBeTrue();
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// chatStream — fallback pg_trgm (fix bug 2026-08-05: pesan jelas + flag)
+// ═══════════════════════════════════════════════════════════════════════
+
+test('chatStream fallback returns keyword snippets when chunks found', function () {
+    // Simulasi Gemini down → pipeline mengambil jalur fallback nyata (searchByKeyword).
+    Http::fake(['generativelanguage.googleapis.com/*' => Http::response([], 401)]);
+
+    KnowledgeBase::create([
+        'title' => 'Sanksi Keterlambatan',
+        'content' => 'Keterlambatan lebih dari 15 menit tanpa pemberitahuan akan dicatat sebagai late. Akumulasi keterlambatan dapat mempengaruhi penilaian kinerja bulanan.',
+        'status' => KnowledgeBaseStatus::READY,
+        'knowledgeable_type' => 'App\Models\User',
+        'knowledgeable_id' => 0,
+    ]);
+
+    $yields = iterator_to_array($this->kbService->chatStream('bagaimana keterlambatan kerja di perusahaan ini'));
+
+    $texts = collect($yields)->pluck('text')->filter()->implode("\n");
+
+    expect($texts)->toContain('Sistem AI sedang offline');
+    expect($texts)->toContain('Sanksi Keterlambatan');
+
+    $last = $yields[array_key_last($yields)];
+
+    expect($last['fallback'] ?? false)->toBeTrue();
+    expect($last['no_results'] ?? false)->toBeFalse();
+    expect($last['sources'][0]['title'])->toBe('Sanksi Keterlambatan');
+});
+
+test('chatStream fallback reports no relevant results honestly', function () {
+    Http::fake(['generativelanguage.googleapis.com/*' => Http::response([], 401)]);
+
+    // Corpus kosong → tidak ada token yang match → pesan no_results (bukan
+    // "coba lagi nanti" yang menyesatkan — masalahnya retrieval, bukan cuma AI).
+    $yields = iterator_to_array($this->kbService->chatStream('premi asuransi jiwa'));
+
+    $texts = collect($yields)->pluck('text')->filter()->implode("\n");
+
+    expect($texts)->toContain('tidak ditemukan informasi yang relevan');
+    expect($texts)->not->toContain('Silakan coba lagi nanti');
+
+    $last = $yields[array_key_last($yields)];
+
+    expect($last['fallback'] ?? false)->toBeTrue();
+    expect($last['no_results'] ?? false)->toBeTrue();
 });

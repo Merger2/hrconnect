@@ -21,6 +21,21 @@ class EmbeddingService
 
     protected const EMBEDDING_DIMENSION = 768;
 
+    /**
+     * Stopword umum Bahasa Indonesia — kata fungsi bernoise tinggi yang tidak
+     * dijadikan token pencarian keyword. Token konten seperti "perusahaan",
+     * "karyawan", "keterlambatan" TIDAK masuk daftar ini.
+     *
+     * @var array<int, string>
+     */
+    protected const KEYWORD_STOPWORDS = [
+        'ada', 'agar', 'akan', 'anda', 'apa', 'apakah', 'apabila', 'atau',
+        'bagaimana', 'bisa', 'dalam', 'dan', 'dapat', 'dari', 'di', 'dimana',
+        'dengan', 'ini', 'itu', 'juga', 'kapan', 'kami', 'ke', 'mengapa',
+        'mohon', 'pada', 'saja', 'saya', 'siapa', 'sudah', 'supaya', 'tidak',
+        'untuk', 'yang',
+    ];
+
     public function __construct() {}
 
     public function chunkText(string $text, int $chunkChars = self::CHUNK_MAX_CHARS, int $overlapChars = self::CHUNK_OVERLAP): array
@@ -114,13 +129,117 @@ class EmbeddingService
             ->get();
     }
 
+    /**
+     * Token-based keyword search (fallback pg_trgm → ILIKE).
+     *
+     * Pertanyaan natural panjang di-tokenize (lowercase, split whitespace,
+     * buang token < 3 karakter + stopword umum), lalu chunk dicari dengan
+     * OR match per token. Hasil di-scoring di PHP berdasarkan jumlah token
+     * yang muncul di content (desc), diambil topK.
+     *
+     * Perbaikan bug 2026-08-05: sebelumnya `$keyword` utuh dipakai sebagai
+     * substring persis (ILIKE %kalimat%) → pertanyaan kalimat penuh ("bagaimana
+     * keterlambatan kerja di perusahaan ini") tidak pernah match content
+     * → fallback gagal menemukan chunk padahal corpus punya topiknya.
+     */
     public function searchByKeyword(string $keyword, int $topK = 5): Collection
     {
-        return KnowledgeBase::query()
+        $tokens = $this->keywordTokens($keyword);
+
+        if ($tokens === []) {
+            return new Collection;
+        }
+
+        $candidates = KnowledgeBase::query()
             ->where('status', KnowledgeBaseStatus::READY)
-            ->where('content', 'ILIKE', "%{$keyword}%")
-            ->limit($topK)
+            ->where(function ($query) use ($tokens): void {
+                $query->where('content', 'ILIKE', '%'.$tokens[0].'%');
+
+                foreach (array_slice($tokens, 1) as $token) {
+                    $query->orWhere('content', 'ILIKE', '%'.$token.'%');
+                }
+            })
+            ->limit(20)
             ->get();
+
+        if ($candidates->isEmpty()) {
+            return $candidates;
+        }
+
+        // Eloquent Collection::map() otomatis turun ke base Collection saat item
+        // bukan Model (array skor) — bungkus ulang agar return type terjaga.
+        // Skor = token match di content (word boundary) + 2× token match di TITLE
+        // (judul dokumen = sinyal relevansi kuat; tanpa ini chunk bertopik spesifik
+        // kalah oleh token generik, mis. "keterlambatan" vs "kerja/perusahaan").
+        // Tie-break: (score desc, id asc) — uasort/sortByDesc tidak stabil di PHP.
+        $ranked = $candidates
+            ->map(fn (KnowledgeBase $kb) => [
+                'kb' => $kb,
+                'score' => $this->countTokenMatches($tokens, mb_strtolower($kb->content))
+                    + (2 * $this->countTokenMatches($tokens, mb_strtolower($kb->title))),
+            ])
+            ->filter(fn (array $row) => $row['score'] > 0)
+            ->sortBy(fn (array $row) => [-$row['score'], $row['kb']->id])
+            ->take($topK)
+            ->map(fn (array $row) => $row['kb'])
+            ->values();
+
+        return new Collection($ranked->all());
+    }
+
+    /**
+     * Tokenize query pencarian: lowercase, split whitespace, strip tanda baca,
+     * buang token < 3 karakter dan stopword umum Bahasa Indonesia (kata fungsi
+     * bernoise tinggi). Token panjang seperti "perusahaan" TIDAK dibuang —
+     * hanya kata fungsi pendek yang hilang.
+     *
+     * @return array<int, string>
+     */
+    protected function keywordTokens(string $keyword): array
+    {
+        $tokens = preg_split('/\s+/u', mb_strtolower(trim($keyword))) ?: [];
+
+        return array_values(array_filter(array_map(
+            fn (string $token) => $this->cleanToken($token),
+            $tokens,
+        )));
+    }
+
+    /**
+     * Bersihkan token: strip tanda baca, buang yang < 3 karakter atau stopword.
+     *
+     * @return string|false token bersih, atau false jika token tidak layak
+     */
+    protected function cleanToken(string $token): string|false
+    {
+        $clean = preg_replace('/[^\p{L}\p{N}]+/u', '', $token) ?? '';
+
+        if (mb_strlen($clean) < 3 || in_array($clean, self::KEYWORD_STOPWORDS, true)) {
+            return false;
+        }
+
+        return $clean;
+    }
+
+    /**
+     * Hitung jumlah token yang muncul sebagai kata utuh di content
+     * (case-insensitive, word boundary). Substring insidental seperti "kerja"
+     * di dalam "Ketenagakerjaan" TIDAK dihitung — scoring mencerminkan relevansi
+     * kata kunci, bukan kemiripan ejaan.
+     *
+     * @param  array<int, string>  $tokens
+     */
+    protected function countTokenMatches(array $tokens, string $content): int
+    {
+        $matches = 0;
+
+        foreach ($tokens as $token) {
+            if (preg_match('/\b'.preg_quote($token, '/').'\b/u', $content)) {
+                $matches++;
+            }
+        }
+
+        return $matches;
     }
 
     public function extractTextFromPdf(string $filePath): string

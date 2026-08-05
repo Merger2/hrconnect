@@ -115,6 +115,7 @@ PROMPT;
                             'title' => $kb->title,
                             'snippet' => mb_substr($kb->content, 0, 200),
                         ])->all(),
+                        'fallback' => true,
                     ];
 
                     return;
@@ -125,8 +126,15 @@ PROMPT;
                 ]);
             }
 
-            yield ['text' => 'Maaf, layanan AI sedang tidak tersedia. Silakan coba lagi nanti.'];
-            yield ['conversation_id' => $conversationId ?? (string) Str::uuid()];
+            // PRD §6: pesan membedakan kondisi — AI tidak tersedia DAN tidak ada
+            // hasil relevan di KB (bukan sekadar "coba lagi nanti" yang menyesatkan,
+            // karena akar masalahnya bisa retrieval, bukan cuma AI down).
+            yield ['text' => 'Layanan AI sedang tidak tersedia, dan tidak ditemukan informasi yang relevan di basis pengetahuan untuk pertanyaan ini. Coba tanyakan dengan kata kunci yang lebih spesifik, atau hubungi HRD.'];
+            yield [
+                'conversation_id' => $conversationId ?? (string) Str::uuid(),
+                'fallback' => true,
+                'no_results' => true,
+            ];
         }
     }
 

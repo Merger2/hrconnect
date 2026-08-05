@@ -41,6 +41,9 @@
                                                 <x-heroicon-o-exclamation-triangle class="h-3.5 w-3.5" />
                                                 <span>{{ __('Powered by keyword search (AI unavailable)') }}</span>
                                             </div>
+                                            @if($msg['no_results'] ?? false)
+                                                <p class="mt-1 text-xs text-amber-600">{{ __('Tidak ada hasil relevan di basis pengetahuan untuk pertanyaan ini.') }}</p>
+                                            @endif
                                         @endif
                                     @endif
                                 </div>

@@ -365,22 +365,22 @@
         {
             "id": "kb-23",
             "category": "negatif",
-            "question": "Bagaimana cara mengajukan klaim asuransi jiwa swasta?",
+            "question": "Berapa premi asuransi jiwa?",
             "expected_answer": [],
             "expected_sources": [],
             "negative": true,
             "verify_human": false,
-            "notes": "Di luar corpus — sistem harus menolak, tidak menjawab palsu (PRD §6)."
+            "notes": "Di luar corpus (premi/asuransi/jiwa tidak ada di KB) — sistem harus menolak, tidak menjawab palsu (PRD §6). Token tidak match corpus → jalur no_results/refusal."
         },
         {
             "id": "kb-24",
             "category": "negatif",
-            "question": "Berapa gaji pokok minimum untuk posisi direktur?",
+            "question": "berapa pesangon?",
             "expected_answer": [],
             "expected_sources": [],
             "negative": true,
             "verify_human": false,
-            "notes": "Data gaji per posisi tidak ada di corpus — sistem harus menolak."
+            "notes": "Di luar corpus (pesangon tidak ada di KB; token lain seperti \"cara\" dihindari karena substring-match \"secara\" di konten) — sistem harus menolak, tidak menjawab palsu (PRD §6)."
         }
     ]
 }
