@@ -142,11 +142,13 @@ const initFlatpickr = (root = document) => {
         const mode = el.getAttribute('data-ui-picker') || 'date';
         const minDate = el.getAttribute('min') || null;
         const maxDate = el.getAttribute('max') || null;
+        const isRange = mode === 'date-range';
 
         try {
             flatpickr(el, {
                 dateFormat: 'd M Y',
                 allowInput: false,
+                mode: isRange ? 'range' : 'single',
                 enableTime: mode === 'datetime' || mode === 'time',
                 noCalendar: mode === 'time',
                 monthSelectorType: 'dropdown',
@@ -154,6 +156,17 @@ const initFlatpickr = (root = document) => {
                 minDate: minDate || undefined,
                 maxDate: maxDate || undefined,
                 onChange: function (selectedDates, dateStr) {
+                    // Date-range: sync hidden inputs (#from / #to) in Y-m-d format
+                    if (isRange) {
+                        const fromSel = el.getAttribute('data-ui-range-from');
+                        const toSel = el.getAttribute('data-ui-range-to');
+                        if (fromSel && selectedDates[0]) {
+                            document.querySelector(fromSel).value = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
+                        }
+                        if (toSel && selectedDates[1]) {
+                            document.querySelector(toSel).value = flatpickr.formatDate(selectedDates[1], 'Y-m-d');
+                        }
+                    }
                     // Trigger Livewire model update
                     el.dispatchEvent(new Event('input', { bubbles: true }));
                     el.dispatchEvent(new Event('change', { bubbles: true }));
