@@ -162,7 +162,7 @@
 | Q2 | **±85 test masih gagal** (22 app-bug + 38 test-side + Tier 3 tersisa) | ✅ (triage) |
 | Q3 | E2E tidak reproducible (`auth.setup.ts` hilang, states gitignored) | ✅ |
 | Q4 | CI tidak ada (tests/ + .github/ untracked, DB mismatch) | ✅ |
-| Q5 | KB eval dataset ≥20 Q&A / ≥90% relevan — **belum ada di mana pun** (hard gate) | ✅ (grep) |
+| Q5 | KB eval dataset ≥20 Q&A / ≥90% relevan — **belum ada di mana pun** (hard gate) | ✅ (grep) | ✅ **FIXED kerangka (2026-08-05)** — `tests/Fixtures/kb-eval-dataset.json` **24 case** (22 positif + 2 negatif, 10 kategori, keyword diselaraskan ke corpus NYATA terverifikasi programmatic); `app/Support/KnowledgeBaseEval.php` (metrik coverage ≥80% + citation + refusal); `tests/Feature/KbEvalDatasetTest.php` **3/3 PASS (409 assertions, 2× run stabil)** — offline fallback pg_trgm kualitas **100% (22/22)**, negatif 2/2 ditolak; online skip tanpa API key (assert struktur + laporan skor informatif); `app/Console/Commands/KbEvalCommand.php` (`kb:eval`) untuk gate retrieval semantic NYATA. Bug test ditemukan: Pest `toContain()` tidak punya param message. **SISA gate:** `verify_human: false` — wajib review HR final; `php artisan kb:eval` manual (embedding 768D asli + Gemini) untuk bukti kualitas semantic |
 | Q6 | Test-side: `auth_middleware_stack` tidak ada (B9 stale); `SystemMaintenanceBackupJobsTest`/`SystemBackupRunJobTest` stale | ✅ |
 
 ---
