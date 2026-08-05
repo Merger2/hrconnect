@@ -4,7 +4,7 @@
 
         <!-- Add Team Member -->
         <div class="mt-10 sm:mt-0">
-            <x-form-section submit="addTeamMember">
+            <x-forms.form-section submit="addTeamMember">
                 <x-slot name="title">
                     {{ __('Add Team Member') }}
                 </x-slot>
@@ -72,7 +72,7 @@
                         {{ __('Add') }}
                     </x-actions.button>
                 </x-slot>
-            </x-form-section>
+            </x-forms.form-section>
         </div>
     @endif
 
@@ -81,7 +81,7 @@
 
         <!-- Team Member Invitations -->
         <div class="mt-10 sm:mt-0">
-            <x-action-section>
+            <x-actions.action-section>
                 <x-slot name="title">
                     {{ __('Pending Team Invitations') }}
                 </x-slot>
@@ -109,7 +109,7 @@
                         @endforeach
                     </div>
                 </x-slot>
-            </x-action-section>
+            </x-actions.action-section>
         </div>
     @endif
 
@@ -118,7 +118,7 @@
 
         <!-- Manage Team Members -->
         <div class="mt-10 sm:mt-0">
-            <x-action-section>
+            <x-actions.action-section>
                 <x-slot name="title">
                     {{ __('Team Members') }}
                 </x-slot>
@@ -166,7 +166,7 @@
                         @endforeach
                     </div>
                 </x-slot>
-            </x-action-section>
+            </x-actions.action-section>
         </div>
     @endif
 

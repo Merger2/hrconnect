@@ -18,6 +18,18 @@ class FaceRecognitionService
     public const SIMILARITY_THRESHOLD = 85.0;
 
     /**
+     * Similarity threshold (%) derived from config('hrconnect.face_distance_threshold').
+     * Config menyimpan batas jarak cosine (0.0–1.0); 0.15 ≈ 85% similarity.
+     * Default 0.15 menjaga perilaku lama (85.0).
+     */
+    public static function similarityThreshold(): float
+    {
+        $distance = (float) config('hrconnect.face_distance_threshold', 0.15);
+
+        return (1 - $distance) * 100;
+    }
+
+    /**
      * Verify a face embedding against registered employees.
      *
      * @param  array<float>  $embedding
@@ -50,7 +62,7 @@ class FaceRecognitionService
         $similarity = 1 - $this->cosineDistance($match->embedding, $vector);
         $similarityPercentage = $similarity * 100;
 
-        if ($similarityPercentage < self::SIMILARITY_THRESHOLD) {
+        if ($similarityPercentage < self::similarityThreshold()) {
             throw new FaceNotRecognizedException(
                 "Wajah tidak dikenali (similarity: {$similarityPercentage}%)"
             );

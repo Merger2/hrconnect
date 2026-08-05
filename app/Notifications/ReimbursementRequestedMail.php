@@ -36,7 +36,9 @@ class ReimbursementRequestedMail extends Notification implements ShouldQueue
             ->line('Tanggal: '.$date)
             ->line('Kategori: '.($this->reimbursement->category?->name ?? '-'))
             ->line('Deskripsi: '.($this->reimbursement->description ?? '-'))
-            ->action('Review Pengajuan', url('/api/v1/reimbursement/'.$this->reimbursement->id))
+            // U11 AUDIT: URL lama menunjuk endpoint API (/api/v1/...) — ganti
+            // ke halaman web admin reimbursement untuk review.
+            ->action('Review Pengajuan', route('admin.reimbursements'))
             ->line('Silakan review pengajuan ini.');
     }
 }

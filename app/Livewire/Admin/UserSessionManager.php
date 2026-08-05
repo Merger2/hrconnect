@@ -20,7 +20,11 @@ class UserSessionManager extends Component
 
     public function boot(): void
     {
-        if (! auth()->user()?->allowsAdminPermission('admin.user_sessions.manage')) {
+        // M18 AUDIT: dulu pakai allowsAdminPermission('admin.user_sessions.manage')
+        // — dot-key legacy tidak pernah match permission_keys enum ('manage_user_sessions')
+        // → non-superadmin selalu 403 padahal role admin di-seed dengan
+        // MANAGE_USER_SESSIONS. Samakan dengan gate route (manageUserSessions).
+        if (! auth()->user()?->can('manageUserSessions')) {
             abort(403);
         }
     }

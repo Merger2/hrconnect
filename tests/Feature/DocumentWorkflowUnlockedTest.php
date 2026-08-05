@@ -20,8 +20,13 @@ test('document workflow admin pages do not require the enterprise document featu
         'name' => 'Document Template Manager_'.uniqid(),
         'slug' => 'document_template_manager_'.uniqid(),
         'description' => 'Can access document templates without an enterprise document feature flag.',
+        // Q6 AUDIT fix: key lama 'admin.document_requests.templates' tidak resolve
+        // ke gate route manapun — route admin.document-templates pakai gate
+        // viewAdminDocumentRequests (keputusan K3). Dot-key legacy yang benar
+        // untuk gate ini adalah 'admin.document_requests.view' (sama seperti
+        // requestRole) — pemetaan via legacyAdminPermissionKey().
         'permission_keys' => [
-            'admin.document_requests.templates',
+            'admin.document_requests.view',
         ],
     ]);
 

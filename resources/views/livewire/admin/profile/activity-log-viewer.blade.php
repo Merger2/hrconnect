@@ -1,4 +1,4 @@
-<x-form-section submit="">
+<x-forms.form-section submit="">
     <x-slot name="title">
         {{ __('Audit Trails & Activity Logs') }}
     </x-slot>
@@ -60,4 +60,4 @@
             @endif
         </div>
     </x-slot>
-</x-form-section>
+</x-forms.form-section>

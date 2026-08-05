@@ -1,6 +1,6 @@
 <div>
     <!-- Generate API Token -->
-    <x-form-section submit="createApiToken">
+    <x-forms.form-section submit="createApiToken">
         <x-slot name="title">
             {{ __('Create API Token') }}
         </x-slot>
@@ -43,14 +43,14 @@
                 {{ __('Create') }}
             </x-actions.button>
         </x-slot>
-    </x-form-section>
+    </x-forms.form-section>
 
     @if ($this->user->tokens->isNotEmpty())
         <x-section-border />
 
         <!-- Manage API Tokens -->
         <div class="mt-10 sm:mt-0">
-            <x-action-section>
+            <x-actions.action-section>
                 <x-slot name="title">
                     {{ __('Manage API Tokens') }}
                 </x-slot>
@@ -89,7 +89,7 @@
                         @endforeach
                     </div>
                 </x-slot>
-            </x-action-section>
+            </x-actions.action-section>
         </div>
     @endif
 

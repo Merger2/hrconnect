@@ -21,18 +21,33 @@ class ApprovalFactory extends Factory
     public function definition(): array
     {
         return [
-            'approvable_type' => $this->faker->randomElement([
-                Leave::class,
-                Overtime::class,
-                Reimbursement::class,
-            ]),
-            'approvable_id' => $this->faker->numberBetween(1, 1000),
+            // M14 AUDIT: approvable_id sebelumnya random (1–1000) → dangling morph
+            // (id bisa tidak ada di tabel target). Default: Leave nyata via factory;
+            // state forOvertime()/forReimbursement() tersedia untuk tipe lain.
+            'approvable_type' => Leave::class,
+            'approvable_id' => Leave::factory(),
             'approver_id' => Employee::factory(),
             'level' => $this->faker->randomElement(ApprovalLevel::cases()),
             'status' => ApprovalStatus::PENDING,
             'notes' => null,
             'approved_at' => null,
         ];
+    }
+
+    public function forOvertime(): static
+    {
+        return $this->state(fn () => [
+            'approvable_type' => Overtime::class,
+            'approvable_id' => Overtime::factory(),
+        ]);
+    }
+
+    public function forReimbursement(): static
+    {
+        return $this->state(fn () => [
+            'approvable_type' => Reimbursement::class,
+            'approvable_id' => Reimbursement::factory(),
+        ]);
     }
 
     public function approved(): static

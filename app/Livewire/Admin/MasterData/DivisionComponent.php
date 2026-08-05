@@ -58,7 +58,7 @@ class DivisionComponent extends Component
 
     public function create()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageDivisions');
         $this->validate();
         Division::create(['name' => trim($this->name)]);
         $this->creating = false;
@@ -78,7 +78,7 @@ class DivisionComponent extends Component
 
     public function update()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageDivisions');
         $this->validate();
         $division = Division::query()->findOrFail($this->selectedId);
         $division->update(['name' => trim($this->name)]);
@@ -98,7 +98,7 @@ class DivisionComponent extends Component
 
     public function delete()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageDivisions');
         $division = Division::query()->findOrFail($this->selectedId);
         $division->delete();
         $this->confirmingDeletion = false;

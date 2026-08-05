@@ -352,7 +352,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     public function canAuthenticate(): bool
     {
-        return true;
+        // Soft-deleted users (users.softDeletes) tidak boleh login. Eloquent
+        // global scope sudah mengecualikan trashed dari query provider, tapi
+        // guard ini menutup jalur login manual (AuthenticateLoginAttempt,
+        // E2eLoginController) yang memuat user langsung.
+        return ! $this->trashed();
     }
 
     // ═══════════════════════════════════════════════

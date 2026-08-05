@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\HrChecklistService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,7 +17,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app')]
 class HrChecklistManager extends Component
 {
-    use WithPagination;
+    use AuthorizesRequests, WithPagination;
 
     public string $search = '';
 
@@ -39,6 +40,14 @@ class HrChecklistManager extends Component
     public string $activeTab = 'cases';
 
     public ?int $selectedCaseId = null;
+
+    public function mount(): void
+    {
+        // M19 AUDIT: sebelumnya hanya route gate (can('viewAny', HrChecklistCase::class))
+        // tanpa authorize in-component — method wire-callable (createCase/startCase/
+        // cancelCase/updateTask) bisa dipanggil langsung. Guard di mount + tiap mutasi.
+        $this->authorize('viewAny', HrChecklistCase::class);
+    }
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -82,6 +91,8 @@ class HrChecklistManager extends Component
     public function cancelCase(int $caseId, HrChecklistService $service): void
     {
         $case = HrChecklistCase::query()->findOrFail($caseId);
+        $this->authorize('cancel', $case);
+
         $service->cancelCase($case);
         $this->dispatch('banner', message: __('Case cancelled.'));
     }
@@ -89,6 +100,8 @@ class HrChecklistManager extends Component
     public function updateTask(int $taskId, string $status, HrChecklistService $service): void
     {
         $task = HrChecklistTask::query()->findOrFail($taskId);
+        $this->authorize('update', $task);
+
         $note = $this->taskNotes[$taskId] ?? null;
 
         $service->updateTaskStatus($task, auth()->user(), $status, $note);
@@ -105,6 +118,8 @@ class HrChecklistManager extends Component
 
     public function startCase(HrChecklistService $service): void
     {
+        // isolated
+
         $this->validate([
             'employeeId' => 'required|exists:users,id',
             'type' => 'required|string',

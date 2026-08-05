@@ -50,7 +50,7 @@ class ShiftForm extends Form
 
     public function store()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageShifts');
         $this->validate();
         Shift::create($this->payload());
         $this->reset();
@@ -58,7 +58,7 @@ class ShiftForm extends Form
 
     public function update()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageShifts');
         $this->validate();
         $this->shift->update($this->payload());
         $this->reset();
@@ -66,7 +66,7 @@ class ShiftForm extends Form
 
     public function delete()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageShifts');
 
         DB::transaction(function () {
             // Detach referensi ke shift yang di-soft-delete supaya tidak menggantung

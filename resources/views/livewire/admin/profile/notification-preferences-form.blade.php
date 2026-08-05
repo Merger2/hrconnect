@@ -1,4 +1,4 @@
-<x-form-section submit="save">
+<x-forms.form-section submit="save">
     <x-slot name="title">
         {{ __('Notification Preferences') }}
     </x-slot>
@@ -48,4 +48,4 @@
             {{ __('Save') }}
         </x-actions.button>
     </x-slot>
-</x-form-section>
+</x-forms.form-section>

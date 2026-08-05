@@ -1,4 +1,4 @@
-<x-action-section>
+<x-actions.action-section>
     <x-slot name="title">
         {{ __('Delete Team') }}
     </x-slot>
@@ -39,4 +39,4 @@
             </x-slot>
         </x-overlays.confirmation-modal>
     </x-slot>
-</x-action-section>
+</x-actions.action-section>

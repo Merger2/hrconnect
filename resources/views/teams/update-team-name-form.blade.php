@@ -1,4 +1,4 @@
-<x-form-section submit="updateTeamName">
+<x-forms.form-section submit="updateTeamName">
     <x-slot name="title">
         {{ __('Team Name') }}
     </x-slot>
@@ -47,4 +47,4 @@
             </x-actions.button>
         </x-slot>
     @endif
-</x-form-section>
+</x-forms.form-section>
