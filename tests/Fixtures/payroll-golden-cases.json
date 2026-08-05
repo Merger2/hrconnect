@@ -917,7 +917,7 @@
       "id": "PR-14",
       "title": "Bruto tinggi multi-bracket progressive (Desember)",
       "scenario": "december_high_income",
-      "notes": "REVISI: gaji diturunkan ke level manajer senior (Rp18jt/bulan) supaya realistis untuk konteks PT DCMS, tetap lintas 2 bracket progresif (5% + 15%). married + 2 anak -> kategori TER C (rate 7% bulanan). ytd_payrolls Jan-Nov diisi konsisten Rp18jt/bulan dengan pph21 TER bulanan Rp1.260.000 (7% x 18jt) supaya realistis (bukan 0).",
+      "notes": "True-up Desember: YTD 11x18jt + Des 18jt = 216jt. Biaya jabatan (M2) = min(5%x216jt, 6jt) = 6jt. PKP = 216-6-67,5 (K/2) = 142,5jt -> 5%(60)+15%(82,5) = 15,375jt annual; Des = 15,375 - 13,86 = 1,515jt.",
       "input": {
         "period": "2026-12",
         "employee": {
@@ -1019,7 +1019,7 @@
         "gross_salary": 18000000,
         "taxable_income": 18000000,
         "ytd_gross_total": 216000000,
-        "annual_pph21": 16275000,
+        "annual_pph21": 15375000,
         "ytd_pph21_sebelumnya": 13860000,
         "bpjs": {
           "kesehatan": {
@@ -1041,9 +1041,9 @@
             "employer": 54000
           }
         },
-        "pph21": 2415000,
-        "total_deduction": 3005863,
-        "net_salary": 14994137
+        "pph21": 1515000,
+        "total_deduction": 2105863,
+        "net_salary": 15894137
       },
       "active": true,
       "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
@@ -1168,16 +1168,16 @@
     {
       "id": "CP-04",
       "method": "calculatePesangon",
-      "title": "Pesangon PHK severe 2x, 2 tahun",
-      "notes": "PP 35/2021: 2 thn -> 3x, severe 2.0x = 3x2x8jt = 48jt.",
+      "title": "Pesangon PHK severe DISTANDARKAN 1x, 2 tahun",
+      "notes": "PP 35/2021: 2 thn -> 3x; keputusan Fikih 2026-08-05 (M3): variant dismissed_severe TIDAK lagi 2.0x -> 3x1x8jt = 24jt (standar sama dgn dismissed).",
       "input": {
         "join_date": "2024-07-01",
         "phk_variant": "dismissed_severe",
         "monthly_salary": 8000000
       },
-      "expected": 48000000,
+      "expected": 24000000,
       "active": true,
-      "reference": "hitung ulang 2026-08-05 (PP 35/2021 Pasal 40(2) — keputusan P0)"
+      "reference": "hitung ulang 2026-08-05 (keputusan Fikih M3 — hapus multiplier 2x)"
     },
     {
       "id": "CP-05",
@@ -1225,15 +1225,15 @@
       "id": "CP-08",
       "method": "calculateAnnualPPh21Progressive",
       "title": "Annual progressive lintas bracket (TK/0)",
-      "notes": "PTKP TK/0=54jt. PKP=426jt -> lintas bracket 5%(60jt)+15%(190jt)+25%(sisa176jt).",
+      "notes": "PTKP TK/0=54jt. Biaya jabatan (M2, PMK 168/2023) = min(5%x480jt, 6jt) = 6jt. PKP = 480-6-54 = 420jt -> 5%(60jt)+15%(190jt)+25%(170jt).",
       "input": {
         "marital_status": "single",
         "children_count": 0,
         "annual_gross_income": 480000000
       },
-      "expected": 75500000,
+      "expected": 74000000,
       "active": true,
-      "reference": "angka Claude asli (tanpa biaya jabatan — keputusan M2 biarkan dulu)"
+      "reference": "hitung ulang 2026-08-05 (keputusan Fikih M2 — biaya jabatan 5%/cap 6jt diterapkan)"
     },
     {
       "id": "CP-09",

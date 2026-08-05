@@ -241,10 +241,15 @@ class PayrollCalculatorService
      */
     public function calculateAnnualPPh21Progressive(Employee $employee, float $annualGrossIncome): float
     {
-        // CATATAN (keputusan Fikih 2026-08-05 "biarkan dulu"): biaya jabatan 5%/cap 6jt
-        // (PMK 168/2023) TIDAK diterapkan — deviasi terdokumentasi di AUDIT.md, revisit later.
+        // Biaya jabatan (PMK 168/2023 + KEP-101/PJ/2024): 5% dari penghasilan
+        // bruto setahun, maksimal Rp 6.000.000 (Rp 500.000/bulan).
+        // Keputusan Fikih 2026-08-05 (AUDIT M2): deviasi "biarkan dulu" dicabut —
+        // biaya jabatan DITERAPKAN pada true-up progresif Pasal 17.
+        // Catatan: basis TER bulanan (PP 58/2023) sudah memperhitungkan biaya
+        // jabatan secara implisit di tarif — tidak diubah.
+        $biayaJabatan = min(0.05 * $annualGrossIncome, 6_000_000);
         $ptkp = $this->getPtkpAmount($employee);
-        $pkp = max(0, $annualGrossIncome - $ptkp);
+        $pkp = max(0, $annualGrossIncome - $biayaJabatan - $ptkp);
 
         if ($pkp <= 0) {
             return 0.0;
@@ -373,7 +378,9 @@ class PayrollCalculatorService
      *
      * Multiplier variant (phk_variant):
      *   dismissed       = 1.0×
-     *   dismissed_severe = 2.0×
+     *   dismissed_severe = 1.0× (keputusan Fikih 2026-08-05 — AUDIT M3:
+     *                   multiplier 2.0× internal DIHAPUS, pakai tabel standar
+     *                   PP 35/2021 yang sama dengan dismissed)
      *   mutual          = 0.5×
      *   resign          = 1.0× (default)
      */
@@ -514,8 +521,10 @@ class PayrollCalculatorService
 
     private function getPhkVariantMultiplier(?string $phkVariant): float
     {
+        // M3 AUDIT (keputusan Fikih 2026-08-05): dismissed_severe TIDAK lagi 2.0×
+        // — standarkan ke tabel PP 35/2021 (sama dengan dismissed). Hanya mutual
+        // yang tetap 0.5× (kesepakatan PHK).
         return match ($phkVariant) {
-            'dismissed_severe' => 2.0,
             'mutual' => 0.5,
             default => 1.0,
         };
