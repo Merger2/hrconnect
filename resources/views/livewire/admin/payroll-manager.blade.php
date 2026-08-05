@@ -1,105 +1,192 @@
-<div class="p-6 space-y-6">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+<div>
+    <x-admin.page-shell :title="__('Kelola Penggajian')" :description="__('Generate, publish, dan kelola payroll periode.')">
+        <x-slot name="toolbar">
+            <x-admin.page-tools grid-class="grid grid-cols-1 items-end gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div class="md:col-span-2">
+                    <x-forms.label for="payroll-search" class="mb-1.5 block">{{ __('Cari karyawan') }}</x-forms.label>
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400" aria-hidden="true">
+                            <x-heroicon-o-magnifying-glass class="h-5 w-5" />
+                        </span>
+                        <x-forms.input id="payroll-search" type="search" wire:model.debounce.300ms="search"
+                            placeholder="Nama / NIP" class="w-full pl-11" />
+                    </div>
+                </div>
+                <div>
+                    <x-forms.label for="payroll-period" class="mb-1.5 block">{{ __('Periode') }}</x-forms.label>
+                    <x-forms.input id="payroll-period" type="month" wire:model.live="periodFilter" class="w-full" />
+                </div>
+                <div>
+                    <x-forms.label for="payroll-status" class="mb-1.5 block">{{ __('Status') }}</x-forms.label>
+                    <x-forms.select id="payroll-status" wire:model.live="statusFilter" class="w-full">
+                        <option value="">Semua</option>
+                        @foreach($statuses as $status)
+                            <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                        @endforeach
+                    </x-forms.select>
+                </div>
+            </x-admin.page-tools>
+        </x-slot>
+
+        @php
+            $pageItems = collect($payrolls->items());
+            $actionableCount = $pageItems->whereIn('status', [
+                \App\Enums\PayrollStatus::DRAFT,
+                \App\Enums\PayrollStatus::SUBMITTED,
+                \App\Enums\PayrollStatus::VERIFIED,
+            ])->count();
+        @endphp
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="relative overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+                <span class="absolute inset-x-0 top-0 h-1 bg-module-payroll" aria-hidden="true"></span>
+                <div class="flex items-center gap-3">
+                    <div class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-module-payroll/10 text-module-payroll">
+                        <x-heroicon-o-banknotes class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Total Payroll</p>
+                        <p class="truncate text-lg font-bold text-slate-950">{{ number_format($payrolls->total(), 0, ',', '.') }}</p>
+                        <p class="text-[11px] text-slate-400">Semua status &amp; filter</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+                <span class="absolute inset-x-0 top-0 h-1 bg-module-payroll" aria-hidden="true"></span>
+                <div class="flex items-center gap-3">
+                    <div class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-module-payroll/10 text-module-payroll">
+                        <x-heroicon-o-currency-dollar class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Total Gross</p>
+                        <p class="truncate text-lg font-bold text-slate-950">Rp {{ number_format($pageItems->sum('gross_salary'), 0, ',', '.') }}</p>
+                        <p class="text-[11px] text-slate-400">Halaman ini</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+                <span class="absolute inset-x-0 top-0 h-1 bg-module-payroll" aria-hidden="true"></span>
+                <div class="flex items-center gap-3">
+                    <div class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-module-payroll/10 text-module-payroll">
+                        <x-heroicon-o-wallet class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Total Net</p>
+                        <p class="truncate text-lg font-bold text-slate-950">Rp {{ number_format($pageItems->sum('net_salary'), 0, ',', '.') }}</p>
+                        <p class="text-[11px] text-slate-400">Halaman ini</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+                <span class="absolute inset-x-0 top-0 h-1 bg-module-payroll" aria-hidden="true"></span>
+                <div class="flex items-center gap-3">
+                    <div class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-module-payroll/10 text-module-payroll">
+                        <x-heroicon-o-clock class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Perlu Tindakan</p>
+                        <p class="truncate text-lg font-bold text-slate-950">{{ $actionableCount }}</p>
+                        <p class="text-[11px] text-slate-400">Draft / Diajukan / Diverifikasi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <x-admin.panel>
+            <div class="overflow-x-auto admin-table-scroll">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-module-payroll/5 text-slate-600">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold">Periode</th>
+                            <th class="px-4 py-3 text-left font-semibold">Karyawan</th>
+                            <th class="px-4 py-3 text-right font-semibold">Gross</th>
+                            <th class="px-4 py-3 text-right font-semibold">Net</th>
+                            <th class="px-4 py-3 text-left font-semibold">Status</th>
+                            <th class="px-4 py-3 text-right font-semibold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        @forelse($payrolls as $payroll)
+                            <tr class="transition hover:bg-slate-50/70">
+                                <td class="px-4 py-3 text-slate-700">{{ $payroll->period }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-slate-900">{{ $payroll->employee?->full_name }}</div>
+                                    <div class="text-xs text-slate-500">{{ $payroll->employee?->employee_number }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-right text-slate-700">Rp {{ number_format($payroll->gross_salary, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3">
+                                    <x-admin.status-badge :tone="match($payroll->status?->value) {
+                                        'draft' => 'neutral',
+                                        'submitted' => 'warning',
+                                        'verified' => 'info',
+                                        'approved' => 'success',
+                                        'paid' => 'primary',
+                                        default => 'neutral'
+                                    }">
+                                        {{ $payroll->status?->label() }}
+                                    </x-admin.status-badge>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        @if($payroll->status === \App\Enums\PayrollStatus::DRAFT)
+                                            <x-actions.button type="button" wire:click="submit({{ $payroll->id }})" variant="soft-primary" size="sm">
+                                                {{ __('Ajukan') }}
+                                            </x-actions.button>
+                                        @endif
+
+                                        @if($payroll->status === \App\Enums\PayrollStatus::SUBMITTED)
+                                            <x-actions.button type="button" wire:click="verify({{ $payroll->id }})" variant="soft-primary" size="sm">
+                                                {{ __('Verifikasi') }}
+                                            </x-actions.button>
+                                            <x-actions.button type="button" wire:click="confirmReject({{ $payroll->id }})" variant="soft-danger" size="sm">
+                                                {{ __('Tolak') }}
+                                            </x-actions.button>
+                                        @endif
+
+                                        @if($payroll->status === \App\Enums\PayrollStatus::VERIFIED)
+                                            <x-actions.button type="button" wire:click="approve({{ $payroll->id }})" variant="soft-success" size="sm">
+                                                {{ __('Setujui') }}
+                                            </x-actions.button>
+                                            <x-actions.button type="button" wire:click="confirmReject({{ $payroll->id }})" variant="soft-danger" size="sm">
+                                                {{ __('Tolak') }}
+                                            </x-actions.button>
+                                        @endif
+
+                                        @if($payroll->status === \App\Enums\PayrollStatus::APPROVED)
+                                            <x-actions.button type="button" wire:click="markPaid({{ $payroll->id }})" variant="soft-success" size="sm">
+                                                {{ __('Tandai Ditransfer') }}
+                                            </x-actions.button>
+                                            <x-actions.button type="button" wire:click="downloadPayslip({{ $payroll->id }})" variant="secondary" size="sm">
+                                                {{ __('Payslip') }}
+                                            </x-actions.button>
+                                        @endif
+
+                                        @if($payroll->status === \App\Enums\PayrollStatus::PAID)
+                                            <x-actions.button type="button" wire:click="downloadPayslip({{ $payroll->id }})" variant="secondary" size="sm">
+                                                {{ __('Payslip') }}
+                                            </x-actions.button>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada data payroll.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </x-admin.panel>
+
         <div>
-            <h1 class="text-2xl font-bold tracking-tight">Kelola Penggajian</h1>
-            <p class="text-sm text-zinc-500">Generate, publish, dan kelola payroll periode.</p>
+            {{ $payrolls->links() }}
         </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium mb-1">Cari karyawan</label>
-            <input type="text" wire:model.debounce.300ms="search" class="w-full rounded-md border-zinc-300" placeholder="Nama / NIP">
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Periode</label>
-            <input type="month" wire:model.live="periodFilter" class="w-full rounded-md border-zinc-300">
-        </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Status</label>
-            <select wire:model.live="statusFilter" class="w-full rounded-md border-zinc-300">
-                <option value="">Semua</option>
-                @foreach($statuses as $status)
-                    <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-zinc-200 overflow-hidden">
-        <table class="min-w-full text-sm">
-            <thead class="bg-zinc-50 text-zinc-600">
-                <tr>
-                    <th class="px-4 py-3 text-left">Periode</th>
-                    <th class="px-4 py-3 text-left">Karyawan</th>
-                    <th class="px-4 py-3 text-right">Gross</th>
-                    <th class="px-4 py-3 text-right">Net</th>
-                    <th class="px-4 py-3 text-left">Status</th>
-                    <th class="px-4 py-3 text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-200 bg-white">
-                @forelse($payrolls as $payroll)
-                    <tr>
-                        <td class="px-4 py-3">{{ $payroll->period }}</td>
-                        <td class="px-4 py-3">
-                            <div class="font-medium">{{ $payroll->employee?->full_name }}</div>
-                            <div class="text-xs text-zinc-500">{{ $payroll->employee?->employee_number }}</div>
-                        </td>
-                        <td class="px-4 py-3 text-right">Rp {{ number_format($payroll->gross_salary, 0, ',', '.') }}</td>
-                        <td class="px-4 py-3 text-right">Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
-                                {{ match($payroll->status?->value) {
-                                    'draft' => 'bg-zinc-100 text-zinc-800',
-                                    'submitted' => 'bg-amber-100 text-amber-800',
-                                    'verified' => 'bg-blue-100 text-blue-800',
-                                    'approved' => 'bg-emerald-100 text-emerald-800',
-                                    'paid' => 'bg-teal-100 text-teal-800',
-                                    default => 'bg-zinc-100 text-zinc-800'
-                                } }}">
-                                {{ $payroll->status?->label() }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <div class="flex justify-end gap-2">
-                                @if($payroll->status === \App\Enums\PayrollStatus::DRAFT)
-                                    <button wire:click="submit({{ $payroll->id }})" class="text-amber-600 hover:text-amber-700 text-xs font-semibold">Ajukan</button>
-                                @endif
-
-                                @if($payroll->status === \App\Enums\PayrollStatus::SUBMITTED)
-                                    <button wire:click="verify({{ $payroll->id }})" class="text-blue-600 hover:text-blue-700 text-xs font-semibold">Verifikasi</button>
-                                    <button wire:click="confirmReject({{ $payroll->id }})" class="text-red-600 hover:text-red-700 text-xs font-semibold">Tolak</button>
-                                @endif
-
-                                @if($payroll->status === \App\Enums\PayrollStatus::VERIFIED)
-                                    <button wire:click="approve({{ $payroll->id }})" class="text-emerald-600 hover:text-emerald-700 text-xs font-semibold">Setujui</button>
-                                    <button wire:click="confirmReject({{ $payroll->id }})" class="text-red-600 hover:text-red-700 text-xs font-semibold">Tolak</button>
-                                @endif
-
-                                @if($payroll->status === \App\Enums\PayrollStatus::APPROVED)
-                                    <button wire:click="markPaid({{ $payroll->id }})" class="text-teal-600 hover:text-teal-700 text-xs font-semibold">Tandai Ditransfer</button>
-                                    <button wire:click="downloadPayslip({{ $payroll->id }})" class="text-zinc-700 hover:text-black text-xs font-semibold">Payslip</button>
-                                @endif
-
-                                @if($payroll->status === \App\Enums\PayrollStatus::PAID)
-                                    <button wire:click="downloadPayslip({{ $payroll->id }})" class="text-zinc-700 hover:text-black text-xs font-semibold">Payslip</button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-zinc-500">Belum ada data payroll.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="mt-4">
-        {{ $payrolls->links() }}
-    </div>
+    </x-admin.page-shell>
 
     @if($rejectingPayrollId)
         <template x-teleport="body">

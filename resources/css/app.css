@@ -38,6 +38,16 @@
   --color-on-primary: #ffffff;
   --color-on-error: #ffffff;
 
+  /* Modular Hue System (design.md 2026-08-05 — colorful per modul) */
+  --color-module-hr: #3b82f6;
+  --color-module-attendance: #06b6d4;
+  --color-module-leave: #8b5cf6;
+  --color-module-payroll: #10b981;
+  --color-module-documents: #f59e0b;
+  --color-module-reports: #0284c7;
+  --color-module-kb: #d946ef;
+  --color-module-finance: #f43f5e;
+
   --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.06);
   --shadow-modal: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
@@ -1083,9 +1093,9 @@
 
     .user-compact-filter input:focus,
     .user-compact-filter select:focus {
-        border-color: rgb(106 180 91 / 0.88) !important;
+        border-color: rgb(2 74 216 / 0.88) !important;
         background-color: rgb(255 255 255 / 0.92) !important;
-        box-shadow: 0 0 0 4px rgb(106 180 91 / 0.14) !important;
+        box-shadow: 0 0 0 4px rgb(2 74 216 / 0.14) !important;
         outline: none !important;
     }
 
@@ -3876,10 +3886,12 @@
         height: 2.75rem;
         line-height: 1.25rem;
         box-sizing: border-box;
+        padding: 0 1rem;
     }
 
     .admin-ui textarea {
         box-sizing: border-box;
+        padding: 0.75rem 1rem;
     }
 
     .admin-ui input[data-ui-picker][readonly],
@@ -4120,7 +4132,7 @@
         z-index: 90 !important;
         background-color: #fff !important;
         padding-top: env(safe-area-inset-top) !important;
-        box-sizing: content-box !important;
+        box-sizing: border-box !important;
     }
 
     /* Keep page content scrolling under the navbar without overlapping it */

@@ -65,7 +65,7 @@
     <!-- Styles -->
     @livewireStyles
 </head>
-<body class="font-sans antialiased text-ink bg-canvas">
+<body class="font-sans antialiased text-ink bg-surface">
     <main>
         {{ $slot }}
     </main>

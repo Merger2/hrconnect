@@ -25,6 +25,30 @@ modern-minimal
 --color-warning:    oklch(75% 0.18 85);        /* #F59E0B */
 --color-error:      oklch(58% 0.22 25);        /* #EF4444 */
 
+## Modular Hue System (2026-08-05 — colorful design decision)
+
+Every module carries its own accent hue so users can navigate by color. The
+global brand blue stays for chrome/CTAs; module hues appear on icons, badges,
+tabs, section headers, and small accent strips (≤8% of viewport per module page).
+
+| Modul | Hue token | OKLCH | Notes |
+|-------|-----------|-------|-------|
+| HR & Master Data | `--color-module-hr` | oklch(58% 0.22 260) | = brand blue (default) |
+| Absensi & Jadwal | `--color-module-attendance` | oklch(70% 0.14 200) | cyan/teal |
+| Cuti & Approval | `--color-module-leave` | oklch(60% 0.20 295) | violet |
+| Payroll & Payslip | `--color-module-payroll` | oklch(65% 0.17 160) | emerald |
+| Dokumen & Checklist | `--color-module-documents` | oklch(70% 0.17 75) | amber |
+| Reports & Import/Export | `--color-module-reports` | oklch(60% 0.18 230) | sky blue |
+| AI Knowledge Base | `--color-module-kb` | oklch(60% 0.22 330) | fuchsia |
+| Finance (reimburse/kasbon) | `--color-module-finance` | oklch(65% 0.20 20) | rose/coral |
+
+Rules:
+- CTA, primary buttons, focus rings, active nav = **global accent** (brand blue), never a module hue.
+- Module hue appears on: module icons, status badges, tab underline, section accent strip, table header tint.
+- Gradient accents allowed ONLY as a subtle module-tint wash on page header surfaces (paper-2 → module hue at ≤10% alpha). No rainbow mixing on one page.
+- Success/warning/error semantic colors unchanged; a module page uses at most its own hue + semantic colors.
+- Dark mode: not supported (light-only, per user decision 2026-08-05).
+
 ## Typography
 - Display: Rubik, Inter, sans-serif — weight 600, style normal
 - Body:    Inter, system-ui, sans-serif — weight 400/500/600
@@ -87,6 +111,15 @@ modern-minimal
   --color-warning:    oklch(75% 0.18 85);
   --color-error:      oklch(58% 0.22 25);
 
+  --color-module-hr:         oklch(58% 0.22 260);
+  --color-module-attendance: oklch(70% 0.14 200);
+  --color-module-leave:      oklch(60% 0.20 295);
+  --color-module-payroll:    oklch(65% 0.17 160);
+  --color-module-documents:  oklch(70% 0.17 75);
+  --color-module-reports:    oklch(60% 0.18 230);
+  --color-module-kb:         oklch(60% 0.22 330);
+  --color-module-finance:    oklch(65% 0.20 20);
+
   --font-display: "Rubik", "Inter", sans-serif;
   --font-body:    "Inter", system-ui, sans-serif;
   --font-mono:    "Monaco", "Consolas", monospace;
@@ -121,6 +154,15 @@ modern-minimal
   --color-success:    oklch(60% 0.18 150);
   --color-warning:    oklch(75% 0.18 85);
   --color-error:      oklch(58% 0.22 25);
+
+  --color-module-hr:         oklch(58% 0.22 260);
+  --color-module-attendance: oklch(70% 0.14 200);
+  --color-module-leave:      oklch(60% 0.20 295);
+  --color-module-payroll:    oklch(65% 0.17 160);
+  --color-module-documents:  oklch(70% 0.17 75);
+  --color-module-reports:    oklch(60% 0.18 230);
+  --color-module-kb:         oklch(60% 0.22 330);
+  --color-module-finance:    oklch(65% 0.20 20);
 
   --font-display: "Rubik", "Inter", sans-serif;
   --font-body:    "Inter", system-ui, sans-serif;
