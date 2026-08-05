@@ -14,13 +14,15 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
-use Livewire\Attributes\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Component as LivewireComponent;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
-#[Component('admin.import-export.attendance')]
+// Q1: #[Component('admin.import-export.attendance')] dihapus — atribut
+// `Livewire\Attributes\Component` TIDAK ADA di Livewire 4 (cek vendor);
+// nama komponen sudah resolve otomatis dari namespace ke kebab-case
+// (App\Livewire\Admin\ImportExport\AttendanceImportExport → admin.import-export.attendance).
 #[Layout('layouts.app')]
 final class AttendanceImportExport extends LivewireComponent
 {

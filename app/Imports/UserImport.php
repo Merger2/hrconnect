@@ -42,7 +42,10 @@ class UserImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, WithVa
                 if (! empty($row['role'])) {
                     $role = Role::where('name', $row['role'])->first();
                     if ($role) {
-                        $user->syncRoles([$role->name]);
+                        // Q1: `syncRoles()` tidak ada di User (bukan Spatie HasRoles —
+                        // lihat HasRolePermissions trait). Pakai roles()->sync()
+                        // (pola AdminDirectory) untuk replace role.
+                        $user->roles()->sync([$role->id]);
                     }
                 }
 

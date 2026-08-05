@@ -18,15 +18,15 @@ class LanguageController extends Controller
             'language' => 'required|in:id,en',
         ]);
 
-        // Always update session for immediate effect (guests & users)
+        // Update session untuk efek langsung (guest & user)
         session(['locale' => $validated['language']]);
         App::setLocale($validated['language']);
 
-        // If user is logged in, save preference to database
-        if ($user = $request->user()) {
-            $user->language = $validated['language'];
-            $user->save();
-        }
+        // Q1: `$user->language = ...` + save() dihapus — kolom `language`
+        // TIDAK ADA di tabel users (0 migration) → UPDATE users SET language
+        // = QueryException 500 setiap ganti bahasa. Preferensi bahasa hidup di
+        // session (locale) + tidak ada konsumen lain yang membaca kolom tsb
+        // (middleware SetLocale/SetUserLocale sudah dihapus — dead code).
 
         return back();
     }

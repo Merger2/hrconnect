@@ -9,12 +9,13 @@ use App\Models\User;
 use App\Support\ImportExportRunService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Component as LivewireComponent;
 use Livewire\WithFileUploads;
 
-#[Component('admin.import-export.user')]
+// Q1: #[Component('admin.import-export.user')] dihapus — atribut
+// `Livewire\Attributes\Component` TIDAK ADA di Livewire 4; nama komponen
+// resolve otomatis dari namespace (UserImportExport → admin.import-export.user).
 #[Layout('layouts.app')]
 final class UserImportExport extends LivewireComponent
 {

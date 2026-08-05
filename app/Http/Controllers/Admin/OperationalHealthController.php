@@ -42,11 +42,11 @@ class OperationalHealthController extends Controller
             $alerts[] = ['code' => 'database_down', 'level' => 'critical', 'message' => __('Database connectivity check failed.')];
         }
 
-        if (($queue['heartbeat_stale'] ?? false)) {
+        if ($queue['heartbeat_stale']) {
             $alerts[] = ['code' => 'queue_stale', 'level' => 'critical', 'message' => __('Queue worker heartbeat is stale — jobs may not be processed.')];
         }
 
-        if (($queue['scheduler_stale'] ?? false)) {
+        if ($queue['scheduler_stale']) {
             $alerts[] = ['code' => 'scheduler_stale', 'level' => 'critical', 'message' => __('Scheduler heartbeat is stale — scheduled tasks may not run.')];
         }
 
@@ -198,16 +198,34 @@ class OperationalHealthController extends Controller
                 ->latest('failed_at')
                 ->first();
 
+            $disk = config('backup.backup.destination.disks')[0] ?? 'backups';
+
             $filePresent = $latest !== null && filled($latest->file_name)
-                && Storage::disk(config('backup.backup.destination.disks')[0] ?? 'backups')
-                    ->exists($latest->file_name);
+                && Storage::disk($disk)->exists($latest->file_name);
+
+            // Q1: `checksum_sha256` BUKAN kolom SystemBackupRun (kolom: meta,
+            // file_name, dst — lihat migration 2026_07_21_000016). Signature
+            // backup HMAC disimpan DI DALAM file dump (SystemBackupService::
+            // signDatabaseBackup, baris `-- APP_BACKUP_SIGNATURE:`), bukan di DB.
+            // Hitung sha256 file nyata saat file ada — hilangkan null-silent.
+            $checksum = null;
+            if ($filePresent) {
+                $checksum = hash_file('sha256', Storage::disk($disk)->path($latest->file_name)) ?: null;
+            }
+
+            // completed_at/failed_at ber-cast datetime — anotasi utk PHPStan
+            // (tanpa IdeHelper mixin, casts() tidak terbaca larastan).
+            /** @var Carbon|null $completedAt */
+            $completedAt = $latest?->completed_at;
+            /** @var Carbon|null $failedAt */
+            $failedAt = $lastFailed?->failed_at;
 
             return [
                 'file_present' => $filePresent,
-                'last_success_at' => $latest?->completed_at?->toIso8601String(),
-                'last_failed_at' => $lastFailed?->failed_at?->toIso8601String(),
+                'last_success_at' => $completedAt?->toIso8601String(),
+                'last_failed_at' => $failedAt?->toIso8601String(),
                 'checksum_matches_meta' => null,
-                'checksum_sha256' => $latest?->checksum_sha256,
+                'checksum_sha256' => $checksum,
             ];
         } catch (\Throwable) {
             return [
