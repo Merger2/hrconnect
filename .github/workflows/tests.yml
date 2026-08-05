@@ -1,0 +1,67 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - master
+      - workos
+  pull_request:
+    branches:
+      - develop
+      - main
+      - master
+      - workos
+
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    environment: Testing
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          # Q4 AUDIT fix: phpunit.xml & phpunit.pgsql.xml hardcode DB_DATABASE=hris_testing
+          # (sebelumnya CI membuat hrconnect_testing → mismatch laten, suite nyasar).
+          POSTGRES_DB: hris_testing
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        php-version: ['8.5']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: composer:v2
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install PostgreSQL Client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create PostgreSQL Extensions
+        run: |
+          psql -h 127.0.0.1 -U postgres -d hris_testing -c "CREATE EXTENSION IF NOT EXISTS vector;"
+          psql -h 127.0.0.1 -U postgres -d hris_testing -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+          psql -h 127.0.0.1 -U postgres -d hris_testing -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+      - name: Run PostgreSQL Integration Tests
+        run: ./vendor/bin/pest --configuration=phpunit.pgsql.xml
