@@ -8,6 +8,7 @@ use App\Models\Overtime;
 use App\Models\Schedule;
 use App\Models\Setting;
 use App\Models\Shift;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -16,6 +17,8 @@ use Livewire\Component;
  */
 class HomeAttendanceStatus extends Component
 {
+    use AuthorizesRequests;
+
     protected AttendanceServiceInterface $attendanceService;
 
     public $hasCheckedIn = false;
@@ -41,6 +44,8 @@ class HomeAttendanceStatus extends Component
 
     public function mount()
     {
+        $this->authorize('viewAny', Attendance::class);
+
         $this->checkAttendanceStatus();
     }
 

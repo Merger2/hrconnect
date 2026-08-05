@@ -173,6 +173,8 @@ class ClockInAction extends Component
      */
     public function startClockIn(): void
     {
+        $this->authorize('create', Attendance::class);
+
         $this->errorMessage = null;
         $this->successMessage = null;
         $this->isLoading = true;
@@ -206,6 +208,8 @@ class ClockInAction extends Component
      */
     public function doClockInWithFace(array $faceDescriptor): void
     {
+        $this->authorize('create', Attendance::class);
+
         $this->errorMessage = null;
         $this->isLoading = true;
 
@@ -247,6 +251,8 @@ class ClockInAction extends Component
      */
     public function startClockOut(): void
     {
+        $this->authorize('create', Attendance::class);
+
         $this->errorMessage = null;
         $this->successMessage = null;
         $this->isLoading = true;
@@ -279,6 +285,8 @@ class ClockInAction extends Component
      */
     public function doClockOutWithFace(array $faceDescriptor): void
     {
+        $this->authorize('create', Attendance::class);
+
         $this->errorMessage = null;
         $this->isLoading = true;
 
@@ -322,6 +330,8 @@ class ClockInAction extends Component
      */
     public function startWfaClockIn(): void
     {
+        $this->authorize('create', Attendance::class);
+
         $this->showWfaModal = false;
         $this->wfaNote = '';
         $this->wfaFaceDescriptor = null;
@@ -355,6 +365,8 @@ class ClockInAction extends Component
 
     public function submitWfaClockIn(): void
     {
+        $this->authorize('create', Attendance::class);
+
         // Face-only: verifikasi wajah sudah dilakukan sebelum modal dibuka (note saja yang divalidasi)
         $this->validate(['wfaNote' => ['required', 'string', 'min:20', 'max:500']]);
 

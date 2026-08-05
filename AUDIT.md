@@ -124,8 +124,8 @@
 | M19 | `HrChecklistManager` tanpa authorize di komponen (hanya route can) | ⚠️ fix-9 |
 | M20 | Route gate vs komponen gate asimetris di master-data (`manageDivisions` route vs `manageMasterData` komponen) | ⚠️ fix-9 |
 | M21 | `EmployeeDocumentRequestPolicy` pakai custom `employeeHasAccess` (inkonsisten 9 policy lain) | ⚠️ fix-18 |
-| M22 | 8 komponen user tanpa authorize in-component (ClockInAction, FaceEnrollment, dll — risiko laten) | ⚠️ fix-10 |
-| M23 | Route tanpa gate: home, my-schedule, my-tasks, collaboration, my-forms, face.enrollment, notifications | ⚠️ fix-20 |
+| M22 | 8 komponen user tanpa authorize in-component (ClockInAction, FaceEnrollment, dll — risiko laten) | ⚠️ fix-10 | ✅ **FIXED (2026-08-05)** — 7 komponen di-guard: ClockInAction `authorize('create', Attendance)` di 6 method (entry + mutasi wire-callable), HomeAttendanceStatus `viewAny Attendance` + trait, FaceEnrollment/ShiftSchedulePage/MyOperationalTasks/CollaborationInbox/MyCustomForms `abort_unless(employee, 403)` (tidak ada policy pas — guard minimal + komentar). MyPerformance DILEWATI (sudah punya viewAny + selfAssess/acknowledge). Fixture 4 test di-update (user punya Employee, sesuai E2eTestSeeder). 2 failure CustomFormBuilderTest PRE-EXISTING (string notifikasi mismatch commit `9c55d86`) |
+| M23 | Route tanpa gate: home, my-schedule, my-tasks, collaboration, my-forms, face.enrollment, notifications | ⚠️ fix-20 | ✅ **FIXED (2026-08-05, via keputusan)** — 0 gate baru (change-control: permission employee tidak tersedia di enum/seeder; `view_collaboration_workspace`/`view_custom_forms` ada di enum tapi TIDAK di-seed ke employee → `->can()` = 403 semua employee = blokir fungsionalitas). Ditutup dengan: komentar keputusan di route + verifikasi middleware chain `web → Authenticate:sanctum → EnsureEmailIsVerified → UserMiddleware` untuk 6 route (route:list). `home` sudah dalam grup `user` — tidak berubah |
 | M24 | Duplikasi route `admin.announcements` (operations.php:24 + security.php:7 — salah satu menimpa) | ✅ |
 
 ### Infra & Reliabilitas

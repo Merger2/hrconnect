@@ -29,6 +29,13 @@ class MyCustomForms extends Component
         $this->forms = $forms;
     }
 
+    public function mount(): void
+    {
+        // Tidak ada policy CustomFormTemplate/Submission — guard minimal:
+        // user harus punya employee record.
+        abort_unless(auth()->user()?->employee, 403);
+    }
+
     public function selectTemplate(int $templateId): void
     {
         $template = $this->queryTemplates()->whereKey($templateId)->firstOrFail();

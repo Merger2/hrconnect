@@ -43,6 +43,8 @@ Route::middleware([
             ->name('reimbursement')
             ->can('viewAny', Reimbursement::class);
 
+        // M23: tidak ada permission employee untuk jadwal sendiri di Permission enum
+        // (MANAGE_SCHEDULES = admin-only). Grup auth+verified+user sudah menutup akses.
         Route::livewire('/my-schedule', 'user.shift-schedule-page')->name('my-schedule');
         Route::livewire('/shift-swap-requests', 'user.shift-swap-request-page')
             ->name('shift-swap-requests')
@@ -62,11 +64,17 @@ Route::middleware([
         Route::livewire('/hr-tasks', 'user.hr-tasks-page')
             ->name('hr-tasks')
             ->can('viewAny', HrChecklistTask::class);
+        // M23: tidak ada permission employee untuk tugas operasional sendiri
+        // (VIEW_OPERATIONS_WORKSPACE = admin). Grup auth+verified+user sudah menutup akses.
         Route::livewire('/my-tasks', 'user.my-operational-tasks')->name('my-tasks');
+        // M23: tidak ada permission employee untuk chat — VIEW_COLLABORATION_WORKSPACE
+        // tidak di-seed ke role employee (akan 403 semua employee). Grup middleware menutup akses.
         Route::livewire('/collaboration', 'user.collaboration-inbox')->name('collaboration');
         Route::get('/collaboration/files/{file}/download', DownloadCloudFileController::class)
             ->name('collaboration.files.download')
             ->can('download', 'file');
+        // M23: VIEW_CUSTOM_FORMS ada di enum tapi tidak di-seed ke role employee
+        // (akan 403 semua employee) — grup middleware menutup akses.
         Route::livewire('/forms', 'user.my-custom-forms')->name('my-forms');
         Route::livewire('/approvals', 'user.team-approvals')
             ->name('approvals')
@@ -80,6 +88,9 @@ Route::middleware([
             ->name('team-kasbon')
             ->middleware('feature.lock:cash_advance,gate:reviewSubordinateRequests,home')
             ->can('reviewSubordinateRequests');
+        // M23: tidak ada permission face enrollment di Permission enum —
+        // akses dijaga in-component (abort_unless employee, lihat FaceEnrollment::mount).
+        // Grup auth+verified+user sudah menutup akses.
         Route::livewire('/face-enrollment', 'user.face-enrollment')->name('face.enrollment');
         Route::redirect('/face-registration', '/face-enrollment')->name('attendance.face-registration');
         Route::livewire('/my-assets', 'user.my-assets')->name('my-assets')->middleware('feature.lock:assets,user,home')->can('viewAny', CompanyAsset::class);

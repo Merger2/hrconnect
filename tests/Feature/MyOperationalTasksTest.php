@@ -2,6 +2,7 @@
 
 use App\Livewire\User\MyOperationalTasks;
 use App\Models\Client;
+use App\Models\Employee;
 use App\Models\Project;
 use App\Models\ProjectTask;
 use App\Models\ProjectTaskChecklistItem;
@@ -54,6 +55,10 @@ test('assigned user can manage operational task status checklist and visit evide
     Storage::fake('local');
 
     $user = User::factory()->create();
+
+    // Guard in-component MyOperationalTasks::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $user->id]);
+
     $task = createAssignedOperationalTask($user);
     $checklistItem = $task->checklistItems->firstOrFail();
 
@@ -108,6 +113,10 @@ test('assigned user can manage operational task status checklist and visit evide
 test('user cannot update another employee operational task', function () {
     $owner = User::factory()->create();
     $otherUser = User::factory()->create();
+
+    // Guard in-component MyOperationalTasks::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $otherUser->id]);
+
     $task = createAssignedOperationalTask($owner, 'PT Field Ops Guard');
 
     $this->actingAs($otherUser);

@@ -31,6 +31,10 @@ test('core user menu pages resolve cleanly for a regular user', function () {
 
     $user = User::factory()->create();
 
+    // Guard in-component (M22) mensyaratkan user punya employee record —
+    // fixture realistis sesuai E2eTestSeeder.
+    Employee::factory()->create(['user_id' => $user->id]);
+
     $this->actingAs($user);
 
     $routes = [

@@ -41,6 +41,10 @@ class CollaborationInbox extends Component
             return;
         }
 
+        // Tidak ada policy ChatThread/ChatMessage — guard minimal: hanya user
+        // dengan employee record (bukan admin/mitra non-staf).
+        abort_unless($user->employee !== null, 403);
+
         if ($this->selectedThreadId !== '' && $this->threadVisibleTo($user, (int) $this->selectedThreadId)->exists()) {
             return;
         }

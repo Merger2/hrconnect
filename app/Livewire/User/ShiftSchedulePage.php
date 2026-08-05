@@ -10,6 +10,13 @@ use Livewire\Component;
 
 class ShiftSchedulePage extends Component
 {
+    public function mount(): void
+    {
+        // Tidak ada policy Schedule/Shift — guard minimal: jadwal hanya untuk
+        // user yang punya employee record.
+        abort_unless(auth()->user()?->employee, 403);
+    }
+
     public function render()
     {
         // Fetch upcoming schedules for the user (from Today onwards)

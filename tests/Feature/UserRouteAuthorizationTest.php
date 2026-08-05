@@ -81,6 +81,10 @@ test('admin accounts cannot open employee-only home schedule or face enrollment 
 test('my schedule only renders schedules owned by the current user', function () {
     $employee = User::factory()->create();
     $otherEmployee = User::factory()->create();
+
+    // Guard in-component ShiftSchedulePage::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $employee->id]);
+
     $ownShift = Shift::factory()->create(['name' => 'Visible Own Shift']);
     $otherShift = Shift::factory()->create(['name' => 'Hidden Coworker Shift']);
 

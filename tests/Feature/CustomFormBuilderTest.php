@@ -4,6 +4,7 @@ use App\Livewire\Admin\CustomFormManager;
 use App\Livewire\User\MyCustomForms;
 use App\Models\CustomFormSubmission;
 use App\Models\CustomFormTemplate;
+use App\Models\Employee;
 use App\Models\Project;
 use App\Models\ProjectTask;
 use App\Models\Role;
@@ -17,6 +18,9 @@ test('admin can create custom form template and user can submit response', funct
     $superadmin = User::factory()->admin(true)->create();
     $company = app(MultiCompanyService::class)->createCompany('PT Custom Forms');
     $employee = User::factory()->create(['company_id' => $company->id]);
+
+    // Guard in-component MyCustomForms::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $employee->id, 'company_id' => $company->id]);
 
     $this->actingAs($superadmin);
 
@@ -54,6 +58,10 @@ test('custom form submission can automatically create operational task', functio
     $superadmin = User::factory()->admin(true)->create();
     $company = app(MultiCompanyService::class)->createCompany('PT Form Automation');
     $employee = User::factory()->create(['company_id' => $company->id]);
+
+    // Guard in-component MyCustomForms::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $employee->id, 'company_id' => $company->id]);
+
     $project = Project::query()->create([
         'company_id' => $company->id,
         'name' => 'Visit Follow-up Project',
@@ -105,6 +113,10 @@ test('custom form submission notifies company scoped reviewers', function () {
     $companyA = app(MultiCompanyService::class)->createCompany('PT Form Review A');
     $companyB = app(MultiCompanyService::class)->createCompany('PT Form Review B');
     $employee = User::factory()->create(['company_id' => $companyA->id]);
+
+    // Guard in-component MyCustomForms::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $employee->id, 'company_id' => $companyA->id]);
+
     $reviewerA = User::factory()->admin()->create(['company_id' => $companyA->id]);
     $reviewerB = User::factory()->admin()->create(['company_id' => $companyB->id]);
 
@@ -144,6 +156,9 @@ test('custom forms are company scoped for template creation and submission', fun
     $companyA = app(MultiCompanyService::class)->createCompany('PT Forms A', $admin);
     $companyB = app(MultiCompanyService::class)->createCompany('PT Forms B');
     $employeeA = User::factory()->create(['company_id' => $companyA->id]);
+
+    // Guard in-component MyCustomForms::mount mensyaratkan employee record.
+    Employee::factory()->create(['user_id' => $employeeA->id, 'company_id' => $companyA->id]);
 
     $role = Role::query()->create([
         'name' => 'Form Manager',
