@@ -1,1 +1,1 @@
-<input type="radio" {!! $attributes->merge(['class' => 'h-4 w-4 border-rule text-accent shadow-sm focus:ring-2 focus:ring-accent/30 focus:ring-offset-0']) !!}>
+<input type="radio" {!! $attributes->merge(['class' => 'h-4 w-4 border-gray-300 text-primary-600 shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0']) !!}>

@@ -63,11 +63,11 @@
     .ts-wrapper-user .ts-wrapper.focus .ts-control,
     .ts-wrapper-user .ts-wrapper.input-active .ts-control,
     .ts-wrapper-user .ts-wrapper.dropdown-active .ts-control {
-        border-color: #6ab45b !important; /* primary-500 */
+        border-color: #024ad8 !important; /* primary-500 */
         outline: 2px solid transparent;
         outline-offset: 2px;
         background-color: #ffffff !important;
-        box-shadow: 0 0 0 4px rgba(106, 180, 91, 0.18) !important;
+        box-shadow: 0 0 0 4px rgba(2, 74, 216, 0.18) !important;
     }
 
     /* Dropdown */

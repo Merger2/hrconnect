@@ -62,7 +62,7 @@
                             <legend class="sr-only">{{ __('Leave Type') }}</legend>
 
                             @if ($leaveTypes->isNotEmpty())
-                                <x-forms.label for="leave_type_id" value="{{ __('Leave Type') }}" class="mb-2 font-bold text-gray-700" />
+                                <label for="leave_type_id" class="mb-2 block text-sm font-bold text-gray-700">{{ __('Leave Type') }}</label>
                                 <div class="relative z-20">
                                     <x-user.tom-select-user
                                         id="leave_type_id"
@@ -84,7 +84,7 @@
                                     </x-user.tom-select-user>
                                 </div>
                             @else
-                                <x-forms.label for="status" value="{{ __('Leave Type') }}" class="mb-2 font-bold text-gray-700" />
+                                <label for="status" class="mb-2 block text-sm font-bold text-gray-700">{{ __('Leave Type') }}</label>
                                 <x-forms.select id="status" name="status" class="block w-full rounded-xl border-gray-200 bg-gray-50" required>
                                     <option value="excused" @selected(old('status', 'excused') === 'excused')>{{ __('Annual Leave') }}</option>
                                 </x-forms.select>
@@ -134,7 +134,7 @@
                         </div>
 
                         <div>
-                            <x-forms.label for="note" value="{{ __('Description / Reason') }}" class="mb-2 font-bold text-gray-700" />
+                            <label for="note" class="mb-2 block text-sm font-bold text-gray-700">{{ __('Description / Reason') }}</label>
                             <x-forms.textarea name="note" id="note" class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3" rows="3" placeholder="{{ __('Explain your detailed reason here...') }}" required>{{ old('note') }}</x-forms.textarea>
                             <x-forms.input-error for="note" class="mt-2" />
                         </div>

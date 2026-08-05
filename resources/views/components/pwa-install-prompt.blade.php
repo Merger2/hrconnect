@@ -18,16 +18,16 @@
     role="alert"
     aria-live="polite"
 >
-    <div class="bg-canvas rounded-2xl shadow-2xl border border-outline-variant p-4 max-w-sm">
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 max-w-sm">
         <div class="flex items-start gap-3">
             <div class="flex-shrink-0">
                 <img src="/icon-192.svg" alt="HRConnect" class="w-12 h-12 rounded-xl" />
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-ink">
+                <p class="text-sm font-semibold text-gray-900">
                     {{ __('Install HRConnect') }}
                 </p>
-                <p class="text-xs text-on-surface-variant mt-0.5">
+                <p class="text-xs text-gray-500 mt-0.5">
                     {{ __('Akses cepat dari layar utama perangkat Anda') }}
                 </p>
                 <div class="flex items-center gap-2 mt-3">
@@ -39,7 +39,7 @@
                     </button>
                     <button
                         @click="dismiss()"
-                        class="text-xs text-on-surface-variant hover:text-ink transition-colors"
+                        class="text-xs text-gray-500 hover:text-gray-900 transition-colors"
                     >
                         {{ __('Nanti') }}
                     </button>
@@ -47,7 +47,7 @@
             </div>
             <button
                 @click="dismiss()"
-                class="flex-shrink-0 p-1 text-on-surface-variant hover:text-ink transition-colors"
+                class="flex-shrink-0 p-1 text-gray-500 hover:text-gray-900 transition-colors"
                 aria-label="{{ __('Tutup') }}"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

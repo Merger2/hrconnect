@@ -103,7 +103,7 @@
         .ts-wrapper.input-active .ts-control,
         .ts-wrapper.dropdown-active .ts-control {
             background-color: #ffffff !important;
-            box-shadow: inset 0 0 0 1px #6ab45b, 0 0 0 4px rgba(106, 180, 91, 0.18) !important;
+            box-shadow: inset 0 0 0 1px #024ad8, 0 0 0 4px rgba(2, 74, 216, 0.18) !important;
         }
 
         /* Dropdown */
@@ -151,8 +151,8 @@
         .user-ui .profile-modal .ts-wrapper.focus .ts-control,
         .user-ui .profile-modal .ts-wrapper.input-active .ts-control,
         .user-ui .profile-modal .ts-wrapper.dropdown-active .ts-control {
-            border-color: #6ab45b !important;
-            box-shadow: 0 0 0 4px rgba(106, 180, 91, 0.22) !important;
+            border-color: #024ad8 !important;
+            box-shadow: 0 0 0 4px rgba(2, 74, 216, 0.22) !important;
         }
 
         .user-ui .ts-wrapper-user .ts-dropdown,

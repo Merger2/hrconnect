@@ -28,12 +28,12 @@
     <label
         for="{{ $inputId }}"
         @class([
-            'inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-paper-3 focus-within:outline-none focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55',
+            'inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm transition hover:bg-gray-100 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55',
             'cursor-not-allowed opacity-60' => $disabled,
         ])
     >
         {{ $buttonLabel }}
     </label>
 
-    <span class="min-w-0 truncate text-xs text-ink-2" x-text="fileName || @js($emptyText)"></span>
+    <span class="min-w-0 truncate text-xs text-gray-500" x-text="fileName || @js($emptyText)"></span>
 </div>
