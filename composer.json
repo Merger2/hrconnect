@@ -90,8 +90,13 @@
         "lint:check": [
             "pint --parallel --test"
         ],
+        "token:check": [
+            "@php scripts/check-color-tokens.php"
+        ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
+            "@token:check",
+            "@php scripts/check-token-sync.php",
             "@test"
         ],
         "test": [

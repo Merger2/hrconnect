@@ -18,9 +18,9 @@ modern-minimal
 --color-ink:        oklch(20% 0.02 255);       /* #1A202C - primary text */
 --color-ink-2:      oklch(45% 0.02 255);       /* #718096 - secondary text */
 --color-rule:       oklch(88% 0.01 240);       /* #E2E8F0 - borders, dividers */
---color-accent:     oklch(58% 0.22 260);       /* #3B82F6 - brand blue (primary) */
+--color-accent:     oklch(24% 0.03 260);       /* #1E293B - NEUTRAL DARK chrome (2026-08-06) */
 --color-accent-ink: oklch(100% 0 0);           /* #FFFFFF - text on accent */
---color-focus:      oklch(58% 0.22 260);       /* matches accent for focus ring */
+--color-focus:      oklch(34% 0.03 260);       /* slate-700 — focus ring netral gelap */
 --color-success:    oklch(60% 0.18 150);       /* #10B981 */
 --color-warning:    oklch(75% 0.18 85);        /* #F59E0B */
 --color-error:      oklch(58% 0.22 25);        /* #EF4444 */
@@ -43,11 +43,337 @@ tabs, section headers, and small accent strips (≤8% of viewport per module pag
 | Finance (reimburse/kasbon) | `--color-module-finance` | oklch(65% 0.20 20) | rose/coral |
 
 Rules:
-- CTA, primary buttons, focus rings, active nav = **global accent** (brand blue), never a module hue.
-- Module hue appears on: module icons, status badges, tab underline, section accent strip, table header tint.
-- Gradient accents allowed ONLY as a subtle module-tint wash on page header surfaces (paper-2 → module hue at ≤10% alpha). No rainbow mixing on one page.
+- **AMENDED 2026-08-06 (multi-warna playful):** CTA, primary buttons, focus
+  rings, active nav = **neutral dark ink** (`--color-primary-*` slate scale,
+  ~#1E293B). Brand blue TIDAK lagi jadi warna chrome global.
+- Module hue appears on: module icons, status badges, tab underline, section accent strip, table header tint, AND (2026-08-06) kartu konten + eyebrow.
+- Gradient accents: wash ≤10% alpha berlaku untuk non-banner admin; kartu konten ESS boleh wash lebih berani (lihat "Multi-Color Playful Redesign").
+- **AMENDED 2026-08-06:** user-facing (ESS) pages MAY use SOLID gradient banners as an exception to the ≤10% wash rule — see "Solid Gradient Banners" below.
 - Success/warning/error semantic colors unchanged; a module page uses at most its own hue + semantic colors.
 - Dark mode: not supported (light-only, per user decision 2026-08-05).
+
+## Solid Gradient Banners (2026-08-06 — user-facing pages)
+
+Keputusan Fikih 2026-08-06: halaman user (ESS) boleh memakai banner gradien
+warna solid — bukan hanya wash ≤10% alpha — supaya tampilan "colorful solid"
+seperti HRIS lain. Ini pengecualian resmi dari aturan gradient wash di atas,
+agar halaman-halaman lain konsisten dengan arah warna baru ini.
+
+Berlaku UNTUK (hanya):
+
+- **Hero home / dashboard user** (`.user-home-hero--command .user-home-hero__inner`)
+  — banner gradien brand blue → cyan (attendance), teks putih. Dekorasi glow
+  lembut wajib ditaruh di wrapper terpisah (`.user-home-hero__glow`), JANGAN
+  pakai `overflow: hidden` di kartu — supaya dropdown notifikasi tidak
+  ter-clip pada viewport 640–767px.
+- **Header halaman modul user** (`.user-page-header--banner`) — gradien per
+  module hue (cyan/violet/emerald/amber/sky/fuchsia/rose/blue). Diterapkan
+  otomatis oleh komponen `x-user.page-header` saat atribut `module` di-set.
+
+Aturan banner:
+- Arah gradien: 135deg, hue GELAP di kiri-atas (tempat teks) → hue terang di
+  kanan-bawah. Kontras teks putih minimal ±4.5:1 pada stop gelap.
+- Elemen glass (tombol back, chip ikon): putih transparan + blur — boleh.
+- CTA / primary button tetap global accent (biru), bukan module hue.
+- **AMENDED 2026-08-06 (lanjutan):** elemen di bawah hero TIDAK boleh menindih
+  banner. `home-date-context` di home sebelumnya overlap tepi bawah hero
+  (margin-top negatif + z-index), lalu dibatalkan setelah 2× keluhan Fikih
+  "komponen saling menindih" — sekarang duduk DI BAWAH hero dengan jarak
+  normal (margin-top positif 0.875rem) dan padding-bottom hero dikurangi
+  (1.5rem/1.75rem) supaya tidak ada ruang gradien kosong.
+- SATU halaman = SATU hue + semantic colors; tidak ada rainbow mixing.
+
+TIDAK berlaku untuk: halaman admin (admin-ui), halaman marketing, dan
+panel/konten non-banner (tetap pakai aturan lama: wash ≤10% alpha / tanpa
+enrichment).
+
+## User App Shell: Topbar Nav, Footer & Card Accents (2026-08-06)
+
+Keputusan Fikih 2026-08-06 (keluhan: "semua page masih putih, tidak ada
+footer, topbar desktop tidak memberi navigasi jelas"): user-facing app shell
+diperkaya warna + navigasi, tanpa mengubah aturan wash untuk panel konten.
+
+### 1. Desktop topbar nav pills (md+)
+- `.app-topbar__nav` — deretan pill ber-ikon yang **mirror bottom-nav mobile**
+  (Beranda, Jadwal, Absen, Tasks; + Team Approvals untuk manager), tampil
+  hanya ≥768px (mobile tetap bottom-nav).
+- Item pill: `.app-topbar__nav-item`, ikon + label, `wire:navigate`;
+  state aktif via `aria-current="page"` + modifier `.is-active` (wash module
+  hue / global accent, bukan fill solid).
+- Alasan: konsistensi navigasi antar breakpoint + affordance klik lebih jelas
+  daripada teks polos.
+
+### 2. Footer — DICABUT (2026-08-06)
+- `x-user.app-footer` yang sempat dipasang di `layouts/app.blade.php`
+  **dihapus total** (blade, include layout, CSS). Keputusan Fikih: footer
+  tidak diperlukan di HRIS — halaman berakhir bersih setelah konten
+  (clearance bottom-nav tetap dijamin wrapper `pb-[calc(6.5rem+...)]`).
+
+### 3. Card accents (panas kartu putih)
+- Kartu konten utama ESS diberi **strip gradien 4px module-hue di tepi atas**
+  + **wash berani (~70-85% alpha di atas, fade ke putih)** — jelas berwarna,
+  bukan lagi strip tipis.
+- Home = multi-hue playful: `.attendance-panel` cyan, `.quick-wallet-surface`
+  biru, `.home-command-panel` (action needed) violet,
+  `.home-command-panel--emerald` (recent) emerald, `.user-content-panel`
+  (events) amber. Halaman modul lain tetap SATU hue.
+- **GENERALIZED 2026-08-06 (halaman modul user):** pola kartu accent di-
+  generalisasi ke `.user-accent-card` + varian hue (`.user-accent-card--
+  attendance/hr/payroll/finance/kb/leave`) + varian `.user-accent-card--soft`
+  untuk baris list (strip 2px + wash ringan). Dipasang di kartu konten utama:
+  scan (cyan), jadwal (cyan), profil (hr blue), kasbon (finance rose),
+  payslip (payroll emerald), KB chat (kb fuchsia). Header modul tetap banner
+  gradien (komponen `x-user.page-header` saat `module` di-set); kartu accent
+  melengkapi banner — KB strip dipasang di area chat (bukan section) supaya
+  tidak menindih banner.
+- **SOLID REDESIGN 2026-08-06 (lanjutan — keluhan Fikih: "glassmorphism,
+  bukan solid"):** semua wash/rgb-alpha dan `backdrop-blur` pada kartu
+  utama DICABUT. Warna kini 100% token-driven via `color-mix()` dari token
+  `@theme --color-module-*` (nol hex hardcode):
+  - `.solid-card` + `.solid-head` = band header gradien module (hue gelap →
+    hue, teks putih) + body putih SOLID — pola dashboard Odoo/Talenta.
+    Dipakai: kartu scan (band attendance), profil identity + section header
+    (band hr), kasbon panel (band finance), payslip secure panel + summary
+    (band payroll).
+  - `.user-accent-card` = latar pastel SOLID opaque (color-mix 10% module +
+    white) + strip solid; varian `--soft` utk baris list (6% tint, strip 2px).
+  - Rule `.user-ui .attendance-panel, ...` di app.css diubah `bg-white/70
+    backdrop-blur-sm` → `bg-white` solid; tint module ditumpuk setelahnya
+    (spesifisitas sama, lebih akhir).
+  - Modifier module (`.user-accent-card--hr/attendance/leave/payroll/
+    documents/reports/kb/finance`) hanya membawa variabel `--mod-base/
+    deep/tint/tint-soft/border`; `.solid-head` dan `.user-accent-card`
+    memakainya. Satu halaman tetap SATU hue.
+  - **TOKENISASI MENYELURUH (audit 2026-08-06 — baca seluruh app.css
+    6.115 baris):** semua hex/rgb hardcode di luar `@theme` dicabut →
+    `color-mix()` dari token `--color-module-*` / `--color-brand-*`.
+    Yang ditoken-kan: module hue header accents (ikon + strip 2px, 8
+    varian), banner header 8 varian (gradien `color-mix(module 62%,
+    #0f172a) → module → color-mix(module 55%, white)`), home hero command
+    (hr → attendance), home-date-context icon + clock pill + time, topbar
+    strip multi-hue 4 modul, quick-wallet badge, attendance eyebrow,
+    verify-email hover, compact-filter focus. Build LightningCSS
+    me-resolve color-mix ke nilai final — source tetap token-driven.
+    (catatan 2026-08-06 lanjutan: route scan/native-scanner, pull-to-
+    refresh spinner, fallback var(), dan netral slate SEMUANYA sudah
+    ditoken-kan juga — lihat aturan TOKEN-ONLY di bawah; yang tersisa
+    hanyalah pengecualian teknis yang wajib literal: email, PDF Dompdf,
+    standalone print, error page tanpa @vite, meta theme-color, SVG
+    data-URI, shadow netral).
+  - **CLEANUP GLASS MENYELURUH (lanjutan 2026-08-06):** `bg-white/5x-7x` +
+    `backdrop-blur` di SEMUA class kartu/panel konten user dicabut → solid
+    (`bg-white`, `bg-slate-50`, `bg-primary-50`) — meliputi: `attendance-
+    panel__step` + variants is-current/is-complete, `user-stat-strip/pill`,
+    `user-history-hero/filters/calendar/panel/summary`, `home-activity-list`,
+    `kasbon-alert`, `team-approval-card`, `team-kasbon-history__item`,
+    `asset-mobile-card` + details, `asset-overview-strip`, `asset-pass`,
+    `wfh-request-form/summary/item`, `document-request-hero/stats/card`,
+    `performance-hero/summary/card/kpi-card/notes`, `face-enrollment-ready`,
+    `notification-center-hero/filters/list`, `payslip-summary__metric`,
+    dan override `.user-ui` (table, form, dropzone, quick-wallet, article).
+    Yang TETAP glass (sengaja): overlay modal backdrop, dropdown notifikasi
+    floating, toolbar sticky, bottom-nav dock, chip ikon/back di atas banner
+    gradien, input OTP, hover state — lapisan floating yang butuh transparansi.
+    Verifikasi: 32 class dicek di bundle build — nol alpha tersisa; 8 halaman
+    user (schedule/kasbon/payroll/kb/scan/profile/notifications/leave)
+    load tanpa pageerror; smoke test 16/16 PASS.
+- `background-image` + `background-color` (white/95) dipakai bersamaan:
+  gradient di atas warna dasar — aman terhadap rule lama yang sama
+  spesifisitasnya karena `background-image` tidak pernah di-set sebelumnya.
+- Aturan: SATU kartu = SATU hue; jangan tambahkan ke kartu admin atau
+  komponen kecil (badge, avatar) yang sudah berwarna sendiri.
+
+### 4. Home layout grid (2026-08-06)
+- `.home-layout` = grid 2 kolom di `lg+`: main 2fr (absensi, action-needed,
+  recent full-width) + side 1fr (quick access, events). Penempatan via
+  `grid-area` (`.home-grid-att/qa/cmd/ev/rec`) — DOM tetap urut. Mobile
+  stack satu kolom.
+
+### 4b. Header gap mobile rapat (2026-08-06 — keluhan Fikih "page header
+kaku, ada space kosong di atasnya")
+- Mobile tidak ada topbar (`.app-topbar` `hidden md:block` di route user),
+  tapi gap header sebelumnya 32px = `main pt-4` (16px) + `.user-page-shell`
+  padding-top (16px). Dirapatkan:
+  - `main` route user mobile: `pt-4 sm:pt-2` → `pt-2 sm:pt-1` (desktop
+    `md:pt-[calc(4rem+env(safe-area-inset-top))]` tetap).
+  - `.user-page-shell` padding-top: mobile `calc(env(safe-area-inset-top) +
+    0.5rem)` (8px), `@media (min-width:1024px)` kembali `max(1rem,
+    env+1rem)`. `body.platform-ios` override 3rem tetap.
+  - Home hero: `pt-0` diganti `pt-[calc(env(safe-area-inset-top)+0.5rem)]`
+    supaya di device notch hero tidak ketimpa status bar.
+- Hasil ukur: mobile headerTop 32 → 16px konsisten semua halaman, home 8px,
+  desktop tetap 80px (hero 72px, 7px di bawah topbar 65px).
+
+## Multi-Color Playful Redesign (2026-08-06 — seluruh aplikasi)
+
+Keputusan Fikih 2026-08-06 (keluhan: "masa design putih biru doang"): redesign
+warna menyeluruh — chrome berhenti biru, module hue bicara lebih luas. Berlaku
+untuk halaman user DAN admin.
+
+### Token baru (app.css `@theme`)
+- `--color-primary-*` → skala **neutral dark slate**: 50 `#f8fafc` · 100
+  `#f1f5f9` · 200 `#e2e8f0` · 300 `#cbd5e1` · 400 `#94a3b8` · 500 `#64748b` ·
+  600 `#475569` · 700 `#334155` · 800 `#1e293b` · 900 `#0f172a` · 950
+  `#020617`. Tombol `bg-primary-700`, focus ring, active nav otomatis ikut.
+- `--color-module-*` (8 hue) dipertahankan — inilah warna utama tiap halaman.
+- `--color-brand-*` = skala BIRU ASLI HRConnect (`#024ad8` family). KHUSUS
+  untuk halaman marketing/auth (login, register, forgot-password, dll) +
+  momen brand kecil. Halaman app PAKAI `primary` (netral) — jangan pakai
+  `brand-*` di halaman app kecuali momen brand yang disengaja.
+
+### Aturan pemakaian warna
+- SATU halaman modul = SATU module hue + semantic colors (tetap). Home
+  dashboard = momen brand (blue → cyan) + boleh multi-hue tipis.
+- Chrome (tombol, focus, active nav, footer) = neutral dark, TIDAK ber-hue.
+- Kartu konten utama: strip 4px module hue + wash lebih berani (~60% alpha di
+  atas, fade ke putih) — bukan lagi ≤10% tipis.
+- Eyebrow section di kartu ber-hue module (contoh: `.attendance-panel__eyebrow`
+  cyan, `.home-command-panel__eyebrow` biru).
+- Topbar: strip bawah `.app-topbar::after` = **multi-hue signature**
+  (blue → cyan → violet → amber) di semua halaman user & admin — pengecualian
+  resmi dari aturan "satu halaman satu hue" karena ini chrome, bukan konten.
+- Kanvas body = `.app-canvas` (gradien netral halus `#f8fafc → #eef2f7 →
+  #f4f7fb`), menggantikan `bg-gray-100` flat.
+
+### TOKEN-ONLY RULE (2026-08-06 — nol hardcode warna/desain)
+
+Keputusan Fikih: **jangan ada design ataupun coloring di hardcode — SEMUA
+warna lewat token.** Berlaku untuk seluruh source: `app.css`, blade, JS.
+
+- `app.css`: nol hex/rgb di luar `@theme` (definisi token) dan fallback
+  `var(--x, fallback)` (fallback wajib merujuk token, bukan hex). Nuansa
+  dibuat via `color-mix(in srgb, var(--color-*), ...)`.
+- Blade: warna lewat utility Tailwind token (`bg-primary-700`, `text-module-
+  leave`, `bg-surface`, dst) — dilarang arbitrary value hex
+  (`bg-[#123456]`, inline `style="color:#..."`).
+- JS/DOM runtime (Chart.js, canvas face overlay, Leaflet): warna dibaca dari
+  token via `window.cssVar('--color-module-*')` / `window.colorWithAlpha(...)`
+  (helper di `resources/js/app.js`) — bukan hex literal di script.
+- SVG logo/mark: `fill="var(--color-brand-500)"` / `currentColor` — bukan
+  hex literal. Fallback `var(--md-sys-*, var(--color-*))` tetap boleh
+  (defensive, merujuk token).
+- Alpha putih netral (glass floating layer: dropdown, topbar, chip di atas
+  banner) juga token: `color-mix(in srgb, var(--color-surface) 95%, transparent)`.
+
+**Layer PHP untuk renderer NON-CSS (PDF Dompdf & email):**
+- `App\Support\DesignTokens` = token PHP tunggal: **CORE mirror @theme**
+  (primary/brand/module/success/dst — wajib sinkron, dicek otomatis oleh
+  `php scripts/check-token-sync.php`) + **docs family** khusus dokumen/email
+  (brand-deep, brand-green-50…950, muted-green-*, status-*, warning-* —
+  web UI tidak memakainya, tidak perlu masuk @theme).
+- Template `pdf/*.blade.php` & `emails/*.blade.php` memanggil
+  `{{ design_token('brand-green-600') }}` / `{{ design_rgba('brand-green-700', 0.8) }}`
+  (helper di `app/helpers.php`) → Blade me-render **hex/rgba literal** saat
+  output → kompatibel penuh Dompdf & Outlook/Gmail, template bebas hardcode.
+
+**Pengecualian teknis — renderer yang TIDAK punya akses ke sistem token:**
+1. **Standalone print page `admin/attendances/report.blade.php`** — dokumen
+   HTML mandiri tanpa bundle app (tidak ada `@vite`), tidak punya akses
+   token CSS maupun helper PHP (di-render mentah tanpa Laravel view data
+   flow — halaman `Route::view` mandiri).
+2. **`errors/minimal.blade.php`** — halaman error standalone tanpa `@vite`;
+   memakai `:root` token lokal sendiri (var-driven, nilai literal di blok
+   definisi — setara `@theme`).
+3. **`<meta name="theme-color">`** (guest-layout, layouts/app, errors) —
+   browser tidak me-resolve `var()` di meta; harus literal.
+4. **SVG data-URI** (chevron tom-select, icon di `url("data:...")`) — string
+   statis, tidak bisa merujuk CSS var. Warna ikon netral.
+5. Shadow netral hitam (`rgb(0 0 0 / …)`) di box-shadow — universal, bukan
+   warna brand/modul.
+6. **`resources/views/vendor/**`** — boilerplate framework (Laravel default
+   mail theme, Jetstream) — bukan desain kita; tidak ditoken.
+   Catatan: `Mail\PayrollPayslipPdfMail` body email pakai default mail theme
+   vendor ini (PDF lampirannya yang branded via `pdf/payslip`).
+
+**Drift palet (disengaja):** nilai warna legacy PDF/email dipetakan ke token
+terdekat untuk unifikasi — contoh `#111827→primary-900`, `#4b5563→primary-600`,
+`#16a34a→success`, `#14532d→brand-green-900`, `#f0f9ee→brand-green-50`.
+Drift halus (keluarga warna sama) adalah konsekuensi token-driven, bukan
+regresi.
+
+### CI: audit warna otomatis
+
+Rule token-only DIJAGA OTOMATIS oleh dua script (masuk `composer ci:check`):
+
+- **`php scripts/check-color-tokens.php`** (`composer token:check`) — scan
+  menyeluruh 2 CSS + 230+ Blade + 5 JS + 580+ PHP:
+  - `app.css`: hex/rgb NON-netral di luar blok `@theme` → FAIL
+    (`rgb(0 0 0 / …)` shadow netral = pengecualian; `@theme` definitions
+    = sumber token, bukan usage).
+  - CSS lain (`resources/css/vendor/*.css`): file custom proyek (mis.
+    `flatpickr-overrides.css`) WAJIB token — bukan vendor murni.
+  - Blade: hex di luar whitelist pengecualian (report print standalone,
+    errors/minimal, meta `theme-color`, SVG data-URI, `views/vendor/**`)
+    → FAIL.
+  - JS: hex + rgb non-netral → FAIL (shadow SweetAlert kini
+    `var(--shadow-alert-*)` token di `@theme`).
+  - `app/**`: hex hanya di `DesignTokens.php` (definisi token).
+- **`php scripts/check-token-sync.php`** — sinkronisasi dua arah
+  `@theme` ↔ `App\Support\DesignTokens` + validasi key blade.
+  - **Pengecualian terdokumentasi (2026-08-06):** palet default Tailwind v4
+    (red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/
+    violet/purple/fuchsia/pink/rose/slate/gray/zinc/neutral/stone/white/
+    black) di @theme TIDAK wajib di-mirror ke DesignTokens — itu
+    framework-provided, bukan desain custom. Token recovery `rec-*` (lihat
+    catatan rekonstruksi di bawah) juga dikecualikan — artefak recovery
+    satu-off, bukan token desain.
+
+Audit perdana 2026-08-06 menemukan 9 hardcode yang lolos grep manual
+(semua shadow berwarna): 4× `rgba(87,148,74)` (hijau brand) →
+`color-mix(in srgb, var(--color-success) 50%, transparent)`, 3×
+`rgba(15,23,42)` (primary-900) di app.css → color-mix token, 2× shadow
+SweetAlert di app.js → `--shadow-alert-popup`/`--shadow-alert-toast` token
+baru di `@theme`. Semua sudah ditoken-kan — bukti audit otomatis menutup
+celah yang tidak terlihat grep manual.
+
+Verifikasi sesi: grep menyeluruh — `app.css` nol hex di luar `@theme`;
+blade screen nol hex; `pdf/**` + `emails/**` nol hex (semua via
+`design_token()`/`design_rgba()`); JS nol hex; `app/**` hex hanya di
+`DesignTokens.php` (definisi token); `scripts/check-token-sync.php` pass
+(43 CORE overlap identik, 43 key @theme ter-mirror, 35 key blade valid —
+typo token = FAIL CI, bukan warna salah diam-diam). Build LightningCSS
+me-resolve color-mix ke nilai final, source tetap token-driven.
+
+### Rekonstruksi app.css 2026-08-06 (insiden `git checkout`)
+
+Insiden: `git checkout resources/css/app.css` saat uji negatif audit
+menimpa file kerja (6.115 baris, semua kerja SOLID redesign + tokenisasi
++ banner + cleanup glass) dengan versi commit lama (5.356 baris). Satu-
+SATUNYA snapshot utuh = bundle build `public/build/assets/app-BNuOO-YO.css`
+(639KB, build 18:52, di-backup ke `/tmp`).
+
+Recovery: app.css disusun ulang dari bundle (kompilasi = ground truth):
+- `@theme` ← seluruh var `:root` bundle (276 token, termasuk palet default
+  yang dulu hanya ter-emit via @apply).
+- `@layer base` ← blok base lama (commit) — rekompilasi dengan theme baru
+  sama persis dengan bundle (terverifikasi).
+- `@layer components` ← isi komponen bundle, di-prettify + SEMUA hex di-
+  token-kan ulang ke `var(--color-*)` / `color-mix()` (mapping eksak:
+  banner 62%/55%, wash 10%/6%, alpha-split, oklch→hex untuk palet default).
+  Catatan: bentuknya kompilasi (bukan @apply source) — @apply yang dulu
+  ada TIDAK bisa direkonstruksi; editing ke depan dilakukan pada CSS var/
+  color-mix (sama aturannya).
+- `@layer utilities` ← utilitas custom (pull-to-refresh, scan-native, dll)
+  + 64 utilitas yang dulu hanya ter-generate via @apply (komplemen tetap).
+- 10 warna satu-off scanner/native yang tidak terpetakan jadi token baru
+  `--color-rec-*` di `@theme` (audit + token-sync pass; di-whitelist di
+  check-token-sync sebagai artefak recovery).
+
+Verifikasi recovery: build ulang → komponen 0 selector hilang, utilitas 0
+hilang, `token:check` PASS, `check-token-sync` OK, smoke test 16/16 PASS,
+browser /home + /scan terverifikasi (hero gradien biru→cyan, kartu pastel
+module, date-context TIDAK overlap hero, nol console error).
+
+**Limitasi terdokumentasi (hasil recovery):**
+- Komponen berbentuk kompilasi — @apply asli hilang. Panduan edit ada di
+  header `app.css` (EDITING NOTE).
+- LightningCSS me-re-proses komponen yang sudah terkompilasi: sebagian
+  pasangan `@supports (color:color-mix(...))` bisa ter-unwrap/ter-urut ulang
+  (fallback hex inline tetap ada di rule pertama — browser lama tetap dapat
+  warna benar). Diterima; diverifikasi spot-check, bukan per-rule.
+- 10 token `--color-rec-*` (warna satu-off scanner/native):
+  `rec-045c48, rec-097a93, rec-0a7690, rec-107b60, rec-108f6a, rec-10956e,
+  rec-76c5ad, rec-a30037b8, rec-c53c00cc, rec-faca79`.
 
 ## Typography
 - Display: Rubik, Inter, sans-serif — weight 600, style normal
@@ -80,11 +406,14 @@ Rules:
 ## Per-page allowances
 - Marketing pages MAY use Tier-A CSS art enrichment (clipped-edge, geometric accent)
 - App pages MUST NOT use enrichment — function carries the page
+  (EXCEPTION 2026-08-06: user-facing ESS page headers & home hero MAY use
+  Solid Gradient Banners — see section above; admin app pages keep this rule)
 - Content pages: typography only
 
 ## What pages MUST share
 - Wordmark "PasPapan" / HRConnect logotype
-- Accent colour `--color-accent` placement ≤ 5% per viewport
+- Chrome = neutral dark ink; module hue placement lebih luas di kartu/header
+  (AMENDED 2026-08-06 — dulu "accent ≤5% per viewport" untuk brand blue)
 - Display + body font pairing (Rubik + Inter)
 - CTA voice (button shape, radius, padding rhythm)
 - Section heading rhythm: eyebrow (ess-eyebrow) + display heading
@@ -92,7 +421,7 @@ Rules:
 ## What pages MAY differ on
 - Macrostructure within family (Marquee Hero vs Long Document for marketing)
 - Hero archetype (within family allowance)
-- Enrichment — only marketing, only Tier-A/Tier-B
+- Enrichment — only marketing, only Tier-A/Tier-B (+ user-facing ESS banner headers per "Solid Gradient Banners" 2026-08-06)
 
 ## Exports
 
@@ -104,9 +433,9 @@ Rules:
   --color-ink:        oklch(20% 0.02 255);
   --color-ink-2:      oklch(45% 0.02 255);
   --color-rule:       oklch(88% 0.01 240);
-  --color-accent:     oklch(58% 0.22 260);
+  --color-accent:     oklch(24% 0.03 260);   /* #1E293B neutral dark (2026-08-06) */
   --color-accent-ink: oklch(100% 0 0);
-  --color-focus:      oklch(58% 0.22 260);
+  --color-focus:      oklch(34% 0.03 260);
   --color-success:    oklch(60% 0.18 150);
   --color-warning:    oklch(75% 0.18 85);
   --color-error:      oklch(58% 0.22 25);
@@ -148,9 +477,9 @@ Rules:
   --color-ink:        oklch(20% 0.02 255);
   --color-ink-2:      oklch(45% 0.02 255);
   --color-rule:       oklch(88% 0.01 240);
-  --color-accent:     oklch(58% 0.22 260);
+  --color-accent:     oklch(24% 0.03 260);   /* #1E293B neutral dark (2026-08-06) */
   --color-accent-ink: oklch(100% 0 0);
-  --color-focus:      oklch(58% 0.22 260);
+  --color-focus:      oklch(34% 0.03 260);
   --color-success:    oklch(60% 0.18 150);
   --color-warning:    oklch(75% 0.18 85);
   --color-error:      oklch(58% 0.22 25);
