@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\JobLevel;
 use App\Models\JobTitle;
 use App\Models\Overtime;
+use App\Models\Position;
 use App\Models\Reimbursement;
 use App\Models\Role;
 use App\Models\User;
@@ -19,6 +20,9 @@ use App\Support\UserAssetService;
 use App\Support\UserNotificationRecipientService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
+
+// RefreshDatabase diterapkan global via tests/Pest.php — jangan deklarasi
+// ulang di file (double-apply memicu migrate:fresh ganda → korupsi DB).
 
 beforeEach(function () {});
 
@@ -46,7 +50,9 @@ function createNotificationHierarchy(string $divisionName = 'Operations'): array
     $manager = User::factory()->create();
     Employee::factory()->create(['user_id' => $manager->id, 'division_id' => $division->id]);
 
-    $employee = User::factory()->create();
+    // Supervisor di-resolve via users.manager_id (UserNotificationRecipientService
+    // memakai relasi User::supervisor) — bukan employees.parent_id.
+    $employee = User::factory()->create(['manager_id' => $manager->id]);
     Employee::factory()->create(['user_id' => $employee->id, 'division_id' => $division->id]);
 
     return [$manager, $employee];
@@ -68,7 +74,21 @@ function createFinanceHeadReviewer(bool $admin = false): User
     $factory = $admin ? User::factory()->admin() : User::factory();
 
     $user = $factory->create();
-    Employee::factory()->create(['user_id' => $user->id, 'division_id' => $division->id]);
+
+    // isFinanceHead() (ApprovalActorService) mengecek rank job level <= 2 DAN
+    // division 'finance' via relasi employee->position->jobTitle->jobLevel —
+    // position HARUS dibuat dengan job_title_id Finance Head (factory default
+    // = posisi random → rank random → finance head tidak ter-resolve).
+    $position = Position::factory()->create([
+        'job_title_id' => $title->id,
+        'division_id' => $division->id,
+    ]);
+
+    Employee::factory()->create([
+        'user_id' => $user->id,
+        'division_id' => $division->id,
+        'position_id' => $position->id,
+    ]);
 
     return $user;
 }
@@ -84,7 +104,9 @@ test('leave request notifications only target supervisor and explicit leave appr
         'name' => 'Leave Approver_'.uniqid(),
         'slug' => 'leave_approver_notification_'.uniqid(),
         'description' => 'Can review leave requests.',
-        'permission_keys' => ['admin.leave_approvals.approve'],
+        // leaveApprovers() mengecek gate manageLeaveApprovals → key kanonik
+        // admin.leave_approvals.manage (bukan .approve).
+        'permission_keys' => ['admin.leave_approvals.manage'],
     ]);
 
     $dashboardOnlyRole = Role::create([
@@ -99,15 +121,17 @@ test('leave request notifications only target supervisor and explicit leave appr
 
     $result = app(LeaveRequestService::class)->submitLeaveRequest(
         $employee,
-        'leave',
+        // Status harus nilai valid AttendanceStatus (attendances.status cast
+        // enum) — 'late' termasuk Attendance::REQUEST_STATUSES.
+        'late',
         'Family event',
-        Carbon::tomorrow(),
-        Carbon::tomorrow(),
+        Carbon::today(),
+        Carbon::today(),
     );
 
     expect($result->ok)->toBeTrue();
 
-    $attendance = Attendance::query()->where('user_id', $employee->id)->latest('created_at')->firstOrFail();
+    $attendance = Attendance::query()->where('employee_id', $employee->employee->id)->latest('created_at')->firstOrFail();
 
     Notification::assertSentTo($manager, LeaveRequested::class, fn (LeaveRequested $notification) => $notification->attendance->is($attendance));
     Notification::assertSentTo($leaveAdmin, LeaveRequested::class, fn (LeaveRequested $notification) => $notification->attendance->is($attendance));
@@ -130,7 +154,9 @@ test('reimbursement request notifications only target supervisor and reimburseme
 
     $dashboardAdmin->roles()->sync([$dashboardOnlyRole->id]);
 
-    $emp = Employee::factory()->create(['user_id' => $employee->id]);
+    // Employee sudah dibuat di createNotificationHierarchy — jangan duplikat
+    // (employees_user_id_unique).
+    $emp = $employee->employee;
     $reimbursement = Reimbursement::create([
         'employee_id' => $emp->id,
         'title' => 'Transport',

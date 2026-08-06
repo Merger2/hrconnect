@@ -5,6 +5,7 @@ use App\Models\Attendance;
 use App\Models\CashAdvance;
 use App\Models\CustomFormSubmission;
 use App\Models\CustomFormTemplate;
+use App\Models\Employee;
 use App\Models\HrChecklistCase;
 use App\Models\HrChecklistTask;
 use App\Models\HrChecklistTemplate;
@@ -28,7 +29,7 @@ test('manager inbox only exposes tabs allowed by admin rbac permissions', functi
         'description' => 'Can review leave requests from the manager inbox only.',
         'permission_keys' => [
             'admin.dashboard.view',
-            'admin.leave_approvals.approve',
+            'admin.leave_approvals.manage',
         ],
     ]);
 
@@ -68,7 +69,7 @@ test('manager inbox rejects crafted tab changes outside admin rbac permissions',
         'description' => 'Can review leaves, but not cash advances.',
         'permission_keys' => [
             'admin.dashboard.view',
-            'admin.leave_approvals.approve',
+            'admin.leave_approvals.manage',
         ],
     ]);
 
@@ -94,6 +95,7 @@ test('manager inbox rejects crafted tab changes outside admin rbac permissions',
 test('manager inbox summarizes and filters overdue approvals', function () {
     $admin = User::factory()->admin()->create();
     $employee = User::factory()->create();
+    $employeeRecord = Employee::factory()->create(['user_id' => $employee->id]);
     $leaveType = LeaveType::create([
         'code' => 'special_approval_test',
         'name' => 'Special Approval Test',
@@ -105,14 +107,15 @@ test('manager inbox summarizes and filters overdue approvals', function () {
         'description' => 'Can review overdue leave requests from the manager inbox.',
         'permission_keys' => [
             'admin.dashboard.view',
-            'admin.leave_approvals.approve',
+            'admin.leave_approvals.manage',
+            'admin.scope.global',
         ],
     ]);
 
     $admin->roles()->sync([$role->id]);
 
     $attendance = Attendance::create([
-        'user_id' => $employee->id,
+        'employee_id' => $employeeRecord->id,
         'date' => now()->toDateString(),
         'status' => 'excused',
         'approval_status' => 'pending',
@@ -143,6 +146,9 @@ test('manager inbox includes hr checklist blockers and quick actions', function 
             'admin.dashboard.view',
             'admin.hr_checklists.view',
             'admin.hr_checklists.manage',
+            // managedBy() scope — admin tanpa employee record butuh scope global
+            // supaya task karyawan terlihat di inbox.
+            'admin.scope.global',
         ],
     ]);
 
@@ -203,6 +209,7 @@ test('manager inbox can approve work from home requests', function () {
         'permission_keys' => [
             'admin.dashboard.view',
             'admin.wfh_requests.manage',
+            'admin.scope.global',
         ],
     ]);
 
@@ -232,8 +239,18 @@ test('manager inbox can mark custom form submissions reviewed within company sco
     $companyA = app(MultiCompanyService::class)->createCompany('PT Inbox Forms A');
     $companyB = app(MultiCompanyService::class)->createCompany('PT Inbox Forms B');
     $admin = User::factory()->admin()->create(['company_id' => $companyA->id]);
+    // Admin punya employee record → scopeManagedBy resolve via parent_id
+    // (tanpa scope.global — scope.global membuat managedBy() return SEMUA user,
+    // termasuk company B → cross-company leak di inbox).
+    $adminEmployee = Employee::factory()->create(['user_id' => $admin->id, 'company_id' => $companyA->id]);
     $employeeA = User::factory()->create(['company_id' => $companyA->id]);
+    Employee::factory()->create([
+        'user_id' => $employeeA->id,
+        'company_id' => $companyA->id,
+        'parent_id' => $adminEmployee->id,
+    ]);
     $employeeB = User::factory()->create(['company_id' => $companyB->id]);
+    Employee::factory()->create(['user_id' => $employeeB->id, 'company_id' => $companyB->id]);
     $role = Role::create([
         'name' => 'Forms Inbox Reviewer_'.uniqid(),
         'slug' => 'forms_inbox_reviewer_'.uniqid(),
