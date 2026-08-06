@@ -3,7 +3,6 @@
 use App\Livewire\Admin\LeaveEntitlementManager;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
-use App\Models\LeaveEntitlement;
 use App\Models\LeaveType;
 use App\Models\Role;
 use App\Models\User;
@@ -37,19 +36,15 @@ test('superadmin can assign annual leave entitlement with expiry', function () {
         ->call('save')
         ->assertHasNoErrors();
 
-    $entitlement = LeaveEntitlement::query()
-        ->where('employee_id', $employee->id)
-        ->firstOrFail();
-
-    expect((float) $entitlement->total_days)->toBe(14.0)
-        ->and((float) $entitlement->remaining_days)->toBe(14.0);
-
+    // M11 (2026-08-06): entitlement kini tersimpan di leave_balances
+    // (single source of truth; leave_entitlements legacy sudah di-drop).
     $balance = LeaveBalance::query()
         ->where('employee_id', $employee->id)
         ->firstOrFail();
 
     expect((float) $balance->quota)->toBe(12.0)
         ->and((float) $balance->carry_forward)->toBe(2.0)
+        ->and((float) $balance->quota + (float) $balance->carry_forward)->toBe(14.0)
         ->and($balance->carry_forward_deadline?->toDateString())->toBe(now()->endOfYear()->toDateString());
 });
 
@@ -82,7 +77,7 @@ test('tenant scoped admin cannot assign entitlement to another company employee'
         ->call('save')
         ->assertForbidden();
 
-    expect(LeaveEntitlement::query()->where('employee_id', $employeeB->id)->exists())->toBeFalse()
+    expect(LeaveBalance::query()->where('employee_id', $employeeB->id)->exists())->toBeFalse()
         ->and($admin->fresh()->company_id)->toBe($companyA->id);
 });
 

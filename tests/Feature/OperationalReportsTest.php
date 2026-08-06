@@ -4,8 +4,8 @@ use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Payroll;
+use App\Models\Schedule;
 use App\Models\Shift;
-use App\Models\ShiftSchedule;
 use App\Models\User;
 
 test('admin can open the operational report center', function () {
@@ -79,8 +79,10 @@ test('schedule roster report export returns an excel download', function () {
         'end_time' => '17:00:00',
     ]);
 
-    ShiftSchedule::create([
-        'employee_id' => $employeeRecord->id,
+    // M11 (2026-08-06): roster export membaca `schedules` (single source of
+    // truth) — user_id + shift_id + date.
+    Schedule::create([
+        'user_id' => $employee->id,
         'shift_id' => $shift->id,
         'date' => now()->toDateString(),
     ]);

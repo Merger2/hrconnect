@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\ShiftSchedule;
+use App\Models\Schedule;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -13,6 +13,11 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+/**
+ * Roster export — M11 (AUDIT.md): pindah dari tabel legacy `shift_schedules`
+ * ke `schedules` (single source of truth, 2026-08-06). Employee di-resolve
+ * via user.employee; status Off untuk jadwal is_off.
+ */
 class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHeadings, WithMapping, WithStyles
 {
     protected Authenticatable $user;
@@ -27,9 +32,9 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
 
     public function collection(): Collection
     {
-        $query = ShiftSchedule::query()
-            ->with(['employee.user', 'employee.division', 'employee.position', 'shift'])
-            ->whereHas('employee', fn ($q) => $q->whereNull('resign_date'));
+        $query = Schedule::query()
+            ->with(['user.employee.division', 'user.employee.position', 'shift'])
+            ->whereHas('user.employee', fn ($q) => $q->whereNull('resign_date'));
 
         if (! empty($this->filters['start_date'])) {
             $query->where('date', '>=', $this->filters['start_date']);
@@ -38,18 +43,20 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
             $query->where('date', '<=', $this->filters['end_date']);
         }
         if (! empty($this->filters['division'])) {
-            $query->whereHas('employee', fn ($q) => $q->where('division_id', $this->filters['division']));
+            $query->whereHas('user.employee', fn ($q) => $q->where('division_id', $this->filters['division']));
         }
         if (! empty($this->filters['shift_id'])) {
             $query->where('shift_id', $this->filters['shift_id']);
         }
         if (! empty($this->filters['search'])) {
             $search = $this->filters['search'];
-            $query->whereHas('employee.user', fn ($q) => $q->where('name', 'ilike', "%{$search}%"))
-                ->orWhereHas('employee', fn ($q) => $q->where('employee_number', 'ilike', "%{$search}%"));
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', fn ($q) => $q->where('name', 'ilike', "%{$search}%"))
+                    ->orWhereHas('user.employee', fn ($q) => $q->where('employee_number', 'ilike', "%{$search}%"));
+            });
         }
 
-        return $query->orderBy('date')->orderBy('employee_id')->get();
+        return $query->orderBy('date')->orderBy('user_id')->get();
     }
 
     public function headings(): array
@@ -69,19 +76,19 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
 
     public function map($schedule): array
     {
-        $employee = $schedule->employee;
-        $shift = $schedule->shift;
+        $employee = $schedule->user?->employee;
+        $shift = $schedule->is_off ? null : $schedule->shift;
 
         return [
             $employee?->employee_number ?? '-',
-            $employee?->user?->name ?? $employee?->full_name ?? '-',
+            $schedule->user?->name ?? $employee?->full_name ?? '-',
             $employee?->division?->name ?? '-',
             $employee?->position?->name ?? '-',
             $schedule->date?->format('Y-m-d') ?? '-',
             $shift?->name ?? '-',
             $shift?->start_time ?? '-',
             $shift?->end_time ?? '-',
-            ucfirst($schedule->status ?? 'scheduled'),
+            $schedule->is_off ? 'Off' : ucfirst($schedule->status ?? 'scheduled'),
         ];
     }
 

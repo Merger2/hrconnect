@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\LeaveBalance;
-use App\Models\LeaveEntitlement;
 use App\Models\LeaveType;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -36,6 +35,8 @@ class LeaveEntitlementService
 
         $leaveType = LeaveType::where('is_active', true)->where('deducts_from_quota', true)->first();
 
+        // M11 (2026-08-06): single-writer — hanya `leave_balances` yang ditulis
+        // (source of truth; `leave_entitlements` legacy sudah di-drop).
         LeaveBalance::updateOrCreate(
             [
                 'employee_id' => $employee->id,
@@ -47,21 +48,6 @@ class LeaveEntitlementService
                 'used' => 0,
                 'carry_forward' => $carriedOverDays,
                 'carry_forward_deadline' => $expiresAt,
-            ]
-        );
-
-        $totalDays = $allocatedDays + $carriedOverDays;
-
-        LeaveEntitlement::updateOrCreate(
-            [
-                'employee_id' => $employee->id,
-                'leave_type_id' => $leaveType?->id,
-                'year' => $year,
-            ],
-            [
-                'total_days' => $totalDays,
-                'used_days' => 0,
-                'remaining_days' => $totalDays,
             ]
         );
     }

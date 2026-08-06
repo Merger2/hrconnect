@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\LeaveEntitlement;
+use App\Models\LeaveBalance;
 use App\Models\User;
 use App\Support\LeaveEntitlementService;
 use Illuminate\Database\Eloquent\Builder;
@@ -97,8 +97,10 @@ class LeaveEntitlementManager extends Component
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'company_id']);
 
-        $entitlements = LeaveEntitlement::query()
-            ->with(['employee.user.company', 'leaveType', 'leaveBalances'])
+        // M11 (2026-08-06): list dari `leave_balances` (single source of
+        // truth; `leave_entitlements` legacy sudah di-drop).
+        $entitlements = LeaveBalance::query()
+            ->with(['employee.user.company', 'leaveType'])
             ->when(! $actor->isSuperadmin && $actor->company_id !== null, fn (Builder $query) => $query->whereHas('employee.user', fn (Builder $userQuery) => $userQuery->where('company_id', $actor->company_id)))
             ->when($this->search !== '', function (Builder $query): void {
                 $query->where(function (Builder $query): void {

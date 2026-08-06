@@ -25,21 +25,22 @@
             </div>
 
             <div class="grid grid-cols-1 gap-3 p-4">
-                @forelse ($entitlements as $entitlement)
+                @forelse ($entitlements as $balance)
                     @php
-                        $balance = $entitlement->leaveBalances->first();
-                        $allocatedDays = (float) $entitlement->total_days - (float) ($balance?->carry_forward ?? 0);
-                        $carriedOverDays = (float) ($balance?->carry_forward ?? 0);
-                        $totalAllocated = (float) $entitlement->total_days;
-                        $expiresAt = $balance?->carry_forward_deadline;
+                        // M11 (2026-08-06): list dari leave_balances —
+                        // quota = allocated, carry_forward, carry_forward_deadline.
+                        $carriedOverDays = (float) ($balance->carry_forward ?? 0);
+                        $allocatedDays = (float) $balance->quota;
+                        $totalAllocated = $allocatedDays + $carriedOverDays;
+                        $expiresAt = $balance->carry_forward_deadline;
                         $isExpired = $expiresAt && $expiresAt->endOfDay()->isPast();
                     @endphp
                     <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                         <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <h3 class="font-semibold text-slate-950">{{ $entitlement->employee?->user?->name }}</h3>
+                                <h3 class="font-semibold text-slate-950">{{ $balance->employee?->user?->name }}</h3>
                                 <p class="mt-1 text-sm text-slate-500">
-                                    {{ $entitlement->employee?->user?->company?->name ?? __('No company') }} · {{ $entitlement->leaveType?->name ?? __('Annual leave') }} · {{ $entitlement->year }}
+                                    {{ $balance->employee?->user?->company?->name ?? __('No company') }} · {{ $balance->leaveType?->name ?? __('Annual leave') }} · {{ $balance->year }}
                                 </p>
                             </div>
                             <x-admin.status-badge :tone="$isExpired ? 'danger' : 'success'">

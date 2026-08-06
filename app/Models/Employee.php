@@ -345,11 +345,6 @@ class Employee extends Model implements CipherSweetEncrypted
         return $this->hasMany(Device::class);
     }
 
-    public function shiftSchedules(): HasMany
-    {
-        return $this->hasMany(ShiftSchedule::class);
-    }
-
     public function getHrApprover(): ?Employee
     {
         return User::role('admin')->first()?->employee;

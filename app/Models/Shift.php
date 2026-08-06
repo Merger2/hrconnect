@@ -93,9 +93,4 @@ class Shift extends Model
     {
         return $this->hasMany(Attendance::class);
     }
-
-    public function shiftSchedules(): HasMany
-    {
-        return $this->hasMany(ShiftSchedule::class);
-    }
 }

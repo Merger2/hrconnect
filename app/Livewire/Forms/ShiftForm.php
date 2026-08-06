@@ -7,7 +7,6 @@ use App\Models\AttendanceCorrection;
 use App\Models\Employee;
 use App\Models\Schedule;
 use App\Models\Shift;
-use App\Models\ShiftSchedule;
 use App\Models\ShiftSwapRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -77,10 +76,10 @@ class ShiftForm extends Form
             ShiftSwapRequest::query()->where('current_shift_id', $this->shift->id)->update(['current_shift_id' => null]);
             ShiftSwapRequest::query()->where('requested_shift_id', $this->shift->id)->update(['requested_shift_id' => null]);
 
-            // schedules dihapus (ekspektasi MasterDataDeleteFlowTest), dan
-            // shift_schedules.shift_id NOT NULL + restrictOnDelete → wajib dihapus.
+            // schedules dihapus (ekspektasi MasterDataDeleteFlowTest).
+            // M11 (2026-08-06): shift_schedules legacy sudah di-drop —
+            // schedules = satu-satunya tabel jadwal.
             Schedule::query()->where('shift_id', $this->shift->id)->delete();
-            ShiftSchedule::query()->where('shift_id', $this->shift->id)->delete();
 
             $this->shift->delete();
         });
