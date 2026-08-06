@@ -87,7 +87,8 @@
     </div>
 
     <x-admin.panel class="ring-1 ring-gray-950/5">
-                <div class="overflow-x-auto">
+                {{-- Desktop: table hanya di lg ke atas, mobile pakai kartu --}}
+                <div class="hidden overflow-x-auto lg:block">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -149,7 +150,43 @@
                         </tbody>
                     </table>
                 </div>
-                
+
+                {{-- Mobile: kartu stacked --}}
+                <div class="divide-y divide-gray-100 lg:hidden">
+                    @forelse($logs as $log)
+                        <div class="flex items-start gap-3 px-4 py-3">
+                            <div class="h-9 w-9 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                {{ substr($log->user->name ?? '?', 0, 1) }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-medium text-gray-900">{{ $log->user->name ?? __('Unknown') }}</div>
+                                        <div class="text-xs text-gray-500">{{ $log->user->nip ?? '-' }}</div>
+                                    </div>
+                                    <span class="shrink-0 text-xs text-gray-400">{{ $log->created_at->format('d M Y H:i') }}</span>
+                                </div>
+                                <div class="mt-2 text-sm font-medium text-gray-900">{{ $log->action }}</div>
+                                <div class="mt-0.5 text-xs text-gray-500">{{ $log->description }}</div>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                        {{ $log->ip_address ?? '-' }}
+                                    </span>
+                                    <span class="text-xs text-gray-400">{{ $log->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="px-4 py-6 text-center text-gray-500">
+                            <x-admin.empty-state :title="__('No activity logs found.')" class="border-0 bg-transparent p-0 shadow-none">
+                                <x-slot name="icon">
+                                    <x-heroicon-o-exclamation-circle class="h-12 w-12 text-gray-300" />
+                                </x-slot>
+                            </x-admin.empty-state>
+                        </div>
+                    @endforelse
+                </div>
+
         <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3">
             {{ $logs->links() }}
         </div>

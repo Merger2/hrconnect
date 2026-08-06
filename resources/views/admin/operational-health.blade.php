@@ -346,7 +346,8 @@
             <h2 class="text-sm font-bold text-slate-950">{{ __('Database Table Summary') }}</h2>
         </div>
         @if(! empty($health['tables']))
-            <div class="md:overflow-x-auto">
+            {{-- Desktop: table hanya di md ke atas, mobile pakai kartu stacked --}}
+            <div class="hidden overflow-x-auto md:block">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50">
                         <tr>
@@ -365,6 +366,19 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            {{-- Mobile: kartu stacked --}}
+            <div class="divide-y divide-slate-200 md:hidden">
+                @foreach($health['tables'] as $table)
+                    <div class="flex items-center justify-between gap-3 px-4 py-3">
+                        <span class="truncate font-medium text-slate-900">{{ $table['name'] }}</span>
+                        <span class="shrink-0 text-right">
+                            <span class="text-slate-600">{{ $table['rows'] === null ? __('Unknown') : number_format($table['rows']) }}</span>
+                            <span class="ml-2 font-semibold text-slate-900">{{ $table['size'] }}</span>
+                        </span>
+                    </div>
+                @endforeach
             </div>
         @else
             <div class="px-4 py-4 text-sm text-slate-600">

@@ -50,7 +50,8 @@
                 </div>
             </div>
         @else
-            <div class="overflow-x-auto">
+            {{-- Desktop: table hanya di lg ke atas, mobile pakai kartu --}}
+            <div class="hidden overflow-x-auto lg:block">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -122,6 +123,59 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            {{-- Mobile: kartu stacked --}}
+            <div class="divide-y divide-gray-100 lg:hidden">
+                @foreach ($documents as $doc)
+                    @php
+                        $statusStyles = match($doc->status?->value) {
+                            'completed' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'ring' => 'ring-emerald-600/20'],
+                            'processing' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'ring' => 'ring-amber-600/20'],
+                            'failed' => ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'ring' => 'ring-rose-600/20'],
+                            default => ['bg' => 'bg-slate-50', 'text' => 'text-slate-700', 'ring' => 'ring-slate-600/20'],
+                        };
+                    @endphp
+                    <div class="flex items-start gap-3 px-4 py-3">
+                        <x-heroicon-o-document-text class="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="font-medium text-gray-900">{{ $doc->title }}</div>
+                                    @if($doc->source_document)
+                                        <div class="truncate text-xs text-gray-500">{{ $doc->source_document }}</div>
+                                    @endif
+                                </div>
+                                <span class="inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ $statusStyles['bg'] }} {{ $statusStyles['text'] }} {{ $statusStyles['ring'] }}">
+                                    @if($doc->status?->value === 'processing')
+                                        <x-heroicon-o-arrow-path class="mr-1 h-3 w-3 animate-spin" />
+                                    @endif
+                                    {{ __(ucfirst($doc->status?->value ?? 'unknown')) }}
+                                </span>
+                            </div>
+                            <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
+                                <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20">
+                                    {{ $doc->category?->value ?? '-' }}
+                                </span>
+                                <span>{{ __('Chunk') }}: {{ $doc->chunk_count ?? '-' }}</span>
+                                <span>{{ $doc->created_at?->translatedFormat('d M Y') }}</span>
+                            </div>
+                            <div class="mt-3 flex items-center gap-1">
+                                <x-actions.button type="button" wire:click="showDetail({{ $doc->id }})" variant="soft-secondary" size="sm">
+                                    <x-heroicon-m-eye class="h-4 w-4" />
+                                </x-actions.button>
+                                @if($doc->status?->value === 'failed' || $doc->status?->value === 'processing')
+                                    <x-actions.button type="button" wire:click="reindex({{ $doc->id }})" variant="soft-warning" size="sm">
+                                        <x-heroicon-m-arrow-path class="h-4 w-4" />
+                                    </x-actions.button>
+                                @endif
+                                <x-actions.button type="button" wire:click="delete({{ $doc->id }})" wire:confirm="{{ __('Hapus dokumen ini?') }}" variant="soft-danger" size="sm">
+                                    <x-heroicon-m-trash class="h-4 w-4" />
+                                </x-actions.button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
             <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">

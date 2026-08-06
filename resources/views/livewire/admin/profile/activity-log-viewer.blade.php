@@ -14,7 +14,8 @@
                     <p class="text-sm text-slate-500">{{ __('No activity logs found.') }}</p>
                 </div>
             @else
-                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                {{-- Desktop: table hanya di lg ke atas, mobile pakai kartu --}}
+                <div class="hidden overflow-x-auto rounded-xl border border-slate-200 lg:block">
                     <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
                         <thead class="bg-slate-50 text-slate-500">
                             <tr>
@@ -50,6 +51,29 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Mobile: kartu stacked --}}
+                <div class="divide-y divide-slate-100 rounded-xl border border-slate-200 lg:hidden">
+                    @foreach ($logs as $log)
+                        <div class="px-4 py-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    @if($log->hasValidIntegrityHash())
+                                        <x-heroicon-s-check-badge class="h-4 w-4 text-emerald-500" title="{{ __('Hash valid') }}" />
+                                    @else
+                                        <x-heroicon-s-exclamation-triangle class="h-4 w-4 text-rose-500" title="{{ __('Integrity compromised') }}" />
+                                    @endif
+                                    <span class="font-medium text-slate-900">{{ Str::headline($log->action) }}</span>
+                                </div>
+                                <span class="shrink-0 text-xs text-slate-500">{{ $log->created_at->format('M d, Y H:i') }}</span>
+                            </div>
+                            <div class="mt-1.5 text-sm text-slate-600">{{ $log->description ?: '-' }}</div>
+                            <span class="mt-2 inline-block rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-500">
+                                {{ $log->ip_address ?: 'Unknown' }}
+                            </span>
+                        </div>
+                    @endforeach
                 </div>
 
                 @if($logs->hasPages())

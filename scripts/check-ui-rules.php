@@ -53,8 +53,16 @@ foreach ($bladeFiles as $file) {
         }
 
         if (preg_match_all('/<table\b/i', $markupContent, $matches, PREG_OFFSET_CAPTURE) > 0 && ! isAllowedTablePath($relativePath)) {
-            $firstOffset = $matches[0][0][1];
-            if (! isWhitelisted($whitelistEntries, 'table_usage', $relativePath, null, $whitelistHitCount)) {
+            // Lewati table desktop-only: dibungkus div hidden+lg:block (pola mobile-first existing:
+            // table hanya di desktop, mobile pakai kartu lg:hidden). Kalau SEMUA table desktop-only,
+            // file dianggap sudah mobile-first dan tidak di-flag.
+            $violatingTables = array_filter(
+                $matches[0],
+                static fn (array $m): bool => tableDesktopBreakpoint($markupContent, $m[1]) === null,
+            );
+
+            if ($violatingTables !== [] && ! isWhitelisted($whitelistEntries, 'table_usage', $relativePath, null, $whitelistHitCount)) {
+                $firstOffset = array_values($violatingTables)[0][1];
                 $blockingFindings[] = makeFinding(
                     'error',
                     'table_usage',
@@ -62,6 +70,32 @@ foreach ($bladeFiles as $file) {
                     lineNumberFromOffset($content, $firstOffset),
                     'Table markup found in normal app UI. Prefer card or stacked mobile layouts.',
                 );
+            }
+
+            // Guard: table desktop-only WAJIB punya companion kartu <bp>:hidden di file yang sama.
+            // Kalau tidak, data hilang di mobile (regresi tersembunyi) — flag sebagai warning.
+            foreach ($matches[0] as $m) {
+                $bp = tableDesktopBreakpoint($markupContent, $m[1]);
+
+                if ($bp === null) {
+                    continue;
+                }
+
+                if (preg_match('/\b'.$bp.':hidden\b/', $markupContent) !== 1) {
+                    addCappedWarning(
+                        $warningFindings,
+                        $warningCaps,
+                        $maxWarningsPerFile,
+                        'mobile_layout_red_flag',
+                        $relativePath,
+                        lineNumberFromOffset($content, $m[1]),
+                        sprintf(
+                            'Desktop-only table (hidden %s:block) has no %s:hidden mobile card companion — data would be hidden on mobile.',
+                            $bp,
+                            $bp,
+                        ),
+                    );
+                }
             }
         }
 
@@ -253,6 +287,105 @@ function findFiles(string $directory, callable $filter): array
     sort($files);
 
     return $files;
+}
+
+function tableDesktopBreakpoint(string $content, int $tableOffset): ?string
+{
+    // Kasus A: <table class="hidden ... md:table"> — table-nya sendiri desktop-only.
+    $tableOpenEnd = strpos($content, '>', $tableOffset);
+
+    if ($tableOpenEnd !== false) {
+        $tableOpenTag = substr($content, $tableOffset, $tableOpenEnd - $tableOffset + 1);
+
+        if (preg_match('/\bclass="([^"]*)"/i', $tableOpenTag, $tm) === 1) {
+            $tableClasses = preg_split('/\s+/', trim($tm[1])) ?: [];
+
+            if (in_array('hidden', $tableClasses, true)) {
+                foreach ($tableClasses as $class) {
+                    if (preg_match('/^(?:sm|md|lg|xl|2xl):table$/', $class) === 1) {
+                        return substr($class, 0, strpos($class, ':'));
+                    }
+                }
+            }
+        }
+    }
+
+    // Kasus B: dibungkus div dengan kelas hidden + <bp>:block
+    // (pola mobile-first project: table disembunyikan di <bp, mobile pakai kartu <bp>:hidden,
+    // breakpoint boleh sm/md/lg/xl/2xl). Jalankan mundur lewat wrapper bersarang
+    // (mis. <div class="hidden md:block"><div class="overflow-x-scroll"><table>).
+    // Depth-aware: hitung net buka-tutup div antara tag pembuka kandidat dan <table>
+    // agar wrapper yang punya sibling div tertutup di dalamnya tetap terdeteksi sebagai ancestor.
+    $before = substr($content, 0, $tableOffset);
+    $cursor = strlen($before);
+
+    while (true) {
+        $segment = substr($before, 0, $cursor);
+        $lastOpen = strrpos($segment, '<div');
+
+        if ($lastOpen === false) {
+            return null;
+        }
+
+        $tagEnd = strpos($content, '>', $lastOpen);
+        $openTag = substr($content, $lastOpen, ($tagEnd === false ? $cursor : $tagEnd) - $lastOpen + 1);
+
+        // Jika kandidat sudah tertutup sebelum <table> (net depth balik ke 0),
+        // ia bukan ancestor — berhenti.
+        if ($tagEnd !== false && ! divIsOpenAt($content, $tagEnd + 1, $tableOffset)) {
+            return null;
+        }
+
+        if (preg_match('/\bclass="([^"]*)"/i', $openTag, $m) === 1) {
+            $classes = preg_split('/\s+/', trim($m[1])) ?: [];
+
+            if (in_array('hidden', $classes, true)) {
+                foreach ($classes as $class) {
+                    if (preg_match('/^(?:sm|md|lg|xl|2xl):block$/', $class) === 1) {
+                        return substr($class, 0, strpos($class, ':'));
+                    }
+                }
+            }
+        }
+
+        $cursor = $lastOpen;
+    }
+}
+
+function divIsOpenAt(string $content, int $start, int $end): bool
+{
+    // Scan dari $start (setelah tag pembuka kandidat) sampai $end (offset table/kelas).
+    // Depth kandidat = 1; setiap <div naik, setiap </div> turun. Kalau depth menyentuh 0
+    // sebelum $end, kandidat sudah ditutup → bukan ancestor.
+    $depth = 1;
+    $pos = $start;
+
+    while ($pos < $end) {
+        $nextOpen = strpos($content, '<div', $pos);
+        $nextClose = strpos($content, '</div', $pos);
+
+        if ($nextClose === false || ($nextOpen !== false && $nextOpen < $nextClose)) {
+            if ($nextOpen === false || $nextOpen >= $end) {
+                break;
+            }
+
+            $depth++;
+            $pos = $nextOpen + 4;
+        } else {
+            if ($nextClose === false || $nextClose >= $end) {
+                break;
+            }
+
+            $depth--;
+            $pos = $nextClose + 5;
+
+            if ($depth <= 0) {
+                return false;
+            }
+        }
+    }
+
+    return $depth > 0;
 }
 
 function stripPhpBlocksPreservingOffsets(string $content): string
@@ -542,6 +675,13 @@ function collectMobileLayoutWarnings(string $content, string $relativePath, arra
         }
 
         foreach ($matches[0] as [$match, $offset]) {
+            // overflow-x-auto di dalam wrapper desktop-only (hidden + <bp>:block) adalah
+            // pola yang benar (scroll horizontal hanya untuk table desktop) — bukan red flag.
+            if ($message === 'overflow-x-auto can hide underlying mobile layout issues.'
+                && isInsideDesktopOnlyWrapper($content, $offset)) {
+                continue;
+            }
+
             addCappedWarning(
                 $warningFindings,
                 $warningCaps,
@@ -552,6 +692,44 @@ function collectMobileLayoutWarnings(string $content, string $relativePath, arra
                 $message,
             );
         }
+    }
+}
+
+function isInsideDesktopOnlyWrapper(string $content, int $offset): bool
+{
+    // Cek ancestor div terdekat: jika ada div dengan hidden + <bp>:block sebelum offset
+    // (tanpa net-depth menyentuh 0 di antaranya), offset dianggap dalam area desktop-only.
+    $before = substr($content, 0, $offset);
+    $cursor = strlen($before);
+
+    while (true) {
+        $segment = substr($before, 0, $cursor);
+        $lastOpen = strrpos($segment, '<div');
+
+        if ($lastOpen === false) {
+            return false;
+        }
+
+        $tagEnd = strpos($content, '>', $lastOpen);
+        $openTag = substr($content, $lastOpen, ($tagEnd === false ? $cursor : $tagEnd) - $lastOpen + 1);
+
+        if ($tagEnd !== false && ! divIsOpenAt($content, $tagEnd + 1, $offset)) {
+            return false;
+        }
+
+        if (preg_match('/\bclass="([^"]*)"/i', $openTag, $m) === 1) {
+            $classes = preg_split('/\s+/', trim($m[1])) ?: [];
+
+            if (in_array('hidden', $classes, true)) {
+                foreach ($classes as $class) {
+                    if (preg_match('/^(?:sm|md|lg|xl|2xl):block$/', $class) === 1) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        $cursor = $lastOpen;
     }
 }
 

@@ -291,7 +291,8 @@
                                             </div>
                                         </div>
 
-                                        <div class="mt-4 overflow-hidden rounded-xl border border-red-100 bg-white">
+                                        {{-- Desktop: table error hanya di md ke atas, mobile pakai kartu --}}
+                                        <div class="mt-4 hidden overflow-hidden rounded-xl border border-red-100 bg-white md:block">
                                             <table class="min-w-full divide-y divide-red-100">
                                                 <thead class="bg-red-50/60">
                                                     <tr>
@@ -316,6 +317,22 @@
                                                     @endforeach
                                                 </tbody>
                                             </table>
+                                        </div>
+
+                                        {{-- Mobile: kartu stacked --}}
+                                        <div class="mt-4 divide-y divide-red-100 rounded-xl border border-red-100 bg-white md:hidden">
+                                            @foreach ($importErrors as $error)
+                                                <div class="px-4 py-3">
+                                                    <span class="inline-flex rounded-md bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">
+                                                        {{ __('Row') }} {{ $error['row'] }}
+                                                    </span>
+                                                    <ul class="mt-2 list-disc space-y-1 pl-4 text-sm text-red-700">
+                                                        @foreach ($error['errors'] as $msg)
+                                                            <li>{{ $msg }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endforeach
                                         </div>
                                     </x-admin.alert>
                                 @endif
@@ -342,7 +359,8 @@
                         </h4>
                     </div>
 
-                    <div class="admin-table-scroll">
+                    {{-- Desktop: table preview hanya di lg ke atas, mobile pakai kartu --}}
+                    <div class="hidden admin-table-scroll lg:block">
                         @php
                             $thClass = 'px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap text-gray-500 bg-gray-50';
                             $tdClass = 'px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-b border-gray-100';
@@ -384,6 +402,42 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- Mobile: kartu stacked --}}
+                    <div class="divide-y divide-gray-100 lg:hidden">
+                        @foreach ($users->take(10) as $user)
+                            <div class="px-4 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="font-medium text-gray-900">{{ $user->name }}</div>
+                                        <div class="truncate text-xs text-gray-500">{{ $user->email }}</div>
+                                    </div>
+                                    <span class="inline-flex shrink-0 rounded-lg px-2 py-1 text-xs {{ $user->group === 'admin' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-700' }}">
+                                        {{ __(ucfirst($user->group)) }}
+                                    </span>
+                                </div>
+                                <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                                    <div>
+                                        <dt class="text-gray-400">{{ __('NIP') }}</dt>
+                                        <dd class="mt-0.5 font-mono font-medium text-gray-900">{{ $user->nip }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-gray-400">{{ __('Phone') }}</dt>
+                                        <dd class="mt-0.5 font-medium text-gray-900">{{ $user->phone }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-gray-400">{{ __('Basic Salary') }}</dt>
+                                        <dd class="mt-0.5 font-mono font-medium text-gray-900">{{ number_format($user->basic_salary, 0) }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-gray-400">{{ __('Role') }}</dt>
+                                        <dd class="mt-0.5 font-medium text-gray-900">{{ $user->jobTitle?->name ?? '-' }}</dd>
+                                        <dd class="text-gray-500">{{ $user->division?->name ?? '-' }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        @endforeach
                     </div>
 
                     @if ($users->count() > 10)
