@@ -97,6 +97,7 @@
             "Composer\\Config::disableProcessTimeout",
             "@token:check",
             "@php scripts/check-token-sync.php",
+            "@php scripts/check-ui-rules.php",
             "@test"
         ],
         "test": [

@@ -36,7 +36,7 @@
 | `composer run setup` | Bootstrap penuh: install deps, copy `.env`, `key:generate`, migrate, npm build |
 | `composer run dev` | Server + queue + logs + Vite concurrently |
 | `composer run test` | `config:clear` → `lint:check` → `php artisan test` (butuh pgsql lokal: DB `hris_testing`, user `postgres`/`password`) |
-| `composer run ci:check` | `disableProcessTimeout` + `@test` (tanpa `config:clear`/lint — beda tipis dari `test`) |
+| `composer run ci:check` | `disableProcessTimeout` + `token:check` + `check-token-sync` + `check-ui-rules` + `@test` (audit statis dulu, test terakhir; tanpa `config:clear`/lint) |
 | `composer run lint` | `pint --parallel` (auto-fix) |
 | `composer run lint:check` | `pint --parallel --test` (dry-run) |
 | `vendor/bin/pint --dirty --format agent` | **Wajib** setelah tiap perubahan PHP |
