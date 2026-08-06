@@ -76,9 +76,12 @@ $recoveryTokens = [
     'attendance-live',            // teks badge "live" panel absensi (attendance 60% / primary-900)
     'attendance-accent',          // teks aksen aksi absensi (orange-700 80% transparan)
     'banner-attendance-deep',     // stop gelap banner absensi (attendance 62% / primary-900)
-    'banner-payroll-deep',        // stop gelap banner payroll (payroll 62% / primary-900)
+    // NOTE (62% vs 78%): keduanya = module-payroll + primary-900, beda persentase SENGJA.
+    // banner-payroll-deep 62% = stop gelap banner utk kontras teks putih 5.22:1 (WCAG AA >=4.5);
+    // module-payroll-deep 78% = strip/accent card tanpa teks putih — boleh lebih terang. JANGAN digabung.
+    'banner-payroll-deep',        // stop gelap banner payroll (payroll 62% / primary-900) — kontras teks putih 5.22:1
     'banner-documents-light',     // stop terang banner dokumen (documents 55% / surface)
-    'module-payroll-deep',        // strip/accent deep emerald (payroll 78% / primary-900)
+    'module-payroll-deep',        // strip/accent deep emerald (payroll 78% / primary-900) — tanpa teks putih, boleh terang
     'module-payroll-eyebrow',     // eyebrow emerald (payroll 74% / primary-900)
     'scan-icon-mint',             // gradien ikon header scan native (mint)
     'scan-icon-ink',              // warna ikon header scan native (teal gelap)

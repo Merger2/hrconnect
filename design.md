@@ -383,6 +383,11 @@ module, date-context TIDAK overlap hero, nol console error).
   `module-payroll-deep` (strip/accent deep emerald), `module-payroll-eyebrow`
   (eyebrow emerald), `scan-icon-mint` / `scan-icon-ink` (ikon header scan
   native), `danger-copy` (teks section danger profil).
+  **`banner-payroll-deep` (62%) vs `module-payroll-deep` (78%) sengaja BEDA**
+  — keduanya = `color-mix(module-payroll, primary-900)` beda persentase:
+  62% (stop gelap banner, kontras teks putih 5.22:1 PASS WCAG AA ≥4.5) vs
+  78% (strip/accent card tanpa teks putih, boleh lebih terang 3.79:1).
+  JANGAN digabung — 78% di banner gagal kontras, 62% di strip ubah visual.
 
 ## Typography
 - Display: Rubik, Inter, sans-serif — weight 600, style normal

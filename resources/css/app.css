@@ -314,6 +314,10 @@
     --color-scan-icon-ink: #045c48;
     --color-banner-attendance-deep: #097a93;
     --color-attendance-live: #0a7690;
+    /* 62% vs 78% sengaja BEDA (keduanya = module-payroll + primary-900, hanya persentase beda):
+       - banner-payroll-deep 62% = stop GELAP banner di bawah teks putih — kontras 5.22:1 PASS WCAG AA (>=4.5), wajib per design.md;
+       - module-payroll-deep 78% = strip/accent card (tanpa teks putih di atasnya) — boleh lebih terang (3.79:1), visual lebih hidup.
+       JANGAN digabung: memakai 78% di banner akan gagal kontras WCAG; memakai 62% di strip mengubah tampilan accent. */
     --color-banner-payroll-deep: #107b60;
     --color-module-payroll-eyebrow: #108f6a;
     --color-module-payroll-deep: #10956e;
