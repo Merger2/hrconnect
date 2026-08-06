@@ -5,13 +5,13 @@
                 :back-href="route('home')"
                 :title="__('Operational Tasks')"
                 :description="__('Follow assigned client, project, and field-work tasks with checklist and visit evidence.')"
-                title-id="my-operational-tasks-title">
+                title-id="my-operational-tasks-title" module="reports">
                 <x-slot name="icon">
                     <x-heroicon-o-briefcase class="h-5 w-5" />
                 </x-slot>
             </x-user.page-header>
 
-            <div class="user-page-body bg-gray-50/50">
+            <div class="user-page-body pt-0">
                 <x-feedback.alert-messages />
 
                 <div class="user-compact-filter mb-4">

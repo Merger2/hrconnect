@@ -5,6 +5,7 @@
                 :back-href="!$showModal ? route('home') : null"
                 :title="$showModal ? __('New Request') : __('Overtime Request')"
                 title-id="overtime-request-title"
+                module="leave"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-clock class="h-5 w-5" />

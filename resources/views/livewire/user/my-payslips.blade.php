@@ -9,7 +9,11 @@
                 :back-href="!($needsSetup && Auth::user()->hasValidPayslipPassword()) ? route('home') : null"
                 :title="$needsSetup ? __('Secure Access') : __('Payslip')"
                 title-id="my-payslips-title"
+                module="payroll"
                 class="border-b-0">
+                <x-slot name="icon">
+                    <x-heroicon-o-banknotes class="h-5 w-5" />
+                </x-slot>
                 <x-slot name="actions">
                     @if ($needsSetup && Auth::user()->hasValidPayslipPassword())
                         <button wire:click="cancelReset" aria-label="{{ __('Back') }}" title="{{ __('Back') }}"

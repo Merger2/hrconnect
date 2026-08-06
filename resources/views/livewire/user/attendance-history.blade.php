@@ -28,8 +28,23 @@
     ];
 @endphp
 
-<div wire:poll.30s class="space-y-4">
-    <section class="user-history-hero" aria-label="{{ __('Attendance summary') }}">
+<div class="user-page-shell">
+    <div class="user-page-container user-page-container--wide">
+        <section aria-labelledby="attendance-history-title" class="user-page-surface">
+            <x-user.page-header
+                :back-href="route('home')"
+                :title="__('Attendance History')"
+                title-id="attendance-history-title"
+                module="attendance"
+                class="border-b-0">
+                <x-slot name="icon">
+                    <x-heroicon-o-calendar-days class="h-5 w-5" />
+                </x-slot>
+            </x-user.page-header>
+
+            <div class="user-page-body pt-0">
+                <div wire:poll.30s class="space-y-4">
+                    <section class="user-history-hero" aria-label="{{ __('Attendance summary') }}">
         <div class="min-w-0">
             <p class="user-history-eyebrow">{{ __('Attendance') }}</p>
             <h2 class="user-history-title">{{ $displayMonth->translatedFormat('F Y') }}</h2>
@@ -55,8 +70,8 @@
                 <h3 class="text-base font-semibold tracking-tight text-slate-950">{{ __('Monthly Calendar') }}</h3>
                 <p class="mt-1 text-xs leading-5 text-slate-500">{{ __('Tap a marked date to view details.') }}</p>
             </div>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700">
-                <span class="h-1.5 w-1.5 rounded-full bg-primary-500"></span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-module-attendance/10 px-2.5 py-1 text-xs font-bold text-module-attendance">
+                <span class="h-1.5 w-1.5 rounded-full bg-module-attendance"></span>
                 {{ __('Today') }}
             </span>
         </div>
@@ -171,4 +186,8 @@
     </section>
 
     <x-shared.attendance-detail-modal :current-attendance="$currentAttendance" />
+                </div>
+            </div>
+        </section>
+    </div>
 </div>

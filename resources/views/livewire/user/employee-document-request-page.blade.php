@@ -5,7 +5,11 @@
                 :back-href="route('home')"
                 :title="__('Document Requests')"
                 title-id="document-request-title"
+                module="documents"
                 class="border-b-0">
+                <x-slot name="icon">
+                    <x-heroicon-o-document-text class="h-5 w-5" />
+                </x-slot>
                 <x-slot name="actions">
                     <button type="button" wire:click="create" class="wcag-touch-target inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-none transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white" aria-label="{{ __('New Request') }}">
                         <x-heroicon-o-plus class="h-5 w-5" />

@@ -5,13 +5,13 @@
                 :back-href="route('home')"
                 :title="__('HR Tasks')"
                 :description="__('Complete onboarding and offboarding follow-ups assigned to you.')"
-                title-id="hr-tasks-title">
+                title-id="hr-tasks-title" module="hr">
                 <x-slot name="icon">
                     <x-heroicon-o-clipboard-document-check class="h-5 w-5" />
                 </x-slot>
             </x-user.page-header>
 
-            <div class="user-page-body bg-gray-50/50">
+            <div class="user-page-body pt-0">
                 <x-feedback.alert-messages />
 
                 <div class="user-compact-filter mb-4">

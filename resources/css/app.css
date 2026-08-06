@@ -654,6 +654,117 @@
         @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary-100/80 bg-primary-50/80 text-primary-700 shadow-none ring-1 ring-white/60 backdrop-blur-sm;
     }
 
+    /* ── Module hue header accents (design.md Modular Hue System 2026-08-05) ──
+       Satu halaman = satu module hue: ikon header + accent strip tipis.
+       CTA/primary button tetap global accent (biru). */
+    .user-page-header--module-attendance,
+    .user-page-header--module-leave,
+    .user-page-header--module-payroll,
+    .user-page-header--module-documents,
+    .user-page-header--module-finance,
+    .user-page-header--module-hr,
+    .user-page-header--module-kb,
+    .user-page-header--module-reports {
+        position: relative;
+    }
+
+    .user-page-header--module-attendance::before,
+    .user-page-header--module-leave::before,
+    .user-page-header--module-payroll::before,
+    .user-page-header--module-documents::before,
+    .user-page-header--module-finance::before,
+    .user-page-header--module-hr::before,
+    .user-page-header--module-kb::before,
+    .user-page-header--module-reports::before {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        height: 2px;
+        border-radius: 9999px;
+        pointer-events: none;
+    }
+
+    .user-page-header--module-attendance .user-page-header__icon {
+        background-color: rgb(6 182 212 / 0.10);
+        border-color: rgb(6 182 212 / 0.25);
+        color: #06b6d4;
+    }
+
+    .user-page-header--module-attendance::before {
+        background: linear-gradient(90deg, rgb(6 182 212 / 0.55), rgb(6 182 212 / 0.08));
+    }
+
+    .user-page-header--module-leave .user-page-header__icon {
+        background-color: rgb(139 92 246 / 0.10);
+        border-color: rgb(139 92 246 / 0.25);
+        color: #8b5cf6;
+    }
+
+    .user-page-header--module-leave::before {
+        background: linear-gradient(90deg, rgb(139 92 246 / 0.55), rgb(139 92 246 / 0.08));
+    }
+
+    .user-page-header--module-payroll .user-page-header__icon {
+        background-color: rgb(16 185 129 / 0.10);
+        border-color: rgb(16 185 129 / 0.25);
+        color: #10b981;
+    }
+
+    .user-page-header--module-payroll::before {
+        background: linear-gradient(90deg, rgb(16 185 129 / 0.55), rgb(16 185 129 / 0.08));
+    }
+
+    .user-page-header--module-documents .user-page-header__icon {
+        background-color: rgb(245 158 11 / 0.10);
+        border-color: rgb(245 158 11 / 0.25);
+        color: #f59e0b;
+    }
+
+    .user-page-header--module-documents::before {
+        background: linear-gradient(90deg, rgb(245 158 11 / 0.55), rgb(245 158 11 / 0.08));
+    }
+
+    .user-page-header--module-finance .user-page-header__icon {
+        background-color: rgb(244 63 94 / 0.10);
+        border-color: rgb(244 63 94 / 0.25);
+        color: #f43f5e;
+    }
+
+    .user-page-header--module-finance::before {
+        background: linear-gradient(90deg, rgb(244 63 94 / 0.55), rgb(244 63 94 / 0.08));
+    }
+
+    .user-page-header--module-hr .user-page-header__icon {
+        background-color: rgb(59 130 246 / 0.10);
+        border-color: rgb(59 130 246 / 0.25);
+        color: #3b82f6;
+    }
+
+    .user-page-header--module-hr::before {
+        background: linear-gradient(90deg, rgb(59 130 246 / 0.55), rgb(59 130 246 / 0.08));
+    }
+
+    .user-page-header--module-kb .user-page-header__icon {
+        background-color: rgb(217 70 239 / 0.10);
+        border-color: rgb(217 70 239 / 0.25);
+        color: #d946ef;
+    }
+
+    .user-page-header--module-kb::before {
+        background: linear-gradient(90deg, rgb(217 70 239 / 0.55), rgb(217 70 239 / 0.08));
+    }
+
+    .user-page-header--module-reports .user-page-header__icon {
+        background-color: rgb(2 132 199 / 0.10);
+        border-color: rgb(2 132 199 / 0.25);
+        color: #0284c7;
+    }
+
+    .user-page-header--module-reports::before {
+        background: linear-gradient(90deg, rgb(2 132 199 / 0.55), rgb(2 132 199 / 0.08));
+    }
+
     .user-ui .user-page-header__icon {
         @apply inline-flex;
     }

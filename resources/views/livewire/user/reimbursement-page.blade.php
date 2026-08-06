@@ -2,6 +2,7 @@
     <div class="user-page-container user-page-container--wide">
         <section aria-labelledby="reimbursement-page-title" class="user-page-surface" @unless($isCreating) wire:poll.visible.20s @endunless>
             <x-user.page-header :back-href="!$isCreating ? route('home') : null" :title="$isCreating ? __('New Claim') : __('Reimbursement')" title-id="reimbursement-page-title"
+                module="finance"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-credit-card class="h-5 w-5" />

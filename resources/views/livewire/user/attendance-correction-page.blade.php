@@ -2,6 +2,7 @@
     <div class="user-page-container user-page-container--wide">
         <section aria-labelledby="attendance-correction-title" class="user-page-surface" @unless($showCreateModal) wire:poll.visible.20s @endunless>
             <x-user.page-header :back-href="route('home')" :title="__('Attendance Corrections')" title-id="attendance-correction-title"
+                module="attendance"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-clipboard-document-check class="h-5 w-5" />

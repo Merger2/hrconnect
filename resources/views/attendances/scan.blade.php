@@ -7,6 +7,7 @@
                     :back-href="route('home')"
                     :title="__('Clock In')"
                     title-id="scan-attendance-title"
+                    module="attendance"
                     class="border-b-0">
                     <x-slot name="icon">
                         <x-heroicon-o-clock class="h-5 w-5" />

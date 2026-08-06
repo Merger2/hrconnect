@@ -5,6 +5,7 @@
                 :back-href="route('home')"
                 :title="__('Knowledge Base Chat')"
                 title-id="kb-chat-title"
+                module="kb"
                 class="border-b-0 shrink-0">
                 <x-slot name="icon">
                     <x-heroicon-o-chat-bubble-left-right class="h-5 w-5" />

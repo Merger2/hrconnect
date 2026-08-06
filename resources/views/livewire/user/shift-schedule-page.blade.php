@@ -5,6 +5,7 @@
                 :back-href="route('home')"
                 :title="__('My Schedule')"
                 title-id="my-schedule-title"
+                module="attendance"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-calendar-days class="h-5 w-5" />

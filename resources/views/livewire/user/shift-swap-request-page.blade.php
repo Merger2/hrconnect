@@ -1,7 +1,7 @@
 <div class="user-page-shell">
     <div class="user-page-container user-page-container--wide">
         <section aria-labelledby="shift-swap-title" class="user-page-surface" @unless($showModal) wire:poll.visible.20s @endunless>
-            <x-user.page-header :back-href="route('my-schedule')" :title="__('Shift Swap Requests')" title-id="shift-swap-title" class="border-b-0">
+            <x-user.page-header :back-href="route('my-schedule')" :title="__('Shift Swap Requests')" title-id="shift-swap-title" module="attendance" class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-arrows-right-left class="h-5 w-5" />
                 </x-slot>
