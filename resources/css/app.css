@@ -765,6 +765,69 @@
         background: linear-gradient(90deg, rgb(2 132 199 / 0.55), rgb(2 132 199 / 0.08));
     }
 
+    /* ── App topbar (admin + user desktop) — satu pola visual (2026-08-05) ──
+       Chrome bersama: fixed, bg-white/95 + blur, border-b, accent strip module-hr.
+       Tinggi baris seragam: 3.5rem mobile / 4rem desktop (sm+). */
+    .app-topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        width: 100%;
+        background-color: rgb(255 255 255 / 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgb(229 231 235 / 0.8);
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .app-topbar::after {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        bottom: -1px;
+        height: 2px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgb(59 130 246 / 0.55), rgb(2 74 216 / 0.18), rgb(59 130 246 / 0.05));
+    }
+
+    .app-topbar__inner {
+        width: 100%;
+        padding-inline: 1rem;
+    }
+
+    .app-topbar__inner--centered {
+        max-width: 80rem;
+        margin-inline: auto;
+    }
+
+    @media (min-width: 640px) {
+        .app-topbar__inner {
+            padding-inline: 1.5rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .app-topbar__inner {
+            padding-inline: 2rem;
+        }
+    }
+
+    .app-topbar__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        height: 3.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .app-topbar__row {
+            height: 4rem;
+        }
+    }
+
     .user-ui .user-page-header__icon {
         @apply inline-flex;
     }

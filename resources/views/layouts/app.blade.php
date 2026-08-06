@@ -83,7 +83,7 @@
             @endif
 
             <!-- Page Content -->
-            <main class="{{ $isAdminRoute ? 'pt-[calc(4rem+env(safe-area-inset-top))]' : 'pt-4 sm:pt-2 md:pt-[calc(4.25rem+env(safe-area-inset-top))]' }}">
+            <main class="{{ $isAdminRoute ? 'pt-[calc(4rem+env(safe-area-inset-top))]' : 'pt-4 sm:pt-2 md:pt-[calc(4rem+env(safe-area-inset-top))]' }}">
                 @yield('content', $slot ?? '')
             </main>
         </div>

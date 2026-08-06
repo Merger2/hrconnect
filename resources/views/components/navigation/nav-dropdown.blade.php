@@ -48,9 +48,9 @@
       x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100"
       x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100"
       x-transition:leave-end="transform opacity-0 scale-95"
-      class="{{ $alignmentClasses }} {{ $dropdownClasses }} absolute z-50 mt-2 rounded-md shadow-lg"
+      class="{{ $alignmentClasses }} {{ $dropdownClasses }} absolute z-50 mt-2 rounded-xl border border-gray-200 bg-white shadow-lg"
       style="display: none;" @click="open = false">
-      <div class="{{ $contentClasses }} rounded-md ring-1 ring-black/10">
+      <div class="{{ $contentClasses }} rounded-xl">
         {{ $content }}
       </div>
     </div>

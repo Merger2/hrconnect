@@ -326,11 +326,10 @@ use App\Helpers\FeatureToggle;
 
 <nav x-data="{ open: false }" @keydown.escape.window="open = false" aria-label="{{ $isAdminRoute ? __('Primary navigation') : __('User navigation') }}"
     data-app-top-nav
-    class="fixed top-0 left-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top)] {{ $isUserRoute ? 'hidden md:block' : '' }}">
+    class="app-topbar {{ $isUserRoute ? 'hidden md:block' : '' }}">
     <!-- Primary Navigation Menu -->
-    <div
-        class="{{ $isAdminRoute ? 'w-full px-4 sm:px-6 lg:px-8 2xl:px-10' : 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8' }}">
-        <div class="flex {{ $isAdminRoute ? 'h-16' : 'h-14 sm:h-[4.25rem]' }} justify-between gap-3">
+    <div class="app-topbar__inner {{ $isUserRoute ? 'app-topbar__inner--centered' : '' }}">
+        <div class="app-topbar__row">
             <div class="flex">
                 <!-- Logo -->
                 <div class="flex shrink-0 items-center">
@@ -493,9 +492,9 @@ use App\Helpers\FeatureToggle;
                                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                         <button
                                             type="button"
-                                            class="wcag-touch-target flex items-center justify-center rounded-full border-2 border-transparent text-sm transition hover:border-gray-300 focus:outline-none"
+                                            class="wcag-touch-target flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-gray-200/80 bg-white text-gray-600 shadow-sm transition hover:border-gray-300 hover:text-gray-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
                                             aria-label="{{ __('Open account menu') }}">
-                                            <img class="h-8 w-8 rounded-full object-cover"
+                                            <img class="h-full w-full object-cover"
                                                 src="{{ $user->profile_photo_url }}"
                                                 alt="{{ $user->name }}" />
                                         </button>
@@ -553,7 +552,7 @@ use App\Helpers\FeatureToggle;
                 @if ($user && $isAdminRoute)
                     <div class="-me-2 flex items-center sm:hidden">
                         <button type="button" @click="open = ! open"
-                            class="wcag-touch-target inline-flex items-center justify-center rounded-md p-2 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950"
+                            class="wcag-touch-target inline-flex items-center justify-center rounded-xl bg-gray-50 p-2 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950"
                             :aria-expanded="open.toString()" aria-controls="mobile-navigation"
                             aria-label="{{ __('Toggle navigation menu') }}">
                             <x-heroicon-o-bars-3 x-show="!open" class="h-6 w-6" />
