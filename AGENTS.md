@@ -161,7 +161,8 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 
 - Auth state pake `storageState` (5 role states: employee, hr, manager, finance, admin) di `tests/e2e/.auth/`.
 - Employee creds: `employee@hrconnect.test` / `password` (dibuat `E2eTestSeeder.php`).
-- ⚠️ `playwright.config.js` mereferensikan **`auth.setup.ts` yang TIDAK ADA di repo** — storage states `.auth/*.json` hasil generate lokal & **gitignored**. Jangan hapus `.auth/` (semua project E2E butuh state-nya) dan jangan heran `setup` project tidak match file apa pun.
+- ✅ **`tests/e2e/auth.setup.ts` TRACKED** sejak commit `4190822` (fix(audit) 2026-08-05) — project `setup` di `playwright.config.js` (testMatch `/auth\.setup\.ts/`) me-re-generate storage state 5 role via **endpoint dev `GET /__e2e-login`** (token `services.e2e.login_token`, default `local-apk-e2e`, hanya aktif di env local/testing), bukan fill form login. Semua project role punya `dependencies: ['setup']`.
+- ⚠️ Storage states `.auth/*.json` hasil generate tetap **gitignored** — di checkout fresh jalankan `npx playwright test --project=setup` dulu supaya `.auth/*.json` terbentuk; jangan hapus `.auth/` (semua project E2E butuh state-nya).
 - Bottom nav: Beranda, Jadwal, Absen (`/scan`), Tasks, Profil.
 - Project lain: `chromium-hr`, `chromium-manager`, `chromium-finance`, `chromium-admin`, `chromium-audit`, `chromium-pwa`, `chromium-ux`, `chromium-profile`, `chromium-auth` — pilih sesuai role yang disentuh. Semua butuh `permissions: ['camera','geolocation']` (sudah di config).
 
