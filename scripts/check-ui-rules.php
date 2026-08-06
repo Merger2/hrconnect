@@ -35,7 +35,11 @@ foreach ($bladeFiles as $file) {
     $isNormalUiBlade = isNormalUiBladeFile($relativePath);
 
     if ($isNormalUiBlade) {
-        if (preg_match_all('/<svg\b/i', $content, $matches, PREG_OFFSET_CAPTURE) > 0) {
+        // PHP/Blade logic (string literal '<svg' untuk deteksi icon, dll) bukan markup.
+        // Ganti blok PHP dengan spasi berpanjang sama agar offset/line tetap valid.
+        $markupContent = stripPhpBlocksPreservingOffsets($content);
+
+        if (preg_match_all('/<svg\b/i', $markupContent, $matches, PREG_OFFSET_CAPTURE) > 0) {
             $firstOffset = $matches[0][0][1];
             if (! isWhitelisted($whitelistEntries, 'raw_inline_svg', $relativePath, null, $whitelistHitCount)) {
                 $blockingFindings[] = makeFinding(
@@ -48,7 +52,7 @@ foreach ($bladeFiles as $file) {
             }
         }
 
-        if (preg_match_all('/<table\b/i', $content, $matches, PREG_OFFSET_CAPTURE) > 0 && ! isAllowedTablePath($relativePath)) {
+        if (preg_match_all('/<table\b/i', $markupContent, $matches, PREG_OFFSET_CAPTURE) > 0 && ! isAllowedTablePath($relativePath)) {
             $firstOffset = $matches[0][0][1];
             if (! isWhitelisted($whitelistEntries, 'table_usage', $relativePath, null, $whitelistHitCount)) {
                 $blockingFindings[] = makeFinding(
@@ -249,6 +253,30 @@ function findFiles(string $directory, callable $filter): array
     sort($files);
 
     return $files;
+}
+
+function stripPhpBlocksPreservingOffsets(string $content): string
+{
+    // Hanya PHP BLOCK (bukan inline @php(...) yang tak punya @endphp).
+    // Non-greedy + butuh penutup: jika blok tak seimbang, preg gagal match
+    // dan isi tidak ikut ter-blank (false negative terhindari).
+    $patterns = [
+        '/<\?php\b.*?\?>/is',
+        '/<\?=.*?\?>/s',
+        '/@php\s(?:(?!@endphp).)*?@endphp/is',
+    ];
+
+    $result = $content;
+
+    foreach ($patterns as $pattern) {
+        $result = (string) preg_replace_callback(
+            $pattern,
+            static fn (array $m): string => str_repeat(' ', strlen($m[0])),
+            $result,
+        );
+    }
+
+    return $result;
 }
 
 function relativePath(string $root, string $path): string

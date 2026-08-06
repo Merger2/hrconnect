@@ -14,11 +14,7 @@
                     <div class="relative">
                         <span
                             class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                         </span>
                         <x-forms.input id="payroll-search" type="search" wire:model.live.debounce.300ms="search"
                             placeholder="{{ __('Search by name, type, or method...') }}" class="w-full pl-11" />

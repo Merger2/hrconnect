@@ -50,9 +50,7 @@
                 class="flex-shrink-0 p-1 text-gray-500 hover:text-gray-900 transition-colors"
                 aria-label="{{ __('Tutup') }}"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <x-heroicon-o-x-mark class="w-4 h-4" />
             </button>
         </div>
     </div>

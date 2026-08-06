@@ -6,11 +6,7 @@
                 <div class="relative">
                     <span
                         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z"
-                                clip-rule="evenodd" />
-                        </svg>
+                        <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                     </span>
                     <x-forms.input id="overtime-search" type="search" wire:model.live.debounce.300ms="search"
                         placeholder="{{ __('Search employee, division, or reason...') }}" class="w-full pl-11" />
@@ -61,11 +57,7 @@
                         <x-slot name="icon">
                             <div
                                 class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
-                                <svg class="h-6 w-6 text-gray-300" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                                <x-heroicon-o-clock class="h-6 w-6 text-gray-300" />
                             </div>
                         </x-slot>
                     </x-admin.empty-state>

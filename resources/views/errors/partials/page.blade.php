@@ -106,9 +106,7 @@
 
         <a href="{{ url()->previous() !== url()->current() ? url()->previous() : url('/') }}"
             class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center gap-2 rounded-[1.35rem] px-4 py-3 text-sm font-semibold text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
+            <x-heroicon-o-arrow-left class="h-4 w-4" />
             <span>{{ __('Go back') }}</span>
         </a>
     </div>

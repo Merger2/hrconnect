@@ -224,13 +224,7 @@
                                         @if ($claim->head_approved_by)
                                             <span
                                                 class="text-[10px] text-gray-500 flex items-center gap-1">
-                                                <svg class="w-3 h-3 text-purple-500 shrink-0" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
-                                                    </path>
-                                                </svg>
+                                                <x-heroicon-o-user class="w-3 h-3 text-purple-500 shrink-0" />
                                                 <span class="truncate">Head:
                                                     {{ $claim->headApprover->name ?? '-' }}</span>
                                             </span>
@@ -238,13 +232,7 @@
                                         @if ($claim->finance_approved_by || $claim->approved_by)
                                             <span
                                                 class="text-[10px] text-gray-500 flex items-center gap-1">
-                                                <svg class="w-3 h-3 text-green-500 shrink-0" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
-                                                    </path>
-                                                </svg>
+                                                <x-heroicon-o-user class="w-3 h-3 text-green-500 shrink-0" />
                                                 <span class="truncate">Finance:
                                                     {{ $claim->financeApprover->name ?? ($claim->approvedBy->name ?? '-') }}</span>
                                             </span>

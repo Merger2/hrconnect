@@ -35,9 +35,7 @@
                 <x-forms.label for="notification-search" value="{{ __('Search inbox') }}" class="mb-1.5 block" />
                 <div class="relative">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z" clip-rule="evenodd" />
-                        </svg>
+                        <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                     </span>
                     <x-forms.input
                         id="notification-search"
@@ -92,9 +90,7 @@
             :description="__('New approvals, system messages, and announcements will appear here.')">
             <x-slot name="icon">
                 <div class="rounded-xl bg-slate-100 p-4 text-slate-500">
-                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
+                    <x-heroicon-o-inbox class="h-8 w-8" />
                 </div>
             </x-slot>
         </x-admin.empty-state>

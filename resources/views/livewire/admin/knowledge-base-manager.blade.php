@@ -11,9 +11,7 @@
                 <x-forms.label for="kb-search" value="{{ __('Cari dokumen') }}" class="mb-1.5 block" />
                 <div class="relative">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z" clip-rule="evenodd" />
-                        </svg>
+                        <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                     </span>
                     <x-forms.input id="kb-search" type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('Cari judul dokumen...') }}" class="w-full pl-11" />
                 </div>
@@ -94,10 +92,7 @@
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ $statusStyles['bg'] }} {{ $statusStyles['text'] }} {{ $statusStyles['ring'] }}">
                                         @if($doc->status?->value === 'processing')
-                                            <svg class="mr-1 h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                            </svg>
+                                            <x-heroicon-o-arrow-path class="mr-1 h-3 w-3 animate-spin" />
                                         @endif
                                         {{ __(ucfirst($doc->status?->value ?? 'unknown')) }}
                                     </span>
