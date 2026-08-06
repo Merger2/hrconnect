@@ -314,7 +314,9 @@ Rule token-only DIJAGA OTOMATIS oleh dua script (masuk `composer ci:check`):
     (red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/
     violet/purple/fuchsia/pink/rose/slate/gray/zinc/neutral/stone/white/
     black) di @theme TIDAK wajib di-mirror ke DesignTokens — itu
-    framework-provided, bukan desain custom. Token recovery `rec-*` (lihat
+    framework-provided, bukan desain custom. Token recovery (10 token
+    semantik: attendance-live/accent, banner-*-deep/light,
+    module-payroll-deep/eyebrow, scan-icon-mint/ink, danger-copy — lihat
     catatan rekonstruksi di bawah) juga dikecualikan — artefak recovery
     satu-off, bukan token desain.
 
@@ -356,8 +358,9 @@ Recovery: app.css disusun ulang dari bundle (kompilasi = ground truth):
 - `@layer utilities` ← utilitas custom (pull-to-refresh, scan-native, dll)
   + 64 utilitas yang dulu hanya ter-generate via @apply (komplemen tetap).
 - 10 warna satu-off scanner/native yang tidak terpetakan jadi token baru
-  `--color-rec-*` di `@theme` (audit + token-sync pass; di-whitelist di
-  check-token-sync sebagai artefak recovery).
+  di `@theme` dengan NAMA SEMANTIK per peran (nilai hex literal tetap;
+  audit + token-sync pass; di-whitelist di check-token-sync sebagai artefak
+  recovery).
 
 Verifikasi recovery: build ulang → komponen 0 selector hilang, utilitas 0
 hilang, `token:check` PASS, `check-token-sync` OK, smoke test 16/16 PASS,
@@ -371,9 +374,15 @@ module, date-context TIDAK overlap hero, nol console error).
   pasangan `@supports (color:color-mix(...))` bisa ter-unwrap/ter-urut ulang
   (fallback hex inline tetap ada di rule pertama — browser lama tetap dapat
   warna benar). Diterima; diverifikasi spot-check, bukan per-rule.
-- 10 token `--color-rec-*` (warna satu-off scanner/native):
-  `rec-045c48, rec-097a93, rec-0a7690, rec-107b60, rec-108f6a, rec-10956e,
-  rec-76c5ad, rec-a30037b8, rec-c53c00cc, rec-faca79`.
+- 10 token recovery (warna satu-off scanner/native, fallback literal yang
+  punya pasangan `color-mix()` setara di blok `@supports` — nama semantik
+  per peran, nilai hex tetap dari bundle):
+  `attendance-live` (badge live absensi), `attendance-accent` (teks aksen
+  aksi absensi), `banner-attendance-deep` / `banner-payroll-deep` /
+  `banner-documents-light` (stop gradien banner modul),
+  `module-payroll-deep` (strip/accent deep emerald), `module-payroll-eyebrow`
+  (eyebrow emerald), `scan-icon-mint` / `scan-icon-ink` (ikon header scan
+  native), `danger-copy` (teks section danger profil).
 
 ## Typography
 - Display: Rubik, Inter, sans-serif — weight 600, style normal

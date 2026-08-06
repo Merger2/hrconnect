@@ -64,17 +64,33 @@ foreach ($phpTokens as $key => $value) {
  *     zinc/neutral/stone + white/black) — framework-provided, bukan desain
  *     kita. Di-rekonstruksi (2026-08-06) @theme ini memuatnya eksplisit
  *     supaya var tetap ter-emit walau pemakaian via @apply sudah ter-kompilasi.
- *  2. Token recovery `rec-*` — artefak rekonstruksi bundle 2026-08-06 (warna
- *     satu-off halaman scanner/native yang tidak terpetakan ke token desain).
+ *  2. Token recovery (array `$recoveryTokens` di bawah) — artefak rekonstruksi
+ *     bundle 2026-08-06: 10 warna satu-off scanner/native bernama semantik
+ *     per peran (attendance-live, banner-*-deep, module-payroll-deep, dll),
+ *     tanpa prefix umum — lihat design.md).
  */
 $defaultPalette = '/^(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone|white|black)(-\d+)?$/i';
+
+$recoveryTokens = [
+    // Recovery 2026-08-06 (10 token, nilai hex literal dari bundle build):
+    'attendance-live',            // teks badge "live" panel absensi (attendance 60% / primary-900)
+    'attendance-accent',          // teks aksen aksi absensi (orange-700 80% transparan)
+    'banner-attendance-deep',     // stop gelap banner absensi (attendance 62% / primary-900)
+    'banner-payroll-deep',        // stop gelap banner payroll (payroll 62% / primary-900)
+    'banner-documents-light',     // stop terang banner dokumen (documents 55% / surface)
+    'module-payroll-deep',        // strip/accent deep emerald (payroll 78% / primary-900)
+    'module-payroll-eyebrow',     // eyebrow emerald (payroll 74% / primary-900)
+    'scan-icon-mint',             // gradien ikon header scan native (mint)
+    'scan-icon-ink',              // warna ikon header scan native (teal gelap)
+    'danger-copy',                // teks copy section danger profil (rose-800 72% transparan)
+];
 
 foreach ($theme as $key => $value) {
     if (array_key_exists($key, $phpTokens)) {
         continue;
     }
 
-    if (str_starts_with($key, 'rec-')) {
+    if (in_array($key, $recoveryTokens, true)) {
         continue; // recovery token (terdokumentasi di design.md)
     }
 

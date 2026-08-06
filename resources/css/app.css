@@ -310,17 +310,17 @@
     --shadow-alert-popup: 0 28px 80px -42px #0f172a9e;
     --shadow-alert-toast: 0 18px 48px -28px #0f172aa6;
     --transition-smooth: .15s cubic-bezier(.4, 0, .2, 1);
-    /* Tokens baru dari recovery 2026-08-06 (warna tak terpetakan) */
-    --color-rec-045c48: #045c48;
-    --color-rec-097a93: #097a93;
-    --color-rec-0a7690: #0a7690;
-    --color-rec-107b60: #107b60;
-    --color-rec-108f6a: #108f6a;
-    --color-rec-10956e: #10956e;
-    --color-rec-76c5ad: #76c5ad;
-    --color-rec-a30037b8: #a30037b8;
-    --color-rec-c53c00cc: #c53c00cc;
-    --color-rec-faca79: #faca79;
+    /* Recovery 2026-08-06 — fallback literal warna satu-off scanner/native (nama semantik per peran; nilai hex tetap dari bundle) */
+    --color-scan-icon-ink: #045c48;
+    --color-banner-attendance-deep: #097a93;
+    --color-attendance-live: #0a7690;
+    --color-banner-payroll-deep: #107b60;
+    --color-module-payroll-eyebrow: #108f6a;
+    --color-module-payroll-deep: #10956e;
+    --color-scan-icon-mint: #76c5ad;
+    --color-danger-copy: #a30037b8;
+    --color-attendance-accent: #c53c00cc;
+    --color-banner-documents-light: #faca79;
 }
 
 
@@ -1256,7 +1256,7 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .attendance-panel__badge--live {
-  color:var(--color-rec-0a7690);
+  color:var(--color-attendance-live);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .attendance-panel__badge--live {
@@ -1711,7 +1711,7 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .attendance-panel__action-copy--accent {
-  color:var(--color-rec-c53c00cc);
+  color:var(--color-attendance-accent);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .attendance-panel__action-copy--accent {
@@ -2289,7 +2289,7 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--banner.user-page-header--module-attendance {
-  background:linear-gradient(135deg, var(--color-rec-097a93) 0%, var(--color-module-attendance) 58%, color-mix(in srgb, var(--color-module-attendance) 55%, var(--color-surface)) 100%);
+  background:linear-gradient(135deg, var(--color-banner-attendance-deep) 0%, var(--color-module-attendance) 58%, color-mix(in srgb, var(--color-module-attendance) 55%, var(--color-surface)) 100%);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner.user-page-header--module-attendance {
@@ -2321,7 +2321,7 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--banner.user-page-header--module-payroll {
-  background:linear-gradient(135deg, var(--color-rec-107b60) 0%, var(--color-module-payroll) 58%, color-mix(in srgb, var(--color-module-payroll) 55%, var(--color-surface)) 100%);
+  background:linear-gradient(135deg, var(--color-banner-payroll-deep) 0%, var(--color-module-payroll) 58%, color-mix(in srgb, var(--color-module-payroll) 55%, var(--color-surface)) 100%);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner.user-page-header--module-payroll {
@@ -2337,7 +2337,7 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--banner.user-page-header--module-documents {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-documents) 62%, var(--color-primary-900)) 0%, var(--color-module-documents) 58%, var(--color-rec-faca79) 100%);
+  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-documents) 62%, var(--color-primary-900)) 0%, var(--color-module-documents) 58%, var(--color-banner-documents-light) 100%);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner.user-page-header--module-documents {
@@ -2939,7 +2939,7 @@ body.platform-ios .user-page-shell {
   color:var(--color-rose-950);
 }
 .profile-section-nav__link[data-profile-panel=danger] .profile-section-nav__copy {
-  color:var(--color-rec-a30037b8);
+  color:var(--color-danger-copy);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-section-nav__link[data-profile-panel=danger] .profile-section-nav__copy {
@@ -6771,7 +6771,7 @@ body.platform-ios .profile-modal {
   }
 }
 .home-command-panel--emerald:before {
-  background:linear-gradient(90deg,var(--color-rec-10956e),color-mix(in srgb, var(--color-module-payroll) 48%, var(--color-surface)));
+  background:linear-gradient(90deg,var(--color-module-payroll-deep),color-mix(in srgb, var(--color-module-payroll) 48%, var(--color-surface)));
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-command-panel--emerald:before {
@@ -6779,7 +6779,7 @@ body.platform-ios .profile-modal {
   }
 }
 .home-command-panel--emerald .home-command-panel__eyebrow {
-  color:var(--color-rec-108f6a);
+  color:var(--color-module-payroll-eyebrow);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-command-panel--emerald .home-command-panel__eyebrow {
@@ -6912,7 +6912,7 @@ body.platform-ios .profile-modal {
 }
 .user-accent-card--payroll {
   --mod-base:var(--color-module-payroll);
-  --mod-deep:var(--color-rec-10956e);
+  --mod-deep:var(--color-module-payroll-deep);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-accent-card--payroll {
@@ -14183,14 +14183,14 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   box-shadow:none!important;
 }
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__icon {
-  background:linear-gradient(135deg,var(--color-primary-300),var(--color-rec-76c5ad));
+  background:linear-gradient(135deg,var(--color-primary-300),var(--color-scan-icon-mint));
   border:0;
   border-radius:999px;
   width:2.55rem;
   height:2.55rem;
 }
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__icon {
-  color:var(--color-rec-045c48);
+  color:var(--color-scan-icon-ink);
 }
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__icon {
   box-shadow:none;
