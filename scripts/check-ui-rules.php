@@ -261,8 +261,13 @@ function relativePath(string $root, string $path): string
 
 function isNormalUiBladeFile(string $relativePath): bool
 {
+    // vendor/** = boilerplate framework (Laravel mail theme, pagination, Jetstream) —
+    // bukan desain kita; konsisten dengan check-color-tokens yang skip /vendor/.
+    if (str_starts_with($relativePath, 'resources/views/vendor/')) {
+        return false;
+    }
+
     return ! matchesAnyPattern($relativePath, [
-        'resources/views/vendor/mail/*',
         'resources/views/emails/*',
         'resources/views/pdf/*',
     ]);
