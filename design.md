@@ -293,7 +293,7 @@ regresi.
 
 ### CI: audit warna otomatis
 
-Rule token-only DIJAGA OTOMATIS oleh dua script (masuk `composer ci:check`):
+Rule token-only DIJAGA OTOMATIS oleh tiga script (semua masuk `composer ci:check`):
 
 - **`php scripts/check-color-tokens.php`** (`composer token:check`) — scan
   menyeluruh 2 CSS + 230+ Blade + 5 JS + 580+ PHP:
@@ -308,6 +308,13 @@ Rule token-only DIJAGA OTOMATIS oleh dua script (masuk `composer ci:check`):
   - JS: hex + rgb non-netral → FAIL (shadow SweetAlert kini
     `var(--shadow-alert-*)` token di `@theme`).
   - `app/**`: hex hanya di `DesignTokens.php` (definisi token).
+- **`php scripts/check-ui-rules.php`** — audit struktur & aksesibilitas UI
+  (blocking: `raw_inline_svg`, `table_usage`, `translation_key_missing`;
+  warning: hardcoded text, form label, icon-only button, mobile layout red
+  flag). Enforce: rule Heroicon-only (`raw_inline_svg`) dan pola table
+  mobile-first (`table_usage` — table wajib desktop-only dalam wrapper
+  `hidden <bp>:block` + companion kartu `<bp>:hidden`, kalau tidak →
+  blocking/warning).
 - **`php scripts/check-token-sync.php`** — sinkronisasi dua arah
   `@theme` ↔ `App\Support\DesignTokens` + validasi key blade.
   - **Pengecualian terdokumentasi (2026-08-06):** palet default Tailwind v4
@@ -413,6 +420,48 @@ module, date-context TIDAK overlap hero, nol console error).
   62% (stop gelap banner, kontras teks putih 5.22:1 PASS WCAG AA ≥4.5) vs
   78% (strip/accent card tanpa teks putih, boleh lebih terang 3.79:1).
   JANGAN digabung — 78% di banner gagal kontras, 62% di strip ubah visual.
+
+## Icons: Heroicon-only rule (2026-08-06)
+
+Keputusan Fikih 2026-08-06 (migrasi 79 inline SVG → komponen, 34 blade):
+SEMUA icon aplikasi memakai komponen **Heroicon** (`<x-heroicon-o-*>`
+outline / `<x-heroicon-m-*>` mini / `<x-heroicon-s-*>` solid) — dilarang
+`<svg>` inline manual. Rule `raw_inline_svg` di `scripts/check-ui-rules.php`
+men-flag setiap `<svg>` mentah di blade normal app UI sebagai blocking
+(script sudah masuk `composer ci:check`).
+
+- Komponen tersedia dari `vendor/blade-ui-kit/blade-heroicons` (sudah di
+  repo). Atribut `class`, `x-show`, `id`, `title` dll diteruskan normal ke
+  komponen.
+- Ikon berwarna dinamis: set warna via class utility token (`text-module-*`,
+  `text-gray-*`, dst), bukan attribute `stroke`/`fill` hex di inline svg.
+- Pengecualian whitelist `raw_inline_svg` (wajib raw, HANYA 5 file): 4 brand
+  logo (application-logo, application-mark, app-logo-icon,
+  authentication-card-logo — path brand, bukan icon) + 1 gauge chart
+  analytics (linearGradient + stroke-dasharray, data-viz bukan icon).
+- Kelas icon wajib diberi ukuran (`h-4 w-4` / `h-5 w-5` dst) — komponen
+  Heroicon default `h-5 w-5` tapi jangan bergantung pada default.
+
+### Spinner loading: `o-arrow-path`, bukan arc circle+path (2026-08-06)
+
+Pattern spinner DIGANTI dari SVG arc manual:
+
+```html
+<!-- ❌ LAMA — arc spinner manual (circle + path) -->
+<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+</svg>
+
+<!-- ✅ BARU — Heroicon arrow-path + animate-spin -->
+<x-heroicon-o-arrow-path class="h-4 w-4 animate-spin" />
+```
+
+Alasan: konsisten dengan pattern existing (settings, face-enrollment),
+selaras dengan Heroicon-only rule, dan `animate-spin` di arrow-loop tetap
+terbaca jelas sebagai loading. Substitusi visual DISENGAJA (arrow loop,
+bukan arc) — jangan dikembalikan ke circle+path manual. Spinner dengan
+ukuran lebih besar (mis. `h-10 w-10`) cukup tambah class ukuran.
 
 ## Typography
 - Display: Rubik, Inter, sans-serif — weight 600, style normal
