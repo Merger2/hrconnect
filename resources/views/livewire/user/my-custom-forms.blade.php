@@ -5,7 +5,8 @@
                 :back-href="route('home')"
                 :title="__('Forms')"
                 :description="__('Submit company forms for HR, operations, visits, and internal requests.')"
-                title-id="my-custom-forms-title">
+                title-id="my-custom-forms-title"
+                module="documents">
                 <x-slot name="icon">
                     <x-heroicon-o-clipboard-document-list class="h-5 w-5" />
                 </x-slot>

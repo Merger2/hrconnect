@@ -5,6 +5,7 @@
                 :back-href="route('home')"
                 :title="__('My Performance')"
                 title-id="my-performance-title"
+                module="reports"
                 class="border-b-0">
                 <x-slot name="actions">
                     <span class="performance-live-pill" aria-label="{{ __('Auto refresh') }}">
