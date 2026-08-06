@@ -309,6 +309,13 @@
     --shadow-modal: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a;
     --shadow-alert-popup: 0 28px 80px -42px #0f172a9e;
     --shadow-alert-toast: 0 18px 48px -28px #0f172aa6;
+    /* 2026-08-06: tokenisasi rgb() hardcode yang lolos gap audit scanRgb blade */
+    --shadow-card-hover: 0 4px 24px -8px #0f172a1f, 0 2px 8px -4px #024ad814;
+    --shadow-error-card: 0 30px 80px -52px #0f172ab8;
+    --shadow-doc-preview: 0 22px 55px #0f172a47;
+    --color-chart-grid: #e2e8f0e6;
+    --color-chart-tick: #475569d1;
+    --color-chart-legend: #334155db;
     --transition-smooth: .15s cubic-bezier(.4, 0, .2, 1);
     /* Recovery 2026-08-06 — fallback literal warna satu-off scanner/native (nama semantik per peran; nilai hex tetap dari bundle) */
     --color-scan-icon-ink: #045c48;

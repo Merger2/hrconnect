@@ -33,7 +33,7 @@
         <div class="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-primary-100/80 via-primary-50/40 to-transparent"></div>
 
         <main id="error-main" tabindex="-1" class="relative mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[34rem] items-center justify-center">
-            <section aria-labelledby="error-page-title" class="w-full overflow-hidden rounded-[2rem] border border-white/80 bg-white/92 shadow-[0_30px_80px_-52px_rgba(15,23,42,0.72)] backdrop-blur">
+            <section aria-labelledby="error-page-title" class="w-full overflow-hidden rounded-[2rem] border border-white/80 bg-white/92 shadow-error-card backdrop-blur">
                 <div class="border-b border-slate-100 px-5 py-5 sm:px-6">
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex min-w-0 items-center gap-3">

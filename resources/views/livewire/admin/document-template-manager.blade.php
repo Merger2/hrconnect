@@ -27,7 +27,7 @@
         }
 
         .document-template-live-preview .employee-document-page {
-            box-shadow: 0 22px 55px rgba(15, 23, 42, .28);
+            box-shadow: var(--shadow-doc-preview);
             margin: 0;
         }
 

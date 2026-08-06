@@ -485,9 +485,9 @@
 
                 chartTheme() {
                     return {
-                        grid: 'rgba(226, 232, 240, 0.9)',
-                        tick: 'rgba(71, 85, 105, 0.82)',
-                        legend: 'rgba(51, 65, 85, 0.86)',
+                        grid: window.cssVar('--color-chart-grid'),
+                        tick: window.cssVar('--color-chart-tick'),
+                        legend: window.cssVar('--color-chart-legend'),
                     };
                 },
 

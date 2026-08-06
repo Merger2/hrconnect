@@ -296,7 +296,9 @@
                         const scaleX = canvas.width / video.videoWidth;
                         const scaleY = canvas.height / video.videoHeight;
 
-                        ctx.strokeStyle = this.faceDetected ? 'rgb(52, 211, 153)' : 'rgb(251, 191, 36)';
+                        ctx.strokeStyle = this.faceDetected
+                            ? window.cssVar('--color-emerald-400')
+                            : window.cssVar('--color-amber-400');
                         ctx.lineWidth = 2;
                         ctx.strokeRect(
                             box.x * scaleX,

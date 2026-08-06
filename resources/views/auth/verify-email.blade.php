@@ -42,7 +42,7 @@
             </div>
 
             {{-- Card --}}
-            <div class="verify-email-card overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg transition-shadow duration-200 hover:shadow-[0_4px_24px_-8px_rgba(15,23,42,0.12),0_2px_8px_-4px_rgba(2,74,216,0.08)]">
+            <div class="verify-email-card overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg transition-shadow duration-200 hover:shadow-card-hover">
                 {{-- Card header --}}
                 <div class="verify-email-card__header border-b border-slate-100 px-6 py-5">
                     <div class="flex items-center gap-3">

@@ -75,6 +75,11 @@ final class DesignTokens
         'module-reports' => '#0284c7',
         'module-kb' => '#d946ef',
         'module-finance' => '#f43f5e',
+
+        // Chart theme (analytics dashboard) — rgba 8-digit @theme
+        'chart-grid' => '#e2e8f0e6',
+        'chart-tick' => '#475569d1',
+        'chart-legend' => '#334155db',
     ];
 
     /**

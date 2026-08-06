@@ -328,6 +328,31 @@ SweetAlert di app.js → `--shadow-alert-popup`/`--shadow-alert-toast` token
 baru di `@theme`. Semua sudah ditoken-kan — bukti audit otomatis menutup
 celah yang tidak terlihat grep manual.
 
+**GAP FIX 2026-08-06 (lanjutan):** audit kedua menemukan gap di
+`check-color-tokens.php` — untuk Blade hanya `scanHex` yang dijalankan,
+`scanRgb` TIDAK pernah → `rgba(...)` di blade lolos audit. Gap ditutup
+(blade kini discan `scanHex` + `scanRgb`), dan 9 hardcode tersembunyi
+langsung ter-flag lalu ditoken-kan:
+- `scan.blade.php` canvas face overlay `rgb(52,211,153)`/`rgb(251,191,36)`
+  → `window.cssVar('--color-emerald-400'/'--color-amber-400')` (pola
+  face-enrollment).
+- `verify-email.blade.php` hover shadow `rgba(15,23,42,0.12)` +
+  `rgba(2,74,216,0.08)` (brand blue) → token `--shadow-card-hover`
+  (`0 4px 24px -8px #0f172a1f, 0 2px 8px -4px #024ad814`), dipakai via
+  utility `hover:shadow-card-hover`.
+- `errors/layout.blade.php` shadow `rgba(15,23,42,0.72)` → token
+  `--shadow-error-card` (`0 30px 80px -52px #0f172ab8`) → `shadow-error-card`.
+- `document-template-manager.blade.php` preview shadow
+  `rgba(15,23,42,.28)` → token `--shadow-doc-preview` (`0 22px 55px
+  #0f172a47`) → `box-shadow: var(--shadow-doc-preview)`.
+- `analytics-dashboard.blade.php` Chart.js theme `rgba(226,232,240,0.9)` /
+  `rgba(71,85,105,0.82)` / `rgba(51,65,85,0.86)` → token
+  `--color-chart-grid/tick/legend` (hex 8-digit, di-`window.cssVar()`).
+
+Juga: `scripts/check-ui-rules.php` crash pre-existing diperbaiki
+(`isWhitelisted()` menerima int untuk `?string $key` karena translation key
+numerik murni diubah PHP jadi int — di-cast `(string)`).
+
 Verifikasi sesi: grep menyeluruh — `app.css` nol hex di luar `@theme`;
 blade screen nol hex; `pdf/**` + `emails/**` nol hex (semua via
 `design_token()`/`design_rgba()`); JS nol hex; `app/**` hex hanya di

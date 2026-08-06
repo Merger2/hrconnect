@@ -93,7 +93,7 @@ foreach ($translationUsage as $key => $locations) {
         continue;
     }
 
-    if (isWhitelisted($whitelistEntries, 'translation_key_missing', $locations[0]['file'], $key, $whitelistHitCount)) {
+    if (isWhitelisted($whitelistEntries, 'translation_key_missing', $locations[0]['file'], (string) $key, $whitelistHitCount)) {
         continue;
     }
 

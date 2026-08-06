@@ -237,6 +237,7 @@ foreach (findFiles($root.'/resources/views', static fn (string $p): bool => str_
     $content = stripComments((string) file_get_contents($file), 'blade');
     $scanned['blade']++;
     scanHex($content, $relative, $failures);
+    scanRgb($content, $relative, $failures); // gap fix 2026-08-06: rgb/rgba di blade juga wajib token
 }
 
 // ───────────────────── 4. JS ─────────────────────
