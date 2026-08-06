@@ -137,6 +137,33 @@ window.tomSelectInput = (options, placeholder, selected, disabled) => ({
 // ─── Flatpickr initializer ─────────────────────────────────────────────
 // Scans for [data-ui-picker] elements and initializes flatpickr on each.
 // Safe to call multiple times (skips already-initialized elements).
+//
+// Parse server value (Y-m-d / range "Y-m-d - Y-m-d") menjadi defaultDate —
+// flatpickr memakai dateFormat 'd M Y' sehingga value mentah server tidak
+// terbaca sebagai tanggal (input tampil mentah + kalender buka bulan salah).
+const parseServerDate = (v) => {
+    if (!v) return undefined;
+
+    const s = String(v).trim();
+
+    const toDate = (str) => {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
+
+        return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    };
+
+    // Range: "YYYY-MM-DD - YYYY-MM-DD" (apply-leave date-range).
+    // Separator = dash dengan spasi di kedua sisi — jangan split dash di dalam
+    // tanggal (YYYY-MM-DD) itu sendiri.
+    const parts = s.split(/\s+-\s+/).map(toDate);
+
+    if (parts.length === 2 && parts[0] && parts[1]) {
+        return parts;
+    }
+
+    return toDate(s) || undefined;
+};
+
 const initFlatpickr = (root = document) => {
     root.querySelectorAll('[data-ui-picker]:not([data-flatpickr-inited])').forEach((el) => {
         const mode = el.getAttribute('data-ui-picker') || 'date';
@@ -144,8 +171,18 @@ const initFlatpickr = (root = document) => {
         const maxDate = el.getAttribute('max') || null;
         const isRange = mode === 'date-range';
 
+        // Destroy existing instance sebelum init ulang. Livewire morph bisa
+        // melepas atribut data-flatpickr-inited pada node yang SAMA (node
+        // dipertahankan, atribut di-patch) — tanpa destroy, kalender ganda
+        // menumpuk di body (instance lama tidak pernah dibersihkan).
+        if (el._flatpickr) {
+            try {
+                el._flatpickr.destroy();
+            } catch (e) { /* ignore */ }
+        }
+
         try {
-            flatpickr(el, {
+            const fp = flatpickr(el, {
                 dateFormat: 'd M Y',
                 allowInput: false,
                 mode: isRange ? 'range' : 'single',
@@ -155,6 +192,7 @@ const initFlatpickr = (root = document) => {
                 disableMobile: true,
                 minDate: minDate || undefined,
                 maxDate: maxDate || undefined,
+                defaultDate: parseServerDate(el.value),
                 onChange: function (selectedDates, dateStr) {
                     // Date-range: sync hidden inputs (#from / #to) in Y-m-d format
                     if (isRange) {
@@ -173,6 +211,19 @@ const initFlatpickr = (root = document) => {
                 },
             });
 
+            // Tampilkan nilai awal server dalam format 'd M Y' di input.
+            // Hanya untuk single date — mode range dibiarkan via defaultDate
+            // (setDate pada range bisa menimpa hidden #from/#to secara tidak
+            // sengaja lewat format ulang).
+            if (!isRange && el.value && /^\d{4}-\d{2}-\d{2}$/.test(String(el.value).trim())) {
+                const serverDate = parseServerDate(el.value);
+
+                if (serverDate instanceof Date) {
+                    // setDate(false) = tanpa trigger onChange → hidden input & model aman
+                    fp.setDate(serverDate, false);
+                }
+            }
+
             el.setAttribute('data-flatpickr-inited', 'true');
         } catch (e) {
             console.warn('Flatpickr init failed for', el, e);
@@ -189,6 +240,17 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('livewire:init', () => {
     Livewire.hook('morph.updated', () => {
         setTimeout(initFlatpickr, 50);
+    });
+
+    // Saat Livewire morph MENGHAPUS elemen input, instance flatpickr lama
+    // ikut mati bersama node — tetapi .flatpickr-calendar-nya tertinggal
+    // yatim di body → kalender dobel. Destroy eksplisit di sini membersihkannya.
+    Livewire.hook('morph.removed', ({ el }) => {
+        if (el._flatpickr) {
+            try {
+                el._flatpickr.destroy();
+            } catch (e) { /* ignore */ }
+        }
     });
 });
 
