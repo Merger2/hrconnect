@@ -190,6 +190,18 @@ const initFlatpickr = (root = document) => {
                 noCalendar: mode === 'time',
                 monthSelectorType: 'dropdown',
                 disableMobile: true,
+                // static: true → kalender dirender DI DALAM .flatpickr-wrapper
+                // (persis di bawah input), bukan di-append ke document.body.
+                // CSS-nya sudah ada (flatpickr-overrides.css: .flatpickr-wrapper,
+                // .flatpickr-calendar.static, [role="dialog"] variants) — opsi
+                // ini yang belum pernah diaktifkan → sebelumnya kalender tampil
+                // in-flow di akhir body (posisi "aneh", jauh dari input) karena
+                // flatpickr default CSS (position: absolute) tidak di-load.
+                static: true,
+                // "below" → kalender tidak pernah flip ke atas input; static
+                // mode menentukan posisi via CSS (top: calc(100% + 0.375rem)),
+                // opsi ini menjaga kelas arrow tetap konsisten (arrowTop).
+                position: 'below',
                 minDate: minDate || undefined,
                 maxDate: maxDate || undefined,
                 defaultDate: parseServerDate(el.value),
@@ -250,6 +262,19 @@ document.addEventListener('livewire:init', () => {
             try {
                 el._flatpickr.destroy();
             } catch (e) { /* ignore */ }
+        }
+
+        // Static mode: flatpickr membungkus input dalam div.flatpickr-wrapper.
+        // Morph menghapus WRAPPER (bukan input di dalamnya) → hook di atas tidak
+        // kena. Destroy instance picker di dalam wrapper agar tidak jadi zombie
+        // (event listener + closure bocor di tiap re-render Livewire).
+        if (el.querySelector) {
+            const picker = el.querySelector('[data-ui-picker]');
+            if (picker && picker._flatpickr) {
+                try {
+                    picker._flatpickr.destroy();
+                } catch (e) { /* ignore */ }
+            }
         }
     });
 });
