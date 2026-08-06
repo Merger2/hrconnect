@@ -275,8 +275,7 @@
                         x-bind:class="showError('nama') ?
                             'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="text" required minlength="2" maxlength="100" autocomplete="name"
-                        placeholder="{{ __('Full name') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                        placeholder="{{ __('Full name') }}" />
                     <p x-cloak x-show="showError('nama')" x-text="errors.nama"
                         class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
@@ -291,8 +290,7 @@
                         x-bind:class="showError('email') ?
                             'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="email" required maxlength="160" autocomplete="email"
-                        placeholder="{{ __('name@company.com') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                        placeholder="{{ __('name@company.com') }}" />
                     <p x-cloak x-show="showError('email')" x-text="errors.email"
                         class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
@@ -310,8 +308,7 @@
                         x-bind:class="showError('perusahaan') ?
                             'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="text" required minlength="2" maxlength="140" autocomplete="organization"
-                        placeholder="{{ __('PT / CV / Organization') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                        placeholder="{{ __('PT / CV / Organization') }}" />
                     <p x-cloak x-show="showError('perusahaan')" x-text="errors.perusahaan"
                         class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
@@ -327,8 +324,7 @@
                         x-bind:class="showError('whatsapp') ?
                             'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="tel" required inputmode="tel" autocomplete="tel"
-                        placeholder="{{ __('08xxxxxxxxxx') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                        placeholder="{{ __('08xxxxxxxxxx') }}" />
                     <p x-cloak x-show="showError('whatsapp')" x-text="errors.whatsapp"
                         class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
@@ -345,8 +341,7 @@
                         x-bind:class="showError('domain') ?
                             'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="text" required maxlength="253" inputmode="url" autocomplete="url"
-                        placeholder="{{ __('example.com') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                        placeholder="{{ __('example.com') }}" />
                     <p x-cloak x-show="showError('domain')" x-text="errors.domain"
                         class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
@@ -362,8 +357,7 @@
                         x-bind:class="showError('jumlahKaryawan') ?
                             'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
                         type="number" required min="1" max="1000000" inputmode="numeric"
-                        placeholder="{{ __('50') }}"
-                        class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                        placeholder="{{ __('50') }}" />
                     <p x-cloak x-show="showError('jumlahKaryawan')" x-text="errors.jumlahKaryawan"
                         class="mt-1 text-[11px] font-medium text-red-600"></p>
                 </div>
@@ -374,7 +368,7 @@
                 <label
                     class="block text-xs font-medium text-gray-700 mb-0.5">{{ __('Server HWID') }}</label>
                 <x-forms.input x-model="hwid" type="text" readonly
-                    class="block w-full rounded-md border-gray-300 bg-gray-100 py-1.5 px-2.5 font-mono text-xs" />
+                    class="font-mono" />
             </div>
 
             {{-- Catatan --}}
@@ -386,8 +380,7 @@
                     x-bind:aria-invalid="showError('catatan') ? 'true' : 'false'"
                     x-bind:class="showError('catatan') ?
                         'border-red-400 focus:border-red-500 focus:ring-red-500' : ''"
-                    rows="2" maxlength="500" placeholder="{{ __('Additional requirements or questions...') }}"
-                    class="block w-full rounded-md border-gray-300 py-1.5 px-2.5 text-xs" />
+                    rows="2" maxlength="500" placeholder="{{ __('Additional requirements or questions...') }}" />
                 <div class="mt-1 flex items-center justify-between gap-2">
                     <p x-cloak x-show="showError('catatan')" x-text="errors.catatan"
                         class="text-[11px] font-medium text-red-600"></p>

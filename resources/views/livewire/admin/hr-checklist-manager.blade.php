@@ -184,7 +184,7 @@
                                         <div class="mt-3">
                                             @if($task->status === \App\Models\HrChecklistTask::STATUS_PENDING)
                                                 <div class="space-y-2">
-                                                    <x-forms.textarea wire:model="taskNotes.{{ $task->id }}" rows="1" placeholder="{{ __('Add notes...') }}" class="w-full bg-gray-50/50 text-xs transition-colors focus:bg-white" />
+                                                    <x-forms.textarea wire:model="taskNotes.{{ $task->id }}" rows="1" placeholder="{{ __('Add notes...') }}" class="text-xs transition-colors focus:bg-white" />
                                                     <div class="grid grid-cols-3 gap-1.5">
                                                         <button type="button" wire:click="updateTask({{ $task->id }}, 'done')" class="rounded-lg bg-success-50 py-1.5 text-xs font-semibold text-success-700 transition hover:bg-success-100">{{ __('Done') }}</button>
                                                         <button type="button" wire:click="updateTask({{ $task->id }}, 'blocked')" class="rounded-lg bg-danger-50 py-1.5 text-xs font-semibold text-danger-700 transition hover:bg-danger-100">{{ __('Block') }}</button>

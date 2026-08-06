@@ -103,7 +103,7 @@
                         @endphp
 
                         <div class="user-native-field">
-                            <x-forms.label for="leave-date-range" :value="__('Leave Date')" class="user-native-field__label" />
+                            <label for="leave-date-range" class="mb-2 block text-sm font-bold text-gray-700">{{ __('Leave Date') }}</label>
 
                             <input type="hidden" name="from" id="from" value="{{ $fromValue }}" />
                             <input type="hidden" name="to" id="to" value="{{ $toValue }}" />
@@ -136,7 +136,7 @@
 
                         <div>
                             <label for="note" class="mb-2 block text-sm font-bold text-gray-700">{{ __('Description / Reason') }}</label>
-                            <x-forms.textarea name="note" id="note" class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3" rows="3" placeholder="{{ __('Explain your detailed reason here...') }}" required>{{ old('note') }}</x-forms.textarea>
+                            <x-forms.textarea name="note" id="note" rows="3" placeholder="{{ __('Explain your detailed reason here...') }}" required>{{ old('note') }}</x-forms.textarea>
                             <x-forms.input-error for="note" class="mt-2" />
                         </div>
 
