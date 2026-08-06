@@ -46,11 +46,22 @@ test('authorized maintenance manager can queue database backup jobs from system 
     });
 });
 
-test('plain admin without maintenance manage permission cannot queue backup jobs from system maintenance', function () {
+test('admin with view but without maintenance manage permission cannot queue backup jobs from system maintenance', function () {
 
     Queue::fake();
 
+    // Seorang admin hanya dengan permission view (bukan manage) tetap bisa
+    // membuka halaman system maintenance — SystemBackupRunPolicy::viewAny
+    // butuh `admin.system_maintenance.view` — tapi tidak boleh meng-queue
+    // backup (Gate::allows('create') butuh `manage` + BackupSecurityService).
     $admin = User::factory()->admin()->create();
+    $viewRole = Role::create([
+        'name' => 'Maintenance Viewer Jobs_'.uniqid(),
+        'slug' => 'maintenance_viewer_jobs_'.uniqid(),
+        'description' => 'Can view maintenance only.',
+        'permission_keys' => ['admin.system_maintenance.view'],
+    ]);
+    $admin->roles()->sync([$viewRole->id]);
     $this->actingAs($admin);
 
     Livewire::test(SystemMaintenance::class)

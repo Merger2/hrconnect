@@ -289,8 +289,8 @@
                 // Use circleMarker instead of divIcon for reliability
                 L.circleMarker([Number(latIn), Number(lngIn)], {
                     radius: 12,
-                    fillColor: '#3b82f6',
-                    color: '#ffffff',
+                    fillColor: 'var(--color-module-hr)',
+                    color: 'var(--color-surface)',
                     weight: 3,
                     opacity: 1,
                     fillOpacity: 1
@@ -316,8 +316,8 @@
                 // Use circleMarker instead of divIcon for reliability
                 L.circleMarker([Number(latOut), Number(lngOut)], {
                     radius: 12,
-                    fillColor: '#f97316',
-                    color: '#ffffff',
+                    fillColor: 'var(--color-module-documents)',
+                    color: 'var(--color-surface)',
                     weight: 3,
                     opacity: 1,
                     fillOpacity: 1

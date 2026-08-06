@@ -4,6 +4,7 @@ use App\Livewire\Admin\AssetManager;
 use App\Livewire\User\MyAssets;
 use App\Models\CompanyAsset;
 use App\Models\CompanyAssetHistory;
+use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -43,7 +44,7 @@ test('user return flow marks asset ready and clears assignment dates', function 
 
     $history = CompanyAssetHistory::query()
         ->where('company_asset_id', $asset->id)
-        ->latest('date')
+        ->latest()
         ->first();
 
     expect($history)->not()->toBeNull()
@@ -54,7 +55,11 @@ test('user return flow marks asset ready and clears assignment dates', function 
 test('admin retrieval marks asset ready and records retrieval note', function () {
 
     $admin = assetAdmin();
+    // Employee record dibutuhkan supaya CompanyAssetHistory.from_employee_id /
+    // created_by (keduanya FK ke employees) terisi.
+    $adminEmployee = Employee::factory()->create(['user_id' => $admin->id]);
     $user = User::factory()->create();
+    $userEmployee = Employee::factory()->create(['user_id' => $user->id]);
 
     $asset = CompanyAsset::create([
         'name' => 'Toyota Avanza',
@@ -68,10 +73,10 @@ test('admin retrieval marks asset ready and records retrieval note', function ()
     $this->actingAs($admin);
 
     Livewire::test(AssetManager::class)
-        ->call('edit', $asset->id)
-        ->set('user_id', '')
-        ->set('status', CompanyAsset::STATUS_AVAILABLE)
-        ->call('save')
+        ->call('editAsset', $asset->id)
+        ->set('form.user_id', '')
+        ->set('form.status', CompanyAsset::STATUS_AVAILABLE)
+        ->call('saveAsset')
         ->assertHasNoErrors();
 
     $asset->refresh();
@@ -84,11 +89,12 @@ test('admin retrieval marks asset ready and records retrieval note', function ()
     $history = CompanyAssetHistory::query()
         ->where('company_asset_id', $asset->id)
         ->where('action', 'returned')
-        ->latest('date')
+        ->latest()
         ->first();
 
     expect($history)->not()->toBeNull()
-        ->and($history->user_id)->toBe($user->id)
+        ->and($history->from_employee_id)->toBe($userEmployee->id)
+        ->and($history->created_by)->toBe($adminEmployee->id)
         ->and($history->notes)->toContain('Retrieved by Admin')
         ->and($history->notes)->toContain('ready for reassignment');
 });
@@ -110,9 +116,9 @@ test('admin selecting ready automatically releases the assigned user', function 
     $this->actingAs($admin);
 
     Livewire::test(AssetManager::class)
-        ->call('edit', $asset->id)
-        ->set('status', CompanyAsset::STATUS_AVAILABLE)
-        ->call('save')
+        ->call('editAsset', $asset->id)
+        ->set('form.status', CompanyAsset::STATUS_AVAILABLE)
+        ->call('saveAsset')
         ->assertHasNoErrors();
 
     $asset->refresh();

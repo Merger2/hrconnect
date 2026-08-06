@@ -25,7 +25,7 @@ class ImportExportRunRetention
 
             if (! $completedAt && isset($run['id'])) {
                 $model = ImportExportRun::query()->find($run['id']);
-                $completedAt = $model?->completed_at ?? $model?->failed_at;
+                $completedAt = $model->completed_at ?? $model?->failed_at;
             }
 
             if (! $completedAt) {

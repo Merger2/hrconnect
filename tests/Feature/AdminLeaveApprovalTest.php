@@ -3,6 +3,7 @@
 use App\Livewire\Admin\LeaveApproval;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\User;
 use App\Support\LeaveApprovalService;
 use Illuminate\Support\Facades\Notification;
@@ -25,8 +26,25 @@ function makeLeaveApprovalEmployee(string $name): array
     return [$user, $employee];
 }
 
-test('admin leave approvals show all request statuses by default', function () {
+/**
+ * Admin dengan permission manageLeaveApprovals (render() & approve/reject
+ * meng-authorize gate ini — roleless admin selalu 403).
+ */
+function makeLeaveApprovalAdmin(): User
+{
     $admin = User::factory()->admin()->create();
+    $role = Role::create([
+        'name' => 'Leave Approval Admin_'.uniqid(),
+        'slug' => 'leave_approval_admin_'.uniqid(),
+        'permission_keys' => ['admin.leave_approvals.manage'],
+    ]);
+    $admin->roles()->sync([$role->id]);
+
+    return $admin;
+}
+
+test('admin leave approvals show all request statuses by default', function () {
+    $admin = makeLeaveApprovalAdmin();
     [, $employee] = makeLeaveApprovalEmployee('Leave Request Employee');
 
     Attendance::create([
@@ -45,7 +63,7 @@ test('admin leave approvals show all request statuses by default', function () {
 });
 
 test('admin leave approvals are not hidden by regional employee scope', function () {
-    $admin = User::factory()->admin()->create();
+    $admin = makeLeaveApprovalAdmin();
 
     [, $employee] = makeLeaveApprovalEmployee('Different Region Leave Employee');
     $employee->update([
@@ -70,7 +88,7 @@ test('admin leave approvals are not hidden by regional employee scope', function
 test('rejecting leave keeps request type visible under rejected approval filter', function () {
     Notification::fake();
 
-    $admin = User::factory()->admin()->create();
+    $admin = makeLeaveApprovalAdmin();
     [, $employee] = makeLeaveApprovalEmployee('Rejected Leave Employee');
 
     $attendance = Attendance::create([

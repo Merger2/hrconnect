@@ -55,7 +55,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('store-leave-request') }}" enctype="multipart/form-data" class="user-native-form space-y-4 p-4 sm:p-5" aria-describedby="leave-form-help">
+                    <form method="POST" action="{{ route('store-leave-request') }}" enctype="multipart/form-data" class="user-native-form space-y-4 p-4 sm:p-5 user-accent-card user-accent-card--leave" aria-describedby="leave-form-help">
                         @csrf
                         <p id="leave-form-help" class="sr-only">{{ __('Complete the leave type, dates, reason, and optional attachment before submitting your request.') }}</p>
 

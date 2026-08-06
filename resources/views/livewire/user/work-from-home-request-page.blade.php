@@ -6,6 +6,7 @@
                 :title="__('WFH Request')"
                 :description="__('Request work-from-home approval with date, time, location, and reason.')"
                 title-id="wfh-request-title"
+                module="attendance"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-home-modern class="h-5 w-5" />

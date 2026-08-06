@@ -35,6 +35,7 @@
                 :back-href="route('home')"
                 :title="__('Team Kasbon')"
                 title-id="team-kasbon-title"
+                module="finance"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-wallet class="h-5 w-5" />

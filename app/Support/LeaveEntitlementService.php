@@ -123,7 +123,7 @@ class LeaveEntitlementService
 
             return [
                 'leave_type_id' => $balance->leave_type_id,
-                'leave_type_name' => $balance->leaveType?->name,
+                'leave_type_name' => $balance->leaveType->name,
                 'quota' => (float) $balance->quota,
                 'used' => (float) $balance->used,
                 'carry_forward' => $carryForward,

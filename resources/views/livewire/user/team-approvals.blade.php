@@ -36,6 +36,7 @@
                 :back-href="route('home')"
                 :title="__('Team Approvals')"
                 title-id="team-approvals-title"
+                module="leave"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-check-badge class="h-5 w-5" />

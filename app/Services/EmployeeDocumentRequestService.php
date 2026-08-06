@@ -133,7 +133,7 @@ final class EmployeeDocumentRequestService
         ]);
 
         // Notifikasi ke admin/HR
-        if ($request->documentType?->admin_requestable) {
+        if ($request->documentType->admin_requestable) {
             // notification ke role HR bisa ditambah di sini
         }
     }
@@ -145,7 +145,7 @@ final class EmployeeDocumentRequestService
     {
         Gate::authorize('generate', $request);
 
-        $template = $request->documentType?->activeTemplate();
+        $template = $request->documentType->activeTemplate();
 
         if (! $template) {
             throw new \RuntimeException('No active template for this document type.');
@@ -197,7 +197,7 @@ final class EmployeeDocumentRequestService
 
         abort_if(blank($request->generated_path), 404);
 
-        return Storage::disk('private')->download($request->generated_path, $request->documentType?->name.'.pdf');
+        return Storage::disk('private')->download($request->generated_path, $request->documentType->name.'.pdf');
     }
 
     /**

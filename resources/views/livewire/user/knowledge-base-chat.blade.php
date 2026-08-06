@@ -19,7 +19,7 @@
                 </x-slot>
             </x-user.page-header>
 
-            <div class="user-page-body pt-0 flex flex-col flex-1">
+            <div class="user-page-body pt-0 flex flex-col flex-1 user-accent-card user-accent-card--kb">
                 {{-- Messages Area --}}
                 <div class="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4" x-ref="messagesContainer">
                     @forelse($messages as $index => $msg)

@@ -23,18 +23,6 @@
                     <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
                         {{ __('Read-only audit access') }}
                     </span>
-                @elseif(false)
-                    <x-actions.button
-                        href="{{ route('admin.activity-logs.export', ['search' => $search, 'start_date' => $dateStart ?: null, 'end_date' => $dateEnd ?: null, 'actor_group' => $actorGroup]) }}"
-                        target="_system"
-                        rel="noopener noreferrer"
-                        x-on:click.prevent="$dispatch('feature-lock', { title: @js(__('Audit Export Locked')), message: @js(__('Audit Logs Export is an Enterprise Feature. Please Upgrade.')) })"
-                        variant="success"
-                    >
-                        <x-heroicon-o-arrow-down-tray class="-ml-1 mr-2 h-4 w-4" />
-                        {{ __('Export Excel') }}
-                        <x-heroicon-o-lock-closed class="ml-2 h-4 w-4" />
-                    </x-actions.button>
                 @else
                     <x-actions.button
                         href="{{ route('admin.activity-logs.export', ['search' => $search, 'start_date' => $dateStart ?: null, 'end_date' => $dateEnd ?: null, 'actor_group' => $actorGroup]) }}"

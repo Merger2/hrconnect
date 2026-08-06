@@ -171,8 +171,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::controller(EmployeeTerminationController::class)->prefix('employee-terminations')->group(function () {
         Route::get('/', 'index')->can('manage_employees');
-        Route::post('/{employee}', 'store')->can('manage_employees');
+        // Literal route HARUS sebelum {employee}, kalau tidak "process-contract-end"
+        // ter-binding ke parameter model employee → 500 (SQL bigint).
         Route::post('/process-contract-end', 'processContractEnd')->can('manage_employees');
+        Route::post('/{employee}', 'store')->can('manage_employees');
     });
 
     Route::controller(AssetController::class)->prefix('assets')->group(function () {
@@ -180,6 +182,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('/', 'store')->can('manage_assets');
         Route::get('/{asset}', 'show')->can('view_assets');
         Route::put('/{asset}', 'update')->can('manage_assets');
+        Route::post('/{asset}/handover', 'handover')->can('manage_assets');
+        Route::post('/{handover}/return', 'return')->can('manage_assets');
         Route::delete('/{asset}', 'destroy')->can('manage_assets');
     });
 

@@ -31,7 +31,7 @@ class ReimbursementRequested extends Notification implements ShouldQueue
             'employee_name' => $this->reimbursement->employee?->full_name,
             'title' => $this->reimbursement->title,
             'amount' => $amount,
-            'message' => 'Pengajuan reimbursement baru dari '.($this->reimbursement->employee?->full_name ?? 'Karyawan').': '
+            'message' => 'Pengajuan reimbursement baru dari '.($this->reimbursement->employee->full_name ?? 'Karyawan').': '
                 .$this->reimbursement->title.' (Rp '.$amount.')',
         ];
     }

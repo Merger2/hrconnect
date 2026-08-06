@@ -70,27 +70,29 @@ test('superadmin can create admin account from admin directory', function () {
     $created = User::where('email', 'finance-admin@example.com')->firstOrFail();
 
     expect($created->group)->toBe('admin');
-    // gender/address kini kolom employees; proxy accessor di User
-    expect($created->gender)->toBe('L');
+    // gender/address kini kolom employees; proxy accessor User::gender
+    // memetakan L → male, P → female.
+    expect($created->gender)->toBe('male');
     expect($created->address)->toBe('Jl. Jend. Sudirman No. 1');
 });
 
-test('admin directory create validates required gender before insert', function () {
+test('admin directory create validates required name and email before insert', function () {
     [$company] = adminDirectoryMasterData();
     $superadmin = adminDirectorySuperadmin($company);
 
     $this->actingAs($superadmin);
 
+    // gender/phone/address kini nullable untuk group admin/superadmin
+    // (UserForm: requiredOrNullable hanya untuk group user) — field yang
+    // selalu wajib adalah name + email.
     Livewire::test(AdminDirectory::class)
-        ->set('form.name', 'Ops Admin')
         ->set('form.nip', '808080')
-        ->set('form.email', 'ops-admin@example.com')
         ->set('form.phone', '08080808')
         ->set('credential', 'admin123')
         ->set('form.address', 'Jl. Veteran No. 2')
         ->set('form.group', 'superadmin')
         ->call('create')
-        ->assertHasErrors(['form.gender' => 'required']);
+        ->assertHasErrors(['form.name' => 'required', 'form.email' => 'required']);
 
     $this->assertDatabaseMissing('users', [
         'email' => 'ops-admin@example.com',
@@ -127,8 +129,9 @@ test('superadmin can update admin account from admin directory', function () {
     $admin->refresh();
 
     expect($admin->name)->toBe('Updated Admin');
-    // gender/address kini kolom employees; proxy accessor di User
-    expect($admin->gender)->toBe('P');
+    // gender/address kini kolom employees; proxy accessor User::gender
+    // memetakan P → female.
+    expect($admin->gender)->toBe('female');
     expect($admin->address)->toBe('Jl. Baru No. 99');
 });
 

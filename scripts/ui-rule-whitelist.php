@@ -105,7 +105,6 @@ $legacyWarningFindings = [
     ['resources/views/components/branding/authentication-card-logo.blade.php', 'hardcoded_ui_text', 1, 'Possible hardcoded UI attribute text: "Logo"'],
     ['resources/views/components/navigation/theme-toggle.blade.php', 'missing_form_label', 2, 'Possible missing label or aria-label for <input>.'],
     ['resources/views/components/shared/attendance-detail-modal.blade.php', 'hardcoded_ui_text', 107, 'Possible hardcoded UI attribute text: "Attachment"'],
-    ['resources/views/components/shared/feature-lock-modal.blade.php', 'icon_only_button_accessibility', 174, 'Possible icon-only button without aria-label or visible text.'],
     ['resources/views/components/user/home-actions-card.blade.php', 'icon_only_button_accessibility', 67, 'Possible icon-only button without aria-label or visible text.'],
     ['resources/views/components/user/home-actions-card.blade.php', 'icon_only_button_accessibility', 156, 'Possible icon-only button without aria-label or visible text.'],
     ['resources/views/components/user/location-card.blade.php', 'icon_only_button_accessibility', 23, 'Possible icon-only button without aria-label or visible text.'],

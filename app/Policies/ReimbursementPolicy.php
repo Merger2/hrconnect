@@ -92,8 +92,8 @@ class ReimbursementPolicy
             return false;
         }
 
-        $rank = $position->jobLevel?->rank ?? 99;
-        $divisionName = $position->division?->name ?? '';
+        $rank = $position->jobLevel->rank ?? 99;
+        $divisionName = $position->division->name ?? '';
 
         return (int) $rank <= 2 && strtolower((string) $divisionName) === 'finance';
     }

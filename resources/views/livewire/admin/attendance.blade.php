@@ -4,7 +4,6 @@
     $showUserDetail = true;
 
     // Export Logic
-    $isLocked = false;
     $exportUrl = route('admin.attendances.report', [
         'startDate' => $startDate,
         'endDate' => $endDate,
@@ -18,12 +17,6 @@
         'jobTitle' => $jobTitle,
         'format' => 'excel',
     ]);
-    $lockAction =
-        "\$dispatch('feature-lock', { title: " .
-        json_encode(__('Export Locked')) .
-        ', message: ' .
-        json_encode(__('This feature is available in the Enterprise Edition. Please upgrade.')) .
-        ' })';
     $attendanceStatusMeta = static function (?string $status): array {
         $enum = $status ? \App\Enums\AttendanceStatus::tryFrom($status) : null;
 
@@ -67,14 +60,6 @@
 @endphp
 <x-admin.page-shell :title="__('Attendance Data')" :description="__('Monitor employee attendance, shifts, and status.')">
     <x-slot name="actions">
-        @if ($isLocked)
-            <x-actions.button type="button" variant="secondary" x-on:click.prevent="{{ $lockAction }}"
-                class="w-full sm:w-auto">
-                <x-heroicon-o-printer class="h-5 w-5" />
-                {{ __('Export Report') }}
-                <x-heroicon-o-lock-closed class="h-4 w-4" />
-            </x-actions.button>
-        @else
             <div x-data="{
                 start: @entangle('startDate'),
                 end: @entangle('endDate'),
@@ -119,7 +104,6 @@
                     </x-slot>
                 </x-navigation.dropdown>
             </div>
-        @endif
     </x-slot>
 
     <x-slot name="toolbar">

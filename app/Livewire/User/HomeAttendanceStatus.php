@@ -53,14 +53,13 @@ class HomeAttendanceStatus extends Component
     {
         $user = Auth::user();
         $today = now()->format('Y-m-d');
-        $attendanceLocked = false;
-        $faceVerificationRequired = ! $attendanceLocked && filter_var(
+        $faceVerificationRequired = filter_var(
             Setting::getValue('attendance.require_face_verification', false),
             FILTER_VALIDATE_BOOLEAN
         );
 
         // Check for mandatory face enrollment (Open Core Logic)
-        $shouldRequireFaceEnrollment = ! $attendanceLocked && (
+        $shouldRequireFaceEnrollment = (
             filter_var(
                 Setting::getValue('attendance.require_face_enrollment', false),
                 FILTER_VALIDATE_BOOLEAN
@@ -82,12 +81,12 @@ class HomeAttendanceStatus extends Component
             ->whereDate('date', $today)
             ->first();
 
-        $shift = $this->attendance?->shift
-            ?? $todaySchedule?->shift
+        $shift = $this->attendance->shift
+            ?? $todaySchedule->shift
             ?? ($todaySchedule?->is_off ? null : $this->defaultMorningShift());
 
         $this->todayShiftSummary = [
-            'is_off' => (bool) ($todaySchedule?->is_off ?? false),
+            'is_off' => (bool) ($todaySchedule->is_off ?? false),
             'name' => $shift?->name,
             'start' => $shift?->formatted_start_time,
             'end' => $shift?->formatted_end_time,

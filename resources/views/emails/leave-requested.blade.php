@@ -20,7 +20,7 @@
             <td class="email-data-label">{{ __('Date') }}</td>
             <td class="email-data-value">
                 {{ $dateDisplay }}
-                <span style="font-size: 12px; color: #5d7766; font-weight: 500;">({{ $daysInfo }})</span>
+                <span style="font-size: 12px; color: {{ design_token('muted-green-600') }}; font-weight: 500;">({{ $daysInfo }})</span>
             </td>
         </tr>
         <tr>

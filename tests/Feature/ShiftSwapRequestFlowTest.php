@@ -295,6 +295,13 @@ test('admin approval page can approve empty date shift swap requests', function 
 
 test('admin superadmin and hr can open shift swap approvals page', function () {
     $admin = User::factory()->admin()->create();
+    // Roleless admin tidak lolos gate route — beri role shift swap eksplisit.
+    $adminRole = Role::create([
+        'name' => 'Shift Swap Admin Access_'.uniqid(),
+        'slug' => 'shift_swap_admin_access_'.uniqid(),
+        'permission_keys' => ['manage_shift_swap_approvals'],
+    ]);
+    $admin->roles()->sync([$adminRole->id]);
     $superadmin = User::factory()->admin(true)->create();
     $hr = User::factory()->admin()->create();
     // Role teknis 'hr' dibuat self-contained — test tidak bergantung pada seed.
@@ -367,6 +374,15 @@ test('management query searches shift swap requests by nip division position and
     $service = app(ShiftSwapRequestService::class);
     $employeeRecord = $employee->employee;
 
+    // Position factory tidak mengisi job_title_id — hubungkan ke JobTitle
+    // supaya proxy User::jobTitle (employee.position.jobTitle) ter-resolve
+    // dan assertion eager-load bermakna (bukan null vs null).
+    $positionTitle = JobTitle::create([
+        'name' => 'Store Crew Search',
+        'division_id' => $employeeRecord->division_id,
+    ]);
+    $employeeRecord->position->forceFill(['job_title_id' => $positionTitle->id])->save();
+
     // getRawOriginal('nip') returns the physical employees.nip column — the
     // getNipAttribute() accessor proxies to employee_number instead.
     $nip = $employeeRecord->getRawOriginal('nip');
@@ -376,7 +392,7 @@ test('management query searches shift swap requests by nip division position and
     $byNip = $service->managementQuery($manager, 'all', $nip)->get();
     expect($byNip->pluck('id'))->toContain($request->id)
         ->and($byNip->first()->user->division?->name)->toBe($employeeRecord->division->name)
-        ->and($byNip->first()->user->jobTitle?->name)->toBe($employeeRecord->position->name);
+        ->and($byNip->first()->user->jobTitle?->name)->toBe($employeeRecord->position->jobTitle?->name);
 
     $byDivision = $service->managementQuery($manager, 'all', $employeeRecord->division->name)->get();
     expect($byDivision->pluck('id'))->toContain($request->id);

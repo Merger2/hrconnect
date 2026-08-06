@@ -9,6 +9,7 @@
                 :back-href="route('home')"
                 :title="__('My Assets')"
                 title-id="my-assets-title"
+                module="finance"
                 class="border-b-0">
                 <x-slot name="actions">
                     <button type="button"

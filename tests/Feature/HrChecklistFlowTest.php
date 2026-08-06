@@ -23,7 +23,20 @@ test('admin and hr roles can access hr checklists while employees cannot', funct
     $hr = User::factory()->admin()->create();
     $employee = User::factory()->create();
 
-    $hrRole = Role::query()->where('slug', 'hr')->firstOrFail();
+    // Role 'hr' tidak lagi di-seed (hr-manager dihapus; HRD memakai role
+    // admin) — buat role self-contained dengan permission HR checklist
+    // eksplisit supaya test tidak bergantung pada seeder.
+    $adminRole = Role::create([
+        'name' => 'HR Checklist Admin_'.uniqid(),
+        'slug' => 'hr_checklist_admin_'.uniqid(),
+        'permission_keys' => ['admin.hr_checklists.view', 'admin.hr_checklists.manage'],
+    ]);
+    $hrRole = Role::create([
+        'name' => 'HR Checklist HR_'.uniqid(),
+        'slug' => 'hr_checklist_hr_'.uniqid(),
+        'permission_keys' => ['admin.hr_checklists.view', 'admin.hr_checklists.manage'],
+    ]);
+    $admin->roles()->sync([$adminRole->id]);
     $hr->roles()->sync([$hrRole->id]);
 
     expect(Gate::forUser($admin)->allows('viewHrChecklists'))->toBeTrue()
@@ -44,6 +57,14 @@ test('hr can start onboarding checklist case with employee manager and hr tasks'
     $manager = User::factory()->create();
     $employee->update(['manager_id' => $manager->id]);
 
+    // startCase() mewajibkan templateId — pakai template onboarding default
+    // dari service (sama dengan test 'assigned employee can complete').
+    $service = app(HrChecklistService::class);
+    $service->ensureDefaultTemplates();
+    $template = HrChecklistTemplate::query()
+        ->where('type', HrChecklistTemplate::TYPE_ONBOARDING)
+        ->firstOrFail();
+
     $this->actingAs($hr);
 
     Livewire::test(HrChecklistManager::class)
@@ -51,6 +72,7 @@ test('hr can start onboarding checklist case with employee manager and hr tasks'
         ->set('employeeId', $employee->id)
         ->set('type', HrChecklistTemplate::TYPE_ONBOARDING)
         ->set('effectiveDate', '2026-05-10')
+        ->set('templateId', $template->id)
         ->call('startCase')
         ->assertHasNoErrors();
 

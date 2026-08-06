@@ -34,7 +34,7 @@ class RoleObserver
             'user_id' => $actorId,
             'action' => $action,
             'description' => 'Perubahan permission pada Role #'.$role->id,
-            'ip_address' => request()?->ip(),
+            'ip_address' => request()->ip(),
         ]);
 
         foreach ($changed as $field => $auditField) {

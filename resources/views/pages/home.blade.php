@@ -4,10 +4,11 @@
     @php($actionSummaryItems = collect($homeCommandCenter['actionItems'] ?? []))
     @php($teamSummaryItems = collect($homeCommandCenter['teamItems'] ?? []))
 
-    <div class="user-page-shell pt-0">
+    <div class="user-page-shell pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div class="user-page-container user-page-container--wide px-0">
             <section aria-labelledby="home-page-title" class="user-home-hero user-home-hero--command">
                 <div class="user-home-hero__inner">
+                    <span class="user-home-hero__glow" aria-hidden="true"></span>
                     <div class="user-home-hero__copy">
                         <p class="user-home-hero__greeting" x-data="liveGreeting()" x-init="init()" x-text="greeting + ','"></p>
                         <h1 id="home-page-title" class="user-home-hero__title">{{ $currentUser->name }}</h1>
@@ -27,28 +28,39 @@
                 </div>
             </section>
 
-            {{-- Date context bar --}}
+            {{-- Date context bar — kartu kaca mengambang di atas hero, live clock --}}
             <div class="home-date-context" x-data="liveClock()" x-init="init()">
                 <div class="home-date-context__date">
-                    <span class="home-date-context__dayname" x-text="dayName"></span>
-                    <span class="home-date-context__sep" aria-hidden="true">•</span>
-                    <span class="home-date-context__fulldate" x-text="fullDate"></span>
+                    <span class="home-date-context__icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                        </svg>
+                    </span>
+                    <span class="home-date-context__text">
+                        <span class="home-date-context__dayname" x-text="dayName"></span>
+                        <span class="home-date-context__sep" aria-hidden="true">•</span>
+                        <span class="home-date-context__fulldate" x-text="fullDate"></span>
+                    </span>
                 </div>
-                <div class="home-date-context__time" x-text="clockTime" aria-live="polite"></div>
+                <div class="home-date-context__clock">
+                    <span class="home-date-context__live-dot" aria-hidden="true"></span>
+                    <span class="home-date-context__time" x-text="clockTime" aria-live="polite"></span>
+                </div>
             </div>
 
             <div class="user-home-content user-home-content--command">
-                <section aria-labelledby="attendance-summary-heading">
+                <div class="home-layout">
+                <section aria-labelledby="attendance-summary-heading" class="home-grid-att">
                     <h2 id="attendance-summary-heading" class="sr-only">{{ __('Today attendance summary') }}</h2>
                     <livewire:user.home-attendance-status />
                 </section>
 
-                <section aria-labelledby="my-menu-heading">
+                <section aria-labelledby="my-menu-heading" class="home-grid-qa">
                     <h2 id="my-menu-heading" class="sr-only">{{ __('Quick Access') }}</h2>
                     <livewire:user.quick-actions />
                 </section>
 
-                <section aria-labelledby="home-action-needed-heading" class="home-command-panel home-command-panel--compact">
+                <section aria-labelledby="home-action-needed-heading" class="home-command-panel home-command-panel--compact home-grid-cmd">
                     <div class="home-command-panel__header">
                         <div>
                             <p class="home-command-panel__eyebrow">{{ __('Action Needed') }}</p>
@@ -150,7 +162,7 @@
                 </section>
 
                 @if(! empty($homeCommandCenter['recentActivities']))
-                    <section aria-labelledby="home-recent-heading" class="home-command-panel">
+                    <section aria-labelledby="home-recent-heading" class="home-command-panel home-command-panel--emerald home-grid-rec">
                         <div class="home-command-panel__header">
                             <div>
                                 <p class="home-command-panel__eyebrow">{{ __('Recent Activity') }}</p>
@@ -175,13 +187,14 @@
                     </section>
                 @endif
 
-                <section aria-labelledby="happening-now-heading" class="home-section--spaced">
+                <section aria-labelledby="happening-now-heading" class="home-section--spaced home-grid-ev">
                     <div class="user-section-heading">
                         <h2 id="happening-now-heading" class="user-section-heading__title">{{ __('Happening Now') }}</h2>
                         <a href="{{ route('notifications') }}" class="user-section-heading__action">{{ __('View All') }}</a>
                     </div>
                     <livewire:user.upcoming-events-widget />
                 </section>
+                </div>
             </div>
         </div>
     </div>

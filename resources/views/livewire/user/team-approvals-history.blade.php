@@ -40,6 +40,7 @@
                 :back-href="route('approvals')"
                 :title="__('Approval History')"
                 title-id="approval-history-title"
+                module="leave"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-clock class="h-5 w-5" />

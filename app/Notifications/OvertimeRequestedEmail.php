@@ -23,7 +23,7 @@ class OvertimeRequestedEmail extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $userName = $this->overtime->employee?->full_name ?? 'Karyawan';
+        $userName = $this->overtime->employee->full_name ?? 'Karyawan';
         $totalHours = $this->overtime->total_hours ?? 0;
 
         return (new MailMessage)

@@ -23,7 +23,7 @@
                 @if($schedules->isNotEmpty())
                     <ul role="list" class="space-y-3">
                         @foreach($schedules as $schedule)
-                            <li class="user-list-card group relative">
+                            <li class="user-list-card group relative user-accent-card user-accent-card--attendance user-accent-card--soft">
                                 <div class="flex items-center gap-4">
                                      {{-- Date Box --}}
                                     <div class="flex h-12 w-12 flex-col items-center justify-center rounded-xl border border-slate-200/70 bg-white/72 shadow-none">

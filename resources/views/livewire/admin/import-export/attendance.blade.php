@@ -10,10 +10,6 @@
         ? $requestedTab
         : ($canExportAttendances ? 'export' : 'import');
     $defaultTabJson = \Illuminate\Support\Js::from($defaultTab);
-    $importLockedPayload = \Illuminate\Support\Js::from([
-        'title' => __('Import Locked'),
-        'message' => __('Importing attendance is an Enterprise feature. Please upgrade.'),
-    ]);
 @endphp
 
 <div x-data="{
@@ -332,23 +328,12 @@
                                         </x-actions.button>
                                     </div>
 
-                                    @if (false)
-                                        <x-actions.danger-button
-                                            class="w-full justify-center gap-2 py-3 sm:w-auto"
-                                            type="button"
-                                            @click.prevent="$dispatch('feature-lock', {{ $importLockedPayload }})"
-                                        >
-                                            {{ __('Import') }}
-                                            <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                        </x-actions.danger-button>
-                                    @else
                                         <div x-show="file" class="flex justify-end" style="display: none;">
                                             <x-actions.danger-button class="w-full justify-center gap-2 py-3 sm:w-auto" wire:click="import" wire:loading.attr="disabled" wire:target="import">
                                                 <x-heroicon-o-arrow-up-tray class="h-4 w-4" />
                                                 {{ __('Import') }}
                                             </x-actions.danger-button>
                                         </div>
-                                    @endif
                                 </form>
 
                                 @if (!empty($importErrors))

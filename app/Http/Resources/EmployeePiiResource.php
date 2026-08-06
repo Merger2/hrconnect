@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property Employee $resource
+ *
+ * @mixin Employee
+ */
 class EmployeePiiResource extends JsonResource
 {
     public function toArray(Request $request): array

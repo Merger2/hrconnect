@@ -70,7 +70,9 @@ test('tenant scoped admin cannot create project for another company', function (
     $role = Role::query()->create([
         'name' => 'Operations Manager',
         'slug' => 'operations_manager',
-        'permission_keys' => ['admin.operations.view', 'admin.operations.manage'],
+        // Key kanonik rbac — gate viewOperationsWorkspace meng-map ke
+        // admin.operations_workspace.view (bukan admin.operations.view).
+        'permission_keys' => ['admin.operations_workspace.view', 'admin.operations_workspace.manage'],
     ]);
     $admin->roles()->sync([$role->id]);
 
@@ -220,10 +222,8 @@ test('operations project financial summary includes linked commercial records', 
     ]);
     SalesOpportunity::query()->create([
         'company_id' => $company->id,
-        'client_id' => $client->id,
         'project_id' => $project->id,
-        'owner_id' => $superadmin->id,
-        'title' => 'Expansion pipeline',
+        'name' => 'Expansion pipeline',
         'stage' => SalesOpportunity::STAGE_PROPOSAL,
         'expected_value' => 5000000,
         'probability' => 70,
@@ -248,7 +248,7 @@ test('operations route requires explicit permission', function () {
     $role = Role::query()->create([
         'name' => 'Operations Viewer',
         'slug' => 'operations_viewer',
-        'permission_keys' => ['admin.operations.view'],
+        'permission_keys' => ['admin.operations_workspace.view'],
     ]);
     $admin->roles()->sync([$role->id]);
 

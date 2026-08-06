@@ -57,12 +57,12 @@ class ApprovalActorService
 
     public function isFinanceHead(User $user): bool
     {
-        return (int) ($user->jobTitle?->jobLevel?->rank ?? 99) <= 2
+        return (int) ($user->jobTitle?->jobLevel->rank ?? 99) <= 2
             && strtolower((string) $user->division?->name) === 'finance';
     }
 
     public function canManageDivisionSubordinates(User $user): bool
     {
-        return (int) ($user->jobTitle?->jobLevel?->rank ?? 99) <= 2;
+        return (int) ($user->jobTitle?->jobLevel->rank ?? 99) <= 2;
     }
 }

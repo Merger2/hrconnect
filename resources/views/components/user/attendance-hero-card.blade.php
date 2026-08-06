@@ -11,7 +11,7 @@
             </div>
 
             <div class="attendance-panel__badge attendance-panel__badge--done shrink-0" role="status" aria-live="polite">
-                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-brand-500 text-white">
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-500 text-white">
                     <x-heroicon-o-check class="h-3 w-3" />
                 </span>
                 <span>{{ __('Finished') }}</span>

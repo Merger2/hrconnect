@@ -80,8 +80,8 @@
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100"
-         class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-5 py-4">
+         class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm user-accent-card--attendance">
+        <div class="px-5 py-4 solid-head">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
                     <x-heroicon-o-face-smile class="h-5 w-5 text-white" />
@@ -108,20 +108,21 @@
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100"
-         class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+         class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm user-accent-card--attendance">
 
         {{-- Card header: Date + Live badge --}}
-        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        {{-- Card header: Date + Live badge — band solid module (cyan) --}}
+        <div class="flex items-center justify-between px-5 py-4 solid-head">
             <div class="min-w-0">
-                <p class="text-xs font-medium uppercase tracking-wider text-slate-500">{{ __('Attendance') }}</p>
-                <h2 class="mt-0.5 text-lg font-bold text-slate-900">{{ now()->translatedFormat('l, d F Y') }}</h2>
+                <p class="text-xs font-medium uppercase tracking-wider solid-head__eyebrow">{{ __('Attendance') }}</p>
+                <h2 class="mt-0.5 text-lg font-bold solid-head__title">{{ now()->translatedFormat('l, d F Y') }}</h2>
             </div>
-            <div class="flex shrink-0 items-center gap-2 rounded-full bg-primary-50 px-3 py-1.5" role="status" aria-live="polite">
+            <div class="flex shrink-0 items-center gap-2 rounded-full solid-head__badge px-3 py-1.5" role="status" aria-live="polite">
                 <span class="relative flex h-2.5 w-2.5">
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-400 opacity-75"></span>
                     <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary-600"></span>
                 </span>
-                <span class="text-xs font-semibold text-primary-700">{{ __('Live') }}</span>
+                <span class="text-xs font-semibold">{{ __('Live') }}</span>
             </div>
         </div>
 
@@ -369,9 +370,21 @@
     {{-- ⚡ Face capture + timeout hidden triggers --}}
     <div x-data="{}"
          x-init="
-            this.$wire.$watch('isLoading', val => {
-                if (val === false) scrollTo({ top: 0, behavior: 'smooth' });
-            });
+            // Guard: x-init dapat berjalan sebelum Livewire menempelkan magic
+            // $wire ke scope ini (race) — retry sampai siap. Dibungkus IIFE
+            // karena compiler ekspresi Alpine tidak menerima deklarasi di
+            // level atas (hanya ekspresi).
+            (() => {
+                let attempts = 0;
+                const registerIsLoadingWatch = () => {
+                    if (attempts++ > 20) return; // 2 detik maks, jangan loop selamanya
+                    if (! this.$wire) { setTimeout(registerIsLoadingWatch, 100); return; }
+                    this.$wire.$watch('isLoading', val => {
+                        if (val === false) scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                };
+                registerIsLoadingWatch();
+            })()
          "
          @trigger-face-capture.window="
             $nextTick(() => {

@@ -3,7 +3,6 @@
     $canReviewSubordinateRequests = $user->can('reviewSubordinateRequests');
     $hasFaceRegistered = $user->hasFaceRegistered();
     $canRequestKasbon = (float) ($user->basic_salary ?? 0) > 0;
-    $cashAdvanceLocked = false;
 
     $primaryItems = [
         [
@@ -117,55 +116,55 @@
             ],
         ],
         __('Finance & Asset') => [
+        [
+            'kind' => 'link',
+            'href' => route('my-payslips'),
+            'label' => __('Payslip'),
+            'description' => __('Open salary statements.'),
+            'icon' => 'payslip',
+            'tone' => 'bg-emerald-100 text-emerald-700',
+            'locked' => false,
+        ],
             [
-                'kind' => false ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::payrollLocked() ? null : route('my-payslips'),
-                'label' => __('Payslip'),
-                'description' => __('Open salary statements.'),
-                'icon' => 'payslip',
-                'tone' => 'bg-emerald-100 text-emerald-700',
-                'locked' => \App\Helpers\Editions::payrollLocked(),
-            ],
-            [
-                'kind' => $cashAdvanceLocked ? 'button' : (!$canRequestKasbon ? 'disabled' : 'link'),
-                'href' => ($cashAdvanceLocked || !$canRequestKasbon) ? null : route('my-kasbon'),
+                'kind' => !$canRequestKasbon ? 'disabled' : 'link',
+                'href' => !$canRequestKasbon ? null : route('my-kasbon'),
                 'label' => __('Kasbon'),
                 'description' => __('Track cash advance requests.'),
                 'icon' => 'kasbon',
                 'tone' => !$canRequestKasbon
                     ? 'bg-gray-100 text-gray-400'
                     : 'bg-orange-100 text-orange-700',
-                'locked' => $cashAdvanceLocked,
+                'locked' => false,
                 'disabledMessage' => __('Kasbon is available after your basic salary has been updated.'),
             ],
             [
-                'kind' => \App\Helpers\Editions::assetLocked() ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::assetLocked() ? null : route('my-assets'),
+                'kind' => 'link',
+                'href' => route('my-assets'),
                 'label' => __('Assets'),
                 'description' => __('Review assigned company assets.'),
                 'icon' => 'assets',
                 'tone' => 'bg-stone-100 text-stone-700',
-                'locked' => \App\Helpers\Editions::assetLocked(),
+                'locked' => false,
             ],
         ],
         __('HR & Document') => [
             [
-                'kind' => \App\Helpers\Editions::documentRequestsLocked() ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::documentRequestsLocked() ? null : route('document-requests'),
+                'kind' => 'link',
+                'href' => route('document-requests'),
                 'label' => __('Documents'),
                 'description' => __('Request and upload HR documents.'),
                 'icon' => 'document',
                 'tone' => 'bg-indigo-100 text-indigo-700',
-                'locked' => \App\Helpers\Editions::documentRequestsLocked(),
+                'locked' => false,
             ],
             [
-                'kind' => \App\Helpers\Editions::appraisalLocked() ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::appraisalLocked() ? null : route('my-performance'),
+                'kind' => 'link',
+                'href' => route('my-performance'),
                 'label' => __('Performance'),
                 'description' => __('Check KPI and appraisal results.'),
                 'icon' => 'performance',
                 'tone' => 'bg-lime-100 text-lime-700',
-                'locked' => \App\Helpers\Editions::appraisalLocked(),
+                'locked' => false,
             ],
         ],
         __('Knowledge Base') => [
@@ -210,13 +209,13 @@
                 'locked' => false,
             ],
             [
-                'kind' => $cashAdvanceLocked ? 'button' : 'link',
-                'href' => $cashAdvanceLocked ? null : route('team-kasbon'),
+                'kind' => 'link',
+                'href' => route('team-kasbon'),
                 'label' => __('Team Kasbon'),
                 'description' => __('Follow team cash advance requests.'),
                 'icon' => 'team',
                 'tone' => 'bg-green-100 text-green-700',
-                'locked' => $cashAdvanceLocked,
+                'locked' => false,
             ],
         ];
     }
@@ -273,7 +272,6 @@
                 <ul class="quick-wallet-team__grid" role="list">
                     @foreach ($teamItems as $item)
                         <li>
-                            @if ($item['kind'] === 'link')
                                 <a href="{{ $item['href'] }}" class="quick-wallet-team-card"
                                     aria-label="{{ $item['label'] }}. {{ $item['description'] }}">
                                     <span class="quick-wallet-team-card__icon {{ $item['tone'] }}" aria-hidden="true">
@@ -285,20 +283,6 @@
                                     </span>
                                     <x-heroicon-o-chevron-right class="h-4 w-4 text-slate-400" aria-hidden="true" />
                                 </a>
-                            @else
-                                <button type="button" class="quick-wallet-team-card"
-                                    aria-label="{{ $item['label'] }}. {{ $item['description'] }}"
-                                    @click.prevent="$dispatch('feature-lock', { title: @js($item['lockTitle']), message: @js($item['lockMessage']) })">
-                                    <span class="quick-wallet-team-card__icon {{ $item['tone'] }}" aria-hidden="true">
-                                        <x-user.quick-menu-icon :name="$item['icon']" class="h-5 w-5" />
-                                    </span>
-                                    <span class="quick-wallet-team-card__body">
-                                        <strong>{{ $item['label'] }}</strong>
-                                        <span>{{ $item['description'] }}</span>
-                                    </span>
-                                    <x-heroicon-o-lock-closed class="h-4 w-4 text-slate-400" aria-hidden="true" />
-                                </button>
-                            @endif
                         </li>
                     @endforeach
                 </ul>

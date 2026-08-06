@@ -42,7 +42,7 @@ class EmployeeObserver
             'user_id' => $actorId,
             'action' => $action,
             'description' => 'Perubahan field sensitif pada Employee #'.$employee->id,
-            'ip_address' => request()?->ip(),
+            'ip_address' => request()->ip(),
         ]);
 
         foreach ($changed as $field) {

@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Approval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property Approval $resource
+ *
+ * @mixin Approval
+ */
 class ApprovalResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -18,7 +24,7 @@ class ApprovalResource extends JsonResource
                 'full_name' => $this->approver->full_name,
             ]),
             'level' => $this->level,
-            'status' => $this->status?->value,
+            'status' => $this->status->value,
             'notes' => $this->notes,
             'approved_at' => $this->approved_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

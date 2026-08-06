@@ -53,7 +53,7 @@
         }
 
         body {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
             line-height: 1.62;
@@ -61,15 +61,15 @@
         }
 
         .employee-document-preview {
-            background: #1f2937;
+            background: {{ design_token('primary-800') }};
             overflow-x: auto;
             padding: 18px;
         }
 
         .employee-document-preview .employee-document-page {
-            background: #ffffff;
+            background: {{ design_token('surface') }};
             box-sizing: border-box;
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 12px;
             line-height: 1.62;
@@ -95,7 +95,7 @@
 
         .top-corner-navy {
             border-left: 82px solid transparent;
-            border-top: 82px solid #083344;
+            border-top: 82px solid {{ design_token('brand-deep') }};
             height: 0;
             right: 0;
             top: 0;
@@ -111,7 +111,7 @@
 
         .top-corner-brand {
             border-left: 60px solid transparent;
-            border-top: 60px solid #badcb3;
+            border-top: 60px solid {{ design_token('brand-green-300') }};
             height: 0;
             right: 0;
             top: 0;
@@ -120,7 +120,7 @@
 
         .top-corner-primary {
             border-left: 38px solid transparent;
-            border-top: 38px solid #6ab45b;
+            border-top: 38px solid {{ design_token('brand-green-500') }};
             height: 0;
             right: 0;
             top: 0;
@@ -138,7 +138,7 @@
         }
 
         .top-rule-primary {
-            background: #6ab45b;
+            background: {{ design_token('brand-green-500') }};
             right: 88px;
             top: 18px;
             width: 132px;
@@ -150,7 +150,7 @@
         }
 
         .top-rule-brand {
-            background: #badcb3;
+            background: {{ design_token('brand-green-300') }};
             right: 96px;
             top: 26px;
             width: 118px;
@@ -162,7 +162,7 @@
         }
 
         .bottom-corner-navy {
-            border-bottom: 72px solid #083344;
+            border-bottom: 72px solid {{ design_token('brand-deep') }};
             border-right: 72px solid transparent;
             bottom: 0;
             height: 0;
@@ -178,7 +178,7 @@
         }
 
         .bottom-corner-primary {
-            border-bottom: 52px solid #6ab45b;
+            border-bottom: 52px solid {{ design_token('brand-green-500') }};
             border-right: 52px solid transparent;
             bottom: 0;
             height: 0;
@@ -187,7 +187,7 @@
         }
 
         .bottom-corner-brand {
-            border-bottom: 32px solid #badcb3;
+            border-bottom: 32px solid {{ design_token('brand-green-300') }};
             border-right: 32px solid transparent;
             bottom: 0;
             height: 0;
@@ -196,7 +196,7 @@
         }
 
         .bottom-rule-primary {
-            background: #6ab45b;
+            background: {{ design_token('brand-green-500') }};
             bottom: 49px;
             left: 86px;
             width: 84px;
@@ -208,7 +208,7 @@
         }
 
         .bottom-rule-brand {
-            background: #badcb3;
+            background: {{ design_token('brand-green-300') }};
             bottom: 57px;
             left: 96px;
             width: 112px;
@@ -228,7 +228,7 @@
         }
 
         .letterhead {
-            border-bottom: 1.4px solid #31542a;
+            border-bottom: 1.4px solid {{ design_token('brand-green-800') }};
             margin: 0 0 20px;
             padding-bottom: 12px;
             width: 100%;
@@ -251,7 +251,7 @@
         }
 
         .contact-cell {
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 8.8px;
             line-height: 1.4;
             padding: 0 0 0 14px;
@@ -261,7 +261,7 @@
         }
 
         .company-name {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 15.5px;
             font-weight: 700;
             letter-spacing: .01em;
@@ -270,14 +270,14 @@
         }
 
         .company-address {
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 9.2px;
             line-height: 1.35;
             margin: 0;
         }
 
         .company-mark {
-            color: #57944a;
+            color: {{ design_token('brand-green-600') }};
             font-size: 8.2px;
             font-weight: 700;
             letter-spacing: .18em;
@@ -286,7 +286,7 @@
         }
 
         .company-contact {
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 8.7px;
             line-height: 1.35;
             margin: 3px 0 0;
@@ -303,7 +303,7 @@
         }
 
         .meta-label {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 10.5px;
             font-weight: 700;
             padding: 0 8px 4px 0;
@@ -311,14 +311,14 @@
         }
 
         .meta-separator {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 10.5px;
             padding: 0 8px 4px 0;
             width: 8px;
         }
 
         .meta-value {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 10.5px;
             padding: 0 0 4px;
         }
@@ -356,7 +356,7 @@
         }
 
         th, td {
-            border: 1px solid #d1d5db;
+            border: 1px solid {{ design_token('primary-300') }};
             padding: 8px;
             text-align: left;
             vertical-align: top;
@@ -367,8 +367,8 @@
             right: -10px;
             bottom: -55px;
             left: 14px;
-            border-top: 1px solid #badcb3;
-            color: #6b7280;
+            border-top: 1px solid {{ design_token('brand-green-300') }};
+            color: {{ design_token('primary-500') }};
             font-size: 10px;
             height: 32px;
             line-height: 1.35;

@@ -31,17 +31,19 @@
 
             <div class="user-page-body pt-0">
                 @if ($needsSetup)
-                    <form wire:submit.prevent="setupPassword" class="payslip-secure-panel">
-                        <div class="payslip-secure-panel__icon">
-                            <x-heroicon-o-lock-closed class="h-7 w-7" />
-                        </div>
+                    <form wire:submit.prevent="setupPassword" class="payslip-secure-panel user-accent-card user-accent-card--payroll">
+                        <div class="solid-head rounded-2xl p-4 flex items-center gap-4">
+                            <div class="payslip-secure-panel__icon">
+                                <x-heroicon-o-lock-closed class="h-7 w-7" />
+                            </div>
 
-                        <div>
-                            <p class="payslip-eyebrow">{{ __('Private payroll access') }}</p>
-                            <h2 class="payslip-secure-panel__title">{{ __('Secure Your Payslips') }}</h2>
-                            <p class="payslip-secure-panel__copy">
-                                {{ __('Create a password used to open encrypted payslip PDF files.') }}
-                            </p>
+                            <div class="min-w-0">
+                                <p class="payslip-eyebrow">{{ __('Private payroll access') }}</p>
+                                <h2 class="payslip-secure-panel__title">{{ __('Secure Your Payslips') }}</h2>
+                                <p class="payslip-secure-panel__copy">
+                                    {{ __('Create a password used to open encrypted payslip PDF files.') }}
+                                </p>
+                            </div>
                         </div>
 
                         <div class="grid gap-4">
@@ -87,7 +89,7 @@
                         $paidCount = $payrollCollection->where('status', 'paid')->count();
                     @endphp
 
-                    <div class="payslip-summary">
+                    <div class="payslip-summary user-accent-card user-accent-card--payroll">
                         <div class="min-w-0">
                             <p class="payslip-eyebrow">{{ __('Payroll archive') }}</p>
                             <h2 class="payslip-summary__title">
@@ -114,7 +116,7 @@
                     @else
                         <div class="payslip-list">
                             @foreach ($payrolls as $payroll)
-                                <article class="payslip-card" x-data="{ show: false }">
+                                <article class="payslip-card user-accent-card user-accent-card--payroll user-accent-card--soft" x-data="{ show: false }">
                                     <div class="payslip-card__period" aria-hidden="true">
                                         <span>{{ \Carbon\Carbon::createFromDate(null, $payroll->month)->translatedFormat('M') }}</span>
                                         <small>{{ $payroll->year }}</small>

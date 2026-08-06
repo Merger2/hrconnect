@@ -57,9 +57,9 @@ class AttendanceReportExport implements FromCollection, WithColumnWidths, WithHe
 
         return [
             $employee->employee_number ?? '-',
-            $employee->user?->name ?? $employee->full_name ?? '-',
-            $employee->division?->name ?? '-',
-            $employee->position?->name ?? '-',
+            $employee->user->name ?? $employee->full_name ?? '-',
+            $employee->division->name ?? '-',
+            $employee->position->name ?? '-',
             $attendance->date?->format('Y-m-d') ?? '-',
             $clockIn,
             $clockOut,

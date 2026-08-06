@@ -14,9 +14,9 @@
     }
 
     .ts-wrapper-user .ts-control {
-        background-color: rgba(248, 250, 252, 0.82) !important;
-        border: 1px solid rgba(203, 213, 225, 0.8) !important;
-        color: #0f172a !important;
+        background-color: color-mix(in srgb, var(--color-primary-50) 82%, transparent) !important;
+        border: 1px solid var(--color-primary-300) !important;
+        color: var(--color-primary-900) !important;
         border-radius: 1rem !important;
         padding: 0 2.5rem 0 1rem !important;
         box-shadow: none !important;
@@ -42,7 +42,7 @@
         width: 1ch !important;
         max-width: 100% !important;
         min-width: 1ch !important;
-        color: #0f172a !important;
+        color: var(--color-primary-900) !important;
         font-size: 1rem !important;
         font-weight: 500 !important;
         vertical-align: middle !important;
@@ -63,18 +63,18 @@
     .ts-wrapper-user .ts-wrapper.focus .ts-control,
     .ts-wrapper-user .ts-wrapper.input-active .ts-control,
     .ts-wrapper-user .ts-wrapper.dropdown-active .ts-control {
-        border-color: #024ad8 !important; /* primary-500 */
+        border-color: var(--color-primary-700) !important; /* primary-700 (slate) */
         outline: 2px solid transparent;
         outline-offset: 2px;
-        background-color: #ffffff !important;
-        box-shadow: 0 0 0 4px rgba(2, 74, 216, 0.18) !important;
+        background-color: var(--color-surface) !important;
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary-700) 18%, transparent) !important;
     }
 
     /* Dropdown */
     .ts-wrapper-user .ts-dropdown {
-        background-color: #ffffff !important;
-        border-color: #e5e7eb;
-        color: #111827;
+        background-color: var(--color-surface) !important;
+        border-color: var(--color-primary-200);
+        color: var(--color-primary-900);
         border-radius: 1rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
         z-index: 99999 !important;
@@ -88,8 +88,8 @@
     }
 
     .ts-wrapper-user .ts-dropdown .active {
-        background-color: #f3f4f6;
-        color: #111827;
+        background-color: var(--color-primary-100);
+        color: var(--color-primary-900);
     }
 
     .user-ui .ts-wrapper-user .ts-control,
@@ -124,16 +124,17 @@
 @endonce
 
 <div wire:ignore
-     x-data="tomSelectInput(
+     x-data="window.tomSelectInput ? tomSelectInput(
         @js($options), 
         @js($placeholder),
         @if(isset($__livewire) && $attributes->wire('model')->value()) @entangle($attributes->wire('model')) @else @js($selected) @endif,
         {{ $disabled ? 'true' : 'false' }}
-     )"
+     ) : {}"
      class="w-full ts-wrapper-user relative">
     
     <select
         x-ref="select"
+        data-ui-tomselect
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $attributes->whereDoesntStartWith('wire:model')->except(['options', 'placeholder', 'aria-label']) }}
         placeholder="{{ $placeholder }}">

@@ -165,9 +165,9 @@ class UserForm extends Form
         $this->basic_salary = $user->basic_salary;
         $this->employment_status = $user->employment_status ?: Employee::EMPLOYMENT_STATUS_ACTIVE;
         $this->join_date = $user->employee?->join_date?->format('Y-m-d');
-        $this->employment_type = $user->employee?->employment_type?->value ?? 'permanent';
+        $this->employment_type = $user->employee?->employment_type->value ?? 'permanent';
         $this->education_level = $user->employee?->education_level?->value;
-        $this->institution_name = $user->employee?->institution_name ?? '';
+        $this->institution_name = $user->employee->institution_name ?? '';
         $this->graduation_year = $user->employee?->graduation_year;
         $this->role_ids = $user->roles()
             ->orderByDesc('roles.is_super_admin')
@@ -416,7 +416,7 @@ class UserForm extends Form
             ->where('is_main', true)
             ->first();
 
-        return $branch?->id ?? Branch::where('company_id', $companyId)->first()?->id ?? 1;
+        return $branch->id ?? Branch::where('company_id', $companyId)->first()->id ?? 1;
     }
 
     private function generateEmployeeNumber(): string

@@ -5,6 +5,7 @@
                 :back-href="route('home')"
                 :title="__('Face ID Setup')"
                 title-id="face-enrollment-title"
+                module="attendance"
                 class="border-b-0" />
 
             <div class="user-page-body pt-0">
@@ -21,33 +22,15 @@
                         </div>
 
                         <div class="face-enrollment-ready__actions">
-                            @if (\App\Helpers\Editions::attendanceLocked())
-                                <button type="button"
-                                    @click.prevent="$dispatch('feature-lock', { title: @js(__('Face ID Locked')), message: @js(__('Face ID Biometrics is an Enterprise Feature. Please Upgrade.')) })"
-                                    class="face-enrollment-primary-action"
-                                    aria-label="{{ __('Update Face ID') }}">
-                                    <x-heroicon-o-arrow-path class="h-5 w-5" />
-                                    <span>{{ __('Update Face ID') }}</span>
-                                    <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                </button>
-                                <button type="button"
-                                    @click.prevent="$dispatch('feature-lock', { title: @js(__('Face ID Locked')), message: @js(__('Face ID Biometrics is an Enterprise Feature. Please Upgrade.')) })"
-                                    class="face-enrollment-danger-action"
-                                    aria-label="{{ __('Remove Face ID') }}">
-                                    <span>{{ __('Remove Face ID') }}</span>
-                                    <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                </button>
-                            @else
-                                <button wire:click="startCapture" data-apk-face-update class="face-enrollment-primary-action" aria-label="{{ __('Update Face ID') }}">
-                                    <x-heroicon-o-arrow-path class="h-5 w-5" />
-                                    <span>{{ __('Update Face ID') }}</span>
-                                </button>
-                                <button wire:click="removeFace"
-                                    wire:confirm="{{ __('Are you sure you want to remove Face ID?') }}"
-                                    class="face-enrollment-danger-action">
-                                    {{ __('Remove Face ID') }}
-                                </button>
-                            @endif
+                            <button wire:click="startCapture" data-apk-face-update class="face-enrollment-primary-action" aria-label="{{ __('Update Face ID') }}">
+                                <x-heroicon-o-arrow-path class="h-5 w-5" />
+                                <span>{{ __('Update Face ID') }}</span>
+                            </button>
+                            <button wire:click="removeFace"
+                                wire:confirm="{{ __('Are you sure you want to remove Face ID?') }}"
+                                class="face-enrollment-danger-action">
+                                {{ __('Remove Face ID') }}
+                            </button>
                         </div>
                     </div>
                 @else
@@ -89,24 +72,13 @@
                                 </button>
                             @endif
 
-                            @if (\App\Helpers\Editions::attendanceLocked())
-                                <button
-                                    @click.prevent="$dispatch('feature-lock', { title: @js(__('Face ID Locked')), message: @js(__('Face ID Biometrics is an Enterprise Feature. Please Upgrade.')) })"
-                                    class="face-enrollment-primary-action @if (! $isEnrolled) w-full @endif"
-                                    aria-label="{{ __('Capture Face') }}">
-                                    <x-heroicon-o-camera class="h-5 w-5" />
-                                    <span>{{ __('Capture Face') }}</span>
-                                    <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                </button>
-                            @else
-                                <button @click="capture({ manual: true })" :disabled="!canCapture()"
-                                    :class="canCapture() ? 'face-enrollment-primary-action' : 'face-enrollment-primary-action face-enrollment-primary-action--disabled'"
-                                    class="@if (! $isEnrolled) w-full @else flex-1 @endif"
-                                    aria-label="{{ __('Capture Face') }}">
-                                    <x-heroicon-o-camera class="h-5 w-5" />
-                                    <span x-text="buttonLabel()"></span>
-                                </button>
-                            @endif
+                            <button @click="capture({ manual: true })" :disabled="!canCapture()"
+                                :class="canCapture() ? 'face-enrollment-primary-action' : 'face-enrollment-primary-action face-enrollment-primary-action--disabled'"
+                                class="@if (! $isEnrolled) w-full @else flex-1 @endif"
+                                aria-label="{{ __('Capture Face') }}">
+                                <x-heroicon-o-camera class="h-5 w-5" />
+                                <span x-text="buttonLabel()"></span>
+                            </button>
                         </div>
                     </div>
                 @endif
@@ -589,23 +561,23 @@
                     const guide = this.getGuideRect(canvas.width, canvas.height);
                     const toneStyles = {
                         neutral: {
-                            stroke: 'rgba(255, 255, 255, 0.82)',
-                            shadow: 'rgba(255, 255, 255, 0.18)',
+                            stroke: window.colorWithAlpha(window.cssVar('--color-surface'), 0.82),
+                            shadow: window.colorWithAlpha(window.cssVar('--color-surface'), 0.18),
                             dash: [],
                         },
                         warning: {
-                            stroke: '#f59e0b',
-                            shadow: 'rgba(245, 158, 11, 0.26)',
+                            stroke: window.cssVar('--color-module-documents'),
+                            shadow: window.colorWithAlpha(window.cssVar('--color-module-documents'), 0.26),
                             dash: [14, 10],
                         },
                         success: {
-                            stroke: '#38bdf8',
-                            shadow: 'rgba(56, 189, 248, 0.28)',
+                            stroke: window.cssVar('--color-module-attendance'),
+                            shadow: window.colorWithAlpha(window.cssVar('--color-module-attendance'), 0.28),
                             dash: [],
                         },
                         danger: {
-                            stroke: '#fb7185',
-                            shadow: 'rgba(251, 113, 133, 0.28)',
+                            stroke: window.cssVar('--color-module-finance'),
+                            shadow: window.colorWithAlpha(window.cssVar('--color-module-finance'), 0.28),
                             dash: [8, 8],
                         },
                     };
@@ -615,7 +587,7 @@
                     const radiusX = guide.width / 2;
                     const radiusY = guide.height / 2;
 
-                    ctx.fillStyle = 'rgba(2, 6, 23, 0.18)';
+                    ctx.fillStyle = window.colorWithAlpha(window.cssVar('--color-primary-950'), 0.18);
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.save();
                     ctx.globalCompositeOperation = 'destination-out';

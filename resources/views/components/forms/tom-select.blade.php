@@ -26,10 +26,10 @@
 @once
     <style>
         .ts-control {
-            background-color: rgba(248, 250, 252, 0.82);
+            background-color: color-mix(in srgb, var(--color-primary-50) 82%, transparent);
             border: 0 !important;
-            box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.8);
-            color: #0f172a;
+            box-shadow: inset 0 0 0 1px var(--color-primary-300);
+            color: var(--color-primary-900);
             border-radius: 1rem;
             padding: 0 2.5rem 0 1rem;
             font-size: 1rem;
@@ -79,7 +79,7 @@
             max-width: 100% !important;
             min-width: 1ch !important;
             height: auto !important;
-            color: #0f172a !important;
+            color: var(--color-primary-900) !important;
             font-size: 1rem !important;
             font-weight: 500 !important;
             line-height: 1.5rem !important;
@@ -102,15 +102,15 @@
         .ts-wrapper.focus .ts-control,
         .ts-wrapper.input-active .ts-control,
         .ts-wrapper.dropdown-active .ts-control {
-            background-color: #ffffff !important;
-            box-shadow: inset 0 0 0 1px #024ad8, 0 0 0 4px rgba(2, 74, 216, 0.18) !important;
+            background-color: var(--color-surface) !important;
+            box-shadow: inset 0 0 0 1px var(--color-primary-700), 0 0 0 4px color-mix(in srgb, var(--color-primary-700) 18%, transparent) !important;
         }
 
         /* Dropdown */
         .ts-dropdown {
-            background-color: #ffffff !important;
-            border-color: #e5e7eb;
-            color: #111827;
+            background-color: var(--color-surface) !important;
+            border-color: var(--color-primary-200);
+            color: var(--color-primary-900);
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
             z-index: 99999 !important;
@@ -118,7 +118,7 @@
         }
 
         .ts-dropdown .ts-dropdown-content {
-            background-color: #ffffff !important;
+            background-color: var(--color-surface) !important;
         }
 
         .ts-dropdown .option {
@@ -128,9 +128,9 @@
         }
 
         .ts-dropdown .active {
-            background-color: #f3f4f6;
+            background-color: var(--color-primary-100);
             /* gray-100 */
-            color: #111827;
+            color: var(--color-primary-900);
         }
 
         .user-ui .ts-wrapper-user .ts-control,
@@ -151,8 +151,8 @@
         .user-ui .profile-modal .ts-wrapper.focus .ts-control,
         .user-ui .profile-modal .ts-wrapper.input-active .ts-control,
         .user-ui .profile-modal .ts-wrapper.dropdown-active .ts-control {
-            border-color: #024ad8 !important;
-            box-shadow: 0 0 0 4px rgba(2, 74, 216, 0.22) !important;
+            border-color: var(--color-primary-700) !important;
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary-700) 22%, transparent) !important;
         }
 
         .user-ui .ts-wrapper-user .ts-dropdown,
@@ -207,15 +207,16 @@
 
 
 
-<div wire:ignore x-data="tomSelectInput(
+<div wire:ignore x-data="window.tomSelectInput ? tomSelectInput(
     @js($options),
     @js($placeholder),
     @if (isset($__livewire) && $wireModel) @entangle($attributes->wire('model')) @else @js($selected) @endif,
     @js((bool) $disabled)
-)" class="{{ $wrapperClass }}" @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
+) : {}" class="{{ $wrapperClass }}" @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
 
     <select
         x-ref="select"
+        data-ui-tomselect
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $disabled ? 'disabled' : '' }}
         {{ $attributes->whereDoesntStartWith(['wire:model', 'x-model'])->except(['options', 'placeholder', 'selected', 'class', 'aria-label']) }}

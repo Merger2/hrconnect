@@ -26,6 +26,8 @@ class IntegrationClient extends Model
     public const ABILITY_SCHEDULES_READ = 'integration:schedules.read';
 
     protected $fillable = [
+        'company_id',
+        'code',
         'name',
         'contact_name',
         'contact_email',
@@ -63,6 +65,9 @@ class IntegrationClient extends Model
 
         $client = self::query()->create([
             ...$attributes,
+            // code NOT NULL + unique di tabel — generate otomatis bila tidak
+            // diberikan (polanya sama seperti generateCredentials).
+            'code' => $attributes['code'] ?? 'ic_'.Str::random(16),
             'api_key_hash' => self::hashApiKey($apiKey),
             'secret_encrypted' => Crypt::encryptString($secret),
             'abilities' => array_values($attributes['abilities'] ?? []),

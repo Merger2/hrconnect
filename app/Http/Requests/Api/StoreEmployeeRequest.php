@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\EducationLevel;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,11 @@ class StoreEmployeeRequest extends FormRequest
             'join_date' => ['required', 'date'],
             'salary_type' => ['required', Rule::in(['monthly', 'daily', 'hourly'])],
             'nip' => ['nullable', 'string', 'max:50'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:20'],
+            'nik' => ['nullable', 'string', 'max:50'],
+            'education_level' => ['required', Rule::in(array_column(EducationLevel::cases(), 'value'))],
+            'institution_name' => ['required', 'string', 'max:255'],
+            'graduation_year' => ['required', 'integer', 'min:1970', 'max:'.now()->year],
             'basic_salary' => ['nullable', 'numeric', 'min:0'],
             'address_detail' => ['nullable', 'string', 'max:500'],
             'bank_name' => ['nullable', 'string', 'max:100'],

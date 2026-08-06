@@ -6,6 +6,7 @@
                 :back-href="route('home')"
                 :title="__('Knowledge Base')"
                 title-id="kb-index-title"
+                module="kb"
                 class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-document-text class="h-5 w-5" />

@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property Asset $resource
+ *
+ * @mixin Asset
+ */
 class AssetResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -17,7 +23,7 @@ class AssetResource extends JsonResource
             'code' => $this->code,
             'category' => $this->category,
             'is_available' => $this->is_available,
-            'status' => $this->status?->value,
+            'status' => $this->status->value,
             'handovers' => AssetHandoverResource::collection($this->whenLoaded('handovers')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

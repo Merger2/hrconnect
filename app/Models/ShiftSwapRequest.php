@@ -99,6 +99,6 @@ class ShiftSwapRequest extends Model
 
     public function effectiveScheduleDate(): ?CarbonInterface
     {
-        return $this->schedule?->date ?? $this->schedule_date;
+        return $this->schedule->date ?? $this->schedule_date;
     }
 }

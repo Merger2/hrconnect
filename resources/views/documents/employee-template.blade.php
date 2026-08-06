@@ -8,7 +8,7 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             margin: 0;
             padding: 2rem;
             font-size: 13px;
@@ -19,24 +19,24 @@
             size: {{ $paperSize ?? 'a4' }} {{ $orientation ?? 'portrait' }};
         }
         .document-header {
-            border-bottom: 2px solid #16a34a;
+            border-bottom: 2px solid {{ design_token('success') }};
             padding-bottom: 0.75rem;
             margin-bottom: 1.5rem;
         }
         .document-header h1 {
             margin: 0;
             font-size: 18px;
-            color: #14532d;
+            color: {{ design_token('brand-green-900') }};
         }
         .document-body {
             margin-bottom: 1.5rem;
         }
         .document-footer {
-            border-top: 1px solid #d1d5db;
+            border-top: 1px solid {{ design_token('primary-300') }};
             padding-top: 0.75rem;
             margin-top: 2rem;
             font-size: 11px;
-            color: #6b7280;
+            color: {{ design_token('primary-500') }};
         }
     </style>
 </head>

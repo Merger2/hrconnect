@@ -92,7 +92,7 @@ class AttendanceService
                     'status' => $status,
                 ]);
 
-                $geofenceRadius = $employee->branch?->radius;
+                $geofenceRadius = $employee->branch->radius;
                 $riskResult = $this->riskScorer->score($attendance, $employee->shift, 'check_in', [
                     'gps_accuracy' => $data['accuracy'] ?? null,
                     'gps_variance' => $data['gps_variance'] ?? null,

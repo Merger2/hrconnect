@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-primary-50/40 px-4 py-12 sm:px-6 lg:px-8">
+    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-brand-50/40 px-4 py-12 sm:px-6 lg:px-8">
         <div class="w-full max-w-md">
             {{-- Logo / Branding --}}
             <div class="mb-8 flex justify-center">
@@ -18,7 +18,7 @@
                 {{-- Card header --}}
                 <div class="border-b border-slate-100 px-6 py-5">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                             </svg>
@@ -50,36 +50,36 @@
                         <div class="mb-4">
                             <label for="name" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Name') }}</label>
                             <input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name"
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20" />
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20" />
                         </div>
 
                         <div class="mb-4">
                             <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Email') }}</label>
                             <input id="email" type="email" name="email" :value="old('email')" required autocomplete="username"
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20" />
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20" />
                         </div>
 
                         <div class="mb-4">
                             <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Password') }}</label>
                             <input id="password" type="password" name="password" required autocomplete="new-password"
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20" />
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20" />
                         </div>
 
                         <div class="mb-4">
                             <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Confirm Password') }}</label>
                             <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20" />
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20" />
                         </div>
 
                         @if (\Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
                             <div class="mb-4">
                                 <label for="terms" class="flex items-start gap-2">
                                     <input id="terms" type="checkbox" name="terms" required
-                                        class="mt-1 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+                                        class="mt-1 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
                                     <span class="text-sm text-slate-600">
                                         {!! __('I agree to the :terms_of_service and :privacy_policy', [
-                                            'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="font-semibold text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700">'.__('Terms of Service').'</a>',
-                                            'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="font-semibold text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700">'.__('Privacy Policy').'</a>',
+                                            'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="font-semibold text-brand-600 underline decoration-brand-300 underline-offset-2 hover:text-brand-700">'.__('Terms of Service').'</a>',
+                                            'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="font-semibold text-brand-600 underline decoration-brand-300 underline-offset-2 hover:text-brand-700">'.__('Privacy Policy').'</a>',
                                         ]) !!}
                                     </span>
                                 </label>
@@ -87,10 +87,10 @@
                         @endif
 
                         <div class="mt-6 flex items-center justify-between gap-4">
-                            <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-primary-300">
+                            <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-brand-600 hover:decoration-brand-300">
                                 {{ __('Already registered?') }}
                             </a>
-                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.97]">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 active:scale-[0.97]">
                                 {{ __('Register') }}
                             </button>
                         </div>

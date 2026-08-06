@@ -29,7 +29,7 @@ class PayrollObserver
             'user_id' => $actorId,
             'action' => $action,
             'description' => "Perubahan payroll pada Employee #{$payroll->employee_id}, Periode {$payroll->period}",
-            'ip_address' => request()?->ip(),
+            'ip_address' => request()->ip(),
         ]);
 
         foreach ($changed as $field) {

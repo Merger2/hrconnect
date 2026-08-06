@@ -70,7 +70,7 @@ class FaceController extends Controller
             'status' => 'success',
             'message' => 'Wajah dikenali',
             'data' => [
-                'valid' => $result['valid'],
+                'valid' => $result['similarity_percentage'] >= FaceRecognitionService::SIMILARITY_THRESHOLD,
                 'similarity_percentage' => round($result['similarity_percentage'], 2),
             ],
         ]);

@@ -1,6 +1,13 @@
 import "./bootstrap";
 import TomSelect from "tom-select";
 import "tom-select/dist/css/tom-select.css";
+// Base flatpickr stylesheet WAJIB di-load. Tanpa ini, rule layout inti dari
+// flatpickr (`.dayContainer` flex-wrap grid 7 kolom, posisi absolut panah
+// prev/next month, header hari `.flatpickr-weekday` flex, state `display:none`
+// saat tertutup) ikut hilang — kalender menyempit jadi satu baris tanggal
+// bertumpuk, panah jadi raksasa, dropdown bulan/tahun melayang terpisah.
+// Overrides di bawah menimpa tampilan visual di atas base ini.
+import "flatpickr/dist/flatpickr.css";
 import "../css/vendor/flatpickr-overrides.css";
 import flatpickr from "flatpickr";
 import Swal from "sweetalert2";
@@ -41,6 +48,34 @@ window.CapacitorGeolocation = CapacitorGeolocation;
 window.CapacitorApp = App;
 window.axios = axios;
 
+// Resolve @theme design token untuk runtime. Canvas / Chart.js TIDAK
+// me-resolve CSS custom properties sendiri — semua warna runtime harus
+// lewat token (token-only rule, design.md), bukan hex hardcode.
+window.cssVar = (name, fallback = '') => {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+    return value || fallback;
+};
+
+// Ubah warna token (#hex / rgb(...)) menjadi rgba() dengan alpha — untuk
+// canvas gradient / shadow yang butuh nilai ter-resolve.
+window.colorWithAlpha = (color, alpha) => {
+    const c = String(color || '').trim();
+    const hex = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(c);
+
+    if (hex) {
+        return `rgba(${parseInt(hex[1], 16)}, ${parseInt(hex[2], 16)}, ${parseInt(hex[3], 16)}, ${alpha})`;
+    }
+
+    const rgb = /^rgba?\(([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)/i.exec(c);
+
+    if (rgb) {
+        return `rgba(${rgb[1]}, ${rgb[2]}, ${rgb[3]}, ${alpha})`;
+    }
+
+    return c;
+};
+
 const pasPapanAlertLabels = () => ({
     confirm: window.PasPapanAlertLabels?.confirm || "Confirm",
     cancel: window.PasPapanAlertLabels?.cancel || "Cancel",
@@ -63,7 +98,7 @@ const normalizeSweetAlertIcon = (icon) => {
 };
 
 const sweetAlertBaseClasses = {
-    popup: "!w-[min(28rem,calc(100vw-2rem))] !rounded-[1.35rem] !border !border-slate-200 !bg-white !px-5 !py-6 !text-slate-950 !shadow-[0_28px_80px_-42px_rgba(15,23,42,0.62)]   ",
+    popup: "!w-[min(28rem,calc(100vw-2rem))] !rounded-[1.35rem] !border !border-slate-200 !bg-white !px-5 !py-6 !text-slate-950 swal-alert-popup   ",
     icon: "!my-2 !h-16 !w-16 !border-[0.28rem]",
     title: "!mt-4 !text-lg !font-bold !tracking-tight",
     htmlContainer: "!mx-0 !mt-3 !text-sm !leading-6 !text-slate-600 ",
@@ -80,7 +115,7 @@ const createPasPapanToast = () => Swal.mixin({
     timerProgressBar: true,
     background: "transparent",
     customClass: {
-        popup: "!bg-white  !text-slate-900  !rounded-2xl !shadow-[0_18px_48px_-28px_rgba(15,23,42,0.65)] !border !border-slate-100 /70 !px-4 !py-3 !w-auto !max-w-[92vw] !mx-auto !mt-4",
+        popup: "!bg-white  !text-slate-900  !rounded-2xl swal-alert-toast !border !border-slate-100 /70 !px-4 !py-3 !w-auto !max-w-[92vw] !mx-auto !mt-4",
         title: "!text-sm !font-semibold !leading-5",
         timerProgressBar: "!bg-primary-500 !h-1",
     },
@@ -135,8 +170,9 @@ window.tomSelectInput = (options, placeholder, selected, disabled) => ({
 });
 
 // ─── Flatpickr initializer ─────────────────────────────────────────────
-// Scans for [data-ui-picker] elements and initializes flatpickr on each.
-// Safe to call multiple times (skips already-initialized elements).
+// Scans for [data-ui-picker] elements (dan [data-ui-picker-static] legacy
+// admin) and initializes flatpickr on each. Safe to call multiple times
+// (skips already-initialized elements).
 //
 // Parse server value (Y-m-d / range "Y-m-d - Y-m-d") menjadi defaultDate —
 // flatpickr memakai dateFormat 'd M Y' sehingga value mentah server tidak
@@ -165,8 +201,22 @@ const parseServerDate = (v) => {
 };
 
 const initFlatpickr = (root = document) => {
-    root.querySelectorAll('[data-ui-picker]:not([data-flatpickr-inited])').forEach((el) => {
+    root.querySelectorAll(
+        '[data-ui-picker]:not([data-flatpickr-inited]), [data-ui-picker-static]:not([data-flatpickr-inited])'
+    ).forEach((el) => {
+        // mode: atribut baru data-ui-picker, atau data-ui-picker-static legacy
+        // (dipakai input admin type="date" — bermakna flatpickr static date).
         const mode = el.getAttribute('data-ui-picker') || 'date';
+
+        // Input admin masih type="date" — flatpickr menulis value berformat
+        // 'd M Y' yang tidak valid untuk native date input (value jadi kosong
+        // di browser). Konversi ke text dulu, sama seperti native-date-field.
+        // (Defensif untuk semua elemen: pemakaian data-ui-picker yang lain sudah
+        // merender type="text" dari awal, jadi ini hanya berdampak pada input
+        // data-ui-picker-static legacy.)
+        if (el.type === 'date') {
+            el.type = 'text';
+        }
         const minDate = el.getAttribute('min') || null;
         const maxDate = el.getAttribute('max') || null;
         const isRange = mode === 'date-range';
@@ -192,11 +242,9 @@ const initFlatpickr = (root = document) => {
                 disableMobile: true,
                 // static: true → kalender dirender DI DALAM .flatpickr-wrapper
                 // (persis di bawah input), bukan di-append ke document.body.
-                // CSS-nya sudah ada (flatpickr-overrides.css: .flatpickr-wrapper,
-                // .flatpickr-calendar.static, [role="dialog"] variants) — opsi
-                // ini yang belum pernah diaktifkan → sebelumnya kalender tampil
-                // in-flow di akhir body (posisi "aneh", jauh dari input) karena
-                // flatpickr default CSS (position: absolute) tidak di-load.
+                // Base flatpickr CSS (posisi absolute + top) kini di-load, dan
+                // overrides (flatpickr-overrides.css: .flatpickr-wrapper,
+                // .flatpickr-calendar.static) menyetel top: calc(100% + 0.375rem).
                 static: true,
                 // "below" → kalender tidak pernah flip ke atas input; static
                 // mode menentukan posisi via CSS (top: calc(100% + 0.375rem)),
@@ -245,14 +293,21 @@ const initFlatpickr = (root = document) => {
 
 // Initial run after DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initFlatpickr, 100);
-});
-
-// Re-init after Livewire updates (component re-renders)
-document.addEventListener('livewire:init', () => {
-    Livewire.hook('morph.updated', () => {
-        setTimeout(initFlatpickr, 50);
-    });
+    setTimeout(() => {
+        initFlatpickr();
+        // Safety net untuk race Alpine-vs-module: tom-select yang x-data-nya
+        // dievaluasi Alpine SEBELUM window.tomSelectInput terdefinisi (module
+        // app.js deferred) dirender sebagai {} — select native tetap harus
+        // di-upgrade ke TomSelect di sini. Idempoten (skip el.tomselect).
+        initUiPickers();
+    }, 100);
+});    // Re-init after Livewire updates (component re-renders)
+    document.addEventListener('livewire:init', () => {
+        Livewire.hook('morph.updated', () => {
+            // initUiPickers memanggil initFlatpickr di dalamnya + upgrade
+            // tom-select baru hasil re-render.
+            setTimeout(initUiPickers, 50);
+        });
 
     // Saat Livewire morph MENGHAPUS elemen input, instance flatpickr lama
     // ikut mati bersama node — tetapi .flatpickr-calendar-nya tertinggal
@@ -269,7 +324,7 @@ document.addEventListener('livewire:init', () => {
         // kena. Destroy instance picker di dalam wrapper agar tidak jadi zombie
         // (event listener + closure bocor di tiap re-render Livewire).
         if (el.querySelector) {
-            const picker = el.querySelector('[data-ui-picker]');
+            const picker = el.querySelector('[data-ui-picker], [data-ui-picker-static]');
             if (picker && picker._flatpickr) {
                 try {
                     picker._flatpickr.destroy();
@@ -290,8 +345,11 @@ const initUiPickers = (root = document) => {
 
     initFlatpickr(container);
 
-    container.querySelectorAll('[x-data^="tomSelectInput"]').forEach((wrapper) => {
-        const select = wrapper.querySelector('select');
+    // Dua bentuk: wrapper lama [x-data^="tomSelectInput"] (select di dalamnya)
+    // dan marker baru [data-ui-tomselect] (select langsung — dipakai setelah
+    // race guard di komponen: window.tomSelectInput ? tomSelectInput(...) : {}).
+    container.querySelectorAll('[data-ui-tomselect], [x-data^="tomSelectInput"]').forEach((el) => {
+        const select = el.matches('select') ? el : el.querySelector('select');
         if (!select || select.tomselect) return;
 
         new TomSelect(select, {

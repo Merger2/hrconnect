@@ -61,7 +61,6 @@ class FaceEnrollment extends Component
                     'user_id' => $user?->id,
                     'exception' => $e->getMessage(),
                 ]);
-                $this->dispatch('feature-lock', title: __('Face ID Locked'), message: __('Face verification is not available for your current license.'));
             } else {
                 throw $e;
             }
@@ -84,7 +83,6 @@ class FaceEnrollment extends Component
                     'user_id' => Auth::id(),
                     'exception' => $e->getMessage(),
                 ]);
-                $this->dispatch('feature-lock', title: __('Face ID Locked'), message: __('Face verification is not available for your current license.'));
             } else {
                 throw $e;
             }

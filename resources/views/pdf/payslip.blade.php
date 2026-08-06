@@ -20,7 +20,7 @@
         }
 
         body {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 11px;
             line-height: 1.55;
@@ -28,7 +28,7 @@
         }
 
         .watermark {
-            color: #e5e7eb;
+            color: {{ design_token('primary-200') }};
             font-size: 68px;
             font-weight: 700;
             left: 0;
@@ -44,7 +44,7 @@
 
         .top-corner-navy {
             border-left: 82px solid transparent;
-            border-top: 82px solid #083344;
+            border-top: 82px solid {{ design_token('brand-deep') }};
             height: 0;
             position: fixed;
             right: -54px;
@@ -54,7 +54,7 @@
 
         .top-corner-primary {
             border-left: 46px solid transparent;
-            border-top: 46px solid #6ab45b;
+            border-top: 46px solid {{ design_token('brand-green-500') }};
             height: 0;
             position: fixed;
             right: -54px;
@@ -63,7 +63,7 @@
         }
 
         .letterhead {
-            border-bottom: 1.4px solid #31542a;
+            border-bottom: 1.4px solid {{ design_token('brand-green-800') }};
             margin: 0 0 20px;
             padding-bottom: 12px;
             width: 100%;
@@ -97,7 +97,7 @@
         }
 
         .company-name {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 15.5px;
             font-weight: 700;
             letter-spacing: .01em;
@@ -106,14 +106,14 @@
         }
 
         .company-address {
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 9.2px;
             line-height: 1.35;
             margin: 0;
         }
 
         .company-mark {
-            color: #57944a;
+            color: {{ design_token('brand-green-600') }};
             font-size: 8.2px;
             font-weight: 700;
             letter-spacing: .18em;
@@ -122,7 +122,7 @@
         }
 
         .document-title {
-            color: #083344;
+            color: {{ design_token('brand-deep') }};
             font-size: 18px;
             font-weight: 700;
             letter-spacing: .04em;
@@ -131,7 +131,7 @@
         }
 
         .document-period {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 10px;
             font-weight: 700;
             margin: 3px 0 0;
@@ -149,7 +149,7 @@
         }
 
         .meta-label {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 9.5px;
             font-weight: 700;
             letter-spacing: .06em;
@@ -158,13 +158,13 @@
         }
 
         .meta-value {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 10.5px;
             font-weight: 700;
         }
 
         .section-title {
-            color: #083344;
+            color: {{ design_token('brand-deep') }};
             font-size: 10px;
             font-weight: 700;
             letter-spacing: .12em;
@@ -179,9 +179,9 @@
         }
 
         .salary-table th {
-            background: #083344;
-            border: 1px solid #083344;
-            color: #ffffff;
+            background: {{ design_token('brand-deep') }};
+            border: 1px solid {{ design_token('brand-deep') }};
+            color: {{ design_token('surface') }};
             font-size: 9px;
             font-weight: 700;
             padding: 7px;
@@ -190,14 +190,14 @@
         }
 
         .salary-table td {
-            border: 1px solid #d1d5db;
+            border: 1px solid {{ design_token('primary-300') }};
             padding: 7px;
             vertical-align: top;
         }
 
         .salary-table .subtotal td {
-            background: #f5faf4;
-            color: #31542a;
+            background: {{ design_token('brand-green-50') }};
+            color: {{ design_token('brand-green-800') }};
             font-weight: 700;
         }
 
@@ -206,12 +206,12 @@
         }
 
         .text-red {
-            color: #b91c1c;
+            color: {{ design_token('status-red') }};
         }
 
         .summary-card {
-            background: #f0f9ee;
-            border: 1.5px solid #6ab45b;
+            background: {{ design_token('brand-green-50') }};
+            border: 1.5px solid {{ design_token('brand-green-500') }};
             border-radius: 8px;
             margin: 16px 0 0;
             padding: 12px 14px;
@@ -222,7 +222,7 @@
         }
 
         .summary-label {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 10px;
             font-weight: 700;
             letter-spacing: .12em;
@@ -230,7 +230,7 @@
         }
 
         .summary-value {
-            color: #083344;
+            color: {{ design_token('brand-deep') }};
             font-size: 20px;
             font-weight: 700;
             text-align: right;
@@ -253,28 +253,28 @@
         }
 
         .signature-line {
-            border-top: 1px solid #9ca3af;
+            border-top: 1px solid {{ design_token('primary-400') }};
             margin: 54px auto 8px;
             width: 62%;
         }
 
         .signature-name {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 11px;
             font-weight: 700;
         }
 
         .signature-role {
-            color: #6b7280;
+            color: {{ design_token('primary-500') }};
             font-size: 9px;
             letter-spacing: .08em;
             text-transform: uppercase;
         }
 
         .footer {
-            border-top: 1px solid #badcb3;
+            border-top: 1px solid {{ design_token('brand-green-300') }};
             bottom: -54px;
-            color: #6b7280;
+            color: {{ design_token('primary-500') }};
             font-size: 8.4px;
             left: 0;
             line-height: 1.4;

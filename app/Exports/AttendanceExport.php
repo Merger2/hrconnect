@@ -53,13 +53,13 @@ class AttendanceExport implements FromCollection, WithColumnWidths, WithHeadings
 
         return [
             $employee->employee_number ?? '-',
-            $employee->user?->name ?? $employee->full_name ?? '-',
-            $employee->division?->name ?? '-',
-            $employee->position?->name ?? '-',
+            $employee->user->name ?? $employee->full_name ?? '-',
+            $employee->division->name ?? '-',
+            $employee->position->name ?? '-',
             $attendance->date?->format('Y-m-d') ?? '-',
             $clockIn,
             $clockOut,
-            ucfirst((string) ($attendance->status?->value ?? 'present')),
+            ucfirst((string) ($attendance->status->value ?? 'present')),
             $totalHours,
             $attendance->overtime_hours ?? 0,
             $attendance->notes ?? '-',

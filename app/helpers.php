@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use App\Support\DesignTokens;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -159,5 +160,27 @@ if (! function_exists('format_time')) {
         }
 
         return $time->format($formatString);
+    }
+}
+
+if (! function_exists('design_token')) {
+    /**
+     * Hex literal dari DesignTokens (renderer non-CSS: PDF Dompdf & email).
+     * Token-only rule (design.md): template pdf/email TIDAK boleh hardcode
+     * hex — selalu lewat token PHP ini.
+     */
+    function design_token(string $key, ?string $fallback = null): string
+    {
+        return DesignTokens::get($key, $fallback);
+    }
+}
+
+if (! function_exists('design_rgba')) {
+    /**
+     * Token hex → rgba(..) dengan alpha (email client mendukung rgba).
+     */
+    function design_rgba(string $key, float $alpha): string
+    {
+        return DesignTokens::rgba($key, $alpha);
     }
 }

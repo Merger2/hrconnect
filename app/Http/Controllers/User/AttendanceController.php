@@ -97,7 +97,7 @@ class AttendanceController extends Controller
                 ->with('success', __('Pengajuan izin berhasil dibuat.'));
         } catch (\Throwable $th) {
             Log::error('Failed to submit leave request.', [
-                'user_id' => $user?->getAuthIdentifier(),
+                'user_id' => $user->getAuthIdentifier(),
                 'exception' => $th->getMessage(),
             ]);
 

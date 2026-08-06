@@ -1,6 +1,5 @@
 {{-- <nav x-data="{ open: false }" class="border-b border-gray-100 bg-white"> --}}
 @php
-use App\Helpers\FeatureToggle;
     $isAdminRoute = request()->routeIs('admin.*');
     $isUserRoute = ! $isAdminRoute;
     $user = Auth::user();
@@ -9,14 +8,36 @@ use App\Helpers\FeatureToggle;
     $homeLabel = $isAdminUser ? __('Go to admin home') : __('Go to home');
     $profileHref = $isAdminRoute ? route('admin.profile.show') : route('profile.show');
     $apiTokensHref = $isAdminRoute ? route('admin.profile.show').'#api' : route('api-tokens.index');
-    $reportingLocked = FeatureToggle::isDisabled('reporting', $user);
-    $payrollLocked = FeatureToggle::isDisabled('payroll', $user);
-    $cashAdvanceLocked = FeatureToggle::isDisabled('cash_advance', $user);
-    $analyticsLocked = FeatureToggle::isDisabled('analytics', $user);
-    $appraisalLocked = FeatureToggle::isDisabled('appraisal', $user);
-    $assetLocked = FeatureToggle::isDisabled('assets', $user);
-    $documentRequestsLocked = FeatureToggle::isDisabled('document_requests', $user);
     $canReviewSubordinateRequests = $user?->can('reviewSubordinateRequests') ?? false;
+
+    // Nav desktop user — pill ber-ikon, mirror bottom-nav mobile supaya
+    // navigasi jelas di topbar (2026-08-06).
+    $userDesktopNav = [
+        [
+            'label' => __('Home'),
+            'href' => route('home'),
+            'active' => request()->routeIs('home'),
+            'icon' => 'heroicon-o-home',
+        ],
+        [
+            'label' => __('Schedule'),
+            'href' => route('my-schedule'),
+            'active' => request()->routeIs('my-schedule', 'shift-swap-requests', 'wfh-requests'),
+            'icon' => 'heroicon-o-calendar-days',
+        ],
+        [
+            'label' => __('Absen'),
+            'href' => route('scan'),
+            'active' => request()->routeIs('scan', 'face.enrollment', 'attendance-history', 'attendance-corrections'),
+            'icon' => 'heroicon-o-camera',
+        ],
+        [
+            'label' => __('Tasks'),
+            'href' => route('hr-tasks'),
+            'active' => request()->routeIs('hr-tasks', 'my-tasks', 'my-forms', 'approvals', 'approvals.history'),
+            'icon' => 'heroicon-o-clipboard-document-check',
+        ],
+    ];
 
     $isRouteActive = fn ($patterns) => request()->routeIs(...(array) $patterns);
     $can = fn (string $ability, mixed $arguments = []) => $user?->can($ability, $arguments) ?? false;
@@ -64,9 +85,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Analytics'),
                     'href' => route('admin.analytics'),
                     'active' => $isRouteActive('admin.analytics'),
-                    'locked' => $analyticsLocked,
-                    'lockTitle' => __('Analytics Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.analytics.view'),
                 ],
                 ['type' => 'divider'],
@@ -86,9 +104,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Payroll'),
                     'href' => route('admin.payrolls'),
                     'active' => $isRouteActive('admin.payrolls'),
-                    'locked' => $payrollLocked,
-                    'lockTitle' => __('Payroll Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.payroll.view'),
                 ],
                 ['type' => 'link', 'label' => __('Reimbursements'), 'href' => route('admin.reimbursements'), 'active' => $isRouteActive('admin.reimbursements'), 'visible' => $can('viewAdminAny', \App\Models\Reimbursement::class)],
@@ -97,9 +112,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Manage Kasbon'),
                     'href' => route('admin.manage-kasbon'),
                     'active' => $isRouteActive('admin.manage-kasbon'),
-                    'locked' => $cashAdvanceLocked,
-                    'lockTitle' => __('Kasbon Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.cash_advances.manage'),
                 ],
                 ['type' => 'divider'],
@@ -108,9 +120,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Payroll Settings'),
                     'href' => route('admin.payroll.settings'),
                     'active' => $isRouteActive('admin.payroll.settings'),
-                    'locked' => $payrollLocked,
-                    'lockTitle' => __('Settings Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.payroll_settings.manage'),
                 ],
             ],
@@ -129,9 +138,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Document Requests'),
                     'href' => route('admin.document-requests'),
                     'active' => $isRouteActive('admin.document-requests'),
-                    'locked' => $documentRequestsLocked,
-                    'lockTitle' => __('Documents Locked'),
-                    'lockMessage' => __('Document Workflow is an Enterprise Feature. Please Upgrade.'),
                     'visible' => $user?->allowsAdminPermission('admin.document_requests.view') ?? false,
                 ],
                 [
@@ -139,9 +145,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Document Templates'),
                     'href' => route('admin.document-templates'),
                     'active' => $isRouteActive(['admin.document-templates', 'admin.document-templates.*']),
-                    'locked' => $documentRequestsLocked,
-                    'lockTitle' => __('Documents Locked'),
-                    'lockMessage' => __('Document Workflow is an Enterprise Feature. Please Upgrade.'),
                     'visible' => ($user?->allowsAdminPermission('admin.document_requests.templates') ?? false)
                         || ($user?->allowsAdminPermission('admin.document_requests.generate') ?? false)
                         || ($user?->allowsAdminPermission('admin.document_requests.fulfill') ?? false)
@@ -152,9 +155,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Performance Appraisals'),
                     'href' => route('admin.appraisals'),
                     'active' => $isRouteActive('admin.appraisals'),
-                    'locked' => $appraisalLocked,
-                    'lockTitle' => __('Appraisals Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.appraisals.view'),
                 ],
                 [
@@ -162,9 +162,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Company Assets'),
                     'href' => route('admin.assets'),
                     'active' => $isRouteActive('admin.assets'),
-                    'locked' => $assetLocked,
-                    'lockTitle' => __('Asset Management Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.assets.view'),
                 ],
                 ['type' => 'divider'],
@@ -203,9 +200,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('KPI Settings'),
                     'href' => route('admin.settings.kpi'),
                     'active' => $isRouteActive('admin.settings.kpi'),
-                    'locked' => $appraisalLocked,
-                    'lockTitle' => __('KPI Settings Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.kpi_settings.manage'),
                 ],
                 $can('viewAny', \App\Models\SystemBackupRun::class)
@@ -224,9 +218,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Import/Export Users'),
                     'href' => route('admin.import-export.users'),
                     'active' => $isRouteActive('admin.import-export.users'),
-                    'locked' => $reportingLocked,
-                    'lockTitle' => __('Import/Export Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.import_export_users.view'),
                 ],
                 [
@@ -234,9 +225,6 @@ use App\Helpers\FeatureToggle;
                     'label' => __('Import/Export Attendance'),
                     'href' => route('admin.import-export.attendances'),
                     'active' => $isRouteActive('admin.import-export.attendances'),
-                    'locked' => $reportingLocked,
-                    'lockTitle' => __('Import/Export Locked'),
-                    'lockMessage' => __('This feature is available in the Enterprise Edition. Please upgrade.'),
                     'visible' => $allowsAdminPermission('admin.import_export_attendances.view'),
                 ],
                 ['type' => 'link', 'label' => __('Roles & Permissions'), 'href' => route('admin.roles.permissions'), 'active' => $isRouteActive('admin.roles.permissions'), 'visible' => $can('manageRbac')],
@@ -405,26 +393,6 @@ use App\Helpers\FeatureToggle;
                                                         @endforeach
                                                     </div>
                                                 </div>
-                                            @elseif (($navItem['type'] ?? 'link') === 'feature' && $navItem['locked'])
-                                                @php($addonFlag = isset($navItem['addonFlag']) ? value($navItem['addonFlag']) : null)
-                                                <button
-                                                    type="button"
-                                                    @click.prevent="$dispatch('feature-lock', { title: @js($navItem['lockTitle']), message: @js($navItem['lockMessage']) })"
-                                                    class="wcag-touch-target block w-full rounded-md px-4 py-2.5 text-start text-sm leading-5 text-gray-800 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-950"
-                                                    aria-label="{{ $navItem['label'] }}. {{ __('Locked feature') }}">
-                                                    <span class="flex items-center justify-between gap-3">
-                                                        <span class="inline-flex items-center gap-1.5">
-                                                            <span>{{ $navItem['label'] }}</span>
-                                                            <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                                        </span>
-                                                        @if ($addonFlag)
-                                                            <span
-                                                                data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                                class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
-                                                            >{{ $addonFlag }}</span>
-                                                        @endif
-                                                    </span>
-                                                </button>
                                             @else
                                                 @php($badge = isset($navItem['badge']) ? value($navItem['badge']) : null)
                                                 @php($addonFlag = isset($navItem['addonFlag']) ? value($navItem['addonFlag']) : null)
@@ -451,15 +419,27 @@ use App\Helpers\FeatureToggle;
                             @endif
                         @endforeach
                     @else
-                        <x-navigation.nav-link href="{{ route('home') }}" :active="request()->routeIs('home')" wire:navigate>
-                            {{ __('Home') }}
-                        </x-navigation.nav-link>
+                        <nav class="app-topbar__nav" aria-label="{{ __('Primary navigation') }}">
+                            @foreach ($userDesktopNav as $item)
+                                <a href="{{ $item['href'] }}"
+                                    @if ($item['active']) aria-current="page" @endif
+                                    class="app-topbar__nav-item {{ $item['active'] ? 'is-active' : '' }}"
+                                    wire:navigate>
+                                    <x-dynamic-component :component="$item['icon']" class="h-4 w-4" />
+                                    <span>{{ $item['label'] }}</span>
+                                </a>
+                            @endforeach
 
-                        @if ($canReviewSubordinateRequests)
-                            <x-navigation.nav-link href="{{ route('approvals') }}" :active="request()->routeIs('approvals')" wire:navigate>
-                                {{ __('Team Approvals') }}
-                            </x-navigation.nav-link>
-                        @endif
+                            @if ($canReviewSubordinateRequests)
+                                <a href="{{ route('approvals') }}"
+                                    @if (request()->routeIs('approvals')) aria-current="page" @endif
+                                    class="app-topbar__nav-item {{ request()->routeIs('approvals') ? 'is-active' : '' }}"
+                                    wire:navigate>
+                                    <x-heroicon-o-check-badge class="h-4 w-4" />
+                                    <span>{{ __('Team Approvals') }}</span>
+                                </a>
+                            @endif
+                        </nav>
                     @endif
                 </div>
             </div>
@@ -649,26 +629,6 @@ use App\Helpers\FeatureToggle;
                                                 @endforeach
                                             </div>
                                         </div>
-                                    @elseif (($navItem['type'] ?? 'link') === 'feature' && $navItem['locked'])
-                                        @php($addonFlag = isset($navItem['addonFlag']) ? value($navItem['addonFlag']) : null)
-                                        <button
-                                            type="button"
-                                            @click.prevent="$dispatch('feature-lock', { title: @js($navItem['lockTitle']), message: @js($navItem['lockMessage']) })"
-                                            class="wcag-touch-target block w-full border-l-4 border-transparent py-2.5 pe-4 ps-3 text-start text-base font-medium text-gray-700 transition duration-150 ease-in-out hover:border-gray-400 hover:bg-gray-100 hover:text-gray-950"
-                                            aria-label="{{ $navItem['label'] }}. {{ __('Locked feature') }}">
-                                            <span class="flex items-center justify-between gap-3">
-                                                <span class="inline-flex items-center gap-1.5">
-                                                    <span>{{ $navItem['label'] }}</span>
-                                                    <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                                </span>
-                                                @if ($addonFlag)
-                                                    <span
-                                                        data-addon-flag="{{ $navItem['addonFeature'] ?? 'addon' }}"
-                                                        class="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-700"
-                                                    >{{ $addonFlag }}</span>
-                                                @endif
-                                            </span>
-                                        </button>
                                     @else
                                         @php($badge = isset($navItem['badge']) ? value($navItem['badge']) : null)
                                         @php($addonFlag = isset($navItem['addonFlag']) ? value($navItem['addonFlag']) : null)

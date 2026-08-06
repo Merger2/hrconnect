@@ -6,6 +6,7 @@
                     :back-href="route('home')"
                     :title="__('Profile')"
                     title-id="profile-page-title"
+                    module="hr"
                     class="border-b-0">
                     <x-slot name="icon">
                         <x-heroicon-o-user-circle class="h-5 w-5" />
@@ -13,7 +14,7 @@
                 </x-user.page-header>
 
                 {{-- Profile Identity Card — redesigned --}}
-                <div class="profile-identity">
+                <div class="profile-identity user-accent-card user-accent-card--hr">
                     <div class="profile-identity__avatar-shell">
                         <img class="profile-identity__avatar"
                              src="{{ auth()->user()->profile_photo_url }}"
@@ -58,9 +59,8 @@
                 </div>
 
                 {{-- Face ID nav --}}
-                @unless (\App\Helpers\Editions::attendanceLocked())
-                    <a href="{{ route('face.enrollment') }}"
-                       class="profile-section-nav__link mb-4">
+                <a href="{{ route('face.enrollment') }}"
+                   class="profile-section-nav__link mb-4">
                         <span class="profile-section-nav__icon">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
@@ -78,29 +78,28 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                         </svg>
                     </a>
-                @endunless
 
                 {{-- Profile Forms — redesigned with modern styling --}}
                 <div class="space-y-4">
                     @if (Laravel\Fortify\Features::canUpdateProfileInformation())
-                        <div class="profile-section">
+                        <div class="profile-section user-accent-card user-accent-card--hr">
                             @livewire('profile.update-profile-information-form')
                         </div>
                     @endif
 
                     @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-                        <div class="profile-section">
+                        <div class="profile-section user-accent-card user-accent-card--hr">
                             @livewire('profile.update-password-form')
                         </div>
                     @endif
 
                     @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-                        <div class="profile-section">
+                        <div class="profile-section user-accent-card user-accent-card--hr">
                             @livewire('profile.two-factor-authentication-form')
                         </div>
                     @endif
 
-                    <div class="profile-section">
+                    <div class="profile-section user-accent-card user-accent-card--hr">
                         @livewire('profile.logout-other-browser-sessions-form')
                     </div>
 

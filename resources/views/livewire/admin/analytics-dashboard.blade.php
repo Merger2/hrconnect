@@ -426,8 +426,8 @@
                         <svg viewBox="0 0 120 120" class="w-24 h-24">
                             <defs>
                                 <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#34d399" />
-                                    <stop offset="100%" stop-color="#059669" />
+                                    <stop offset="0%" stop-color="var(--color-module-payroll)" />
+                                    <stop offset="100%" stop-color="var(--color-module-payroll)" />
                                 </linearGradient>
                             </defs>
                             <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" class="stroke-slate-100/80" />
@@ -581,8 +581,8 @@
                     }
 
                     const presentGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
-                    presentGradient.addColorStop(0, 'rgba(22, 163, 74, 0.2)');
-                    presentGradient.addColorStop(1, 'rgba(22, 163, 74, 0)');
+                    presentGradient.addColorStop(0, window.colorWithAlpha(window.cssVar('--color-module-payroll'), 0.2));
+                    presentGradient.addColorStop(1, window.colorWithAlpha(window.cssVar('--color-module-payroll'), 0));
 
                     this.charts.trend = new Chart(ctx, {
                         type: 'line',
@@ -591,7 +591,7 @@
                             datasets: [{
                                     label: this.translate('present'),
                                     data: this.data.trend.present || [],
-                                    borderColor: '#16a34a',
+                                    borderColor: window.cssVar('--color-module-payroll'),
                                     backgroundColor: presentGradient,
                                     fill: true,
                                     tension: 0.35,
@@ -600,7 +600,7 @@
                                 {
                                     label: this.translate('late'),
                                     data: this.data.trend.late || [],
-                                    borderColor: '#f59e0b',
+                                    borderColor: window.cssVar('--color-module-documents'),
                                     backgroundColor: 'transparent',
                                     tension: 0.35,
                                     pointRadius: 2
@@ -608,7 +608,7 @@
                                 {
                                     label: this.translate('absent'),
                                     data: this.data.trend.absent || [],
-                                    borderColor: '#ef4444',
+                                    borderColor: window.cssVar('--color-module-finance'),
                                     backgroundColor: 'transparent',
                                     borderDash: [6, 6],
                                     tension: 0.35,
@@ -685,7 +685,7 @@
                             datasets: [{
                                 label: '{{ __('Present') }}',
                                 data: this.data.division.data || [],
-                                backgroundColor: '#16a34a',
+                                backgroundColor: window.cssVar('--color-module-payroll'),
                                 borderRadius: 8
                             }]
                         },
@@ -745,8 +745,8 @@
                             labels: labels.map(l => this.translate(l)),
                             datasets: [{
                                 data: data,
-                                backgroundColor: ['#16a34a', '#f59e0b', '#0ea5e9', '#8b5cf6', '#ef4444',
-                                    '#64748b'
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-finance'),
+                                    window.cssVar('--color-primary-500')
                                 ],
                                 borderWidth: 0
                             }]
@@ -792,7 +792,7 @@
                             labels: labels,
                             datasets: [{
                                 data: data,
-                                backgroundColor: ['#fde68a', '#fbbf24', '#f59e0b', '#d97706'],
+                                backgroundColor: [window.cssVar('--color-module-documents'), window.cssVar('--color-module-finance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-reports')],
                                 borderWidth: 0
                             }]
                         },
@@ -836,7 +836,7 @@
                             labels: labels.map(l => this.translate(l)),
                             datasets: [{
                                 data: data,
-                                backgroundColor: ['#0f766e', '#16a34a', '#94a3b8'],
+                                backgroundColor: [window.cssVar('--color-module-attendance'), window.cssVar('--color-module-payroll'), window.cssVar('--color-primary-400')],
                                 borderWidth: 0
                             }]
                         },
@@ -885,7 +885,7 @@
                             labels: labels.map(l => this.translate(l)),
                             datasets: [{
                                 data: data,
-                                backgroundColor: ['#0ea5e9', '#8b5cf6', '#e11d48', '#f59e0b'],
+                                backgroundColor: [window.cssVar('--color-module-attendance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-finance'), window.cssVar('--color-module-documents')],
                                 borderWidth: 0
                             }]
                         },
@@ -928,7 +928,7 @@
                             datasets: [{
                                 label: '{{ __('Headcount') }}',
                                 data: this.data.headcount?.data || [],
-                                backgroundColor: '#0f766e',
+                                backgroundColor: window.cssVar('--color-module-attendance'),
                                 borderRadius: 8
                             }]
                         },

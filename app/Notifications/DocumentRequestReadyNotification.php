@@ -37,7 +37,7 @@ class DocumentRequestReadyNotification extends Notification implements ShouldQue
         return [
             'type' => 'document_ready',
             'document_request_id' => $this->request->id,
-            'document_type' => $this->request->documentType?->name,
+            'document_type' => $this->request->documentType->name,
             'message' => __('Document :type is ready for download.', [
                 'type' => $this->request->documentType?->name ?? __('Document'),
             ]),

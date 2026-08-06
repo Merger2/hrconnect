@@ -368,7 +368,7 @@ class UserHomeCommandCenterService
             ->get()
             ->map(fn (Overtime $item): array => [
                 'label' => __('Overtime'),
-                'description' => $item->date?->translatedFormat('d M Y') ?? __('No date'),
+                'description' => $item->date->translatedFormat('d M Y') ?? __('No date'),
                 'href' => route('overtime'),
                 'status' => __(str($this->statusValue($item->status))->headline()->toString()),
                 'tone' => $this->statusTone($this->statusValue($item->status)),
@@ -419,7 +419,7 @@ class UserHomeCommandCenterService
             ->get()
             ->map(fn (AttendanceCorrection $item): array => [
                 'label' => __('Correction'),
-                'description' => $item->attendance_date?->translatedFormat('d M Y') ?? __('No date'),
+                'description' => $item->attendance_date->translatedFormat('d M Y') ?? __('No date'),
                 'href' => route('attendance-corrections'),
                 'status' => $item->statusLabel(),
                 'tone' => $this->statusTone($this->statusValue($item->status)),

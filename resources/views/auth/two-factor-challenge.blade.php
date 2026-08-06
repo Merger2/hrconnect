@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-primary-50/40 px-4 py-12 sm:px-6 lg:px-8">
+    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-brand-50/40 px-4 py-12 sm:px-6 lg:px-8">
         <div class="w-full max-w-md">
             {{-- Logo / Branding --}}
             <div class="mb-8 flex justify-center">
@@ -18,7 +18,7 @@
                 {{-- Card header --}}
                 <div class="border-b border-slate-100 px-6 py-5">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-600">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                             </svg>
@@ -56,14 +56,14 @@
                         <div class="mb-4" x-show="! recovery">
                             <label for="code" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Authentication Code') }}</label>
                             <input id="code" type="text" inputmode="numeric" name="code" required autofocus x-ref="code" autocomplete="one-time-code"
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 font-mono text-center text-lg tracking-[0.3em]"
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20 font-mono text-center text-lg tracking-[0.3em]"
                                 placeholder="• • • • • •" />
                         </div>
 
                         <div class="mb-4" x-cloak x-show="recovery">
                             <label for="recovery_code" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Recovery Code') }}</label>
                             <input id="recovery_code" type="text" name="recovery_code" x-ref="recovery_code" autocomplete="one-time-code"
-                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20"
+                                class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20"
                                 placeholder="{{ __('Enter recovery code') }}" />
                         </div>
 
@@ -71,16 +71,16 @@
                             <div>
                                 <button type="button" x-show="! recovery"
                                     x-on:click="recovery = true; $nextTick(() => $refs.recovery_code.focus())"
-                                    class="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-primary-300">
+                                    class="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-brand-600 hover:decoration-brand-300">
                                     {{ __('Use a recovery code') }}
                                 </button>
                                 <button type="button" x-cloak x-show="recovery"
                                     x-on:click="recovery = false; $nextTick(() => $refs.code.focus())"
-                                    class="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-primary-300">
+                                    class="text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-brand-600 hover:decoration-brand-300">
                                     {{ __('Use an authentication code') }}
                                 </button>
                             </div>
-                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.97]">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 active:scale-[0.97]">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                                 </svg>

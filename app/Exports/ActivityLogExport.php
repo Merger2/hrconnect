@@ -53,7 +53,7 @@ class ActivityLogExport implements FromCollection, WithColumnWidths, WithHeading
             $log->subject_id ?? '-',
             $log->causer_type ?? '-',
             $log->causer_id ?? '-',
-            $causer?->name ?? $causer?->email ?? '-',
+            $causer->name ?? $causer->email ?? '-',
             json_encode($log->properties ?? []),
             $log->created_at?->format('Y-m-d H:i:s') ?? '-',
         ];

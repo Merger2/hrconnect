@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Payroll;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property Payroll $resource
+ *
+ * @mixin Payroll
+ */
 class PayrollResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -13,7 +19,7 @@ class PayrollResource extends JsonResource
             'id' => $this->id,
             'employee_id' => $this->employee_id,
             'period' => $this->period,
-            'status' => $this->status?->value,
+            'status' => $this->status->value,
             'gross_salary' => (int) $this->gross_salary,
             'total_deduction' => (int) $this->total_deduction,
             'net_salary' => (int) $this->net_salary,

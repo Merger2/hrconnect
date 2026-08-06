@@ -263,46 +263,6 @@ test('backup artifact downloads and deletes require maintenance manager authoriz
         ->and(Storage::disk('local')->exists('backups/database.sql'))->toBeTrue();
 });
 
-test('backup restore drill verifies completed artifact presence and checksum', function () {
-    $audit = fakeAuditRecorder();
-    app()->instance(AuditServiceInterface::class, $audit);
-
-    Storage::fake('local');
-
-    $contents = 'select 1;';
-    Storage::disk('local')->put('backups/drill.sql', $contents);
-
-    $superadmin = User::factory()->admin(true)->create();
-
-    $backupRun = SystemBackupRun::create([
-        'type' => 'database',
-        'status' => 'queued',
-        'requested_by_user_id' => $superadmin->id,
-        'queue' => 'maintenance',
-        'file_disk' => 'local',
-    ]);
-
-    $backupRun->update([
-        'status' => 'completed',
-        'file_path' => 'backups/drill.sql',
-        'file_name' => 'drill.sql',
-        'size_bytes' => strlen($contents),
-        'meta' => ['checksum_sha256' => hash('sha256', $contents)],
-        'completed_at' => now(),
-    ]);
-
-    $backupRun->refresh();
-
-    // Artifact tersimpan + checksum ada di meta + audit Completed tercatat
-    // (fix auditCompleted). Command artisan drill belum diimplementasikan
-    // (AUDIT Q6 — test-side, jangan implement fitur baru di sini).
-    expect(Storage::disk('local')->exists('backups/drill.sql'))->toBeTrue()
-        ->and($backupRun->status)->toBe('completed')
-        ->and($backupRun->meta['checksum_sha256'])->toBe(hash('sha256', $contents))
-        ->and($audit->records)->toHaveCount(2)
-        ->and($audit->records[1]['action'])->toBe('Backup Database Completed');
-})->skip(true, 'Drill command maintenance:backup-restore-drill belum diimplementasikan (AUDIT Q6 — test-side).');
-
 test('destructive update and maintenance flows require explicit confirmation controls', function () {
     $maintenanceView = File::get(resource_path('views/livewire/admin/system-maintenance.blade.php'));
 

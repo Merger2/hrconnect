@@ -118,8 +118,6 @@
         ],
     ];
     $platformSignalCards = array_values(array_filter($platformSignalCards, fn (array $item): bool => $item['visible']));
-    $exportLockTitle = __('Export Locked');
-    $exportLockMessage = __('Advanced reporting is an Enterprise feature. Please upgrade.');
 @endphp
 
 <x-admin.page-shell :title="__('Attendance Overview')" :description="$date->translatedFormat('l, d F Y')">
@@ -898,8 +896,8 @@
                     });
 
                     const presentGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 360);
-                    presentGradient.addColorStop(0, 'rgba(22, 163, 74, 0.22)');
-                    presentGradient.addColorStop(1, 'rgba(22, 163, 74, 0)');
+                    presentGradient.addColorStop(0, window.colorWithAlpha(window.cssVar('--color-module-payroll'), 0.22));
+                    presentGradient.addColorStop(1, window.colorWithAlpha(window.cssVar('--color-module-payroll'), 0));
 
                     chart = new Chart(ctx, {
                         type: 'line',
@@ -908,7 +906,7 @@
                             datasets: [{
                                     label: '{{ __('Present') }}',
                                     data: window.dashboardChartData.present,
-                                    borderColor: '#16a34a',
+                                    borderColor: window.cssVar('--color-module-payroll'),
                                     backgroundColor: presentGradient,
                                     fill: true,
                                     tension: 0.35,
@@ -918,7 +916,7 @@
                                 {
                                     label: '{{ __('Late') }}',
                                     data: window.dashboardChartData.late,
-                                    borderColor: '#f59e0b',
+                                    borderColor: window.cssVar('--color-module-documents'),
                                     backgroundColor: 'transparent',
                                     tension: 0.35,
                                     pointRadius: 2,
@@ -927,7 +925,7 @@
                                 {
                                     label: '{{ __('Excused') }}',
                                     data: window.dashboardChartData.excused,
-                                    borderColor: '#0ea5e9',
+                                    borderColor: window.cssVar('--color-module-attendance'),
                                     backgroundColor: 'transparent',
                                     borderDash: [6, 6],
                                     tension: 0.35,
@@ -937,7 +935,7 @@
                                 {
                                     label: '{{ __('Sick') }}',
                                     data: window.dashboardChartData.sick,
-                                    borderColor: '#8b5cf6',
+                                    borderColor: window.cssVar('--color-module-leave'),
                                     backgroundColor: 'transparent',
                                     borderDash: [3, 5],
                                     tension: 0.35,
@@ -947,7 +945,7 @@
                                 {
                                     label: '{{ __('No Record') }}',
                                     data: window.dashboardChartData.absent,
-                                    borderColor: '#e11d48',
+                                    borderColor: window.cssVar('--color-module-finance'),
                                     backgroundColor: 'transparent',
                                     tension: 0.35,
                                     pointRadius: 1,
@@ -1020,7 +1018,7 @@
                             labels: ['{{ __("Logged In") }}', '{{ __("Not Logged In") }}', '{{ __("Never Logged In") }}'],
                             datasets: [{
                                 data: [{{ $loggedInUsersCount }}, {{ $notLoggedInUsersCount }}, {{ $neverLoggedInCount }}],
-                                backgroundColor: ['#10b981', '#f59e0b', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-finance')],
                                 borderWidth: 0,
                                 hoverOffset: 4
                             }]
@@ -1057,7 +1055,7 @@
                             labels: ['{{ __("Leave") }}', '{{ __("Correction") }}', '{{ __("Reimburse") }}', '{{ __("Overtime") }}', '{{ __("Kasbon") }}'],
                             datasets: [{
                                 data: [{{ $pendingLeavesCount }}, {{ $pendingAttendanceCorrectionsCount }}, {{ $pendingReimbursementsCount }}, {{ $pendingOvertimesCount }}, {{ $pendingKasbonCount }}],
-                                backgroundColor: ['#8b5cf6', '#0ea5e9', '#f59e0b', '#10b981', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-leave'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-payroll'), window.cssVar('--color-module-finance')],
                                 borderRadius: 6,
                                 barThickness: 18
                             }]
@@ -1114,7 +1112,7 @@
                                     {{ $sickCount }},
                                     {{ $absentCount }},
                                 ],
-                                backgroundColor: ['#10b981', '#f59e0b', '#0ea5e9', '#8b5cf6', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-finance')],
                                 borderWidth: 0,
                                 hoverOffset: 4
                             }]
@@ -1177,7 +1175,7 @@
                             ],
                             datasets: [{
                                 data: valuesFrom(window.dashboardChartData),
-                                backgroundColor: ['#16a34a', '#f59e0b', '#0ea5e9', '#8b5cf6', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-finance')],
                                 borderWidth: 0,
                             }]
                         },

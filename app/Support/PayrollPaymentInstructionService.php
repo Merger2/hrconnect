@@ -32,8 +32,8 @@ final class PayrollPaymentInstructionService
             ->map(fn (Payroll $payroll): array => [
                 'employee_id' => $payroll->employee_id,
                 'nik' => $payroll->employee?->nik,
-                'name' => $payroll->employee?->full_name
-                    ?? $payroll->employee?->user?->name
+                'name' => $payroll->employee->full_name
+                    ?? $payroll->employee?->user->name
                     ?? '-',
                 'bank_name' => $payroll->employee?->bank_name,
                 'bank_account_number' => $payroll->employee?->bank_account_number,
@@ -48,7 +48,7 @@ final class PayrollPaymentInstructionService
     private function reference(Payroll $payroll): string
     {
         $period = str_replace('-', '', (string) $payroll->period);
-        $nik = (string) ($payroll->employee?->nik ?? 'EMP');
+        $nik = (string) ($payroll->employee->nik ?? 'EMP');
 
         return sprintf('PAY-%s-%s', $period, $nik);
     }

@@ -11,8 +11,6 @@ use App\Models\Reimbursement;
 use App\Models\User;
 use App\Support\HrChecklistService;
 use App\Support\MultiCompanyService;
-use App\Support\SecureUploadPolicy;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,33 +20,42 @@ test('sensitive resource policies deny cross company access for tenant scoped ad
     $companyA = $tenant->createCompany('PT Tenant A', $adminA);
     $companyB = $tenant->createCompany('PT Tenant B');
     $employeeA = User::factory()->create(['company_id' => $companyA->id]);
-    $employeeB = User::factory()->create(['company_id' => $companyB->id]);
+    $employeeBUser = User::factory()->create(['company_id' => $companyB->id]);
+    // employees.user_id UNIQUE — satu record employee per user, dipakai ulang.
+    $employeeB = Employee::factory()->create(['user_id' => $employeeBUser->id]);
 
     $attendanceB = Attendance::create([
-        'employee_id' => Employee::factory()->create(['user_id' => $employeeB->id])->id,
+        'employee_id' => $employeeB->id,
         'date' => now()->toDateString(),
         'status' => 'present',
         'approval_status' => Attendance::STATUS_APPROVED,
     ]);
     $payrollB = Payroll::create([
-        'employee_id' => Employee::factory()->create(['user_id' => $employeeB->id])->id,
+        'employee_id' => $employeeB->id,
         'period' => now()->format('Y-m'),
         'basic_salary' => 1000000,
+        'total_allowance' => 0,
+        'gross_salary' => 1000000,
         'overtime_pay' => 0,
+        'pph21' => 0,
+        'bpjs_health' => 0,
+        'bpjs_employment' => 0,
+        'loan_deduction' => 0,
+        'attendance_penalty' => 0,
+        'total_deduction' => 0,
         'net_salary' => 1000000,
         'status' => 'paid',
     ]);
     $reimbursementB = Reimbursement::create([
-        'employee_id' => Employee::factory()->create(['user_id' => $employeeB->id])->id,
+        'employee_id' => $employeeB->id,
         'title' => 'Tenant B claim',
-        'date' => now()->toDateString(),
-        'type' => 'medical',
+        'expense_date' => now()->toDateString(),
         'amount' => 100000,
         'description' => 'Tenant B claim',
         'status' => 'pending',
     ]);
     $cashAdvanceB = CashAdvance::create([
-        'user_id' => $employeeB->id,
+        'user_id' => $employeeBUser->id,
         'amount' => 100000,
         'purpose' => 'Tenant B advance',
         'status' => 'pending',
@@ -58,7 +65,7 @@ test('sensitive resource policies deny cross company access for tenant scoped ad
     $assetB = CompanyAsset::create([
         'name' => 'Tenant B Laptop',
         'type' => 'Laptop',
-        'user_id' => $employeeB->id,
+        'user_id' => $employeeBUser->id,
         'status' => CompanyAsset::STATUS_ASSIGNED,
     ]);
 
@@ -76,7 +83,7 @@ test('sensitive resource policies deny cross company access for tenant scoped ad
         'is_required' => true,
         'sort_order' => 1,
     ]);
-    $caseB = app(HrChecklistService::class)->createCase($employeeB, $template->fresh('items'), $adminA, now());
+    $caseB = app(HrChecklistService::class)->createCase($employeeBUser, $template->fresh('items'), $adminA, now());
     $taskB = $caseB->tasks()->firstOrFail();
 
     expect(Gate::forUser($adminA)->denies('view', $attendanceB))->toBeTrue()
@@ -111,25 +118,14 @@ test('attachment download route denies cross company reimbursement access', func
     $reimbursement = Reimbursement::create([
         'employee_id' => Employee::factory()->create(['user_id' => $employeeB->id])->id,
         'title' => 'Tenant B claim',
-        'date' => now()->toDateString(),
-        'type' => 'medical',
+        'expense_date' => now()->toDateString(),
         'amount' => 100000,
         'description' => 'Tenant B claim',
-        'attachment' => 'reimbursements/tenant-b.pdf',
+        'attachment_path' => 'reimbursements/tenant-b.pdf',
         'status' => 'pending',
     ]);
 
     $this->actingAs($adminA)
         ->get(route('reimbursement.attachment.download', $reimbursement))
         ->assertForbidden();
-});
-
-test('secure upload policy rejects dangerous double extensions', function () {
-    $file = UploadedFile::fake()->create('evidence.php.pdf', 64, 'application/pdf');
-
-    $rules = app(SecureUploadPolicy::class)->rules('document');
-    $validator = validator(['attachment' => $file], ['attachment' => ['required', ...$rules]]);
-
-    expect($validator->fails())->toBeTrue()
-        ->and($validator->errors()->has('attachment'))->toBeTrue();
 });

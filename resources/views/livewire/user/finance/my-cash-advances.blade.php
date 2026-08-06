@@ -9,6 +9,7 @@
                 :back-href="! $showCreateModal ? route('home') : null"
                 :title="$showCreateModal ? __('Request Kasbon') : __('My Kasbon')"
                 title-id="my-kasbon-title"
+                module="finance"
                 class="border-b-0">
                 <x-slot name="actions">
                     @if ($showCreateModal)
@@ -39,8 +40,8 @@
                 @endunless
 
                 @if ($showCreateModal)
-                    <form wire:submit.prevent="submit" class="kasbon-request-panel">
-                        <div>
+                    <form wire:submit.prevent="submit" class="kasbon-request-panel user-accent-card user-accent-card--finance">
+                        <div class="solid-head rounded-2xl px-5 py-4">
                             <p class="kasbon-eyebrow">{{ __('Cash advance request') }}</p>
                             <h2 class="kasbon-request-panel__title">{{ __('Choose amount and payroll deduction') }}</h2>
                             <p class="kasbon-request-panel__copy">
@@ -125,7 +126,7 @@
                         </div>
                     </form>
                 @else
-                    <div class="kasbon-summary">
+                    <div class="kasbon-summary user-accent-card user-accent-card--finance">
                         <div class="kasbon-summary__item kasbon-summary__item--warning">
                             <span>{{ __('Unpaid') }}</span>
                             <strong>{{ __('Rp') }} {{ number_format($totalUnpaid, 0, ',', '.') }}</strong>
@@ -166,7 +167,7 @@
                                     };
                                 @endphp
 
-                                <article class="kasbon-card">
+                                <article class="kasbon-card user-accent-card user-accent-card--finance user-accent-card--soft">
                                     <div class="kasbon-card__icon" aria-hidden="true">
                                         <x-heroicon-o-banknotes class="h-5 w-5" />
                                     </div>

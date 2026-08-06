@@ -79,7 +79,7 @@ class NotificationPreferenceService
     {
         $preference = $this->preferenceFor($user, $eventKey);
 
-        return (array) ($preference?->external_routes ?? []);
+        return (array) ($preference->external_routes ?? []);
     }
 
     public function preferenceFor(User $user, string $eventKey): ?UserNotificationPreference

@@ -194,7 +194,7 @@ final class PayrollManager extends Component
         $filename = sprintf(
             'payslip-%s-%s.pdf',
             $payroll->period,
-            $payroll->employee?->employee_number ?? 'unknown'
+            $payroll->employee->employee_number ?? 'unknown'
         );
 
         $this->dispatch('download-file', url: $path, filename: $filename);

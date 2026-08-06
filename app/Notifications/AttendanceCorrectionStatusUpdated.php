@@ -29,7 +29,7 @@ class AttendanceCorrectionStatusUpdated extends Notification implements ShouldQu
             ->subject(__('Attendance Correction: :status', ['status' => $statusLabel]))
             ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? '']))
             ->line(__('Your attendance correction request status has been updated.'))
-            ->line(__('Date: :date', ['date' => $this->correction->attendance_date?->format('d M Y') ?? '-']))
+            ->line(__('Date: :date', ['date' => $this->correction->attendance_date->format('d M Y') ?? '-']))
             ->line(__('Status: **:status**', ['status' => $statusLabel]))
             ->action(__('View Details'), url('/attendance-corrections'));
     }

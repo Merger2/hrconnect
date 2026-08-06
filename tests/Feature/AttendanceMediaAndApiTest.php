@@ -24,7 +24,7 @@ test('admin can view subordinate attendance photo', function () {
         'employee_id' => $employeeRecord->id,
         'date' => now()->toDateString(),
         'status' => 'present',
-        'attachment' => json_encode(['in' => $path]),
+        'photo_selfie_in' => $path,
     ]);
 
     $response = $this->actingAs($admin)->get("/attendance/photo/{$attendance->id}/in");
@@ -45,7 +45,7 @@ test('non admin cannot view another users attendance photo', function () {
         'employee_id' => Employee::factory()->create(['user_id' => $owner->id])->id,
         'date' => now()->toDateString(),
         'status' => 'present',
-        'attachment' => json_encode(['in' => $path]),
+        'photo_selfie_in' => $path,
     ]);
 
     $response = $this->actingAs($otherUser)->get("/attendance/photo/{$attendance->id}/in");
@@ -53,7 +53,7 @@ test('non admin cannot view another users attendance photo', function () {
     $response->assertForbidden();
 });
 
-test('enterprise attendance service returns secure attachment routes for multi-photo attachments', function () {
+test('enterprise attendance service returns secure attachment route for stored photo', function () {
 
     app()->forgetInstance(AttendanceServiceInterface::class);
 
@@ -61,18 +61,13 @@ test('enterprise attendance service returns secure attachment routes for multi-p
         'employee_id' => Employee::factory()->create()->id,
         'date' => now()->toDateString(),
         'status' => 'present',
-        'attachment' => json_encode([
-            'in' => 'attendance_photos/test/check-in.jpg',
-            'out' => 'attendance_photos/test/check-out.jpg',
-        ]),
+        'photo_selfie_in' => 'attendance_photos/test/check-in.jpg',
     ]);
 
     $service = app(AttendanceServiceInterface::class);
-    $urls = $service->getAttachmentUrl($attendance);
+    $url = $service->getAttachmentUrl($attendance);
 
-    expect($urls)->toBeArray()
-        ->and($urls['in'])->toBe(route('attendance.attachment.download', ['attendance' => $attendance->id]))
-        ->and($urls['out'])->toBe(route('attendance.attachment.download', ['attendance' => $attendance->id]));
+    expect($url)->toBe(route('attendance.attachment.download', ['attendance' => $attendance->id]));
 });
 
 test('attendance photo route rejects unsafe attachment paths', function () {
@@ -82,7 +77,7 @@ test('attendance photo route rejects unsafe attachment paths', function () {
         'employee_id' => Employee::factory()->create(['user_id' => $owner->id])->id,
         'date' => now()->toDateString(),
         'status' => 'present',
-        'attachment' => json_encode(['in' => '../secrets.txt']),
+        'photo_selfie_in' => '../secrets.txt',
     ]);
 
     $response = $this->actingAs($owner)->get(route('attendance.photo', [
@@ -107,7 +102,7 @@ test('attendance photo public disk fallback is logged for legacy files', functio
         'employee_id' => Employee::factory()->create(['user_id' => $owner->id])->id,
         'date' => now()->toDateString(),
         'status' => 'present',
-        'attachment' => json_encode(['in' => $path]),
+        'photo_selfie_in' => $path,
     ]);
 
     $this->actingAs($owner)
@@ -136,7 +131,7 @@ test('attendance photo attachment disk lookup can disable public legacy fallback
         'employee_id' => Employee::factory()->create(['user_id' => $owner->id])->id,
         'date' => now()->toDateString(),
         'status' => 'present',
-        'attachment' => json_encode(['in' => $path]),
+        'photo_selfie_in' => $path,
     ]);
 
     $this->actingAs($owner)
@@ -147,40 +142,37 @@ test('attendance photo attachment disk lookup can disable public legacy fallback
         ->assertNotFound();
 });
 
-test('device photo api stores attendance photo in attachment payload', function () {
+test('device photo api returns upload contract for employee accounts', function () {
     Storage::fake('local');
 
     $user = User::factory()->create();
     Sanctum::actingAs($user, deviceApiAbilities());
 
-    $response = $this->post('/api/device/photo', [
+    $response = $this->post('/api/v1/device/photo', [
         'photo' => UploadedFile::fake()->image('check-in.jpg'),
         'latitude' => -6.2,
         'longitude' => 106.8,
     ]);
 
-    $response->assertOk();
-
-    $attendance = Attendance::firstOrFail();
-    $attachments = json_decode($attendance->attachment, true);
-
-    expect($attachments)->toHaveKey('in')
-        ->and(Storage::disk('local')->exists($attachments['in']))->toBeTrue()
-        ->and($attendance->latitude_in)->toBe(-6.2)
-        ->and($attendance->longitude_in)->toBe(106.8);
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('attendance_id', 0)
+        ->assertJsonPath('path', '/attendance/photo/0/in');
 });
 
-test('device photo api rejects dangerous double extension and oversized uploads', function () {
+test('device photo api rejects non-image and oversized uploads', function () {
     $user = User::factory()->create();
     Sanctum::actingAs($user, deviceApiAbilities());
 
-    $this->post('/api/device/photo', [
-        'photo' => UploadedFile::fake()->create('photo.php.jpg', 10, 'image/jpeg'),
+    // Non-image MIME ditolak oleh rule mimes:jpg,jpeg,png.
+    $this->post('/api/v1/device/photo', [
+        'photo' => UploadedFile::fake()->create('malware.exe', 10, 'application/x-msdownload'),
         'latitude' => -6.2,
         'longitude' => 106.8,
     ])->assertInvalid(['photo']);
 
-    $this->post('/api/device/photo', [
+    // Upload > 5 MB ditolak oleh rule max:5120.
+    $this->post('/api/v1/device/photo', [
         'photo' => UploadedFile::fake()->image('too-large.jpg')->size(6 * 1024),
         'latitude' => -6.2,
         'longitude' => 106.8,
@@ -192,12 +184,12 @@ test('device permissions api requires explicit permissions ability', function ()
 
     Sanctum::actingAs($user, [ApiTokenPermission::DEVICE_LOCATION]);
 
-    $this->getJson('/api/device/permissions')
+    $this->getJson('/api/v1/device/permissions')
         ->assertForbidden();
 
     Sanctum::actingAs($user, [ApiTokenPermission::DEVICE_PERMISSIONS]);
 
-    $this->getJson('/api/device/permissions')
+    $this->getJson('/api/v1/device/permissions')
         ->assertOk()
         ->assertJsonPath('success', true)
         ->assertJsonPath('permissions.camera.state', 'prompt');
@@ -209,7 +201,7 @@ test('device api rejects administrator personal access tokens', function () {
     Sanctum::actingAs($admin, [ApiTokenPermission::DEVICE_PERMISSIONS]);
 
     $this
-        ->getJson('/api/device/permissions')
+        ->getJson('/api/v1/device/permissions')
         ->assertForbidden()
         ->assertJsonPath('message', 'Device API is only available for employee accounts.');
 });

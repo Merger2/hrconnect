@@ -100,7 +100,7 @@ class AttendanceCorrectionService
             // created with employee_id but without a linked user (e.g. seeders
             // or migrated records), in which case the user relation is null.
             $employeeId = $correction->employee_id
-                ?? $correction->user?->employee?->id
+                ?? $correction->user?->employee->id
                 ?? Employee::where('user_id', $correction->user_id)->value('id');
 
             $attendance = $correction->attendance ?? Attendance::query()->firstOrNew([
@@ -127,7 +127,7 @@ class AttendanceCorrectionService
                 $attendance->time_in ? Carbon::parse($attendance->time_in) : null,
                 $correction->requestedShift ?? $attendance->shift,
                 (int) Setting::getValue('attendance.grace_period', 10),
-                $attendance->status?->value,
+                $attendance->status->value,
             );
 
             $attendance->save();
@@ -228,7 +228,7 @@ class AttendanceCorrectionService
             return $snapshotValue->format('Y-m-d H:i');
         }
 
-        $shift = $attendance?->shift
+        $shift = $attendance->shift
             ?? ($requestedShiftId ? Shift::query()->find($requestedShiftId) : null);
 
         if ($direction === 'in') {

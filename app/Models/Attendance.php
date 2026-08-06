@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonImmutable $date
  * @property CarbonImmutable|null $clock_in Null jika status=absent dari DetectAlphaAttendanceCommand
  * @property CarbonImmutable|null $clock_out
+ * @property-read CarbonImmutable|null $time_in Accessor — alias clock_in
+ * @property-read CarbonImmutable|null $time_out Accessor — alias clock_out
  * @property numeric|null $lat_in
  * @property numeric|null $long_in
  * @property bool $clock_in_is_mocked
@@ -83,6 +85,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $time_in
  * @property-read mixed $time_out
  * @property-read User|null $user
+ *
  * @method static \Database\Factories\AttendanceFactory factory($count = null, $state = [])
  * @method static Builder<static>|Attendance managedBy(\App\Models\User $admin)
  * @method static Builder<static>|Attendance newModelQuery()
@@ -138,6 +141,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Attendance whereWfaNote($value)
  * @method static Builder<static>|Attendance withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Attendance withoutTrashed()
+ *
  * @mixin \Eloquent
  * @mixin IdeHelperAttendance
  */

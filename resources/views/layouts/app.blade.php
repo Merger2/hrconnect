@@ -70,7 +70,7 @@
     @php $isAdminRoute = request()->routeIs('admin.*'); @endphp
     <body class="font-sans antialiased {{ $isAdminRoute ? 'admin-ui' : 'user-ui' }}">
 
-        <div class="min-h-screen bg-gray-100 {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0' : '' }}">
+        <div class="min-h-screen app-canvas {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0' : '' }}">
             @livewire('navigation-menu')
 
             <!-- Page Heading -->
@@ -83,12 +83,11 @@
             @endif
 
             <!-- Page Content -->
-            <main class="{{ $isAdminRoute ? 'pt-[calc(4rem+env(safe-area-inset-top))]' : 'pt-4 sm:pt-2 md:pt-[calc(4rem+env(safe-area-inset-top))]' }}">
+            <main class="{{ $isAdminRoute ? 'pt-[calc(4rem+env(safe-area-inset-top))]' : 'pt-2 sm:pt-1 md:pt-[calc(4rem+env(safe-area-inset-top))]' }}">
                 @yield('content', $slot ?? '')
             </main>
-        </div>
 
-<x-shared.feature-lock-modal />
+        </div>
 
 @stack('modals')
 

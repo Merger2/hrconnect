@@ -400,7 +400,9 @@ class ManagerInbox extends Component
                 ->tap($applyInboxFilters)
                 ->latest(),
             'custom_forms' => CustomFormSubmission::query()
-                ->with(['template:id,title,category', 'submitter:id,name,email,profile_photo_path,job_title_id,company_id'])
+                // users tidak punya kolom job_title_id (job title di-proxy via
+                // employee.position.jobTitle) — seleksi kolom nyata saja.
+                ->with(['template:id,title,category', 'submitter:id,name,email,profile_photo_path,company_id'])
                 ->whereHas('submitter', fn (Builder $query) => $query->managedBy($admin))
                 ->where('status', CustomFormSubmission::STATUS_SUBMITTED)
                 ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $nested) use ($search): void {

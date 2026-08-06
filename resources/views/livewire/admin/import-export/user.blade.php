@@ -10,14 +10,6 @@
         ? $requestedTab
         : ($canExportUsers ? 'export' : 'import');
     $defaultTabJson = \Illuminate\Support\Js::from($defaultTab);
-    $exportLockedPayload = \Illuminate\Support\Js::from([
-        'title' => __('Export Locked'),
-        'message' => __('Exporting users is an Enterprise feature. Please upgrade.'),
-    ]);
-    $importLockedPayload = \Illuminate\Support\Js::from([
-        'title' => __('Import Locked'),
-        'message' => __('Importing users is an Enterprise feature. Please upgrade.'),
-    ]);
 @endphp
 
 <div x-data="{
@@ -160,22 +152,10 @@
                                 @enderror
 
                                 <div class="flex justify-end">
-                                    @if (false)
-                                        <x-actions.button
-                                            class="w-full justify-center gap-2 py-3 sm:w-auto"
-                                            type="button"
-                                            @click.prevent="$dispatch('feature-lock', {{ $exportLockedPayload }})"
-                                        >
-                                            <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
-                                            {{ __('Export') }}
-                                            <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                        </x-actions.button>
-                                    @else
                                         <x-actions.button wire:click="export" size="lg" class="w-full sm:w-auto">
                                             <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
                                             {{ __('Export') }}
                                         </x-actions.button>
-                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -289,23 +269,12 @@
                                     </div>
 
                                     <div class="flex justify-end">
-                                        @if (false)
-                                            <x-actions.danger-button
-                                                class="w-full justify-center gap-2 py-3 sm:w-auto"
-                                                type="button"
-                                                @click.prevent="$dispatch('feature-lock', {{ $importLockedPayload }})"
-                                            >
-                                                {{ __('Import') }}
-                                                <x-heroicon-o-lock-closed class="h-4 w-4" />
-                                            </x-actions.danger-button>
-                                        @else
                                             <div x-show="file" style="display: none;">
                                                 <x-actions.danger-button class="w-full justify-center gap-2 py-3 sm:w-auto" wire:loading.attr="disabled" wire:target="import">
                                                     <x-heroicon-o-arrow-up-tray class="h-4 w-4" />
                                                     {{ __('Import') }}
                                                 </x-actions.danger-button>
                                             </div>
-                                        @endif
                                     </div>
                                 </form>
 

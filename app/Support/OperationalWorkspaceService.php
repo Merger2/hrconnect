@@ -176,9 +176,9 @@ class OperationalWorkspaceService implements ScopesCompanies
 
         return collect($projectIds)
             ->mapWithKeys(function (int $projectId) use ($invoiceRows, $pipelineRows): array {
-                $invoiced = round((float) ($invoiceRows->get($projectId)?->invoiced_total ?? 0), 2);
-                $paid = round((float) ($invoiceRows->get($projectId)?->paid_total ?? 0), 2);
-                $pipeline = round((float) ($pipelineRows->get($projectId)?->weighted_pipeline ?? 0), 2);
+                $invoiced = round((float) ($invoiceRows->get($projectId)->invoiced_total ?? 0), 2);
+                $paid = round((float) ($invoiceRows->get($projectId)->paid_total ?? 0), 2);
+                $pipeline = round((float) ($pipelineRows->get($projectId)->weighted_pipeline ?? 0), 2);
 
                 return [
                     $projectId => [

@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="flex min-h-screen">
         <!-- Sidebar - Desktop only -->
-        <div class="relative hidden lg:flex w-1/2 items-center justify-center overflow-hidden bg-gradient-to-br from-primary-700 via-primary-600 to-primary-500 p-12">
+        <div class="relative hidden lg:flex w-1/2 items-center justify-center overflow-hidden bg-gradient-to-br from-brand-700 via-brand-600 to-brand-500 p-12">
             <!-- Decorative background elements -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-20 left-20 w-64 h-64 border-4 border-white rounded-full"></div>
@@ -83,7 +83,7 @@
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-slate-900">Selamat Datang</h2>
                     <p class="mt-2 text-sm text-slate-500">Silakan masuk menggunakan kredensial perusahaan Anda</p>
-                    <span class="mt-4 block h-1 w-12 rounded-full bg-gradient-to-r from-primary-500 to-module-leave" aria-hidden="true"></span>
+                    <span class="mt-4 block h-1 w-12 rounded-full bg-gradient-to-r from-brand-500 to-module-leave" aria-hidden="true"></span>
                 </div>
 
                 <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -95,13 +95,13 @@
 
                     <div class="space-y-1.5">
                         <label for="email" class="block text-sm font-semibold text-slate-700">Alamat Email</label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20" placeholder="email@perusahaan.com" />
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20" placeholder="email@perusahaan.com" />
                     </div>
 
                     <div class="space-y-1.5">
                         <label for="password" class="block text-sm font-semibold text-slate-700">Kata Sandi</label>
                         <div class="relative">
-                            <input id="password" :type="show ? 'text' : 'password'" name="password" required class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/20 pr-12" placeholder="••••••••" />
+                            <input id="password" :type="show ? 'text' : 'password'" name="password" required class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20 pr-12" placeholder="••••••••" />
                             <button type="button" class="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-slate-700 transition-colors" @click="show = !show">
                                 <span class="material-symbols-outlined text-xl" x-text="show ? 'visibility_off' : 'visibility'">visibility</span>
                             </button>
@@ -110,15 +110,15 @@
 
                     <div class="flex items-center justify-between">
                         <label class="flex items-center gap-2 text-sm text-slate-600">
-                            <input type="checkbox" name="remember" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+                            <input type="checkbox" name="remember" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
                             Ingat saya
                         </label>
                         @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline">Lupa kata sandi?</a>
+                            <a href="{{ route('password.request') }}" class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline">Lupa kata sandi?</a>
                         @endif
                     </div>
 
-                    <button type="submit" class="w-full inline-flex justify-center rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.97]">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 active:scale-[0.97]">
                         Masuk
                     </button>
                 </form>

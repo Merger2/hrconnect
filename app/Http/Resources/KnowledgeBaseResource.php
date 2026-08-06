@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\KnowledgeBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property KnowledgeBase $resource
+ *
+ * @mixin KnowledgeBase
+ */
 class KnowledgeBaseResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -14,7 +20,7 @@ class KnowledgeBaseResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'category' => $this->category?->value,
-            'status' => $this->status?->value,
+            'status' => $this->status->value,
             'source_document' => $this->source_document,
             'page_number' => $this->page_number,
             'created_at' => $this->created_at?->toIso8601String(),

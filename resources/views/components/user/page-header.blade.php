@@ -8,7 +8,7 @@
     'module' => null,
 ])
 
-<header {{ $attributes->merge(['class' => 'user-page-header' . ($plain ? ' user-page-header--plain' : '') . ($module ? ' user-page-header--module-'.$module : '')]) }}>
+<header {{ $attributes->merge(['class' => 'user-page-header' . ($plain ? ' user-page-header--plain' : '') . ($module ? ' user-page-header--banner user-page-header--module-'.$module : '')]) }}>
     <div class="user-page-header__row">
         <div class="user-page-header__main">
             @if ($backHref)

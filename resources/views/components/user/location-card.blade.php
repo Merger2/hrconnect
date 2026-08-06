@@ -208,7 +208,7 @@
                 // Custom icon for user (green marker)
                 const userIcon = L.divIcon({
                     className: '',
-                    html: `<div style="background:#16a34a;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:16px;">📍</div>`,
+                    html: `<div style="background:var(--color-success);color:var(--color-surface);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--color-surface);box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:16px;">📍</div>`,
                     iconSize: [32, 32],
                     iconAnchor: [16, 16],
                 });
@@ -221,7 +221,7 @@
                 if (this.branchLat && this.branchLng) {
                     const officeIcon = L.divIcon({
                         className: '',
-                        html: `<div style="background:#2563eb;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:16px;">🏢</div>`,
+                        html: `<div style="background:var(--color-module-hr);color:var(--color-surface);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--color-surface);box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:16px;">🏢</div>`,
                         iconSize: [32, 32],
                         iconAnchor: [16, 16],
                     });
@@ -236,7 +236,7 @@
                         [this.lat, this.lng],
                         [this.branchLat, this.branchLng]
                     ], {
-                        color: '#6b7280',
+                        color: 'var(--color-muted)',
                         weight: 2,
                         dashArray: '8, 6',
                         opacity: 0.7,
@@ -249,7 +249,7 @@
                         L.marker([midLat, midLng], {
                             icon: L.divIcon({
                                 className: '',
-                                html: `<div style="background:#fff;color:#374151;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,0.1);white-space:nowrap;">${this.formattedDistance}</div>`,
+                                html: `<div style="background:var(--color-surface);color:var(--color-primary-700);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;border:1px solid var(--color-primary-200);box-shadow:0 1px 4px rgba(0,0,0,0.1);white-space:nowrap;">${this.formattedDistance}</div>`,
                                 iconSize: [0, 0],
                                 iconAnchor: [0, 0],
                             }),
@@ -261,8 +261,8 @@
                     if (this.branchRadius) {
                         this._geofenceCircle = L.circle([this.branchLat, this.branchLng], {
                             radius: this.branchRadius,
-                            color: '#2563eb',
-                            fillColor: '#2563eb',
+                            color: 'var(--color-module-hr)',
+                            fillColor: 'var(--color-module-hr)',
                             fillOpacity: 0.06,
                             weight: 1.5,
                             dashArray: '4, 4',
@@ -271,7 +271,7 @@
 
                         // Check if user is within geofence
                         if (this.officeDistance !== null && this.officeDistance <= this.branchRadius) {
-                            this._geofenceCircle.setStyle({ color: '#16a34a', fillColor: '#16a34a' });
+                            this._geofenceCircle.setStyle({ color: 'var(--color-success)', fillColor: 'var(--color-success)' });
                         }
                     }
                 }

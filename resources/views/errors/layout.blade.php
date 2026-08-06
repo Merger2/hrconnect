@@ -26,7 +26,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-full bg-[#f6faf4] font-sans antialiased text-slate-950 selection:bg-primary-600 selection:text-white">
+<body class="min-h-full bg-primary-50 font-sans antialiased text-slate-950 selection:bg-primary-600 selection:text-white">
     <a href="#error-main" class="skip-link">{{ __('Skip to main content') }}</a>
 
     <div class="relative min-h-screen overflow-hidden px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6">

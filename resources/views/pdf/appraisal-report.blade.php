@@ -30,7 +30,7 @@
         }
 
         body {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 11px;
             line-height: 1.55;
@@ -39,7 +39,7 @@
 
         .top-corner-navy {
             border-left: 82px solid transparent;
-            border-top: 82px solid #083344;
+            border-top: 82px solid {{ design_token('brand-deep') }};
             height: 0;
             position: fixed;
             right: -54px;
@@ -49,7 +49,7 @@
 
         .top-corner-primary {
             border-left: 46px solid transparent;
-            border-top: 46px solid #6ab45b;
+            border-top: 46px solid {{ design_token('brand-green-500') }};
             height: 0;
             position: fixed;
             right: -54px;
@@ -58,7 +58,7 @@
         }
 
         .letterhead {
-            border-bottom: 1.4px solid #31542a;
+            border-bottom: 1.4px solid {{ design_token('brand-green-800') }};
             margin: 0 0 20px;
             padding-bottom: 12px;
             width: 100%;
@@ -91,7 +91,7 @@
         }
 
         .company-name {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 15.5px;
             font-weight: 700;
             letter-spacing: .01em;
@@ -100,14 +100,14 @@
         }
 
         .company-address {
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 9.2px;
             line-height: 1.35;
             margin: 0;
         }
 
         .company-mark {
-            color: #57944a;
+            color: {{ design_token('brand-green-600') }};
             font-size: 8.2px;
             font-weight: 700;
             letter-spacing: .18em;
@@ -116,7 +116,7 @@
         }
 
         .document-title {
-            color: #083344;
+            color: {{ design_token('brand-deep') }};
             font-size: 15.5px;
             font-weight: 700;
             letter-spacing: .04em;
@@ -126,7 +126,7 @@
         }
 
         .document-meta {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 9.5px;
             font-weight: 700;
             margin: 3px 0 0;
@@ -144,7 +144,7 @@
         }
 
         .meta-label {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 9.5px;
             font-weight: 700;
             letter-spacing: .06em;
@@ -153,7 +153,7 @@
         }
 
         .meta-value {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 10.5px;
             font-weight: 700;
         }
@@ -168,27 +168,27 @@
         }
 
         .status-badge {
-            background: #f0f9ee;
-            color: #31542a;
+            background: {{ design_token('brand-green-50') }};
+            color: {{ design_token('brand-green-800') }};
         }
 
         .score-good {
-            background: #dcfce7;
-            color: #166534;
+            background: {{ design_token('status-good-soft') }};
+            color: {{ design_token('status-good') }};
         }
 
         .score-watch {
-            background: #fef3c7;
-            color: #92400e;
+            background: {{ design_token('status-watch-soft') }};
+            color: {{ design_token('status-watch') }};
         }
 
         .score-risk {
-            background: #fee2e2;
-            color: #991b1b;
+            background: {{ design_token('status-risk-soft') }};
+            color: {{ design_token('status-risk') }};
         }
 
         .section-title {
-            color: #083344;
+            color: {{ design_token('brand-deep') }};
             font-size: 10px;
             font-weight: 700;
             letter-spacing: .12em;
@@ -203,9 +203,9 @@
         }
 
         .kpi-table th {
-            background: #083344;
-            border: 1px solid #083344;
-            color: #ffffff;
+            background: {{ design_token('brand-deep') }};
+            border: 1px solid {{ design_token('brand-deep') }};
+            color: {{ design_token('surface') }};
             font-size: 9px;
             font-weight: 700;
             padding: 7px;
@@ -214,14 +214,14 @@
         }
 
         .kpi-table td {
-            border: 1px solid #d1d5db;
+            border: 1px solid {{ design_token('primary-300') }};
             padding: 7px;
             vertical-align: top;
         }
 
         .score-card {
-            background: #f0f9ee;
-            border: 1.5px solid #6ab45b;
+            background: {{ design_token('brand-green-50') }};
+            border: 1.5px solid {{ design_token('brand-green-500') }};
             border-radius: 8px;
             margin: 16px 0 14px;
             padding: 13px 14px;
@@ -232,7 +232,7 @@
         }
 
         .score-label {
-            color: #31542a;
+            color: {{ design_token('brand-green-800') }};
             font-size: 10px;
             font-weight: 700;
             letter-spacing: .12em;
@@ -240,24 +240,24 @@
         }
 
         .score-value {
-            color: #083344;
+            color: {{ design_token('brand-deep') }};
             font-size: 28px;
             font-weight: 700;
             text-align: right;
         }
 
         .score-grade {
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 10px;
             margin-top: 4px;
         }
 
         .notes-box {
-            background: #f9fafb;
-            border: 1px solid #d1d5db;
-            border-left: 3px solid #6ab45b;
+            background: {{ design_token('primary-50') }};
+            border: 1px solid {{ design_token('primary-300') }};
+            border-left: 3px solid {{ design_token('brand-green-500') }};
             border-radius: 6px;
-            color: #4b5563;
+            color: {{ design_token('primary-600') }};
             font-size: 10px;
             margin: 0 0 10px;
             padding: 9px 10px;
@@ -281,34 +281,34 @@
         }
 
         .signature-line {
-            border-top: 1px solid #9ca3af;
+            border-top: 1px solid {{ design_token('primary-400') }};
             margin: 52px auto 8px;
             width: 78%;
         }
 
         .signature-name {
-            color: #111827;
+            color: {{ design_token('primary-900') }};
             font-size: 10.5px;
             font-weight: 700;
         }
 
         .signature-role {
-            color: #6b7280;
+            color: {{ design_token('primary-500') }};
             font-size: 8.8px;
             letter-spacing: .06em;
             text-transform: uppercase;
         }
 
         .acknowledged {
-            color: #166534;
+            color: {{ design_token('status-good') }};
             font-size: 8.5px;
             margin-top: 3px;
         }
 
         .footer {
-            border-top: 1px solid #badcb3;
+            border-top: 1px solid {{ design_token('brand-green-300') }};
             bottom: -54px;
-            color: #6b7280;
+            color: {{ design_token('primary-500') }};
             font-size: 8.4px;
             left: 0;
             line-height: 1.4;

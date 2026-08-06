@@ -80,14 +80,14 @@ class ScheduleRosterExport implements FromCollection, WithColumnWidths, WithHead
         $shift = $schedule->is_off ? null : $schedule->shift;
 
         return [
-            $employee?->employee_number ?? '-',
-            $schedule->user?->name ?? $employee?->full_name ?? '-',
-            $employee?->division?->name ?? '-',
-            $employee?->position?->name ?? '-',
+            $employee->employee_number ?? '-',
+            $schedule->user->name ?? $employee->full_name ?? '-',
+            $employee?->division->name ?? '-',
+            $employee?->position->name ?? '-',
             $schedule->date?->format('Y-m-d') ?? '-',
-            $shift?->name ?? '-',
-            $shift?->start_time ?? '-',
-            $shift?->end_time ?? '-',
+            $shift->name ?? '-',
+            $shift->start_time ?? '-',
+            $shift->end_time ?? '-',
             $schedule->is_off ? 'Off' : ucfirst($schedule->status ?? 'scheduled'),
         ];
     }

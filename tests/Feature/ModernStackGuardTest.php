@@ -153,22 +153,6 @@ test('blade views use livewire four component tags and tailwind four safe utilit
     }
 });
 
-test('feature lock modal backdrop stays behind the interactive form', function () {
-    $contents = file_get_contents(resource_path('views/components/shared/feature-lock-modal.blade.php'));
-
-    expect($contents)
-        ->toContain('fixed inset-0 z-0')
-        ->toContain('absolute inset-0 z-0')
-        ->toContain('relative z-10 mx-auto')
-        ->toContain('normalizeWhatsapp(value)')
-        ->toContain('isValidDomain(value)')
-        ->toContain('x-bind:disabled="!isFormValid()"')
-        ->toContain('x-on:blur="touch(\'email\')"')
-        ->toContain('x-on:blur="touch(\'whatsapp\')"')
-        ->toContain('x-show="showError(\'jumlahKaryawan\')"')
-        ->not->toMatch('/x-model="(?:nama|email|perusahaan|whatsapp|domain|jumlahKaryawan|catatan)"[^>]*\sdisabled\b/');
-});
-
 test('pull to refresh asset is loaded with animated pill surface and mobile guards', function () {
     $script = file_get_contents(public_path('js/pulltorefresh.js'));
     $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));

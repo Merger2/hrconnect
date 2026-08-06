@@ -2,11 +2,17 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Employee;
 use App\Services\Security\FaceRecognitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property Employee $resource
+ *
+ * @mixin Employee
+ */
 class EmployeeResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -17,15 +23,15 @@ class EmployeeResource extends JsonResource
             'employee_number' => $this->employee_number,
             'full_name' => $this->full_name,
             'email' => $this->whenLoaded('user', fn () => $this->user?->email),
-            'gender' => $this->gender?->value,
-            'marital_status' => $this->marital_status?->value,
+            'gender' => $this->gender->value,
+            'marital_status' => $this->marital_status->value,
             'blood_type' => $this->blood_type?->value,
-            'education_level' => $this->education_level?->value,
-            'birth_date' => $this->birth_date?->toDateString(),
-            'join_date' => $this->join_date?->toDateString(),
-            'status' => $this->status?->value,
-            'employment_type' => $this->employment_type?->value,
-            'salary_type' => $this->salary_type?->value,
+            'education_level' => $this->education_level->value,
+            'birth_date' => $this->birth_date->toDateString(),
+            'join_date' => $this->join_date->toDateString(),
+            'status' => $this->status->value,
+            'employment_type' => $this->employment_type->value,
+            'salary_type' => $this->salary_type->value,
             'photo_url' => $this->photo ? Storage::url($this->photo) : null,
             'face_registered' => app(FaceRecognitionService::class)->hasFaceEnrolled($this->resource),
             'pin_set' => ! empty($this->pin),

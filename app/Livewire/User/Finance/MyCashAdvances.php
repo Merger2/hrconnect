@@ -49,7 +49,7 @@ final class MyCashAdvances extends Component
             'canRequestCashAdvance' => $this->canRequestCashAdvance($employee),
             'totalUnpaid' => $advances->whereIn('status', ['pending', 'pending_finance', 'approved'])->sum('amount'),
             'totalPaid' => $advances->where('status', 'paid')->sum('amount'),
-            'basicSalary' => $employee?->basic_salary ?? 0,
+            'basicSalary' => $employee->basic_salary ?? 0,
         ]);
     }
 
