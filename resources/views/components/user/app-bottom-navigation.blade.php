@@ -44,7 +44,7 @@
 
 <nav
     aria-label="{{ __('User navigation') }}"
-    class="user-bottom-navigation"
+    class="user-bottom-navigation md:hidden"
 >
     <div class="user-bottom-navigation__dock">
         @foreach ($items as $item)

@@ -326,7 +326,7 @@ use App\Helpers\FeatureToggle;
 
 <nav x-data="{ open: false }" @keydown.escape.window="open = false" aria-label="{{ $isAdminRoute ? __('Primary navigation') : __('User navigation') }}"
     data-app-top-nav
-    class="fixed top-0 left-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top)]">
+    class="fixed top-0 left-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top)] {{ $isUserRoute ? 'hidden md:block' : '' }}">
     <!-- Primary Navigation Menu -->
     <div
         class="{{ $isAdminRoute ? 'w-full px-4 sm:px-6 lg:px-8 2xl:px-10' : 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8' }}">
@@ -456,11 +456,11 @@ use App\Helpers\FeatureToggle;
                             {{ __('Home') }}
                         </x-navigation.nav-link>
 
-                        {{-- @if (Auth::user()->subordinates->isNotEmpty())
-                    <x-navigation.nav-link href="{{ route('approvals') }}" :active="request()->routeIs('approvals')" wire:navigate>
-                        {{ __('Team Approvals') }}
-                    </x-navigation.nav-link>
-                    @endif --}}
+                        @if ($canReviewSubordinateRequests)
+                            <x-navigation.nav-link href="{{ route('approvals') }}" :active="request()->routeIs('approvals')" wire:navigate>
+                                {{ __('Team Approvals') }}
+                            </x-navigation.nav-link>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -470,6 +470,19 @@ use App\Helpers\FeatureToggle;
                     <div class="{{ $isAdminRoute ? 'flex items-center gap-3' : 'topbar-action-cluster' }}">
 
                         <livewire:shared.notifications-dropdown />
+
+                        @if ($user && ! $isAdminRoute)
+                            <a href="{{ route('profile.show') }}"
+                                class="wcag-touch-target flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200/80 bg-white text-gray-600 shadow-sm transition hover:border-gray-300 hover:text-gray-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+                                aria-label="{{ __('Profile') }}"
+                                title="{{ __('Profile') }}">
+                                @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+                                    <img class="h-full w-full object-cover" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" />
+                                @else
+                                    <x-heroicon-o-user-circle class="h-5 w-5" />
+                                @endif
+                            </a>
+                        @endif
                     </div>
 
                     <!-- Settings Dropdown -->

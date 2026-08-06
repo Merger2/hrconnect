@@ -1925,6 +1925,14 @@
         @apply flex shrink-0 items-center gap-2;
     }
 
+    @media (min-width: 768px) {
+        /* Desktop gets the app topbar (notifications + profile) — the hero
+           cluster would duplicate it, so keep it mobile-only. */
+        .user-home-hero__tools {
+            display: none;
+        }
+    }
+
     .user-home-content {
         @apply relative z-10 mx-auto mt-5 max-w-5xl space-y-4 px-4 pb-8 sm:px-6 lg:px-8;
     }
@@ -3506,6 +3514,11 @@
 
 
     @media (min-width: 768px) {
+        /* Desktop uses the app topbar — bottom nav stays mobile-only. */
+        .user-bottom-navigation {
+            display: none;
+        }
+
         .user-bottom-navigation__dock {
             @apply h-[4.25rem] max-w-lg px-2;
         }

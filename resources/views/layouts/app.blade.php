@@ -70,10 +70,8 @@
     @php $isAdminRoute = request()->routeIs('admin.*'); @endphp
     <body class="font-sans antialiased {{ $isAdminRoute ? 'admin-ui' : 'user-ui' }}">
 
-        <div class="min-h-screen bg-gray-100 {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))]' : '' }}">
-            @if ($isAdminRoute)
-                @livewire('navigation-menu')
-            @endif
+        <div class="min-h-screen bg-gray-100 {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0' : '' }}">
+            @livewire('navigation-menu')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -85,7 +83,7 @@
             @endif
 
             <!-- Page Content -->
-            <main class="{{ $isAdminRoute ? 'pt-[calc(4rem+env(safe-area-inset-top))]' : 'pt-4 sm:pt-2' }}">
+            <main class="{{ $isAdminRoute ? 'pt-[calc(4rem+env(safe-area-inset-top))]' : 'pt-4 sm:pt-2 md:pt-[calc(4.25rem+env(safe-area-inset-top))]' }}">
                 @yield('content', $slot ?? '')
             </main>
         </div>
