@@ -70,6 +70,23 @@ Berlaku UNTUK (hanya):
   module hue (cyan/violet/emerald/amber/sky/fuchsia/rose/blue). Diterapkan
   otomatis oleh komponen `x-user.page-header` saat atribut `module` di-set.
 
+Pemetaan `module=` → hue (terverifikasi grep blade 2026-08-06):
+
+| `module=` | Hue | Pages |
+|-----------|-----|-------|
+| `attendance` (7) | cyan | scan, face-enrollment, shift-schedule-page, work-from-home-request-page, shift-swap-request-page, attendance-history, attendance-correction-page |
+| `leave` (4) | violet | apply-leave, team-approvals, overtime-request, team-approvals-history |
+| `hr` (4) | blue | profile/show, collaboration-inbox, hr-tasks-page, notifications-page |
+| `finance` (4) | rose | reimbursement-page, team-cash-advance-manager, my-cash-advances, my-assets |
+| `reports` (2) | sky | my-performance + my-operational-tasks — keputusan Fikih 2026-08-06 (performance & tasks = laporan, bukan hr) |
+| `documents` (2) | amber | employee-document-request-page, my-custom-forms — keputusan Fikih 2026-08-06 (form internal = dokumen) |
+| `payroll` (1) | emerald | my-payslips |
+| `kb` (2) | fuchsia | knowledge-base-chat, knowledge-base/index |
+
+Aturan tambahan: kalau `module` TIDAK di-set, komponen render header polos
+(tanpa banner) — halaman yang belum dipetakan tidak akan mendapat gradien
+sampai pemetaannya ditambahkan.
+
 Aturan banner:
 - Arah gradien: 135deg, hue GELAP di kiri-atas (tempat teks) → hue terang di
   kanan-bawah. Kontras teks putih minimal ±4.5:1 pada stop gelap.
