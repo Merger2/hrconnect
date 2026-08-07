@@ -87,44 +87,44 @@ test('reimbursement page filters claims by status and type', function () {
     $employee = Employee::factory()->create(['user_id' => $user->id]);
 
     // Type filter memakai relasi category (code) — fixture wajib punya kategori.
-    $medical = ReimbursementCategory::create([
-        'company_id' => $user->company_id,
-        'name' => 'Medical',
-        'code' => 'medical',
-        'is_active' => true,
-    ]);
     $transport = ReimbursementCategory::create([
         'company_id' => $user->company_id,
         'name' => 'Transport',
         'code' => 'transport',
         'is_active' => true,
     ]);
-
-    Reimbursement::create([
-        'employee_id' => $employee->id,
-        'category_id' => $medical->id,
-        'title' => 'Medical',
-        'expense_date' => now()->toDateString(),
-        'amount' => 150000,
-        'description' => 'Medical reimbursement',
-        'status' => 'approved',
+    $meals = ReimbursementCategory::create([
+        'company_id' => $user->company_id,
+        'name' => 'Meals',
+        'code' => 'meals',
+        'is_active' => true,
     ]);
 
     Reimbursement::create([
         'employee_id' => $employee->id,
         'category_id' => $transport->id,
         'title' => 'Transport',
+        'expense_date' => now()->toDateString(),
+        'amount' => 150000,
+        'description' => 'Transport reimbursement',
+        'status' => 'approved',
+    ]);
+
+    Reimbursement::create([
+        'employee_id' => $employee->id,
+        'category_id' => $meals->id,
+        'title' => 'Meals',
         'expense_date' => now()->subDay()->toDateString(),
         'amount' => 50000,
-        'description' => 'Transport reimbursement',
+        'description' => 'Meals reimbursement',
         'status' => 'pending',
     ]);
 
     Livewire::test(ReimbursementPage::class)
         ->set('statusFilter', 'approved')
-        ->set('typeFilter', 'medical')
-        ->assertSee('Medical reimbursement')
-        ->assertDontSee('Transport reimbursement');
+        ->set('typeFilter', 'transport')
+        ->assertSee('Transport reimbursement')
+        ->assertDontSee('Meals reimbursement');
 });
 
 test('home action needed explains each count and routes to the matching workflow', function () {
@@ -201,9 +201,9 @@ test('reimbursement page stores uploaded attachments on private disk', function 
 
     Livewire::test(ReimbursementPage::class)
         ->set('date', now()->toDateString())
-        ->set('type', 'medical')
+        ->set('type', 'transport')
         ->set('amount', 150000)
-        ->set('description', 'Medical receipt')
+        ->set('description', 'Transport receipt')
         ->set('attachment', UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'))
         ->call('save');
 

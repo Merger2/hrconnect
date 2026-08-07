@@ -94,9 +94,9 @@ test('reimbursement attachment validation still rejects unsafe files', function 
 
     Livewire::test(ReimbursementPage::class)
         ->set('date', now()->toDateString())
-        ->set('type', 'medical')
+        ->set('type', 'transport')
         ->set('amount', 100000)
-        ->set('description', 'Medical reimbursement receipt')
+        ->set('description', 'Transport reimbursement receipt')
         ->set('attachment', UploadedFile::fake()->create('malware.exe', 1, 'application/x-msdownload'))
         ->call('save')
         ->assertHasErrors(['attachment']);

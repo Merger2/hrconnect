@@ -51,11 +51,12 @@
                                         <x-user.tom-select-user id="type" wire:model="type"
                                             placeholder="{{ __('Select Type') }}" class="block w-full">
                                             <option value="" disabled>{{ __('Select Type') }}</option>
-                                            <option value="medical">{{ __('Medical') }}</option>
                                             <option value="transport">{{ __('Transport') }}</option>
-                                            <option value="project">{{ __('Project') }}</option>
-                                            <option value="optical">{{ __('Optical') }}</option>
-                                            <option value="dental">{{ __('Dental') }}</option>
+                                            <option value="meals">{{ __('Meals') }}</option>
+                                            <option value="lodging">{{ __('Lodging') }}</option>
+                                            <option value="communication">{{ __('Communication') }}</option>
+                                            <option value="education">{{ __('Education') }}</option>
+                                            <option value="equipment">{{ __('Equipment') }}</option>
                                             <option value="other">{{ __('Other') }}</option>
                                         </x-user.tom-select-user>
                                     </div>
@@ -165,11 +166,12 @@
                             <div class="user-filter-chip-row" role="tablist" aria-label="{{ __('Type') }}">
                                 @foreach ([
                                     'all' => __('All Types'),
-                                    'medical' => __('Medical'),
                                     'transport' => __('Transport'),
-                                    'project' => __('Project'),
-                                    'optical' => __('Optical'),
-                                    'dental' => __('Dental'),
+                                    'meals' => __('Meals'),
+                                    'lodging' => __('Lodging'),
+                                    'communication' => __('Communication'),
+                                    'education' => __('Education'),
+                                    'equipment' => __('Equipment'),
                                     'other' => __('Other'),
                                 ] as $typeKey => $typeLabel)
                                     <button type="button" wire:click="setTypeFilter('{{ $typeKey }}')"
@@ -202,14 +204,26 @@
                                             <div
                                                 class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110
                                                 @php $claimCategoryCode = $claim->category?->code ?? $claim->title ?? 'other'; @endphp
-                                                @if ($claimCategoryCode == 'medical') bg-blue-50 text-blue-600
-                                                @elseif($claimCategoryCode == 'transport') bg-amber-50 text-amber-600
+                                                @if ($claimCategoryCode == 'transport') bg-amber-50 text-amber-600
+                                                @elseif($claimCategoryCode == 'meals') bg-rose-50 text-rose-600
+                                                @elseif($claimCategoryCode == 'lodging') bg-violet-50 text-violet-600
+                                                @elseif($claimCategoryCode == 'communication') bg-cyan-50 text-cyan-600
+                                                @elseif($claimCategoryCode == 'education') bg-sky-50 text-sky-600
+                                                @elseif($claimCategoryCode == 'equipment') bg-emerald-50 text-emerald-600
                                                 @else bg-gray-50 text-gray-600 @endif">
 
-                                                @if ($claimCategoryCode == 'medical')
-                                                    <x-heroicon-o-heart class="h-5 w-5 sm:h-6 sm:w-6" />
-                                                @elseif($claimCategoryCode == 'transport')
+                                                @if ($claimCategoryCode == 'transport')
                                                     <x-heroicon-o-paper-airplane class="h-5 w-5 sm:h-6 sm:w-6" />
+                                                @elseif($claimCategoryCode == 'meals')
+                                                    <x-heroicon-o-cake class="h-5 w-5 sm:h-6 sm:w-6" />
+                                                @elseif($claimCategoryCode == 'lodging')
+                                                    <x-heroicon-o-building-office-2 class="h-5 w-5 sm:h-6 sm:w-6" />
+                                                @elseif($claimCategoryCode == 'communication')
+                                                    <x-heroicon-o-device-phone-mobile class="h-5 w-5 sm:h-6 sm:w-6" />
+                                                @elseif($claimCategoryCode == 'education')
+                                                    <x-heroicon-o-academic-cap class="h-5 w-5 sm:h-6 sm:w-6" />
+                                                @elseif($claimCategoryCode == 'equipment')
+                                                    <x-heroicon-o-computer-desktop class="h-5 w-5 sm:h-6 sm:w-6" />
                                                 @else
                                                     <x-heroicon-o-document-text class="h-5 w-5 sm:h-6 sm:w-6" />
                                                 @endif

@@ -105,7 +105,6 @@ test('company scoped policies deny cross tenant sensitive HR finance and asset r
         'employee_id' => $employeeB->employee->id,
         'title' => 'Tenant B claim',
         'expense_date' => now()->toDateString(),
-        'type' => 'medical',
         'amount' => 100000,
         'description' => 'Tenant B claim',
         'status' => 'pending',

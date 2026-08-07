@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             PayrollComponentSeeder::class,
             ShiftSeeder::class,
+            ReimbursementCategorySeeder::class,
             LeaveTypeSeeder::class,
             HolidaySeeder::class,
             PayrollConfigSeeder::class,
