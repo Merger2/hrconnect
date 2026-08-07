@@ -420,12 +420,20 @@ class AdminDashboardQueryService
      */
     private function managedUserIds(User $admin): Collection
     {
-        if ($admin->group === 'user') {
-            return $admin->subordinates->pluck('id');
-        }
-
+        // Global-scope admin (super-admin, termasuk yang group-nya 'user')
+        // melihat SEMUA user — dicek DULU supaya akun super-admin dengan
+        // group 'user' (mis. admin@hrconnect.local) tidak jatuh ke cabang
+        // subordinates yang hanya relevan untuk manajer terbatas.
         if ($admin->hasGlobalAdminScope()) {
             return User::query()->pluck('id');
+        }
+
+        if ($admin->group === 'user') {
+            // Pola sama dengan TeamApprovalQueryService::subordinateIds() —
+            // relasi subordinates ada di Employee (parent_id), bukan di User.
+            // User::subordinates tidak pernah terdefinisi → null → crash
+            // (fix 2026-08-06: dashboard admin 500 untuk admin group 'user').
+            return $admin->employee?->subordinates()->pluck('user_id') ?? collect();
         }
 
         return User::query()->managedBy($admin)->pluck('id');

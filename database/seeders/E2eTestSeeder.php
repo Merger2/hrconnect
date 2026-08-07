@@ -96,6 +96,15 @@ class E2eTestSeeder extends Seeder
             }
 
             if ($roleName === 'super-admin') {
+                // Aksesor isSuperadmin/isAdmin berbasis kolom `group` (legacy
+                // PasPapan), bukan role. Tanpa group='superadmin', akun ini
+                // kehilangan global admin scope (managedBy -> kosong) dan
+                // dashboard admin tampil tanpa data. Konsisten dengan
+                // SuperAdminSeeder. (fix 2026-08-06)
+                if ($user->group !== 'superadmin') {
+                    $user->update(['group' => 'superadmin']);
+                }
+
                 continue;
             }
 

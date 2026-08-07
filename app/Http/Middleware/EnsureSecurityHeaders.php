@@ -43,7 +43,14 @@ class EnsureSecurityHeaders
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:",
             "img-src 'self' data: blob: https: http:",
-            "connect-src 'self' https://tile.openstreetmap.org https://cdn.jsdelivr.net wss:",
+            // connect-src: host tile map yang benar-benar dipakai aplikasi.
+            // - https://tile.openstreetmap.org            : attendance-detail-modal (tanpa subdomain)
+            // - https://*.tile.openstreetmap.org          : components/user/location-card ({s}.tile...)
+            // - https://*.basemaps.cartocdn.com           : analytics-dashboard ({s}.basemaps.cartocdn.com)
+            // - data:                                     : fallback error-tile Leaflet (1px gif) —
+            //   tanpa ini, tile gagal → Leaflet swap ke data:gif → console error connect-src spam
+            //   (fix 2026-08-06: admin/analytics + location-card + attendance modal).
+            "connect-src 'self' https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://cdn.jsdelivr.net wss: data:",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self'",
