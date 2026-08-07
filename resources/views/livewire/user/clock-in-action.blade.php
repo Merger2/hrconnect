@@ -146,7 +146,7 @@
              x-cloak
              x-transition
              class="border-b border-slate-100 px-5 py-3">
-            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-slate-50 to-primary-50/50 px-4 py-2.5">
+            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-slate-50 to-primary-50 px-4 py-2.5">
                 <div class="flex items-center gap-2 text-sm font-medium text-slate-600">
                     <x-heroicon-o-clock class="h-4 w-4" />
                     <span>{{ __('Shift ends in') }}</span>

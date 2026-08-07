@@ -30,7 +30,7 @@
     <a href="#error-main" class="skip-link">{{ __('Skip to main content') }}</a>
 
     <div class="relative min-h-screen overflow-hidden px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6">
-        <div class="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-primary-100/80 via-primary-50/40 to-transparent"></div>
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-primary-100 via-primary-50 to-transparent"></div>
 
         <main id="error-main" tabindex="-1" class="relative mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[34rem] items-center justify-center">
             <section aria-labelledby="error-page-title" class="w-full overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-error-card">

@@ -215,7 +215,7 @@
             <!-- Mobile List -->
             <div class="grid grid-cols-1 divide-y divide-gray-200 lg:hidden">
                 @foreach ($users as $user)
-                    <div class="space-y-4 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 p-4">
+                    <div class="space-y-4 bg-gradient-to-br from-emerald-50 via-white to-slate-50 p-4">
                         <div class="flex items-start gap-3">
                             <img class="h-14 w-14 rounded-xl border-2 border-emerald-100 object-cover shadow-sm"
                                 src="{{ $user->profile_photo_url }}"

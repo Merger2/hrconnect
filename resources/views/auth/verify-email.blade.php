@@ -26,7 +26,7 @@
                 });
             }
         }"
-        class="verify-email-page flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-brand-50/40 px-4 py-12 sm:px-6 lg:px-8"
+        class="verify-email-page flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-brand-50 px-4 py-12 sm:px-6 lg:px-8"
     >
         <div class="w-full max-w-md">
             {{-- Logo / Branding --}}
