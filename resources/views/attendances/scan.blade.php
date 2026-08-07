@@ -64,7 +64,7 @@
 
                 {{-- Status indicator --}}
                 <div class="absolute bottom-32 left-1/2 -translate-x-1/2">
-                    <div class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg backdrop-blur-sm"
+                    <div class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg"
                          :class="statusClass"
                          role="status" aria-live="polite">
                         <template x-if="captureStatus === 'loading'">
@@ -97,7 +97,7 @@
             {{-- Error retry --}}
             <div x-show="captureStatus === 'error'" x-cloak class="absolute bottom-4 left-1/2 -translate-x-1/2">
                 <button @click="startCamera()"
-                        class="rounded-full bg-white/20 px-6 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
+                        class="rounded-full bg-white px-6 py-2 text-sm font-semibold text-slate-700 shadow-lg hover:bg-slate-100 transition-colors">
                     {{ __('Try Again') }}
                 </button>
             </div>
@@ -141,12 +141,12 @@
 
                 get statusClass() {
                     switch (this.captureStatus) {
-                        case 'loading': return 'bg-slate-800/80 text-slate-200';
-                        case 'detecting': return 'bg-amber-800/80 text-amber-200';
-                        case 'ready': return 'bg-emerald-800/80 text-emerald-200';
-                        case 'success': return 'bg-emerald-800/80 text-emerald-200';
-                        case 'error': return 'bg-red-800/80 text-red-200';
-                        default: return 'bg-slate-800/80 text-slate-200';
+                        case 'loading': return 'bg-slate-800 text-slate-200';
+                        case 'detecting': return 'bg-amber-800 text-amber-200';
+                        case 'ready': return 'bg-emerald-800 text-emerald-200';
+                        case 'success': return 'bg-emerald-800 text-emerald-200';
+                        case 'error': return 'bg-red-800 text-red-200';
+                        default: return 'bg-slate-800 text-slate-200';
                     }
                 },
 

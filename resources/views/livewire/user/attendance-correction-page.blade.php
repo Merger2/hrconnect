@@ -289,12 +289,12 @@
 
                             @if ($includeRequestedTimeIn)
                                 <div
-                                    class="mt-4 rounded-[1rem] border border-emerald-100 bg-emerald-50/50 p-4">
+                                    class="mt-4 rounded-[1rem] border border-emerald-100 bg-emerald-50 p-4">
                                     <div class="mb-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <div class="text-xs font-medium text-emerald-800">
                                             {{ __('Base date: :date', ['date' => \Illuminate\Support\Carbon::parse($attendanceDate)->translatedFormat('d M Y')]) }}
                                         </div>
-                                        <div class="whitespace-nowrap rounded-full bg-emerald-100/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                                        <div class="whitespace-nowrap rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                                             {{ __('Date & time') }}
                                         </div>
                                     </div>
@@ -330,12 +330,12 @@
 
                             @if ($includeRequestedTimeOut)
                                 <div
-                                    class="mt-4 rounded-[1rem] border border-amber-100 bg-amber-50/50 p-4">
+                                    class="mt-4 rounded-[1rem] border border-amber-100 bg-amber-50 p-4">
                                     <div class="mb-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <div class="text-xs font-medium text-amber-800">
                                             {{ __('Base date: :date', ['date' => \Illuminate\Support\Carbon::parse($attendanceDate)->translatedFormat('d M Y')]) }}
                                         </div>
-                                        <div class="whitespace-nowrap rounded-full bg-amber-100/80 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                                        <div class="whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                                             {{ __('Date & time') }}
                                         </div>
                                     </div>

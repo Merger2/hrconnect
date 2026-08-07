@@ -578,11 +578,11 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .quick-wallet-surface {
-  background-color:color-mix(in srgb, var(--color-on-error) 95%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .quick-wallet-surface {
-    background-color:color-mix(in oklab, var(--color-white) 95%, transparent);
+  background-color:var(--color-white);
   }
 }
 .quick-wallet-surface {
@@ -654,11 +654,11 @@ input[type=range]::-moz-range-thumb {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-primary-100);
-  background-color:color-mix(in srgb, var(--color-primary-50) 35%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .quick-wallet-team {
-    background-color:color-mix(in oklab, var(--color-primary-50) 35%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .quick-wallet-team {
@@ -858,11 +858,11 @@ input[type=range]::-moz-range-thumb {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-primary-100);
-  background-color:color-mix(in srgb, var(--color-primary-50) 40%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .quick-wallet-more {
-    background-color:color-mix(in oklab, var(--color-primary-50) 40%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .quick-wallet-more {
@@ -885,19 +885,19 @@ input[type=range]::-moz-range-thumb {
   padding-bottom:max(7.75rem, calc(env(safe-area-inset-bottom) + 7.75rem));
 }
 .quick-wallet-modal__backdrop {
-  background-color:color-mix(in srgb, var(--color-gray-950) 45%, transparent);
+  background-color:var(--color-gray-950);
   position:fixed;
   inset:0;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .quick-wallet-modal__backdrop {
-    background-color:color-mix(in oklab, var(--color-gray-950) 45%, transparent);
+  background-color:var(--color-gray-950);
   }
 }
 .quick-wallet-modal__backdrop {
-  --tw-backdrop-blur:blur(var(--blur-sm));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 .quick-wallet-modal__frame {
   justify-content:center;
@@ -1115,11 +1115,11 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .attendance-panel {
-  background-color:color-mix(in srgb, var(--color-on-error) 95%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .attendance-panel {
-    background-color:color-mix(in oklab, var(--color-white) 95%, transparent);
+  background-color:var(--color-white);
   }
 }
 .attendance-panel {
@@ -1540,7 +1540,7 @@ input[type=range]::-moz-range-thumb {
 .attendance-panel__cta-icon {
   height:calc(var(--spacing) * 9);
   width:calc(var(--spacing) * 9);
-  background-color:color-mix(in srgb, var(--color-on-error) 16%, transparent);
+  background-color:var(--color-surface);
   border-radius:3.40282e38px;
   flex-shrink:0;
   place-items:center;
@@ -1548,7 +1548,7 @@ input[type=range]::-moz-range-thumb {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .attendance-panel__cta-icon {
-    background-color:color-mix(in oklab, var(--color-white) 16%, transparent);
+  background-color:var(--color-white);
   }
 }
 .attendance-panel__cta-icon {
@@ -1914,20 +1914,20 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header__back {
-  background-color:color-mix(in srgb, var(--color-on-error) 76%, transparent);
+  background-color:var(--color-white);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header__back {
-    background-color:color-mix(in oklab, var(--color-white) 76%, transparent);
+    background-color:var(--color-white);
   }
 }
 .user-page-header__back {
   color:var(--color-slate-700);
   --tw-shadow:0 0 transparent;
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(var(--blur-md));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
   transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter,display,content-visibility,overlay,pointer-events;
   transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));
   transition-duration:var(--tw-duration,var(--default-transition-duration));
@@ -1956,15 +1956,15 @@ body.platform-ios .user-page-shell {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:color-mix(in oklab, var(--color-primary-100) 80%, transparent);
-  background-color:color-mix(in oklab, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
   color:var(--color-primary-700);
   --tw-shadow:0 0 transparent;
   --tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   --tw-ring-color:color-mix(in oklab, var(--color-white) 60%, transparent);
-  --tw-backdrop-blur:blur(var(--blur-sm));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
   border-radius:3.40282e38px;
   flex-shrink:0;
   justify-content:center;
@@ -1984,11 +1984,11 @@ body.platform-ios .user-page-shell {
   top:0;
 }
 .user-page-header--module-attendance .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-attendance) 10%, transparent);
+  background-color:var(--color-module-attendance);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-attendance .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-attendance) 10%, transparent);
+  background-color:var(--color-module-attendance);
   }
 }
 .user-page-header--module-attendance .user-page-header__icon {
@@ -2011,11 +2011,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-leave .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-leave) 10%, transparent);
+  background-color:var(--color-module-leave);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-leave .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-leave) 10%, transparent);
+  background-color:var(--color-module-leave);
   }
 }
 .user-page-header--module-leave .user-page-header__icon {
@@ -2038,11 +2038,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-payroll .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-payroll) 10%, transparent);
+  background-color:var(--color-module-payroll);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-payroll .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-payroll) 10%, transparent);
+  background-color:var(--color-module-payroll);
   }
 }
 .user-page-header--module-payroll .user-page-header__icon {
@@ -2065,11 +2065,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-documents .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-documents) 10%, transparent);
+  background-color:var(--color-module-documents);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-documents .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-documents) 10%, transparent);
+  background-color:var(--color-module-documents);
   }
 }
 .user-page-header--module-documents .user-page-header__icon {
@@ -2092,11 +2092,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-finance .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-finance) 10%, transparent);
+  background-color:var(--color-module-finance);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-finance .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-finance) 10%, transparent);
+  background-color:var(--color-module-finance);
   }
 }
 .user-page-header--module-finance .user-page-header__icon {
@@ -2119,11 +2119,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-hr .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-hr) 10%, transparent);
+  background-color:var(--color-module-hr);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-hr .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-hr) 10%, transparent);
+  background-color:var(--color-module-hr);
   }
 }
 .user-page-header--module-hr .user-page-header__icon {
@@ -2146,11 +2146,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-kb .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-kb) 10%, transparent);
+  background-color:var(--color-module-kb);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-kb .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-kb) 10%, transparent);
+  background-color:var(--color-module-kb);
   }
 }
 .user-page-header--module-kb .user-page-header__icon {
@@ -2173,11 +2173,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-page-header--module-reports .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-module-reports) 10%, transparent);
+  background-color:var(--color-module-reports);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--module-reports .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-module-reports) 10%, transparent);
+  background-color:var(--color-module-reports);
   }
 }
 .user-page-header--module-reports .user-page-header__icon {
@@ -2215,51 +2215,50 @@ body.platform-ios .user-page-shell {
   display:none;
 }
 .user-page-header--banner .user-page-header__back {
-  border-color:color-mix(in srgb, var(--color-on-error) 32%, transparent);
+  border-color:var(--color-primary-200);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner .user-page-header__back {
-    border-color:color-mix(in srgb, var(--color-surface) 32%, transparent);
+    border-color:var(--color-primary-200);
   }
 }
 .user-page-header--banner .user-page-header__back {
-  background-color:color-mix(in srgb, var(--color-on-error) 16%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner .user-page-header__back {
-    background-color:color-mix(in srgb, var(--color-surface) 16%, transparent);
+    background-color:var(--color-surface);
   }
 }
 .user-page-header--banner .user-page-header__back {
-  color:var(--color-surface);
+  color:var(--color-primary-900);
   box-shadow:none;
-  -webkit-backdrop-filter:blur(10px);
 }
 .user-page-header--banner .user-page-header__back:hover {
-  background-color:color-mix(in srgb, var(--color-on-error) 26%, transparent);
+  background-color:var(--color-primary-100);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner .user-page-header__back:hover {
-    background-color:color-mix(in srgb, var(--color-surface) 26%, transparent);
+    background-color:var(--color-primary-100);
   }
 }
 .user-page-header--banner .user-page-header__back:hover {
   color:var(--color-surface);
 }
 .user-page-header--banner .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-on-error) 32%, transparent);
+  border-color:var(--color-primary-200);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-surface) 32%, transparent);
+    border-color:var(--color-primary-200);
   }
 }
 .user-page-header--banner .user-page-header__icon {
-  background-color:color-mix(in srgb, var(--color-on-error) 20%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-page-header--banner .user-page-header__icon {
-    background-color:color-mix(in srgb, var(--color-surface) 20%, transparent);
+    background-color:var(--color-surface);
   }
 }
 .user-page-header--banner .user-page-header__icon {
@@ -2413,7 +2412,7 @@ body.platform-ios .user-page-shell {
 }
 .app-topbar {
   z-index:50;
-  background-color:color-mix(in srgb, var(--color-on-error) 95%, transparent);
+  background-color:var(--color-surface);
   width:100%;
   position:fixed;
   top:0;
@@ -2422,16 +2421,16 @@ body.platform-ios .user-page-shell {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .app-topbar {
-    background-color:color-mix(in srgb, var(--color-surface) 95%, transparent);
+    background-color:var(--color-surface);
   }
 }
 .app-topbar {
-  -webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid color-mix(in srgb, var(--color-primary-200) 80%, transparent);
+
+  border-bottom:1px solid var(--color-primary-200);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .app-topbar {
-    border-bottom:1px solid color-mix(in srgb, var(--color-primary-200) 80%, transparent);
+    border-bottom:1px solid var(--color-primary-200);
   }
 }
 .app-topbar {
@@ -2571,20 +2570,20 @@ body.platform-ios .user-page-shell {
   }
 }
 .user-header-icon-action {
-  background-color:color-mix(in srgb, var(--color-on-error) 76%, transparent);
+  background-color:var(--color-white);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-header-icon-action {
-    background-color:color-mix(in oklab, var(--color-white) 76%, transparent);
+    background-color:var(--color-white);
   }
 }
 .user-header-icon-action {
   color:var(--color-slate-700);
   --tw-shadow:0 0 transparent;
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(var(--blur-md));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
   transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter,display,content-visibility,overlay,pointer-events;
   transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));
   transition-duration:var(--tw-duration,var(--default-transition-duration));
@@ -2775,11 +2774,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .profile-identity__meta span {
-  background-color:color-mix(in srgb, var(--color-primary-50) 75%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-identity__meta span {
-    background-color:color-mix(in oklab, var(--color-slate-50) 75%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .profile-identity__meta span {
@@ -2887,7 +2886,7 @@ body.platform-ios .user-page-shell {
 .profile-section-nav__icon {
   height:calc(var(--spacing) * 10);
   width:calc(var(--spacing) * 10);
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:3.40282e38px;
   flex-shrink:0;
   place-items:center;
@@ -2895,7 +2894,7 @@ body.platform-ios .user-page-shell {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-section-nav__icon {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .profile-section-nav__icon {
@@ -2918,11 +2917,11 @@ body.platform-ios .user-page-shell {
   }
 }
 .profile-section-nav__link[data-profile-panel=danger] {
-  background-color:color-mix(in srgb, var(--color-rose-50) 55%, transparent);
+  background-color:var(--color-rose-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-section-nav__link[data-profile-panel=danger] {
-    background-color:color-mix(in oklab, var(--color-rose-50) 55%, transparent);
+  background-color:var(--color-rose-50);
   }
 }
 @media (hover:hover) {
@@ -3003,19 +3002,19 @@ body.platform-ios .profile-modal {
   padding-bottom:max(1.5rem, env(safe-area-inset-bottom))!important;
 }
 .profile-modal__backdrop {
-  background-color:color-mix(in srgb, var(--color-gray-950) 55%, transparent);
+  background-color:var(--color-gray-950);
   position:fixed;
   inset:0;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-modal__backdrop {
-    background-color:color-mix(in oklab, var(--color-gray-950) 55%, transparent);
+  background-color:var(--color-gray-950);
   }
 }
 .profile-modal__backdrop {
-  --tw-backdrop-blur:blur(var(--blur-sm));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 .profile-modal__panel {
   z-index:10;
@@ -3038,12 +3037,12 @@ body.platform-ios .profile-modal {
   border-bottom-style:var(--tw-border-style);
   border-bottom-width:1px;
   border-color:var(--color-gray-200);
-  background-color:color-mix(in srgb, var(--color-on-error) 95%, transparent);
+  background-color:var(--color-surface);
   display:flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-modal__header {
-    background-color:color-mix(in oklab, var(--color-white) 95%, transparent);
+  background-color:var(--color-white);
   }
 }
 .profile-modal__header {
@@ -3274,11 +3273,11 @@ body.platform-ios .profile-modal {
   }
 }
 .profile-stat {
-  background-color:color-mix(in srgb, var(--color-primary-50) 50%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-stat {
-    background-color:color-mix(in oklab, var(--color-slate-50) 50%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .profile-stat {
@@ -3334,11 +3333,11 @@ body.platform-ios .profile-modal {
 }
 .profile-page .profile-card--danger>form>div>div:first-child,.profile-page .profile-card--danger>div>div:first-child {
   border-color:var(--color-red-100);
-  background-color:color-mix(in srgb, var(--color-red-50) 70%, transparent);
+  background-color:var(--color-red-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-page .profile-card--danger>form>div>div:first-child,.profile-page .profile-card--danger>div>div:first-child {
-    background-color:color-mix(in oklab, var(--color-red-50) 70%, transparent);
+    background-color:var(--color-red-50);
   }
 }
 .profile-page .profile-card--danger>form>div>div:first-child>div:first-child,.profile-page .profile-card--danger>div>div:first-child>div:first-child {
@@ -3441,7 +3440,7 @@ body.platform-ios .profile-modal {
   border-style:dashed;
   border-width:1px;
   border-color:var(--color-gray-200);
-  background-color:color-mix(in srgb, var(--color-gray-50) 80%, transparent);
+  background-color:var(--color-gray-50);
   border-radius:1.5rem;
   flex-direction:column;
   justify-content:center;
@@ -3451,7 +3450,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-empty-state {
-    background-color:color-mix(in oklab, var(--color-gray-50) 80%, transparent);
+  background-color:var(--color-gray-50);
   }
 }
 .user-empty-state {
@@ -3538,11 +3537,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-compact-filter input:not([type=checkbox]):not([type=radio]):not([type=file]),.user-compact-filter select {
-  background-color:color-mix(in srgb, var(--color-primary-50) 72%, transparent)!important;
+  background-color:var(--color-primary-50)!important;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-compact-filter input:not([type=checkbox]):not([type=radio]):not([type=file]),.user-compact-filter select {
-    background-color:color-mix(in srgb, var(--color-primary-50) 72%, transparent)!important;
+    background-color:var(--color-primary-50)!important;
   }
 }
 .user-compact-filter input:not([type=checkbox]):not([type=radio]):not([type=file]),.user-compact-filter select {
@@ -3591,11 +3590,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-filter-chip {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-filter-chip {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .user-filter-chip {
@@ -3740,11 +3739,11 @@ body.platform-ios .profile-modal {
   }
 }
 .payslip-secure-panel__icon {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .payslip-secure-panel__icon {
-    background-color:color-mix(in oklab, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .payslip-secure-panel__icon {
@@ -3891,7 +3890,7 @@ body.platform-ios .profile-modal {
 .payslip-card__period {
   height:calc(var(--spacing) * 14);
   width:calc(var(--spacing) * 14);
-  background-color:color-mix(in srgb, var(--color-primary-50) 78%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
   flex-shrink:0;
   place-items:center;
@@ -3899,7 +3898,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .payslip-card__period {
-    background-color:color-mix(in oklab, var(--color-primary-50) 78%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .payslip-card__period {
@@ -3975,11 +3974,11 @@ body.platform-ios .profile-modal {
   }
 }
 .payslip-card__status {
-  background-color:color-mix(in srgb, var(--color-emerald-50) 78%, transparent);
+  background-color:var(--color-emerald-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .payslip-card__status {
-    background-color:color-mix(in oklab, var(--color-emerald-50) 78%, transparent);
+  background-color:var(--color-emerald-50);
   }
 }
 .payslip-card__status {
@@ -4029,11 +4028,11 @@ body.platform-ios .profile-modal {
   }
 }
 .payslip-card__icon-button,.payslip-card__download {
-  background-color:color-mix(in srgb, var(--color-on-error) 62%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .payslip-card__icon-button,.payslip-card__download {
-    background-color:color-mix(in oklab, var(--color-white) 62%, transparent);
+  background-color:var(--color-white);
   }
 }
 .payslip-card__icon-button,.payslip-card__download {
@@ -4219,11 +4218,11 @@ body.platform-ios .profile-modal {
   }
 }
 .kasbon-request-note {
-  background-color:color-mix(in srgb, var(--color-primary-50) 55%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-request-note {
-    background-color:color-mix(in oklab, var(--color-primary-50) 55%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .kasbon-request-note {
@@ -4376,7 +4375,7 @@ body.platform-ios .profile-modal {
 .kasbon-card__icon {
   height:calc(var(--spacing) * 10);
   width:calc(var(--spacing) * 10);
-  background-color:color-mix(in srgb, var(--color-amber-50) 78%, transparent);
+  background-color:var(--color-amber-50);
   border-radius:.85rem;
   flex-shrink:0;
   place-items:center;
@@ -4384,7 +4383,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-card__icon {
-    background-color:color-mix(in oklab, var(--color-amber-50) 78%, transparent);
+  background-color:var(--color-amber-50);
   }
 }
 .kasbon-card__icon {
@@ -4447,11 +4446,11 @@ body.platform-ios .profile-modal {
   }
 }
 .kasbon-card__status--warning {
-  background-color:color-mix(in srgb, var(--color-amber-50) 78%, transparent);
+  background-color:var(--color-amber-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-card__status--warning {
-    background-color:color-mix(in oklab, var(--color-amber-50) 78%, transparent);
+  background-color:var(--color-amber-50);
   }
 }
 .kasbon-card__status--warning {
@@ -4466,11 +4465,11 @@ body.platform-ios .profile-modal {
   }
 }
 .kasbon-card__status--success {
-  background-color:color-mix(in srgb, var(--color-emerald-50) 78%, transparent);
+  background-color:var(--color-emerald-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-card__status--success {
-    background-color:color-mix(in oklab, var(--color-emerald-50) 78%, transparent);
+  background-color:var(--color-emerald-50);
   }
 }
 .kasbon-card__status--success {
@@ -4485,11 +4484,11 @@ body.platform-ios .profile-modal {
   }
 }
 .kasbon-card__status--info {
-  background-color:color-mix(in srgb, var(--color-sky-50) 78%, transparent);
+  background-color:var(--color-sky-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-card__status--info {
-    background-color:color-mix(in oklab, var(--color-sky-50) 78%, transparent);
+  background-color:var(--color-sky-50);
   }
 }
 .kasbon-card__status--info {
@@ -4504,11 +4503,11 @@ body.platform-ios .profile-modal {
   }
 }
 .kasbon-card__status--danger {
-  background-color:color-mix(in srgb, var(--color-rose-50) 78%, transparent);
+  background-color:var(--color-rose-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-card__status--danger {
-    background-color:color-mix(in oklab, var(--color-rose-50) 78%, transparent);
+  background-color:var(--color-rose-50);
   }
 }
 .kasbon-card__status--danger {
@@ -4550,11 +4549,11 @@ body.platform-ios .profile-modal {
   }
 }
 .kasbon-card__cancel {
-  background-color:color-mix(in srgb, var(--color-rose-50) 62%, transparent);
+  background-color:var(--color-rose-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .kasbon-card__cancel {
-    background-color:color-mix(in oklab, var(--color-rose-50) 62%, transparent);
+  background-color:var(--color-rose-50);
   }
 }
 .kasbon-card__cancel {
@@ -4620,11 +4619,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-upload-dropzone {
-  background-color:color-mix(in srgb, var(--color-primary-50) 62%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-upload-dropzone {
-    background-color:color-mix(in oklab, var(--color-slate-50) 62%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .user-upload-dropzone {
@@ -4892,11 +4891,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-disabled-action {
-  background-color:color-mix(in srgb, var(--color-primary-100) 70%, transparent);
+  background-color:var(--color-slate-100);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-disabled-action {
-    background-color:color-mix(in oklab, var(--color-slate-100) 70%, transparent);
+    background-color:var(--color-slate-100);
   }
 }
 .user-disabled-action {
@@ -4962,11 +4961,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-secondary-action {
-  background-color:color-mix(in srgb, var(--color-on-error) 64%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-secondary-action {
-    background-color:color-mix(in oklab, var(--color-white) 64%, transparent);
+  background-color:var(--color-white);
   }
 }
 .user-secondary-action {
@@ -5019,13 +5018,13 @@ body.platform-ios .profile-modal {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-primary-100);
-  background-color:color-mix(in srgb, var(--color-primary-50) 60%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1.15rem;
   display:flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .leave-quota-pill {
-    background-color:color-mix(in oklab, var(--color-primary-50) 60%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .leave-quota-pill {
@@ -5035,7 +5034,7 @@ body.platform-ios .profile-modal {
 .leave-quota-pill__icon {
   height:calc(var(--spacing) * 10);
   width:calc(var(--spacing) * 10);
-  background-color:color-mix(in srgb, var(--color-on-error) 76%, transparent);
+  background-color:var(--color-on-error);
   border-radius:3.40282e38px;
   flex-shrink:0;
   place-items:center;
@@ -5043,7 +5042,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .leave-quota-pill__icon {
-    background-color:color-mix(in oklab, var(--color-white) 76%, transparent);
+  background-color:var(--color-white);
   }
 }
 .leave-quota-pill__icon {
@@ -5243,9 +5242,9 @@ body.platform-ios .profile-modal {
   }
 }
 .auth-card {
-  --tw-backdrop-blur:;
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 @media (width>=40rem) {
   .auth-card {
@@ -5273,11 +5272,11 @@ body.platform-ios .profile-modal {
   }
 }
 .auth-status {
-  background-color:color-mix(in srgb, var(--color-green-50) 86%, transparent);
+  background-color:var(--color-green-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .auth-status {
-    background-color:color-mix(in oklab, var(--color-green-50) 86%, transparent);
+  background-color:var(--color-green-50);
   }
 }
 .auth-status {
@@ -5291,11 +5290,11 @@ body.platform-ios .profile-modal {
 }
 .auth-card .ts-wrapper.ui-invalid .ts-control {
   border-color:var(--color-red-500);
-  background-color:color-mix(in srgb, var(--color-red-50) 70%, transparent);
+  background-color:var(--color-red-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .auth-card .ts-wrapper.ui-invalid .ts-control {
-    background-color:color-mix(in oklab, var(--color-red-50) 70%, transparent);
+  background-color:var(--color-red-50);
   }
 }
 .auth-card .ts-wrapper.ui-invalid .ts-control {
@@ -5431,20 +5430,20 @@ body.platform-ios .profile-modal {
   }
 }
 .notifications-trigger {
-  background-color:color-mix(in srgb, var(--color-on-error) 78%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notifications-trigger {
-    background-color:color-mix(in oklab, var(--color-white) 78%, transparent);
+  background-color:var(--color-white);
   }
 }
 .notifications-trigger {
   color:var(--color-slate-700);
   --tw-shadow:0 0 transparent;
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(8px);
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 @media (hover:hover) {
   .notifications-trigger:hover {
@@ -5486,15 +5485,15 @@ body.platform-ios .profile-modal {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:color-mix(in oklab, var(--color-slate-200) 80%, transparent);
-  background-color:color-mix(in oklab, var(--color-white) 96%, transparent);
+  background-color:var(--color-white);
   max-height:min(30rem,100dvh - 5.5rem);
   color:var(--color-slate-950);
   --tw-shadow:0 26px 80px -48px var(--tw-shadow-color,color-mix(in srgb,var(--color-primary-900) 72%,transparent));
   --tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(var(--blur-xl));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
   border-radius:1.45rem;
   padding-block:0;
   position:fixed;
@@ -5815,11 +5814,11 @@ body.platform-ios .profile-modal {
   }
 }
 .notifications-panel__footer {
-  background-color:color-mix(in srgb, var(--color-primary-50) 62%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notifications-panel__footer {
-    background-color:color-mix(in oklab, var(--color-slate-50) 62%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .notifications-panel__footer {
@@ -5856,12 +5855,12 @@ body.platform-ios .profile-modal {
 .topbar-action-cluster {
   align-items:center;
   gap:calc(var(--spacing) * 2);
-  background-color:color-mix(in srgb, var(--color-gray-50) 90%, transparent);
+  background-color:var(--color-gray-50);
   display:flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .topbar-action-cluster {
-    background-color:color-mix(in oklab, var(--color-gray-50) 90%, transparent);
+  background-color:var(--color-gray-50);
   }
 }
 .language-toggle {
@@ -6372,15 +6371,15 @@ body.platform-ios .profile-modal {
   }
 }
 .home-date-context {
-  background:color-mix(in srgb, var(--color-on-error) 94%, transparent);
+  background:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-date-context {
-    background:color-mix(in srgb, var(--color-surface) 94%, transparent);
+    background:var(--color-surface);
   }
 }
 .home-date-context {
-  -webkit-backdrop-filter:blur(12px);
+
   box-shadow:0 14px 34px -18px color-mix(in srgb, var(--color-primary-deep) 28%, transparent);
 }
 @supports (color:color-mix(in lab, red, red)) {
@@ -6540,11 +6539,11 @@ body.platform-ios .profile-modal {
   }
 }
 .home-command-panel {
-  background-color:color-mix(in srgb, var(--color-on-error) 95%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-command-panel {
-    background-color:color-mix(in oklab, var(--color-white) 95%, transparent);
+  background-color:var(--color-white);
   }
 }
 .home-command-panel {
@@ -6626,13 +6625,13 @@ body.platform-ios .profile-modal {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-primary-100);
-  background-color:color-mix(in srgb, var(--color-primary-50) 58%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
   display:flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-empty-strip {
-    background-color:color-mix(in oklab, var(--color-primary-50) 58%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .home-empty-strip {
@@ -7130,11 +7129,11 @@ body.platform-ios .profile-modal {
   }
 }
 .solid-head__badge {
-  background-color:color-mix(in srgb, var(--color-on-error) 94%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .solid-head__badge {
-    background-color:color-mix(in srgb, var(--color-surface) 94%, transparent);
+  background-color:var(--color-surface);
   }
 }
 .solid-head__badge {
@@ -7164,11 +7163,11 @@ body.platform-ios .profile-modal {
   }
 }
 .profile-identity.user-accent-card--hr .profile-identity__meta span {
-  background-color:color-mix(in srgb, var(--color-on-error) 16%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .profile-identity.user-accent-card--hr .profile-identity__meta span {
-    background-color:color-mix(in srgb, var(--color-surface) 16%, transparent);
+    background-color:var(--color-surface);
   }
 }
 .profile-identity.user-accent-card--hr .profile-identity__meta span {
@@ -7206,11 +7205,11 @@ body.platform-ios .profile-modal {
   color:var(--color-surface);
 }
 .payslip-summary.user-accent-card--payroll .payslip-summary__metric {
-  background-color:color-mix(in srgb, var(--color-on-error) 16%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .payslip-summary.user-accent-card--payroll .payslip-summary__metric {
-    background-color:color-mix(in srgb, var(--color-surface) 16%, transparent);
+    background-color:var(--color-surface);
   }
 }
 .payslip-summary.user-accent-card--payroll .payslip-summary__metric {
@@ -7252,11 +7251,11 @@ body.platform-ios .profile-modal {
   }
 }
 .solid-head .payslip-secure-panel__icon {
-  background-color:color-mix(in srgb, var(--color-on-error) 18%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .solid-head .payslip-secure-panel__icon {
-    background-color:color-mix(in srgb, var(--color-surface) 18%, transparent);
+  background-color:var(--color-surface);
   }
 }
 .solid-head .payslip-secure-panel__icon {
@@ -7361,7 +7360,7 @@ body.platform-ios .profile-modal {
   align-items:center;
   gap:calc(var(--spacing) * 2);
   border-style:var(--tw-border-style);
-  background-color:color-mix(in srgb, var(--color-primary-50) 72%, transparent);
+  background-color:var(--color-primary-50);
   border-width:1px;
   border-radius:3.40282e38px;
   flex-shrink:0;
@@ -7369,7 +7368,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-compact-action {
-    background-color:color-mix(in oklab, var(--color-slate-50) 72%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .home-compact-action {
@@ -7453,11 +7452,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-header-icon-button {
-  background-color:color-mix(in srgb, var(--color-on-error) 80%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-header-icon-button {
-    background-color:color-mix(in oklab, var(--color-white) 80%, transparent);
+  background-color:var(--color-white);
   }
 }
 .user-header-icon-button {
@@ -7492,13 +7491,13 @@ body.platform-ios .profile-modal {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-primary-100);
-  background-color:color-mix(in srgb, var(--color-primary-50) 58%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1.6rem;
   display:flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-overview {
-    background-color:color-mix(in oklab, var(--color-primary-50) 58%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .team-approval-overview {
@@ -7539,7 +7538,7 @@ body.platform-ios .profile-modal {
 .team-approval-overview__count {
   height:calc(var(--spacing) * 20);
   width:calc(var(--spacing) * 20);
-  background-color:color-mix(in srgb, var(--color-on-error) 80%, transparent);
+  background-color:var(--color-on-error);
   border-radius:1.35rem;
   flex-shrink:0;
   place-items:center;
@@ -7547,7 +7546,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-overview__count {
-    background-color:color-mix(in oklab, var(--color-white) 80%, transparent);
+  background-color:var(--color-white);
   }
 }
 .team-approval-overview__count {
@@ -7593,20 +7592,20 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-toolbar {
-  background-color:color-mix(in srgb, var(--color-on-error) 82%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-toolbar {
-    background-color:color-mix(in oklab, var(--color-white) 82%, transparent);
+  background-color:var(--color-white);
   }
 }
 .team-approval-toolbar {
   padding:calc(var(--spacing) * 3);
   --tw-shadow:0 1px 3px 0 var(--tw-shadow-color,rgb(0 0 0 / 10%)), 0 1px 2px -1px var(--tw-shadow-color,rgb(0 0 0 / 10%));
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(var(--blur-xl));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 .team-approval-search {
   height:calc(var(--spacing) * 12);
@@ -7624,11 +7623,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-search {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-search {
-    background-color:color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .team-approval-search {
@@ -7701,11 +7700,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-tab {
-  background-color:color-mix(in srgb, var(--color-on-error) 72%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-tab {
-    background-color:color-mix(in oklab, var(--color-white) 72%, transparent);
+  background-color:var(--color-white);
   }
 }
 .team-approval-tab {
@@ -7748,11 +7747,11 @@ body.platform-ios .profile-modal {
   display:grid;
 }
 .team-approval-tab[aria-selected=true] .team-approval-tab__icon {
-  background-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  background-color:var(--color-primary-200);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-tab[aria-selected=true] .team-approval-tab__icon {
-    background-color:color-mix(in oklab, var(--color-primary-200) 70%, transparent);
+  background-color:var(--color-primary-200);
   }
 }
 .team-approval-tab[aria-selected=true] .team-approval-tab__icon {
@@ -7893,11 +7892,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-facts div {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-facts div {
-    background-color:color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .team-approval-facts div {
@@ -7938,11 +7937,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-amount {
-  background-color:color-mix(in srgb, var(--color-emerald-50) 70%, transparent);
+  background-color:var(--color-emerald-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-amount {
-    background-color:color-mix(in oklab, var(--color-emerald-50) 70%, transparent);
+  background-color:var(--color-emerald-50);
   }
 }
 .team-approval-amount {
@@ -7967,11 +7966,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-note,.team-approval-location {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-note,.team-approval-location {
-    background-color:color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .team-approval-note,.team-approval-location {
@@ -7992,11 +7991,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-location {
-  background-color:color-mix(in srgb, var(--color-sky-50) 60%, transparent);
+  background-color:var(--color-sky-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-location {
-    background-color:color-mix(in oklab, var(--color-sky-50) 60%, transparent);
+  background-color:var(--color-sky-50);
   }
 }
 .team-approval-location {
@@ -8113,11 +8112,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-approval-empty {
-  background-color:color-mix(in srgb, var(--color-primary-50) 55%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-approval-empty {
-    background-color:color-mix(in oklab, var(--color-slate-50) 55%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .team-approval-empty {
@@ -8177,11 +8176,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-kasbon-status-chip {
-  background-color:color-mix(in srgb, var(--color-on-error) 72%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-kasbon-status-chip {
-    background-color:color-mix(in oklab, var(--color-white) 72%, transparent);
+  background-color:var(--color-white);
   }
 }
 .team-kasbon-status-chip {
@@ -8238,11 +8237,11 @@ body.platform-ios .profile-modal {
   }
 }
 .team-kasbon-approval-path,.team-kasbon-months,.team-kasbon-history {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .team-kasbon-approval-path,.team-kasbon-months,.team-kasbon-history {
-    background-color:color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .team-kasbon-approval-path,.team-kasbon-months,.team-kasbon-history {
@@ -8675,13 +8674,13 @@ body.platform-ios .profile-modal {
   display:grid;
 }
 .asset-mobile-card__fact {
-  background-color:color-mix(in srgb, var(--color-primary-50) 85%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:.85rem;
   min-width:0;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-mobile-card__fact {
-    background-color:color-mix(in oklab, var(--color-slate-50) 85%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .asset-mobile-card__fact {
@@ -9061,14 +9060,14 @@ body.platform-ios .profile-modal {
 .asset-pass__meta span {
   align-items:center;
   gap:calc(var(--spacing) * 1.5);
-  background-color:color-mix(in srgb, var(--color-primary-50) 78%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:3.40282e38px;
   min-height:1.75rem;
   display:inline-flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-pass__meta span {
-    background-color:color-mix(in oklab, var(--color-slate-50) 78%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .asset-pass__meta span {
@@ -9205,11 +9204,11 @@ body.platform-ios .profile-modal {
   }
 }
 .asset-pass__action--disabled {
-  background-color:color-mix(in srgb, var(--color-primary-100) 60%, transparent);
+  background-color:var(--color-slate-100);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-pass__action--disabled {
-    background-color:color-mix(in oklab, var(--color-slate-100) 60%, transparent);
+    background-color:var(--color-slate-100);
   }
 }
 .asset-pass__action--disabled {
@@ -9217,11 +9216,11 @@ body.platform-ios .profile-modal {
 }
 @media (hover:hover) {
   .asset-pass__action--disabled:hover {
-    background-color:color-mix(in srgb, var(--color-primary-100) 60%, transparent);
+    background-color:var(--color-slate-100);
   }
   @supports (color:color-mix(in lab, red, red)) {
     .asset-pass__action--disabled:hover {
-      background-color:color-mix(in oklab, var(--color-slate-100) 60%, transparent);
+      background-color:var(--color-slate-100);
     }
   }
 }
@@ -9234,12 +9233,12 @@ body.platform-ios .profile-modal {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-primary-100);
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1.05rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-return-flow__asset {
-    background-color:color-mix(in oklab, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .asset-return-flow__asset {
@@ -9279,11 +9278,11 @@ body.platform-ios .profile-modal {
   }
 }
 .asset-return-flow__notice {
-  background-color:color-mix(in srgb, var(--color-primary-50) 74%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-return-flow__notice {
-    background-color:color-mix(in oklab, var(--color-slate-50) 74%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .asset-return-flow__notice {
@@ -9309,11 +9308,11 @@ body.platform-ios .profile-modal {
   }
 }
 .asset-return-flow__notice--success {
-  background-color:color-mix(in srgb, var(--color-emerald-50) 72%, transparent);
+  background-color:var(--color-emerald-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-return-flow__notice--success {
-    background-color:color-mix(in oklab, var(--color-emerald-50) 72%, transparent);
+  background-color:var(--color-emerald-50);
   }
 }
 .asset-return-flow__notice--success {
@@ -9355,11 +9354,11 @@ body.platform-ios .profile-modal {
   }
 }
 .asset-return-flow__otp input {
-  background-color:color-mix(in srgb, var(--color-on-error) 78%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .asset-return-flow__otp input {
-    background-color:color-mix(in oklab, var(--color-white) 78%, transparent);
+  background-color:var(--color-white);
   }
 }
 .asset-return-flow__otp input {
@@ -9503,14 +9502,14 @@ body.platform-ios .profile-modal {
   border-style:var(--tw-border-style);
   border-width:1px;
   border-color:var(--color-slate-300);
-  background-color:color-mix(in srgb, var(--color-primary-50) 82%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
   width:100%;
   min-height:3.35rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-native-field__input,.wfh-native-field__input {
-    background-color:color-mix(in oklab, var(--color-slate-50) 82%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .user-native-field__input,.wfh-native-field__input {
@@ -9551,11 +9550,11 @@ body.platform-ios .profile-modal {
 }
 .user-native-field__input.ui-invalid,.wfh-native-field__input.ui-invalid,.user-native-field__control.ui-invalid .user-native-field__input,.wfh-native-field__control.ui-invalid .wfh-native-field__input,.flatpickr-wrapper.ui-invalid .user-native-field__input,.flatpickr-wrapper.ui-invalid .wfh-native-field__input {
   border-color:var(--color-red-500);
-  background-color:color-mix(in srgb, var(--color-red-50) 75%, transparent);
+  background-color:var(--color-red-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-native-field__input.ui-invalid,.wfh-native-field__input.ui-invalid,.user-native-field__control.ui-invalid .user-native-field__input,.wfh-native-field__control.ui-invalid .wfh-native-field__input,.flatpickr-wrapper.ui-invalid .user-native-field__input,.flatpickr-wrapper.ui-invalid .wfh-native-field__input {
-    background-color:color-mix(in oklab, var(--color-red-50) 75%, transparent);
+  background-color:var(--color-red-50);
   }
 }
 .user-native-field__input.ui-invalid,.wfh-native-field__input.ui-invalid,.user-native-field__control.ui-invalid .user-native-field__input,.wfh-native-field__control.ui-invalid .wfh-native-field__input,.flatpickr-wrapper.ui-invalid .user-native-field__input,.flatpickr-wrapper.ui-invalid .wfh-native-field__input {
@@ -9635,11 +9634,11 @@ body.platform-ios .profile-modal {
   }
 }
 .wfh-request-modal__close {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .wfh-request-modal__close {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .wfh-request-modal__close {
@@ -9750,11 +9749,11 @@ body.platform-ios .profile-modal {
   }
 }
 .wfh-request-modal__footer {
-  background-color:color-mix(in srgb, var(--color-on-error) 94%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .wfh-request-modal__footer {
-    background-color:color-mix(in oklab, var(--color-white) 94%, transparent);
+  background-color:var(--color-white);
   }
 }
 .wfh-request-modal__footer {
@@ -9883,7 +9882,7 @@ body.platform-ios .profile-modal {
 .wfh-request-summary__icon {
   height:calc(var(--spacing) * 11);
   width:calc(var(--spacing) * 11);
-  background-color:color-mix(in srgb, var(--color-on-error) 80%, transparent);
+  background-color:var(--color-on-error);
   border-radius:3.40282e38px;
   flex-shrink:0;
   place-items:center;
@@ -9891,7 +9890,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .wfh-request-summary__icon {
-    background-color:color-mix(in oklab, var(--color-white) 80%, transparent);
+  background-color:var(--color-white);
   }
 }
 .wfh-request-summary__icon {
@@ -9990,14 +9989,14 @@ body.platform-ios .profile-modal {
   margin-top:var(--spacing);
   align-items:center;
   gap:calc(var(--spacing) * 1.5);
-  background-color:color-mix(in srgb, var(--color-primary-100) 80%, transparent);
+  background-color:var(--color-primary-100);
   border-radius:3.40282e38px;
   min-width:0;
   display:inline-flex;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .wfh-request-item__meta {
-    background-color:color-mix(in oklab, var(--color-slate-100) 80%, transparent);
+  background-color:var(--color-slate-100);
   }
 }
 .wfh-request-item__meta {
@@ -10086,11 +10085,11 @@ body.platform-ios .profile-modal {
   }
 }
 .wfh-request-pagination {
-  background-color:color-mix(in srgb, var(--color-on-error) 72%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .wfh-request-pagination {
-    background-color:color-mix(in oklab, var(--color-white) 72%, transparent);
+  background-color:var(--color-white);
   }
 }
 .wfh-request-pagination {
@@ -10113,11 +10112,11 @@ body.platform-ios .profile-modal {
   }
 }
 .wfh-request-time-note {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .wfh-request-time-note {
-    background-color:color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .wfh-request-time-note {
@@ -10156,7 +10155,7 @@ body.platform-ios .profile-modal {
 .document-request-hero__icon {
   height:calc(var(--spacing) * 12);
   width:calc(var(--spacing) * 12);
-  background-color:color-mix(in srgb, var(--color-on-error) 82%, transparent);
+  background-color:var(--color-on-error);
   border-radius:3.40282e38px;
   flex-shrink:0;
   place-items:center;
@@ -10164,7 +10163,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-hero__icon {
-    background-color:color-mix(in oklab, var(--color-white) 82%, transparent);
+  background-color:var(--color-white);
   }
 }
 .document-request-hero__icon {
@@ -10201,14 +10200,14 @@ body.platform-ios .profile-modal {
   height:calc(var(--spacing) * 14);
   width:calc(var(--spacing) * 14);
   border-radius:var(--radius-2xl);
-  background-color:color-mix(in srgb, var(--color-on-error) 78%, transparent);
+  background-color:var(--color-on-error);
   flex-shrink:0;
   place-items:center;
   display:grid;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-hero__count {
-    background-color:color-mix(in oklab, var(--color-white) 78%, transparent);
+  background-color:var(--color-white);
   }
 }
 .document-request-hero__count {
@@ -10264,7 +10263,7 @@ body.platform-ios .profile-modal {
 }
 .document-request-stat {
   min-height:calc(var(--spacing) * 16);
-  background-color:color-mix(in srgb, var(--color-primary-50) 76%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
   flex-direction:column;
   justify-content:center;
@@ -10273,7 +10272,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-stat {
-    background-color:color-mix(in oklab, var(--color-slate-50) 76%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .document-request-stat {
@@ -10418,11 +10417,11 @@ body.platform-ios .profile-modal {
   }
 }
 .document-request-card__note {
-  background-color:color-mix(in srgb, var(--color-primary-50) 62%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-card__note {
-    background-color:color-mix(in oklab, var(--color-slate-50) 62%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .document-request-card__note {
@@ -10499,11 +10498,11 @@ body.platform-ios .profile-modal {
   }
 }
 .document-request-action {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-action {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .document-request-action {
@@ -10613,11 +10612,11 @@ body.platform-ios .profile-modal {
   }
 }
 .document-request-modal__close {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-modal__close {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .document-request-modal__close {
@@ -10671,11 +10670,11 @@ body.platform-ios .profile-modal {
   }
 }
 .document-request-modal__footer {
-  background-color:color-mix(in srgb, var(--color-on-error) 94%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-request-modal__footer {
-    background-color:color-mix(in oklab, var(--color-white) 94%, transparent);
+  background-color:var(--color-white);
   }
 }
 .document-request-modal__footer {
@@ -10775,11 +10774,11 @@ body.platform-ios .profile-modal {
   }
 }
 .document-upload-dropzone {
-  background-color:color-mix(in srgb, var(--color-primary-50) 64%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-upload-dropzone {
-    background-color:color-mix(in oklab, var(--color-slate-50) 64%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .document-upload-dropzone {
@@ -10804,14 +10803,14 @@ body.platform-ios .profile-modal {
 .document-upload-dropzone__icon {
   height:calc(var(--spacing) * 12);
   width:calc(var(--spacing) * 12);
-  background-color:color-mix(in srgb, var(--color-on-error) 80%, transparent);
+  background-color:var(--color-on-error);
   border-radius:3.40282e38px;
   place-items:center;
   display:grid;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .document-upload-dropzone__icon {
-    background-color:color-mix(in oklab, var(--color-white) 80%, transparent);
+  background-color:var(--color-white);
   }
 }
 .document-upload-dropzone__icon {
@@ -10858,11 +10857,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-live-pill {
-  background-color:color-mix(in srgb, var(--color-primary-50) 74%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-live-pill {
-    background-color:color-mix(in oklab, var(--color-primary-50) 74%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .performance-live-pill {
@@ -10957,11 +10956,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-score-ring {
-  background-color:color-mix(in srgb, var(--color-on-error) 74%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-score-ring {
-    background-color:color-mix(in oklab, var(--color-white) 74%, transparent);
+  background-color:var(--color-white);
   }
 }
 .performance-score-ring {
@@ -11024,7 +11023,7 @@ body.platform-ios .profile-modal {
 }
 .performance-summary__item {
   min-height:calc(var(--spacing) * 16);
-  background-color:color-mix(in srgb, var(--color-primary-50) 76%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
   flex-direction:column;
   justify-content:center;
@@ -11032,7 +11031,7 @@ body.platform-ios .profile-modal {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-summary__item {
-    background-color:color-mix(in oklab, var(--color-slate-50) 76%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-summary__item {
@@ -11108,14 +11107,14 @@ body.platform-ios .profile-modal {
   height:calc(var(--spacing) * 14);
   width:calc(var(--spacing) * 14);
   border-radius:var(--radius-2xl);
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
   flex-shrink:0;
   place-items:center;
   display:grid;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-card__period {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-card__period {
@@ -11199,12 +11198,12 @@ body.platform-ios .profile-modal {
   display:grid;
 }
 .performance-card__details div {
-  background-color:color-mix(in srgb, var(--color-primary-50) 76%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-card__details div {
-    background-color:color-mix(in oklab, var(--color-slate-50) 76%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-card__details div {
@@ -11256,11 +11255,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-card__note a,.performance-card__note span {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-card__note a,.performance-card__note span {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-card__note a,.performance-card__note span {
@@ -11331,11 +11330,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-action {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-action {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-action {
@@ -11430,11 +11429,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-modal__notice {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-modal__notice {
-    background-color:color-mix(in oklab, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .performance-modal__notice {
@@ -11477,11 +11476,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-assessment-group__header {
-  background-color:color-mix(in srgb, var(--color-primary-50) 70%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-assessment-group__header {
-    background-color:color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-assessment-group__header {
@@ -11505,14 +11504,14 @@ body.platform-ios .profile-modal {
 .performance-assessment-group__header strong {
   height:calc(var(--spacing) * 9);
   width:calc(var(--spacing) * 9);
-  background-color:color-mix(in srgb, var(--color-on-error) 80%, transparent);
+  background-color:var(--color-on-error);
   border-radius:3.40282e38px;
   place-items:center;
   display:grid;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-assessment-group__header strong {
-    background-color:color-mix(in oklab, var(--color-white) 80%, transparent);
+  background-color:var(--color-white);
   }
 }
 .performance-assessment-group__header strong {
@@ -11599,11 +11598,11 @@ body.platform-ios .profile-modal {
   }
 }
 .performance-kpi-card__indicator {
-  background-color:color-mix(in srgb, var(--color-primary-50) 68%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .performance-kpi-card__indicator {
-    background-color:color-mix(in oklab, var(--color-slate-50) 68%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .performance-kpi-card__indicator {
@@ -11765,11 +11764,11 @@ body.platform-ios .profile-modal {
   }
 }
 .face-enrollment-guide {
-  background-color:color-mix(in srgb, var(--color-primary-50) 60%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .face-enrollment-guide {
-    background-color:color-mix(in oklab, var(--color-primary-50) 60%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .face-enrollment-guide {
@@ -11810,14 +11809,14 @@ body.platform-ios .profile-modal {
 .face-enrollment-guide__steps span {
   height:calc(var(--spacing) * 7);
   width:calc(var(--spacing) * 7);
-  background-color:color-mix(in srgb, var(--color-on-error) 78%, transparent);
+  background-color:var(--color-on-error);
   border-radius:3.40282e38px;
   place-items:center;
   display:grid;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .face-enrollment-guide__steps span {
-    background-color:color-mix(in oklab, var(--color-white) 78%, transparent);
+  background-color:var(--color-white);
   }
 }
 .face-enrollment-guide__steps span {
@@ -12017,11 +12016,11 @@ body.platform-ios .profile-modal {
   }
 }
 .face-enrollment-danger-action {
-  background-color:color-mix(in srgb, var(--color-rose-50) 70%, transparent);
+  background-color:var(--color-rose-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .face-enrollment-danger-action {
-    background-color:color-mix(in oklab, var(--color-rose-50) 70%, transparent);
+  background-color:var(--color-rose-50);
   }
 }
 .face-enrollment-danger-action {
@@ -12072,11 +12071,11 @@ body.platform-ios .profile-modal {
   }
 }
 .user-bottom-navigation__dock {
-  background-color:color-mix(in srgb, var(--color-on-error) 88%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-bottom-navigation__dock {
-    background-color:color-mix(in oklab, var(--color-white) 88%, transparent);
+  background-color:var(--color-white);
   }
 }
 .user-bottom-navigation__dock {
@@ -12091,9 +12090,9 @@ body.platform-ios .profile-modal {
 }
 .user-bottom-navigation__dock {
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(var(--blur-xl));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
   --user-nav-surface:color-mix(in srgb, var(--color-on-error) 95%, transparent);
 }
 @supports (color:color-mix(in lab, red, red)) {
@@ -12412,17 +12411,17 @@ body.platform-ios .app-shell {
   padding-bottom:max(6.25rem, calc(env(safe-area-inset-bottom) + 6.25rem));
 }
 .user-ui .quick-wallet-modal__backdrop {
-  background-color:color-mix(in srgb, var(--color-slate-950) 45%, transparent);
+  background-color:var(--color-slate-950);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .quick-wallet-modal__backdrop {
-    background-color:color-mix(in oklab, var(--color-slate-950) 45%, transparent);
+  background-color:var(--color-slate-950);
   }
 }
 .user-ui .quick-wallet-modal__backdrop {
-  --tw-backdrop-blur:blur(var(--blur-md));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 .user-ui .quick-wallet-modal__panel {
   border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
@@ -12434,11 +12433,11 @@ body.platform-ios .app-shell {
   }
 }
 .user-ui .quick-wallet-modal__panel {
-  background-color:color-mix(in srgb, var(--color-on-error) 95%, transparent);
+  background-color:var(--color-surface);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .quick-wallet-modal__panel {
-    background-color:color-mix(in oklab, var(--color-white) 95%, transparent);
+  background-color:var(--color-white);
   }
 }
 .user-ui .quick-wallet-modal__panel {
@@ -12573,11 +12572,11 @@ body.platform-ios .app-shell {
   }
 }
 .user-ui .user-page-header__back {
-  background-color:color-mix(in srgb, var(--color-on-error) 70%, transparent)!important;
+  background-color:var(--color-on-error)!important;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .user-page-header__back {
-    background-color:color-mix(in oklab, var(--color-white) 70%, transparent)!important;
+  background-color:var(--color-white)!important;
   }
 }
 .user-ui .user-page-header__back {
@@ -12586,14 +12585,14 @@ body.platform-ios .app-shell {
 }
 .user-ui .user-empty-state {
   --tw-border-style:dashed;
-  background-color:color-mix(in srgb, var(--color-on-error) 40%, transparent);
+  background-color:var(--color-on-error);
   border-style:dashed;
   border-radius:1.25rem;
   min-height:15rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .user-empty-state {
-    background-color:color-mix(in oklab, var(--color-white) 40%, transparent);
+  background-color:var(--color-white);
   }
 }
 .user-ui .user-empty-state__icon {
@@ -12625,7 +12624,7 @@ body.platform-ios .app-shell {
 }
 .user-ui .profile-section-nav__link {
   border-style:var(--tw-border-style);
-  background-color:color-mix(in oklab, var(--color-white) 50%, transparent);
+  background-color:var(--color-white);
   --tw-shadow:0 0 transparent;
   --tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -12664,11 +12663,11 @@ body.platform-ios .app-shell {
   border-radius:1.15rem!important;
 }
 .user-ui .user-page-body .bg-white:not(input):not(textarea):not(select) {
-  background-color:color-mix(in srgb, var(--color-on-error) 70%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .user-page-body .bg-white:not(input):not(textarea):not(select) {
-    background-color:color-mix(in srgb, var(--color-surface) 70%, transparent);
+  background-color:var(--color-surface);
   }
 }
 .user-ui .user-page-body .border-gray-100,.user-ui .user-page-body .border-gray-200 {
@@ -12701,13 +12700,13 @@ body.platform-ios .app-shell {
 }
 .user-ui .user-page-body input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.ts-input),.user-ui .user-page-body textarea,.user-ui .user-page-body select {
   border-color:var(--color-slate-300);
-  background-color:color-mix(in srgb, var(--color-primary-50) 82%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1rem;
   min-height:3.25rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .user-page-body input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.ts-input),.user-ui .user-page-body textarea,.user-ui .user-page-body select {
-    background-color:color-mix(in oklab, var(--color-slate-50) 82%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .user-ui .user-page-body input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.ts-input),.user-ui .user-page-body textarea,.user-ui .user-page-body select {
@@ -12766,13 +12765,13 @@ body.platform-ios .app-shell {
 }
 .user-ui .user-page-body .ts-wrapper .ts-control,.user-ui .profile-modal .ts-wrapper .ts-control,.user-ui .ts-wrapper-user .ts-control {
   border-color:var(--color-slate-300);
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1.05rem;
   min-height:3.25rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .user-page-body .ts-wrapper .ts-control,.user-ui .profile-modal .ts-wrapper .ts-control,.user-ui .ts-wrapper-user .ts-control {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .user-ui .user-page-body .ts-wrapper .ts-control,.user-ui .profile-modal .ts-wrapper .ts-control,.user-ui .ts-wrapper-user .ts-control {
@@ -12788,13 +12787,13 @@ body.platform-ios .app-shell {
 }
 .user-ui .profile-modal select,.user-ui .profile-modal input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.ts-input),.user-ui .profile-modal textarea {
   border-color:var(--color-slate-300);
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
   border-radius:1.05rem;
   min-height:3.25rem;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .profile-modal select,.user-ui .profile-modal input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.ts-input),.user-ui .profile-modal textarea {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .user-ui .profile-modal select,.user-ui .profile-modal input:not([type=checkbox]):not([type=radio]):not([type=file]):not(.ts-input),.user-ui .profile-modal textarea {
@@ -12886,11 +12885,11 @@ body.platform-ios .app-shell {
 }
 .user-ui .ts-wrapper-user.ui-invalid .ts-control,.user-ui .profile-modal .ts-wrapper.ui-invalid .ts-control,.user-ui .user-page-body .ts-wrapper.ui-invalid .ts-control {
   border-color:var(--color-red-500);
-  background-color:color-mix(in srgb, var(--color-red-50) 75%, transparent);
+  background-color:var(--color-red-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .ts-wrapper-user.ui-invalid .ts-control,.user-ui .profile-modal .ts-wrapper.ui-invalid .ts-control,.user-ui .user-page-body .ts-wrapper.ui-invalid .ts-control {
-    background-color:color-mix(in oklab, var(--color-red-50) 75%, transparent);
+  background-color:var(--color-red-50);
   }
 }
 .user-ui .ts-wrapper-user.ui-invalid .ts-control,.user-ui .profile-modal .ts-wrapper.ui-invalid .ts-control,.user-ui .user-page-body .ts-wrapper.ui-invalid .ts-control {
@@ -13193,16 +13192,16 @@ body.is-native-scanning .native-scan-page-header {
   z-index:80!important;
   background-color:var(--color-primary-900)!important;
   box-shadow:none!important;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
+
+
   border:none!important;
 }
 body.is-native-scanning #scanner-card {
   position:relative;
   box-shadow:0 0 0 9999px var(--color-primary-50)!important;
   z-index:60!important;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
+
+
   background-color:transparent!important;
   border-color:transparent!important;
   overflow:hidden!important;
@@ -13418,11 +13417,11 @@ body.is-native-scanning #scan-wrapper>div {
   }
 }
 .notification-center-search {
-  background-color:color-mix(in srgb, var(--color-primary-50) 80%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-search {
-    background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent);
+  background-color:var(--color-slate-50);
   }
 }
 .notification-center-search {
@@ -13481,11 +13480,11 @@ body.is-native-scanning #scan-wrapper>div {
   }
 }
 .notification-center-tab {
-  background-color:color-mix(in srgb, var(--color-on-error) 58%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-tab {
-    background-color:color-mix(in oklab, var(--color-white) 58%, transparent);
+  background-color:var(--color-white);
   }
 }
 .notification-center-tab {
@@ -13556,19 +13555,19 @@ body.is-native-scanning #scan-wrapper>div {
   }
 }
 .notification-center-item--unread {
-  background-color:color-mix(in srgb, var(--color-primary-50) 32%, transparent);
+  background-color:var(--color-primary-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-item--unread {
-    background-color:color-mix(in oklab, var(--color-primary-50) 32%, transparent);
+  background-color:var(--color-primary-50);
   }
 }
 .notification-center-item--announcement {
-  background-color:color-mix(in srgb, var(--color-amber-50) 38%, transparent);
+  background-color:var(--color-amber-50);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-item--announcement {
-    background-color:color-mix(in oklab, var(--color-amber-50) 38%, transparent);
+  background-color:var(--color-amber-50);
   }
 }
 .notification-center-item__icon {
@@ -13712,11 +13711,11 @@ body.is-native-scanning #scan-wrapper>div {
   }
 }
 .notification-center-item__button {
-  background-color:color-mix(in srgb, var(--color-on-error) 70%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-item__button {
-    background-color:color-mix(in oklab, var(--color-white) 70%, transparent);
+  background-color:var(--color-white);
   }
 }
 .notification-center-item__button {
@@ -13765,11 +13764,11 @@ body.is-native-scanning #scan-wrapper>div {
   }
 }
 .notification-center-empty {
-  background-color:color-mix(in srgb, var(--color-on-error) 54%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-empty {
-    background-color:color-mix(in oklab, var(--color-white) 54%, transparent);
+  background-color:var(--color-white);
   }
 }
 .notification-center-empty {
@@ -13818,20 +13817,20 @@ body.is-native-scanning #scan-wrapper>div {
   }
 }
 .notification-center-pagination {
-  background-color:color-mix(in srgb, var(--color-on-error) 64%, transparent);
+  background-color:var(--color-on-error);
 }
 @supports (color:color-mix(in lab, red, red)) {
   .notification-center-pagination {
-    background-color:color-mix(in oklab, var(--color-white) 64%, transparent);
+  background-color:var(--color-white);
   }
 }
 .notification-center-pagination {
   padding:calc(var(--spacing) * 3);
   --tw-shadow:0 0 transparent;
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-backdrop-blur:blur(var(--blur-sm));
-  -webkit-backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  backdrop-filter:var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+
+
+
 }
 @media (width<=420px) {
   .notification-center-hero {
@@ -13988,10 +13987,10 @@ html.scan-attendance-route,body.scan-attendance-route,body.scan-attendance-route
   color:var(--color-primary-900)!important;
 }
 body.scan-attendance-route nav[data-app-top-nav] {
-  background-color:color-mix(in srgb, var(--color-on-error) 96%, transparent)!important;
+  background-color:var(--color-white)!important;
 }
 body.scan-attendance-route nav[data-app-top-nav] {
-  border-color:color-mix(in srgb, var(--color-primary-200) 95%, transparent)!important;
+  border-color:var(--color-primary-200)!important;
 }
 html.scan-attendance-route,body.scan-attendance-route {
   height:100dvh;
@@ -14182,15 +14181,14 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__back {
   width:2.9rem;
   height:2.9rem;
-  background:color-mix(in srgb, var(--color-on-error) 74%, transparent)!important;
+  background:var(--color-surface)!important;
   border-radius:999px!important;
 }
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__back {
   border-color:color-mix(in srgb, var(--color-primary-300) 78%, transparent)!important;
 }
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__back {
-  -webkit-backdrop-filter:blur(14px);
-  backdrop-filter:blur(14px);
+
   box-shadow:none!important;
 }
 .scan-attendance-page .user-page-header--plain.native-scan-page-header .user-page-header__icon {
@@ -14219,16 +14217,15 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   padding:0!important;
 }
 .scan-attendance-page .scanner-header {
-  border:1px solid color-mix(in srgb, var(--color-primary-200) 78%, transparent);
+  border:1px solid var(--color-primary-200);
 }
 .scan-attendance-page .scanner-header {
-  background:color-mix(in srgb, var(--color-on-error) 76%, transparent);
+  background:var(--color-surface);
   border-radius:1.2rem;
 }
 .scan-attendance-page .scanner-header {
   box-shadow:none;
-  -webkit-backdrop-filter:blur(16px);
-  backdrop-filter:blur(16px);
+
   margin-bottom:.6rem!important;
   padding:.65rem!important;
 }
@@ -14261,10 +14258,10 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   gap:.45rem;
   min-height:2.2rem;
   display:inline-flex;
-  border:1px solid color-mix(in srgb, var(--color-primary-300) 76%, transparent)!important;
+  border:1px solid var(--color-primary-300)!important;
 }
 .scan-attendance-page .scanner-camera-toggle,.scan-attendance-page #switch-camera-btn.scanner-camera-toggle {
-  background:color-mix(in srgb, var(--color-primary-50) 82%, transparent)!important;
+  background:var(--color-primary-50)!important;
 }
 .scan-attendance-page .scanner-camera-toggle,.scan-attendance-page #switch-camera-btn.scanner-camera-toggle {
   padding:0 .7rem;
@@ -14337,15 +14334,14 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   padding-top:0!important;
 }
 .scan-attendance-page #scanner-card .scan-attendance-location-card,.scan-attendance-page .scan-attendance-location-card {
-  border:1px solid color-mix(in srgb, var(--color-primary-200) 78%, transparent)!important;
+  border:1px solid var(--color-primary-200)!important;
 }
 .scan-attendance-page #scanner-card .scan-attendance-location-card,.scan-attendance-page .scan-attendance-location-card {
-  background:color-mix(in srgb, var(--color-on-error) 76%, transparent)!important;
+  background:var(--color-surface)!important;
   border-radius:1.2rem!important;
 }
 .scan-attendance-page #scanner-card .scan-attendance-location-card,.scan-attendance-page .scan-attendance-location-card {
-  -webkit-backdrop-filter:blur(16px);
-  backdrop-filter:blur(16px);
+
   box-shadow:none!important;
   padding:.8rem!important;
 }
@@ -14363,11 +14359,11 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   width:2rem;
   height:2rem;
   display:inline-flex;
-  border:1px solid color-mix(in srgb, var(--color-primary-300) 70%, transparent)!important;
+  border:1px solid var(--color-primary-300)!important;
 }
 .scan-attendance-page .location-icon-button,.scan-attendance-page #refresh-location-btn.location-icon-button {
   border-radius:999px;
-  background:color-mix(in srgb, var(--color-primary-50) 82%, transparent)!important;
+  background:var(--color-primary-50)!important;
 }
 .scan-attendance-page .location-icon-button,.scan-attendance-page #refresh-location-btn.location-icon-button {
   color:var(--color-primary-500)!important;
@@ -14378,11 +14374,11 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   gap:.35rem;
   min-height:2rem;
   display:inline-flex;
-  border:1px solid color-mix(in srgb, var(--color-success) 26%, transparent)!important;
+  border:1px solid var(--color-success)!important;
 }
 .scan-attendance-page .location-map-toggle,.scan-attendance-page #toggle-currentLocationMap-btn.location-map-toggle {
   border-radius:999px;
-  background:color-mix(in srgb, color-mix(in srgb, var(--color-module-payroll) 10%, var(--color-surface)) 78%, transparent)!important;
+  background:color-mix(in srgb, var(--color-module-payroll) 10%, var(--color-surface))!important;
 }
 .scan-attendance-page .location-map-toggle,.scan-attendance-page #toggle-currentLocationMap-btn.location-map-toggle {
   padding:0 .75rem;
@@ -14391,7 +14387,7 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   color:var(--color-success)!important;
 }
 .scan-attendance-page .location-coordinate-link {
-  border:1px solid color-mix(in srgb, var(--color-primary-200) 78%, transparent);
+  border:1px solid var(--color-primary-200);
   border-radius:999px;
   align-items:center;
   gap:.4rem;
@@ -14400,7 +14396,7 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   overflow:hidden;
 }
 .scan-attendance-page .location-coordinate-link {
-  background:color-mix(in srgb, var(--color-primary-50) 74%, transparent);
+  background:var(--color-primary-50);
 }
 .scan-attendance-page .location-coordinate-link {
   color:var(--color-primary-600);
@@ -14411,16 +14407,15 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   font-weight:700;
 }
 .scan-attendance-page .scan-selfie-panel,.scan-attendance-page .scan-processing-panel {
-  border:1px solid color-mix(in srgb, var(--color-primary-200) 78%, transparent);
+  border:1px solid var(--color-primary-200);
 }
 .scan-attendance-page .scan-selfie-panel,.scan-attendance-page .scan-processing-panel {
-  background:color-mix(in srgb, var(--color-on-error) 76%, transparent);
+  background:var(--color-surface);
   border-radius:1.2rem;
 }
 .scan-attendance-page .scan-selfie-panel,.scan-attendance-page .scan-processing-panel {
   box-shadow:none;
-  -webkit-backdrop-filter:blur(16px);
-  backdrop-filter:blur(16px);
+
   padding:.8rem;
 }
 .scan-attendance-page .scan-selfie-title,.scan-attendance-page .scan-processing-title {
@@ -14456,7 +14451,7 @@ body.is-native-platform.scan-attendance-route .scan-attendance-page {
   transform:scale(.99);
 }
 .scan-attendance-page .scan-attendance-flow .ts-wrapper .ts-control,.scan-attendance-page .scan-attendance-flow .tom-select,.scan-attendance-page .scan-attendance-flow .ts-control {
-  background:color-mix(in srgb, var(--color-primary-50) 82%, transparent)!important;
+  background:var(--color-primary-50)!important;
   border-radius:1rem!important;
   height:3rem!important;
   min-height:3rem!important;
@@ -14487,8 +14482,8 @@ body.is-native-scanning .scan-attendance-page .scanner-header,body.is-native-sca
 }
 body.is-native-scanning .scan-attendance-page .scanner-header,body.is-native-scanning .scan-attendance-page .scanner-footer,body.is-native-scanning .scan-attendance-page .scan-attendance-location-card,body.is-native-scanning .scan-attendance-page .native-scan-page-header.user-page-header--plain {
   position:relative;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
+
+
   z-index:60!important;
 }
 
@@ -14611,10 +14606,10 @@ body.is-native-scanning .scan-attendance-page .scanner-header,body.is-native-sca
   background-color:var(--color-rose-200)!important;
 }
 .bg-white\/5 {
-  background-color:color-mix(in srgb, var(--color-on-error) 5%, transparent);
+  background-color:var(--color-on-error);
 }
 .bg-white\/\[2\%\] {
-  background-color:color-mix(in srgb, var(--color-on-error) 2%, transparent);
+  background-color:var(--color-on-error);
 }
 .px-\[6px\] {
   padding-inline:6px;

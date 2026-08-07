@@ -26,7 +26,7 @@
                             <li class="user-list-card group relative user-accent-card user-accent-card--attendance user-accent-card--soft">
                                 <div class="flex items-center gap-4">
                                      {{-- Date Box --}}
-                                    <div class="flex h-12 w-12 flex-col items-center justify-center rounded-xl border border-slate-200/70 bg-white/72 shadow-none">
+                                    <div class="flex h-12 w-12 flex-col items-center justify-center rounded-xl border border-slate-200/70 bg-white shadow-none">
                                         <span class="text-[10px] font-bold text-red-500 uppercase leading-none mb-0.5">{{ $schedule->date->format('M') }}</span>
                                         <span class="text-lg font-black text-gray-800 leading-none">{{ $schedule->date->format('d') }}</span>
                                     </div>

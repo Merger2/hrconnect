@@ -217,7 +217,7 @@
             </div>
 
             @if ($users->hasPages())
-                <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
+                <div class="border-t border-gray-200/60 bg-gray-50 px-4 py-2.5">
                     {{ $users->links() }}
                 </div>
             @endif
@@ -375,7 +375,7 @@
                         </p>
                         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             @foreach ($assignableAdminRoles as $role)
-                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700">
+                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-slate-700">
                                     <x-forms.radio wire:model.live="form.role_id" value="{{ $role->id }}" class="mt-0.5 h-5 w-5" />
                                     <span>
                                         <span class="block font-medium text-slate-900">{{ $role->name }}</span>
@@ -561,7 +561,7 @@
                         </p>
                         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             @foreach ($assignableAdminRoles as $role)
-                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700">
+                                <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-slate-700">
                                     <x-forms.radio wire:model.live="form.role_id" value="{{ $role->id }}" class="mt-0.5 h-5 w-5" />
                                     <span>
                                         <span class="block font-medium text-slate-900">{{ $role->name }}</span>

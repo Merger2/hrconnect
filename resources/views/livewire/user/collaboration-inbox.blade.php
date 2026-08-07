@@ -42,7 +42,7 @@
                                 <button
                                     type="button"
                                     wire:click="selectThread({{ $thread->id }})"
-                                    class="w-full rounded-[1.15rem] border px-4 py-3 text-left transition {{ $isSelected ? 'border-primary-300 bg-primary-50/80 shadow-sm' : 'border-slate-200 bg-white/80 hover:border-primary-200 hover:bg-primary-50/40' }}"
+                                    class="w-full rounded-[1.15rem] border px-4 py-3 text-left transition {{ $isSelected ? 'border-primary-300 bg-primary-50 shadow-sm' : 'border-slate-200 bg-white hover:border-primary-200 hover:bg-primary-50' }}"
                                 >
                                     <div class="flex items-start gap-3">
                                         <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
@@ -74,7 +74,7 @@
                         </div>
                     </aside>
 
-                    <main class="min-h-[32rem] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/85 shadow-sm">
+                    <main class="min-h-[32rem] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm">
                         @if ($selectedThread)
                             <header class="border-b border-slate-200/80 px-4 py-4">
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -135,7 +135,7 @@
                             <form wire:submit="postMessage" class="border-t border-slate-200/80 p-4">
                                 <x-forms.input-error for="messageBody" class="mb-2" />
                                 <x-forms.input-error for="uploadedFile" class="mb-2" />
-                                <div class="mb-3 flex flex-col gap-2 rounded-[1rem] border border-dashed border-slate-200 bg-slate-50/70 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="mb-3 flex flex-col gap-2 rounded-[1rem] border border-dashed border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="min-w-0">
                                         <label for="collaboration-uploaded-file" class="text-sm font-semibold text-slate-900">{{ __('Attach file') }}</label>
                                         <p class="mt-0.5 text-xs text-slate-500">{{ __('PDF, Office, CSV, TXT, or image files up to 12 MB.') }}</p>

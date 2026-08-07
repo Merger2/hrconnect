@@ -165,7 +165,7 @@
                     x-transition:enter-end="opacity-100 translate-y-0">
                     @if ($panelTab === 'app')
                         <x-admin.panel class="relative mb-4 rounded-xl">
-                            <div class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50/50 px-4 py-3">
+                            <div class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50 px-4 py-3">
                                 <div>
                                     <h3 class="text-base font-semibold capitalize text-gray-900">
                                         {{ __('Branding') }}
@@ -248,7 +248,7 @@
                             <x-admin.panel class="relative mb-4 rounded-xl transition-all duration-300">
 
                                 <div
-                                    class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                    class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <h3 class="text-base font-semibold capitalize text-gray-900">
                                             {{ $group }} {{ __('Settings') }}

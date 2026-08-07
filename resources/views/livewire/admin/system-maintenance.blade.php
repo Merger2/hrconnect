@@ -138,7 +138,7 @@
                 </div>
                 <div class="grid gap-3 px-4 py-3 lg:items-start lg:grid-cols-3">
                     {{-- Maintenance Mode --}}
-                    <div class="rounded-lg border border-slate-200/70 bg-slate-50/60 p-3">
+                    <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-xs font-bold text-slate-950">{{ __('Maintenance Mode') }}</h3>
                             @if ($canManageMaintenance)
@@ -169,7 +169,7 @@
                     </div>
 
                     {{-- Backup Readiness --}}
-                    <div class="rounded-lg border border-slate-200/70 bg-slate-50/60 p-3">
+                    <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-xs font-bold text-slate-950">{{ __('Backup Readiness') }}</h3>
                             <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{{ $backupOverview['files'] }} {{ __('files') }}</span>
@@ -222,7 +222,7 @@
                         @endforeach
                     </div>
 
-                    <div class="space-y-4 rounded-xl border border-slate-200/70 bg-slate-50/70 p-4">
+                    <div class="space-y-4 rounded-xl border border-slate-200/70 bg-slate-50 p-4">
                         <h3 class="text-base font-semibold text-slate-900">{{ __('Destructive Guardrail') }}</h3>
                         <p class="sr-only">
                             {{ __('Type CLEAN before executing any destructive task. Admin and superadmin accounts are never removed by the employee cleanup option.') }}
@@ -265,7 +265,7 @@
                 </div>
 
                 <div class="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)]">
-                    <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3.5">
+                    <div class="rounded-xl border border-slate-200/70 bg-slate-50 p-3.5">
                         <h3 class="text-base font-semibold text-slate-950">{{ __('Create Backup') }}</h3>
                         <p class="sr-only">
                             {{ __('Run direct downloads for immediate SQL export or queue longer backup jobs in the background.') }}
@@ -406,7 +406,7 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-lg border border-slate-200/70 bg-slate-50/80 px-3.5 py-3 text-sm text-slate-600">
+                            <div class="rounded-lg border border-slate-200/70 bg-slate-50 px-3.5 py-3 text-sm text-slate-600">
                                 @if ($backupScheduleSummary['enabled'])
                                     <p class="font-medium text-slate-900">
                                         {{ __('Next run: :time', ['time' => $backupScheduleSummary['next_run_human'] ?? __('Not available')]) }}
@@ -598,7 +598,7 @@
                         </x-admin.alert>
                     @endif
 
-                    <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
+                    <div class="rounded-xl border border-slate-200/70 bg-slate-50 p-4">
                         <h3 class="text-base font-semibold text-slate-950">{{ __('Restore Requirements') }}</h3>
                         <ul class="sr-only">
                             <li>{{ __('Only `.sql` backups generated and signed by this application are accepted.') }}</li>

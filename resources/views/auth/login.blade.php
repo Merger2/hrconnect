@@ -16,8 +16,8 @@
             <div class="max-w-md w-full relative z-10">
                 <!-- Logo -->
                 <div class="mb-10 flex items-center gap-3">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                        <x-app-logo-icon class="size-8 fill-current text-white" />
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-md">
+                        <x-app-logo-icon class="size-8 fill-current text-brand-700" />
                     </div>
                     <h1 class="text-3xl font-bold text-white">{{ config('app.name', 'HRConnect') }}</h1>
                 </div>
@@ -35,8 +35,8 @@
                 <!-- Feature list with icons -->
                 <div class="space-y-4">
                     <div class="flex items-start gap-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm shrink-0">
-                            <span class="material-symbols-outlined text-white text-xl">groups</span>
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shrink-0">
+                            <span class="material-symbols-outlined text-brand-700 text-xl">groups</span>
                         </div>
                         <div>
                             <h3 class="text-white font-semibold">Manajemen Karyawan</h3>
@@ -44,8 +44,8 @@
                         </div>
                     </div>
                     <div class="flex items-start gap-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm shrink-0">
-                            <span class="material-symbols-outlined text-white text-xl">schedule</span>
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shrink-0">
+                            <span class="material-symbols-outlined text-brand-700 text-xl">schedule</span>
                         </div>
                         <div>
                             <h3 class="text-white font-semibold">Kehadiran Real-time</h3>
@@ -53,8 +53,8 @@
                         </div>
                     </div>
                     <div class="flex items-start gap-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm shrink-0">
-                            <span class="material-symbols-outlined text-white text-xl">payments</span>
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shrink-0">
+                            <span class="material-symbols-outlined text-brand-700 text-xl">payments</span>
                         </div>
                         <div>
                             <h3 class="text-white font-semibold">Penggajian Otomatis</h3>

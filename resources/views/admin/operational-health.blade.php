@@ -124,7 +124,7 @@
         </x-slot>
 
     <div class="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
-        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white/90">
+        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white">
             <div class="px-4 pb-2 pt-4">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -138,19 +138,19 @@
             </div>
 
             <dl class="grid gap-2 p-3 md:grid-cols-3">
-                <div class="rounded-xl bg-slate-50/80 p-3">
+                <div class="rounded-xl bg-slate-50 p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Database') }}</dt>
                     <dd class="mt-1 text-xl font-bold text-slate-950">
                         {{ $health['database']['latency_ms'] !== null ? $health['database']['latency_ms'].' ms' : __('Attention') }}
                     </dd>
                     <p class="mt-1 text-xs text-slate-500">{{ $health['database']['ok'] ? __('Connectivity check passed') : __('Connectivity check failed') }}</p>
                 </div>
-                <div class="rounded-xl bg-slate-50/80 p-3">
+                <div class="rounded-xl bg-slate-50 p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Queue') }}</dt>
                     <dd class="mt-1 text-xl font-bold text-slate-950">{{ $health['queue_backlog_count'] }}</dd>
                     <p class="mt-1 text-xs text-slate-500">{{ __('pending jobs') }} · {{ $health['failed_jobs_count'] }} {{ __('failed') }}</p>
                 </div>
-                <div class="rounded-xl bg-slate-50/80 p-3">
+                <div class="rounded-xl bg-slate-50 p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Disk Free') }}</dt>
                     <dd class="mt-1 text-xl font-bold text-slate-950">{{ $health['disk_free_human'] }}</dd>
                     <p class="mt-1 text-xs text-slate-500">
@@ -163,7 +163,7 @@
             </dl>
         </x-admin.insight-panel>
 
-        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white/90">
+        <x-admin.insight-panel class="overflow-hidden rounded-2xl bg-white">
             <div class="px-4 pb-2 pt-4">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Alerts') }}</p>
                 <h2 class="mt-1 text-base font-bold text-slate-950">{{ count($health['alerts']) }} {{ __('active') }}</h2>
@@ -177,7 +177,7 @@
                                 ? 'bg-rose-500'
                                 : ($alert['level'] === 'warning' ? 'bg-amber-500' : 'bg-slate-400');
                         @endphp
-                        <li class="rounded-xl bg-slate-50/80 p-3">
+                        <li class="rounded-xl bg-slate-50 p-3">
                             <div class="flex items-start gap-3">
                                 <span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $alertTone }}"></span>
                                 <div class="min-w-0">

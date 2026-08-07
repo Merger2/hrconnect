@@ -111,7 +111,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
                         @forelse($payrolls as $payroll)
-                            <tr class="transition hover:bg-slate-50/70">
+                            <tr class="transition hover:bg-slate-50">
                                 <td class="px-4 py-3 text-slate-700">{{ $payroll->period }}</td>
                                 <td class="px-4 py-3">
                                     <div class="font-medium text-slate-900">{{ $payroll->employee?->full_name }}</div>

@@ -187,7 +187,7 @@
                     @endforelse
                 </div>
 
-        <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3">
+        <div class="border-t border-gray-200/60 bg-gray-50 px-4 py-3">
             {{ $logs->links() }}
         </div>
     </x-admin.panel>

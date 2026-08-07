@@ -577,7 +577,7 @@
                                 id="mobile-admin-group-{{ $menuItem['id'] }}"
                                 x-show="expanded"
                                 style="display: none;"
-                                class="bg-gray-50/80 pb-2">
+                                class="bg-gray-50 pb-2">
                                 @foreach ($menuItem['items'] as $navItem)
                                     @if ($navItem['type'] === 'heading')
                                         <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -617,7 +617,7 @@
                                                 id="mobile-admin-subtree-{{ $menuItem['id'] }}-{{ $navItem['id'] }}"
                                                 x-show="subtreeExpanded"
                                                 style="display: none;"
-                                                class="ms-5 border-s border-gray-200 bg-gray-50/70 py-1 ps-2">
+                                                class="ms-5 border-s border-gray-200 bg-gray-50 py-1 ps-2">
                                                 @foreach ($navItem['items'] as $treeItem)
                                                     <x-navigation.responsive-nav-link
                                                         href="{{ $treeItem['href'] }}"

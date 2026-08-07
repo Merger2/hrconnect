@@ -252,11 +252,11 @@
                     <x-heroicon-o-bell-alert class="h-5 w-5 text-amber-500" />
                 </div>
                 <div class="grid grid-cols-2 gap-2 sm:block sm:space-y-3">
-                    <div class="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2 sm:p-3">
+                    <div class="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 sm:p-3">
                         <span class="text-xs font-semibold text-amber-900 sm:text-sm">{{ __('Face Enrollment Gap') }}</span>
                         <span class="text-base font-bold text-amber-700 sm:text-lg">{{ $missingFaceDataCount }}</span>
                     </div>
-                    <div class="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50/70 px-3 py-2 sm:p-3">
+                    <div class="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 sm:p-3">
                         <span class="text-xs font-semibold text-rose-900 sm:text-sm">{{ __('Open Overdue Checkout') }}</span>
                         <span class="text-base font-bold text-rose-700 sm:text-lg">{{ $overdueUsers->count() }}</span>
                     </div>
@@ -341,21 +341,21 @@
                         </div>
                         <span class="text-sm font-bold text-slate-900">{{ $employeesCount }}</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-2.5">
+                    <div class="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-check-badge class="h-4 w-4 text-emerald-500" />
                             <span class="text-sm font-medium text-emerald-700">{{ __('Coverage Rate') }}</span>
                         </div>
                         <span class="text-sm font-bold text-emerald-700">{{ $attendanceCoverage }}%</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-sky-100 bg-sky-50/60 px-3 py-2.5">
+                    <div class="flex items-center justify-between rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-arrow-left-end-on-rectangle class="h-4 w-4 text-sky-500" />
                             <span class="text-sm font-medium text-sky-700">{{ __('Early Checkout') }}</span>
                         </div>
                         <span class="text-sm font-bold text-sky-700">{{ $earlyCheckoutCount }}</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2.5">
+                    <div class="flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-calendar-days class="h-4 w-4 text-violet-500" />
                             <span class="text-sm font-medium text-violet-700">{{ __('Active Holidays') }}</span>
@@ -546,7 +546,7 @@
                         }
                     @endphp
 
-                    <x-admin.tone-panel class="p-3 bg-slate-50/60">
+                    <x-admin.tone-panel class="p-3 bg-slate-50">
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
                                 <div
@@ -599,7 +599,7 @@
             <div
                 class="mt-4 hidden rounded-xl border border-slate-200/70 lg:block">
                 <table class="w-full divide-y divide-slate-200">
-                    <thead class="bg-slate-50/90">
+                    <thead class="bg-slate-50">
                         <tr>
                             <th
                                 class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -672,7 +672,7 @@
                             @endphp
 
                             <tr wire:key="{{ $employee->id }}"
-                                class="transition hover:bg-slate-50/80">
+                                class="transition hover:bg-slate-50">
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-3">
                                         <div

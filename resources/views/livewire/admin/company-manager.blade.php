@@ -43,7 +43,7 @@
             </div>
 
             <div class="lg:col-span-2">
-                <div class="rounded-xl border border-emerald-100 bg-emerald-50/80 px-3 py-2 text-xs font-semibold text-emerald-800">
+                <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
                     {{ __('Isolation active through user company scope.') }}
                 </div>
             </div>
@@ -100,7 +100,7 @@
                                 </div>
                             </div>
 
-                            <div class="mt-4 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                            <div class="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3">
                                 <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                     {{ __('Assigned users') }}
                                 </h4>

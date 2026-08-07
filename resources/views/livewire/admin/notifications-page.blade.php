@@ -107,7 +107,7 @@
                 <div class="divide-y divide-slate-200/70">
                     @forelse($notifications as $notification)
                         @php($targetUrl = normalize_internal_url($notification->data['url'] ?? $notification->data['action_url'] ?? null))
-                        <article class="px-5 py-4 transition hover:bg-slate-50/80">
+                        <article class="px-5 py-4 transition hover:bg-slate-50">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 @if($targetUrl)
                                     <a href="{{ $targetUrl }}"

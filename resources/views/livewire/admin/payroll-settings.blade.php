@@ -123,7 +123,7 @@
 
             <div class="hidden lg:block">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50/50">
+                    <thead class="bg-gray-50">
                         <tr>
                             <th
                                 class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -147,7 +147,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-transparent">
                         @forelse ($components as $payrollComponent)
-                            <tr class="transition-colors hover:bg-gray-50/50">
+                            <tr class="transition-colors hover:bg-gray-50">
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <div class="text-sm font-medium text-gray-900">
                                         {{ $payrollComponent->name }}</div>
@@ -215,7 +215,7 @@
 
             @if ($components->hasPages())
                 <div
-                    class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3">
+                    class="border-t border-gray-200/60 bg-gray-50 px-4 py-3">
                     {{ $components->links() }}
                 </div>
             @endif

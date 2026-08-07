@@ -62,7 +62,7 @@
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"
-                        class="mb-4 flex items-center gap-2 rounded-lg border border-brand-100 bg-brand-50/60 px-3.5 py-2.5"
+                        class="mb-4 flex items-center gap-2 rounded-lg border border-brand-100 bg-brand-50 px-3.5 py-2.5"
                         role="status"
                         aria-live="polite"
                         style="display: none;"

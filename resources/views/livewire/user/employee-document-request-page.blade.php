@@ -152,7 +152,7 @@
     @if ($showModal)
         <template x-teleport="body">
             <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]" role="dialog" aria-modal="true" aria-labelledby="document-request-modal-title">
-                <div class="fixed inset-0 z-0 bg-slate-950/70 backdrop-blur-sm" wire:click="close"></div>
+                <div class="fixed inset-0 z-0 bg-slate-950/70" wire:click="close"></div>
                 <form wire:submit="store" class="user-ui document-request-modal relative z-10 w-full max-w-xl sm:mx-auto" wire:click.stop x-trap.inert.noscroll="true">
                     <div class="document-request-modal__header">
                         <div class="min-w-0">
@@ -208,7 +208,7 @@
     @if ($uploadingRequestId)
         <template x-teleport="body">
             <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]" role="dialog" aria-modal="true" aria-labelledby="document-upload-modal-title">
-                <div class="fixed inset-0 z-0 bg-slate-950/70 backdrop-blur-sm" wire:click="cancelUpload"></div>
+                <div class="fixed inset-0 z-0 bg-slate-950/70" wire:click="cancelUpload"></div>
                 <form wire:submit="upload" class="user-ui document-request-modal relative z-10 w-full max-w-lg sm:mx-auto" wire:click.stop data-e2e="document-upload-form" x-trap.inert.noscroll="true">
                     <div class="document-request-modal__header">
                         <div class="min-w-0">

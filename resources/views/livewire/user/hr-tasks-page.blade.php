@@ -58,15 +58,15 @@
 
                             <div class="space-y-4 p-4">
                                 <dl class="grid gap-3 text-sm sm:grid-cols-3">
-                                    <div class="rounded-xl bg-slate-50/70 p-3">
+                                    <div class="rounded-xl bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Employee') }}</dt>
                                         <dd class="mt-1 font-semibold text-gray-900">{{ $task->case->user->name }}</dd>
                                     </div>
-                                    <div class="rounded-xl bg-slate-50/70 p-3">
+                                    <div class="rounded-xl bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Due Date') }}</dt>
                                         <dd class="mt-1 font-semibold text-gray-900">{{ $task->due_date?->translatedFormat('d M Y') ?? '-' }}</dd>
                                     </div>
-                                    <div class="rounded-xl bg-slate-50/70 p-3">
+                                    <div class="rounded-xl bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Effective Date') }}</dt>
                                         <dd class="mt-1 font-semibold text-gray-900">{{ $task->case->effective_date->translatedFormat('d M Y') }}</dd>
                                     </div>

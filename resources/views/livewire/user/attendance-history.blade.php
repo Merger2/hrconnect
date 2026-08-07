@@ -104,11 +104,11 @@
                     }
 
                     $dayClass = $isCurrentMonth
-                        ? 'bg-white/70 text-slate-800 ring-slate-200/70 hover:bg-white'
-                        : 'bg-slate-100/45 text-slate-400 ring-transparent opacity-45';
+                        ? 'bg-white text-slate-800 ring-slate-200/70 hover:bg-white'
+                        : 'bg-slate-100 text-slate-400 ring-transparent opacity-45';
 
                     if ($isHoliday && $isCurrentMonth) {
-                        $dayClass = 'bg-rose-50/80 text-rose-600 ring-rose-100 hover:bg-rose-50';
+                        $dayClass = 'bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-50';
                     } elseif ($date->isSunday() && $isCurrentMonth) {
                         $dayClass .= ' text-rose-500';
                     } elseif ($date->isFriday() && $isCurrentMonth) {
@@ -165,7 +165,7 @@
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
                 @foreach ($holidays->sortBy(fn ($holiday) => $holiday->date->day) as $holiday)
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50/72 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
                         <span>{{ $holiday->date->day }}</span>
                         <span class="max-w-[12rem] truncate opacity-80">{{ $holiday->name }}</span>
                     </span>

@@ -92,7 +92,7 @@
                 </div>
 
                 {{-- Input Area --}}
-                <div class="shrink-0 border-t border-gray-100 bg-white/80 backdrop-blur-sm px-4 sm:px-5 py-3">
+                <div class="shrink-0 border-t border-gray-100 bg-white px-4 sm:px-5 py-3">
                     {{-- Real-time loading indicator — request lifecycle, bukan nunggu render --}}
                     <div wire:loading wire:target="sendMessage, processAnswer"
                          class="mb-2 flex items-center gap-2 text-sm text-gray-500"
@@ -201,3 +201,4 @@
     </script>
     @endpush
 </div>
+

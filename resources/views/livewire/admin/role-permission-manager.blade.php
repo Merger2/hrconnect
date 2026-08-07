@@ -28,14 +28,14 @@
                     </div>
                 </div>
 
-                <div class="flex min-h-12 items-center rounded-xl border border-indigo-100 bg-indigo-50/80 px-3 py-2 text-sm text-indigo-900">
+                <div class="flex min-h-12 items-center rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm text-indigo-900">
                     <p class="font-semibold">{{ __('Admin-first scope') }}</p>
                     <p class="sr-only">
                         {{ __('This page currently manages admin menu access and admin-side actions only.') }}
                     </p>
                 </div>
 
-                <div class="flex min-h-12 items-center rounded-xl border border-emerald-100 bg-emerald-50/80 px-3 py-2 text-sm text-emerald-900">
+                <div class="flex min-h-12 items-center rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
                     <p class="font-semibold">{{ __('Role assignment') }}</p>
                     <p class="sr-only">
                         {{ __('Role assignment is enforced separately so normal admins do not gain access automatically.') }}
@@ -84,7 +84,7 @@
                                     @endphp
 
                                     @if ($previewModules !== [])
-                                        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+                                        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
                                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Role can access') }}</p>
                                             <div class="mt-2 flex flex-wrap gap-2">
                                                 @foreach (array_slice($previewModules, 0, 6) as $module)
@@ -150,7 +150,7 @@
 
                 <div class="space-y-3 p-4">
                     @foreach ($groupedModules as $section)
-                        <section class="rounded-xl border border-gray-100 bg-gray-50/80 p-4">
+                        <section class="rounded-xl border border-gray-100 bg-gray-50 p-4">
                             <div class="mb-4">
                                 <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                                     {{ __($section['meta']['label']) }}
@@ -162,7 +162,7 @@
 
                             <div class="space-y-3">
                                 @foreach ($section['modules'] as $module)
-                                    <div class="rounded-xl border border-white/80 bg-white/90 p-3 shadow-sm">
+                                    <div class="rounded-xl border border-white/80 bg-white p-3 shadow-sm">
                                         <div class="flex flex-wrap items-center gap-2">
                                             <h4 class="font-semibold text-slate-900">{{ __($module['label']) }}</h4>
                                             @if ($module['enterprise'])
@@ -221,7 +221,7 @@
                 </div>
 
                 @if ($editingRole?->grantsFullAdminAccess())
-                    <div class="rounded-xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+                    <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                         <p class="font-semibold">{{ __('Super Admin role stays full access.') }}</p>
                                         <p class="sr-only">
                                             {{ __('The super admin preset always keeps every admin permission enabled.') }}
@@ -237,7 +237,7 @@
                         </div>
 
                         @foreach ($groupedModules as $sectionKey => $section)
-                            <section class="rounded-xl border border-gray-100 bg-gray-50/80 p-4">
+                            <section class="rounded-xl border border-gray-100 bg-gray-50 p-4">
                                 <div class="mb-4">
                                     <h4 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                                         {{ __($section['meta']['label']) }}
@@ -260,7 +260,7 @@
 
                                             <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
                                                 @foreach ($module['actions'] as $actionKey => $action)
-                                                    <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700 transition hover:border-primary-300 hover:bg-primary-50/50">
+                                                    <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-slate-700 transition hover:border-primary-300 hover:bg-primary-50">
                                                         <x-forms.checkbox
                                                             wire:model="permissions"
                                                             value="{{ $action['permission'] }}"

@@ -52,7 +52,7 @@
                             <div>{{ __('Check in') }}: {{ data_get($correction->current_snapshot, 'time_in', __('None')) }}</div>
                             <div>{{ __('Check out') }}: {{ data_get($correction->current_snapshot, 'time_out', __('None')) }}</div>
                         </div>
-                        <div class="rounded-lg bg-primary-50/70 p-2 text-primary-900">
+                        <div class="rounded-lg bg-primary-50 p-2 text-primary-900">
                             <div class="font-medium text-primary-700">{{ __('Requested') }}</div>
                             @if ($correction->requestedShift)
                                 <div>{{ __('Shift') }}: {{ $correction->requestedShift->name }}</div>

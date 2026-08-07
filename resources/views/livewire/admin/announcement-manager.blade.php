@@ -55,7 +55,7 @@
                 </div>
             </div>
         @else
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 p-4 bg-gray-50/50">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 p-4 bg-gray-50">
                 @foreach ($announcements as $announcement)
                     @php
                         $styles = match($announcement->priority) {
@@ -122,7 +122,7 @@
                             @endif
                         </div>
 
-                        <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50/50 px-4 py-2.5">
+                        <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-4 py-2.5">
                             @if ($requiresAck)
                                 <x-actions.button type="button" wire:click="viewStatus({{ $announcement->id }})" variant="soft-primary" size="sm">
                                     <x-heroicon-m-users class="mr-1.5 h-4 w-4" /> {{ __('Status') }}
@@ -140,7 +140,7 @@
             </div>
 
             <div
-                class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
+                class="border-t border-gray-200/60 bg-gray-50 px-4 py-2.5">
                 {{ $announcements->links() }}
             </div>
         @endif

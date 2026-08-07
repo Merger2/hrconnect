@@ -14,7 +14,7 @@
         @if (count($this->sessions) > 0)
             <div class="mb-5 space-y-3">
                 @foreach ($this->sessions as $session)
-                    <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+                    <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
                         <div class="shrink-0 text-slate-400">
                             @if ($session->agent->isDesktop())
                                 <x-heroicon-o-computer-desktop class="h-6 w-6" />

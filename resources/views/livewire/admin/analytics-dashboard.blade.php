@@ -176,7 +176,7 @@
                                 </div>
                                 <span class="font-bold text-slate-900 group-hover:text-{{ $row['color'] }}-600 transition-colors text-sm">{{ $row['value'] }}</span>
                             </div>
-                            <div class="h-2.5 overflow-hidden rounded-full bg-slate-100/80 shadow-inner" role="progressbar" aria-valuenow="{{ $row['value'] }}" aria-valuemax="{{ $attendanceMixTotal }}" aria-label="{{ $row['label'] }}">
+                            <div class="h-2.5 overflow-hidden rounded-full bg-slate-100 shadow-inner" role="progressbar" aria-valuenow="{{ $row['value'] }}" aria-valuemax="{{ $attendanceMixTotal }}" aria-label="{{ $row['label'] }}">
                                 <div class="h-full rounded-full {{ $row['bar'] }} transition-all duration-1000 ease-out" style="width: {{ round(($row['value'] / $attendanceMixTotal) * 100, 1) }}%"></div>
                             </div>
                         </div>
@@ -324,13 +324,13 @@
                 </div>
                 <div class="space-y-3">
                     @forelse ($topDiligent as $employee)
-                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
+                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white p-2.5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 text-xs uppercase">
                                 {{ substr($employee->name, 0, 2) }}
                             </div>
                             <div class="flex flex-1 items-center justify-between">
                                 <span class="text-sm font-semibold text-slate-700 truncate pr-2">{{ $employee->name }}</span>
-                                <span class="shrink-0 rounded-full bg-emerald-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-emerald-700 shadow-sm">{{ gmdate('H:i', $employee->avg_check_in) }}</span>
+                                <span class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[0.7rem] font-bold text-emerald-700 shadow-sm">{{ gmdate('H:i', $employee->avg_check_in) }}</span>
                             </div>
                         </div>
                     @empty
@@ -348,13 +348,13 @@
                 </div>
                 <div class="space-y-3">
                     @forelse ($topLate as $employee)
-                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
+                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white p-2.5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 text-xs uppercase">
                                 {{ substr($employee->name, 0, 2) }}
                             </div>
                             <div class="flex flex-1 items-center justify-between">
                                 <span class="text-sm font-semibold text-slate-700 truncate pr-2">{{ $employee->name }}</span>
-                                <span class="shrink-0 rounded-full bg-amber-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-amber-700 shadow-sm">{{ $employee->late_count }}x</span>
+                                <span class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[0.7rem] font-bold text-amber-700 shadow-sm">{{ $employee->late_count }}x</span>
                             </div>
                         </div>
                     @empty
@@ -372,13 +372,13 @@
                 </div>
                 <div class="space-y-3">
                     @forelse ($topEarlyLeavers as $employee)
-                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white/60 p-2.5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
+                        <div class="group flex items-center gap-3 rounded-xl border border-slate-200/50 bg-white p-2.5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow">
                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 font-bold text-rose-700 text-xs uppercase">
                                 {{ substr($employee->name, 0, 2) }}
                             </div>
                             <div class="flex flex-1 items-center justify-between">
                                 <span class="text-sm font-semibold text-slate-700 truncate pr-2">{{ $employee->name }}</span>
-                                <span class="shrink-0 rounded-full bg-rose-100/80 px-2 py-0.5 text-[0.7rem] font-bold text-rose-700 shadow-sm">{{ $employee->early_leave_count }}x</span>
+                                <span class="shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[0.7rem] font-bold text-rose-700 shadow-sm">{{ $employee->early_leave_count }}x</span>
                             </div>
                         </div>
                     @empty
@@ -436,15 +436,15 @@
                         </div>
                     </div>
                     <div class="flex-1 space-y-2 text-xs">
-                        <div class="flex justify-between rounded-lg bg-emerald-50/80 p-2.5 backdrop-blur-sm text-emerald-700">
+                        <div class="flex justify-between rounded-lg bg-emerald-50 p-2.5 text-emerald-700">
                             <span class="font-medium">{{ __('Avg Daily') }}</span>
                             <span class="font-bold">{{ $summary['avg_daily_attendance'] ?? 0 }}</span>
                         </div>
-                        <div class="flex justify-between rounded-lg bg-amber-50/80 p-2.5 backdrop-blur-sm text-amber-700">
+                        <div class="flex justify-between rounded-lg bg-amber-50 p-2.5 text-amber-700">
                             <span class="font-medium">{{ __('Late Rate') }}</span>
                             <span class="font-bold">{{ $summary['late_rate'] ?? 0 }}%</span>
                         </div>
-                        <div class="flex justify-between rounded-lg bg-slate-50/80 p-2.5 backdrop-blur-sm text-slate-700">
+                        <div class="flex justify-between rounded-lg bg-slate-50 p-2.5 text-slate-700">
                             <span class="font-medium">{{ __('Workforce') }}</span>
                             <span class="font-bold">{{ $summary['total_employees'] }}</span>
                         </div>

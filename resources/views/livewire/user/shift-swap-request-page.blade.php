@@ -16,7 +16,7 @@
 
             <div class="user-page-body pt-0">
                 <div
-                    class="hidden overflow-hidden rounded-[1.15rem] border border-slate-200/70 bg-white/72 shadow-none backdrop-blur-sm md:block">
+                    class="hidden overflow-hidden rounded-[1.15rem] border border-slate-200/70 bg-white shadow-none md:block">
                     <div class="user-desktop-table-scroll">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -180,12 +180,12 @@
 
                 @if ($selectedSchedule)
                     <div
-                        class="rounded-[1.15rem] border border-slate-200/70 bg-slate-50/70 p-3 text-sm text-slate-700">
+                        class="rounded-[1.15rem] border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-700">
                         <p class="font-semibold text-gray-900">{{ __('Current Schedule Snapshot') }}
                         </p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
                             <div
-                                class="rounded-[1rem] border border-white/70 bg-white/72 p-3 shadow-none">
+                                class="rounded-[1rem] border border-slate-200/70 bg-white p-3 shadow-none">
                                 <div
                                     class="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
                                     {{ __('Schedule Date') }}</div>
@@ -194,7 +194,7 @@
                                 </div>
                             </div>
                             <div
-                                class="rounded-[1rem] border border-white/70 bg-white/72 p-3 shadow-none">
+                                class="rounded-[1rem] border border-slate-200/70 bg-white p-3 shadow-none">
                                 <div
                                     class="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
                                     {{ __('Current') }}</div>
@@ -213,7 +213,7 @@
                     </div>
                 @elseif ($selectedScheduleDate)
                     <div
-                            class="rounded-2xl border border-sky-100 bg-sky-50/60 p-3 text-sm text-sky-800">
+                            class="rounded-2xl border border-sky-100 bg-sky-50 p-3 text-sm text-sky-800">
                         <span>{{ __('No current schedule') }}</span>
                         <span class="sr-only">{{ __('No current schedule is assigned for this date. The requested shift will be added to the schedule after approval.') }}</span>
                     </div>
@@ -237,7 +237,7 @@
 
                     @if ($selectedRequestedShift)
                         <div
-                            class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
+                            class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                             <div
                                 class="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
                                 {{ __('Requested Shift') }}</div>
@@ -275,7 +275,7 @@
 
                     @if ($selectedReplacement)
                         <div
-                            class="mt-4 rounded-2xl border border-sky-100 bg-sky-50/60 p-3">
+                            class="mt-4 rounded-2xl border border-sky-100 bg-sky-50 p-3">
                             <div
                                 class="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-700">
                                 {{ __('Replacement') }}</div>
@@ -293,7 +293,7 @@
 
                 @if ($selectedScheduleDate && $selectedRequestedShift)
                     <div
-                        class="rounded-2xl border border-primary-100 bg-primary-50/60 p-3 sm:p-4">
+                        class="rounded-2xl border border-primary-100 bg-primary-50 p-3 sm:p-4">
                         <p class="text-sm font-semibold text-gray-900">{{ __('Request Summary') }}</p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
                             <div class="user-soft-panel">

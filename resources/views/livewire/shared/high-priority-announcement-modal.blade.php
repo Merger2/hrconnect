@@ -15,7 +15,7 @@
             class="fixed inset-0 z-[70] overflow-y-auto px-4 py-4 sm:px-5"
             style="display: none;"
         >
-            <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity"></div>
+            <div class="fixed inset-0 bg-slate-900/70 transition-opacity"></div>
 
             <div class="fixed inset-0 z-10 overflow-y-auto">
                 <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -49,13 +49,13 @@
                             </div>
                         </div>
 
-                        <div class="relative max-h-[45dvh] overflow-y-auto border-y border-slate-200 bg-slate-50/50 px-4 py-4 sm:px-5">
+                        <div class="relative max-h-[45dvh] overflow-y-auto border-y border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
                             <div class="prose prose-slate prose-sm max-w-none">
                                 {!! nl2br(e($announcement->content)) !!}
                             </div>
                         </div>
 
-                        <div class="sticky bottom-0 z-20 border-t border-slate-200/80 bg-white/80 px-4 py-4 backdrop-blur-xl sm:px-5">
+                        <div class="sticky bottom-0 z-20 border-t border-slate-200/80 bg-white px-4 py-4 sm:px-5">
                             @if (($announcement->modal_behavior ?? 'acknowledge') === 'acknowledge')
                                 <div class="mb-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
                                     <x-heroicon-m-information-circle class="h-4 w-4 shrink-0 text-amber-600" />
@@ -95,3 +95,4 @@
         </div>
     @endif
 </div>
+

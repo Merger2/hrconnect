@@ -21,7 +21,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-900">
+                <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                     <p class="font-semibold">{{ __('Database session guard') }}</p>
                     <p class="mt-0.5 text-xs text-emerald-700">
                         {{ __('This tool only affects session rows, not passwords or account status.') }}
@@ -31,7 +31,7 @@
         </x-slot>
 
         @unless ($sessionsAvailable)
-            <x-admin.panel class="border-amber-200 bg-amber-50/80 p-4 text-amber-900">
+            <x-admin.panel class="border-amber-200 bg-amber-50 p-4 text-amber-900">
                 <div class="flex items-start gap-3">
                     <x-heroicon-o-exclamation-triangle class="mt-0.5 h-6 w-6 shrink-0" />
                     <div>
@@ -54,7 +54,7 @@
                         <button
                             type="button"
                             wire:click="selectUser('{{ $user->id }}')"
-                            class="w-full rounded-xl border px-4 py-3 text-left transition hover:border-emerald-300 hover:bg-emerald-50/70 {{ $selectedUser?->is($user) ? 'border-emerald-400 bg-emerald-50 shadow-sm' : 'border-slate-200 bg-white' }}"
+                            class="w-full rounded-xl border px-4 py-3 text-left transition hover:border-emerald-300 hover:bg-emerald-50 {{ $selectedUser?->is($user) ? 'border-emerald-400 bg-emerald-50 shadow-sm' : 'border-slate-200 bg-white' }}"
                         >
                             <div class="flex items-start justify-between gap-3">
                                 <div>
@@ -140,7 +140,7 @@
                             </x-slot>
                         </x-admin.empty-state>
                     @else
-                        <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
                             <div class="flex flex-wrap items-center gap-3">
                                 <img src="{{ $selectedUser->profile_photo_url }}" alt="" class="h-12 w-12 rounded-full object-cover">
                                 <div>

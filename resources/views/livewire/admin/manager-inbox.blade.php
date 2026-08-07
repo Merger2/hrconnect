@@ -126,7 +126,7 @@
                             @endif
                         </div>
                     <div class="relative w-full sm:w-72">
-                        <x-forms.input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search employee...') }}" class="w-full text-sm pl-10 bg-white/50 backdrop-blur-sm" />
+                        <x-forms.input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search employee...') }}" class="w-full text-sm pl-10 bg-white" />
                         <span class="absolute left-3 top-2.5 text-gray-400">
                             <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                         </span>
@@ -199,7 +199,7 @@
                                     </a>
                                 </div>
                                 
-                                <div class="mt-3 flex-1 rounded-lg bg-gray-50/50 p-3 border border-gray-100">
+                                <div class="mt-3 flex-1 rounded-lg bg-gray-50 p-3 border border-gray-100">
                                     <div class="flex flex-col gap-2 text-sm text-gray-600">
                                         @if($activeTab === 'leaves')
                                             <div class="flex justify-between items-center"><span class="text-xs text-gray-400">{{ __('Leave Type') }}</span> <span class="font-bold text-primary-600">{{ $item->leaveType->name }}</span></div>

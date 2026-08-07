@@ -422,7 +422,7 @@
                     <div class="relative min-h-0 flex-1">
                         <div wire:loading.flex
                             wire:target="templateBuilderForm,documentTemplateForm.name,documentTemplateForm.body,documentTemplateForm.footer,documentTemplateForm.paper_size,documentTemplateForm.orientation,documentTemplateForm.layout_options"
-                            class="absolute right-3 top-3 z-10 items-center rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-primary-700 shadow-sm ring-1 ring-primary-100">
+                            class="absolute right-3 top-3 z-10 items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary-700 shadow-sm ring-1 ring-primary-100">
                             {{ __('Updating preview...') }}
                         </div>
                         <div class="document-template-live-preview h-[62vh] overflow-auto overscroll-contain bg-slate-950 p-4 xl:h-[calc(100vh-12rem)]">

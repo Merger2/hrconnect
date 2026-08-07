@@ -256,7 +256,7 @@
 
         <div class="order-1 space-y-4 xl:order-2">
             @if ($canManage)
-                <x-admin.panel class="border-primary-200 bg-primary-50/60">
+                <x-admin.panel class="border-primary-200 bg-primary-50">
                     <div class="space-y-1 p-3.5">
                         <p class="text-xs font-semibold uppercase tracking-wide text-primary-800">{{ __('Quick action') }}</p>
                         <p class="text-sm leading-5 text-primary-700">

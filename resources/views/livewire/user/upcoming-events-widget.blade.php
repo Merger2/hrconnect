@@ -24,7 +24,7 @@
                 {{-- Announcements --}}
                 @if($announcements->isNotEmpty())
                     @foreach($announcements as $announcement)
-                         <button type="button" wire:click="showAnnouncement({{ $announcement->id }})" class="flex w-full items-center gap-2.5 rounded-xl border border-blue-100 bg-blue-50/50 p-2 text-left transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:col-span-2" aria-label="{{ __('View event details') }}: {{ $announcement->title }}">
+                         <button type="button" wire:click="showAnnouncement({{ $announcement->id }})" class="flex w-full items-center gap-2.5 rounded-xl border border-blue-100 bg-blue-50 p-2 text-left transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:col-span-2" aria-label="{{ __('View event details') }}: {{ $announcement->title }}">
                             <div class="flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-full border border-blue-100 bg-white text-blue-500">
                                 <x-heroicon-o-megaphone class="h-4 w-4" />
                             </div>
@@ -45,7 +45,7 @@
                 {{-- Holidays --}}
                 @if($holidays->isNotEmpty())
                     @foreach($holidays as $holiday)
-                        <button type="button" wire:click="showHoliday({{ $holiday->id }})" class="flex w-full items-center gap-2.5 rounded-xl border border-rose-100 bg-rose-50/50 p-2 text-left transition hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('View event details') }}: {{ $holiday->name }}">
+                        <button type="button" wire:click="showHoliday({{ $holiday->id }})" class="flex w-full items-center gap-2.5 rounded-xl border border-rose-100 bg-rose-50 p-2 text-left transition hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('View event details') }}: {{ $holiday->name }}">
                             <div class="flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-full border border-rose-100 bg-white">
                                 <span class="text-[8px] font-bold text-rose-500 uppercase tracking-tighter leading-none mb-0.5">{{ $holiday->date->shortMonthName }}</span>
                                 <span class="text-xs font-black text-gray-900 leading-none">{{ $holiday->date->day }}</span>
@@ -62,7 +62,7 @@
                 {{-- Birthdays --}}
                 @if($birthdays->isNotEmpty())
                     @foreach($birthdays as $user)
-                        <button type="button" wire:click="showBirthday('{{ $user->id }}')" class="flex w-full items-center gap-2.5 rounded-xl border border-amber-100 bg-amber-50/50 p-2 text-left transition hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('View event details') }}: {{ $user->name }}">
+                        <button type="button" wire:click="showBirthday('{{ $user->id }}')" class="flex w-full items-center gap-2.5 rounded-xl border border-amber-100 bg-amber-50 p-2 text-left transition hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('View event details') }}: {{ $user->name }}">
                             <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-lg object-cover border border-amber-100">
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-gray-800 truncate max-w-[140px]">{{ $user->name }}</p>
@@ -84,7 +84,7 @@
     @if($selectedEvent)
         <template x-teleport="body">
             <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]">
-                <div class="fixed inset-0 z-0 bg-slate-950/45 backdrop-blur-sm" wire:click.self="closeEvent"></div>
+                <div class="fixed inset-0 z-0 bg-slate-950/45" wire:click.self="closeEvent"></div>
                 <div class="relative z-10 w-full transform overflow-y-auto rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:max-w-md"
                     style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
                     role="dialog" aria-modal="true" aria-labelledby="upcoming-event-detail-title"

@@ -181,7 +181,7 @@
                         <article
                             x-show="matchesItem(@js($kpiSearchIndex), @js((bool) $kpi->is_active))"
                             x-transition.opacity.duration.150ms
-                            class="rounded-2xl border border-gray-100 bg-white/80 p-3 shadow-sm"
+                            class="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm"
                         >
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">

@@ -23,7 +23,7 @@
                 <button
                     type="button"
                     wire:click="selectTemplate({{ $template->id }})"
-                    class="w-full rounded-[1.05rem] border p-4 text-left shadow-none transition {{ (int) $selectedTemplateId === $template->id ? 'border-primary-300 bg-primary-50' : 'border-slate-200/70 bg-white/72 hover:border-primary-200' }}"
+                    class="w-full rounded-[1.05rem] border p-4 text-left shadow-none transition {{ (int) $selectedTemplateId === $template->id ? 'border-primary-300 bg-primary-50' : 'border-slate-200/70 bg-white hover:border-primary-200' }}"
                 >
                     <p class="font-semibold text-slate-950">{{ $template->title }}</p>
                     <p class="mt-1 text-sm text-slate-500">{{ __(str($template->category)->headline()->toString()) }} · {{ $template->company?->name }}</p>
@@ -85,7 +85,7 @@
                 <h2 class="text-base font-semibold text-slate-950">{{ __('Recent Submissions') }}</h2>
                 <div class="mt-3 space-y-2">
                     @forelse ($submissions as $submission)
-                        <div class="rounded-xl bg-slate-50/70 p-3 text-sm">
+                        <div class="rounded-xl bg-slate-50 p-3 text-sm">
                             <p class="font-semibold text-slate-900">{{ $submission->template?->title }}</p>
                             <p class="mt-1 text-xs text-slate-500">{{ $submission->created_at?->format('d M Y H:i') }}</p>
                         </div>

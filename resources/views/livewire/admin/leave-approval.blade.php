@@ -49,15 +49,15 @@
     @endphp
 
     <dl class="flex flex-wrap gap-2 mb-4" role="region" aria-label="{{ __('Leave Summary') }}">
-        <div class="rounded-xl border border-amber-300/70 bg-amber-50/60 px-3 py-1.5 flex items-center gap-2">
+        <div class="rounded-xl border border-amber-300/70 bg-amber-50 px-3 py-1.5 flex items-center gap-2">
             <dt class="text-xs font-semibold uppercase text-amber-700">{{ __('Pending') }}</dt>
             <dd class="text-sm font-bold text-amber-800">{{ $pendingLeaves }}</dd>
         </div>
-        <div class="rounded-xl border border-emerald-300/70 bg-emerald-50/60 px-3 py-1.5 flex items-center gap-2">
+        <div class="rounded-xl border border-emerald-300/70 bg-emerald-50 px-3 py-1.5 flex items-center gap-2">
             <dt class="text-xs font-semibold uppercase text-emerald-700">{{ __('Approved') }}</dt>
             <dd class="text-sm font-bold text-emerald-800">{{ $approvedLeaves }}</dd>
         </div>
-        <div class="rounded-xl border border-rose-300/70 bg-rose-50/60 px-3 py-1.5 flex items-center gap-2">
+        <div class="rounded-xl border border-rose-300/70 bg-rose-50 px-3 py-1.5 flex items-center gap-2">
             <dt class="text-xs font-semibold uppercase text-rose-700">{{ __('Rejected') }}</dt>
             <dd class="text-sm font-bold text-rose-800">{{ $rejectedLeaves }}</dd>
         </div>

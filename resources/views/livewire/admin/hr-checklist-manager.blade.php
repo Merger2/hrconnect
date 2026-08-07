@@ -110,7 +110,7 @@
             <div class="grid grid-cols-1 items-start gap-4 pb-10 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($taskColumns as $statusKey => $columnTitle)
                     <div
-                        class="flex min-w-0 flex-col rounded-xl bg-gray-100/80 p-3 shadow-inner transition-colors duration-200 max-h-[75vh]"
+                        class="flex min-w-0 flex-col rounded-xl bg-gray-100 p-3 shadow-inner transition-colors duration-200 max-h-[75vh]"
                         x-data="{ isHovered: false }"
                         x-on:dragover.prevent="isHovered = true"
                         x-on:dragleave.prevent="isHovered = false"
@@ -207,7 +207,7 @@
                                     @endcan
                                 </article>
                             @empty
-                                <div class="flex h-24 items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white/50">
+                                <div class="flex h-24 items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white">
                                     <span class="text-xs font-medium text-gray-500">{{ __('Drag tasks here') }}</span>
                                 </div>
                             @endforelse
@@ -219,7 +219,7 @@
             <!-- Cases Board View -->
             <div class="grid items-start gap-4 md:grid-cols-3">
                 @foreach ($caseColumns as $statusKey => $columnTitle)
-                    <div class="flex flex-col gap-3 rounded-xl bg-gray-50/80 p-3 shadow-inner">
+                    <div class="flex flex-col gap-3 rounded-xl bg-gray-50 p-3 shadow-inner">
                         <div class="flex items-center justify-between px-1">
                             <h3 class="text-sm font-bold uppercase tracking-wide text-gray-700">{{ $columnTitle }}</h3>
                             <span class="rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-gray-600 shadow-sm">

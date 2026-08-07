@@ -421,7 +421,7 @@
 
                                             @if ($eval->kpiTemplate && $eval->kpiTemplate->indicator_description)
                                                 <div
-                                                    class="px-4 py-2.5 bg-sky-50/70 border-b border-sky-100/70">
+                                                    class="px-4 py-2.5 bg-sky-50 border-b border-sky-100/70">
                                                     <div
                                                         class="text-xs text-sky-700 leading-relaxed">
                                                         @foreach (explode("\n", $eval->kpiTemplate->indicator_description) as $line)

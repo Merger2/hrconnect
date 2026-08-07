@@ -12,7 +12,7 @@
 
 @if (!empty($visibleRuns))
 <x-admin.panel class="ring-1 ring-gray-950/5">
-    <div class="border-b border-gray-100 bg-gray-50/70 {{ $compact ? 'px-3 py-2.5' : 'px-4 py-3' }}">
+    <div class="border-b border-gray-100 bg-gray-50 {{ $compact ? 'px-3 py-2.5' : 'px-4 py-3' }}">
         <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
                 <h4 class="{{ $compact ? 'truncate text-sm font-bold normal-case tracking-normal text-slate-900' : 'text-sm font-semibold uppercase tracking-[0.2em] text-gray-500' }}">

@@ -9,31 +9,31 @@
             'badge' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-200',
             'icon' => 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
             'dot' => 'bg-amber-500',
-            'panel' => 'border-amber-100 bg-amber-50/50',
+            'panel' => 'border-amber-100 bg-amber-50',
         ],
         'red' => [
             'badge' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-200',
             'icon' => 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
             'dot' => 'bg-red-600',
-            'panel' => 'border-rose-100 bg-rose-50/50',
+            'panel' => 'border-rose-100 bg-rose-50',
         ],
         'blue' => [
             'badge' => 'bg-sky-50 text-sky-800 ring-1 ring-sky-200',
             'icon' => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
             'dot' => 'bg-sky-600',
-            'panel' => 'border-sky-100 bg-sky-50/50',
+            'panel' => 'border-sky-100 bg-sky-50',
         ],
         'slate' => [
             'badge' => 'bg-slate-100 text-slate-800 ring-1 ring-slate-200',
             'icon' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
             'dot' => 'bg-slate-600',
-            'panel' => 'border-slate-200 bg-slate-50/70',
+            'panel' => 'border-slate-200 bg-slate-50',
         ],
         default => [
             'badge' => 'bg-primary-50 text-primary-800 ring-1 ring-primary-200',
             'icon' => 'bg-primary-100 text-primary-800 ring-1 ring-primary-200',
             'dot' => 'bg-primary-700',
-            'panel' => 'border-primary-100 bg-primary-50/50',
+            'panel' => 'border-primary-100 bg-primary-50',
         ],
     };
 
@@ -80,7 +80,7 @@
 
             <ul class="space-y-2 text-sm leading-6 text-slate-600">
                 @foreach ($details as $detail)
-                    <li class="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
+                    <li class="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
                         <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full {{ $toneClasses['dot'] }}" aria-hidden="true"></span>
                         <span>{{ $detail }}</span>
                     </li>

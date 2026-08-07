@@ -90,7 +90,7 @@ sampai pemetaannya ditambahkan.
 Aturan banner:
 - Arah gradien: 135deg, hue GELAP di kiri-atas (tempat teks) → hue terang di
   kanan-bawah. Kontras teks putih minimal ±4.5:1 pada stop gelap.
-- Elemen glass (tombol back, chip ikon): putih transparan + blur — boleh.
+- Elemen di atas banner (tombol back, chip ikon): **SOLID putih** (`background: var(--color-white)`, ikon `slate-700`) — AMENDED 2026-08-06: transparan+blur DILARANG (lihat ZERO-GLASS FINAL).
 - CTA / primary button tetap global accent (biru), bukan module hue.
 - **AMENDED 2026-08-06 (lanjutan):** elemen di bawah hero TIDAK boleh menindih
   banner. `home-date-context` di home sebelumnya overlap tepi bawah hero
@@ -194,6 +194,73 @@ diperkaya warna + navigasi, tanpa mengubah aturan wash untuk panel konten.
     Verifikasi: 32 class dicek di bundle build — nol alpha tersisa; 8 halaman
     user (schedule/kasbon/payroll/kb/scan/profile/notifications/leave)
     load tanpa pageerror; smoke test 16/16 PASS.
+  - **CLEANUP GLASS EKSTENSI — UTILITY CLASS INLINE (2026-08-06):** sweep
+    sebelumnya hanya membersihkan class CSS custom; sesi ini membersihkan
+    **utility class inline di blade user pages** yang terlewat (12 file,
+    31 baris): `bg-white/55-85` → `bg-white`/`bg-slate-50`,
+    `bg-slate-50/70` → `bg-slate-50`, `bg-gray-50/50` → `bg-gray-50`,
+    `bg-rose-50/50`/`bg-amber-50/50` → solid,
+    `bg-emerald-50/50`/`bg-sky-50/60`/`bg-primary-50/60` → solid,
+    `border-white/70` → `border-slate-200/70`, dan `backdrop-blur-sm`
+    dicabut dari kartu yang bg-nya sudah solid (desktop panel shift-swap).
+    File: collaboration-inbox, shift-schedule-page, hr-tasks-page,
+    work-from-home-request-page, my-custom-forms, shift-swap-request-page,
+    attendance-correction-page, my-operational-tasks, attendance-history,
+    upcoming-events-widget, profile/admin-show, profile/logout-sessions.
+    Pengecualian tetap dipertahankan: overlay modal (fixed inset-0),
+    sticky footer KB chat, chip ikon/back di atas banner gradien (scan),
+    hover state, overlay clock-in. Verifikasi: grep sisa wash = hanya
+    pengecualian; backdrop-blur = hanya overlay/sticky/banner; 3 audit
+    script PASS; UserMenuSmokeTest 9/9 PASS.
+  - **GLASS SWEEP TOTAL — USER + ADMIN (2026-08-06, keluhan Fikih ulang):**
+    glassmorphism DILARANG di seluruh halaman (tidak hanya user pages).
+    42 blade di-sweep: `bg-*/NN` (white/slate/gray/primary/blue/sky/rose/
+    amber/emerald/red-800 dll) → solid; `backdrop-blur` dicabut dari kartu
+    yang bg-nya sudah solid (insight-panel, analytics-dashboard, sticky
+    header employees, search input, error card, footer KB chat, footer
+    modal announcement). Hover wash ikut di-solid-kan (transisi singkat,
+    nol glass). Sisa transparansi HANYA fungsional (bukan glassmorphism):
+    scrim overlay modal (`fixed inset-0 bg-slate-950/NN`), chip/ikon
+    transparan DI ATAS banner gradien (login, scan), overlay fullscreen
+    clock-in + ripple `animate-ping`. Verifikasi: grep sisa wash alpha =
+    3 baris (banner/overlay clock-in); backdrop-blur = 5 baris (scrim +
+    banner); 3 audit script PASS; build sukses; smoke test 9/9 PASS
+    (46 assertions); 54 blade lint OK.
+  - **ZERO-GLASS FINAL (2026-08-06, keluhan Fikih "masih glassmorphism"):**
+    nol blur + nol alpha tersisa di kartu/chip — GLASSMORPHISM HAPUS TOTAL.
+    Definisi Fikih: transparansi + blur + border tipis = glass; yang
+    sebelumnya dianggap "pengecualian fungsional" (chip back/ikon di atas
+    banner, chip login, scrim modal) TIDAK lagi dibenarkan. Yang dilakukan:
+    - `backdrop-filter`/`--tw-backdrop-blur` DIHAPUS SEMUA dari aturan
+      custom app.css (42 deklarasi: `user-page-header__back`,
+      `user-header-icon-action`, `quick-wallet-modal__backdrop`, dll) +
+      dari 4 scrim modal blade (doc-request ×2, upcoming-events,
+      announcement). Sisa `backdrop-filter` di app.css hanya di daftar
+      `transition-property` (inert, bukan deklarasi blur). Grep:
+      `backdrop-blur` di blade = 0, di app.css = 0, di JS = 0.
+    - Background alpha `color-mix(..., transparent)` di app.css
+      di-solid-kan SEMUA (227 deklarasi total lintas 5 pass) untuk
+      white/slate/primary-50/red-50/orange-50/on-error/surface — kartu
+      quick-wallet, profile stat/icon/meta, compact-filter input, danger
+      card, disabled action, scan topnav (96%→solid white), dst. Sisa
+      alpha HANYA state transient (`:hover`/`:focus`/`:active` — transisi
+      interaksi, bukan desain glass) + scrim overlay modal + kontrol
+      kamera (scan/clock-in, fungsional tanpa blur) + blob dekoratif
+      `blur-3xl` (ambience, bukan kartu). Utility dead
+      `.odd\:bg-white\/2` dihapus.
+    - Chip login (4 tile di banner brand): `bg-white/20 backdrop-blur-sm`
+      → **solid `bg-white shadow-md`** + ikon `text-white` →
+      `text-brand-700` (biru brand di tile putih). Tombol scan "Try
+      Again": solid white + `text-slate-700`; status pill scan: blur
+      dicabut (bg tetap dari `statusClass` solid).
+    - Verifikasi: bundle terbaru (app-*.css, ambil via `ls -t` bukan
+      alfabetis) — `backdrop-blur` utility = 0, deklarasi `backdrop-filter`
+      = 0 (hanya transition-property), `text-brand-700`/`from-brand-700`
+      hadir (login gradient biru tetap jalan); 3 audit PASS; build sukses;
+      smoke test 9/9 PASS. Aturan baru: **nol backdrop-blur, nol
+      background alpha di kartu/chip — hanya hover state + scrim overlay +
+      kontrol kamera + blob dekoratif yang boleh semi-transparan, dan itu
+      pun TANPA blur.**
 - `background-image` + `background-color` (white/95) dipakai bersamaan:
   gradient di atas warna dasar — aman terhadap rule lama yang sama
   spesifisitasnya karena `background-image` tidak pernah di-set sebelumnya.

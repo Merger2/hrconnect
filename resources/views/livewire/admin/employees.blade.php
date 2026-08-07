@@ -53,11 +53,11 @@
 
         <!-- Content -->
         <x-admin.panel>
-            <div class="border-b border-emerald-100 bg-emerald-50/50 px-4 py-3 sm:px-5">
+            <div class="border-b border-emerald-100 bg-emerald-50 px-4 py-3 sm:px-5">
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100/80 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                                 <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                                 {{ __('Employee Directory') }}
                             </span>
@@ -71,23 +71,23 @@
                     </div>
 
                     <dl class="grid grid-cols-2 gap-2 sm:grid-cols-5 xl:min-w-[40rem]">
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                        <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2">
                             <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Total') }}</dt>
                             <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $users->total() }}</dd>
                         </div>
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                        <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2">
                             <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Showing') }}</dt>
                             <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $users->count() }}</dd>
                         </div>
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                        <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2">
                             <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Active') }}</dt>
                             <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $statusSummary['active'] }}</dd>
                         </div>
-                        <div class="rounded-lg border border-emerald-200 bg-white/80 px-3 py-2">
+                        <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2">
                             <dt class="truncate text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Deletion Requests') }}</dt>
                             <dd class="mt-0.5 text-base font-semibold leading-5 text-slate-950">{{ $statusSummary['pending_deletion'] }}</dd>
                         </div>
-                        <div class="col-span-2 rounded-lg border border-emerald-200 bg-white/80 px-3 py-2 sm:col-span-1">
+                        <div class="col-span-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 sm:col-span-1">
                             <dt class="text-[0.68rem] font-semibold uppercase text-emerald-700">{{ __('Filters') }}</dt>
                             <dd class="mt-0.5 truncate text-sm font-medium leading-5 text-slate-700">
                                 {{ collect([$division, $jobTitle, $education, $employmentStatus, filled($search) ? $search : null])->filter()->count() ?: __('None') }}
@@ -100,7 +100,7 @@
             <!-- Desktop Table -->
             <div class="hidden overflow-x-auto lg:block">
                 <table class="w-full whitespace-nowrap text-left text-sm">
-                    <thead class="bg-emerald-50/80 text-gray-500">
+                    <thead class="bg-emerald-50 text-gray-500">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Employee') }}</th>
                             <th scope="col" class="px-4 py-3 font-medium">{{ __('Role & Unit') }}</th>
@@ -110,7 +110,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($users as $user)
-                            <tr class="group transition-colors hover:bg-emerald-50/60">
+                            <tr class="group transition-colors hover:bg-emerald-50">
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-4">
                                         <div
@@ -254,11 +254,11 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
-                            <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm">
+                            <div class="rounded-xl border border-white/80 bg-white px-3 py-2.5 shadow-sm">
                                 <span class="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{{ __('Phone') }}</span>
                                 <div class="mt-1 text-sm font-medium text-slate-900">{{ $user->phone ?: '-' }}</div>
                             </div>
-                            <div class="rounded-xl border border-white/80 bg-white/80 px-3 py-2.5 shadow-sm">
+                            <div class="rounded-xl border border-white/80 bg-white px-3 py-2.5 shadow-sm">
                                 <span class="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{{ __('Gender') }}</span>
                                 <div class="mt-1 text-sm font-medium text-slate-900">
                                     {{ $user->gender ? __(ucfirst($user->gender)) : '-' }}
@@ -843,7 +843,7 @@
     <x-overlays.modal wire:model="showDetail" max-width="5xl">
         @if ($form->user)
             <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
-                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur sm:px-6">
+                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
                     <div class="flex items-start justify-between gap-4">
                         <div class="flex min-w-0 items-start gap-4">
                             <img class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover sm:h-20 sm:w-20"

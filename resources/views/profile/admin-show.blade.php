@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
+                    <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
                         <span class="text-xs font-semibold uppercase text-slate-400">{{ __('Language') }}</span>
                         <form method="POST" action="{{ route('user.language.update') }}">
                             @csrf

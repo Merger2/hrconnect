@@ -130,7 +130,7 @@
             </div>
 
             @if ($leaveTypes->hasPages())
-                <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5">
+                <div class="border-t border-gray-200/60 bg-gray-50 px-4 py-2.5">
                     {{ $leaveTypes->onEachSide(1)->links() }}
                 </div>
             @endif

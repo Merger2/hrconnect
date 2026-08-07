@@ -63,15 +63,15 @@
 
                             <div class="space-y-4 p-4">
                                 <dl class="grid gap-3 text-sm sm:grid-cols-3">
-                                    <div class="rounded-xl bg-slate-50/70 p-3">
+                                    <div class="rounded-xl bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Priority') }}</dt>
                                         <dd class="mt-1 font-semibold text-gray-900">{{ __(str($task->priority)->headline()->toString()) }}</dd>
                                     </div>
-                                    <div class="rounded-xl bg-slate-50/70 p-3">
+                                    <div class="rounded-xl bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Due Date') }}</dt>
                                         <dd class="mt-1 font-semibold text-gray-900">{{ $task->due_date?->translatedFormat('d M Y') ?? '-' }}</dd>
                                     </div>
-                                    <div class="rounded-xl bg-slate-50/70 p-3">
+                                    <div class="rounded-xl bg-slate-50 p-3">
                                         <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Visit Evidence') }}</dt>
                                         <dd class="mt-1 font-semibold text-gray-900">{{ $task->visitEvidences->count() }}</dd>
                                     </div>
@@ -130,7 +130,7 @@
                                 </form>
 
                                 @if ($task->visitEvidences->isNotEmpty())
-                                    <div class="rounded-[1.15rem] border border-slate-200/70 bg-white/55 p-3">
+                                    <div class="rounded-[1.15rem] border border-slate-200/70 bg-slate-50 p-3">
                                         <h3 class="text-sm font-semibold text-gray-900">{{ __('Recent Evidence') }}</h3>
                                         <div class="mt-3 space-y-2">
                                             @foreach ($task->visitEvidences->take(3) as $evidence)

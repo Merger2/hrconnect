@@ -27,7 +27,7 @@
     >
         <div class="space-y-4">
             <x-admin.panel>
-                <div class="border-b border-gray-100 bg-gray-50/70 px-4 py-3">
+                <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
@@ -94,7 +94,7 @@
                     <div x-cloak x-show="activeTab === 'export'" x-transition.opacity.duration.200ms id="attendance-export-panel" role="tabpanel" aria-labelledby="attendance-export-tab" tabindex="0">
                         <div class="grid gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
                             <div class="space-y-4">
-                                <div class="rounded-xl border border-primary-100 bg-primary-50/70 p-4">
+                                <div class="rounded-xl border border-primary-100 bg-primary-50 p-4">
                                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-primary-600 shadow-sm">
                                         <x-heroicon-o-document-chart-bar class="h-6 w-6" />
                                     </div>
@@ -157,7 +157,7 @@
                                     <span class="text-sm text-red-500">{{ $message }}</span>
                                 @enderror
 
-                                <div x-data="{ expanded: false }" class="rounded-xl border border-gray-200 bg-gray-50/70 p-4">
+                                <div x-data="{ expanded: false }" class="rounded-xl border border-gray-200 bg-gray-50 p-4">
                                     <button
                                         type="button"
                                         @click="expanded = !expanded"
@@ -244,7 +244,7 @@
                     <div x-cloak x-show="activeTab === 'import'" x-transition.opacity.duration.200ms id="attendance-import-panel" role="tabpanel" aria-labelledby="attendance-import-tab" tabindex="0" style="display: none;">
                         <div class="grid gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
                             <div class="space-y-4">
-                                <div class="rounded-xl border border-gray-200 bg-gray-50/80 p-4">
+                                <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
                                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
                                         <x-heroicon-o-document-arrow-up class="h-6 w-6" />
                                     </div>
@@ -289,7 +289,7 @@
                                     class="space-y-4"
                                 >
                                     <div
-                                        :class="dragging ? 'border-primary-500 bg-primary-50/60' : 'border-gray-300'"
+                                        :class="dragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300'"
                                         class="rounded-xl border-2 border-dashed p-4 text-center transition-all duration-200"
                                     >
                                         <input id="attendance-import-file-upload" type="file" class="sr-only" x-ref="file" wire:model.live="file" accept=".xlsx,.xls,.csv" x-on:change="file = $refs.file.files && $refs.file.files[0] ? $refs.file.files[0] : null">
@@ -407,7 +407,7 @@
 
             @if ($mode && $previewing)
                 <x-admin.panel>
-                    <div class="border-b border-gray-100 bg-gray-50/70 px-4 py-3">
+                    <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
                         <h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
                             {{ __('Preview') . ' ' . __($mode) }}
                         </h4>
