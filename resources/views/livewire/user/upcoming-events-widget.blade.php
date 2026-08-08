@@ -16,7 +16,7 @@
                 <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
                     <x-heroicon-o-calendar-days class="h-6 w-6 text-gray-300" />
                 </div>
-                <p class="text-xs text-gray-400">{{ __('No upcoming events.') }}</p>
+                <p class="text-xs text-slate-500">{{ __('No upcoming events.') }}</p>
             </div>
         @else
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">

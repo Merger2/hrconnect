@@ -32,7 +32,7 @@
                                     </div>
 
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">
+                                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">
                                             {{ $schedule->date->format('l') }}
                                         </div>
                                         <div class="flex items-center justify-between">
@@ -51,7 +51,7 @@
                                                 <span class="bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded font-mono font-medium">
                                                     {{ \Carbon\Carbon::parse($schedule->shift->start_time)->format('H:i') }}
                                                 </span>
-                                                <span class="text-gray-300">➜</span>
+                                                <span class="text-slate-400">➜</span>
                                                 <span class="bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded font-mono font-medium">
                                                     {{ \Carbon\Carbon::parse($schedule->shift->end_time)->format('H:i') }}
                                                 </span>
@@ -70,7 +70,7 @@
                                                 @endif
                                             </div>
                                         @else
-                                            <div class="mt-1 text-xs text-gray-400 italic">
+                                            <div class="mt-1 text-xs text-slate-500 italic">
                                                 {{ __('No shift assigned') }}
                                             </div>
                                         @endif

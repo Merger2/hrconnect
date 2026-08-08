@@ -59,7 +59,7 @@
                                                 {{ $request->statusLabel() }}
                                             </span>
                                             @if ($request->reviewer)
-                                                <div class="mt-1 text-[10px] text-gray-400">{{ __('by') }}
+                                                <div class="mt-1 text-[10px] text-slate-500">{{ __('by') }}
                                                     {{ $request->reviewer->name }}</div>
                                             @endif
                                             @if ($request->rejection_note)

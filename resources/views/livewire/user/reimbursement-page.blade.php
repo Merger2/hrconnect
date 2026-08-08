@@ -247,7 +247,7 @@
                                                     class="sr-only">
                                                     {{ $claim->description }}</p>
                                                 <div
-                                                    class="text-[10px] text-gray-400 mt-0.5 sm:mt-1 flex items-center gap-1">
+                                                    class="text-[10px] text-slate-500 mt-0.5 sm:mt-1 flex items-center gap-1">
                                                     <x-heroicon-o-calendar-days class="h-3 w-3" />
                                                     {{ $claim->expense_date?->format('d M Y') ?? $claim->created_at?->format('d M Y') }}
                                                 </div>
@@ -258,7 +258,7 @@
                                             <p
                                                 class="text-sm sm:text-lg font-black text-gray-900 tracking-tight">
                                                 <span
-                                                    class="text-[10px] sm:text-xs text-gray-400 font-normal mr-0.5">{{ __('Rp') }}</span>{{ number_format($claim->amount, 0, ',', '.') }}
+                                                    class="text-[10px] sm:text-xs text-slate-500 font-normal mr-0.5">{{ __('Rp') }}</span>{{ number_format($claim->amount, 0, ',', '.') }}
                                             </p>
                                         </div>
                                     </div>

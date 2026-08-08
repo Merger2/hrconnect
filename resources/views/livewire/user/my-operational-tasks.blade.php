@@ -92,7 +92,7 @@
                                                     @else
                                                         <x-heroicon-m-circle-stack class="h-5 w-5 shrink-0 text-gray-400" />
                                                     @endif
-                                                    <span class="{{ $item->is_done ? 'text-gray-400 line-through' : 'text-gray-700' }}">{{ $item->title }}</span>
+                                                    <span class="{{ $item->is_done ? 'text-slate-500 line-through' : 'text-gray-700' }}">{{ $item->title }}</span>
                                                 </button>
                                             @endforeach
                                         </div>
