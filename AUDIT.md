@@ -20,6 +20,28 @@
 
 ---
 
+## ✅ Verifikasi Gate Production — 0 open P0/P1 (2026-08-08, berbasis bukti)
+
+> Audit ulang seluruh hard gate `AGENTS.md` setelah suite **720 pass / 0 fail / 1 skip** (12.004 assertions) + PHPStan 0 errors. Semua klaim diverifikasi langsung (grep/read/config), bukan dari dokumen status.
+
+| Gate | Status | Bukti verifikasi langsung |
+|------|:------:|--------------------------|
+| **Production gate = 0 open P0/P1** | ✅ CLOSED | Suite 720/0/1 + PHPStan level 5 = **0 errors** (triase `9aa38e4`) + 3 audit script PASS + lint pint PASS |
+| **No silent degradation** | ✅ CLOSED | KB fallback Gemini→pg_trgm eksplisit (`Log::warning` + `fallback:true` + pesan budget habis di `KnowledgeBaseService`); import row error di-log (`UserImport`/`AttendanceImport`); backup stale → health `degraded` 503 (`latestBackupHealthIssue` + `HealthController::checkBackup`) |
+| **AI KB hard gate** | ✅ CLOSED | Eval dataset **30 kasus** (28 positif + 2 negatif, 0 pending verify_human); embedding `gemini-embedding-001` **768D nyata** (`output_dimensionality`); citation `sources` wajib di tiap jawaban; cost limit `AI_DAILY_TOKEN_BUDGET=1M` + `AiCostGuard`; kualitas produksi **100%** (28/28 + negatif 2/2 ditolak) |
+| **Policy: absensi face-only** | ✅ CLOSED | grep `verifyPin`/`pinBypass`/`showPinModal`/`fallbackToPin` di `AttendanceService`/`ClockInAction` = **0 hit** (PIN fallback dihapus 2026-08-05) |
+| **Policy: geofence 50m + toleransi 15 menit** | ✅ CLOSED | `GeofenceService` tolak accuracy >50; `config/attendance.php` `grace_period = 15` |
+| **Policy: approval Manager → HR** | ✅ CLOSED | `ApprovalService::getApprovers`: L1 supervisor (`parent_id`) → L2 HR (role admin) |
+| **Policy: payroll PPh21 TER** | ✅ CLOSED | `TarifTer` + `getTERCategory` A/B/C + TER bulanan; golden test 27/27 |
+| **Policy: kalender kerja 5 hari** | ✅ CLOSED | Policy resmi (konversi 6 hari = TODO by-design, `PayrollCalculatorService:95`) |
+| **RPO 24 jam / RTO 4 jam** | ✅ CLOSED | Backup harian `maintenance:scheduled-backups` 02:00 (signed, retensi 14); drill `maintenance:backup-restore-drill` (restore temp DB + verifikasi + drop); health 26h |
+| **Queue/mail (P1: queue/mail mati)** | ✅ CLOSED | `QUEUE_CONNECTION=database` + worker terjadwal (`queue:work --stop-when-empty`); `MAIL_MAILER=smtp` |
+
+**Kesimpulan: seluruh hard gate AGENTS.md CLOSED — 0 open P0/P1 — production gate TERPENUHI.**
+Catatan non-blocking: 1 skip test = android platform-gated (PWA-only, memang di-skip); dokumen release lengkap di `docs/PRODUCTION-READINESS.md`.
+
+---
+
 ## ✅ Fix Terapan Sesi Ini (2026-08-04, commit `436634d` + working tree)
 
 | # | Fix | Status |
