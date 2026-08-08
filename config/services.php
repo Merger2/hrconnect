@@ -45,6 +45,9 @@ return [
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'timeout' => (int) env('GEMINI_TIMEOUT', 30),
         'max_retries' => (int) env('GEMINI_MAX_RETRIES', 3),
+        // Hard gate AGENTS.md (cost limit): batas token AI per hari (global,
+        // akumulasi di cache database via AiCostGuard). 0 = nonaktif.
+        'daily_token_budget' => (int) env('AI_DAILY_TOKEN_BUDGET', 1_000_000),
     ],
 
 ];

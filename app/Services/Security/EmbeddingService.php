@@ -7,6 +7,7 @@ namespace App\Services\Security;
 use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\KnowledgeBase;
+use App\Support\AiCostGuard;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Embeddings;
@@ -69,6 +70,16 @@ class EmbeddingService
             throw new BusinessRuleException('Teks untuk embedding harus 1-30000 karakter.');
         }
 
+        // Hard gate cost limit: tolak sebelum memanggil Gemini bila kuota
+        // token harian habis. Pemanggil (chat/job) menangani dengan fallback
+        // atau status ERROR — tidak ada degradasi senyap.
+        $cost = app(AiCostGuard::class);
+        $estimatedTokens = $cost->estimateTokens($text);
+
+        if (! $cost->canSpend($estimatedTokens)) {
+            throw new BusinessRuleException('Kuota penggunaan AI harian telah tercapai (cost limit). Coba lagi besok.');
+        }
+
         // Test mode: return deterministic fake embedding
         if (app()->runningUnitTests()) {
             return Embeddings::fakeEmbedding(self::EMBEDDING_DIMENSION);
@@ -79,6 +90,8 @@ class EmbeddingService
         $response = Embeddings::for([$text])
             ->dimensions(self::EMBEDDING_DIMENSION)
             ->generate(Lab::Gemini, config('ai.providers.gemini.embedding_model', 'gemini-embedding-001'));
+
+        $cost->record($estimatedTokens);
 
         $vector = $response->first();
 

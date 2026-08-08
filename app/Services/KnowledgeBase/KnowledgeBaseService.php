@@ -12,6 +12,7 @@ use App\Jobs\ProcessKnowledgeBaseEmbedding;
 use App\Models\KnowledgeBase;
 use App\Models\User;
 use App\Services\Security\EmbeddingService;
+use App\Support\AiCostGuard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,15 @@ class KnowledgeBaseService
         $question = trim($question);
 
         try {
+            $cost = app(AiCostGuard::class);
+
+            // Hard gate cost limit: kuota harian habis -> fallback gratis ter-stream.
+            if (! $cost->canSpend($cost->estimateTokens($question) + AiCostGuard::ESTIMATED_MAX_OUTPUT_TOKENS)) {
+                yield from $this->yieldBudgetFallback($question, $conversationId);
+
+                return;
+            }
+
             $queryEmbedding = $this->embedding->embed($question);
             $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
 
@@ -78,6 +88,8 @@ PROMPT;
             // Streaming structured output is not supported by Gemini,
             // so we use sync prompt() and yield the full answer as a single event.
             $result = $agent->prompt($agentPrompt);
+
+            $this->recordGenerationUsage($cost, $result, $agentPrompt);
 
             yield ['text' => $result['answer'] ?? ''];
 
@@ -157,7 +169,15 @@ PROMPT;
             throw new BusinessRuleException('Pertanyaan harus 5-500 karakter.');
         }
 
+        $cost = app(AiCostGuard::class);
+
         try {
+            // Hard gate cost limit: hentikan sebelum memanggil Gemini kalau
+            // kuota token harian habis — fallback gratis + tanda fallback.
+            if (! $cost->canSpend($cost->estimateTokens($question) + AiCostGuard::ESTIMATED_MAX_OUTPUT_TOKENS)) {
+                return $this->fallbackKeywordSearch($question, $conversationId, budgetExceeded: true);
+            }
+
             // Tier 1: vector search via Gemini embedding
             $queryEmbedding = $this->embedding->embed($question);
             $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
@@ -179,6 +199,8 @@ PROMPT;
 
             $agent = $this->prepareAgent($user, $conversationId);
             $result = $agent->prompt($agentPrompt);
+
+            $this->recordGenerationUsage($cost, $result, $agentPrompt);
 
             return [
                 'answer' => $result['answer'],
@@ -222,17 +244,19 @@ PROMPT;
     }
 
     /**
-     * Fallback kalau Gemini API down — pg_trgm keyword search.
+     * Fallback kalau Gemini API down ATAU kuota harian habis — pg_trgm keyword search.
      *
      * @return array{answer: string, sources: array<int, array{id: int, title: string, snippet: string}>, confidence: string, fallback: bool, model: string, conversation_id?: string}
      */
-    protected function fallbackKeywordSearch(string $question, ?string $conversationId = null): array
+    protected function fallbackKeywordSearch(string $question, ?string $conversationId = null, bool $budgetExceeded = false): array
     {
         $chunks = $this->embedding->searchByKeyword($question, topK: 5);
 
         if ($chunks->isEmpty()) {
             return [
-                'answer' => 'Maaf, tidak ada informasi yang cocok dengan pertanyaan Anda di basis data HRConnect saat ini. Sistem AI sedang offline.',
+                'answer' => $budgetExceeded
+                    ? 'Kuota penggunaan AI harian telah tercapai untuk hari ini. Tidak ada informasi yang cocok dengan pertanyaan Anda di basis data HRConnect saat ini.'
+                    : 'Maaf, tidak ada informasi yang cocok dengan pertanyaan Anda di basis data HRConnect saat ini. Sistem AI sedang offline.',
                 'sources' => [],
                 'confidence' => 'low',
                 'fallback' => true,
@@ -244,8 +268,12 @@ PROMPT;
         $snippets = $chunks->map(fn (KnowledgeBase $kb) => "- {$kb->title}: ".mb_substr($kb->content, 0, 150))
             ->implode("\n");
 
+        $answer = $budgetExceeded
+            ? app(AiCostGuard::class)->exhaustedMessage()."\n\n{$snippets}"
+            : "Sistem AI sedang offline. Berikut hasil pencarian keyword yang mungkin relevan:\n\n{$snippets}";
+
         return [
-            'answer' => "Sistem AI sedang offline. Berikut hasil pencarian keyword yang mungkin relevan:\n\n{$snippets}",
+            'answer' => $answer,
             'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
                 'id' => $kb->id,
                 'title' => $kb->title,
@@ -258,6 +286,63 @@ PROMPT;
             'model' => 'pg_trgm',
             'conversation_id' => $conversationId,
         ];
+    }
+
+    /**
+     * Yield fallback gratis (pg_trgm keyword search) saat kuota AI harian habis.
+     *
+     * @return \Generator<int, array{text?: string, conversation_id?: string, fallback?: bool}, void, void>
+     */
+    protected function yieldBudgetFallback(string $question, ?string $conversationId = null): \Generator
+    {
+        $message = app(AiCostGuard::class)->exhaustedMessage();
+
+        try {
+            $chunks = $this->embedding->searchByKeyword($question, topK: 5);
+
+            if ($chunks->isNotEmpty()) {
+                $snippets = $chunks->map(fn (KnowledgeBase $kb) => "- {$kb->title}: ".mb_substr($kb->content, 0, 150))
+                    ->implode("\n");
+
+                yield ['text' => $message."\n\n{$snippets}"];
+            } else {
+                yield ['text' => $message];
+            }
+        } catch (Throwable $e) {
+            Log::error('pg_trgm fallback gagal saat kuota AI habis', [
+                'error' => $e->getMessage(),
+            ]);
+
+            yield ['text' => $message];
+        }
+
+        yield [
+            'conversation_id' => $conversationId ?? (string) Str::uuid(),
+            'fallback' => true,
+        ];
+    }
+
+    /**
+     * Catat token generasi ke cost guard — pakai usage metadata nyata dari
+     * Gemini (prompt + completion + cache-read + reasoning); fallback ke
+     * estimasi karakter bila metadata nol (mis. provider/mock tanpa usage).
+     */
+    protected function recordGenerationUsage(AiCostGuard $cost, mixed $result, string $agentPrompt): void
+    {
+        $tokens = 0;
+
+        if (isset($result->usage)) {
+            $tokens = $result->usage->promptTokens
+                + $result->usage->completionTokens
+                + $result->usage->cacheReadInputTokens
+                + $result->usage->reasoningTokens;
+        }
+
+        if ($tokens <= 0) {
+            $tokens = $cost->estimateTokens($agentPrompt) + AiCostGuard::ESTIMATED_MAX_OUTPUT_TOKENS;
+        }
+
+        $cost->record($tokens);
     }
 
     protected function buildContextSection(array $context): string
