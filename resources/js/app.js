@@ -11,19 +11,10 @@ import "flatpickr/dist/flatpickr.css";
 import "../css/vendor/flatpickr-overrides.css";
 import flatpickr from "flatpickr";
 import Swal from "sweetalert2";
-import Chart from "chart.js/auto";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App } from "@capacitor/app";
 import { Browser } from "@capacitor/browser";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import CapacitorGeolocation from "./services/capacitor-geolocation";
 
 import axios from "axios";
@@ -31,22 +22,58 @@ import Echo from "laravel-echo";
 import Pusher from "pusher-js";
 import bootSseNotifications from "./sse-notifications";
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
-});
-
-window.L = L;
 window.TomSelect = TomSelect;
 window.flatpickr = flatpickr;
 window.Swal = Swal;
-window.Chart = Chart;
 window.Capacitor = window.Capacitor || Capacitor;
 window.CapacitorGeolocation = CapacitorGeolocation;
 window.CapacitorApp = App;
 window.axios = axios;
+
+// ─── Chart.js & Leaflet: lazy-load per halaman ─────────────────────────
+// Dua library terbesar (vendor-charts ~198KB, vendor-maps ~179KB) hanya
+// di-download saat halaman benar-benar memakainya. Blade pemakai sudah
+// defensif: analytics/dashboard retry `typeof Chart === 'undefined'`,
+// location-card return bila L belum ada, modal attendance memanggil
+// window.ensureMaps() sebelum L.map.
+let chartsPromise = null;
+let mapsPromise = null;
+
+window.ensureCharts = () => {
+    if (!chartsPromise) {
+        chartsPromise = import("chart.js/auto").then((mod) => {
+            window.Chart = mod.default;
+        });
+    }
+
+    return chartsPromise;
+};
+
+window.ensureMaps = () => {
+    if (!mapsPromise) {
+        // Wrapper leaflet-map.js: leaflet + markercluster dalam satu module graph
+        // (markercluster UMD butuh global L — lihat komentar di file tsb).
+        mapsPromise = import("./leaflet-map");
+    }
+
+    return mapsPromise;
+};
+
+// Marker halaman: [data-*-charts-root] → Chart; #employeeOriginsMap /
+// [data-leaflet-map] / #map_in / #map_out → Leaflet.
+const bootLazyLibs = () => {
+    if (document.querySelector('[data-analytics-charts-root], [data-dashboard-charts-root]')) {
+        window.ensureCharts();
+    }
+
+    if (document.querySelector('#employeeOriginsMap, [data-leaflet-map], #map_in, #map_out')) {
+        window.ensureMaps();
+    }
+};
+
+bootLazyLibs();
+document.addEventListener('DOMContentLoaded', bootLazyLibs);
+document.addEventListener('livewire:navigated', bootLazyLibs);
 
 // Resolve @theme design token untuk runtime. Canvas / Chart.js TIDAK
 // me-resolve CSS custom properties sendiri — semua warna runtime harus

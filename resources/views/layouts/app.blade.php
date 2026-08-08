@@ -37,6 +37,20 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- Material Symbols (icon font) — non-blocking: preload + async stylesheet.
+             Dulu @import di app.css (render-blocking). display=block sesuai rekomendasi
+             Google untuk icon font (hindari glyph salah saat FOIT). -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preload" as="style"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+        <link rel="stylesheet" media="print" onload="this.media='all'"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+        <noscript>
+            <link rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+        </noscript>
+
         <!-- PWA -->
         <link rel="manifest" href="/build/manifest.webmanifest">
         <meta name="theme-color" content="#0a0a0a">

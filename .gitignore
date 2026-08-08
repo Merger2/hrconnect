@@ -31,6 +31,7 @@ test_results.txt
 update.sh
 
 # Storage generated files
+/storage/app/private/
 /storage/app/private/imports/
 /storage/app/private/payslips/
 /storage/framework/testing/

@@ -8,6 +8,7 @@
 
 <div x-data="locationCard('{{ $mapId }}')"
      x-init="init()"
+     data-leaflet-map
      {{ $attributes->merge(['class' => 'location-card-surface relative overflow-visible']) }}>
     <div class="relative z-10 mb-3 flex items-center justify-between gap-3">
         <div class="flex min-w-0 items-center gap-3">
@@ -181,7 +182,13 @@
             initMap() {
                 const container = this.$refs.mapContainer;
                 if (!container || this._map) return;
-                if (typeof L === 'undefined') return;
+                if (typeof L === 'undefined') {
+                    // Leaflet lazy-load (app.js ensureMaps) — tunggu lalu coba lagi.
+                    if (window.ensureMaps) {
+                        window.ensureMaps().then(() => this.initMap());
+                    }
+                    return;
+                }
 
                 // Compute bounds to fit both user and office
                 const bounds = [];

@@ -120,7 +120,7 @@
     $platformSignalCards = array_values(array_filter($platformSignalCards, fn (array $item): bool => $item['visible']));
 @endphp
 
-<x-admin.page-shell :title="__('Attendance Overview')" :description="$date->translatedFormat('l, d F Y')">
+<x-admin.page-shell :title="__('Attendance Overview')" :description="$date->translatedFormat('l, d F Y')" data-dashboard-charts-root>
     <x-slot name="actions">
         <div class="flex flex-wrap items-center justify-end gap-2">
             <label for="selectedDate" class="sr-only">{{ __('Date') }}</label>

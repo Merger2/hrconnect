@@ -274,6 +274,13 @@
         });
 
         function initAttendanceMaps(latIn, lngIn, latOut, lngOut) {
+            // Leaflet lazy-load (app.js ensureMaps) — tunggu library lalu render ulang.
+            if (typeof L === 'undefined') {
+                if (window.ensureMaps) {
+                    window.ensureMaps().then(() => initAttendanceMaps(latIn, lngIn, latOut, lngOut));
+                }
+                return;
+            }
             removeAllMaps();
 
             // Check In Map
