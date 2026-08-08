@@ -48,8 +48,11 @@ class ChatThread extends Model
 
     public function members(): BelongsToMany
     {
+        // chat_thread_user TIDAK punya kolom `role` (hanya chat_thread_id,
+        // employee_id, last_read_at) — withPivot(['role', ...]) memicu
+        // SQLSTATE 42703 Undefined column saat members eager-loaded.
         return $this->belongsToMany(User::class)
-            ->withPivot(['role', 'last_read_at'])
+            ->withPivot('last_read_at')
             ->withTimestamps();
     }
 
