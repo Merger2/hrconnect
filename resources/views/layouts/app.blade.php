@@ -76,6 +76,13 @@
         </script>
 
         <!-- Scripts -->
+        {{-- Critical CSS TIDAK dipakai utk layout app (revert 2026-08-08):
+             A/B Lighthouse /home — critical (32KB gzip + full CSS async) vs
+             fallback (full CSS render-blocking): FCP -2.6s TAPI TBT +760ms
+             (full CSS async apply di tengah JS = reflow storm) → skor net -10.
+             Di prod (nginx gzip) fallback makin unggul. Guest (login) tetap
+             critical (58KB inline, apply ringan, +3 skor terbukti).
+             Detail: scripts/extract-critical-css.mjs + resources/css/critical/ --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Styles -->
