@@ -47,7 +47,7 @@
                     <div class="min-w-0">
                         <p class="text-xs font-medium text-slate-500">Total Payroll</p>
                         <p class="truncate text-lg font-bold text-slate-950">{{ number_format($payrolls->total(), 0, ',', '.') }}</p>
-                        <p class="text-[11px] text-slate-400">Semua status &amp; filter</p>
+                        <p class="text-[11px] text-slate-500">Semua status &amp; filter</p>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                     <div class="min-w-0">
                         <p class="text-xs font-medium text-slate-500">Total Gross</p>
                         <p class="truncate text-lg font-bold text-slate-950">Rp {{ number_format($pageItems->sum('gross_salary'), 0, ',', '.') }}</p>
-                        <p class="text-[11px] text-slate-400">Halaman ini</p>
+                        <p class="text-[11px] text-slate-500">Halaman ini</p>
                     </div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                     <div class="min-w-0">
                         <p class="text-xs font-medium text-slate-500">Total Net</p>
                         <p class="truncate text-lg font-bold text-slate-950">Rp {{ number_format($pageItems->sum('net_salary'), 0, ',', '.') }}</p>
-                        <p class="text-[11px] text-slate-400">Halaman ini</p>
+                        <p class="text-[11px] text-slate-500">Halaman ini</p>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
                     <div class="min-w-0">
                         <p class="text-xs font-medium text-slate-500">Perlu Tindakan</p>
                         <p class="truncate text-lg font-bold text-slate-950">{{ $actionableCount }}</p>
-                        <p class="text-[11px] text-slate-400">Draft / Diajukan / Diverifikasi</p>
+                        <p class="text-[11px] text-slate-500">Draft / Diajukan / Diverifikasi</p>
                     </div>
                 </div>
             </div>
