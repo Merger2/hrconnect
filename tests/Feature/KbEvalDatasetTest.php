@@ -147,8 +147,10 @@ test('dataset fixture valid: >= 20 kasus, >= 2 negatif, keyword & sumber konsist
     $categories = collect($cases)->pluck('category')->unique()->values()->all();
     expect($categories)->toContain('kepegawaian', 'absensi', 'cuti', 'payroll', 'lembur', 'reimbursement', 'kasbon', 'fasilitas', 'kinerja', 'teknis');
 
+    // Semua kasus WAJIB sudah di-review konten (verify_human=true) —
+    // case baru tanpa review akan memicu kegagalan ini (gate PRD §6).
     foreach ($cases as $case) {
-        expect($case['verify_human'])->toBeFalse();
+        expect($case['verify_human'])->toBeTrue("[{$case['id']}] verify_human harus true — review konten wajib sebelum dataset dipakai sebagai bukti gate");
 
         if ($case['negative']) {
             expect($case['expected_answer'])->toBeEmpty();

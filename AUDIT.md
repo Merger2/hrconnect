@@ -105,7 +105,7 @@
 | M4 | Cap JP seeder 9.559.600 (regulasi Maret 2026 ≈ 11jt) | ✅ |
 | M5 | `app.timezone` = UTC (HRIS Indonesia tanpa Asia/Jakarta) | ⚠️ fix-22 | ✅ **FIXED (2026-08-05)** — `config/app.php` → `Asia/Jakarta`; PayrollGoldenTest 27/27 PASS (freeze 2026-08-04 tetap konsisten) |
 | M6 | `config/payroll.php` mati total (0 pembaca) | ⚠️ fix-22 | ✅ **FIXED (2026-08-05)** — 0 referensi `config('payroll…')` di app/routes/tests (hanya match palsu `admin.payroll.process` di rbac.php) → file dihapus |
-| M7 | Mismatch embedding model: config default `gemini-embedding-001` vs `text-embedding-004` | ⚠️ fix-22 | ✅ **FIXED (2026-08-05)** — default di `config/ai.php` + `config/services.php` → `text-embedding-004` (selaras .env.example + 768D; EmbeddingService tetap baca `ai.providers.gemini.embedding_model` — tidak disentuh) |
+| M7 | Mismatch embedding model: config default `gemini-embedding-001` vs `text-embedding-004` | ⚠️ fix-22 | ⚠️ **RE-OPEN & RE-FIXED (2026-08-06)** — fix-22 (→ `text-embedding-004`) membuat embedding 404 (model dihapus Google dari v1beta). Default `config/ai.php` + `config/services.php` + `.env.example` → `gemini-embedding-001` (768D via `output_dimensionality`, diverifikasi di `GeminiGateway::generateEmbeddings`). Selaras AGENTS.md/README/docs. |
 
 ### Schema & Data
 | # | Temuan | Verifikasi |

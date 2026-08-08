@@ -172,7 +172,7 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 
 - `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`
 - `CIPHERSWEET_KEY` **wajib** (hex; generate via `php artisan ciphersweet:generate-key`). Nilai test/dev di semua config: `0123456789abcdef0123456789abcdef` (phpunit.xml, phpunit.pgsql.xml, .env.testing).
-- `GEMINI_API_KEY` prefer dari `GOOGLE_AI_API_KEY`; model RAG di `.env.example`: `GEMINI_MODEL=gemini-2.5-flash`, embedding `text-embedding-004` 768D.
+- `GEMINI_API_KEY` prefer dari `GOOGLE_AI_API_KEY`; model RAG di `.env.example`: `GEMINI_MODEL=gemini-2.5-flash`, embedding `gemini-embedding-001` 768D (via `output_dimensionality`; `text-embedding-004` dihapus Google 2026 → 404).
 - ⚠️ `package.json` `overrides` pin **`@tensorflow/tfjs-core` ke 2.4.0** — jangan upgrade (face-api.js butuh API v2).
 - `docs/**`, `/.agents/`, `/.claude/`, `/.opencode/`, `phpstan.*` — gitignored.
 

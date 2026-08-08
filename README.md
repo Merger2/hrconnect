@@ -117,7 +117,7 @@ Dibangun dengan **Laravel 13**, **Livewire 4**, **PostgreSQL + pgvector**, **fac
 | Technology | Purpose |
 |------------|---------|
 | **face-api.js** (FaceNet) | Client-side face detection & 128D embedding |
-| **Google Gemini** (text-embedding-004) | PDF chunk embedding → vector(768) |
+| **Google Gemini** (gemini-embedding-001) | PDF chunk embedding → vector(768) |
 | **Google Gemini 2.5 Flash** | RAG Knowledge Base Q&A |
 
 ---
@@ -190,7 +190,7 @@ DB_PASSWORD=your_password
 RAG_MOCK_MODE=true
 GOOGLE_AI_API_KEY=AIza...
 GEMINI_MODEL=gemini-2.5-flash
-GEMINI_EMBEDDING_MODEL=text-embedding-004
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
 ### 4. Database Setup

@@ -84,7 +84,9 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'category_id' => $catAbsensi,
                 'title' => 'Cara Absensi (Check In/Out)',
-                'content' => 'Absensi dilakukan melalui aplikasi HRConnect dengan metode: 1) Face ID — verifikasi wajah, 2) PIN — kode rahasia personal. Karyawan wajib melakukan check in saat datang dan check out saat pulang. Absensi menggunakan teknologi geolokasi GPS untuk memastikan karyawan berada di lokasi yang ditentukan. Check in dapat dilakukan mulai pukul 06.00 WIB.',
+                // 2026-08-06: face-ONLY (keputusan Fikih 2026-08-05 — PIN fallback
+                // dihapus dari AttendanceService). Konten lama masih menyebut PIN.
+                'content' => 'Absensi dilakukan melalui aplikasi HRConnect dengan metode Face ID — verifikasi wajah (wajib, tanpa PIN fallback). Karyawan wajib melakukan check in saat datang dan check out saat pulang. Absensi menggunakan teknologi geolokasi GPS untuk memastikan karyawan berada di lokasi yang ditentukan. Check in dapat dilakukan mulai pukul 06.00 WIB. Pastikan wajah terdaftar di menu Face Enrollment sebelum absen.',
             ],
             [
                 'category_id' => $catAbsensi,

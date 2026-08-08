@@ -94,7 +94,9 @@ return [
         'gemini' => [
             'driver' => 'gemini',
             'key' => env('GEMINI_API_KEY'),
-            'embedding_model' => env('GEMINI_EMBEDDING_MODEL', 'text-embedding-004'),
+            // 2026-08-06: text-embedding-004 dihapus Google (404 v1beta) —
+            // gemini-embedding-001 + output_dimensionality 768 (lihat EmbeddingService).
+            'embedding_model' => env('GEMINI_EMBEDDING_MODEL', 'gemini-embedding-001'),
             'embedding_dimensions' => (int) env('GEMINI_EMBEDDING_DIMENSIONS', 768),
             'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
         ],

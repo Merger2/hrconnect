@@ -132,7 +132,13 @@ class KbEvalCommand extends Command
         }
 
         $this->newLine();
-        $this->components->warn('Dataset masih verify_human=false — wajib review HR final sebelum dipakai sebagai bukti gate produksi (PRD §6).');
+        $reviewed = $dataset['meta']['reviewed'] ?? null;
+
+        if ($reviewed) {
+            $this->components->info("Dataset sudah di-review konten ({$reviewed}) — layak sebagai bukti gate produksi (PRD §6).");
+        } else {
+            $this->components->warn('Dataset belum di-review (verify_human=false) — wajib review HR final sebelum dipakai sebagai bukti gate produksi (PRD §6).');
+        }
 
         return $passed ? self::SUCCESS : self::FAILURE;
     }
