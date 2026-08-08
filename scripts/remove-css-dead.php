@@ -18,7 +18,6 @@
  *   php scripts/remove-css-dead.php            # dry-run
  *   php scripts/remove-css-dead.php --apply    # backup + hapus
  */
-
 $t0 = microtime(true);
 ini_set('memory_limit', '512M');
 $apply = in_array('--apply', $argv, true);
@@ -82,11 +81,13 @@ $usedFn = function (string $c) use ($tokens, $prefixes): bool {
             return true;
         }
     }
+
     return false;
 };
 
 // ---------- parser CSS depth-aware (dengan offset absolut) ----------
-function walkCssOffsets(string $css, int $base, callable $cb): void {
+function walkCssOffsets(string $css, int $base, callable $cb): void
+{
     $len = strlen($css);
     $depth = 0;
     $selStart = -1;
@@ -99,22 +100,26 @@ function walkCssOffsets(string $css, int $base, callable $cb): void {
         if ($ch === '/' && ($css[$i + 1] ?? '') === '*') {
             $end = strpos($css, '*/', $i + 2);
             $i = ($end === false) ? $len : $end + 2;
+
             continue;
         }
         if ($quote !== null) {
             if ($ch === '\\') {
                 $i += 2;
+
                 continue;
             }
             if ($ch === $quote) {
                 $quote = null;
             }
             $i++;
+
             continue;
         }
         if ($ch === "'" || $ch === '"') {
             $quote = $ch;
             $i++;
+
             continue;
         }
         if ($ch === '{') {
@@ -127,6 +132,7 @@ function walkCssOffsets(string $css, int $base, callable $cb): void {
             $depth++;
             $selStart = -1;
             $i++;
+
             continue;
         }
         if ($ch === '}') {
@@ -144,6 +150,7 @@ function walkCssOffsets(string $css, int $base, callable $cb): void {
             }
             $depth = max(0, $depth - 1);
             $i++;
+
             continue;
         }
         if ($depth === 0 && $selStart === -1 && ! ctype_space($ch)) {
@@ -179,6 +186,7 @@ $lineOf = function (int $absOffset) use ($lineStarts): int {
             $hi = $mid - 1;
         }
     }
+
     return $hi + 1;
 };
 
@@ -260,7 +268,7 @@ foreach ($merged as $r) {
         $delBytes += strlen(($lines[$ln - 1] ?? '')."\n");
     }
 }
-echo 'Class mati: '.count($deadClasses).' | blok akan dihapus: '.count($merged).' | ~'.number_format($delBytes)." bytes (baris ".
+echo 'Class mati: '.count($deadClasses).' | blok akan dihapus: '.count($merged).' | ~'.number_format($delBytes).' bytes (baris '.
     (count($merged) ? $merged[0]['start'].'-'.$merged[count($merged) - 1]['end'] : '-').")\n\n";
 foreach ($merged as $r) {
     printf("  L%4d-%4d  %s\n        → %s\n", $r['start'], $r['end'], $r['class'], substr($r['sel'], 0, 90));

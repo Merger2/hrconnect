@@ -22,7 +22,6 @@
  *
  * Usage: php scripts/audit-css-dead.php [--min-bytes=100] [--pages-top=15] [--verbose]
  */
-
 $t0 = microtime(true);
 // Tool audit satu-off: butuh >128MB default karena menyimpan ribuan blok CSS + token.
 ini_set('memory_limit', '512M');
@@ -44,7 +43,7 @@ foreach ($argv as $i => $a) {
 $root = dirname(__DIR__);
 $css = file_get_contents($root.'/resources/css/app.css');
 $cssLen = strlen($css);
-echo 'app.css: '.number_format($cssLen)." bytes (".substr_count($css, "\n")." baris)\n";
+echo 'app.css: '.number_format($cssLen).' bytes ('.substr_count($css, "\n")." baris)\n";
 
 // Kumpulkan semua teks blade + js + vendor @source (sesuai deklarasi @source di app.css)
 // untuk pencarian referensi — supaya class yang dipakai hanya di vendor blade
@@ -72,7 +71,7 @@ foreach ($scanDirs as $dir) {
         }
     }
 }
-echo 'Scanned: '.number_format(strlen($haystack))." bytes blade+js+vendor (".count($allBladeFiles)." blade files)\n";
+echo 'Scanned: '.number_format(strlen($haystack)).' bytes blade+js+vendor ('.count($allBladeFiles)." blade files)\n";
 
 // Tokenisasi haystack per-chunk (hemat memori — satu preg_match_all penuh
 // menyimpan ratusan ribu match string sekaligus): identifier + prefix per segmen hyphen.
@@ -108,6 +107,7 @@ $usedFn = function (string $c) use ($tokens, $prefixes): bool {
             return true;
         }
     }
+
     return false;
 };
 echo 'Token identifier unik: '.number_format(count($tokens)).' | prefix dinamis: '.count($prefixes)."\n";
@@ -132,22 +132,26 @@ function walkCss(string $css, callable $cb): void
         if ($ch === '/' && ($css[$i + 1] ?? '') === '*') { // komentar
             $end = strpos($css, '*/', $i + 2);
             $i = ($end === false) ? $len : $end + 2;
+
             continue;
         }
         if ($quote !== null) { // di dalam string
             if ($ch === '\\') {
                 $i += 2;
+
                 continue;
             }
             if ($ch === $quote) {
                 $quote = null;
             }
             $i++;
+
             continue;
         }
         if ($ch === "'" || $ch === '"') {
             $quote = $ch;
             $i++;
+
             continue;
         }
 
@@ -159,6 +163,7 @@ function walkCss(string $css, callable $cb): void
             $depth++;
             $selStart = -1;
             $i++;
+
             continue;
         }
         if ($ch === '}') {
@@ -174,6 +179,7 @@ function walkCss(string $css, callable $cb): void
             }
             $depth = max(0, $depth - 1);
             $i++;
+
             continue;
         }
         if ($depth === 0 && $selStart === -1 && ! ctype_space($ch)) {
@@ -249,6 +255,7 @@ $usedCount = 0;
 foreach ($classSet as $c => $_) {
     if (isset($usedClasses[$c])) {
         $usedCount++;
+
         continue;
     }
     // Semua class di sini 0-referensi; tapi block milik owner ini tetap "mati" hanya
@@ -310,7 +317,7 @@ foreach ($dead as $cls => $info) {
         substr($info['selector'], 0, 110)
     );
 }
-echo "\n(menampilkan ".$shown." blok ≥ ".number_format($minBytes)." bytes dari ".count($dead)." total 0-ref)\n";
+echo "\n(menampilkan ".$shown.' blok ≥ '.number_format($minBytes).' bytes dari '.count($dead)." total 0-ref)\n";
 
 // Ringkasan pengurangan potensial
 $pct = $sureBytes / max(1, $cssLen) * 100;
@@ -359,7 +366,7 @@ if ($pagesTop > 0) {
         }
         echo sprintf("  %6d B  %3d class  %s\n", $u['bytes'], $u['classes'], $rel);
     }
-    echo "\nTotal: ".count($pageUsage)." blade punya custom class; ".$pagesTop." terbesar di atas.\n";
+    echo "\nTotal: ".count($pageUsage).' blade punya custom class; '.$pagesTop." terbesar di atas.\n";
     echo "Interpretasi: jika 1-3 halaman memegang sebagian besar bytes (>40%), split per halaman layak;\n";
     echo "jika tersebar merata, lebih efektif menghapus class mati + mengecilkan @theme.\n";
 }
