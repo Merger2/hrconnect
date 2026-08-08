@@ -82,7 +82,7 @@
              (full CSS async apply di tengah JS = reflow storm) → skor net -10.
              Di prod (nginx gzip) fallback makin unggul. Guest (login) tetap
              critical (58KB inline, apply ringan, +3 skor terbukti).
-             Detail: scripts/extract-critical-css.mjs + resources/css/critical/ --}}
+             Detail: scripts/extract-critical-css.mjs + resources/css/critical-guest.css --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Styles -->

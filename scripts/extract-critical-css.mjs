@@ -31,8 +31,8 @@
  *   node scripts/extract-critical-css.mjs \
  *     --urls /login,/home,/attendance-history,/payroll,/knowledge-base/chat,/admin \
  *     --state tests/e2e/.auth/employee.json \
- *     --out resources/css/critical/critical-app.css
- *   node scripts/extract-critical-css.mjs --urls /login --guest --out resources/css/critical/critical-guest.css
+ *     --out resources/css/critical-app.css
+ *   node scripts/extract-critical-css.mjs --urls /login --guest --out resources/css/critical-guest.css
  */
 
 import { chromium } from 'playwright';

@@ -74,16 +74,16 @@
 
     <!-- Scripts -->
     {{-- Critical CSS inline (di-generate via scripts/extract-critical-css.mjs,
-         disimpan di resources/css/critical/critical-guest.css) — menghilangkan
+         disimpan di resources/css/critical-guest.css) — menghilangkan
          render-blocking CSS 622KB dari critical path. Full CSS di-defer async
          (media=print onload) + fallback noscript. CSP: style-src unsafe-inline OK. --}}
-    @if (file_exists(resource_path('css/critical/critical-guest.css')))
+    @if (file_exists(resource_path('css/critical-guest.css')))
         {{-- {!! !!} (bukan {{ }}) — file_get_contents CSS harus RAW: {{ }} = htmlspecialchars
              meng-escape " → &quot; dll yang merusak aturan CSS (font-family, content, url).
-             Sumber di resources/css/critical/ (git-tracked) BUKAN public/build (gitignored).
-             Regen: node scripts/extract-critical-css.mjs --urls /login --guest
-               --out resources/css/critical/critical-guest.css --}}
-        <style>{!! file_get_contents(resource_path('css/critical/critical-guest.css')) !!}</style>
+             Sumber di resources/css/critical-guest.css (git-tracked) BUKAN public/build
+             (gitignored). Regen: node scripts/extract-critical-css.mjs --urls /login
+               --guest --out resources/css/critical-guest.css --}}
+        <style>{!! file_get_contents(resource_path('css/critical-guest.css')) !!}</style>
         @php($fullCss = Vite::asset('resources/css/app.css'))
         <link rel="stylesheet" href="{{ $fullCss }}" media="print" onload="this.media='all'">
         <noscript><link rel="stylesheet" href="{{ $fullCss }}"></noscript>
