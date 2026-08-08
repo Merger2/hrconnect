@@ -134,7 +134,7 @@
                                             </div>
 
                                             <span class="payslip-card__status">
-                                                {{ __(ucfirst($payroll->status)) }}
+                                                {{ __(ucfirst(is_string($payroll->status) ? $payroll->status : $payroll->status->value)) }}
                                             </span>
                                         </div>
 

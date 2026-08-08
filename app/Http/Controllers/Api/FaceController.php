@@ -30,6 +30,10 @@ class FaceController extends Controller
             ], 404);
         }
 
+        // Defense-in-depth: EmployeePolicy::view mengizinkan self-access
+        // (employee.id === user.employee.id) — tidak memblokir enrollment sendiri.
+        $this->authorize('view', $employee);
+
         $this->faceService->saveFaceDescriptor($employee, $data['embedding']);
 
         return response()->json([
@@ -55,6 +59,9 @@ class FaceController extends Controller
                 'message' => 'Akun Anda belum terhubung dengan data karyawan.',
             ], 404);
         }
+
+        // Defense-in-depth: EmployeePolicy::view mengizinkan self-access.
+        $this->authorize('view', $employee);
 
         // Check if face is enrolled first
         if (! $this->faceService->hasFaceEnrolled($employee)) {
