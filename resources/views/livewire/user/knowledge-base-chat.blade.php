@@ -59,7 +59,7 @@
                                             <x-heroicon-o-chevron-right class="h-3.5 w-3.5 transition-transform duration-200"
                                                 x-bind:class="{ 'rotate-90': expandedSources.has({{ $index }}) }" />
                                             <span>{{ __('Sources') }}</span>
-                                            <span class="text-gray-400">({{ count($msg['sources']) }})</span>
+                                            <span class="text-slate-500">({{ count($msg['sources']) }})</span>
                                         </button>
                                         <div x-show="expandedSources.has({{ $index }})"
                                             x-collapse
@@ -117,7 +117,7 @@
                                 class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 resize-none transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                                 :disabled="{{ $isLoading ? 'true' : 'false' }}"
                             ></textarea>
-                            <span class="absolute bottom-2 right-3 text-xs text-gray-400" x-text="charCount()"></span>
+                            <span class="absolute bottom-2 right-3 text-xs text-slate-500" x-text="charCount()"></span>
                         </div>
                         <button type="submit"
                             wire:loading.attr="disabled"
@@ -133,7 +133,7 @@
                             </template>
                         </button>
                     </form>
-                    <p class="mt-1.5 text-xs text-gray-400 px-1">
+                    <p class="mt-1.5 text-xs text-slate-500 px-1">
                         {{ __('Ask questions about company policies, leave, payroll, and more.') }}
                     </p>
                 </div>
