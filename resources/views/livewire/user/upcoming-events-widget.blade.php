@@ -47,12 +47,12 @@
                     @foreach($holidays as $holiday)
                         <button type="button" wire:click="showHoliday({{ $holiday->id }})" class="flex w-full items-center gap-2.5 rounded-xl border border-rose-100 bg-rose-50 p-2 text-left transition hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="{{ __('View event details') }}: {{ $holiday->name }}">
                             <div class="flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-full border border-rose-100 bg-white">
-                                <span class="text-[8px] font-bold text-rose-500 uppercase tracking-tighter leading-none mb-0.5">{{ $holiday->date->shortMonthName }}</span>
+                                <span class="text-[8px] font-bold text-rose-700 uppercase tracking-tighter leading-none mb-0.5">{{ $holiday->date->shortMonthName }}</span>
                                 <span class="text-xs font-black text-gray-900 leading-none">{{ $holiday->date->day }}</span>
                             </div>
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-gray-800 truncate">{{ $holiday->name }}</p>
-                                <span class="text-[9px] font-medium text-rose-500 bg-rose-100 px-1.5 py-0.5 rounded">{{ __('Holiday') }}</span>
+                                <span class="text-[9px] font-medium text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded">{{ __('Holiday') }}</span>
                             </div>
                             <x-heroicon-o-chevron-right class="ml-auto h-4 w-4 shrink-0 text-rose-300" />
                         </button>

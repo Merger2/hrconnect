@@ -70,7 +70,7 @@
                 <h3 class="text-base font-semibold tracking-tight text-slate-950">{{ __('Monthly Calendar') }}</h3>
                 <p class="mt-1 text-xs leading-5 text-slate-500">{{ __('Tap a marked date to view details.') }}</p>
             </div>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-module-attendance/10 px-2.5 py-1 text-xs font-bold text-module-attendance">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-bold text-cyan-700">
                 <span class="h-1.5 w-1.5 rounded-full bg-module-attendance"></span>
                 {{ __('Today') }}
             </span>
@@ -78,7 +78,7 @@
 
         <div class="user-history-week-grid mt-4 text-center">
             @foreach ([__('Sun'), __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat')] as $index => $day)
-                <div class="py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] {{ $index === 0 ? 'text-rose-500' : ($index === 5 ? 'text-emerald-600' : 'text-slate-400') }}">
+                <div class="py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] {{ $index === 0 ? 'text-rose-700' : ($index === 5 ? 'text-emerald-700' : 'text-slate-600') }}">
                     {{ $day }}
                 </div>
             @endforeach
@@ -108,9 +108,9 @@
                         : 'bg-slate-100 text-slate-400 ring-transparent opacity-45';
 
                     if ($isHoliday && $isCurrentMonth) {
-                        $dayClass = 'bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-50';
+                        $dayClass = 'bg-rose-50 text-rose-700 ring-rose-100 hover:bg-rose-50';
                     } elseif ($date->isSunday() && $isCurrentMonth) {
-                        $dayClass .= ' text-rose-500';
+                        $dayClass .= ' text-rose-700';
                     } elseif ($date->isFriday() && $isCurrentMonth) {
                         $dayClass .= ' text-emerald-600';
                     }
@@ -130,7 +130,7 @@
                             @if ($style && $status !== '-')
                                 <span class="inline-flex h-2 w-2 rounded-full {{ $style['dot'] }} ring-4 {{ $style['ring'] }}"></span>
                             @elseif ($isHoliday && $isCurrentMonth)
-                                <span class="text-[0.65rem] font-bold leading-none text-rose-500">{{ __('Holiday initial') }}</span>
+                                <span class="text-[0.65rem] font-bold leading-none text-rose-700">{{ __('Holiday initial') }}</span>
                             @endif
 
                             @if ($timeIn && ! $isHoliday)

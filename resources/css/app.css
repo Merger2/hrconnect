@@ -6098,14 +6098,14 @@ input[type=range]::-moz-range-thumb {
 }
 .home-date-context__time {
   letter-spacing:.03em;
-  color:color-mix(in srgb, var(--color-module-attendance) 78%, var(--color-primary-900));
+  color:color-mix(in srgb, var(--color-module-attendance) 62%, var(--color-primary-900));
   font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
   font-size:.9375rem;
   font-weight:700;
 }
 @supports (color:color-mix(in lab, red, red)) {
   .home-date-context__time {
-    color:color-mix(in srgb, var(--color-module-attendance) 78%, var(--color-primary-900));
+    color:color-mix(in srgb, var(--color-module-attendance) 62%, var(--color-primary-900));
   }
 }
 .home-date-context__time {
@@ -6320,11 +6320,11 @@ input[type=range]::-moz-range-thumb {
   pointer-events:none;
 }
 .attendance-panel__eyebrow {
-  color:color-mix(in srgb, var(--color-module-attendance) 75%, var(--color-primary-900));
+  color:color-mix(in srgb, var(--color-module-attendance) 60%, var(--color-primary-900));
 }
 @supports (color:color-mix(in lab, red, red)) {
   .attendance-panel__eyebrow {
-    color:color-mix(in srgb, var(--color-module-attendance) 74%, var(--color-primary-900));
+    color:color-mix(in srgb, var(--color-module-attendance) 60%, var(--color-primary-900));
   }
 }
 .quick-wallet-surface {
@@ -6950,7 +6950,7 @@ input[type=range]::-moz-range-thumb {
   font-weight:var(--font-weight-bold);
   --tw-tracking:.15em;
   letter-spacing:.15em;
-  color:var(--color-slate-400);
+  color:var(--color-slate-600);
   text-transform:uppercase;
 }
 .home-compact-actions {
@@ -11829,7 +11829,7 @@ input[type=range]::-moz-range-thumb {
   font-weight:var(--font-weight-semibold);
   --tw-tracking:.18em;
   letter-spacing:.18em;
-  color:var(--color-module-hr);
+  color:color-mix(in srgb, var(--color-module-hr) 65%, var(--color-primary-900));
   text-transform:uppercase;
   background-color:transparent;
   border-width:0;
@@ -11845,7 +11845,7 @@ input[type=range]::-moz-range-thumb {
   --tw-tracking:.18em;
   letter-spacing:.18em;
   text-transform:uppercase;
-  color:color-mix(in srgb, var(--color-module-attendance) 75%, var(--color-primary-900));
+  color:color-mix(in srgb, var(--color-module-attendance) 60%, var(--color-primary-900));
   background-color:transparent;
   border-width:0;
   padding-block:0;
@@ -11853,7 +11853,7 @@ input[type=range]::-moz-range-thumb {
 }
 @supports (color:color-mix(in lab, red, red)) {
   .user-ui .attendance-panel__eyebrow {
-    color:color-mix(in srgb, var(--color-module-attendance) 74%, var(--color-primary-900));
+    color:color-mix(in srgb, var(--color-module-attendance) 60%, var(--color-primary-900));
   }
 }
 .user-ui .quick-wallet-title,.user-ui .attendance-panel__title {
