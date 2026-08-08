@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\SystemBackupRun;
 use App\Models\User;
 use App\Support\EnterpriseRuntime;
+use App\Support\SystemBackupService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -280,4 +281,47 @@ test('destructive update and maintenance flows require explicit confirmation con
             ->toContain('PASPAPAN_UPDATE_DISCARD_LOCAL_CHANGES')
             ->toContain('git reset --hard "origin/${TARGET_BRANCH}"');
     }
+});
+
+test('backup restore drill command reports success when the latest backup restores cleanly', function () {
+    $service = mock(SystemBackupService::class);
+    $service->shouldReceive('runRestoreDrill')
+        ->once()
+        ->with(null)
+        ->andReturn([
+            'filename' => 'backup-2026-08-06-02-00-00.sql',
+            'temp_database' => 'hrconnect_drill_20260806_020000_ab12',
+            'duration_seconds' => 4.5,
+            'row_counts' => ['users' => 7, 'employees' => 6],
+        ]);
+    app()->instance(SystemBackupService::class, $service);
+
+    $this->artisan('maintenance:backup-restore-drill')
+        ->expectsOutputToContain('RESTORE DRILL PASSED')
+        ->expectsOutputToContain('users: 7 rows')
+        ->assertExitCode(0);
+});
+
+test('backup restore drill command fails cleanly when the drill cannot run', function () {
+    $service = mock(SystemBackupService::class);
+    $service->shouldReceive('runRestoreDrill')
+        ->once()
+        ->andThrow(new RuntimeException('No database backup found in maintenance-backups/database.'));
+    app()->instance(SystemBackupService::class, $service);
+
+    $this->artisan('maintenance:backup-restore-drill')
+        ->expectsOutputToContain('Restore drill FAILED')
+        ->assertExitCode(1);
+});
+
+test('database backup drill verification accepts only signed application backups', function () {
+    $service = app(SystemBackupService::class);
+
+    $sql = "-- Absensi GPS & Enterprise Database Backup\nSET FOREIGN_KEY_CHECKS=0;\nSET FOREIGN_KEY_CHECKS=1;\n";
+    $signature = hash_hmac('sha256', $sql, config('app.key'));
+
+    expect($service->verifyDatabaseBackup($sql."\n-- APP_BACKUP_SIGNATURE: {$signature}\n"))->toBe($sql);
+
+    expect(fn () => $service->verifyDatabaseBackup($sql))->toThrow(RuntimeException::class);
+    expect(fn () => $service->verifyDatabaseBackup($sql."DROP TABLE users;\n-- APP_BACKUP_SIGNATURE: {$signature}\n"))->toThrow(RuntimeException::class);
 });

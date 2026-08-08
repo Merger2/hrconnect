@@ -84,3 +84,4 @@ graphify-out/.graphify_root
 
 # Laravel Excel / framework cache (runtime artifacts)
 /storage/framework/cache/
+/storage/app/private/maintenance-backups/

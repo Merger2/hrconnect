@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Jobs\RunSystemBackup;
 use App\Models\Setting;
 use App\Models\SystemBackupRun;
+use App\Support\SystemBackupService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -328,23 +329,14 @@ class SystemMaintenance extends Component
      * Verify the HMAC signature appended to an application-generated SQL
      * backup and return the SQL content without the signature line.
      *
+     * Delegates to SystemBackupService::verifyDatabaseBackup() so the restore
+     * drill and the UI restore flow share a single verification source.
+     *
      * @throws RuntimeException when the signature line is missing or invalid.
      */
     protected function verifiedBackupSql(string $sql): string
     {
-        $pattern = "/\n-- APP_BACKUP_SIGNATURE: ([0-9a-f]{64})\s*$/";
-
-        if (! preg_match($pattern, $sql, $matches)) {
-            throw new RuntimeException('Unsigned or malformed backup: missing APP_BACKUP_SIGNATURE.');
-        }
-
-        $content = preg_replace($pattern, '', $sql);
-
-        if (! hash_equals(hash_hmac('sha256', $content, (string) config('app.key')), $matches[1])) {
-            throw new RuntimeException('Backup signature verification failed; the file may have been tampered with.');
-        }
-
-        return $content;
+        return app(SystemBackupService::class)->verifyDatabaseBackup($sql);
     }
 
     /**
