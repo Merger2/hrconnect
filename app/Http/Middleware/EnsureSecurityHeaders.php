@@ -117,6 +117,17 @@ class EnsureSecurityHeaders
             }
         }
 
+        // Scramble API docs UI (Stoplight Elements web-components) dimuat dari unpkg CDN.
+        // Hanya diizinkan di route docs/api — tidak melebarkan CSP ke seluruh aplikasi.
+        if ($request->is('docs/api')) {
+            foreach ($cspConfig as &$docsDirective) {
+                if (str_starts_with($docsDirective, 'script-src') || str_starts_with($docsDirective, 'style-src')) {
+                    $docsDirective .= ' https://unpkg.com';
+                }
+            }
+            unset($docsDirective);
+        }
+
         $csp = implode('; ', $cspConfig);
         $response->headers->set('Content-Security-Policy', $csp);
 
