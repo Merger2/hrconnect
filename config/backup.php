@@ -14,6 +14,34 @@ use Spatie\DbDumper\Compressors\GzipCompressor;
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Retensi artefak backup terjadwal (SystemBackupService)
+    |--------------------------------------------------------------------------
+    |
+    | Sejak 2026-08-06 daily 02:00 memakai pipeline signed (maintenance-backups)
+    | — bukan lagi spatie backup:run. Key ini menggantikan spatie backup:clean
+    | untuk membersihkan .sql lama di maintenance-backups/database.
+    |
+    */
+
+    'retention_days' => (int) env('BACKUP_RETENTION_DAYS', 14),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Health check backup (pengganti spatie monitor_backups)
+    |--------------------------------------------------------------------------
+    |
+    | `backup.health_backup_max_age_hours` (env `BACKUP_MAX_AGE_HOURS`, default
+    | 26 = jadwal 02:00 + toleransi) dipakai HealthController untuk melaporkan
+    | service `backup`: `fresh` bila backup terbaru ≤ threshold, `stale` bila
+    | lebih tua atau belum ada sama sekali (endpoint api/v1/health → 503
+    | degraded).
+    |
+    */
+
+    'health_backup_max_age_hours' => (int) env('BACKUP_MAX_AGE_HOURS', 26),
+
     'backup' => [
         /*
          * The name of this application. You can use this name to monitor

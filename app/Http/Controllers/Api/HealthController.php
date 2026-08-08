@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\SystemBackupService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -22,9 +23,10 @@ class HealthController extends Controller
             'cache' => $this->checkCache(),
             'queue' => $this->checkQueue(),
             'storage' => $this->checkStorage(),
+            'backup' => $this->checkBackup(),
         ];
 
-        $allUp = ! in_array('down', $services, true);
+        $allUp = ! in_array('down', $services, true) && ! in_array('stale', $services, true);
 
         return response()->json([
             'status' => $allUp ? 'ok' : 'degraded',
@@ -73,6 +75,23 @@ class HealthController extends Controller
     {
         try {
             return Storage::disk('local')->exists('') ? 'writable' : 'down';
+        } catch (Throwable) {
+            return 'down';
+        }
+    }
+
+    /**
+     * Backup freshness check: returns 'stale' when the latest signed database
+     * backup is missing or older than health.backup_max_age_hours (default 26h,
+     * mencakup jadwal harian 02:00 + toleransi). Pengganti spatie
+     * monitor_backups yang kini dorman — mencegah kematian backup senyap.
+     */
+    private function checkBackup(): string
+    {
+        try {
+            return app(SystemBackupService::class)->latestBackupHealthIssue() === null
+                ? 'fresh'
+                : 'stale';
         } catch (Throwable) {
             return 'down';
         }

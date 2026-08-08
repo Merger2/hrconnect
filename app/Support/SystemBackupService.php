@@ -156,6 +156,40 @@ class SystemBackupService
     }
 
     /**
+     * Backup freshness health check (pengganti spatie monitor_backups untuk
+     * pipeline maintenance-backups). Mengembalikan null bila backup terbaru
+     * masih segar, atau deskripsi masalah bila:
+     *  - belum ada backup sama sekali, atau
+     *  - backup terbaru lebih tua dari `backup.health_backup_max_age_hours`
+     *    (env `BACKUP_MAX_AGE_HOURS`, default 26 = jadwal 02:00 + toleransi).
+     *
+     * Bisa dipanggil HealthController (endpoint api/v1/health) maupun command
+     * lain; konsumen cukup menampilkan/meng-log `null = sehat`.
+     */
+    public function latestBackupHealthIssue(): ?string
+    {
+        $latest = $this->findLatestDatabaseBackup();
+
+        if ($latest === null) {
+            return 'No database backup exists in maintenance-backups/database.';
+        }
+
+        $maxAgeHours = (int) config('backup.health_backup_max_age_hours', 26);
+        $ageHours = (now()->getTimestamp() - (int) Storage::disk('local')->lastModified($latest)) / 3600;
+
+        if ($ageHours > $maxAgeHours) {
+            return sprintf(
+                'Latest database backup (%s) is %.1f hours old, exceeding the %d hour threshold.',
+                basename($latest),
+                $ageHours,
+                $maxAgeHours
+            );
+        }
+
+        return null;
+    }
+
+    /**
      * Return the path (relative to the local disk) of the most recently
      * modified database backup under maintenance-backups/database, or null
      * when no backup exists yet.
@@ -211,9 +245,10 @@ class SystemBackupService
      * finally block, so a failed drill cannot leak state).
      *
      * Scope: pipeline `maintenance-backups` (signed, SystemBackupService /
-     * RunSystemBackup). Backup harian spatie (`backup:run --only-db`,
-     * storage/app/backups) adalah pipeline terpisah yang tidak ter-signing
-     * HMAC — di luar cakupan drill ini (lihat PROGRESS.md).
+     * RunSystemBackup). Sejak 2026-08-06 backup harian terjadwal (02:00)
+     * memakai pipeline ini juga (`maintenance:scheduled-backups`) — sehingga
+     * drill meng-cover backup harian asli. spatie (`storage/app/backups`)
+     * tidak lagi dipakai untuk jadwal (dorman).
      *
      * @param  string|null  $backupPath  Relative path on the local disk; defaults to the latest backup.
      * @return array{filename: string, temp_database: string, duration_seconds: float, row_counts: array<string, int>}
