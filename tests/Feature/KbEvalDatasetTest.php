@@ -27,7 +27,7 @@ uses(RefreshDatabase::class);
 /**
  * Baca dataset fixture.
  *
- * @return array{meta: array, cases: array<int, array{id: string, category: string, question: string, expected_answer: array<int, string>, expected_sources: array<int, string>, negative: bool, verify_human: bool, notes?: string}>}
+ * @return array{meta: array, cases: array<int, array{id: string, category: string, question: string, expected_answer: array<int, string>, expected_sources: array<int, string>, negative: bool, verify_human: bool, natural?: bool, notes?: string}>}
  */
 function kbEvalDataset(): array
 {
@@ -61,6 +61,13 @@ function kbEvalRun(KnowledgeBaseService $service, bool $offline): array
     $negativePassed = 0;
 
     foreach ($dataset['cases'] as $case) {
+        // Kasus natural = uji retrieval semantik (vector search) — hanya
+        // bermakna online; di mode offline (pg_trgm deterministik) di-skip
+        // agar gate offline tetap stabil.
+        if ($offline && ($case['natural'] ?? false)) {
+            continue;
+        }
+
         $response = kbEvalAsk($service, $case['question']);
 
         $answer = (string) ($response['answer'] ?? '');
@@ -169,9 +176,24 @@ test('dataset fixture valid: >= 20 kasus, >= 2 negatif, keyword & sumber konsist
                 ->toBeTrue("expected_sources '{$title}' harus ada di corpus seeder");
         }
 
-        // Constraint offline: pertanyaan harus substring dari konten sumber
-        // (fallback pg_trgm searchByKeyword = ILIKE %question%).
         $kb = KnowledgeBase::where('title', $case['expected_sources'][0])->firstOrFail();
+        $isNatural = (bool) ($case['natural'] ?? false);
+
+        if ($isNatural) {
+            // Kasus natural: kalimat penuh TIDAK harus substring konten — ini uji
+            // retrieval semantik (online). Keyword wajib muncul di konten penuh.
+            foreach ($case['expected_answer'] as $keyword) {
+                if (! str_contains(KnowledgeBaseEval::normalize($kb->content), KnowledgeBaseEval::normalize($keyword))) {
+                    test()->fail("[{$case['id']}] keyword '{$keyword}' harus ada di konten '{$kb->title}'");
+                }
+                expect(KnowledgeBaseEval::normalize($kb->content))->toContain(KnowledgeBaseEval::normalize($keyword));
+            }
+
+            continue;
+        }
+
+        // Constraint offline (bukan natural): pertanyaan harus substring dari
+        // konten sumber (fallback pg_trgm searchByKeyword = ILIKE %question%).
         if (! str_contains(mb_strtolower($kb->content), mb_strtolower($case['question']))) {
             test()->fail("[{$case['id']}] question '{$case['question']}' harus substring konten '{$kb->title}' (constraint offline pg_trgm)");
         }

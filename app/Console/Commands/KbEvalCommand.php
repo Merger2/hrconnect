@@ -65,6 +65,21 @@ class KbEvalCommand extends Command
         $negativePassed = 0;
 
         foreach ($cases as $case) {
+            // Kasus natural = uji retrieval semantik (vector search) — hanya
+            // bermakna saat mode online (API key ada); offline pg_trgm di-skip.
+            if (! $apiKey && ($case['natural'] ?? false)) {
+                $rows[] = [
+                    $case['id'],
+                    $case['category'],
+                    substr($case['question'], 0, 60),
+                    'SKIP (online only)',
+                    '-',
+                    '-',
+                ];
+
+                continue;
+            }
+
             $response = $kbService->chat((string) $case['question']);
 
             $answer = (string) ($response['answer'] ?? '');
