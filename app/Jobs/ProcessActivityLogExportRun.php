@@ -45,8 +45,9 @@ class ProcessActivityLogExportRun implements ShouldQueue
 
     private function exportData(ImportExportRun $run, array $meta): array
     {
+        // Tabel activity_logs pakai kolom user_id (bukan skema spatie causer_id/subject_*).
         $query = ActivityLog::query()
-            ->with(['causer', 'subject'])
+            ->with('user')
             ->orderBy('created_at', 'desc');
 
         if (! empty($meta['start_date'])) {
@@ -55,11 +56,8 @@ class ProcessActivityLogExportRun implements ShouldQueue
         if (! empty($meta['end_date'])) {
             $query->whereDate('created_at', '<=', $meta['end_date']);
         }
-        if (! empty($meta['causer_id'])) {
-            $query->where('causer_id', $meta['causer_id']);
-        }
-        if (! empty($meta['subject_type'])) {
-            $query->where('subject_type', $meta['subject_type']);
+        if (! empty($meta['user_id'])) {
+            $query->where('user_id', $meta['user_id']);
         }
 
         $records = $query->get();

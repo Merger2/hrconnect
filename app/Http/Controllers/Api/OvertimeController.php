@@ -119,7 +119,7 @@ class OvertimeController extends Controller
         $this->authorize('delete', $overtime);
 
         DB::transaction(function () use ($overtime): void {
-            $overtime->details()->delete();
+            $overtime->approvals()->delete();
             $overtime->delete();
         });
 

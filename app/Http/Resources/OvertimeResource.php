@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Overtime;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,8 +20,8 @@ class OvertimeResource extends JsonResource
             'id' => $this->id,
             'employee_id' => $this->employee_id,
             'date' => $this->date->toDateString(),
-            'start_time' => $this->start_time?->toIso8601String(),
-            'end_time' => $this->end_time?->toIso8601String(),
+            'start_time' => filled($this->start_time) ? Carbon::parse($this->start_time)->toIso8601String() : null,
+            'end_time' => filled($this->end_time) ? Carbon::parse($this->end_time)->toIso8601String() : null,
             'total_hours' => (float) $this->total_hours,
             'description' => $this->description,
             'status' => $this->status->value,

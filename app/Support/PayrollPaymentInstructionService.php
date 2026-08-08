@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\Payroll;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 final class PayrollPaymentInstructionService
 {
@@ -24,7 +24,7 @@ final class PayrollPaymentInstructionService
      *     reference:string,
      * }>
      */
-    public function rows(Collection $payrolls): array
+    public function rows(EloquentCollection $payrolls): array
     {
         return $payrolls
             ->load('employee')

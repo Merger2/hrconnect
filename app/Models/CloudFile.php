@@ -50,6 +50,11 @@ class CloudFile extends Model
         return $this->belongsTo(ChatThread::class, 'chat_thread_id');
     }
 
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');

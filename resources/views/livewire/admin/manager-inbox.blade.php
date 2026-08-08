@@ -165,6 +165,7 @@
                                 $employee = match($activeTab) {
                                     'hr_tasks' => $item->case?->user,
                                     'custom_forms' => $item->submitter,
+                                    'document_requests' => $item->employee?->user,
                                     default => $item->user,
                                 };
 

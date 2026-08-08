@@ -20,7 +20,7 @@ class PositionController extends Controller
 
         $perPage = (int) $request->input('per_page', 50);
 
-        $positions = Position::with('department:id,name')
+        $positions = Position::with('division:id,name')
             ->orderBy('name')
             ->paginate($perPage);
 

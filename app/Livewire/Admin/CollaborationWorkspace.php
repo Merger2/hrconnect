@@ -31,17 +31,17 @@ class CollaborationWorkspace extends Component
     use ValidatesCompanyId;
     use WithFileUploads;
 
-    private const TABS = ['threads', 'files', 'meetings'];
+    protected const TABS = ['threads', 'files', 'meetings'];
 
-    private const DEFAULT_TAB = 'threads';
+    protected const DEFAULT_TAB = 'threads';
 
-    private const THREAD_TYPES = [
+    protected const THREAD_TYPES = [
         ChatThread::TYPE_GROUP,
         ChatThread::TYPE_PROJECT,
         ChatThread::TYPE_PERSONAL,
     ];
 
-    private const FILE_VISIBILITIES = [
+    protected const FILE_VISIBILITIES = [
         CloudFile::VISIBILITY_PRIVATE,
         CloudFile::VISIBILITY_COMPANY,
         CloudFile::VISIBILITY_PROJECT,
@@ -310,7 +310,7 @@ class CollaborationWorkspace extends Component
             ->get(['id', 'company_id', 'name', 'email']);
 
         $threads = ChatThread::query()
-            ->with(['company:id,name', 'project:id,name', 'members:id,name', 'messages' => fn ($query) => $query->latest()->limit(3)])
+            ->with(['company:id,name', 'members:id,name', 'messages' => fn ($query) => $query->latest()->limit(3)])
             ->withCount('messages')
             ->whereIn('company_id', $companyIds)
             ->when($this->search !== '', fn (Builder $query) => $query->where(function (Builder $nested): void {
@@ -329,7 +329,7 @@ class CollaborationWorkspace extends Component
             ->get();
 
         $meetings = OnlineMeeting::query()
-            ->with(['company:id,name', 'project:id,name', 'host:id,name'])
+            ->with(['company:id,name', 'host:id,name'])
             ->whereIn('company_id', $companyIds)
             ->when($this->search !== '', fn (Builder $query) => $query->where('title', 'like', '%'.$this->search.'%'))
             ->orderByRaw('start_time is null, start_time asc')

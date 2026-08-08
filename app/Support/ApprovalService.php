@@ -56,12 +56,16 @@ class ApprovalService
         }
     }
 
-    public function approve(Approval $approval): void
+    public function approve(Approval $approval, string $notes = ''): void
     {
         $approval->load('approvable');
 
         if ($approval->status !== ApprovalStatus::PENDING) {
             throw new BusinessRuleException('Approval sudah diproses');
+        }
+
+        if ($notes !== '') {
+            $approval->notes = $notes;
         }
 
         // Check if previous levels are approved

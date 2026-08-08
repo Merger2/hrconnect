@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperKpiGroup
@@ -25,12 +26,12 @@ class KpiGroup extends Model
         'sort_order' => 'integer',
     ];
 
-    public function kpiTemplates()
+    public function kpiTemplates(): HasMany
     {
         return $this->hasMany(KpiTemplate::class);
     }
 
-    public function activeKpiTemplates()
+    public function activeKpiTemplates(): HasMany
     {
         return $this->hasMany(KpiTemplate::class)->where('is_active', true);
     }

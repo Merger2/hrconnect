@@ -82,9 +82,6 @@
                                         </div>
                                         <p class="mt-1 text-sm text-slate-500">
                                             {{ $thread->company?->name }}
-                                            @if ($thread->project)
-                                                · {{ $thread->project->name }}
-                                            @endif
                                             · {{ __(':count members', ['count' => $thread->members->count()]) }}
                                             · {{ __(':count messages', ['count' => $thread->messages_count]) }}
                                         </p>
@@ -168,9 +165,6 @@
                                         </div>
                                         <p class="mt-1 text-sm text-slate-500">
                                             {{ $meeting->company?->name }}
-                                            @if ($meeting->project)
-                                                · {{ $meeting->project->name }}
-                                            @endif
                                             @if ($meeting->starts_at)
                                                 · {{ $meeting->starts_at->format('d M Y H:i') }}
                                             @endif
