@@ -63,7 +63,7 @@
         },
         "files": [
             "app/helpers.php",
-            "_ide_helper_models.php"
+            "app/Models/_ide_helper_models.php"
         ]
     },
     "autoload-dev": {
