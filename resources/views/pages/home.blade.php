@@ -3,6 +3,12 @@
     @php($homeCommandCenter = $homeCommandCenter ?? ['attentionCount' => 0, 'actionItems' => [], 'teamItems' => [], 'recentActivities' => []])
     @php($actionSummaryItems = collect($homeCommandCenter['actionItems'] ?? []))
     @php($teamSummaryItems = collect($homeCommandCenter['teamItems'] ?? []))
+    {{-- SSR fallback utk elemen x-text (fix CLS): nilai awal harus IDENTIK dgn
+         yang dihitung Alpine (liveGreeting/liveClock) supaya hydrasi tidak
+         menggeser layout — CLS /home 0.081 (Lighthouse) berasal dari elemen
+         kosong yg diisi setelah render. --}}
+    @php($homeHour = (int) now()->format('H'))
+    @php($homeGreeting = $homeHour < 11 ? __('Good morning') : ($homeHour < 15 ? __('Good afternoon') : __('Good evening')))
 
     <div class="user-page-shell pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div class="user-page-container user-page-container--wide px-0">
@@ -10,7 +16,7 @@
                 <div class="user-home-hero__inner">
                     <span class="user-home-hero__glow" aria-hidden="true"></span>
                     <div class="user-home-hero__copy">
-                        <p class="user-home-hero__greeting" x-data="liveGreeting()" x-init="init()" x-text="greeting + ','"></p>
+                        <p class="user-home-hero__greeting" x-data="liveGreeting('{{ $homeGreeting }}')" x-init="init()" x-text="greeting + ','">{{ $homeGreeting }},</p>
                         <h1 id="home-page-title" class="user-home-hero__title">{{ $currentUser->name }}</h1>
                         <p class="user-home-hero__subtitle">
                             {{ $homeCommandCenter['attentionCount'] > 0
@@ -35,14 +41,14 @@
                         <x-heroicon-o-calendar />
                     </span>
                     <span class="home-date-context__text">
-                        <span class="home-date-context__dayname" x-text="dayName"></span>
+                        <span class="home-date-context__dayname" x-text="dayName">{{ now()->translatedFormat('l') }}</span>
                         <span class="home-date-context__sep" aria-hidden="true">•</span>
-                        <span class="home-date-context__fulldate" x-text="fullDate"></span>
+                        <span class="home-date-context__fulldate" x-text="fullDate">{{ now()->translatedFormat('j F Y') }}</span>
                     </span>
                 </div>
                 <div class="home-date-context__clock">
                     <span class="home-date-context__live-dot" aria-hidden="true"></span>
-                    <span class="home-date-context__time" x-text="clockTime" aria-live="polite"></span>
+                    <span class="home-date-context__time" x-text="clockTime" aria-live="polite">{{ now()->format('H:i:s') }}</span>
                 </div>
             </div>
 
@@ -198,8 +204,8 @@
     @push('scripts')
         <script>
             document.addEventListener('alpine:init', () => {
-                Alpine.data('liveGreeting', () => ({
-                    greeting: '',
+                Alpine.data('liveGreeting', (initial = '') => ({
+                    greeting: initial,
                     init() {
                         this.update();
                         setInterval(() => this.update(), 60000);
