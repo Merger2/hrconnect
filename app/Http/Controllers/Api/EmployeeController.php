@@ -139,6 +139,9 @@ class EmployeeController extends Controller
             'birth_date' => $data['birth_date'],
             'join_date' => $data['join_date'],
             'salary_type' => $data['salary_type'],
+            // employees.status nullable tanpa default — karyawan baru selalu active
+            // (EmployeeResource membaca status->value, null akan crash).
+            'status' => EmployeeStatus::ACTIVE,
             'nip' => $data['nip'] ?? null,
             'phone' => $data['phone'],
             // employees.phone & employees.nik NOT NULL tanpa default — ikuti

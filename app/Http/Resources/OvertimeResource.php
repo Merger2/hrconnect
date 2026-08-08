@@ -25,7 +25,12 @@ class OvertimeResource extends JsonResource
             'description' => $this->description,
             'status' => $this->status->value,
             'amount' => $this->amount,
-            'employee' => EmployeeResource::make($this->whenLoaded('employee')),
+            // Subset minimal — query overtime memuat employee partial (id,employee_number,full_name).
+            'employee' => $this->whenLoaded('employee', fn () => $this->employee ? [
+                'id' => $this->employee->id,
+                'employee_number' => $this->employee->employee_number,
+                'full_name' => $this->employee->full_name,
+            ] : null),
             'approvals' => ApprovalResource::collection($this->whenLoaded('approvals')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

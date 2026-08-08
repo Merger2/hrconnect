@@ -25,7 +25,12 @@ class AttendanceResource extends JsonResource
             'is_wfa' => $this->is_wfa,
             'late_minutes' => $this->late_minutes,
             'verification_method' => $this->verification_method,
-            'employee' => EmployeeResource::make($this->whenLoaded('employee')),
+            // Subset minimal — konsisten dengan resource lain yang memuat employee partial.
+            'employee' => $this->whenLoaded('employee', fn () => $this->employee ? [
+                'id' => $this->employee->id,
+                'employee_number' => $this->employee->employee_number,
+                'full_name' => $this->employee->full_name,
+            ] : null),
         ];
     }
 }

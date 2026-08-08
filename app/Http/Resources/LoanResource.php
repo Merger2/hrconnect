@@ -18,7 +18,13 @@ class LoanResource extends JsonResource
         return [
             'id' => $this->id,
             'employee_id' => $this->employee_id,
-            'employee' => EmployeeResource::make($this->whenLoaded('employee')),
+            // Hanya subset minimal — EmployeeResource penuh butuh kolom lengkap
+            // (gender/status/dll), sementara query loan memuat employee partial.
+            'employee' => $this->whenLoaded('employee', fn () => $this->employee ? [
+                'id' => $this->employee->id,
+                'employee_number' => $this->employee->employee_number,
+                'full_name' => $this->employee->full_name,
+            ] : null),
             'amount' => (float) $this->amount,
             'interest_rate' => (float) $this->interest_rate,
             'tenor_months' => $this->tenor_months,

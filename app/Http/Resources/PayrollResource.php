@@ -31,7 +31,12 @@ class PayrollResource extends JsonResource
             'bpjs_employment' => (int) $this->bpjs_employment,
             'attendance_penalty' => (int) $this->attendance_penalty,
             'loan_deduction' => (int) $this->loan_deduction,
-            'employee' => EmployeeResource::make($this->whenLoaded('employee')),
+            // Subset minimal — query payroll memuat employee partial (id,employee_number,full_name).
+            'employee' => $this->whenLoaded('employee', fn () => $this->employee ? [
+                'id' => $this->employee->id,
+                'employee_number' => $this->employee->employee_number,
+                'full_name' => $this->employee->full_name,
+            ] : null),
             'items' => PayrollItemResource::collection($this->whenLoaded('items')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

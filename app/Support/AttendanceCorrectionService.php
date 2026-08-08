@@ -127,7 +127,7 @@ class AttendanceCorrectionService
                 $attendance->time_in ? Carbon::parse($attendance->time_in) : null,
                 $correction->requestedShift ?? $attendance->shift,
                 (int) Setting::getValue('attendance.grace_period', 10),
-                $attendance->status->value,
+                $attendance->status?->value,
             );
 
             $attendance->save();
