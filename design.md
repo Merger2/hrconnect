@@ -505,6 +505,33 @@ module, date-context TIDAK overlap hero, nol console error).
   78% (strip/accent card tanpa teks putih, boleh lebih terang 3.79:1).
   JANGAN digabung — 78% di banner gagal kontras, 62% di strip ubah visual.
 
+## Ops & Security Notes (2026-08-06)
+
+### CSP map tile — Leaflet butuh subdomain (commit `a4fe411`)
+
+Map Leaflet memakai tile **CARTO** (`{s}.basemaps.cartocdn.com`, halaman
+analytics) dan subdomain OSM (`{s}.tile.openstreetmap.org`, location-card &
+modal detail absensi), tapi CSP `connect-src` awalnya hanya mengizinkan host
+tanpa subdomain → semua tile diblokir → Leaflet fallback ke error-tile 1×1
+`data:image/gif` → **map tampil kosong + spam error console**. Fix di
+`app/Http/Middleware/EnsureSecurityHeaders.php`:
+
+```text
+connect-src 'self' https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com data: ...
+```
+
+`data:` sengaja diizinkan sebagai fallback error-tile Leaflet. Terverifikasi:
+map analytics render 15/15 tile, console 0 error di 11 halaman × 2 role.
+
+### Deploy: exclude `scripts/` (commit `14468ea`)
+
+`.gitattributes` menambahkan `scripts/ export-ignore` — folder dev-tooling
+(38 file, ~300KB) tidak ikut paket `git archive` / zip download / rsync
+deploy. Catatan: `composer ci:check` (3 audit script) tetap jalan di dev/CI
+karena `scripts/` tetap ada di repo git — hanya tidak masuk archive
+production. Kalau deploy memakai `git clone` (mis. Forge), gunakan rsync
+`--exclude` di script deploy karena `export-ignore` tidak berlaku untuk clone.
+
 ## Icons: Heroicon-only rule (2026-08-06)
 
 Keputusan Fikih 2026-08-06 (migrasi 79 inline SVG → komponen, 34 blade):
