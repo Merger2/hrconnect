@@ -83,6 +83,14 @@
              Di prod (nginx gzip) fallback makin unggul. Guest (login) tetap
              critical (58KB inline, apply ringan, +3 skor terbukti).
              Detail: scripts/extract-critical-css.mjs + resources/css/critical-guest.css --}}
+
+        {{-- Preload livewire.js DI-REVERT (A/B net-negatif 2026-08-08): di env
+             tanpa gzip (dev server), livewire.js 552KB mentah berebut bandwidth
+             dengan CSS 622KB (kritis utk first paint) saat di-preload → FCP
+             6.8→9.8s, skor 53→47. @livewireScripts tetap di akhir body (hanya
+             menunda TTI, bukan FCP); di prod nginx gzip + livewire.min.js
+             (±120KB) preload tidak diperlukan. pulltorefresh.js dihapus (dead,
+             23KB + 1 request, 0 init call di seluruh repo). --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Styles -->
@@ -122,6 +130,5 @@
 
 <x-pwa-install-prompt />
 
-<script src="{{ asset('js/pulltorefresh.js') }}"></script>
     </body>
 </html>
