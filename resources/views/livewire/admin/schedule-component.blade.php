@@ -34,7 +34,7 @@
             <div class="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
                 @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $index => $day)
                     <div
-                        class="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 py-3 {{ $index === 0 ? 'text-red-500' : '' }}">
+                        class="text-center text-xs font-semibold uppercase tracking-wider text-slate-600 py-3 {{ $index === 0 ? 'text-red-700' : '' }}">
                         {{ __($day) }}
                     </div>
                 @endforeach
@@ -52,7 +52,7 @@
                         $bgClass = $isCurrentMonth ? 'bg-white' : 'bg-gray-50';
                         $textClass = $isCurrentMonth
                             ? 'text-gray-900'
-                            : 'text-gray-400';
+                            : 'text-slate-500';
 
                         // Shift Style
                         $shiftColor = 'bg-gray-100 text-gray-500';
@@ -73,7 +73,7 @@
                         {{-- Date Number --}}
                         <div class="p-2 flex justify-between items-start">
                             <span
-                                class="text-sm font-semibold {{ $textClass }} {{ $isToday ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : '' }}">
+                                class="text-sm font-semibold {{ $textClass }} {{ $isToday ? 'bg-blue-700 text-white rounded-full w-6 h-6 flex items-center justify-center' : '' }}">
                                 {{ $date->day }}
                             </span>
 
@@ -96,7 +96,7 @@
                                     @endif
                                 </div>
                             @elseif($isCurrentMonth)
-                                <div class="text-[10px] text-gray-400 italic">{{ __('Auto') }}</div>
+                                <div class="text-[10px] text-slate-500 italic">{{ __('Auto') }}</div>
                             @endif
                         </div>
                     </button>

@@ -148,7 +148,7 @@
                         </span>
                         <span class="min-w-0 flex-1 truncate text-left" x-text="tab.label"></span>
                         <span
-                            class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500"
+                            class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600"
                             x-text="tab.count"></span>
                     </button>
                 </template>
@@ -183,7 +183,7 @@
                                             <img src="{{ $logoUrl }}" alt="{{ __('Company Logo') }}"
                                                 class="h-20 w-auto rounded-lg border border-gray-200 object-contain">
                                         @else
-                                            <div class="flex h-20 w-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-xs text-gray-400">
+                                            <div class="flex h-20 w-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-xs text-slate-500">
                                                 {{ __('No logo') }}
                                             </div>
                                         @endif
@@ -216,7 +216,7 @@
                                             @endif
                                         </div>
 
-                                        <p class="mt-2 text-xs text-gray-400">
+                                        <p class="mt-2 text-xs text-slate-500">
                                             {{ __('Recommended: PNG or JPG, max 2MB, transparent background preferred.') }}
                                         </p>
                                     </div>
@@ -341,7 +341,7 @@
                                                         class="text-sm font-medium text-gray-800" />
                                                     <div class="flex items-center gap-2 mt-1">
                                                         <span
-                                                            class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded select-all">{{ $setting->key }}</span>
+                                                            class="text-xs font-mono text-slate-600 bg-gray-100 px-2 py-0.5 rounded select-all">{{ $setting->key }}</span>
                                                         <div class="h-4 w-4" wire:loading
                                                             wire:target="updateValue({{ $setting->id }})">
                                                             <x-heroicon-o-arrow-path class="h-4 w-4 animate-spin text-primary-600" />

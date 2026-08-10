@@ -26,14 +26,14 @@
                             <button
                                 type="button"
                                 wire:click="$set('activeTab', '{{ $tab }}')"
-                                class="rounded-lg px-2.5 py-2 transition sm:px-3 {{ $activeTab === $tab ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}"
+                                class="rounded-lg px-2.5 py-2 transition sm:px-3 {{ $activeTab === $tab ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
                             >
                                 {{ $label }}
                             </button>
                         @endforeach
                     </div>
                     <div class="flex items-center justify-end">
-                        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {{ $realtimeEnabled ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-slate-100 text-slate-500 ring-1 ring-slate-200' }}">
+                        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {{ $realtimeEnabled ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' }}">
                             <span class="h-2 w-2 rounded-full {{ $realtimeEnabled ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
                             {{ $realtimeEnabled ? __('Realtime ready') : __('Realtime off') }}
                         </span>
