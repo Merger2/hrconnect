@@ -11,7 +11,7 @@
         'primary' => 'border-transparent bg-primary-700 text-white hover:bg-primary-800 focus:ring-primary-600 active:bg-primary-900',
         'secondary' => 'border-gray-300 bg-white text-gray-800 hover:bg-gray-50 focus:ring-primary-600',
         'success' => 'border-transparent bg-emerald-700 text-white hover:bg-emerald-800 focus:ring-emerald-600 active:bg-emerald-900',
-        'warning' => 'border-transparent bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500 active:bg-amber-700',
+        'warning' => 'border-transparent bg-amber-700 text-white hover:bg-amber-800 focus:ring-amber-600 active:bg-amber-900',
         'danger' => 'border-transparent bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 active:bg-red-800',
         'ghost' => 'border-transparent bg-transparent text-gray-700 shadow-none hover:bg-gray-100 focus:ring-primary-600',
         'soft-primary' => 'border-transparent bg-primary-50 text-primary-700 shadow-none hover:bg-primary-100 focus:ring-primary-600',
