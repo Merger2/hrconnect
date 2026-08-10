@@ -67,7 +67,8 @@ class MyPerformance extends Component
 
         foreach ($this->evaluations as $evaluation) {
             $this->selfScores[$evaluation->id] = $evaluation->self_score ? ($evaluation->self_score / 20) : '';
-            $this->evidenceDescriptions[$evaluation->id] = $evaluation->evidence_description ?? '';
+            // Kolom penyimpanan adalah `comments` (sama dengan AppraisalManager admin).
+            $this->evidenceDescriptions[$evaluation->id] = $evaluation->comments ?? '';
         }
         $this->employeeNotes = $appraisal->employee_notes ?? '';
 
@@ -85,7 +86,7 @@ class MyPerformance extends Component
             $mappedSelfScore = isset($this->selfScores[$evaluation->id]) ? ($this->selfScores[$evaluation->id] * 20) : null;
             $evaluation->update([
                 'self_score' => $mappedSelfScore,
-                'evidence_description' => $this->evidenceDescriptions[$evaluation->id] ?? null,
+                'comments' => $this->evidenceDescriptions[$evaluation->id] ?? null,
             ]);
         }
 
