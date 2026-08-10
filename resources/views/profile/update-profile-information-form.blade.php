@@ -84,6 +84,18 @@
             @endif
         </div>
 
+        {{-- Marital Status (disimpan di tabel employees via UpdateUserProfileInformation) --}}
+        <div class="mb-4">
+            <label class="profile-field__label" for="marital_status">{{ __('Marital Status') }}</label>
+            <select id="marital_status" class="profile-field__input mt-1 block w-full"
+                wire:model="state.marital_status">
+                @foreach (\App\Enums\MaritalStatus::cases() as $marital)
+                    <option value="{{ $marital->value }}">{{ $marital->label() }}</option>
+                @endforeach
+            </select>
+            @error('marital_status') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+        </div>
+
         {{-- Actions --}}
         <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
             <div x-data="{ shown: false, timeout: null }"

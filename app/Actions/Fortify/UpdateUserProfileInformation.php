@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Enums\MaritalStatus;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -29,6 +30,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'nip' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:64'],
             'gender' => ['nullable', 'string', 'in:male,female'],
+            'marital_status' => ['nullable', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'address' => ['nullable', 'string', 'max:255'],
             'provinsi_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
             'kabupaten_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
@@ -65,10 +67,24 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     protected function syncEmployeeProfile(User $user, array $input): void
     {
-        $employeeData = [
+        $employee = $user->employee;
+
+        if (! $employee) {
+            // Users without an employee record (e.g. admin-only accounts) cannot
+            // persist employee columns — skip silently instead of failing.
+            return;
+        }
+
+        // State profil sekarang di-mount LENGKAP dari employees (lihat
+        // UpdateProfileInformationForm::mount) — null di sini berarti user
+        // benar-benar menghapus/reset field, jadi tetap ditulis. Jangan
+        // array_filter: itu akan mengunci nilai lama dan membatalkan reset.
+        // marital_status fallback 'single' karena kolom NOT NULL (default).
+        $employee->update([
             'nip' => $input['nip'] ?? null,
             'phone' => $input['phone'] ?? null,
             'gender' => isset($input['gender']) ? ($input['gender'] === 'male' ? 'L' : 'P') : null,
+            'marital_status' => $input['marital_status'] ?? 'single',
             'address_detail' => $input['address'] ?? null,
             'provinsi_kode' => $input['provinsi_kode'] ?? null,
             'kabupaten_kode' => $input['kabupaten_kode'] ?? null,
@@ -77,18 +93,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'birth_date' => $input['birth_date'] ?? null,
             'birth_place' => $input['birth_place'] ?? null,
             'division_id' => $input['division_id'] ?? null,
-        ];
-
-        $employee = $user->employee;
-
-        if ($employee) {
-            $employee->update($employeeData);
-
-            return;
-        }
-
-        // Users without an employee record (e.g. admin-only accounts) cannot
-        // persist employee columns — skip silently instead of failing.
+        ]);
     }
 
     /**

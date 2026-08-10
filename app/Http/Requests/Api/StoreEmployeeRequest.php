@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use App\Enums\EducationLevel;
+use App\Enums\MaritalStatus;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -27,7 +28,7 @@ class StoreEmployeeRequest extends FormRequest
             'division_id' => ['required', 'integer', 'exists:divisions,id'],
             'position_id' => ['required', 'integer', 'exists:positions,id'],
             'gender' => ['required', 'in:L,P'],
-            'marital_status' => ['required', 'string', 'max:50'],
+            'marital_status' => ['required', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'employment_type' => ['required', Rule::in(['permanent', 'contract', 'probation', 'intern'])],
             'birth_date' => ['required', 'date', 'before:today'],
             'join_date' => ['required', 'date'],
@@ -69,6 +70,7 @@ class StoreEmployeeRequest extends FormRequest
             'gender.required' => 'Jenis kelamin wajib dipilih.',
             'gender.in' => 'Jenis kelamin harus L atau P.',
             'marital_status.required' => 'Status pernikahan wajib diisi.',
+            'marital_status.in' => 'Status pernikahan tidak valid.',
             'employment_type.required' => 'Tipe karyawan wajib dipilih.',
             'employment_type.in' => 'Tipe karyawan tidak valid.',
             'birth_date.required' => 'Tanggal lahir wajib diisi.',

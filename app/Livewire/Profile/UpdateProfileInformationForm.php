@@ -46,6 +46,31 @@ class UpdateProfileInformationForm extends Component
         $this->state = array_merge([
             'email' => $user->email,
         ], $user->withoutRelations()->toArray());
+
+        // Kolom employee (phone, gender, alamat, wilayah, dll.) tidak ada di
+        // tabel users. Expose nilai asli dari employees supaya state mount
+        // lengkap — kalau dibiarkan null palsu, save profil akan menimpa
+        // kolom NOT NULL (mis. phone) dan selalu gagal 500/rollback.
+        $employee = $user->employee;
+
+        if ($employee) {
+            $this->state = array_merge($this->state, [
+                'nip' => $employee->nip,
+                'phone' => $employee->phone,
+                'gender' => $employee->gender?->value === 'L' ? 'male' : ($employee->gender?->value === 'P' ? 'female' : null),
+                'marital_status' => $employee->marital_status?->value ?? 'single',
+                'address' => $employee->address_detail,
+                'provinsi_kode' => $employee->provinsi_kode,
+                'kabupaten_kode' => $employee->kabupaten_kode,
+                'kecamatan_kode' => $employee->kecamatan_kode,
+                'kelurahan_kode' => $employee->kelurahan_kode,
+                'birth_date' => $employee->birth_date?->format('Y-m-d'),
+                'birth_place' => $employee->birth_place,
+                'division_id' => $employee->division_id,
+                'education_id' => $employee->education_id,
+                'job_title_id' => $employee->job_title_id,
+            ]);
+        }
     }
 
     /**
