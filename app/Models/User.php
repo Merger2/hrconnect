@@ -524,9 +524,20 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->employee?->division;
     }
 
+    /**
+     * Jabatan display untuk user.
+     *
+     * Prioritas: JobTitle terhubung via positions.job_title_id (punya level/rank
+     * untuk approval). Fallback: Position langsung (seeder/API mengisi positions
+     * tanpa job_title_id) supaya nama jabatan tetap tampil — return type
+     * `JobTitle|Position|null`. Pemanggil yang butuh `jobLevel`/`rank` wajib
+     * null-safe (`?->`) karena Position tidak punya relasi jobLevel.
+     *
+     * @return JobTitle|Position|null
+     */
     public function getJobTitleAttribute()
     {
-        return $this->employee?->position?->jobTitle;
+        return $this->employee?->position?->jobTitle ?? $this->employee?->position;
     }
 
     public function getEducationAttribute()
@@ -534,9 +545,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->employee?->education_level;
     }
 
+    /**
+     * Atasan langsung (User) untuk ditampilkan.
+     *
+     * Prioritas: kolom employees.manager_id (direct manager eksplisit).
+     * Fallback: employees.parent_id (hierarki seeder/legacy) supaya label
+     * "Direct Manager" tidak kosong padahal manajer sudah ditugaskan.
+     * Return `null` hanya bila employee benar-benar tanpa atasan (puncak hierarki).
+     */
     public function getDirectManagerAttribute()
     {
-        return $this->employee?->directManager?->user;
+        return $this->employee?->directManager?->user ?? $this->employee?->manager?->user;
     }
 
     public function getProvinsiAttribute()

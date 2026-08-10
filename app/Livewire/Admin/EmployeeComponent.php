@@ -231,7 +231,7 @@ class EmployeeComponent extends Component
     {
         $employeeQuery = User::where('group', 'user')
             ->managedBy(auth()->user())
-            ->with('employee.division', 'employee.position', 'employee.directManager')
+            ->with('employee.division', 'employee.position', 'employee.directManager.user', 'employee.manager.user')
             ->when($this->search, function (Builder $q) {
                 $q->where(function ($subQ) {
                     $subQ->where('name', 'like', '%'.$this->search.'%')
