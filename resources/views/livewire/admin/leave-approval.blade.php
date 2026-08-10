@@ -108,7 +108,7 @@
                                         <x-heroicon-m-paper-clip class="h-4 w-4" /> {{ __('View') }}
                                     </a>
                                 @else
-                                    <span class="text-gray-400">-</span>
+                                    <span class="text-slate-500">-</span>
                                 @endif
                             </dd>
                         </div>
@@ -228,7 +228,7 @@
                                         <span>{{ __('View') }}</span>
                                     </a>
                                 @else
-                                    <span class="text-gray-400">-</span>
+                                    <span class="text-slate-500">-</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right">

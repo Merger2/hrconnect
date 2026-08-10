@@ -106,7 +106,7 @@
                                         <x-heroicon-m-paper-clip class="h-4 w-4" /> {{ __('View') }}
                                     </a>
                                 @else
-                                    <span class="text-gray-400 text-xs">{{ __('No File') }}</span>
+                                    <span class="text-slate-500 text-xs">{{ __('No File') }}</span>
                                 @endif
                             </dd>
                         </div>
@@ -130,7 +130,7 @@
                                 <x-heroicon-m-x-circle class="h-5 w-5" />
                             </x-actions.icon-button>
                         @else
-                            <span class="text-xs text-gray-400">{{ __('Completed') }}</span>
+                            <span class="text-xs text-slate-500">{{ __('Completed') }}</span>
                         @endif
                     </div>
                 </article>
@@ -207,7 +207,7 @@
                                         <span>{{ __('View') }}</span>
                                     </a>
                                 @else
-                                    <span class="text-gray-400 text-xs">{{ __('No File') }}</span>
+                                    <span class="text-slate-500 text-xs">{{ __('No File') }}</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">
@@ -259,7 +259,7 @@
                                         </x-actions.icon-button>
                                     </div>
                                 @else
-                                    <span class="text-xs text-gray-400">{{ __('Completed') }}</span>
+                                    <span class="text-xs text-slate-500">{{ __('Completed') }}</span>
                                 @endif
                             </td>
                         </tr>

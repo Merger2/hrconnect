@@ -126,7 +126,7 @@
                                         {{ __(ucfirst($overtime->status?->value ?? $overtime->status)) }}
                                     </x-admin.status-badge>
                                     @if ($overtime->approvedBy)
-                                        <span class="text-[10px] text-gray-400">{{ __('by') }}
+                                        <span class="text-[10px] text-slate-500">{{ __('by') }}
                                             {{ $overtime->approvedBy->name }}</span>
                                     @endif
                                 @endif
