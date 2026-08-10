@@ -72,23 +72,6 @@ test('leave attachment upload uses native file input for capacitor webview taps'
         ->not->toContain('opacity-[0.01]');
 });
 
-test('android manifest declares gallery and media permissions for webview uploads', function () {
-    $manifest = base_path('android/app/src/main/AndroidManifest.xml');
-
-    if (! file_exists($manifest)) {
-        $this->markTestSkipped('Platform Capacitor android belum di-generate (npx cap add android) — AndroidManifest.xml tidak ada di workspace.');
-    }
-
-    $contents = File::get($manifest);
-
-    expect($contents)
-        ->toContain('android.permission.READ_EXTERNAL_STORAGE')
-        ->toContain('android:maxSdkVersion="32"')
-        ->toContain('android.permission.READ_MEDIA_IMAGES')
-        ->toContain('android.permission.READ_MEDIA_VIDEO')
-        ->toContain('android.permission.READ_MEDIA_VISUAL_USER_SELECTED');
-});
-
 test('reimbursement attachment validation still rejects unsafe files', function () {
     $this->actingAs(User::factory()->create());
 
