@@ -5,6 +5,12 @@ import { fileURLToPath } from 'url';
 /**
  * Playwright configuration for HRConnect E2E tests
  * @see https://playwright.dev/docs/test-configuration
+ *
+ * Catatan 2026-08-10: project role yang mereferensikan spec legacy Paspapan /
+ * email dev (approval-workflow, main-smoke, payroll, login-critical, profile,
+ * post-login, test-profile, login_and_dashboard_check) dihapus bersama
+ * spec-nya — kredensialnya tidak ada di DB seeder, tidak akan pernah hijau.
+ * Hanya project dengan spec nyata yang dipertahankan.
  */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const authDir = path.join(__dirname, 'tests/e2e/.auth');
@@ -37,7 +43,7 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
+    // Employee-authenticated tests (24 halaman user: clock-in, KB chat, payroll, dll)
     {
       name: 'chromium-employee',
       testMatch: /employee-pages\.spec\.ts/,
@@ -50,104 +56,10 @@ export default defineConfig({
       },
     },
 
-    // HR-authenticated tests (face enrollment, master data, full role coverage)
-    {
-      name: 'chromium-hr',
-      testMatch: /(face-enrollment|master-data|role-hr)\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'hr.json'),
-      },
-    },
-
-    // Manager-authenticated tests
-    {
-      name: 'chromium-manager',
-      testMatch: /role-manager\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'manager.json'),
-      },
-    },
-
-    // Finance-authenticated tests
-    {
-      name: 'chromium-finance',
-      testMatch: /role-finance\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'finance.json'),
-      },
-    },
-
-    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement)
-    {
-      name: 'chromium-admin',
-      testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring|payroll-config|auth-enhanced|face-recognition-api|approval-workflow|role-super-admin)\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'admin.json'),
-      },
-    },
-
-    // Cross-role console, page-error, and network audit
-    {
-      name: 'chromium-audit',
-      testMatch: /console-network-audit\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
+    // PWA: manifest + service worker (guest, tanpa login)
     {
       name: 'chromium-pwa',
       testMatch: /pwa\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
-    {
-      name: 'chromium-ux',
-      testMatch: /user-experience\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
-    {
-      name: 'chromium-profile',
-      testMatch: /profile\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
-    {
-      name: 'chromium-auth',
-      testMatch: /(auth|login-flow-test|login-critical)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],

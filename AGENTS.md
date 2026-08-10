@@ -164,7 +164,7 @@ canSend() { return this.$wire?.question?.trim()?.length >= 5; }
 - ✅ **`tests/e2e/auth.setup.ts` TRACKED** sejak commit `4190822` (fix(audit) 2026-08-05) — project `setup` di `playwright.config.js` (testMatch `/auth\.setup\.ts/`) me-re-generate storage state 5 role via **endpoint dev `GET /__e2e-login`** (token `services.e2e.login_token`, default `local-apk-e2e`, hanya aktif di env local/testing), bukan fill form login. Semua project role punya `dependencies: ['setup']`.
 - ⚠️ Storage states `.auth/*.json` hasil generate tetap **gitignored** — di checkout fresh jalankan `npx playwright test --project=setup` dulu supaya `.auth/*.json` terbentuk; jangan hapus `.auth/` (semua project E2E butuh state-nya).
 - Bottom nav: Beranda, Jadwal, Absen (`/scan`), Tasks, Profil.
-- Project lain: `chromium-hr`, `chromium-manager`, `chromium-finance`, `chromium-admin`, `chromium-audit`, `chromium-pwa`, `chromium-ux`, `chromium-profile`, `chromium-auth` — pilih sesuai role yang disentuh. Semua butuh `permissions: ['camera','geolocation']` (sudah di config).
+- 🧹 **2026-08-10: spec legacy Paspapan + email dev DIHAPUS** (approval-workflow, main-smoke, payroll, login-critical, profile, post-login, test-profile, login_and_dashboard_check) — kredensialnya (`apk.demo.*@paspapan.test`, `fikhahldiansyah28@gmail.com`) tidak ada di DB seeder, tidak pernah hijau. Project config yang jadi kosong ikut dihapus. **Project aktif:** `setup`, `chromium-employee` (24 halaman user), `chromium-pwa` (manifest + SW). Semua butuh `permissions: ['camera','geolocation']` (sudah di config).
 
 ---
 
