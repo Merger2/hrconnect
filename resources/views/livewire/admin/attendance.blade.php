@@ -344,7 +344,7 @@
                                             </x-actions.icon-button>
                                         </div>
                                     @else
-                                        <span class="text-gray-400">-</span>
+                                        <span class="text-slate-500">-</span>
                                     @endif
                                 </td>
                             @endif

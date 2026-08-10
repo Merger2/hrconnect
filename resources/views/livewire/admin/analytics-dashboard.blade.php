@@ -215,7 +215,7 @@
                         <x-heroicon-o-wallet class="h-6 w-6" />
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-600">
+                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-700">
                     <span>{{ __('Needs finance review') }}</span>
                     <x-heroicon-s-arrow-right class="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
@@ -232,7 +232,7 @@
                         <x-heroicon-o-document-text class="h-6 w-6" />
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-amber-600">
+                <div class="mt-4 flex items-center gap-2 text-xs font-medium text-amber-700">
                     <span>{{ __('Pending issuance') }}</span>
                     <x-heroicon-s-arrow-right class="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>

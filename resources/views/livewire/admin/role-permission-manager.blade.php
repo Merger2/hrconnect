@@ -68,7 +68,7 @@
                                         @endif
                                     </div>
 
-                                    <p class="text-xs uppercase tracking-[0.22em] text-slate-400">{{ $role->slug }}</p>
+                                    <p class="text-xs uppercase tracking-[0.22em] text-slate-600">{{ $role->slug }}</p>
 
                                     @if ($role->description)
                                         <p class="sr-only">{{ $role->description }}</p>
@@ -90,7 +90,7 @@
                                                 @foreach (array_slice($previewModules, 0, 6) as $module)
                                                     <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
                                                         {{ $module['label'] }}
-                                                        <span class="ml-1 text-slate-400">({{ implode(', ', array_slice($module['actions'], 0, 2)) }})</span>
+                                                        <span class="ml-1 text-slate-600">({{ implode(', ', array_slice($module['actions'], 0, 2)) }})</span>
                                                     </span>
                                                 @endforeach
                                                 @if (count($previewModules) > 6)

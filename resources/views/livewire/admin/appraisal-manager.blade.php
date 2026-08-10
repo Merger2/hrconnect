@@ -46,7 +46,7 @@
                             class="text-sm font-bold text-green-700">{{ __('Appraisal Window: OPEN') }}</span>
                         @if ($periodLabel)
                             <span
-                                class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full">{{ $periodLabel }}</span>
+                                class="text-xs text-green-800 bg-green-100 px-2 py-0.5 rounded-full">{{ $periodLabel }}</span>
                         @endif
                     @else
                         <x-heroicon-m-lock-closed class="h-5 w-5 text-red-600" />

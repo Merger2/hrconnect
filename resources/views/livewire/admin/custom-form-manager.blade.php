@@ -18,7 +18,7 @@
                         <button
                             type="button"
                             wire:click="$set('activeTab', '{{ $tab }}')"
-                            class="rounded-lg px-2.5 py-2 transition sm:px-3 {{ $activeTab === $tab ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}"
+                            class="rounded-lg px-2.5 py-2 transition sm:px-3 {{ $activeTab === $tab ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
                         >
                             {{ $label }}
                         </button>
