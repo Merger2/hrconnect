@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             \Laravolt\Indonesia\Seeds\DatabaseSeeder::class,
+            WilayahSeeder::class,
             RoleAndPermissionSeeder::class,
             SuperAdminSeeder::class,
             CompanyAndDivisionSeeder::class,

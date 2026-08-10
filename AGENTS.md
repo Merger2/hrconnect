@@ -49,6 +49,7 @@
 | `npm run test:e2e:headed` / `:debug` / `:report` | Playwright headed / debug / HTML report |
 | `npm run build` | Build assets |
 | `php artisan db:seed --class=KnowledgeBaseSeeder` | **Wajib** — isi KB entries + 768D embeddings. RAG gak jalan tanpa ini |
+| `php artisan db:seed --class=WilayahSeeder` | **Wajib** — isi tabel `wilayah` (±91 ribu baris: 38 provinsi → 514 kota → 7.285 kecamatan → 83.762 desa/kelurahan, dari CSV paket `laravolt/indonesia`). Dropdown alamat karyawan (provinsi→kelurahan) kosong tanpa ini. Sudah dipanggil otomatis oleh `db:seed` penuh |
 
 ---
 
