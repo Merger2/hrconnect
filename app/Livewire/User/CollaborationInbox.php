@@ -126,7 +126,7 @@ class CollaborationInbox extends Component
     {
         $user = Auth::user();
         $threads = $this->visibleThreads($user)
-            ->with(['company:id,name', 'project:id,name', 'members:id,name,profile_photo_path'])
+            ->with(['company:id,name', 'members:id,name,profile_photo_path'])
             ->withCount('messages')
             ->when($this->search !== '', fn (Builder $query) => $query->where('title', 'like', '%'.$this->search.'%'))
             ->latest()
