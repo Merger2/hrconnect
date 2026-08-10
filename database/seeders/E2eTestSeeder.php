@@ -61,13 +61,13 @@ class E2eTestSeeder extends Seeder
             'ops' => Division::where('code', 'OPS')->firstOrFail(),
         ];
 
-        $posMap = Position::whereIn('code', ['IT-STAFF', 'HR-MGR', 'HR-STAFF', 'FIN-STAFF', 'OPS-STAFF'])->get()->keyBy('code');
+        $posMap = Position::whereIn('code', ['IT-STAFF', 'HR-MGR', 'IT-MGR', 'FIN-STAFF', 'OPS-MGR'])->get()->keyBy('code');
 
         $employeeData = [
             'employee@hrconnect.test' => ['div' => 'it',  'pos' => 'IT-STAFF',   'emp_no' => 'EMP-E2E-001', 'full_name' => 'Test Employee', 'nik' => '3276010000000001', 'npwp' => '99.999.999.9-999.001', 'phone' => '081900000001'],
             'hr@hrconnect.test' => ['div' => 'hr',  'pos' => 'HR-MGR',     'emp_no' => 'EMP-E2E-002', 'full_name' => 'Test HR',       'nik' => '3276010000000002', 'npwp' => '99.999.999.9-999.002', 'phone' => '081900000002'],
             'test@hrconnect.test' => ['div' => 'it',  'pos' => 'IT-STAFF',   'emp_no' => 'EMP-E2E-003', 'full_name' => 'Test User',     'nik' => '3276010000000003', 'npwp' => '99.999.999.9-999.003', 'phone' => '081900000003'],
-            'manager@hrconnect.test' => ['div' => 'ops', 'pos' => 'OPS-STAFF',  'emp_no' => 'EMP-E2E-004', 'full_name' => 'Test Manager',  'nik' => '3276010000000004', 'npwp' => '99.999.999.9-999.004', 'phone' => '081900000004'],
+            'manager@hrconnect.test' => ['div' => 'ops', 'pos' => 'OPS-MGR',   'emp_no' => 'EMP-E2E-004', 'full_name' => 'Test Manager',  'nik' => '3276010000000004', 'npwp' => '99.999.999.9-999.004', 'phone' => '081900000004'],
             'finance@hrconnect.test' => ['div' => 'fin', 'pos' => 'FIN-STAFF',  'emp_no' => 'EMP-E2E-005', 'full_name' => 'Test Finance',  'nik' => '3276010000000005', 'npwp' => '99.999.999.9-999.005', 'phone' => '081900000005'],
         ];
 
@@ -113,6 +113,10 @@ class E2eTestSeeder extends Seeder
                 continue;
             }
 
+            // Cari parent_id dari IT Manager (untuk approval flow E2E)
+            $itManager = User::where('email', 'employee1@hrconnect.local')->first();
+            $parentId = $itManager?->employee?->id;
+
             Employee::firstOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -126,19 +130,20 @@ class E2eTestSeeder extends Seeder
                     'npwp' => $emp['npwp'],
                     'phone' => $emp['phone'],
                     'gender' => Gender::LAKI_LAKI,
-                    'marital_status' => MaritalStatus::SINGLE,
+                    'marital_status' => $emp['pos'] === 'OPS-MGR' ? MaritalStatus::MARRIED : MaritalStatus::SINGLE,
                     'blood_type' => BloodType::O_PLUS,
                     'status' => EmployeeStatus::ACTIVE,
                     'birth_date' => '1995-06-15',
                     'join_date' => '2024-01-01',
                     'education_level' => EducationLevel::BACHELOR,
-                    'institution_name' => 'Universitas Indonesia',
-                    'major' => 'Teknik Informatika',
+                    'institution_name' => ['Universitas Indonesia', 'Institut Teknologi Bandung', 'BINUS University'][array_rand(['Universitas Indonesia', 'Institut Teknologi Bandung', 'BINUS University'])],
+                    'major' => $emp['div'] === 'fin' ? 'Akuntansi' : ($emp['div'] === 'hr' ? 'Psikologi' : 'Teknik Informatika'),
                     'graduation_year' => 2018,
                     'salary_type' => SalaryType::MONTHLY,
                     'shift_id' => Shift::where('name', 'Office Hour')->first()?->id,
-                    'address_detail' => 'Jl. Test No. 1, Jakarta',
+                    'address_detail' => 'Jl. Test No. '.rand(1, 50).', Jakarta',
                     'pin' => Hash::make('123456'),
+                    'parent_id' => $emp['pos'] === 'OPS-MGR' || $emp['pos'] === 'HR-MGR' ? null : $parentId,
                 ]
             );
         }

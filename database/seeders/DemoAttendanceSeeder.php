@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\AttendanceStatus;
+use App\Enums\EmployeeStatus;
 use App\Enums\VerificationMethod;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -27,7 +28,6 @@ class DemoAttendanceSeeder extends Seeder
 {
     public function run(): void
     {
-        // Fallback shift default (CompanyEmployeesSeeder tidak set shift_id di employee)
         $defaultShiftId = Shift::where('name', 'Office Hour')->first()?->id;
 
         $today = CarbonImmutable::today();
@@ -47,6 +47,7 @@ class DemoAttendanceSeeder extends Seeder
 
         $employees = Employee::query()
             ->whereIn('user_id', $users->pluck('id'))
+            ->where('status', EmployeeStatus::ACTIVE->value)
             ->get()
             ->keyBy('user_id');
 
