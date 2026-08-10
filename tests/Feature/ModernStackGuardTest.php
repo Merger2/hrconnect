@@ -153,25 +153,17 @@ test('blade views use livewire four component tags and tailwind four safe utilit
     }
 });
 
-test('pull to refresh asset is loaded with animated pill surface and mobile guards', function () {
-    $script = file_get_contents(public_path('js/pulltorefresh.js'));
+test('pull to refresh dead asset stays removed from layout, css, and public', function () {
     $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));
     $css = file_get_contents(resource_path('css/app.css'));
 
-    expect($script)
-        ->toContain('@keyframes __PREFIX__pill')
-        ->toContain('calc(var(--ptr-progress) * 100%)')
-        ->toContain('.__PREFIX__refresh .__PREFIX__surface')
-        ->toContain('data-ptr-state')
-        ->toContain('Pull to sync this page')
-        ->not->toContain('__PREFIX__spinner')
-        ->not->toContain('conic-gradient')
-        ->not->toContain('__PREFIX__rail-fill')
-        ->and($layout)
-        ->toContain("asset('js/pulltorefresh.js')")
-        ->and($css)
-        ->toContain('body.is-native-scanning .ptr--ptr')
-        ->toContain('display: none !important');
+    // pulltorefresh.js dihapus 2026-08-08 (commit 27806c0): dead asset,
+    // 0 init call, hanya script tag tanpa aktivasi. Guard negatif ini
+    // memastikan asset tidak re-introduce.
+    expect(file_exists(public_path('js/pulltorefresh.js')))->toBeFalse()
+        ->and($layout)->not->toContain("asset('js/pulltorefresh.js')")
+        ->and($layout)->not->toContain('__PREFIX__')
+        ->and($css)->not->toMatch('/\.ptr--ptr/');
 });
 
 /**
