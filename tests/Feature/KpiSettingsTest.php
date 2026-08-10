@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Livewire\Admin\Settings\KpiSettings;
 use App\Models\KpiGroup;
 use App\Models\KpiTemplate;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);

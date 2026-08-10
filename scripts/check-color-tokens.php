@@ -26,6 +26,8 @@ declare(strict_types=1);
  * Pengecualian teknis (wajib literal, didokumentasikan di design.md):
  *   - admin/attendances/report.blade.php   (standalone print, tanpa @vite)
  *   - errors/minimal.blade.php             (standalone, token lokal sendiri)
+ *   - resources/css/critical-guest.css     (GENERATED oleh extract-critical-css.mjs
+ *     dari bundle terkompilasi — warna resolve oklch/rgba bukan hand-written)
  *   - <meta name="theme-color">            (browser tak resolve var() di meta)
  *   - SVG data-URI (url("data:image/svg+xml,…")) — string statis
  *   - rgb(0 0 0 / …)                       (shadow netral hitam, universal)
@@ -208,8 +210,19 @@ scanRgb($content, 'resources/css/app.css', $failures);
 
 // ───────────────────── 2. CSS lain (vendor/custom) ─────────────────────
 
+// critical-guest.css = GENERATED (extract-critical-css.mjs, dari bundle
+// terkompilasi) — warna resolve di luar @theme bukan pelanggaran token.
+$cssExceptions = [
+    'resources/css/critical-guest.css',
+];
+
 foreach (findFiles($root.'/resources/css', static fn (string $p): bool => str_ends_with($p, '.css') && ! str_ends_with($p, '/app.css')) as $file) {
     $relative = relativePath($root, $file);
+
+    if (in_array($relative, $cssExceptions, true)) {
+        continue; // generated — pengecualian terdokumentasi (design.md)
+    }
+
     $css = stripComments((string) file_get_contents($file), 'css');
     $scanned['css']++;
     scanHex($css, $relative, $failures);

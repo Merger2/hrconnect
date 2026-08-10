@@ -368,6 +368,14 @@ warna lewat token.** Berlaku untuk seluruh source: `app.css`, blade, JS.
    mail theme, Jetstream) — bukan desain kita; tidak ditoken.
    Catatan: `Mail\PayrollPayslipPdfMail` body email pakai default mail theme
    vendor ini (PDF lampirannya yang branded via `pdf/payslip`).
+7. **`resources/css/critical-guest.css`** — GENERATED oleh
+   `scripts/extract-critical-css.mjs` dari bundle terkompilasi (Tailwind
+   sudah me-resolve `var(--color-*)` → nilai `oklch()/rgba()` literal saat
+   build). Isinya mesin, bukan tangan; di-inline di `guest-layout` untuk
+   menghilangkan CSS render-blocking di critical path halaman guest/login.
+   Regenerasi: `node scripts/extract-critical-css.mjs --urls /login --guest
+   --out resources/css/critical-guest.css`. Jangan edit manual — nanti
+   tertimpa saat regen.
 
 **Drift palet (disengaja):** nilai warna legacy PDF/email dipetakan ke token
 terdekat untuk unifikasi — contoh `#111827→primary-900`, `#4b5563→primary-600`,
