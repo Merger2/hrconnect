@@ -46,7 +46,7 @@ export default defineConfig({
     // Employee-authenticated tests (24 halaman user: clock-in, KB chat, payroll, dll)
     {
       name: 'chromium-employee',
-      testMatch: /employee-pages\.spec\.ts/,
+      testMatch: /(employee-pages|user-tomselect)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
