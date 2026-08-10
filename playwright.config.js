@@ -56,6 +56,23 @@ export default defineConfig({
       },
     },
 
+    // Admin-authenticated regression tests (tom-select persistence, dll)
+    {
+      name: 'chromium-admin',
+      testMatch: /admin-tomselect\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'admin.json'),
+        // Block service worker: SW PWA meng-intercept navigasi kedua dalam satu
+        // test dan meng-abort page.goto (net::ERR_ABORTED). Test ini untuk
+        // regresi form/tom-select, bukan PWA (pwa.spec.ts khusus SW).
+        serviceWorkers: 'block',
+      },
+    },
+
     // PWA: manifest + service worker (guest, tanpa login)
     {
       name: 'chromium-pwa',
