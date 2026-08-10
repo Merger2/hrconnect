@@ -66,6 +66,16 @@
                         <x-forms.input-error for="form.employment_type" class="mt-2" />
                     </div>
 
+                    <div>
+                        <x-forms.label for="create_marital_status" value="{{ __('Marital Status') }}" />
+                        <x-forms.select id="create_marital_status" wire:model="form.marital_status" class="mt-1 block w-full">
+                            @foreach (\App\Enums\MaritalStatus::cases() as $marital)
+                                <option value="{{ $marital->value }}" @selected($form->marital_status === $marital->value)>{{ $marital->label() }}</option>
+                            @endforeach
+                        </x-forms.select>
+                        <x-forms.input-error for="form.marital_status" class="mt-2" />
+                    </div>
+
                     <div class="sm:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <x-forms.label for="create_provinsi" value="{{ __('Province') }}" />

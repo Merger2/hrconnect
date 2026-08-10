@@ -443,6 +443,17 @@
                         <x-forms.input-error for="form.employment_type" class="mt-2" />
                     </div>
 
+                    <!-- Marital Status -->
+                    <div>
+                        <x-forms.label for="create_marital_status" value="{{ __('Marital Status') }}" />
+                        <x-forms.select id="create_marital_status" wire:model="form.marital_status" class="mt-1 block w-full">
+                            @foreach (\App\Enums\MaritalStatus::cases() as $marital)
+                                <option value="{{ $marital->value }}" @selected($form->marital_status === $marital->value)>{{ $marital->label() }}</option>
+                            @endforeach
+                        </x-forms.select>
+                        <x-forms.input-error for="form.marital_status" class="mt-2" />
+                    </div>
+
                     <!-- Wilayah Selection (Create) -->
                     <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -679,6 +690,17 @@
                             <option value="intern">{{ __('Intern') }}</option>
                         </x-forms.select>
                         <x-forms.input-error for="form.employment_type" class="mt-2" />
+                    </div>
+
+                    <!-- Marital Status (Edit) -->
+                    <div class="sm:col-span-2">
+                        <x-forms.label for="edit_marital_status" value="{{ __('Marital Status') }}" />
+                        <x-forms.select id="edit_marital_status" wire:model="form.marital_status" class="mt-1 block w-full">
+                            @foreach (\App\Enums\MaritalStatus::cases() as $marital)
+                                <option value="{{ $marital->value }}" @selected($form->marital_status === $marital->value)>{{ $marital->label() }}</option>
+                            @endforeach
+                        </x-forms.select>
+                        <x-forms.input-error for="form.marital_status" class="mt-2" />
                     </div>
 
                     <!-- Wilayah Selection (Edit) -->

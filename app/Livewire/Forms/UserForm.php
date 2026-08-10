@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Actions\Hr\SyncUserRoles;
 use App\Enums\EducationLevel;
+use App\Enums\MaritalStatus;
 use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\User;
@@ -34,6 +35,8 @@ class UserForm extends Form
     public $password = null;
 
     public $gender = null;
+
+    public $marital_status = 'single';
 
     public $address = '';
 
@@ -102,6 +105,7 @@ class UserForm extends Form
             'phone' => [$requiredOrNullable, 'string', 'min:5', 'max:255'],
             'password' => ['nullable', 'string', 'min:4', 'max:255'],
             'gender' => [$requiredOrNullable, 'in:male,female'],
+            'marital_status' => ['nullable', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'address' => [$requiredOrNullable, 'string', 'max:255'],
             // Wilayah (provinsi→kelurahan) OPSIONAL: konsisten dengan kolom DB
             // nullable, StoreEmployeeRequest (API) dan UpdateUserProfileInformation
@@ -154,6 +158,7 @@ class UserForm extends Form
         $this->phone = $user->phone;
         $this->password = null;
         $this->gender = $user->gender;
+        $this->marital_status = $user->employee?->marital_status?->value ?? 'single';
         $this->address = $user->address;
         $this->provinsi_kode = $user->provinsi_kode;
         $this->kabupaten_kode = $user->kabupaten_kode;
@@ -324,6 +329,7 @@ class UserForm extends Form
         $this->manager_id = $this->manager_id ?: null;
         $this->education_id = $this->education_id ?: null;
         $this->employment_status = $this->employment_status ?: Employee::EMPLOYMENT_STATUS_ACTIVE;
+        $this->marital_status = $this->marital_status ?: 'single';
         $this->provinsi_kode = $this->provinsi_kode ?: null;
         $this->kabupaten_kode = $this->kabupaten_kode ?: null;
         $this->kecamatan_kode = $this->kecamatan_kode ?: null;
@@ -397,6 +403,7 @@ class UserForm extends Form
             'nip' => $this->nip,
             'phone' => $this->phone,
             'gender' => $this->gender === 'male' ? 'L' : 'P',
+            'marital_status' => $this->marital_status,
             'address_detail' => $this->address,
             'provinsi_kode' => $this->provinsi_kode,
             'kabupaten_kode' => $this->kabupaten_kode,
