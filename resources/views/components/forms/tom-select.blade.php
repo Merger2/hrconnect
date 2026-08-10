@@ -207,20 +207,47 @@
 
 
 
-<div wire:ignore x-data="window.tomSelectInput ? tomSelectInput(
-    @js($options),
-    @js($placeholder),
-    @if (isset($__livewire) && $wireModel) @entangle($attributes->wire('model')) @else @js($selected) @endif,
-    @js((bool) $disabled)
-) : {}" class="{{ $wrapperClass }}" @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
+{{-- Inisialisasi TomSelect DIHAPUS dari x-data (fix race 2026-08-11): sebelumnya
+     `x-data="window.tomSelectInput ? tomSelectInput(...) : {}"` — kalau module
+     app.js belum selesai load saat Alpine mengevaluasi ekspresi ini, hasilnya `{}`
+     (silent) → dropdown tanpa handler sync (change tidak tersimpan, submit-on-change
+     mati). Sekarang x-data HANYA membawa model (entangle/x-modelable), dan init
+     TomSelect sepenuhnya di `initUiPickers` (resources/js/app.js, DOM-ready +
+     hook Livewire) yang deterministik. `value` = entangle (interceptor) atau
+     @js($selected) statis. --}}
+<div wire:ignore
+     x-data="{ value: @if (isset($__livewire) && $wireModel) @entangle($attributes->wire('model')) @else @js($selected) @endif }"
+     data-ui-tomselect-root
+     class="{{ $wrapperClass }}"
+     @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
 
     <select
         x-ref="select"
         data-ui-tomselect
+        @if ($submitOnChange) data-submit-on-change="1" @endif
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $disabled ? 'disabled' : '' }}
         {{ $attributes->whereDoesntStartWith(['wire:model', 'x-model'])->except(['options', 'placeholder', 'selected', 'class', 'aria-label']) }}
         placeholder="{{ $placeholder }}">
+        {{-- Render :options (fix 2026-08-11: sebelumnya $options diterima tapi tidak
+             pernah dirender → dropdown berbasis options kosong, filter admin 0 opsi).
+             Bentuk didukung: list ['id'=>, 'name'=>] (mayoritas caller) dan asosiatif
+             value=>label. Slot ({{ $slot }}) tetap dirender setelahnya utk caller yang
+             mengirim option manual (mis. shift-swap empty option). --}}
+        @if (count($options))
+            @foreach ($options as $optionKey => $option)
+                @php
+                    if (is_array($option)) {
+                        $optionValue = $option['id'] ?? $optionKey;
+                        $optionLabel = $option['name'] ?? $optionValue;
+                    } else {
+                        $optionValue = $optionKey;
+                        $optionLabel = $option;
+                    }
+                @endphp
+                <option value="{{ $optionValue }}" @selected((string) $optionValue === (string) $selected)>{{ $optionLabel }}</option>
+            @endforeach
+        @endif
         {{ $slot }}
     </select>
 </div>

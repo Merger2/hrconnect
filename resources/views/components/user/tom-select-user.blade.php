@@ -123,13 +123,12 @@
 </style>
 @endonce
 
+{{-- Inisialisasi TomSelect DIHAPUS dari x-data (fix race 2026-08-11, lihat
+     komponen forms.tom-select untuk penjelasan lengkap) — init sepenuhnya di
+     initUiPickers (resources/js/app.js). --}}
 <div wire:ignore
-     x-data="window.tomSelectInput ? tomSelectInput(
-        @js($options), 
-        @js($placeholder),
-        @if(isset($__livewire) && $attributes->wire('model')->value()) @entangle($attributes->wire('model')) @else @js($selected) @endif,
-        {{ $disabled ? 'true' : 'false' }}
-     ) : {}"
+     x-data="{ value: @if(isset($__livewire) && $attributes->wire('model')->value()) @entangle($attributes->wire('model')) @else @js($selected) @endif }"
+     data-ui-tomselect-root
      class="w-full ts-wrapper-user relative">
     
     <select
@@ -138,6 +137,24 @@
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $attributes->whereDoesntStartWith('wire:model')->except(['options', 'placeholder', 'aria-label']) }}
         placeholder="{{ $placeholder }}">
+        {{-- Render :options (fix 2026-08-11: $options sebelumnya tidak pernah
+             dirender → dropdown berbasis options kosong). Bentuk didukung:
+             list ['id'=>, 'name'=>] (attendance-history, shift-swap) dan
+             asosiatif value=>label. Slot tetap dirender setelahnya. --}}
+        @if (count($options))
+            @foreach ($options as $optionKey => $option)
+                @php
+                    if (is_array($option)) {
+                        $optionValue = $option['id'] ?? $optionKey;
+                        $optionLabel = $option['name'] ?? $optionValue;
+                    } else {
+                        $optionValue = $optionKey;
+                        $optionLabel = $option;
+                    }
+                @endphp
+                <option value="{{ $optionValue }}" @selected((string) $optionValue === (string) $selected)>{{ $optionLabel }}</option>
+            @endforeach
+        @endif
         {{ $slot }}
     </select>
 </div>

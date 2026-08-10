@@ -111,8 +111,8 @@ test('employee component can assign a direct manager', function () {
     $manager = createEmployeeWithUser();
     $employee = createEmployeeWithUser([
         'parent_id' => null,
-        // Wilayah wajib untuk akun group=user (rule required) — tanpanya
-        // validate() gagal di provinsi_kode sebelum update berjalan.
+        // Wilayah OPSIONAL sejak 2026-08-11 (UserForm nullable, konsisten dgn
+        // DB/API/Fortify) — data berikut sekadar sample lengkap.
         'provinsi_kode' => '11',
         'kabupaten_kode' => '11.01',
         'kecamatan_kode' => '11.01.01',

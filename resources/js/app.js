@@ -181,20 +181,52 @@ window.PasPapanAlert = {
 
 document.addEventListener("DOMContentLoaded", () => bootSseNotifications());
 
-window.tomSelectInput = (options, placeholder, selected, disabled) => ({
-    init() {
-        this.$nextTick(() => {
-            const el = this.$refs.select;
-            if (!el || el.tomselect) return;
+// Inisialisasi satu elemen select menjadi TomSelect. getOrCreate: kalau select
+// sudah punya instance (mis. safety net initUiPickers duluan sebelum Alpine
+// factory dievaluasi), return instance yang ada — pemanggil tetap bisa
+// register change handler tanpa double-init.
+const getOrCreateTomSelect = (select, { placeholder }) => {
+    let ts = select.tomselect;
 
-            new TomSelect(el, {
-                placeholder: placeholder || 'Select an option',
-                maxOptions: null,
-                allowEmptyOption: true,
-            });
+    if (!ts) {
+        ts = new TomSelect(select, {
+            placeholder: placeholder || 'Select an option',
+            maxOptions: null,
+            allowEmptyOption: true,
         });
-    },
-});
+        select.tomselect = ts;
+    }
+
+    return ts;
+};
+
+// Nilai awal widget: entangle/x-model (initial) lebih diutamakan. Saat
+// KOSONG jangan fallback ke apa pun — biarkan placeholder tampil hingga user
+// memilih. Catatan: jangan fallback ke select.value / option[selected] karena
+// TomSelect MENANDAI option[selected] sendiri saat sync (nilai bisa terkunci
+// ke opsi yang salah), dan scope.value (entangle atau @js($selected)) sudah
+// menjadi source of truth di x-data komponen.
+const resolveInitial = (initial) => {
+    if (initial !== null && initial !== undefined && initial !== '') {
+        return initial;
+    }
+
+    return null;
+};
+
+// Akses scope Alpine (x-data wrapper) secara LAZY. Dipanggil dari dalam
+// handler change dan saat init — kalau Alpine belum siap (module app.js
+// selesai sebelum Livewire/Alpine boot), return null dan dicoba lagi nanti
+// (morph.updated / livewire:init memanggil initUiPickers ulang).
+const resolveAlpineScope = (el) => {
+    if (!el || typeof window.Alpine === 'undefined') return null;
+
+    try {
+        return Alpine.$data(el);
+    } catch (e) {
+        return null;
+    }
+};
 
 // ─── Flatpickr initializer ─────────────────────────────────────────────
 // Scans for [data-ui-picker] elements (dan [data-ui-picker-static] legacy
@@ -328,8 +360,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // di-upgrade ke TomSelect di sini. Idempoten (skip el.tomselect).
         initUiPickers();
     }, 100);
-});    // Re-init after Livewire updates (component re-renders)
+});    // Halaman NON-Livewire (login/guest/blade statis yang memakai tom-select):
+    // livewire:init / morph.updated tidak pernah fire — re-init begitu Alpine
+    // selesai boot supaya scope (value: entangle atau @js($selected)) tersedia
+    // dan nilai awal diterapkan. Idempoten.
+    document.addEventListener('alpine:initialized', () => {
+        setTimeout(initUiPickers, 50);
+    });
+
+    // Re-init after Livewire updates (component re-renders)
     document.addEventListener('livewire:init', () => {
+        // Livewire + Alpine sudah pasti boot di sini — init ulang pickers
+        // supaya model (entangle/x-model) yang baru tersedia ikut dibaca
+        // (kasus initUiPickers pertama di DOMContentLoaded terjadi sebelum
+        // Alpine siap → scope null). Idempoten.
+        setTimeout(initUiPickers, 50);
+
         Livewire.hook('morph.updated', () => {
             // initUiPickers memanggil initFlatpickr di dalamnya + upgrade
             // tom-select baru hasil re-render.
@@ -372,18 +418,63 @@ const initUiPickers = (root = document) => {
 
     initFlatpickr(container);
 
-    // Dua bentuk: wrapper lama [x-data^="tomSelectInput"] (select di dalamnya)
-    // dan marker baru [data-ui-tomselect] (select langsung — dipakai setelah
-    // race guard di komponen: window.tomSelectInput ? tomSelectInput(...) : {}).
-    container.querySelectorAll('[data-ui-tomselect], [x-data^="tomSelectInput"]').forEach((el) => {
-        const select = el.matches('select') ? el : el.querySelector('select');
-        if (!select || select.tomselect) return;
+    // SATU-SATUNYA jalur inisialisasi TomSelect (fix race 2026-08-11):
+    // sebelumnya init ada dua jalur (Alpine x-data factory + safety net ini)
+    // yang saling race — kalau Alpine mengevaluasi x-data sebelum module
+    // app.js selesai, hasilnya `{}` dan widget di-init tanpa handler sync.
+    // Sekarang x-data blade HANYA membawa model (`{ value: @entangle }`),
+    // dan seluruh init + sinkronisasi dua arah ada di sini. Idempoten
+    // (el.tomselect / el.__tsSync), dipanggil ulang oleh morph.updated /
+    // livewire:init / DOMContentLoaded.
+    container.querySelectorAll('[data-ui-tomselect]').forEach((el) => {
+        const wrapper = el.closest('[data-ui-tomselect-root]') || el.parentElement;
 
-        new TomSelect(select, {
-            placeholder: select.getAttribute('placeholder') || 'Select an option',
-            maxOptions: null,
-            allowEmptyOption: true,
+        const ts = getOrCreateTomSelect(el, {
+            placeholder: el.getAttribute('placeholder') || 'Select an option',
         });
+
+        // Nilai awal dari model (entangle/x-model via scope Alpine). Saat
+        // scope belum siap (Alpine belum boot — initUiPickers pertama di
+        // DOMContentLoaded), biarkan placeholder; livewire:init / morph
+        // memanggil initUiPickers lagi dan set nilai dari model.
+        const scope = resolveAlpineScope(wrapper);
+        const modelValue = resolveInitial(scope ? scope.value : null);
+        if (modelValue !== null) {
+            ts.setValue(modelValue, true);
+        } else if (ts.getValue() !== null && ts.getValue() !== '' && !el.querySelector('option[selected]')) {
+            // Model kosong tapi widget punya nilai — TomSelect meng-adopsi
+            // nilai browser default saat konstruksi (select native tanpa
+            // option[selected] otomatis terpilih opsi pertama) atau sisa run
+            // init sebelumnya. Reset ke placeholder supaya filter tidak
+            // menampilkan opsi pertama seolah terpilih ("All Divisions"
+            // berubah jadi divisi pertama).
+            //
+            // Guard option[selected]: TomSelect menandai option.selected
+            // (PROPERTY, bukan attribute) saat sync — attribute hanya dibuat
+            // blade @selected (via :selected prop). Kalau ada, nilai itu nilai
+            // server asli dan harus dipertahankan (mis. halaman non-Livewire
+            // yang scope Alpine-nya tidak pernah tersedia).
+            ts.clear(true);
+        }
+
+        if (!el.__tsSync) {
+            el.__tsSync = true;
+            const submitOnChange = el.hasAttribute('data-submit-on-change');
+
+            // TomSelect → model: pilihan user menulis ke entangle/x-model
+            // (scope dibaca LAZY setiap change — bukan di-capture saat init).
+            ts.on('change', () => {
+                const s = resolveAlpineScope(wrapper);
+                if (s) {
+                    s.value = ts.getValue();
+                }
+                // submitOnChange: form GET non-Livewire (analytics-dashboard
+                // month/year) — pilihan langsung submit agar query terkirim.
+                if (submitOnChange && el.form) {
+                    el.form.submit();
+                }
+            });
+        }
     });
 };
 

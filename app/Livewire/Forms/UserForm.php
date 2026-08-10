@@ -103,10 +103,16 @@ class UserForm extends Form
             'password' => ['nullable', 'string', 'min:4', 'max:255'],
             'gender' => [$requiredOrNullable, 'in:male,female'],
             'address' => [$requiredOrNullable, 'string', 'max:255'],
-            'provinsi_kode' => [$requiredOrNullable, 'string', 'max:13'],
-            'kabupaten_kode' => [$requiredOrNullable, 'string', 'max:13'],
-            'kecamatan_kode' => [$requiredOrNullable, 'string', 'max:13'],
-            'kelurahan_kode' => [$requiredOrNullable, 'string', 'max:13'],
+            // Wilayah (provinsi→kelurahan) OPSIONAL: konsisten dengan kolom DB
+            // nullable, StoreEmployeeRequest (API) dan UpdateUserProfileInformation
+            // (Fortify) yang semuanya nullable. Sebelumnya dipaksa required untuk
+            // group 'user' padahal tabel wilayah bisa kosong (tanpa seeder) dan
+            // data karyawan lama tidak punya alamat wilayah → form edit/create
+            // user-group TIDAK PERNAH bisa disimpan di UI (P1).
+            'provinsi_kode' => ['nullable', 'string', 'max:13'],
+            'kabupaten_kode' => ['nullable', 'string', 'max:13'],
+            'kecamatan_kode' => ['nullable', 'string', 'max:13'],
+            'kelurahan_kode' => ['nullable', 'string', 'max:13'],
             'group' => ['nullable', 'string', 'max:255', Rule::in(User::$groups)],
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
