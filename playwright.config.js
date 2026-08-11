@@ -84,11 +84,11 @@ export default defineConfig({
       },
     },
 
-    // Auth-flow regression (email verification + 2FA): login sendiri tanpa
-    // storageState — user dibuat helper PHP (serial mode di spec).
+    // Auth-flow regression (email verification + 2FA + password reset): login
+    // sendiri tanpa storageState — user dibuat helper PHP (serial mode di spec).
     {
       name: 'chromium-auth',
-      testMatch: /(email-verify|twofa)\.spec\.ts/,
+      testMatch: /(email-verify|twofa|password-reset)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],

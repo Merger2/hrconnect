@@ -56,7 +56,7 @@
 
                         <div class="mb-4">
                             <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Email') }}</label>
-                            <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username"
+                            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
                                 class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20" />
                         </div>
 

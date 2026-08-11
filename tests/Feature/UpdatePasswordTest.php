@@ -19,6 +19,12 @@ test('password can be updated', function () {
 
     expect(Hash::check('new-password', $user->fresh()->password))->toBeTrue();
     expect(Schema::hasColumn('users', 'raw_password'))->toBeFalse();
+
+    // Fix audit 2026-08-12: UpdateUserPassword menyegarkan password_changed_at
+    // (konsisten dgn ResetUserPassword & ProfileService::changePassword) supaya
+    // CheckPasswordExpired tidak menganggap password expired setelah diganti.
+    expect($user->fresh()->password_changed_at)->not->toBeNull()
+        ->and($user->fresh()->password_changed_at->gt(now()->subMinutes(5)))->toBeTrue();
 });
 
 test('superadmin can update own password from profile', function () {
