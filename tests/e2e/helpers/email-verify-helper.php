@@ -2,6 +2,24 @@
 
 declare(strict_types=1);
 
+use App\Enums\BloodType;
+use App\Enums\EducationLevel;
+use App\Enums\EmployeeStatus;
+use App\Enums\Gender;
+use App\Enums\MaritalStatus;
+use App\Enums\SalaryType;
+use App\Models\Branch;
+use App\Models\Company;
+use App\Models\Division;
+use App\Models\Employee;
+use App\Models\Position;
+use App\Models\User;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+
 /**
  * Helper E2E untuk tests/e2e/email-verify.spec.ts.
  *
@@ -26,24 +44,6 @@ require __DIR__.'/../../../vendor/autoload.php';
 
 $app = require __DIR__.'/../../../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
-
-use App\Enums\BloodType;
-use App\Enums\EducationLevel;
-use App\Enums\EmployeeStatus;
-use App\Enums\Gender;
-use App\Enums\MaritalStatus;
-use App\Enums\SalaryType;
-use App\Models\Branch;
-use App\Models\Company;
-use App\Models\Division;
-use App\Models\Employee;
-use App\Models\Position;
-use App\Models\User;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 
 const E2E_VERIFY_EMAIL = 'e2e-verify@hrconnect.test';
 

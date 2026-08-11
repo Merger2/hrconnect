@@ -51,14 +51,18 @@
 
                         <div class="mb-4" x-show="! recovery">
                             <label for="code" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Authentication Code') }}</label>
-                            <input id="code" type="text" inputmode="numeric" name="code" required autofocus x-ref="code" autocomplete="one-time-code"
+                            {{-- required dinamis: hanya wajib di mode OTP. required statis
+                                 membuat browser memblokir submit di mode recovery
+                                 ("invalid form control is not focusable"). --}}
+                            <input id="code" type="text" inputmode="numeric" name="code"
+                                :required="! recovery" autofocus x-ref="code" autocomplete="one-time-code"
                                 class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20 font-mono text-center text-lg tracking-[0.3em]"
                                 placeholder="• • • • • •" />
                         </div>
 
                         <div class="mb-4" x-cloak x-show="recovery">
                             <label for="recovery_code" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ __('Recovery Code') }}</label>
-                            <input id="recovery_code" type="text" name="recovery_code" x-ref="recovery_code" autocomplete="one-time-code"
+                            <input id="recovery_code" type="text" name="recovery_code" :required="recovery" x-ref="recovery_code" autocomplete="one-time-code"
                                 class="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20"
                                 placeholder="{{ __('Enter recovery code') }}" />
                         </div>

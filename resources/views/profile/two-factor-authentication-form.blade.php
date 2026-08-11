@@ -69,65 +69,56 @@
         @endif
 
         <div class="mt-5 flex flex-wrap items-center gap-3">
-@php($confirmId = \Illuminate\Support\Str::random(32))
+            {{-- Konfirmasi password memakai komponen x-overlays.confirms-password
+                 (modal + wire:then) — JANGAN inline startConfirmingPassword tanpa
+                 modal: modal tidak akan muncul dan event 'then' tak terdengar
+                 (aksi seperti Enable/Disable jadi mati). --}}
             @if (! $this->enabled)
-                <span x-data="" x-ref="span"
-                      x-on:click="$wire.startConfirmingPassword('{{ $confirmId }}')"
-                      x-on:password-confirmed.window="setTimeout(() => $event.detail.id === '{{ $confirmId }}' && $refs.span.dispatchEvent(new CustomEvent('then', { bubbles: false })), 250)">
+                <x-overlays.confirms-password wire:then="enableTwoFactorAuthentication">
                     <button type="button" wire:loading.attr="disabled"
                         class="rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                         {{ __('Enable') }}
                     </button>
-                </span>
+                </x-overlays.confirms-password>
             @else
                 @if ($showingRecoveryCodes)
-                    <span x-data="" x-ref="span"
-                          x-on:click="$wire.startConfirmingPassword('{{ $confirmId }}')"
-                          x-on:password-confirmed.window="setTimeout(() => $event.detail.id === '{{ $confirmId }}' && $refs.span.dispatchEvent(new CustomEvent('then', { bubbles: false })), 250)">
+                    <x-overlays.confirms-password wire:then="regenerateRecoveryCodes">
                         <button type="button" wire:loading.attr="disabled"
                             class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
                             {{ __('Regenerate Recovery Codes') }}
                         </button>
-                    </span>
+                    </x-overlays.confirms-password>
                 @elseif ($showingConfirmation)
-                    <span x-data="" x-ref="span"
-                          x-on:click="$wire.startConfirmingPassword('{{ $confirmId }}')"
-                          x-on:password-confirmed.window="setTimeout(() => $event.detail.id === '{{ $confirmId }}' && $refs.span.dispatchEvent(new CustomEvent('then', { bubbles: false })), 250)">
+                    <x-overlays.confirms-password wire:then="confirmTwoFactorAuthentication">
                         <button type="button" class="rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                                 wire:loading.attr="disabled">
                             {{ __('Confirm') }}
                         </button>
-                    </span>
+                    </x-overlays.confirms-password>
                 @else
-                    <span x-data="" x-ref="span"
-                          x-on:click="$wire.startConfirmingPassword('{{ $confirmId }}')"
-                          x-on:password-confirmed.window="setTimeout(() => $event.detail.id === '{{ $confirmId }}' && $refs.span.dispatchEvent(new CustomEvent('then', { bubbles: false })), 250)">
+                    <x-overlays.confirms-password wire:then="showRecoveryCodes">
                         <button type="button" wire:loading.attr="disabled"
                             class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
                             {{ __('Show Recovery Codes') }}
                         </button>
-                    </span>
+                    </x-overlays.confirms-password>
                 @endif
 
                 @if ($showingConfirmation)
-                    <span x-data="" x-ref="span"
-                          x-on:click="$wire.startConfirmingPassword('{{ $confirmId }}')"
-                          x-on:password-confirmed.window="setTimeout(() => $event.detail.id === '{{ $confirmId }}' && $refs.span.dispatchEvent(new CustomEvent('then', { bubbles: false })), 250)">
+                    <x-overlays.confirms-password wire:then="disableTwoFactorAuthentication">
                         <button type="button" wire:loading.attr="disabled"
                             class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
                             {{ __('Cancel') }}
                         </button>
-                    </span>
+                    </x-overlays.confirms-password>
                 @else
-                    <span x-data="" x-ref="span"
-                          x-on:click="$wire.startConfirmingPassword('{{ $confirmId }}')"
-                          x-on:password-confirmed.window="setTimeout(() => $event.detail.id === '{{ $confirmId }}' && $refs.span.dispatchEvent(new CustomEvent('then', { bubbles: false })), 250)">
+                    <x-overlays.confirms-password wire:then="disableTwoFactorAuthentication">
                         <button type="button"
                             class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                             wire:loading.attr="disabled">
                             {{ __('Disable') }}
                         </button>
-                    </span>
+                    </x-overlays.confirms-password>
                 @endif
             @endif
         </div>
