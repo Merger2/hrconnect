@@ -12,16 +12,17 @@ class PayrollPayslipPdfMail extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public Payroll $payroll,
-        public string $pdfContent
+        public Payroll $payroll
     ) {}
 
     public function build(): self
     {
+        // Keputusan Fikih 2026-08-11: PDF payslip dilindungi PIN — email hanya
+        // berisi link ke route `payslip.download` (pemilik memasukkan PIN saat
+        // download, PDF di-enkripsi dengan PIN plaintext).
         return $this->subject('Slip Gaji '.$this->payroll->period)
-            ->attachData($this->pdfContent, "SlipGaji-{$this->payroll->period}.pdf", [
-                'mimetype' => 'application/pdf',
-            ])
-            ->markdown('mail.payroll.payslip-pdf');
+            ->markdown('mail.payroll.payslip-pdf', [
+                'downloadUrl' => route('payslip.download', $this->payroll),
+            ]);
     }
 }

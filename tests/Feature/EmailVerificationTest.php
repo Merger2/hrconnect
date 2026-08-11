@@ -18,6 +18,22 @@ test('email verification screen can be rendered', function () {
     $response->assertStatus(200);
 });
 
+test('verification screen shows 6-digit code input form (UI regression 2026-08-11)', function () {
+    enableFortifyEmailVerificationForTests();
+
+    $user = User::factory()->create([
+        'email_verified_at' => null,
+    ]);
+
+    $response = $this->actingAs($user)->get('/email/verify');
+
+    $response->assertOk()
+        ->assertSee('name="code"', false)
+        ->assertSee('maxlength="6"', false)
+        ->assertSee('action="'.route('verification.code.verify').'"', false)
+        ->assertSee('autocomplete="one-time-code"', false);
+});
+
 test('email can be verified', function () {
     enableFortifyEmailVerificationForTests();
 

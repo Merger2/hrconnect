@@ -30,6 +30,12 @@
             </x-user.page-header>
 
             <div class="user-page-body pt-0">
+                @if (session('error'))
+                    <div class="mb-4 rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm font-medium text-error" role="alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 @if ($needsSetup)
                     <form wire:submit.prevent="setupPassword" class="payslip-secure-panel user-accent-card user-accent-card--payroll">
                         <div class="solid-head rounded-2xl p-4 flex items-center gap-4">
@@ -150,10 +156,10 @@
                                         </div>
                                     </div>
 
-                                    <button wire:click="download('{{ $payroll->id }}')" class="payslip-card__download"
+                                    <a href="{{ route('payslip.download', $payroll) }}" class="payslip-card__download"
                                         aria-label="{{ __('Download payslip') }} {{ \Carbon\Carbon::createFromDate(null, $payroll->month)->translatedFormat('F') }} {{ $payroll->year }}">
                                         <x-heroicon-o-arrow-down-tray class="h-5 w-5" />
-                                    </button>
+                                    </a>
                                 </article>
                             @endforeach
                         </div>

@@ -161,13 +161,13 @@
                                             <x-actions.button type="button" wire:click="markPaid({{ $payroll->id }})" variant="soft-success" size="sm">
                                                 {{ __('Tandai Ditransfer') }}
                                             </x-actions.button>
-                                            <x-actions.button type="button" wire:click="downloadPayslip({{ $payroll->id }})" variant="secondary" size="sm">
+                                            <x-actions.button href="{{ route('payslip.download', $payroll) }}" variant="secondary" size="sm">
                                                 {{ __('Payslip') }}
                                             </x-actions.button>
                                         @endif
 
                                         @if($payroll->status === \App\Enums\PayrollStatus::PAID)
-                                            <x-actions.button type="button" wire:click="downloadPayslip({{ $payroll->id }})" variant="secondary" size="sm">
+                                            <x-actions.button href="{{ route('payslip.download', $payroll) }}" variant="secondary" size="sm">
                                                 {{ __('Payslip') }}
                                             </x-actions.button>
                                         @endif
@@ -247,13 +247,13 @@
                                 <x-actions.button type="button" wire:click="markPaid({{ $payroll->id }})" variant="soft-success" size="sm">
                                     {{ __('Tandai Ditransfer') }}
                                 </x-actions.button>
-                                <x-actions.button type="button" wire:click="downloadPayslip({{ $payroll->id }})" variant="secondary" size="sm">
+                                <x-actions.button href="{{ route('payslip.download', $payroll) }}" variant="secondary" size="sm">
                                     {{ __('Payslip') }}
                                 </x-actions.button>
                             @endif
 
                             @if($payroll->status === \App\Enums\PayrollStatus::PAID)
-                                <x-actions.button type="button" wire:click="downloadPayslip({{ $payroll->id }})" variant="secondary" size="sm">
+                                <x-actions.button href="{{ route('payslip.download', $payroll) }}" variant="secondary" size="sm">
                                     {{ __('Payslip') }}
                                 </x-actions.button>
                             @endif

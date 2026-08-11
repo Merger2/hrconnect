@@ -93,13 +93,10 @@ class PayrollController extends Controller
     #[Endpoint(title: 'Download Payslip', description: 'Download payslip PDF for approved/paid payroll. Flow: Payroll (Step 3/4) — Generate → List → Download → Export.')]
     public function payslip(Request $request, Payroll $payroll): BinaryFileResponse
     {
-        $this->authorize('downloadPayslip', $payroll);
-
-        if (! in_array($payroll->status, [PayrollStatus::APPROVED, PayrollStatus::PAID], true)) {
-            throw new BusinessRuleException(
-                'Payslip hanya tersedia untuk payroll yang sudah dipublikasi.'
-            );
-        }
+        // P1 fix 2026-08-11: policy 'download' (kepemilikan + status) —
+        // menggantikan gate 'downloadPayslip' yang permission-only dan
+        // membiarkan employee mengambil payslip karyawan lain via ID (IDOR).
+        $this->authorize('download', $payroll);
 
         $service = app(PayslipPdfService::class);
         $cachedPath = $service->getPayslipPath($payroll);

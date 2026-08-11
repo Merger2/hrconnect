@@ -12,7 +12,6 @@ use App\Events\PayrollSubmitted;
 use App\Events\PayrollVerified;
 use App\Jobs\SendPayrollPayslipEmail;
 use App\Models\Payroll;
-use App\Services\Payroll\PayslipPdfService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -178,27 +177,8 @@ final class PayrollManager extends Component
         $this->dispatch('notify', type: 'success', message: 'Payroll ditandai ditransfer. Email payslip terkirim.');
     }
 
-    public function downloadPayslip(Payroll $payroll): void
-    {
-        $this->authorize('downloadPayslip', $payroll);
-
-        if (! in_array($payroll->status, [PayrollStatus::APPROVED, PayrollStatus::PAID], true)) {
-            $this->dispatch('notify', type: 'error', message: 'Payslip hanya untuk payroll Disetujui/Ditransfer.');
-
-            return;
-        }
-
-        $service = app(PayslipPdfService::class);
-        $path = $service->generateAndStore($payroll);
-
-        $filename = sprintf(
-            'payslip-%s-%s.pdf',
-            $payroll->period,
-            $payroll->employee->employee_number ?? 'unknown'
-        );
-
-        $this->dispatch('download-file', url: $path, filename: $filename);
-    }
+    // Download payslip dipindah ke route web `payslip.download` (P1 fix
+    // 2026-08-11): dispatch 'download-file' tidak punya listener di JS/blade.
 
     #[On('payroll-generated')]
     public function refreshPayrolls(): void

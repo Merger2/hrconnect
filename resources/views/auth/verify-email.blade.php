@@ -97,6 +97,51 @@
                         </div>
                     </div>
 
+                    {{-- Verify with 6-digit code (from email) --}}
+                    <div class="mt-5">
+                        <div class="flex items-center gap-3" role="separator" aria-label="{{ __('or') }}">
+                            <span class="h-px flex-1 bg-slate-200"></span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">{{ __('or') }}</span>
+                            <span class="h-px flex-1 bg-slate-200"></span>
+                        </div>
+
+                        <form method="POST" action="{{ route('verification.code.verify') }}" class="mt-4 space-y-3">
+                            @csrf
+
+                            <div>
+                                <label for="verification_code" class="mb-1.5 block text-sm font-semibold text-slate-700">
+                                    {{ __('Enter the verification code we sent to your email address.') }}
+                                </label>
+                                <input
+                                    id="verification_code"
+                                    name="code"
+                                    type="text"
+                                    inputmode="numeric"
+                                    pattern="[0-9]{6}"
+                                    maxlength="6"
+                                    autocomplete="one-time-code"
+                                    required
+                                    autofocus
+                                    value="{{ old('code') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-center text-2xl font-bold tracking-[0.5em] text-slate-900 placeholder:tracking-normal placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                                    placeholder="••••••"
+                                    aria-label="{{ __('Verification Code') }}"
+                                />
+                                @error('code')
+                                    <p class="mt-1.5 text-sm font-medium text-rose-600" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <p class="text-xs text-slate-500">{{ __('This code expires in 15 minutes.') }}</p>
+
+                            <button type="submit"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.97]">
+                                <x-heroicon-o-check-badge class="h-4 w-4" />
+                                {{ __('Verify Email') }}
+                            </button>
+                        </form>
+                    </div>
+
                     {{-- Actions --}}
                     <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex items-center gap-2">

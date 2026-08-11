@@ -3,7 +3,6 @@
 namespace App\Livewire\User;
 
 use App\Models\Payroll;
-use App\Services\Payroll\PayslipPdfService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -83,25 +82,10 @@ class MyPayslips extends Component
         $this->reset(['new_password', 'new_password_confirmation']);
     }
 
-    public function download(int $payrollId): void
-    {
-        $payroll = Payroll::findOrFail($payrollId);
-
-        $this->authorize('downloadPayslip', $payroll);
-
-        $password = $payroll->employee?->payslip_password;
-
-        $service = app(PayslipPdfService::class);
-        $path = $service->generateAndStore($payroll, $password);
-
-        $filename = sprintf(
-            'payslip-%s-%s.pdf',
-            $payroll->period,
-            $payroll->employee->employee_number ?? 'unknown'
-        );
-
-        $this->dispatch('download-file', url: $path, filename: $filename);
-    }
+    // Download payslip dipindah ke route web `payslip.download` (P1 fix
+    // 2026-08-11): dispatch 'download-file' tidak punya listener di JS/blade,
+    // dan authorize('downloadPayslip') hanya cek permission (IDOR). Route
+    // memakai PayrollPolicy::download (kepemilikan + status approved/paid).
 
     public function render()
     {
