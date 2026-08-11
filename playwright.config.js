@@ -83,6 +83,18 @@ export default defineConfig({
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
       },
     },
+
+    // Auth-flow regression (email verification): login sendiri tanpa
+    // storageState — user unverified dibuat helper PHP (serial mode di spec).
+    {
+      name: 'chromium-auth',
+      testMatch: /email-verify\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
   ],
 
   // webServer disabled - server runs separately on localhost:8000
