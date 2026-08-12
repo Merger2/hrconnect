@@ -38,7 +38,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'kelurahan_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
-            'education_id' => ['nullable', 'exists:educations,id'],
+            // education_id TIDAK ada di tabel mana pun (phantom — tidak pernah
+            // di-persist); tidak ada rule utk kolom yang tidak ada.
             'division_id' => ['nullable', 'exists:divisions,id'],
             'job_title_id' => ['nullable', 'exists:job_titles,id'],
         ])->validateWithBag('updateProfileInformation');

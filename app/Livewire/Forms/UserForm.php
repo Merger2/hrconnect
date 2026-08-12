@@ -56,8 +56,6 @@ class UserForm extends Form
 
     public $division_id = null;
 
-    public $education_id = null;
-
     public $position_id = null;
 
     public $manager_id = null;
@@ -121,7 +119,6 @@ class UserForm extends Form
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'division_id' => ['nullable', 'exists:divisions,id'],
-            'education_id' => ['nullable', 'exists:educations,id'],
             'position_id' => ['nullable', 'exists:positions,id'],
             'manager_id' => [
                 'nullable',
@@ -170,8 +167,6 @@ class UserForm extends Form
             : null;
         $this->birth_place = $user->birth_place;
         $this->division_id = $user->division_id;
-        // users table TIDAK punya kolom education_id (phantom — tidak pernah
-        // di-persist); property form tetap null persis seperti sebelumnya.
         $this->position_id = $user->employee?->position_id;
         $this->manager_id = $user->manager_id;
         $this->basic_salary = $user->basic_salary;
@@ -328,7 +323,6 @@ class UserForm extends Form
         $this->division_id = $this->division_id ?: null;
         $this->position_id = $this->position_id ?: null;
         $this->manager_id = $this->manager_id ?: null;
-        $this->education_id = $this->education_id ?: null;
         $this->employment_status = $this->employment_status ?: Employee::EMPLOYMENT_STATUS_ACTIVE;
         $this->marital_status = $this->marital_status ?: 'single';
         $this->provinsi_kode = $this->provinsi_kode ?: null;

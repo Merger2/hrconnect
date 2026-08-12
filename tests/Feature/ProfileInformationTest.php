@@ -42,7 +42,6 @@ test('profile information can be updated', function () {
             'kelurahan_kode' => '31.01.01.1001',
             'birth_date' => '2024-01-01',
             'birth_place' => 'abc',
-            'education_id' => null,
             'division_id' => null,
             'job_title_id' => null,
         ])->call('updateProfileInformation');
@@ -60,7 +59,6 @@ test('profile information can be updated', function () {
         ->kelurahan_kode->toEqual('31.01.01.1001')
         ->birth_date->toEqual(Carbon::parse('2024-01-01'))
         ->birth_place->toEqual('abc')
-        ->education_id->toEqual(null)
         ->division_id->toEqual(null)
         ->job_title_id->toEqual(null);
 });
