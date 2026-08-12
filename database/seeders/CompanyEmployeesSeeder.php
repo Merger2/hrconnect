@@ -69,6 +69,13 @@ class CompanyEmployeesSeeder extends Seeder
 
     public function run(): void
     {
+        // Demo/test-only: 50 karyawan palsu (@hrconnect.local) dengan password
+        // publik ('password'/'owner12345') + NIK/NPWP fiktif — jangan pernah
+        // di-seed di production. (Guard kedua: DatabaseSeeder juga skip.)
+        if (app()->isProduction()) {
+            return;
+        }
+
         $this->company = Company::where('code', 'DKMS-2025')->firstOrFail();
         $this->branch = Branch::where('company_id', $this->company->id)->where('is_main', true)->firstOrFail();
         $this->defaultShift = Shift::where('name', 'Office Hour')->firstOrFail();

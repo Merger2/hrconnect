@@ -27,18 +27,22 @@ class DatabaseSeeder extends Seeder
             PayrollConfigSeeder::class,
             TarifTerSeeder::class,
             BranchSeeder::class,
-            CompanyEmployeesSeeder::class,
-            DemoAttendanceSeeder::class,
-            IntegrationSampleSeeder::class,
             KnowledgeBaseSeeder::class,
         ]);
 
-        // Guard ganda (defense-in-depth): E2eTestSeeder berisi akun test
-        // dengan password publik ('password'/'ChangeMe!2026') — jangan pernah
-        // di-seed di production. E2eTestSeeder sendiri juga sudah guard
-        // app()->isProduction() di dalam run() (baris 39).
+        // Guard ganda (defense-in-depth): 4 seeder demo/test di bawah berisi
+        // data palsu (@hrconnect.local / pas-papan) + password & secret publik
+        // ('password'/'ChangeMe!2026'/'owner12345'/'secret-key-123') — jangan
+        // pernah di-seed di production. Masing-masing seeder juga punya guard
+        // app()->isProduction() di dalam run() (lapis kedua, aman walau
+        // dipanggil langsung via php artisan db:seed --class=...).
         if (! app()->isProduction()) {
-            $this->call(E2eTestSeeder::class);
+            $this->call([
+                CompanyEmployeesSeeder::class,   // 50 karyawan demo (owner+manager+staff)
+                DemoAttendanceSeeder::class,     // 30 hari absensi demo utk user demo
+                E2eTestSeeder::class,            // akun test E2E (employee/hr/manager/finance)
+                IntegrationSampleSeeder::class,  // client integrasi palsu (pas-papan)
+            ]);
         }
     }
 }

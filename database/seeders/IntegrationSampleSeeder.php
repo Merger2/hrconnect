@@ -13,6 +13,13 @@ class IntegrationSampleSeeder extends Seeder
 {
     public function run(): void
     {
+        // Demo/test-only: client integrasi palsu (pas-papan.hrconnect.local)
+        // dengan secret hardcoded (secret-key-123 / DKMS-TEST-001) — jangan
+        // pernah di-seed di production. (Guard kedua: DatabaseSeeder juga skip.)
+        if (app()->isProduction()) {
+            return;
+        }
+
         $company = Company::firstOrFail();
 
         $client = IntegrationClient::firstOrCreate(

@@ -28,6 +28,13 @@ class DemoAttendanceSeeder extends Seeder
 {
     public function run(): void
     {
+        // Demo/test-only: 30 hari absensi palsu utk user demo — jangan pernah
+        // di-seed di production (polusi riwayat absensi nyata + denda).
+        // (Guard kedua: DatabaseSeeder juga skip.)
+        if (app()->isProduction()) {
+            return;
+        }
+
         $defaultShiftId = Shift::where('name', 'Office Hour')->first()?->id;
 
         $today = CarbonImmutable::today();
