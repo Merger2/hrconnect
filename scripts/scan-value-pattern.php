@@ -6,9 +6,17 @@
  *
  * Output: SEMUA referensi `-><col>->value` / `-><col>?->value` di kode
  * (blade/resource/controller/export/livewire) + status cast enum utk kolom
- * tsb di SEMUA model yang punya kolom itu. Auditor mencocokkan variabel di
- * snippet dgn model-nya: jika model punya cast enum → aman; jika tidak →
- * potensi bug.
+ * tsb di SEMUA model yang punya kolom itu.
+ *
+ * ⚠️ SEMANTIK: agregasi PER-KOLOM, bukan per-variabel. Kolom dianggap aman
+ * jika ADA minimal SATU model yg me-cast kolom itu ke enum (mis. `status`
+ * di-cast di 11 model → referensi `$cashAdvance->status->value` pun TIDAK
+ * di-flag, karena CashAdvance punya kolom status tanpa cast). Artinya:
+ *   - Exit 1 (CI fail) hanya utk kolom yang TIDAK di-cast DI MANA PUN.
+ *   - Referensi ->value pada model TANPA cast utk kolom yang SUDAH di-cast
+ *     di model lain (pola bug nyata) TIDAK terdeteksi otomatis — perlu
+ *     review manual (seperti audit 2026-08-12) atau guard defensif
+ *     (instanceof / ?? / is_string) yg diverifikasi per-referensi.
  *
  * Hasil audit 2026-08-12 (commit ea58174 + verifikasi manual 57 referensi):
  *   - Satu-satunya bug pola ini: KnowledgeBase.category (tanpa cast) →
@@ -110,6 +118,9 @@ ksort($refs);
 echo 'REFERENSI ->value DI KODE ('.array_sum(array_map('count', $refs)).' total)'.PHP_EOL;
 echo str_repeat('=', 120).PHP_EOL;
 
+$exitCode = 0;
+$uncastColumns = [];
+
 foreach ($refs as $col => $locations) {
     // Model yang punya kolom ini + cast-nya
     $castInfo = [];
@@ -131,4 +142,20 @@ foreach ($refs as $col => $locations) {
     if (count($locations) > 10) {
         echo '    … +'.(count($locations) - 10).' lagi'.PHP_EOL;
     }
+
+    if (! $castInfo) {
+        // Kolom diakses ->value TANPA cast enum di model mana pun = pola bug
+        // /knowledge-base (500 "Attempt to read property value on string").
+        // Catatan: referensi dgn guard defensif (instanceof / ?? / is_string)
+        // di-check manual saat audit; flag di sini memaksa review manusia.
+        $exitCode = 1;
+        $uncastColumns[] = $col;
+    }
 }
+
+if ($exitCode !== 0) {
+    echo PHP_EOL.'❌ TEMUAN: kolom diakses ->value tanpa cast enum: '.implode(', ', array_unique($uncastColumns)).PHP_EOL;
+    echo '   Periksa apakah benar-benar bug (pola /knowledge-base) atau guard defensif yg perlu ditambahkan ke whitelist.'.PHP_EOL;
+}
+
+exit($exitCode);

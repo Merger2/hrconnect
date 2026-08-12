@@ -98,6 +98,7 @@
             "@token:check",
             "@php scripts/check-token-sync.php",
             "@php scripts/check-ui-rules.php",
+            "@php scripts/scan-value-pattern.php",
             "@test"
         ],
         "test": [
