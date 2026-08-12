@@ -57,8 +57,24 @@ sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=$NEW_DB_PASS|" .env
 
 **Catatan backup/drill**: `SystemBackupService` membangun `.pgpass` dinamis dari config saat runtime → **tidak ada file terpisah yang perlu diupdate**. Setelah `.env` baru + `config:cache`, backup harian 02:00 & drill otomatis pakai password baru.
 
-**Verifikasi:**
+**⚠️ Wajib: `pg_hba.conf` produksi harus `scram-sha-256`, BUKAN `trust`.**
+Validasi dry-run di dev (2026-08-12) membuktikan: dengan `trust`, koneksi pakai password **lama** tetap berhasil — password tidak pernah dicek → rotasi tanpa efek. Sebelum go-live, pastikan:
+```
+# /var/lib/postgres/data/pg_hba.conf (produksi) — contoh:
+local   all   all                                scram-sha-256
+host    all   all   127.0.0.1/32   scram-sha-256
+host    all   all   ::1/128        scram-sha-256
+```
+Lalu `SELECT pg_reload_conf();` + `SHOW password_encryption;` → `scram-sha-256`.
+
+**Verifikasi** (tahan-trust — jangan andalkan coba-connect):
 ```bash
+# 1. Hash rol berubah setelah ALTER USER (bukti password benar-benar diganti):
+sudo -u postgres psql -tAc "SELECT rolpassword FROM pg_authid WHERE rolname='<user>';"   # catat SEBELUM
+# ... jalankan ALTER USER ...
+sudo -u postgres psql -tAc "SELECT rolpassword FROM pg_authid WHERE rolname='<user>';"   # harus BERUBAH sesudah
+
+# 2. App membaca kredensial baru:
 php artisan tinker --execute="echo DB::connection()->getPdo() ? 'DB OK' : 'FAIL';"
 # + login app normal
 # + jalankan drill restore (menguji backup pipeline + kredensial):
@@ -155,7 +171,8 @@ php scripts/verify-seeder-prod-dryrun.php
 ```
 
 **Checklist ringkas (tempel ke ticket go-live):**
-- [ ] `DB_PASSWORD` dirotasi (ALTER USER + .env + restart) — verifikasi `DB OK` + drill pass
+- [ ] `DB_PASSWORD` dirotasi (ALTER USER + .env + restart) — verifikasi hash rol berubah + `DB OK` + drill pass
+- [ ] `pg_hba.conf` produksi `scram-sha-256` (BUKAN trust) + `password_encryption=scram-sha-256`
 - [ ] `APP_KEY` dirotasi + `APP_PREVIOUS_KEYS` key lama — verifikasi login + decrypt
 - [ ] `SUPER_ADMIN_PASSWORD` di-set + `SuperAdminSeeder` — login admin OK
 - [ ] 2FA aktif di akun admin + recovery codes tersimpan
