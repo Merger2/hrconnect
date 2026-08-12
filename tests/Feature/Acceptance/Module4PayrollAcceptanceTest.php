@@ -11,7 +11,7 @@ use Livewire\Livewire;
  * Acceptance — Modul 4: Payroll & Payslip (PRD §Modul 4)
  *
  * Cakupan checklist:
- * - [ ] Perhitungan gross bulanan + PPh21 TER + komponen + potongan → PayrollGoldenTest 27/27 (suite)
+ * - [ ] Perhitungan gross bulanan + PPh21 TER + komponen + potongan → PayrollGoldenTest 3/3 (suite; fixture `payroll-golden-cases.json` — dataset 27 kasus lama sudah dikecilkan)
  * - [ ] Generate payslip per periode → PayrollIntegrationTest (suite)
  * - [ ] Payroll dapat di-lock dan di-review sebelum publish → PayrollStatusActionTest (suite)
  * - [ ] Karyawan dapat melihat payslip historisnya sendiri → test ini (isolation)

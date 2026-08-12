@@ -153,8 +153,8 @@ Latar: item 1.4 menuntut 2FA aktif (alur 2FA sudah diaudit & berfungsi penuh —
 # Env production & debug mati (APP_DEBUG=false — item 2.2)
 php artisan about | grep -E 'Environment|Debug'
 
-# Health endpoint (bila route health ada) → HTTP 200
-curl -s -o /dev/null -w '%{http_code}' https://your-domain.com/up
+# Health endpoint → HTTP 200 (route aktual: /api/v1/health — status "ok")
+curl -s -o /dev/null -w '%{http_code}' https://your-domain.com/api/v1/health
 
 # Scheduler & queue hidup
 php artisan schedule:list
