@@ -44,7 +44,11 @@ return [
             'connection' => env('DB_CACHE_CONNECTION'),
             'table' => env('DB_CACHE_TABLE', 'cache'),
             'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
-            'lock_table' => env('DB_CACHE_LOCK_TABLE', 'cache'),
+            // Fix 2026-08-12: lock WAJIB di tabel cache_locks (kolom owner + tanpa value).
+            // Sebelumnya default 'cache' -> insert lock gagal (value NOT NULL) ->
+            // Cache::lock() selalu false -> generatePayroll menolak semua periode
+            // ('Payroll sedang diproses') padahal cache_locks kosong.
+            'lock_table' => env('DB_CACHE_LOCK_TABLE', 'cache_locks'),
         ],
 
         'file' => [
