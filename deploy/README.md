@@ -63,8 +63,8 @@ crontab -e
 Verifikasi:
 ```bash
 php artisan schedule:list          # daftar semua job + jadwal
-# setelah 1-2 menit:
-redis-cli GET health:scheduler_heartbeat_at   # (jika redis) — atau cek cache DB
+# setelah 1-2 menit (CACHE_STORE=database):
+php artisan tinker --execute="echo Illuminate\\Support\\Facades\\Cache::get('health:scheduler_heartbeat_at');"
 curl -s https://your-domain/api/v1/health | jq .   # scheduler.ok harus true
 ```
 
