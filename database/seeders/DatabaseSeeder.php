@@ -29,9 +29,16 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             CompanyEmployeesSeeder::class,
             DemoAttendanceSeeder::class,
-            E2eTestSeeder::class,
             IntegrationSampleSeeder::class,
             KnowledgeBaseSeeder::class,
         ]);
+
+        // Guard ganda (defense-in-depth): E2eTestSeeder berisi akun test
+        // dengan password publik ('password'/'ChangeMe!2026') — jangan pernah
+        // di-seed di production. E2eTestSeeder sendiri juga sudah guard
+        // app()->isProduction() di dalam run() (baris 39).
+        if (! app()->isProduction()) {
+            $this->call(E2eTestSeeder::class);
+        }
     }
 }
