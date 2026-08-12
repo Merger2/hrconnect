@@ -25,6 +25,7 @@
  *   - Aman dijalankan kapan pun: transaksi di-rollback di finally.
  */
 
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +35,7 @@ putenv('APP_ENV=production');
 
 require __DIR__.'/../vendor/autoload.php';
 $app = require __DIR__.'/../bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app->make(Kernel::class)->bootstrap();
 
 $SEEDERS = [
     'Database\Seeders\E2eTestSeeder',
