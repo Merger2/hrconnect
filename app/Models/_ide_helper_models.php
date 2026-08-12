@@ -4226,49 +4226,6 @@ namespace App\Models{
 
     /**
      * @property int $id
-     * @property string $name
-     * @property string $email
-     * @property string $company
-     * @property string|null $phone
-     * @property string $status
-     * @property string|null $notes
-     * @property int|null $reviewed_by
-     * @property CarbonImmutable|null $reviewed_at
-     * @property CarbonImmutable|null $created_at
-     * @property CarbonImmutable|null $updated_at
-     * @property CarbonImmutable|null $deleted_at
-     * @property-read User|null $reviewer
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration newModelQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration newQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration onlyTrashed()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration query()
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereCompany($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereDeletedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereEmail($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereNotes($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration wherePhone($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereReviewedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereReviewedBy($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereStatus($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration whereUpdatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration withTrashed(bool $withTrashed = true)
-     * @method static \Illuminate\Database\Eloquent\Builder<static>|SelfRegistration withoutTrashed()
-     *
-     * @mixin \Eloquent
-     */
-    #[\AllowDynamicProperties]
-    class IdeHelperSelfRegistration {}
-}
-
-namespace App\Models{
-    use Carbon\CarbonImmutable;
-
-    /**
-     * @property int $id
      * @property string $key
      * @property string|null $value
      * @property string $group

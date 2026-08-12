@@ -144,7 +144,11 @@ return [
     */
 
     'features' => array_filter([
-        env('FORTIFY_REGISTRATION_ENABLED', true) ? Features::registration() : null,
+        // HRIS internal perusahaan (PT Daya Cipta Mandiri Solusi): akun
+        // karyawan dibuat oleh admin/HR, BUKAN self-registration publik.
+        // Default mati (keputusan Fikih 2026-08-12) — bisa di-enable sementara
+        // via env FORTIFY_REGISTRATION_ENABLED=true bila diperlukan.
+        env('FORTIFY_REGISTRATION_ENABLED', false) ? Features::registration() : null,
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::updateProfileInformation(),
