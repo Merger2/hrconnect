@@ -43,6 +43,15 @@ class DatabaseSeeder extends Seeder
                 E2eTestSeeder::class,            // akun test E2E (employee/hr/manager/finance)
                 IntegrationSampleSeeder::class,  // client integrasi palsu (pas-papan)
             ]);
+
+            // Seeder 1 TAHUN (jadwal + absensi + cuti + lembur + payroll 12 periode)
+            // OPSIONAL — ~33k baris, berat utk test suite (RefreshDatabase + transaction
+            // kena PostgreSQL out of shared memory). Jalankan eksplisit:
+            //   php artisan db:seed --class=YearOneDemoSeeder
+            // atau aktifkan flag: SEED_YEAR_ONE=true
+            if (env('SEED_YEAR_ONE', false)) {
+                $this->call([YearOneDemoSeeder::class]);
+            }
         }
     }
 }
