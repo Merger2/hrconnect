@@ -88,7 +88,7 @@ export default defineConfig({
     // sendiri tanpa storageState — user dibuat helper PHP (serial mode di spec).
     {
       name: 'chromium-auth',
-      testMatch: /(email-verify|twofa|password-reset)\.spec\.ts/,
+      testMatch: /(email-verify|twofa|password-reset|register)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],

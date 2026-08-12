@@ -31,6 +31,11 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $validated['email'],
             'group' => 'user',
             'password' => Hash::make($validated['password']),
+            // Konsisten dgn ResetUserPassword/UpdateUserPassword (audit
+            // password-reset 2026-08-12): CheckPasswordExpired menilai user
+            // dari password_changed_at — user baru wajib punya nilai segar
+            // supaya tidak langsung dianggap 'belum pernah ganti password'.
+            'password_changed_at' => now(),
         ]);
     }
 }

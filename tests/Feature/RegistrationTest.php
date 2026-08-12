@@ -22,6 +22,27 @@ test('registration screen can be rendered', function () {
     $response->assertNotFound();
 });
 
+test('newly registered user gets a fresh password_changed_at', function () {
+    expect(Features::enabled(Features::registration()))->toBeTrue();
+
+    Notification::fake();
+
+    post('/register', [
+        'name' => 'Changed At User',
+        'email' => 'changed-at@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
+    ]);
+
+    $user = User::where('email', 'changed-at@example.com')->firstOrFail();
+
+    // Konsisten dengan ResetUserPassword/UpdateUserPassword (audit
+    // password-reset): password_changed_at di-set segar supaya
+    // CheckPasswordExpired tidak menganggap user baru sebagai expired.
+    expect($user->password_changed_at)->not->toBeNull();
+});
+
 test('registration route matches the current feature configuration', function () {
     $response = $this->get('/register');
 
