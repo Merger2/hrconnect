@@ -119,7 +119,7 @@
                                             @if($overtime->status === 'approved') bg-green-100 text-green-800
                                             @elseif($overtime->status === 'rejected') bg-red-100 text-red-800
                                             @else bg-yellow-100 text-yellow-800 @endif">
-                                            {{ __(ucfirst($overtime->status?->value ?? $overtime->status)) }}
+                                            {{ $overtime->status instanceof \BackedEnum ? $overtime->status->label() : __(ucfirst((string) $overtime->status)) }}
                                         </span>
                                     </div>
                                     </div>

@@ -123,7 +123,7 @@
                                     </div>
                                 @else
                                     <x-admin.status-badge :tone="$overtime->status === 'approved' ? 'success' : 'danger'" pill="true">
-                                        {{ __(ucfirst($overtime->status?->value ?? $overtime->status)) }}
+                                        {{ $overtime->status instanceof \BackedEnum ? $overtime->status->label() : __(ucfirst((string) $overtime->status)) }}
                                     </x-admin.status-badge>
                                     @if ($overtime->approvedBy)
                                         <span class="text-[10px] text-slate-500">{{ __('by') }}

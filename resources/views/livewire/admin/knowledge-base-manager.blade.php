@@ -95,7 +95,7 @@
                                         @if($doc->status?->value === 'processing')
                                             <x-heroicon-o-arrow-path class="mr-1 h-3 w-3 animate-spin" />
                                         @endif
-                                        {{ __(ucfirst($doc->status?->value ?? 'unknown')) }}
+                                        {{ $doc->status instanceof \BackedEnum ? $doc->status->label() : __('Unknown') }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
@@ -150,7 +150,7 @@
                                     @if($doc->status?->value === 'processing')
                                         <x-heroicon-o-arrow-path class="mr-1 h-3 w-3 animate-spin" />
                                     @endif
-                                    {{ __(ucfirst($doc->status?->value ?? 'unknown')) }}
+                                    {{ $doc->status instanceof \BackedEnum ? $doc->status->label() : __('Unknown') }}
                                 </span>
                             </div>
                             <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
@@ -234,7 +234,7 @@
                     </div>
                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div class="text-xs text-gray-500">{{ __('Status') }}</div>
-                        <div class="mt-0.5 font-medium text-gray-900">{{ __(ucfirst($detailDoc->status?->value ?? 'unknown')) }}</div>
+                        <div class="mt-0.5 font-medium text-gray-900">{{ $detailDoc->status instanceof \BackedEnum ? $detailDoc->status->label() : __('Unknown') }}</div>
                     </div>
                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                         <div class="text-xs text-gray-500">{{ __('Total Chunk') }}</div>

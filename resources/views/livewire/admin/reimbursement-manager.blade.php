@@ -81,7 +81,7 @@
                             <p class="truncate text-xs text-gray-500">{{ $employeeEmail }}</p>
                         </div>
                         <x-admin.status-badge :tone="$claimStatus === 'approved' ? 'success' : ($claimStatus === 'rejected' ? 'danger' : ($claimStatus === 'pending_finance' ? 'accent' : 'warning'))">
-                            {{ __($claimStatus === 'pending_finance' ? 'Menunggu Finance' : ucfirst((string) $claimStatus)) }}
+                            {{ $claim->status instanceof \BackedEnum ? $claim->status->label() : __(ucfirst((string) $claimStatus)) }}
                         </x-admin.status-badge>
                     </div>
 
@@ -212,7 +212,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <x-admin.status-badge :tone="$claimStatus === 'approved' ? 'success' : ($claimStatus === 'rejected' ? 'danger' : ($claimStatus === 'pending_finance' ? 'accent' : 'warning'))">
-                                    {{ __($claimStatus === 'pending_finance' ? 'Menunggu Finance' : ucfirst((string) $claimStatus)) }}
+                                    {{ $claim->status instanceof \BackedEnum ? $claim->status->label() : __(ucfirst((string) $claimStatus)) }}
                                 </x-admin.status-badge>
                                 @if ($claim->accounting_journal_entry_id)
                                     <div class="mt-1 text-[10px] font-semibold text-emerald-600">

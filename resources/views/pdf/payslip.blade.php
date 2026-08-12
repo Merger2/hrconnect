@@ -322,7 +322,7 @@
             <td class="meta-label">{{ __('Name') }}</td>
             <td class="meta-value">{{ $payroll->employee->full_name ?? $payroll->employee->user->name ?? '-' }}</td>
             <td class="meta-label">{{ __('Status') }}</td>
-            <td class="meta-value">{{ __(ucfirst((string) $payroll->status->value)) }}</td>
+            <td class="meta-value">{{ $payroll->status instanceof \BackedEnum ? $payroll->status->label() : __(ucfirst((string) $payroll->status)) }}</td>
         </tr>
         <tr>
             <td class="meta-label">{{ __('Department') }}</td>

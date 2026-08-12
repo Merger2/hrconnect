@@ -140,7 +140,7 @@
                                             </div>
 
                                             <span class="payslip-card__status">
-                                                {{ __(ucfirst(is_string($payroll->status) ? $payroll->status : $payroll->status->value)) }}
+                                                {{ $payroll->status instanceof \BackedEnum ? $payroll->status->label() : __(ucfirst((string) $payroll->status)) }}
                                             </span>
                                         </div>
 

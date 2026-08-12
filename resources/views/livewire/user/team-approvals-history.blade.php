@@ -27,11 +27,13 @@
             default => 'team-approval-status team-approval-status--warning',
         };
 
-        $statusLabel = fn (?string $status): string => match ($status) {
-            'pending_finance' => __('Pending Finance'),
-            'pending_admin' => __('Pending Admin'),
-            default => __(str((string) $status)->headline()->toString()),
-        };
+        $statusLabel = fn (\BackedEnum|string|null $status): string => $status instanceof \BackedEnum
+            ? $status->label()
+            : match ($status) {
+                'pending_finance' => __('Pending Finance'),
+                'pending_admin' => __('Pending Admin'),
+                default => __(str((string) $status)->headline()->toString()),
+            };
     @endphp
 
     <div class="user-page-container user-page-container--wide">

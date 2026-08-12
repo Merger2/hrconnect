@@ -91,7 +91,7 @@
                             <p class="truncate text-xs text-gray-500">{{ $firstLeave->user->jobTitle->name ?? '-' }}</p>
                         </div>
                         <x-admin.status-badge :tone="($firstLeave->status?->value ?? $firstLeave->status) === 'sick' ? 'warning' : 'info'">
-                            {{ $firstLeave->leaveType?->name ?? __(ucfirst($firstLeave->status?->value ?? $firstLeave->status)) }}
+                            {{ $firstLeave->leaveType?->name ?? ($firstLeave->status instanceof \BackedEnum ? $firstLeave->status->label() : __(ucfirst((string) $firstLeave->status))) }}
                         </x-admin.status-badge>
                     </div>
 
@@ -209,7 +209,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <x-admin.status-badge :tone="($firstLeave->status?->value ?? $firstLeave->status) === 'sick' ? 'warning' : 'info'">
-                                    {{ $firstLeave->leaveType?->name ?? __(ucfirst($firstLeave->status?->value ?? $firstLeave->status)) }}
+                                    {{ $firstLeave->leaveType?->name ?? ($firstLeave->status instanceof \BackedEnum ? $firstLeave->status->label() : __(ucfirst((string) $firstLeave->status))) }}
                                 </x-admin.status-badge>
                             </td>
                             <td class="px-4 py-3 text-gray-600 max-w-xs truncate">
