@@ -171,7 +171,7 @@
                                             variant="primary" label="{{ __('View employee') }}: {{ $user->name }}">
                                             <x-heroicon-m-eye class="h-5 w-5" />
                                         </x-actions.icon-button>
-                                        @if ($canManageEmployees)
+                                        @if ($canManageEmployees && $user->employee)
                                             <x-actions.icon-button href="{{ route('admin.employees.edit', $user->employee) }}"
                                                 variant="primary" label="{{ __('Edit employee') }}: {{ $user->name }}">
                                                 <x-heroicon-m-pencil-square class="h-5 w-5" />
@@ -270,7 +270,7 @@
                             <x-actions.button type="button" wire:click="show('{{ $user->id }}')"
                                 variant="secondary" size="sm"
                                 label="{{ __('View employee') }}: {{ $user->name }}">{{ __('View') }}</x-actions.button>
-                            @if ($canManageEmployees)
+                            @if ($canManageEmployees && $user->employee)
                                 <x-actions.button href="{{ route('admin.employees.edit', $user->employee) }}"
                                     variant="soft-primary" size="sm"
                                     label="{{ __('Edit employee') }}: {{ $user->name }}">{{ __('Edit') }}</x-actions.button>
