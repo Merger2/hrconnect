@@ -41,9 +41,9 @@ final class DocumentTemplateRenderService
         return [
             'employee_name' => $employee->full_name ?? $user->name ?? '-',
             'employee_nip' => $employee->nip ?? '-',
-            'employee_position' => $employee->position->title ?? '-',
-            'employee_division' => $employee->division->name ?? '-',
-            'employee_join_date' => $employee->hire_date?->format('d M Y') ?? '-',
+            'employee_position' => $employee->position?->name ?? '-',
+            'employee_division' => $employee->division?->name ?? '-',
+            'employee_join_date' => $employee->join_date?->format('d M Y') ?? '-',
             'company_name' => config('app.name'),
             'request_purpose' => $request->purpose ?? '-',
             'request_date' => $request?->created_at?->format('d M Y') ?? now()->format('d M Y'),

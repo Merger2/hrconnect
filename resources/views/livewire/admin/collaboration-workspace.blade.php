@@ -165,8 +165,8 @@
                                         </div>
                                         <p class="mt-1 text-sm text-slate-500">
                                             {{ $meeting->company?->name }}
-                                            @if ($meeting->starts_at)
-                                                · {{ $meeting->starts_at->format('d M Y H:i') }}
+                                            @if ($meeting->start_time)
+                                                · {{ $meeting->start_time->format('d M Y H:i') }}
                                             @endif
                                         </p>
                                         @if ($meeting->notes)
