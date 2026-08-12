@@ -67,6 +67,54 @@ test('owner downloads paid payslip with correct PIN (encrypted PDF)', function (
         ->assertHeader('content-type', 'application/pdf');
 });
 
+test('owner payslip PDF bytes contain the /Encrypt dictionary (real encryption)', function () {
+    [$owner, , $paid] = payslipDownloadPayrolls();
+
+    $response = $this->actingAs($owner)
+        ->post(route('payslip.download', $paid), ['pin' => '4321'])
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
+
+    // Regression: content-type application/pdf saja tidak membuktikan PDF
+    // ter-enkripsi — verifikasi langsung ke byte stream output bahwa CPDF
+    // menulis dictionary /Encrypt (setEncryption($pin, $pin)).
+    $pdfBytes = $response->streamedContent();
+
+    expect($pdfBytes)->not->toBeEmpty()
+        ->and($pdfBytes)->toContain('/Encrypt');
+});
+
+test('admin streamed payslip PDF does NOT contain /Encrypt (plaintext, no PIN)', function () {
+    $company = Company::factory()->create();
+
+    $owner = User::factory()->create();
+    $ownerEmployee = Employee::factory()->for($company)->create([
+        'user_id' => $owner->id,
+        'payslip_password' => '4321',
+    ]);
+
+    $admin = User::factory()->create(['group' => 'superadmin']);
+
+    $paid = Payroll::factory()->create([
+        'employee_id' => $ownerEmployee->id,
+        'period' => '2026-07',
+        'net_salary' => 6250000,
+        'status' => PayrollStatus::PAID,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('payslip.download', $paid))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
+
+    // Admin stream memakai password null → applyEncryption() di-skip → PDF
+    // tanpa dictionary /Encrypt (kontras dgn jalur owner yg ter-enkripsi).
+    $pdfBytes = $response->streamedContent();
+
+    expect($pdfBytes)->not->toBeEmpty()
+        ->and($pdfBytes)->not->toContain('/Encrypt');
+});
+
 test('owner rejected with wrong PIN', function () {
     [$owner, , $paid] = payslipDownloadPayrolls();
 
