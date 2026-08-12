@@ -37,7 +37,7 @@ class PayslipDownloadController extends Controller
         $this->authorize('download', $payroll);
 
         $employee = $payroll->employee;
-        $isOwner = $employee && $employee->user_id === $request->user()->id;
+        $isOwner = $employee && $employee->user_id === $request->user()->getAuthIdentifier();
 
         if ($isOwner) {
             if (! $employee->hasValidPayslipPassword()) {
@@ -59,7 +59,7 @@ class PayslipDownloadController extends Controller
 
         $employee = $payroll->employee;
 
-        if (! $employee || $employee->user_id !== $request->user()->id) {
+        if (! $employee || $employee->user_id !== $request->user()->getAuthIdentifier()) {
             abort(403);
         }
 
@@ -83,7 +83,7 @@ class PayslipDownloadController extends Controller
         $filename = sprintf(
             'payslip-%s-%s.pdf',
             $payroll->period,
-            $payroll->employee?->employee_number ?? 'unknown'
+            $payroll->employee->employee_number ?? 'unknown'
         );
 
         return response()->download($path, $filename);

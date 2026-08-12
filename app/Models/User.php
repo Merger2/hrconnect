@@ -377,11 +377,12 @@ class User extends Authenticatable implements MustVerifyEmailContract
     // ═══════════════════════════════════════════════
     //
     // Kolom employment_status, phone, gender, address, birth_date, birth_place,
-    // hourly_rate, basic_salary, division_id, position_id, provinsi/kabupaten/
-    // kecamatan/kelurahan, account_deletion_*, dll SEMUA ada di tabel `employees`,
-    // bukan `users`. Accessor/method di bawah ini nge-proxy lewat relasi
+    // basic_salary, division_id, position_id, provinsi/kabupaten/kecamatan/
+    // kelurahan, account_deletion_*, dll SEMUA ada di tabel `employees`, bukan
+    // `users`. Accessor/method di bawah ini nge-proxy lewat relasi
     // $this->employee (HasOne) agar blade view tetap bisa panggil $user->xxx
-    // tanpa error.
+    // tanpa error. (Catatan: hourly_rate TIDAK punya kolom di schema — accessor
+    // pernah ada, dihapus 2026-08-12 karena selalu null / dead code.)
     //
 
     // ── Status display methods ──
@@ -470,9 +471,9 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->employee?->birth_date;
     }
 
-    public function getHourlyRateAttribute(): mixed
+    public function getBasicSalaryAttribute(): mixed
     {
-        return $this->employee?->hourly_rate;
+        return $this->employee?->basic_salary;
     }
 
     public function getProvinsiKodeAttribute(): ?string
@@ -537,7 +538,13 @@ class User extends Authenticatable implements MustVerifyEmailContract
      */
     public function getJobTitleAttribute()
     {
-        return $this->employee?->position?->jobTitle ?? $this->employee?->position;
+        $position = $this->employee?->position;
+
+        if ($position?->jobTitle) {
+            return $position->jobTitle;
+        }
+
+        return $position;
     }
 
     public function getEducationAttribute()
@@ -555,7 +562,13 @@ class User extends Authenticatable implements MustVerifyEmailContract
      */
     public function getDirectManagerAttribute()
     {
-        return $this->employee?->directManager?->user ?? $this->employee?->manager?->user;
+        $direct = $this->employee?->directManager;
+
+        if ($direct) {
+            return $direct->user;
+        }
+
+        return $this->employee?->manager?->user;
     }
 
     public function getProvinsiAttribute()

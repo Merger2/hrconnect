@@ -158,7 +158,7 @@ class UserForm extends Form
         $this->phone = $user->phone;
         $this->password = null;
         $this->gender = $user->gender;
-        $this->marital_status = $user->employee?->marital_status?->value ?? 'single';
+        $this->marital_status = $user->employee?->marital_status->value ?? 'single';
         $this->address = $user->address;
         $this->provinsi_kode = $user->provinsi_kode;
         $this->kabupaten_kode = $user->kabupaten_kode;
@@ -170,7 +170,8 @@ class UserForm extends Form
             : null;
         $this->birth_place = $user->birth_place;
         $this->division_id = $user->division_id;
-        $this->education_id = $user->education_id;
+        // users table TIDAK punya kolom education_id (phantom — tidak pernah
+        // di-persist); property form tetap null persis seperti sebelumnya.
         $this->position_id = $user->employee?->position_id;
         $this->manager_id = $user->manager_id;
         $this->basic_salary = $user->basic_salary;
@@ -183,8 +184,8 @@ class UserForm extends Form
         $this->role_ids = $user->roles()
             ->orderByDesc('roles.is_super_admin')
             ->orderBy('roles.name')
+            ->limit(1)
             ->pluck('roles.id')
-            ->take(1)
             ->all();
         $this->role_id = $this->role_ids[0] ?? null;
         $this->original_role_id = $this->role_id;
@@ -342,7 +343,7 @@ class UserForm extends Form
         $this->institution_name = trim((string) $this->institution_name);
     }
 
-    public function deleteProfilePhoto()
+    public function deleteProfilePhoto(): void
     {
         $this->authorizeMutation();
 
@@ -350,7 +351,7 @@ class UserForm extends Form
             throw new AuthorizationException(__('Default user profile cannot be modified in demo mode.'));
         }
 
-        return $this->user->deleteProfilePhoto();
+        $this->user->deleteProfilePhoto();
     }
 
     public function delete()
@@ -443,7 +444,7 @@ class UserForm extends Form
 
         if ($latest) {
             $lastSeq = (int) substr($latest->employee_number, strlen($prefix));
-            $seq = str_pad($lastSeq + 1, 4, '0', STR_PAD_LEFT);
+            $seq = str_pad((string) ($lastSeq + 1), 4, '0', STR_PAD_LEFT);
         } else {
             $seq = '0001';
         }

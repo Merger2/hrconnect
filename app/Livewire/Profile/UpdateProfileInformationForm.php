@@ -54,21 +54,30 @@ class UpdateProfileInformationForm extends Component
         $employee = $user->employee;
 
         if ($employee) {
+            // gender/marital_status/birth_date NOT NULL di schema → enum/date
+            // cast non-null; `?->` tidak perlu (PHPStan nullsafe.never).
+            // education_id TIDAK ada di tabel mana pun (phantom, tidak pernah
+            // di-persist oleh UpdateUserProfileInformation) → tidak di-mount.
+            // job_title_id ada di positions, bukan employees → baca lewat
+            // relasi position agar field menampilkan nilai asli.
             $this->state = array_merge($this->state, [
                 'nip' => $employee->nip,
                 'phone' => $employee->phone,
-                'gender' => $employee->gender?->value === 'L' ? 'male' : ($employee->gender?->value === 'P' ? 'female' : null),
-                'marital_status' => $employee->marital_status?->value ?? 'single',
+                // Gender enum hanya L/P (ekshaustif — PHPStan match.alwaysTrue)
+                'gender' => match ($employee->gender->value) {
+                    'L' => 'male',
+                    'P' => 'female',
+                },
+                'marital_status' => $employee->marital_status->value,
                 'address' => $employee->address_detail,
                 'provinsi_kode' => $employee->provinsi_kode,
                 'kabupaten_kode' => $employee->kabupaten_kode,
                 'kecamatan_kode' => $employee->kecamatan_kode,
                 'kelurahan_kode' => $employee->kelurahan_kode,
-                'birth_date' => $employee->birth_date?->format('Y-m-d'),
+                'birth_date' => $employee->birth_date->format('Y-m-d'),
                 'birth_place' => $employee->birth_place,
                 'division_id' => $employee->division_id,
-                'education_id' => $employee->education_id,
-                'job_title_id' => $employee->job_title_id,
+                'job_title_id' => $employee->position?->job_title_id,
             ]);
         }
     }
@@ -96,6 +105,8 @@ class UpdateProfileInformationForm extends Component
         $this->dispatch('saved');
 
         $this->dispatch('refresh-navigation-menu');
+
+        return null;
     }
 
     /**
