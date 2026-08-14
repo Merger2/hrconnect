@@ -54,7 +54,7 @@ class MyPayslips extends Component
         $employee = auth()->user()->employee;
 
         if (! $employee) {
-            $this->addError('new_password', 'Data karyawan tidak ditemukan.');
+            $this->addError('new_password', __('Data karyawan tidak ditemukan.'));
 
             return;
         }
@@ -67,7 +67,7 @@ class MyPayslips extends Component
         $this->needsSetup = false;
         $this->reset(['new_password', 'new_password_confirmation']);
 
-        $this->dispatch('notify', type: 'success', message: 'Password payslip berhasil disimpan.');
+        $this->dispatch('notify', type: 'success', message: __('Password payslip berhasil disimpan.'));
     }
 
     public function triggerReset(): void

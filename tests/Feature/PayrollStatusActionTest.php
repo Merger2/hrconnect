@@ -62,6 +62,12 @@ test('admin can submit, verify, approve and pay a payroll record', function () {
 
     expect($payroll->refresh()->status)->toBe(PayrollStatus::PAID);
 
+    // markPaid wajib mencatat tanggal + metode transfer SEKALIGUS dgn transisi
+    // (guard model menolak update terpisah pd payroll PAID — regresi 2026-08-13:
+    // 617/617 paid NULL payment_date).
+    expect($payroll->payment_date)->not->toBeNull()
+        ->and($payroll->payment_method)->toBe('transfer');
+
     Notification::assertSentTo($employee, PayrollPaid::class, function (PayrollPaid $notification, array $channels) use ($payroll) {
         return $notification->payroll->is($payroll)
             && in_array('database', $channels, true);

@@ -108,7 +108,7 @@ final class PayrollManager extends Component
         $payroll->update(['status' => PayrollStatus::SUBMITTED]);
         event(new PayrollSubmitted($payroll));
 
-        $this->dispatch('notify', type: 'success', message: 'Payroll diajukan untuk verifikasi.');
+        $this->dispatch('notify', type: 'success', message: __('Payroll diajukan untuk verifikasi.'));
     }
 
     public function verify(Payroll $payroll): void
@@ -118,7 +118,7 @@ final class PayrollManager extends Component
         $payroll->update(['status' => PayrollStatus::VERIFIED]);
         event(new PayrollVerified($payroll));
 
-        $this->dispatch('notify', type: 'success', message: 'Payroll diverifikasi.');
+        $this->dispatch('notify', type: 'success', message: __('Payroll diverifikasi.'));
     }
 
     public function approve(Payroll $payroll): void
@@ -128,7 +128,7 @@ final class PayrollManager extends Component
         $payroll->update(['status' => PayrollStatus::APPROVED]);
         event(new PayrollApproved($payroll));
 
-        $this->dispatch('notify', type: 'success', message: 'Payroll disetujui.');
+        $this->dispatch('notify', type: 'success', message: __('Payroll disetujui.'));
     }
 
     public function confirmReject(Payroll $payroll): void
@@ -156,7 +156,7 @@ final class PayrollManager extends Component
         $this->rejectingPayrollId = null;
         $this->rejectionReason = '';
 
-        $this->dispatch('notify', type: 'warning', message: 'Payroll ditolak dan dikembalikan ke Draft.');
+        $this->dispatch('notify', type: 'warning', message: __('Payroll ditolak dan dikembalikan ke Draft.'));
     }
 
     public function cancelReject(): void
@@ -169,12 +169,19 @@ final class PayrollManager extends Component
     {
         $this->authorize('update', $payroll);
 
-        $payroll->update(['status' => PayrollStatus::PAID]);
+        $payroll->update([
+            'status' => PayrollStatus::PAID,
+            // Set tanggal + metode transfer SEKALIGUS dgn transisi PAID — guard
+            // model menolak update terpisah pada payroll berstatus PAID, dan
+            // kolom payment_method punya CHECK constraint (transfer/cash/cheque).
+            'payment_date' => now(),
+            'payment_method' => 'transfer',
+        ]);
 
         event(new PayrollPaid($payroll));
         SendPayrollPayslipEmail::dispatch($payroll->id);
 
-        $this->dispatch('notify', type: 'success', message: 'Payroll ditandai ditransfer. Email payslip terkirim.');
+        $this->dispatch('notify', type: 'success', message: __('Payroll ditandai ditransfer. Email payslip terkirim.'));
     }
 
     // Download payslip dipindah ke route web `payslip.download` (P1 fix

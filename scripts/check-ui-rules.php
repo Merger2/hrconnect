@@ -634,6 +634,14 @@ function collectIconButtonWarnings(string $content, string $relativePath, array 
             continue;
         }
 
+        // Blade translation ({{ __('...') }}, @lang(...), {!! trans(...) !!}) merender
+        // teks visible — jangan salah-flag sebagai icon-only button.
+        $hasTranslationText = preg_match('/\{\{.*?__\(|\{\{.*?trans\(|\{!!.*?__\(|@lang\(/s', $body) === 1;
+
+        if ($hasTranslationText) {
+            continue;
+        }
+
         $bodyWithoutBlade = preg_replace('/\{\{.*?\}\}|\{!!.*?!!\}|@[\w:-]+(?:\(.*?\))?/s', ' ', $body) ?? $body;
         $visibleText = trim(strip_tags($bodyWithoutBlade));
         $visibleText = preg_replace('/\s+/', ' ', $visibleText) ?? $visibleText;

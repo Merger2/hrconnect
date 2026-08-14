@@ -165,7 +165,7 @@
                         }" x-init="displayValue = format(model); $watch('model', value => displayValue = format(value))">
                             <x-forms.label for="edit_basic_salary" value="{{ __('Basic Salary (Rp)') }}" />
                             <x-forms.input id="edit_basic_salary" type="text" class="mt-1 block w-full"
-                                x-model="displayValue" @input="update" placeholder="e.g. 5.000.000" />
+                                x-model="displayValue" @input="update" placeholder="{{ __('e.g. 5.000.000') }}" />
                             <x-forms.input-error for="form.basic_salary" class="mt-2" />
                         </div>
                     </div>

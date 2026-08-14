@@ -459,12 +459,19 @@ class YearOneDemoSeeder extends Seeder
                     // (draft→submitted→verified→approved→paid — guard di model
                     // menolak lompatan langsung). Bulan berjalan → biarkan DRAFT.
                     if ($period < $currentPeriod && ! $payroll->isTerminal()) {
-                        foreach ([PayrollStatus::SUBMITTED, PayrollStatus::VERIFIED, PayrollStatus::APPROVED, PayrollStatus::PAID] as $status) {
+                        foreach ([PayrollStatus::SUBMITTED, PayrollStatus::VERIFIED, PayrollStatus::APPROVED] as $status) {
                             $payroll->forceFill(['status' => $status->value])->save();
                         }
+
+                        // payment_date + payment_method di-set SEKALIGUS dgn transisi
+                        // ke PAID: guard model menolak update terpisah pada payroll
+                        // berstatus PAID (sebelumnya payment_date selalu gagal
+                        // tersimpan — 617/617 paid NULL). 'transfer' = nilai valid
+                        // CHECK constraint (migration enum transfer/cash/cheque).
                         $payroll->forceFill([
+                            'status' => PayrollStatus::PAID->value,
                             'payment_date' => $periodEnd->addDays(3)->toDateString(),
-                            'payment_method' => 'bank_transfer',
+                            'payment_method' => 'transfer',
                         ])->save();
                     }
                     $count++;
