@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PACKAGE_NAME="${PACKAGE_NAME:-com.pandanteknik.paspapan}"
-ACTIVITY_NAME="${ACTIVITY_NAME:-com.pandanteknik.paspapan/.MainActivity}"
+PACKAGE_NAME="${PACKAGE_NAME:-com.hrconnect.app}"
+ACTIVITY_NAME="${ACTIVITY_NAME:-com.hrconnect.app/.MainActivity}"
 APK_PATH="${APK_PATH:-android/app/build/outputs/apk/release/app-release.apk}"
 SCREENSHOT_PATH="${SCREENSHOT_PATH:-screenshots/apk-device-smoke.png}"
 LAUNCH_WAIT_SECONDS="${LAUNCH_WAIT_SECONDS:-8}"
@@ -62,7 +62,7 @@ do
 done
 
 if ! adb shell pm list features | grep -q 'android.hardware.camera'; then
-  echo "Warning: device does not advertise a camera feature; barcode/photo attendance smoke is limited." >&2
+  echo "Warning: device does not advertise a camera feature; face-recognition attendance smoke is limited." >&2
 fi
 
 adb shell settings put secure location_mode 3 >/dev/null 2>&1 || true
@@ -75,7 +75,7 @@ fi
 
 adb logcat -c
 adb shell am force-stop "$PACKAGE_NAME" >/dev/null 2>&1 || true
-adb shell am start -W -n "$ACTIVITY_NAME" >/tmp/paspapan-apk-smoke-start.txt
+adb shell am start -W -n "$ACTIVITY_NAME" >/tmp/hrconnect-apk-smoke-start.txt
 sleep "$LAUNCH_WAIT_SECONDS"
 
 focused_window="$(
@@ -102,11 +102,11 @@ fi
 
 if adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime' | grep -q "$PACKAGE_NAME"; then
   echo "Fatal Android crash detected for $PACKAGE_NAME." >&2
-  adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime|com.pandanteknik.paspapan' >&2 || true
+  adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime|com.hrconnect.app' >&2 || true
   exit 1
 fi
 
 echo "APK smoke test passed."
 echo "Package: $PACKAGE_NAME"
 echo "Screenshot: $SCREENSHOT_PATH"
-echo "Checked: launch, camera permission, GPS permission, barcode/photo camera readiness, crash log."
+echo "Checked: launch, camera permission, GPS permission, face-recognition camera readiness, crash log."

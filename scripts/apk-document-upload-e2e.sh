@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PACKAGE_NAME="${PACKAGE_NAME:-com.pandanteknik.paspapan.debug}"
-ACTIVITY_NAME="${ACTIVITY_NAME:-com.pandanteknik.paspapan.debug/com.pandanteknik.paspapan.MainActivity}"
+PACKAGE_NAME="${PACKAGE_NAME:-com.hrconnect.app}"
+ACTIVITY_NAME="${ACTIVITY_NAME:-com.hrconnect.app/com.hrconnect.app.MainActivity}"
 APK_PATH="${APK_PATH:-android/app/build/outputs/apk/debug/app-debug.apk}"
 APP_URL="${APP_URL:-http://127.0.0.1:8000}"
 APP_PORT="${APP_PORT:-8000}"
 CDP_PORT="${CDP_PORT:-9222}"
-E2E_EMAIL="${E2E_EMAIL:-apk.e2e.user@paspapan.test}"
+E2E_EMAIL="${E2E_EMAIL:-apk.e2e.user@hrconnect.test}"
 E2E_PASSWORD="${E2E_PASSWORD:-12345678}"
 E2E_MARKER="${E2E_MARKER:-APK E2E document upload}"
 E2E_LOGIN_TOKEN="${E2E_LOGIN_TOKEN:-local-apk-e2e}"
-E2E_FILE_PATH="${E2E_FILE_PATH:-/tmp/paspapan-apk-document-upload-e2e.pdf}"
-E2E_DEVICE_FILE_PATH="${E2E_DEVICE_FILE_PATH:-/sdcard/Download/paspapan-apk-document-upload-e2e.pdf}"
+E2E_FILE_PATH="${E2E_FILE_PATH:-/tmp/hrconnect-apk-document-upload-e2e.pdf}"
+E2E_DEVICE_FILE_PATH="${E2E_DEVICE_FILE_PATH:-/sdcard/Download/hrconnect-apk-document-upload-e2e.pdf}"
 SCREENSHOT_PATH="${SCREENSHOT_PATH:-screenshots/apk-document-upload-e2e.png}"
 LAUNCH_WAIT_SECONDS="${LAUNCH_WAIT_SECONDS:-8}"
 FORCE_REBUILD="${FORCE_REBUILD:-1}"
@@ -65,7 +65,7 @@ if [ "$device_count" -gt 1 ] && [ -z "${ANDROID_SERIAL:-}" ]; then
 fi
 
 if ! curl -fsS "$APP_URL/login" >/dev/null 2>&1; then
-  php artisan serve --host=127.0.0.1 --port="$APP_PORT" >/tmp/paspapan-apk-e2e-server.log 2>&1 &
+  php artisan serve --host=127.0.0.1 --port="$APP_PORT" >/tmp/hrconnect-apk-e2e-server.log 2>&1 &
   server_pid="$!"
   for _ in $(seq 1 30); do
     if curl -fsS "$APP_URL/login" >/dev/null 2>&1; then
@@ -77,14 +77,14 @@ fi
 
 if ! curl -fsS "$APP_URL/login" >/dev/null 2>&1; then
   echo "Laravel app is not reachable at $APP_URL." >&2
-  if [ -f /tmp/paspapan-apk-e2e-server.log ]; then
-    tail -40 /tmp/paspapan-apk-e2e-server.log >&2
+  if [ -f /tmp/hrconnect-apk-e2e-server.log ]; then
+    tail -40 /tmp/hrconnect-apk-e2e-server.log >&2
   fi
   exit 1
 fi
 
 if [ "$FORCE_REBUILD" = "1" ] || [ ! -f "$APK_PATH" ]; then
-  cap_config_backup="$(mktemp /tmp/paspapan-cap-config.XXXXXX)"
+  cap_config_backup="$(mktemp /tmp/hrconnect-cap-config.XXXXXX)"
   cp "$CAP_CONFIG_PATH" "$cap_config_backup"
 
   APP_URL="$APP_URL" CAP_CONFIG_PATH="$CAP_CONFIG_PATH" node -e '
@@ -109,7 +109,7 @@ if [ "$FORCE_REBUILD" = "1" ] || [ ! -f "$APK_PATH" ]; then
 fi
 
 if [ ! -f "$E2E_FILE_PATH" ]; then
-  printf '%%PDF-1.4\n%% PasPapan APK document upload E2E fixture\n1 0 obj <<>> endobj\ntrailer <<>>\n%%%%EOF\n' > "$E2E_FILE_PATH"
+  printf '%%PDF-1.4\n%% HRConnect APK document upload E2E fixture\n1 0 obj <<>> endobj\ntrailer <<>>\n%%%%EOF\n' > "$E2E_FILE_PATH"
 fi
 
 prepare_output="$(
@@ -138,7 +138,7 @@ done
 
 adb logcat -c
 adb shell am force-stop "$PACKAGE_NAME" >/dev/null 2>&1 || true
-adb shell am start -W -n "$ACTIVITY_NAME" >/tmp/paspapan-apk-document-e2e-start.txt
+adb shell am start -W -n "$ACTIVITY_NAME" >/tmp/hrconnect-apk-document-e2e-start.txt
 sleep "$LAUNCH_WAIT_SECONDS"
 
 devtools_socket="$(
@@ -172,7 +172,7 @@ adb exec-out screencap -p > "$SCREENSHOT_PATH"
 
 if adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime' | grep -q "$PACKAGE_NAME"; then
   echo "Fatal Android crash detected for $PACKAGE_NAME." >&2
-  adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime|com.pandanteknik.paspapan' >&2 || true
+  adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime|com.hrconnect.app' >&2 || true
   exit 1
 fi
 

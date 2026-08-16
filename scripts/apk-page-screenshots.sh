@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PACKAGE_NAME="${PACKAGE_NAME:-com.pandanteknik.paspapan.debug}"
-ACTIVITY_NAME="${ACTIVITY_NAME:-com.pandanteknik.paspapan.debug/com.pandanteknik.paspapan.MainActivity}"
+PACKAGE_NAME="${PACKAGE_NAME:-com.hrconnect.app}"
+ACTIVITY_NAME="${ACTIVITY_NAME:-com.hrconnect.app/com.hrconnect.app.MainActivity}"
 APK_PATH="${APK_PATH:-android/app/build/outputs/apk/debug/app-debug.apk}"
 APP_URL="${APP_URL:-http://127.0.0.1:8000}"
 APP_PORT="${APP_PORT:-8000}"
 CDP_PORT="${CDP_PORT:-9222}"
 E2E_LOGIN_TOKEN="${E2E_LOGIN_TOKEN:-local-apk-e2e}"
-APK_SCREENSHOT_USER_EMAIL="${APK_SCREENSHOT_USER_EMAIL:-apk.demo.user@paspapan.test}"
-APK_SCREENSHOT_ADMIN_EMAIL="${APK_SCREENSHOT_ADMIN_EMAIL:-apk.demo.superadmin@paspapan.test}"
+APK_SCREENSHOT_USER_EMAIL="${APK_SCREENSHOT_USER_EMAIL:-apk.demo.user@hrconnect.test}"
+APK_SCREENSHOT_ADMIN_EMAIL="${APK_SCREENSHOT_ADMIN_EMAIL:-apk.demo.superadmin@hrconnect.test}"
 APK_SCREENSHOT_PASSWORD="${APK_SCREENSHOT_PASSWORD:-12345678}"
 SCREENSHOT_DIR="${SCREENSHOT_DIR:-screenshots/apk-pages}"
 LAUNCH_WAIT_SECONDS="${LAUNCH_WAIT_SECONDS:-8}"
@@ -63,7 +63,7 @@ if [ "$device_count" -gt 1 ] && [ -z "${ANDROID_SERIAL:-}" ]; then
 fi
 
 if ! curl -fsS "$APP_URL/login" >/dev/null 2>&1; then
-  php artisan serve --host=127.0.0.1 --port="$APP_PORT" >/tmp/paspapan-apk-screenshots-server.log 2>&1 &
+  php artisan serve --host=127.0.0.1 --port="$APP_PORT" >/tmp/hrconnect-apk-screenshots-server.log 2>&1 &
   server_pid="$!"
   for _ in $(seq 1 30); do
     if curl -fsS "$APP_URL/login" >/dev/null 2>&1; then
@@ -75,14 +75,14 @@ fi
 
 if ! curl -fsS "$APP_URL/login" >/dev/null 2>&1; then
   echo "Laravel app is not reachable at $APP_URL." >&2
-  if [ -f /tmp/paspapan-apk-screenshots-server.log ]; then
-    tail -40 /tmp/paspapan-apk-screenshots-server.log >&2
+  if [ -f /tmp/hrconnect-apk-screenshots-server.log ]; then
+    tail -40 /tmp/hrconnect-apk-screenshots-server.log >&2
   fi
   exit 1
 fi
 
 if [ "$FORCE_REBUILD" = "1" ] || [ ! -f "$APK_PATH" ]; then
-  cap_config_backup="$(mktemp /tmp/paspapan-cap-config.XXXXXX)"
+  cap_config_backup="$(mktemp /tmp/hrconnect-cap-config.XXXXXX)"
   cp "$CAP_CONFIG_PATH" "$cap_config_backup"
 
   APP_URL="$APP_URL" CAP_CONFIG_PATH="$CAP_CONFIG_PATH" node -e '
@@ -109,7 +109,7 @@ fi
 APK_SCREENSHOT_USER_EMAIL="$APK_SCREENSHOT_USER_EMAIL" \
 APK_SCREENSHOT_ADMIN_EMAIL="$APK_SCREENSHOT_ADMIN_EMAIL" \
 APK_SCREENSHOT_PASSWORD="$APK_SCREENSHOT_PASSWORD" \
-  php scripts/prepare-apk-screenshots-demo.php >/tmp/paspapan-apk-screenshots-demo.json
+  php scripts/prepare-apk-screenshots-demo.php >/tmp/hrconnect-apk-screenshots-demo.json
 
 adb reverse "tcp:$APP_PORT" "tcp:$APP_PORT" >/dev/null
 adb install -r -d "$APK_PATH" >/dev/null
@@ -132,7 +132,7 @@ adb shell am force-stop "$PACKAGE_NAME" >/dev/null 2>&1 || true
 adb shell svc power stayon true >/dev/null 2>&1 || true
 adb shell input keyevent 224 >/dev/null 2>&1 || true
 adb shell wm dismiss-keyguard >/dev/null 2>&1 || true
-adb shell am start -W -n "$ACTIVITY_NAME" >/tmp/paspapan-apk-screenshots-start.txt
+adb shell am start -W -n "$ACTIVITY_NAME" >/tmp/hrconnect-apk-screenshots-start.txt
 sleep "$LAUNCH_WAIT_SECONDS"
 
 devtools_socket="$(
@@ -159,7 +159,7 @@ SCREENSHOT_DIR="$SCREENSHOT_DIR" \
 
 if adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime' | grep -q "$PACKAGE_NAME"; then
   echo "Fatal Android crash detected for $PACKAGE_NAME." >&2
-  adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime|com.pandanteknik.paspapan' >&2 || true
+  adb logcat -d -t 400 | grep -E 'FATAL EXCEPTION|AndroidRuntime|com.hrconnect.app' >&2 || true
   exit 1
 fi
 

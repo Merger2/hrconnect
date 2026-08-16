@@ -101,7 +101,6 @@ export function buildPageScreenshotCatalog({
     },
     { slug: 'admin-appraisals', label: 'Performance Appraisals', url: urlFor('/admin/appraisals'), expectedPath: '/admin/appraisals' },
     { slug: 'admin-assets', label: 'Company Assets', url: urlFor('/admin/assets'), expectedPath: '/admin/assets' },
-    { slug: 'admin-barcodes', label: 'Barcode Locations', url: urlFor('/admin/barcodes') },
     { slug: 'admin-divisions', label: 'Divisions', url: urlFor('/admin/masterdata/division') },
     { slug: 'admin-job-titles', label: 'Job Titles', url: urlFor('/admin/masterdata/job-title') },
     { slug: 'admin-education', label: 'Education Levels', url: urlFor('/admin/masterdata/education') },
