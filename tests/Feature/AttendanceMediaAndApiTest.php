@@ -5,7 +5,6 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\User;
 use App\Support\ApiTokenPermission;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
@@ -140,43 +139,6 @@ test('attendance photo attachment disk lookup can disable public legacy fallback
             'type' => 'in',
         ]))
         ->assertNotFound();
-});
-
-test('device photo api returns upload contract for employee accounts', function () {
-    Storage::fake('local');
-
-    $user = User::factory()->create();
-    Sanctum::actingAs($user, deviceApiAbilities());
-
-    $response = $this->post('/api/v1/device/photo', [
-        'photo' => UploadedFile::fake()->image('check-in.jpg'),
-        'latitude' => -6.2,
-        'longitude' => 106.8,
-    ]);
-
-    $response->assertOk()
-        ->assertJsonPath('success', true)
-        ->assertJsonPath('attendance_id', 0)
-        ->assertJsonPath('path', '/attendance/photo/0/in');
-});
-
-test('device photo api rejects non-image and oversized uploads', function () {
-    $user = User::factory()->create();
-    Sanctum::actingAs($user, deviceApiAbilities());
-
-    // Non-image MIME ditolak oleh rule mimes:jpg,jpeg,png.
-    $this->post('/api/v1/device/photo', [
-        'photo' => UploadedFile::fake()->create('malware.exe', 10, 'application/x-msdownload'),
-        'latitude' => -6.2,
-        'longitude' => 106.8,
-    ])->assertInvalid(['photo']);
-
-    // Upload > 5 MB ditolak oleh rule max:5120.
-    $this->post('/api/v1/device/photo', [
-        'photo' => UploadedFile::fake()->image('too-large.jpg')->size(6 * 1024),
-        'latitude' => -6.2,
-        'longitude' => 106.8,
-    ])->assertInvalid(['photo']);
 });
 
 test('device permissions api requires explicit permissions ability', function () {

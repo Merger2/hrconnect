@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\ImportExport;
 
+use App\Exports\UserImportTemplateExport;
 use App\Models\ImportExportRun;
 use App\Models\User;
 use App\Support\ImportExportRunService;
@@ -12,6 +13,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Component as LivewireComponent;
 use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 // Q1: #[Component('admin.import-export.user')] dihapus — atribut
 // `Livewire\Attributes\Component` TIDAK ADA di Livewire 4; nama komponen
@@ -87,10 +90,12 @@ final class UserImportExport extends LivewireComponent
         $this->dispatch('notify', type: 'success', message: __('User import queued. Track progress from run #:id.', ['id' => $run->id]));
     }
 
-    public function downloadTemplate(): void
+    public function downloadTemplate(): BinaryFileResponse
     {
         $this->authorize('importUsers');
 
-        $this->dispatch('notify', type: 'info', message: __('Download the template from the import section.'));
+        // Mock-miss fix (2026-08-16): sebelumnya hanya toast info tanpa file
+        // nyata. Kini mengunduh template header yang sesuai kontrak UserImport.
+        return Excel::download(new UserImportTemplateExport, 'user-import-template.xlsx');
     }
 }

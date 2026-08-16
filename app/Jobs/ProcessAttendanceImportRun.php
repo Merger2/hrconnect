@@ -45,11 +45,25 @@ class ProcessAttendanceImportRun implements ShouldQueue
             Excel::import($import, $sourcePath, 'local');
 
             $rowCount = $import->getRowCount();
+            $errors = $import->getErrors();
 
+            // Mock-miss fix (2026-08-16): baris yang gagal sebelumnya hanya
+            // masuk Log::error dan run tetap dilaporkan `completed` tanpa jejak
+            // → partial failure senyap di UI. Kini error dipersist ke
+            // meta.errors + error_message (ditampilkan run-list) dan total_rows
+            // mencerminkan seluruh baris (sukses + gagal).
             $run->update([
                 'status' => 'completed',
-                'total_rows' => $rowCount,
+                'total_rows' => $rowCount + count($errors),
                 'processed_rows' => $rowCount,
+                'meta' => array_merge($run->meta ?? [], [
+                    'successful_rows' => $rowCount,
+                    'skipped_rows' => count($errors),
+                    'errors' => array_slice($errors, 0, 20),
+                ]),
+                'error_message' => $errors !== []
+                    ? count($errors).' baris gagal diimpor (lihat detail error).'
+                    : null,
                 'completed_at' => now(),
             ]);
         } catch (ValidationException $e) {

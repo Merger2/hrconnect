@@ -46,6 +46,9 @@ class PhotoUploadController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to upload photo.',
+                // No silent degradation: alasan kegagalan ikut dikirim ke client
+                // (BusinessRuleException memakai pesan user-friendly Bahasa Indonesia).
+                'reason' => $e->getMessage(),
             ], 422);
         }
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\ImportExport;
 
 use App\Enums\EducationLevel;
+use App\Exports\AttendanceImportTemplateExport;
 use App\Models\Attendance;
 use App\Models\Division;
 use App\Models\ImportExportRun;
@@ -18,6 +19,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Component as LivewireComponent;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 // Q1: #[Component('admin.import-export.attendance')] dihapus — atribut
 // `Livewire\Attributes\Component` TIDAK ADA di Livewire 4 (cek vendor);
@@ -131,11 +134,13 @@ final class AttendanceImportExport extends LivewireComponent
         $this->dispatch('notify', type: 'success', message: __('Attendance import queued. Track progress from run #:id.', ['id' => $run->id]));
     }
 
-    public function downloadTemplate(): void
+    public function downloadTemplate(): BinaryFileResponse
     {
         $this->authorize('importAttendances');
 
-        $this->dispatch('notify', type: 'info', message: __('Download the template from the import section.'));
+        // Mock-miss fix (2026-08-16): sebelumnya hanya toast info tanpa file
+        // nyata. Kini mengunduh template header yang sesuai kontrak AttendanceImport.
+        return Excel::download(new AttendanceImportTemplateExport, 'attendance-import-template.xlsx');
     }
 
     protected function previewQuery(): Builder

@@ -170,6 +170,15 @@ test('processKnowledgeBase updates to READY and stores embedding', function () {
 // EmbeddingService — searchSimilar()
 // ═══════════════════════════════════════════════════════════════════════
 
+test('searchSimilar throws for wrong dimension query vector (mock-miss fix)', function () {
+    // Sebelumnya: diam-diam memakai fake embedding random → retrieval sampah.
+    // Kini dimensi salah = gagal keras (no silent degradation / jangan fake).
+    $queryVector = array_fill(0, 10, 0.01);
+
+    expect(fn () => $this->embeddingService->searchSimilar($queryVector))
+        ->toThrow(BusinessRuleException::class, 'Query vector untuk pencarian semantik harus 768D');
+});
+
 test('searchSimilar returns only READY records', function () {
     KnowledgeBase::create([
         'title' => 'Ready Doc',

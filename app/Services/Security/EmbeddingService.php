@@ -131,8 +131,14 @@ class EmbeddingService
     public function searchSimilar(array $queryVector, int $topK = 5, ?float $minSimilarity = null): Collection
     {
         if (count($queryVector) !== self::EMBEDDING_DIMENSION) {
-            // Re-generate or fallback if dimension mismatches
-            $queryVector = Embeddings::fakeEmbedding(self::EMBEDDING_DIMENSION);
+            // Mock-miss fix (2026-08-16): sebelumnya diam-diam mengganti vector
+            // dengan fake embedding random → retrieval sampah tanpa error.
+            // Hard gate AGENTS.md "embedding 768D nyata (jangan fake/random)"
+            // + no-silent-degradation: dimensi salah = gagal keras, bukan
+            // substitusi random.
+            throw new BusinessRuleException(
+                'Query vector untuk pencarian semantik harus '.self::EMBEDDING_DIMENSION.'D, diterima '.count($queryVector).'D.'
+            );
         }
 
         $vectorString = $this->formatVector($queryVector);
