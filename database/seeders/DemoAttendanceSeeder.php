@@ -31,7 +31,8 @@ class DemoAttendanceSeeder extends Seeder
         // Demo/test-only: 30 hari absensi palsu utk user demo — jangan pernah
         // di-seed di production (polusi riwayat absensi nyata + denda).
         // (Guard kedua: DatabaseSeeder juga skip.)
-        if (app()->isProduction()) {
+        // Demo VPS (skripsi): SEED_DEMO=true mengizinkan di production — default off.
+        if (app()->isProduction() && ! filter_var(env('SEED_DEMO', false), FILTER_VALIDATE_BOOLEAN)) {
             return;
         }
 

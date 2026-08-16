@@ -36,7 +36,8 @@ class E2eTestSeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->isProduction()) {
+        // Demo VPS (skripsi): SEED_DEMO=true mengizinkan di production — default off.
+        if (app()->isProduction() && ! filter_var(env('SEED_DEMO', false), FILTER_VALIDATE_BOOLEAN)) {
             return;
         }
 
@@ -49,7 +50,10 @@ class E2eTestSeeder extends Seeder
             ['email' => 'admin@hrconnect.local',    'name' => 'Super Admin',   'role' => 'super-admin', 'password' => 'ChangeMe!2026'],
             ['email' => 'manager@hrconnect.test',   'name' => 'Test Manager',  'role' => 'manager',    'password' => 'Manager1234!!'],
             ['email' => 'finance@hrconnect.test',   'name' => 'Test Finance',  'role' => 'finance',    'password' => 'Finance1234!!'],
-            ['email' => 'it-support@hrconnect.test','name' => 'IT Support',    'role' => 'it-support', 'password' => 'ITsupport1234'],
+            // Role 'it-support' TIDAK ADA di RoleAndPermissionSeeder (modul ItSupport
+            // dihapus) — entry lama di bawah membuat assignRole() throw ModelNotFound
+            // dan menggagalkan seluruh db:seed. User it-support dihapus 2026-08-16.
+            // ['email' => 'it-support@hrconnect.test', 'name' => 'IT Support', 'role' => 'it-support', 'password' => 'ITsupport1234'],
         ];
 
         $company = Company::where('code', 'DKMS-2025')->firstOrFail();

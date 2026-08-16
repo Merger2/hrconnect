@@ -128,6 +128,9 @@ php artisan db:seed --class=Database\Seeders\SuperAdminSeeder --force
 ```
 
 > ⚠️ **Jangan** jalankan `db:seed` penuh di production — seeder demo sudah di-guard `app()->isProduction()`, dan master data tidak perlu di-seed ulang (gunakan seeder spesifik saja: `SuperAdminSeeder`, `KnowledgeBaseSeeder`).
+> **Pengecualian VPS demo (skripsi):** set `SEED_DEMO=true` (default off) untuk mengizinkan seeder demo di production —
+> `SEED_DEMO=true SEED_YEAR_ONE=true php artisan db:seed --force` untuk demo penuh 1 tahun. Verifikasi guard:
+> `php scripts/verify-seeder-prod-dryrun.php` (skip) dan `php scripts/verify-seeder-prod-dryrun.php --demo` (bypass bekerja, rollback bersih).
 
 **Verifikasi**: login dengan `SUPER_ADMIN_EMAIL` + password baru → dashboard admin OK.
 

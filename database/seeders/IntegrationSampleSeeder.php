@@ -16,7 +16,8 @@ class IntegrationSampleSeeder extends Seeder
         // Demo/test-only: client integrasi palsu (pas-papan.hrconnect.local)
         // dengan secret hardcoded (secret-key-123 / DKMS-TEST-001) — jangan
         // pernah di-seed di production. (Guard kedua: DatabaseSeeder juga skip.)
-        if (app()->isProduction()) {
+        // Demo VPS (skripsi): SEED_DEMO=true mengizinkan di production — default off.
+        if (app()->isProduction() && ! filter_var(env('SEED_DEMO', false), FILTER_VALIDATE_BOOLEAN)) {
             return;
         }
 

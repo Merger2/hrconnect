@@ -46,6 +46,7 @@
       php artisan db:seed --class=KnowledgeBaseSeeder --force   # KB + embedding 768D nyata — RAG mati tanpa ini
       ```
       > ⚠️ JANGAN `db:seed` penuh di produksi untuk user demo — gunakan seeder spesifik (`SuperAdminSeeder`, `KnowledgeBaseSeeder`).
+      > **VPS demo skripsi:** set `SEED_DEMO=true` di .env (opt-in, default off) lalu `SEED_DEMO=true SEED_YEAR_ONE=true php artisan db:seed --force` untuk demo 1 tahun penuh. Verifikasi guard: `php scripts/verify-seeder-prod-dryrun.php` (skip) / `--demo` (bypass bekerja).
 - [ ] **[T]** Cache: `config:cache && route:cache && view:cache && event:cache` + `composer dump-autoload --optimize`.
 
 ## Fase 4 — Nginx + HTTPS (WAJIB sebelum traffic)

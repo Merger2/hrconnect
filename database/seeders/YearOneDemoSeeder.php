@@ -46,7 +46,8 @@ class YearOneDemoSeeder extends Seeder
     public function run(): void
     {
         // Demo/test-only: jangan pernah di-seed di production (polusi riwayat nyata).
-        if (app()->isProduction()) {
+        // Demo VPS (skripsi): SEED_DEMO=true mengizinkan di production — default off.
+        if (app()->isProduction() && ! filter_var(env('SEED_DEMO', false), FILTER_VALIDATE_BOOLEAN)) {
             return;
         }
 
