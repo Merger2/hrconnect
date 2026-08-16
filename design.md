@@ -124,7 +124,7 @@ diperkaya warna + navigasi, tanpa mengubah aturan wash untuk panel konten.
 - `x-user.app-footer` yang sempat dipasang di `layouts/app.blade.php`
   **dihapus total** (blade, include layout, CSS). Keputusan Fikih: footer
   tidak diperlukan di HRIS — halaman berakhir bersih setelah konten
-  (clearance bottom-nav tetap dijamin wrapper `pb-[calc(6.5rem+...)]`).
+  (clearance bottom-nav tetap dijamin wrapper `pb-[calc(5.25rem+...)]`).
 
 ### 3. Card accents (panas kartu putih)
 - Kartu konten utama ESS diberi **strip gradien 4px module-hue di tepi atas**

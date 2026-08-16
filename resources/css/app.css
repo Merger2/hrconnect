@@ -411,7 +411,6 @@
 
 
 :root {
-  --home-bottom-nav-height:6.75rem;
 }
 input[type=range] {
   cursor:pointer;
@@ -1610,6 +1609,14 @@ input[type=range]::-moz-range-thumb {
 .user-page-shell {
   min-height:100dvh;
   padding-top:calc(env(safe-area-inset-top) + .5rem);
+}
+@media (width<64rem) {
+  /* Mobile: clearance bottom-nav (wrapper app-canvas pb-5.25rem) dikurangi
+     dari min-height supaya halaman konten-pendek tidak punya scroll kosong
+     berlebih di bawah kartu terakhir. */
+  .user-page-shell {
+    min-height:calc(100dvh - 5.25rem);
+  }
 }
 @media (width>=1024px) {
   .user-page-shell {
@@ -5658,7 +5665,10 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-home-content--command {
-  padding-bottom:calc(var(--home-bottom-nav-height,6.75rem) + env(safe-area-inset-bottom));
+  /* Clearance bottom-nav di-handle wrapper global (app-canvas pb-5.25rem);
+     padding-bottom ganda di sini menghilangkan space kosong di bawah kartu
+     terakhir ("Sedang Berlangsung"). */
+  padding-bottom:0;
 }
 .user-home-content--command .home-section--spaced {
   margin-top:var(--spacing);
@@ -6330,6 +6340,17 @@ input[type=range]::-moz-range-thumb {
 @supports (color:color-mix(in lab, red, red)) {
   .user-accent-card--reports {
     --mod-border:color-mix(in srgb, var(--color-module-reports) 40%, var(--color-surface));
+  }
+}
+.kb-chat-surface {
+  /* min-height chat: pas dengan clearance bottom-nav (wrapper app-canvas
+     pb-5.25rem + pt main/shell ~1rem) → tanpa ruang kosong berlebih di bawah
+     kartu chat di mobile. Desktop (ada topbar, tanpa bottom-nav) tetap luas. */
+  min-height:calc(100dvh - 6.25rem);
+}
+@media (width>=64rem) {
+  .kb-chat-surface {
+    min-height:calc(100vh - 10rem);
   }
 }
 .user-accent-card--kb {

@@ -99,7 +99,7 @@
     @php $isAdminRoute = request()->routeIs('admin.*'); @endphp
     <body class="font-sans antialiased {{ $isAdminRoute ? 'admin-ui' : 'user-ui' }}">
 
-        <div class="min-h-screen app-canvas {{ ! $isAdminRoute ? 'pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0' : '' }}">
+        <div class="min-h-screen app-canvas {{ ! $isAdminRoute ? 'pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-0' : '' }}">
             @livewire('navigation-menu')
 
             <!-- Page Heading -->
