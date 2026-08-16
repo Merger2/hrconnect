@@ -21,11 +21,11 @@
     <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 max-w-sm">
         <div class="flex items-start gap-3">
             <div class="flex-shrink-0">
-                <img src="/icon-192.svg" alt="HRConnect" class="w-12 h-12 rounded-xl" />
+                <img src="/icon-192.svg" alt="{{ config('app.name') }}" class="w-12 h-12 rounded-xl" />
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-gray-900">
-                    {{ __('Install HRConnect') }}
+                    {{ __('Install :app', ['app' => config('app.name')]) }}
                 </p>
                 <p class="text-xs text-gray-500 mt-0.5">
                     {{ __('Akses cepat dari layar utama perangkat Anda') }}
@@ -61,7 +61,7 @@
         @click="showInstallGuide()"
         class="mt-2 w-full text-xs text-center text-primary hover:text-primary/80 transition-colors"
     >
-        {{ __('Pelajari cara install HRConnect') }}
+        {{ __('Pelajari cara install :app', ['app' => config('app.name')]) }}
     </button>
 </div>
 

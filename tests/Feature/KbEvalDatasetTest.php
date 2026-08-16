@@ -236,7 +236,17 @@ test('offline: pipeline nyata (fallback pg_trgm) — kualitas >= 90%, negatif di
 // 3. ONLINE — integritas jalur Gemini (skip otomatis tanpa API key)
 // ═══════════════════════════════════════════════════════════════════════
 
-test('online: pipeline Gemini merespons semua kasus dengan struktur jawaban+sumber (skip tanpa API key)', function () {
+test('online: pipeline Gemini merespons semua kasus dengan struktur jawaban+sumber (skip di env testing)', function () {
+    // 2026-08-16: eval online SELALU di-skip di env testing (bukan hanya saat
+    // key kosong) — suite test tidak boleh memanggil API Gemini nyata, karena
+    // free tier hanya 20 generateContent/menit (429 "retry in 45s"): 20+ kasus
+    // beruntun menghabiskan kuota dan membuat AI down untuk demo. Gate kualitas
+    // retrieval NYATA tetap dijalankan manual via `php artisan kb:eval` (mode
+    // produksi, key asli) — persis dokumentasi header file ini.
+    if (app()->environment('testing')) {
+        $this->markTestSkipped('Eval online di-skip di env testing (proteksi kuota Gemini free tier). Gate kualitas >= 90% retrieval NYATA via `php artisan kb:eval` mode produksi.');
+    }
+
     $key = config('ai.providers.gemini.key') ?: config('services.gemini.api_key');
 
     if (! $key) {

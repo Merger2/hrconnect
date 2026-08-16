@@ -22,6 +22,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Single Device Policy
+    |--------------------------------------------------------------------------
+    | Saat true, satu akun hanya boleh aktif di satu perangkat (login dari
+    | perangkat lain ditolak sampai sesi lama logout). Default false =
+    | multi-device DIIZINKAN (keputusan Fikih 2026-08-16: employee/finance
+    | boleh login HP + komputer bersamaan). Manage sesi tetap tersedia via
+    | "Logout sesi lain" di halaman profil.
+    |
+    */
+
+    'single_device' => (bool) env('AUTH_SINGLE_DEVICE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------
     |

@@ -124,7 +124,7 @@ class EmbeddingService
         }
     }
 
-    public function searchSimilar(array $queryVector, int $topK = 5): Collection
+    public function searchSimilar(array $queryVector, int $topK = 5, ?float $minSimilarity = null): Collection
     {
         if (count($queryVector) !== self::EMBEDDING_DIMENSION) {
             // Re-generate or fallback if dimension mismatches
@@ -133,13 +133,27 @@ class EmbeddingService
 
         $vectorString = $this->formatVector($queryVector);
 
-        return KnowledgeBase::query()
+        $results = KnowledgeBase::query()
             ->where('status', KnowledgeBaseStatus::READY)
             ->whereNotNull('embedding')
             ->selectRaw('*, 1 - (embedding <=> ?::vector) as similarity', [$vectorString])
             ->orderByDesc('similarity')
             ->limit($topK)
             ->get();
+
+        // Filter relevansi: buang dokumen yang kemiripannya di bawah ambang
+        // (mis. "Komponen Gaji" muncul saat tanya cuti). Kalau hasil tersaring
+        // kurang dari 2, pertahankan 2 teratas apa adanya agar jawaban tidak
+        // pernah kehilangan semua konteks (graceful degradation).
+        if ($minSimilarity !== null && $results->count() > 2) {
+            $filtered = $results->filter(fn (KnowledgeBase $kb) => ($kb->similarity ?? 0) >= $minSimilarity);
+
+            if ($filtered->count() >= 2) {
+                return $filtered->values();
+            }
+        }
+
+        return $results;
     }
 
     /**

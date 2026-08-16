@@ -23,7 +23,9 @@ class AuthenticateLoginAttempt
         }
 
         if ($user && Hash::check($request->password, $user->password) && $user->canAuthenticate()) {
-            if ($this->activeSessionGuard->hasActiveSession($user)) {
+            // Multi-device diizinkan secara default; blokir hanya jika
+            // AUTH_SINGLE_DEVICE=true (keputusan Fikih 2026-08-16).
+            if (config('auth.single_device') && $this->activeSessionGuard->hasActiveSession($user)) {
                 throw ValidationException::withMessages([
                     'email' => __('This account is still active on another device. Please log out from that device first.'),
                 ])->redirectTo('/login');

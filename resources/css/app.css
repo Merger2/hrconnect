@@ -501,14 +501,9 @@ input[type=range]::-moz-range-thumb {
 .quick-wallet-surface {
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  border-color:var(--color-primary-200);
   border-radius:1.2rem;
   overflow:hidden;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .quick-wallet-surface {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
 }
 .quick-wallet-surface {
   background-color:var(--color-surface);
@@ -969,13 +964,8 @@ input[type=range]::-moz-range-thumb {
 .attendance-panel {
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  border-color:var(--color-primary-200);
   overflow:hidden;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
 }
 .attendance-panel {
   background-color:var(--color-surface);
@@ -1045,14 +1035,9 @@ input[type=range]::-moz-range-thumb {
   gap:calc(var(--spacing) * 2.5);
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  border-color:var(--color-primary-200);
   border-radius:3.40282e38px;
   display:flex;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__worktime {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
 }
 .attendance-panel__worktime {
   background-color:var(--color-slate-50);
@@ -1139,12 +1124,7 @@ input[type=range]::-moz-range-thumb {
 }
 .attendance-panel__badge--done {
   border-color:var(--color-primary-200);
-  background:linear-gradient(to right, var(--color-primary-50), color-mix(in srgb, var(--color-module-attendance) 8%, var(--color-surface)));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__badge--done {
-    background:linear-gradient(to right, var(--color-primary-50), color-mix(in srgb, var(--color-module-attendance) 8%, var(--color-surface)));
-  }
+  background:var(--color-primary-50);
 }
 .attendance-panel__badge--done {
   color:var(--color-primary-800);
@@ -1164,18 +1144,13 @@ input[type=range]::-moz-range-thumb {
 .attendance-panel__step {
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  border-color:var(--color-primary-200);
   border-radius:1.05rem;
   flex-direction:column;
   justify-content:space-between;
   min-height:6rem;
   display:flex;
   position:relative;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__step {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
 }
 .attendance-panel__step {
   background-color:var(--color-white);
@@ -1577,42 +1552,27 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .attendance-panel__action-copy--primary {
-  color:color-mix(in srgb, var(--color-focus) 75%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__action-copy--primary {
-    color:color-mix(in oklab, var(--color-primary-700) 75%, transparent);
-  }
+  color:var(--color-primary-700);
 }
 .attendance-panel__action-copy--accent {
   color:var(--color-attendance-accent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__action-copy--accent {
-    color:color-mix(in oklab, var(--color-orange-700) 80%, transparent);
-  }
 }
 .attendance-panel__action-copy--disabled {
   color:var(--color-gray-500);
 }
 .attendance-panel__summary {
   border:1px solid var(--color-primary-100);
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-brand-50) 80%, transparent),color-mix(in srgb, var(--color-module-attendance) 8%, var(--color-surface)));
+  background:var(--color-primary-50);
   align-items:flex-start;
   gap:.75rem;
   margin-top:.875rem;
   display:flex;
 }
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__summary {
-    background:linear-gradient(to right, color-mix(in srgb, var(--color-brand-50) 80%, transparent), color-mix(in srgb, var(--color-module-attendance) 8%, var(--color-surface)));
-  }
-}
 .attendance-panel__summary {
   padding:.875rem;
 }
 .attendance-panel__summary-icon {
-  background:linear-gradient(to bottom right, var(--color-primary-100), color-mix(in srgb, var(--color-module-attendance) 19%, var(--color-surface)));
+  background:var(--color-primary-100);
   border-radius:9999px;
   flex-shrink:0;
   justify-content:center;
@@ -1620,11 +1580,6 @@ input[type=range]::-moz-range-thumb {
   width:2.25rem;
   height:2.25rem;
   display:flex;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .attendance-panel__summary-icon {
-    background:linear-gradient(to bottom right, var(--color-primary-100), color-mix(in srgb, var(--color-module-attendance) 19%, var(--color-surface)));
-  }
 }
 .attendance-panel__summary-icon {
   color:var(--color-primary-700);
@@ -1680,7 +1635,7 @@ input[type=range]::-moz-range-thumb {
   container-type:inline-size;
 }
 .user-page-container--wide,.user-page-container--standard {
-  max-width:var(--container-5xl);
+  max-width:var(--container-6xl);
 }
 .user-page-container--narrow {
   max-width:var(--container-4xl);
@@ -1738,7 +1693,7 @@ input[type=range]::-moz-range-thumb {
 .user-page-header__back {
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in srgb, var(--color-primary-200) 80%, transparent);
+  border-color:var(--color-primary-200);
   border-radius:3.40282e38px;
   flex-shrink:0;
   justify-content:center;
@@ -1746,11 +1701,6 @@ input[type=range]::-moz-range-thumb {
   min-width:2.75rem;
   min-height:2.75rem;
   display:inline-flex;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header__back {
-    border-color:color-mix(in oklab, var(--color-slate-200) 80%, transparent);
-  }
 }
 .user-page-header__back {
   background-color:var(--color-white);
@@ -1794,13 +1744,13 @@ input[type=range]::-moz-range-thumb {
   width:calc(var(--spacing) * 11);
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in oklab, var(--color-primary-100) 80%, transparent);
+  border-color:var(--color-primary-100);
   background-color:var(--color-primary-50);
   color:var(--color-primary-700);
   --tw-shadow:0 0 transparent;
   --tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  --tw-ring-color:color-mix(in oklab, var(--color-white) 60%, transparent);
+  --tw-ring-color:var(--color-primary-100);
 
 
 
@@ -1831,23 +1781,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-attendance .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-attendance) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-attendance .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-attendance) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-attendance) 25%, var(--color-surface));
 }
 .user-page-header--module-attendance .user-page-header__icon {
   color:var(--color-module-attendance);
 }
 .user-page-header--module-attendance:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-attendance) 55%, transparent),color-mix(in srgb, var(--color-module-attendance) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-attendance:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-attendance) 55%, transparent), color-mix(in srgb, var(--color-module-attendance) 8%, transparent));
-  }
+  background:var(--color-module-attendance);
 }
 .user-page-header--module-leave .user-page-header__icon {
   background-color:var(--color-module-leave);
@@ -1858,23 +1798,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-leave .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-leave) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-leave .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-leave) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-leave) 25%, var(--color-surface));
 }
 .user-page-header--module-leave .user-page-header__icon {
   color:var(--color-module-leave);
 }
 .user-page-header--module-leave:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-leave) 55%, transparent),color-mix(in srgb, var(--color-module-leave) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-leave:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-leave) 55%, transparent), color-mix(in srgb, var(--color-module-leave) 8%, transparent));
-  }
+  background:var(--color-module-leave);
 }
 .user-page-header--module-payroll .user-page-header__icon {
   background-color:var(--color-module-payroll);
@@ -1885,23 +1815,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-payroll .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-payroll) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-payroll .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-payroll) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-payroll) 25%, var(--color-surface));
 }
 .user-page-header--module-payroll .user-page-header__icon {
   color:var(--color-module-payroll);
 }
 .user-page-header--module-payroll:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-payroll) 55%, transparent),color-mix(in srgb, var(--color-module-payroll) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-payroll:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-payroll) 55%, transparent), color-mix(in srgb, var(--color-module-payroll) 8%, transparent));
-  }
+  background:var(--color-module-payroll);
 }
 .user-page-header--module-documents .user-page-header__icon {
   background-color:var(--color-module-documents);
@@ -1912,23 +1832,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-documents .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-documents) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-documents .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-documents) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-documents) 25%, var(--color-surface));
 }
 .user-page-header--module-documents .user-page-header__icon {
   color:var(--color-module-documents);
 }
 .user-page-header--module-documents:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-documents) 55%, transparent),color-mix(in srgb, var(--color-module-documents) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-documents:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-documents) 55%, transparent), color-mix(in srgb, var(--color-module-documents) 8%, transparent));
-  }
+  background:var(--color-module-documents);
 }
 .user-page-header--module-finance .user-page-header__icon {
   background-color:var(--color-module-finance);
@@ -1939,23 +1849,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-finance .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-finance) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-finance .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-finance) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-finance) 25%, var(--color-surface));
 }
 .user-page-header--module-finance .user-page-header__icon {
   color:var(--color-module-finance);
 }
 .user-page-header--module-finance:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-finance) 55%, transparent),color-mix(in srgb, var(--color-module-finance) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-finance:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-finance) 55%, transparent), color-mix(in srgb, var(--color-module-finance) 8%, transparent));
-  }
+  background:var(--color-module-finance);
 }
 .user-page-header--module-hr .user-page-header__icon {
   background-color:var(--color-module-hr);
@@ -1966,23 +1866,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-hr .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-hr) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-hr .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-hr) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-hr) 25%, var(--color-surface));
 }
 .user-page-header--module-hr .user-page-header__icon {
   color:var(--color-module-hr);
 }
 .user-page-header--module-hr:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-hr) 55%, transparent),color-mix(in srgb, var(--color-module-hr) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-hr:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-hr) 55%, transparent), color-mix(in srgb, var(--color-module-hr) 8%, transparent));
-  }
+  background:var(--color-module-hr);
 }
 .user-page-header--module-kb .user-page-header__icon {
   background-color:var(--color-module-kb);
@@ -1993,23 +1883,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-kb .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-kb) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-kb .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-kb) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-kb) 25%, var(--color-surface));
 }
 .user-page-header--module-kb .user-page-header__icon {
   color:var(--color-module-kb);
 }
 .user-page-header--module-kb:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-kb) 55%, transparent),color-mix(in srgb, var(--color-module-kb) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-kb:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-kb) 55%, transparent), color-mix(in srgb, var(--color-module-kb) 8%, transparent));
-  }
+  background:var(--color-module-kb);
 }
 .user-page-header--module-reports .user-page-header__icon {
   background-color:var(--color-module-reports);
@@ -2020,23 +1900,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--module-reports .user-page-header__icon {
-  border-color:color-mix(in srgb, var(--color-module-reports) 25%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-reports .user-page-header__icon {
-    border-color:color-mix(in srgb, var(--color-module-reports) 25%, transparent);
-  }
+  border-color:color-mix(in srgb, var(--color-module-reports) 25%, var(--color-surface));
 }
 .user-page-header--module-reports .user-page-header__icon {
   color:var(--color-module-reports);
 }
 .user-page-header--module-reports:before {
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-reports) 55%, transparent),color-mix(in srgb, var(--color-module-reports) 8%, transparent));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--module-reports:before {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-reports) 55%, transparent), color-mix(in srgb, var(--color-module-reports) 8%, transparent));
-  }
+  background:var(--color-module-reports);
 }
 .user-page-header--banner {
   color:var(--color-surface);
@@ -2122,132 +1992,52 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-page-header--banner.user-page-header--module-hr {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-hr) 62%, var(--color-primary-900)) 0%, var(--color-module-hr) 58%, color-mix(in srgb, var(--color-module-hr) 55%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-hr {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-hr) 62%, var(--color-primary-900)) 0%, var(--color-module-hr) 58%, color-mix(in srgb, var(--color-module-hr) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-hr) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-hr {
-  border:1px solid color-mix(in srgb, var(--color-module-hr) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-hr {
-    border:1px solid color-mix(in srgb, var(--color-module-hr) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-hr) 40%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-attendance {
-  background:linear-gradient(135deg, var(--color-banner-attendance-deep) 0%, var(--color-module-attendance) 58%, color-mix(in srgb, var(--color-module-attendance) 55%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-attendance {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-attendance) 62%, var(--color-primary-900)) 0%, var(--color-module-attendance) 58%, color-mix(in srgb, var(--color-module-attendance) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-attendance) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-attendance {
-  border:1px solid color-mix(in srgb, var(--color-module-attendance) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-attendance {
-    border:1px solid color-mix(in srgb, var(--color-module-attendance) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-attendance) 40%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-leave {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-leave) 62%, var(--color-primary-900)) 0%, var(--color-module-leave) 58%, color-mix(in srgb, var(--color-module-leave) 55%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-leave {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-leave) 62%, var(--color-primary-900)) 0%, var(--color-module-leave) 58%, color-mix(in srgb, var(--color-module-leave) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-leave) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-leave {
-  border:1px solid color-mix(in srgb, var(--color-module-leave) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-leave {
-    border:1px solid color-mix(in srgb, var(--color-module-leave) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-leave) 40%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-payroll {
-  background:linear-gradient(135deg, var(--color-banner-payroll-deep) 0%, var(--color-module-payroll) 58%, color-mix(in srgb, var(--color-module-payroll) 55%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-payroll {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-payroll) 62%, var(--color-primary-900)) 0%, var(--color-module-payroll) 58%, color-mix(in srgb, var(--color-module-payroll) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-payroll) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-payroll {
-  border:1px solid color-mix(in srgb, var(--color-module-payroll) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-payroll {
-    border:1px solid color-mix(in srgb, var(--color-module-payroll) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-payroll) 40%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-documents {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-documents) 62%, var(--color-primary-900)) 0%, var(--color-module-documents) 58%, var(--color-banner-documents-light) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-documents {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-documents) 62%, var(--color-primary-900)) 0%, var(--color-module-documents) 58%, color-mix(in srgb, var(--color-module-documents) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-documents) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-documents {
-  border:1px solid color-mix(in srgb, var(--color-module-documents) 45%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-documents {
-    border:1px solid color-mix(in srgb, var(--color-module-documents) 45%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-documents) 45%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-reports {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-reports) 62%, var(--color-primary-900)) 0%, var(--color-module-reports) 58%, color-mix(in srgb, var(--color-module-reports) 55%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-reports {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-reports) 62%, var(--color-primary-900)) 0%, var(--color-module-reports) 58%, color-mix(in srgb, var(--color-module-reports) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-reports) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-reports {
-  border:1px solid color-mix(in srgb, var(--color-module-reports) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-reports {
-    border:1px solid color-mix(in srgb, var(--color-module-reports) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-reports) 40%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-kb {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-kb) 62%, var(--color-primary-900)) 0%, var(--color-module-kb) 58%, color-mix(in srgb, var(--color-module-kb) 56%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-kb {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-kb) 62%, var(--color-primary-900)) 0%, var(--color-module-kb) 58%, color-mix(in srgb, var(--color-module-kb) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-kb) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-kb {
-  border:1px solid color-mix(in srgb, var(--color-module-kb) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-kb {
-    border:1px solid color-mix(in srgb, var(--color-module-kb) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-kb) 40%, var(--color-surface));
 }
 .user-page-header--banner.user-page-header--module-finance {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-finance) 62%, var(--color-primary-900)) 0%, var(--color-module-finance) 58%, color-mix(in srgb, var(--color-module-finance) 55%, var(--color-surface)) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-finance {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-finance) 62%, var(--color-primary-900)) 0%, var(--color-module-finance) 58%, color-mix(in srgb, var(--color-module-finance) 55%, var(--color-surface)) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-finance) 62%, var(--color-primary-900));
 }
 .user-page-header--banner.user-page-header--module-finance {
-  border:1px solid color-mix(in srgb, var(--color-module-finance) 40%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-page-header--banner.user-page-header--module-finance {
-    border:1px solid color-mix(in srgb, var(--color-module-finance) 40%, transparent);
-  }
+  border:1px solid color-mix(in srgb, var(--color-module-finance) 40%, var(--color-surface));
 }
 .app-topbar {
   z-index:50;
@@ -2279,15 +2069,10 @@ input[type=range]::-moz-range-thumb {
   content:"";
   pointer-events:none;
   inset-inline:0;
-  background:linear-gradient(90deg,color-mix(in srgb, var(--color-module-hr) 75%, transparent),color-mix(in srgb, var(--color-module-attendance) 60%, transparent),color-mix(in srgb, var(--color-module-leave) 55%, transparent),color-mix(in srgb, var(--color-module-documents) 50%, transparent));
+  background:linear-gradient(90deg, var(--color-module-hr), var(--color-module-attendance), var(--color-module-leave), var(--color-module-documents));
   height:2px;
   position:absolute;
   bottom:-1px;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .app-topbar:after {
-    background:linear-gradient(90deg, color-mix(in srgb, var(--color-module-hr) 75%, transparent), color-mix(in srgb, var(--color-module-attendance) 60%, transparent), color-mix(in srgb, var(--color-module-leave) 55%, transparent), color-mix(in srgb, var(--color-module-documents) 50%, transparent));
-  }
 }
 .app-topbar__inner {
   width:100%;
@@ -2525,15 +2310,10 @@ input[type=range]::-moz-range-thumb {
   gap:calc(var(--spacing) * 3);
   border-style:var(--tw-border-style);
   border-width:1px;
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  border-color:var(--color-primary-200);
   border-radius:1.35rem;
   grid-template-columns:auto minmax(0,1fr);
   display:grid;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .profile-identity {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
 }
 .profile-identity {
   background-color:var(--color-white);
@@ -5592,37 +5372,11 @@ input[type=range]::-moz-range-thumb {
 .user-ui {
   --user-menu-card-radius:1.1rem;
   --user-menu-icon-radius:.95rem;
-  --user-native-surface:color-mix(in srgb, var(--color-on-error) 72%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui {
-    --user-native-surface:color-mix(in srgb, var(--color-surface) 72%, transparent);
-  }
-}
-.user-ui {
-  --user-native-surface-strong:color-mix(in srgb, var(--color-on-error) 86%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui {
-    --user-native-surface-strong:color-mix(in srgb, var(--color-surface) 86%, transparent);
-  }
-}
-.user-ui {
-  --user-native-border:color-mix(in srgb, var(--color-primary-300) 72%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui {
-    --user-native-border:color-mix(in srgb, var(--color-primary-300) 72%, transparent);
-  }
-}
-.user-ui {
+  --user-native-surface:var(--color-surface);
+  --user-native-surface-strong:var(--color-surface);
+  --user-native-border:var(--color-primary-300);
   --user-native-page:var(--color-primary-50);
-  background:radial-gradient(circle at 50% -12rem, color-mix(in srgb, var(--color-module-payroll) 20%, transparent), transparent 28rem), linear-gradient(180deg, var(--color-primary-50) 0%, var(--color-primary-50) 46%, var(--color-primary-100) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui {
-    background:radial-gradient(circle at 50% -12rem, color-mix(in srgb, var(--color-module-payroll) 20%, transparent), transparent 28rem), linear-gradient(180deg, var(--color-primary-50) 0%, var(--color-primary-50) 46%, var(--color-primary-100) 100%);
-  }
+  background:var(--color-primary-100);
 }
 .user-ui {
   --lightningcss-light:initial;
@@ -5634,23 +5388,18 @@ input[type=range]::-moz-range-thumb {
   pointer-events:none;
   z-index:calc(10 * -1);
   inset-inline:0;
-  background:linear-gradient(color-mix(in srgb, var(--color-module-payroll) 25%, transparent),transparent);
+  background:none;
   height:18rem;
   position:absolute;
   top:0;
   overflow:hidden;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-app-backdrop {
-    background:linear-gradient(180deg, color-mix(in srgb, var(--color-module-payroll) 25%, transparent), color-mix(in srgb, var(--color-primary-50) 0%, transparent));
-  }
 }
 .user-home-hero {
   padding-top:calc(1.25rem + env(safe-area-inset-top));
 }
 .user-home-hero__inner {
   width:100%;
-  max-width:var(--container-5xl);
+  max-width:var(--container-6xl);
   justify-content:space-between;
   align-items:center;
   gap:calc(var(--spacing) * 4);
@@ -5779,7 +5528,7 @@ input[type=range]::-moz-range-thumb {
   padding-top:calc(1rem + env(safe-area-inset-top));
 }
 .user-home-hero--command .user-home-hero__inner {
-  border:1px solid color-mix(in srgb, var(--color-module-hr) 40%, transparent);
+  border:1px solid color-mix(in srgb, var(--color-module-hr) 40%, var(--color-surface));
   border-radius:1.2rem;
   justify-content:space-between;
   align-items:flex-start;
@@ -5788,18 +5537,8 @@ input[type=range]::-moz-range-thumb {
   display:flex;
   position:relative;
 }
-@supports (color:color-mix(in lab, red, red)) {
-  .user-home-hero--command .user-home-hero__inner {
-    border:1px solid color-mix(in srgb, var(--color-module-hr) 40%, transparent);
-  }
-}
 .user-home-hero--command .user-home-hero__inner {
-  background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-hr) 62%, var(--color-primary-900)) 0%, var(--color-module-hr) 52%, var(--color-module-attendance) 100%);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-home-hero--command .user-home-hero__inner {
-    background:linear-gradient(135deg, color-mix(in srgb, var(--color-module-hr) 62%, var(--color-primary-900)) 0%, var(--color-module-hr) 52%, var(--color-module-attendance) 100%);
-  }
+  background:color-mix(in srgb, var(--color-module-hr) 62%, var(--color-primary-900));
 }
 .user-home-hero--command .user-home-hero__inner {
   color:var(--color-surface);
@@ -5864,42 +5603,8 @@ input[type=range]::-moz-range-thumb {
   .user-home-hero--command .user-home-hero__profile {
     box-shadow:0 8px 20px -8px color-mix(in srgb, var(--color-brand-950) 50%, transparent);
   }
-}
-.user-home-hero--command .user-home-hero__glow {
-  border-radius:inherit;
-  pointer-events:none;
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-}
-.user-home-hero--command .user-home-hero__glow:before,.user-home-hero--command .user-home-hero__glow:after {
-  content:"";
-  border-radius:9999px;
-  position:absolute;
-}
-.user-home-hero--command .user-home-hero__glow:before {
-  background:radial-gradient(closest-side,color-mix(in srgb, var(--color-on-error) 18%, transparent),transparent);
-  width:13rem;
-  height:13rem;
-  top:-4rem;
-  right:-3rem;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-home-hero--command .user-home-hero__glow:before {
-    background:radial-gradient(closest-side, color-mix(in srgb, var(--color-surface) 18%, transparent), transparent);
-  }
-}
-.user-home-hero--command .user-home-hero__glow:after {
-  background:radial-gradient(closest-side,color-mix(in srgb, var(--color-module-attendance) 22%, transparent),transparent);
-  width:12rem;
-  height:12rem;
-  bottom:-5rem;
-  left:-3rem;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-home-hero--command .user-home-hero__glow:after {
-    background:radial-gradient(closest-side, color-mix(in srgb, var(--color-module-attendance) 22%, transparent), transparent);
-  }
+}.user-home-hero--command .user-home-hero__glow {
+  display:none;
 }
 .user-home-hero__greeting {
   font-size:var(--text-base);
@@ -5966,7 +5671,7 @@ input[type=range]::-moz-range-thumb {
 .home-date-context {
   z-index:20;
   margin-top:.875rem;
-  border:1px solid color-mix(in srgb, var(--color-primary-200) 95%, transparent);
+  border:1px solid var(--color-primary-200);
   border-radius:1.15rem;
   justify-content:space-between;
   align-items:center;
@@ -5977,11 +5682,6 @@ input[type=range]::-moz-range-thumb {
   padding:.625rem .875rem .625rem .625rem;
   display:flex;
   position:relative;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .home-date-context {
-    border:1px solid color-mix(in srgb, var(--color-primary-200) 95%, transparent);
-  }
 }
 .home-date-context {
   background:var(--color-surface);
@@ -6699,13 +6399,13 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .user-accent-card {
-  background-color:var(--mod-tint,var(--color-primary-100));
+  background-color:color-mix(in srgb, var(--mod-base) 18%, var(--color-surface));
   position:relative;
   overflow:hidden;
 }
 .user-accent-card:before {
   content:"";
-  background:linear-gradient(90deg, var(--mod-deep,var(--color-primary-700)), var(--mod-base,var(--color-primary-600)));
+  background:var(--mod-deep,var(--color-primary-700));
   pointer-events:none;
   inset-inline:0;
   height:4px;
@@ -6713,13 +6413,13 @@ input[type=range]::-moz-range-thumb {
   top:0;
 }
 .user-accent-card--soft {
-  background-color:var(--mod-tint-soft,var(--color-primary-50));
+  background-color:color-mix(in srgb, var(--mod-base) 12%, var(--color-surface));
 }
 .user-accent-card--soft:before {
   height:2px;
 }
 .solid-head {
-  background:linear-gradient(135deg, var(--mod-deep,var(--color-primary-700)), var(--mod-base,var(--color-primary-600)));
+  background:var(--mod-deep,var(--color-primary-700));
   color:var(--color-surface);
 }
 .solid-head__eyebrow {
@@ -6750,7 +6450,7 @@ input[type=range]::-moz-range-thumb {
   color:var(--mod-deep,var(--color-primary-800));
 }
 .profile-identity.user-accent-card--hr {
-  background:linear-gradient(135deg, var(--mod-deep), var(--mod-base));
+  background:var(--mod-deep);
   color:var(--color-surface);
 }
 .profile-identity.user-accent-card--hr .profile-identity__eyebrow {
@@ -6909,7 +6609,34 @@ input[type=range]::-moz-range-thumb {
   }
 }
 .app-canvas {
-  background:linear-gradient(180deg, var(--color-primary-50) 0%, var(--color-primary-100) 48%, var(--color-primary-50) 100%);
+  background:var(--color-primary-100);
+}
+/* COLORFUL BACKGROUND (2026-08-16 — keputusan Fikih: background bukan putih polos).
+   Tint solid opaque mengikuti hue module halaman (via :has); home/netral tetap
+   primary-100. Tanpa gradien, tanpa alpha — solid flat. */
+.app-canvas:has(.user-page-header--module-hr) {
+  background-color:color-mix(in srgb, var(--color-module-hr) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-attendance) {
+  background-color:color-mix(in srgb, var(--color-module-attendance) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-leave) {
+  background-color:color-mix(in srgb, var(--color-module-leave) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-payroll) {
+  background-color:color-mix(in srgb, var(--color-module-payroll) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-documents) {
+  background-color:color-mix(in srgb, var(--color-module-documents) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-reports) {
+  background-color:color-mix(in srgb, var(--color-module-reports) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-kb) {
+  background-color:color-mix(in srgb, var(--color-module-kb) 10%, var(--color-surface));
+}
+.app-canvas:has(.user-page-header--module-finance) {
+  background-color:color-mix(in srgb, var(--color-module-finance) 10%, var(--color-surface));
 }
 .home-empty-strip h3 {
   font-size:var(--text-sm);
@@ -6932,13 +6659,8 @@ input[type=range]::-moz-range-thumb {
 .home-compact-group+.home-compact-group {
   margin-top:calc(var(--spacing) * 3);
   border-top-style:var(--tw-border-style);
-  border-color:color-mix(in srgb, var(--color-primary-200) 60%, transparent);
+  border-color:var(--color-primary-200);
   border-top-width:1px;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .home-compact-group+.home-compact-group {
-    border-color:color-mix(in oklab, var(--color-slate-200) 60%, transparent);
-  }
 }
 .home-compact-group+.home-compact-group {
   padding-top:calc(var(--spacing) * 3);
@@ -11758,58 +11480,36 @@ input[type=range]::-moz-range-thumb {
   background-color:transparent;
 }
 .user-ui .quick-wallet-surface,.user-ui .quick-wallet-team,.user-ui .attendance-panel,.user-ui .wcag-card,.user-ui .user-empty-state,.user-ui .user-segmented-tabs,.user-ui .scanner-card-surface,.user-ui .location-card-surface,.user-ui .user-content-panel {
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .quick-wallet-surface,.user-ui .quick-wallet-team,.user-ui .attendance-panel,.user-ui .wcag-card,.user-ui .user-empty-state,.user-ui .user-segmented-tabs,.user-ui .scanner-card-surface,.user-ui .location-card-surface,.user-ui .user-content-panel {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
+  border-color:var(--color-primary-200);
 }
 .user-ui .quick-wallet-surface,.user-ui .quick-wallet-team,.user-ui .attendance-panel,.user-ui .wcag-card,.user-ui .user-empty-state,.user-ui .user-segmented-tabs,.user-ui .scanner-card-surface,.user-ui .location-card-surface,.user-ui .user-content-panel {
   background-color:var(--color-white);
   --tw-shadow:0 0 transparent;
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
 }
+/* COLORFUL SOLID (2026-08-16 — keputusan Fikih: HRIS harus colorful, bukan putih polos;
+   warna module solid opaque, bukan wash pucat) */
 .user-ui .attendance-panel {
-  background-color:color-mix(in srgb, var(--color-module-attendance) 10%, var(--color-surface));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .attendance-panel {
-    background-color:color-mix(in srgb, var(--color-module-attendance) 10%, var(--color-surface));
-  }
+  background-color:color-mix(in srgb, var(--color-module-attendance) 18%, var(--color-surface));
+  border-color:color-mix(in srgb, var(--color-module-attendance) 35%, var(--color-surface));
 }
 .user-ui .quick-wallet-surface {
-  background-color:color-mix(in srgb, var(--color-module-hr) 10%, var(--color-surface));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .quick-wallet-surface {
-    background-color:color-mix(in srgb, var(--color-module-hr) 10%, var(--color-surface));
-  }
+  background-color:color-mix(in srgb, var(--color-module-hr) 18%, var(--color-surface));
+  border-color:color-mix(in srgb, var(--color-module-hr) 35%, var(--color-surface));
 }
 .user-ui .home-command-panel {
-  background-color:color-mix(in srgb, var(--color-module-leave) 10%, var(--color-surface));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .home-command-panel {
-    background-color:color-mix(in srgb, var(--color-module-leave) 10%, var(--color-surface));
-  }
+  background-color:color-mix(in srgb, var(--color-module-leave) 18%, var(--color-surface));
+  border-color:color-mix(in srgb, var(--color-module-leave) 35%, var(--color-surface));
 }
 .user-ui .home-command-panel--emerald {
-  background-color:color-mix(in srgb, var(--color-module-payroll) 10%, var(--color-surface));
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .home-command-panel--emerald {
-    background-color:color-mix(in srgb, var(--color-module-payroll) 10%, var(--color-surface));
-  }
+  background-color:color-mix(in srgb, var(--color-module-payroll) 18%, var(--color-surface));
+  border-color:color-mix(in srgb, var(--color-module-payroll) 35%, var(--color-surface));
 }
 .user-ui .user-content-panel {
-  background-color:color-mix(in srgb, var(--color-module-documents) 8%, var(--color-surface));
+  background-color:color-mix(in srgb, var(--color-module-documents) 18%, var(--color-surface));
+  border-color:color-mix(in srgb, var(--color-module-documents) 35%, var(--color-surface));
 }
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .user-content-panel {
-    background-color:color-mix(in srgb, var(--color-module-documents) 7%, var(--color-surface));
-  }
-}
+
 .user-ui .scanner-card-surface,.user-ui .location-card-surface {
   border-radius:1.15rem;
 }
@@ -12418,19 +12118,21 @@ input[type=range]::-moz-range-thumb {
   opacity:.7;
 }
 .user-ui .user-page-body .user-native-form,.user-ui .user-page-body form.user-native-form {
-  border-color:color-mix(in srgb, var(--color-primary-200) 70%, transparent);
+  border-color:var(--color-primary-200);
   border-radius:1.4rem;
-}
-@supports (color:color-mix(in lab, red, red)) {
-  .user-ui .user-page-body .user-native-form,.user-ui .user-page-body form.user-native-form {
-    border-color:color-mix(in oklab, var(--color-slate-200) 70%, transparent);
-  }
 }
 .user-ui .user-page-body .user-native-form,.user-ui .user-page-body form.user-native-form {
   background-color:var(--color-white);
   --tw-shadow:0 0 transparent;
   box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   overflow:visible;
+}
+/* COHERENCE (2026-08-16): form yang juga .user-accent-card (mis. apply-leave)
+   harus tetap dapat tint module, bukan putih — menang atas .user-native-form
+   (specificity lebih tinggi + lebih akhir). Border ikut tint module solid. */
+.user-ui .user-page-body form.user-accent-card {
+  background-color:color-mix(in srgb, var(--mod-base) 18%, var(--color-surface));
+  border-color:color-mix(in srgb, var(--mod-base) 35%, var(--color-surface));
 }
 .user-ui .user-page-body .user-filter-grid {
   gap:calc(var(--spacing) * 3);

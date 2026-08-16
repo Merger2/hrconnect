@@ -31,7 +31,7 @@ class KnowledgeBaseSeeder extends Seeder
             ['name' => 'Kasbon', 'slug' => 'kasbon', 'description' => 'Informasi kasbon/pinjaman karyawan', 'sort_order' => 7],
             ['name' => 'Fasilitas & Aset', 'slug' => 'fasilitas', 'description' => 'Fasilitas dan aset perusahaan', 'sort_order' => 8],
             ['name' => 'Penilaian Kinerja', 'slug' => 'kinerja', 'description' => 'Informasi appraisal dan KPI', 'sort_order' => 9],
-            ['name' => 'Teknis Aplikasi', 'slug' => 'teknis', 'description' => 'Panduan penggunaan aplikasi HRConnect', 'sort_order' => 10],
+            ['name' => 'Teknis Aplikasi', 'slug' => 'teknis', 'description' => 'Panduan penggunaan aplikasi perusahaan', 'sort_order' => 10],
         ];
 
         foreach ($categories as $data) {
@@ -58,7 +58,7 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'category_id' => $catKepegawaian,
                 'title' => 'Jam Kerja Karyawan',
-                'content' => 'Jam kerja HRConnect adalah Senin-Jumat pukul 08.00 - 17.00 WIB dengan istirahat 1 jam (12.00-13.00 WIB). Jam kerja fleksibel dapat diatur dengan persetujuan atasan langsung. Karyawan wajib mengisi absensi masuk sebelum pukul 08.00 WIB dan absensi pulang setelah pukul 17.00 WIB. Keterlambatan di atas 15 menit akan dicatat sebagai keterlambatan.',
+                'content' => 'Jam kerja perusahaan adalah Senin-Jumat pukul 08.00 - 17.00 WIB dengan istirahat 1 jam (12.00-13.00 WIB). Jam kerja fleksibel dapat diatur dengan persetujuan atasan langsung. Karyawan wajib mengisi absensi masuk sebelum pukul 08.00 WIB dan absensi pulang setelah pukul 17.00 WIB. Keterlambatan di atas 15 menit akan dicatat sebagai keterlambatan.',
             ],
             [
                 'category_id' => $catKepegawaian,
@@ -68,7 +68,7 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'category_id' => $catKepegawaian,
                 'title' => 'Struktur Organisasi',
-                'content' => 'Perusahaan memiliki struktur organisasi yang terdiri dari: Direktur Utama, Direktur, General Manager, Manager, Supervisor, Staff. Setiap divisi dipimpin oleh seorang Manager yang bertanggung jawab kepada Direktur. Karyawan dapat melihat struktur organisasi lengkap melalui menu Company Directory di aplikasi HRConnect.',
+                'content' => 'Perusahaan memiliki struktur organisasi yang terdiri dari: Direktur Utama, Direktur, General Manager, Manager, Supervisor, Staff. Setiap divisi dipimpin oleh seorang Manager yang bertanggung jawab kepada Direktur. Karyawan dapat melihat struktur organisasi lengkap melalui menu Company Directory di aplikasi.',
             ],
             [
                 'category_id' => $catKepegawaian,
@@ -86,7 +86,7 @@ class KnowledgeBaseSeeder extends Seeder
                 'title' => 'Cara Absensi (Check In/Out)',
                 // 2026-08-06: face-ONLY (keputusan Fikih 2026-08-05 — PIN fallback
                 // dihapus dari AttendanceService). Konten lama masih menyebut PIN.
-                'content' => 'Absensi dilakukan melalui aplikasi HRConnect dengan metode Face ID — verifikasi wajah (wajib, tanpa PIN fallback). Karyawan wajib melakukan check in saat datang dan check out saat pulang. Absensi menggunakan teknologi geolokasi GPS untuk memastikan karyawan berada di lokasi yang ditentukan. Check in dapat dilakukan mulai pukul 06.00 WIB. Pastikan wajah terdaftar di menu Face Enrollment sebelum absen.',
+                'content' => 'Absensi dilakukan melalui aplikasi dengan metode Face ID — verifikasi wajah (wajib, tanpa PIN fallback). Karyawan wajib melakukan check in saat datang dan check out saat pulang. Absensi menggunakan teknologi geolokasi GPS untuk memastikan karyawan berada di lokasi yang ditentukan. Check in dapat dilakukan mulai pukul 06.00 WIB. Pastikan wajah terdaftar di menu Face Enrollment sebelum absen.',
             ],
             [
                 'category_id' => $catAbsensi,
@@ -107,7 +107,7 @@ class KnowledgeBaseSeeder extends Seeder
             [
                 'category_id' => $catCuti,
                 'title' => 'Jenis Cuti yang Tersedia',
-                'content' => 'Jenis cuti yang tersedia di HRConnect: 1) Cuti Tahunan — 12 hari per tahun (menggunakan kuota), 2) Cuti Sakit — tidak terbatas (tanpa kuota), 3) Cuti Khusus — pernikahan, kelahiran, dll (tanpa kuota). Cuti tahunan yang tidak digunakan dapat di-carry-over ke tahun berikutnya maksimal 6 hari. Pengajuan cuti dilakukan melalui menu Leave Request.',
+                'content' => 'Jenis cuti yang tersedia: 1) Cuti Tahunan — 12 hari per tahun (menggunakan kuota), 2) Cuti Sakit — tidak terbatas (tanpa kuota), 3) Cuti Khusus — pernikahan, kelahiran, dll (tanpa kuota). Cuti tahunan yang tidak digunakan dapat di-carry-over ke tahun berikutnya maksimal 6 hari. Pengajuan cuti dilakukan melalui menu Leave Request.',
             ],
             [
                 'category_id' => $catCuti,
@@ -213,18 +213,13 @@ class KnowledgeBaseSeeder extends Seeder
             ],
             [
                 'category_id' => $catTeknis,
-                'title' => 'Fitur Chat RAG (Knowledge Base)',
-                'content' => 'Chat RAG (Retrieval-Augmented Generation) adalah fitur AI yang memungkinkan karyawan bertanya tentang kebijakan dan prosedur perusahaan. Cukup ketik pertanyaan dalam bahasa Indonesia, AI akan mencari jawaban dari database pengetahuan perusahaan. Fitur ini dapat diakses melalui menu Knowledge Base Chat.',
-            ],
-            [
-                'category_id' => $catTeknis,
-                'title' => 'Aplikasi Mobile HRConnect',
-                'content' => 'HRConnect tersedia sebagai PWA (Progressive Web App) yang dapat diinstal di perangkat Android dan iOS. Buka aplikasi melalui browser Chrome/Safari, lalu pilih "Install" atau "Add to Home Screen". Fitur yang tersedia: absensi Face ID, GPS tracking, pengajuan cuti/lembur, payslip, notifikasi, dan chat RAG.',
+                'title' => 'Aplikasi Mobile Karyawan',
+                'content' => 'Aplikasi ini tersedia sebagai PWA (Progressive Web App) yang dapat diinstal di perangkat Android dan iOS. Buka aplikasi melalui browser Chrome/Safari, lalu pilih "Install" atau "Add to Home Screen". Fitur yang tersedia: absensi Face ID, GPS tracking, pengajuan cuti/lembur, payslip, notifikasi, dan asisten AI tanya-jawab.',
             ],
         ];
 
         foreach ($entries as $data) {
-            KnowledgeBase::firstOrCreate(
+            KnowledgeBase::updateOrCreate(
                 ['title' => $data['title']],
                 array_merge($data, [
                     'knowledgeable_type' => 'App\\Models\\Company',

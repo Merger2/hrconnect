@@ -66,8 +66,15 @@ class KnowledgeBaseService
                 return;
             }
 
+            // Sapaan murni — tanpa retrieval, tanpa source.
+            if (is_greeting_question($question)) {
+                yield from $this->streamGreeting($question, $conversationId, $user);
+
+                return;
+            }
+
             $queryEmbedding = $this->embedding->embed($question);
-            $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
+            $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5, minSimilarity: 0.70);
 
             $context = $chunks->map(fn (KnowledgeBase $kb) => [
                 'content' => $kb->content,
@@ -87,7 +94,7 @@ PROMPT;
             $agent = $this->prepareAgent($user, $conversationId);
             // Streaming structured output is not supported by Gemini,
             // so we use sync prompt() and yield the full answer as a single event.
-            $result = $agent->prompt($agentPrompt);
+            $result = $agent->prompt($agentPrompt, model: $this->model());
 
             $this->recordGenerationUsage($cost, $result, $agentPrompt);
 
@@ -98,7 +105,7 @@ PROMPT;
             $sources = $chunks->map(fn (KnowledgeBase $kb) => [
                 'id' => $kb->id,
                 'title' => $kb->title,
-                'snippet' => mb_substr($kb->content, 0, 200),
+                'snippet' => $this->excerpt($kb->content),
             ])->all();
 
             yield [
@@ -114,18 +121,14 @@ PROMPT;
                 $chunks = $this->embedding->searchByKeyword($question, topK: 5);
 
                 if ($chunks->isNotEmpty()) {
-                    $snippets = $chunks->map(
-                        fn (KnowledgeBase $kb) => "- {$kb->title}: ".mb_substr($kb->content, 0, 150)
-                    )->implode("\n");
-
-                    yield ['text' => "Sistem AI sedang offline. Berikut hasil pencarian keyword yang mungkin relevan:\n\n{$snippets}"];
+                    yield ['text' => 'Maaf, asisten AI sedang tidak tersedia saat ini. Berikut informasi yang ditemukan di basis pengetahuan perusahaan:'];
 
                     yield [
                         'conversation_id' => $conversationId ?? (string) Str::uuid(),
                         'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
                             'id' => $kb->id,
                             'title' => $kb->title,
-                            'snippet' => mb_substr($kb->content, 0, 200),
+                            'snippet' => $this->excerpt($kb->content),
                         ])->all(),
                         'fallback' => true,
                     ];
@@ -141,7 +144,7 @@ PROMPT;
             // PRD §6: pesan membedakan kondisi — AI tidak tersedia DAN tidak ada
             // hasil relevan di KB (bukan sekadar "coba lagi nanti" yang menyesatkan,
             // karena akar masalahnya bisa retrieval, bukan cuma AI down).
-            yield ['text' => 'Layanan AI sedang tidak tersedia, dan tidak ditemukan informasi yang relevan di basis pengetahuan untuk pertanyaan ini. Coba tanyakan dengan kata kunci yang lebih spesifik, atau hubungi HRD.'];
+            yield ['text' => 'Maaf, asisten AI sedang tidak tersedia saat ini, dan tidak ditemukan informasi yang relevan di basis pengetahuan perusahaan untuk pertanyaan ini. Coba tanyakan dengan kata kunci yang lebih spesifik, atau hubungi HRD.'];
             yield [
                 'conversation_id' => $conversationId ?? (string) Str::uuid(),
                 'fallback' => true,
@@ -165,13 +168,24 @@ PROMPT;
     {
         $question = trim($question);
 
-        if (mb_strlen($question) < 5 || mb_strlen($question) > 500) {
+        // Sapaan pendek ("halo", "hai") diizinkan; pertanyaan substantif 5-500.
+        if (mb_strlen($question) < 5 && ! is_greeting_question($question)) {
+            throw new BusinessRuleException('Pertanyaan harus 5-500 karakter.');
+        }
+
+        if (mb_strlen($question) > 500) {
             throw new BusinessRuleException('Pertanyaan harus 5-500 karakter.');
         }
 
         $cost = app(AiCostGuard::class);
 
         try {
+            // Sapaan murni — jawab ramah TANPA retrieval/source (dokumen tidak
+            // relevan tidak tampil saat user sekadar menyapa).
+            if (is_greeting_question($question)) {
+                return $this->greetingResponse($question, $conversationId, $user);
+            }
+
             // Hard gate cost limit: hentikan sebelum memanggil Gemini kalau
             // kuota token harian habis — fallback gratis + tanda fallback.
             if (! $cost->canSpend($cost->estimateTokens($question) + AiCostGuard::ESTIMATED_MAX_OUTPUT_TOKENS)) {
@@ -180,7 +194,7 @@ PROMPT;
 
             // Tier 1: vector search via Gemini embedding
             $queryEmbedding = $this->embedding->embed($question);
-            $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5);
+            $chunks = $this->embedding->searchSimilar($queryEmbedding, topK: 5, minSimilarity: 0.70);
 
             $context = $chunks->map(fn (KnowledgeBase $kb) => [
                 'content' => $kb->content,
@@ -198,7 +212,7 @@ JAWABAN:
 PROMPT;
 
             $agent = $this->prepareAgent($user, $conversationId);
-            $result = $agent->prompt($agentPrompt);
+            $result = $agent->prompt($agentPrompt, model: $this->model());
 
             $this->recordGenerationUsage($cost, $result, $agentPrompt);
 
@@ -207,7 +221,7 @@ PROMPT;
                 'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
                     'id' => $kb->id,
                     'title' => $kb->title,
-                    'snippet' => mb_substr($kb->content, 0, 200),
+                    'snippet' => $this->excerpt($kb->content),
                     'page_number' => $kb->page_number,
                     'source_document' => $kb->source_document,
                 ])->all(),
@@ -223,6 +237,119 @@ PROMPT;
 
             return $this->fallbackKeywordSearch($question, $conversationId);
         }
+    }
+
+    /**
+     * Ringkasan kalimat utuh untuk panel Source — potong pada batas kalimat
+     * terakhir dalam 200 karakter (bukan di tengah kata/kalimat), + elipsis.
+     */
+    protected function excerpt(string $content, int $maxChars = 200): string
+    {
+        $clean = trim(preg_replace('/\s+/u', ' ', $content) ?? '');
+
+        if (mb_strlen($clean) <= $maxChars) {
+            return $clean;
+        }
+
+        $cut = mb_substr($clean, 0, $maxChars);
+        $lastBoundary = max(
+            mb_strrpos($cut, '.'),
+            mb_strrpos($cut, '!'),
+            mb_strrpos($cut, '?'),
+            mb_strrpos($cut, ';'),
+            mb_strrpos($cut, ','),
+        );
+
+        $end = $lastBoundary !== false && $lastBoundary > 40 ? $lastBoundary + 1 : $maxChars;
+
+        return rtrim(mb_substr($clean, 0, $end), ' ,;.').' …';
+    }
+
+    /**
+     * Balasan sapaan murni — jawab ramah via agent (tanpa konteks/retrieval),
+     * sources selalu kosong supaya dokumen tidak relevan tidak tampil.
+     * Kalau Gemini gagal → balasan statis ramah (bukan pesan error teknis).
+     */
+    protected function greetingResponse(string $question, ?string $conversationId = null, ?User $user = null): array
+    {
+        $agent = $this->prepareAgent($user, $conversationId);
+
+        try {
+            $result = $agent->prompt($question, model: $this->model());
+            $this->recordGenerationUsage(app(AiCostGuard::class), $result, $question);
+
+            return [
+                'answer' => $result['answer'] ?? $this->staticGreeting(),
+                'sources' => [],
+                'confidence' => 'high',
+                'fallback' => false,
+                'model' => $this->model(),
+                'conversation_id' => $result->conversationId ?? $conversationId ?? (string) Str::uuid(),
+            ];
+        } catch (Throwable $e) {
+            Log::warning('Gemini greeting gagal, gunakan balasan statis', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'answer' => $this->staticGreeting(),
+                'sources' => [],
+                'confidence' => 'high',
+                'fallback' => true,
+                'model' => $this->model(),
+                'conversation_id' => $conversationId ?? (string) Str::uuid(),
+            ];
+        }
+    }
+
+    /**
+     * Versi streaming dari greetingResponse.
+     *
+     * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array}, void, void>
+     */
+    protected function streamGreeting(string $question, ?string $conversationId = null, ?User $user = null): \Generator
+    {
+        $agent = $this->prepareAgent($user, $conversationId);
+
+        try {
+            $result = $agent->prompt($question, model: $this->model());
+            $this->recordGenerationUsage(app(AiCostGuard::class), $result, $question);
+
+            yield ['text' => $result['answer'] ?? $this->staticGreeting()];
+            yield [
+                'conversation_id' => $result->conversationId ?? $conversationId ?? (string) Str::uuid(),
+                'sources' => [],
+            ];
+        } catch (Throwable $e) {
+            Log::warning('Gemini greeting gagal, gunakan balasan statis', [
+                'error' => $e->getMessage(),
+            ]);
+
+            yield ['text' => $this->staticGreeting()];
+            yield [
+                'conversation_id' => $conversationId ?? (string) Str::uuid(),
+                'sources' => [],
+                'fallback' => true,
+            ];
+        }
+    }
+
+    /**
+     * Balasan ramah tanpa AI (fallback kalau Gemini tidak tersedia) — bukan
+     * error teknis, sekadar sapaan + arahan pertanyaan.
+     */
+    protected function staticGreeting(): string
+    {
+        return 'Halo! Ada yang bisa saya bantu seputar kepegawaian? Coba tanyakan misalnya: "Apa itu cuti tahunan?" atau "Bagaimana cara mengajukan lembur?".';
+    }
+
+    /**
+     * Model generasi aktif — env-driven (GEMINI_MODEL), dipakai sebagai
+     * override per-panggilan. Fallback attribute #[Model] di agent.
+     */
+    protected function model(): string
+    {
+        return (string) config('services.gemini.model', 'gemini-2.5-flash');
     }
 
     /**
@@ -255,8 +382,8 @@ PROMPT;
         if ($chunks->isEmpty()) {
             return [
                 'answer' => $budgetExceeded
-                    ? 'Kuota penggunaan AI harian telah tercapai untuk hari ini. Tidak ada informasi yang cocok dengan pertanyaan Anda di basis data HRConnect saat ini.'
-                    : 'Maaf, tidak ada informasi yang cocok dengan pertanyaan Anda di basis data HRConnect saat ini. Sistem AI sedang offline.',
+                    ? 'Kuota penggunaan AI harian untuk hari ini telah tercapai, dan tidak ditemukan informasi yang cocok di basis pengetahuan perusahaan. Coba lagi besok, atau hubungi HRD.'
+                    : 'Maaf, asisten AI sedang tidak tersedia saat ini, dan tidak ditemukan informasi yang cocok di basis pengetahuan perusahaan. Coba tanyakan dengan kata kunci yang berbeda, atau hubungi HRD.',
                 'sources' => [],
                 'confidence' => 'low',
                 'fallback' => true,
@@ -265,19 +392,16 @@ PROMPT;
             ];
         }
 
-        $snippets = $chunks->map(fn (KnowledgeBase $kb) => "- {$kb->title}: ".mb_substr($kb->content, 0, 150))
-            ->implode("\n");
-
         $answer = $budgetExceeded
-            ? app(AiCostGuard::class)->exhaustedMessage()."\n\n{$snippets}"
-            : "Sistem AI sedang offline. Berikut hasil pencarian keyword yang mungkin relevan:\n\n{$snippets}";
+            ? app(AiCostGuard::class)->exhaustedMessage().' Berikut informasi yang ditemukan di basis pengetahuan perusahaan:'
+            : 'Maaf, asisten AI sedang tidak tersedia saat ini. Berikut informasi yang ditemukan di basis pengetahuan perusahaan:';
 
         return [
             'answer' => $answer,
             'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
                 'id' => $kb->id,
                 'title' => $kb->title,
-                'snippet' => mb_substr($kb->content, 0, 200),
+                'snippet' => $this->excerpt($kb->content),
                 'page_number' => $kb->page_number,
                 'source_document' => $kb->source_document,
             ])->all(),
@@ -300,20 +424,27 @@ PROMPT;
         try {
             $chunks = $this->embedding->searchByKeyword($question, topK: 5);
 
-            if ($chunks->isNotEmpty()) {
-                $snippets = $chunks->map(fn (KnowledgeBase $kb) => "- {$kb->title}: ".mb_substr($kb->content, 0, 150))
-                    ->implode("\n");
+            yield ['text' => $message];
 
-                yield ['text' => $message."\n\n{$snippets}"];
-            } else {
-                yield ['text' => $message];
+            if ($chunks->isNotEmpty()) {
+                yield [
+                    'conversation_id' => $conversationId ?? (string) Str::uuid(),
+                    'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
+                        'id' => $kb->id,
+                        'title' => $kb->title,
+                        'snippet' => $this->excerpt($kb->content),
+                        'page_number' => $kb->page_number,
+                        'source_document' => $kb->source_document,
+                    ])->all(),
+                    'fallback' => true,
+                ];
+
+                return;
             }
         } catch (Throwable $e) {
             Log::error('pg_trgm fallback gagal saat kuota AI habis', [
                 'error' => $e->getMessage(),
             ]);
-
-            yield ['text' => $message];
         }
 
         yield [

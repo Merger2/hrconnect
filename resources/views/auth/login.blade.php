@@ -9,17 +9,13 @@
                 <div class="absolute top-1/2 left-1/3 w-32 h-32 border-4 border-white rounded-full"></div>
             </div>
 
-            {{-- Tier-A enrichment: subtle module-leave (violet) glow wash --}}
-            <div class="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-module-leave/25 blur-3xl" aria-hidden="true"></div>
-            <div class="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" aria-hidden="true"></div>
-
             <div class="max-w-md w-full relative z-10">
                 <!-- Logo -->
                 <div class="mb-10 flex items-center gap-3">
                     <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-md">
                         <x-app-logo-icon class="size-8 fill-current text-brand-700" />
                     </div>
-                    <h1 class="text-3xl font-bold text-white">{{ config('app.name', 'HRConnect') }}</h1>
+                    <h1 class="text-3xl font-bold text-white">{{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }}</h1>
                 </div>
 
                 <!-- Main headline -->
@@ -67,17 +63,13 @@
 
         <!-- Auth Form -->
         <div class="relative w-full overflow-hidden bg-white lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
-            {{-- Tier-A enrichment: subtle module tint washes (blue + violet) --}}
-            <div class="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-module-hr/10 blur-3xl" aria-hidden="true"></div>
-            <div class="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-module-leave/10 blur-3xl" aria-hidden="true"></div>
-
             <div class="w-full max-w-sm relative z-10">
                 <!-- Mobile Logo -->
                 <div class="lg:hidden mb-8 flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-module-hr/10 text-module-hr">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-module-hr text-white">
                         <x-app-logo-icon class="size-5 fill-current" />
                     </div>
-                    <h1 class="text-xl font-bold text-slate-900">{{ config('app.name', 'HRConnect') }}</h1>
+                    <h1 class="text-xl font-bold text-slate-900">{{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }}</h1>
                 </div>
 
                 <div class="mb-8">

@@ -53,6 +53,40 @@ test('sendMessage appends user message and streaming placeholder', function () {
         ->assertSet('question', '');
 });
 
+test('ask (suggestion chip) kirim pertanyaan + jawaban + sources dalam satu request', function () {
+    $admin = User::factory()->admin(true)->create();
+
+    $this->mock(KnowledgeBaseService::class, function ($mock) {
+        $mock->shouldReceive('chatStream')
+            ->once()
+            ->andReturnUsing(function () {
+                yield ['text' => 'Cuti tahunan 12 hari per tahun.', 'sources' => [['title' => 'Cuti Tahunan']]];
+            });
+    });
+
+    Livewire::actingAs($admin)
+        ->test(KnowledgeBaseChat::class)
+        ->call('ask', 'Apa itu cuti tahunan?')
+        ->assertHasNoErrors()
+        ->assertSet('isLoading', false)
+        ->assertSet('question', '')
+        ->assertCount('messages', 3)
+        ->assertSet('messages.1.role', 'user')
+        ->assertSet('messages.1.text', 'Apa itu cuti tahunan?')
+        ->assertSet('messages.2.is_streaming', false)
+        ->assertSet('messages.2.text', 'Cuti tahunan 12 hari per tahun.')
+        ->assertSet('messages.2.sources.0.title', 'Cuti Tahunan');
+});
+
+test('ask menolak pertanyaan pendek (< 5 char)', function () {
+    $admin = User::factory()->admin(true)->create();
+
+    Livewire::actingAs($admin)
+        ->test(KnowledgeBaseChat::class)
+        ->call('ask', 'abc')
+        ->assertHasErrors(['question']);
+});
+
 test('processAnswer fills assistant answer with sources', function () {
     $admin = User::factory()->admin(true)->create();
 

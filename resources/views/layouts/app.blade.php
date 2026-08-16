@@ -56,7 +56,7 @@
         <meta name="theme-color" content="#0a0a0a">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <meta name="apple-mobile-web-app-title" content="HRConnect">
+        <meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">
         <link rel="apple-touch-icon" href="/apple-icon-180.png">
 
         <script>

@@ -22,7 +22,7 @@
             <div class="user-page-body pt-0 flex flex-col flex-1 user-accent-card user-accent-card--kb">
                 {{-- Messages Area --}}
                 <div class="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4" x-ref="messagesContainer">
-                    @forelse($messages as $index => $msg)
+                    @foreach($messages as $index => $msg)
                         <div class="flex {{ $msg['role'] === 'user' ? 'justify-end' : 'justify-start' }}"
                             wire:key="msg-{{ $index }}">
                             <div class="max-w-[85%] sm:max-w-[75%] {{ $msg['role'] === 'user' ? 'order-1' : 'order-1' }}">
@@ -38,12 +38,12 @@
                                         <div class="whitespace-pre-wrap">{{ $msg['text'] }}</div>
 
                                         @if(($msg['fallback'] ?? false) && !($msg['is_welcome'] ?? false))
-                                            <div class="mt-2 flex items-center gap-1.5 text-xs text-amber-600">
-                                                <x-heroicon-o-exclamation-triangle class="h-3.5 w-3.5" />
-                                                <span>{{ __('Powered by keyword search (AI unavailable)') }}</span>
+                                            <div class="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                                                <x-heroicon-o-information-circle class="h-3.5 w-3.5" />
+                                                <span>{{ __('Dijawab dari basis pengetahuan perusahaan') }}</span>
                                             </div>
                                             @if($msg['no_results'] ?? false)
-                                                <p class="mt-1 text-xs text-amber-600">{{ __('Tidak ada hasil relevan di basis pengetahuan untuk pertanyaan ini.') }}</p>
+                                                <p class="mt-1 text-xs text-slate-500">{{ __('Tidak ada hasil relevan di basis pengetahuan untuk pertanyaan ini.') }}</p>
                                             @endif
                                         @endif
                                     @endif
@@ -78,17 +78,28 @@
                                 @endif
                             </div>
                         </div>
-                    @empty
-                        <div class="flex flex-col items-center justify-center text-center py-16">
-                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-sky-50 text-emerald-500 ring-1 ring-inset ring-emerald-200">
-                                <x-heroicon-o-chat-bubble-left-right class="h-8 w-8" />
+                    @endforeach
+
+                    {{-- Suggestion chips — hanya saat percakapan baru (belum ada pesan user) --}}
+                    @if(count($messages) === 1)
+                        <div class="px-1">
+                            <p class="mb-2 text-xs font-medium text-slate-500">{{ __('Pertanyaan cepat') }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach([
+                                    __('Apa itu cuti tahunan?'),
+                                    __('Bagaimana cara absensi?'),
+                                    __('Kapan jadwal penggajian?'),
+                                    __('Bagaimana mengajukan lembur?'),
+                                ] as $suggestion)
+                                    <button type="button"
+                                        @click="askSuggestion(@js($suggestion))"
+                                        class="wcag-touch-target rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700">
+                                        {{ $suggestion }}
+                                    </button>
+                                @endforeach
                             </div>
-                            <h3 class="mt-4 text-lg font-bold text-gray-900">{{ __('Ask me anything') }}</h3>
-                            <p class="mt-1 text-sm text-gray-500 max-w-sm">
-                                {{ __('I can help with company policies, HR procedures, benefits, and more.') }}
-                            </p>
                         </div>
-                    @endforelse
+                    @endif
                 </div>
 
                 {{-- Input Area --}}
@@ -109,6 +120,7 @@
                             <textarea
                                 wire:model="question"
                                 x-ref="questionInput"
+                                aria-label="{{ __('Type your question...') }}"
                                 @keydown.enter.prevent="if(!$event.shiftKey) submitMessage()"
                                 rows="1"
                                 style="field-sizing: content"
@@ -123,14 +135,12 @@
                             wire:loading.attr="disabled"
                             wire:target="sendMessage, processAnswer"
                             :disabled="!canSend() || $wire.isLoading"
-                            class="wcag-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="wcag-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-md transition hover:bg-primary-700 hover:shadow-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-primary-600 disabled:hover:shadow-md"
                             aria-label="{{ __('Send') }}">
-                            <template x-if="!$wire.isLoading">
-                                <x-heroicon-o-paper-airplane class="h-5 w-5" />
-                            </template>
-                            <template x-if="$wire.isLoading">
-                                <x-heroicon-o-arrow-path class="h-5 w-5 animate-spin" />
-                            </template>
+                            {{-- x-show (bukan template x-if) agar ikon tidak pernah
+                                 terduplikasi saat morph Livewire streaming --}}
+                            <x-heroicon-o-paper-airplane class="h-5 w-5" x-show="!$wire.isLoading" />
+                            <x-heroicon-o-arrow-path class="h-5 w-5 animate-spin" x-show="$wire.isLoading" />
                         </button>
                     </form>
                     <p class="mt-1.5 text-xs text-slate-500 px-1">
@@ -172,7 +182,21 @@
                 },
 
                 canSend() {
-                    return this.$wire?.question?.trim()?.length >= 5;
+                    const q = this.$wire?.question?.trim() ?? '';
+                    return q.length >= 5 || this.isGreetingQuestion(q);
+                },
+
+                isGreetingQuestion(q) {
+                    const greetings = new Set(['halo', 'hai', 'hi', 'hello', 'hey', 'salam', 'assalamualaikum', 'assalamualikum', 'permisi', 'pagi', 'siang', 'sore', 'malam', 'selamat', 'apa', 'kabar', 'terima', 'kasih', 'makasih', 'thanks', 'thank', 'good', 'morning', 'afternoon', 'evening', 'min', 'kak', 'bang', 'bu', 'pak', 'mbak', 'mas', 'bro', 'ya', 'nih', 'dong', 'sih', 'deh', 'dll']);
+                    const tokens = q.toLowerCase().replace(/[^\p{L}\p{N}\s]+/gu, ' ').trim().split(/\s+/).filter(Boolean);
+                    return tokens.length > 0 && tokens.every(t => greetings.has(t));
+                },
+
+                async askSuggestion(question) {
+                    if (this.$wire.isLoading) return;
+                    // Satu request: kirim pertanyaan + streaming jawaban (ask()).
+                    await this.$wire.ask(question);
+                    this.$nextTick(() => this.scrollToBottom());
                 },
 
                 charCount() {

@@ -65,7 +65,7 @@ test('chat falls back to keyword search when daily AI budget is exceeded', funct
     expect($result['fallback'])->toBeTrue()
         ->and($result['model'])->toBe('pg_trgm')
         ->and($result['sources'])->not->toBeEmpty()
-        ->and($result['answer'])->toContain('Kuota penggunaan AI harian telah tercapai');
+        ->and($result['answer'])->toContain('Kuota penggunaan AI harian untuk hari ini telah tercapai');
 });
 
 test('chatStream falls back to keyword snippets when daily AI budget is exceeded', function () {
@@ -86,7 +86,7 @@ test('chatStream falls back to keyword snippets when daily AI budget is exceeded
     $text = collect($events)->pluck('text')->filter()->implode(' ');
     $last = $events[array_key_last($events)];
 
-    expect($text)->toContain('Kuota penggunaan AI harian telah tercapai')
+    expect($text)->toContain('Kuota penggunaan AI harian untuk hari ini telah tercapai')
         ->and($last['fallback'] ?? false)->toBeTrue();
 });
 

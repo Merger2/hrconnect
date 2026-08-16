@@ -153,7 +153,7 @@ test('processKnowledgeBase sets ERROR for empty content', function () {
 test('processKnowledgeBase updates to READY and stores embedding', function () {
     $kb = KnowledgeBase::create([
         'title' => 'Test KB',
-        'content' => 'Ini adalah konten pengetahuan yang cukup panjang untuk di-embedding dan diproses oleh sistem RAG HRConnect. Sistem akan menghasilkan vector embedding untuk pencarian semantic.',
+        'content' => 'Ini adalah konten pengetahuan yang cukup panjang untuk di-embedding dan diproses oleh sistem RAG perusahaan. Sistem akan menghasilkan vector embedding untuk pencarian semantic.',
         'knowledgeable_type' => 'App\Models\User',
         'knowledgeable_id' => 0,
         'status' => KnowledgeBaseStatus::PROCESSING,
@@ -552,14 +552,50 @@ test('chatStream fallback returns keyword snippets when chunks found', function 
 
     $texts = collect($yields)->pluck('text')->filter()->implode("\n");
 
-    expect($texts)->toContain('Sistem AI sedang offline');
-    expect($texts)->toContain('Sanksi Keterlambatan');
+    expect($texts)->toContain('asisten AI sedang tidak tersedia saat ini');
 
     $last = $yields[array_key_last($yields)];
 
     expect($last['fallback'] ?? false)->toBeTrue();
     expect($last['no_results'] ?? false)->toBeFalse();
     expect($last['sources'][0]['title'])->toBe('Sanksi Keterlambatan');
+});
+
+test('is_greeting_question detects pure greetings only', function () {
+    expect(is_greeting_question('halo selamat sore'))->toBeTrue();
+    expect(is_greeting_question('halo'))->toBeTrue();
+    expect(is_greeting_question('terima kasih'))->toBeTrue();
+    expect(is_greeting_question('apa kabar'))->toBeTrue();
+    expect(is_greeting_question('halo, bagaimana cara cuti?'))->toBeFalse();
+    expect(is_greeting_question('apa itu cuti tahunan?'))->toBeFalse();
+    expect(is_greeting_question('selamat sore min'))->toBeTrue();
+    expect(is_greeting_question(''))->toBeFalse();
+});
+
+test('chat greeting answers without sources (no leak of unrelated docs)', function () {
+    // Gemini gagal (401) → greetingResponse jatuh ke balasan statis ramah,
+    // TAPI tetap tanpa sources — dokumen tidak relevan tidak pernah tampil
+    // saat user sekadar menyapa.
+    Http::fake(['generativelanguage.googleapis.com/*' => Http::response([], 401)]);
+
+    $result = $this->kbService->chat('halo selamat sore');
+
+    expect($result['sources'])->toBe([]);
+    expect($result['answer'])->toContain('Halo!');
+});
+
+test('chat allows short greetings but still rejects non-greeting short text', function () {
+    // 'halo' (4 char) = greeting → diizinkan; jalur greeting memakai fake 401
+    // sehingga agent gagal → balasan statis tanpa sources.
+    Http::fake(['generativelanguage.googleapis.com/*' => Http::response([], 401)]);
+
+    $greeting = $this->kbService->chat('halo');
+
+    expect($greeting['sources'])->toBe([]);
+
+    // 'Abc' bukan greeting → tetap tolak (validasi 5-500).
+    expect(fn () => $this->kbService->chat('Abc'))
+        ->toThrow(BusinessRuleException::class, 'Pertanyaan harus 5-500 karakter');
 });
 
 test('chatStream fallback reports no relevant results honestly', function () {

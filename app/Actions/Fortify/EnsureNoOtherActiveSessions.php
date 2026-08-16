@@ -25,7 +25,8 @@ class EnsureNoOtherActiveSessions
             : User::where('phone', $login)->first();
 
         if ($user && Hash::check((string) $request->input('password'), $user->password)) {
-            if ($this->activeSessionGuard->hasActiveSession($user)) {
+            // Multi-device default; blokir hanya saat AUTH_SINGLE_DEVICE=true.
+            if (config('auth.single_device') && $this->activeSessionGuard->hasActiveSession($user)) {
                 throw ValidationException::withMessages([
                     'email' => __('This account is still active on another device. Please log out from that device first.'),
                 ])->redirectTo('/login');

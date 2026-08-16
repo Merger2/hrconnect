@@ -97,6 +97,25 @@
                         @livewire('profile.logout-other-browser-sessions-form')
                     </div>
 
+                    {{-- Log Out (sesi sendiri) — 2026-08-16: employee tidak punya tombol
+                         logout di nav; ditambahkan di profil agar selalu terjangkau. --}}
+                    <div class="profile-section user-accent-card user-accent-card--hr">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-semibold text-slate-900">{{ __('Log Out') }}</h3>
+                                <p class="mt-1 text-sm text-slate-600">{{ __('End this session on this device.') }}</p>
+                            </div>
+                            <form method="POST" action="{{ route('logout') }}" x-data>
+                                @csrf
+                                <button type="submit"
+                                    class="inline-flex items-center rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2">
+                                    <x-heroicon-o-arrow-right-on-rectangle class="me-2 h-4 w-4" />
+                                    {{ __('Log Out') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                     @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures() && auth()->user()->can('delete', \App\Models\User::class))
                         <div class="profile-section profile-section--danger">
                             @livewire('profile.delete-user-form')

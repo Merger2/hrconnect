@@ -513,6 +513,28 @@ module, date-context TIDAK overlap hero, nol console error).
   78% (strip/accent card tanpa teks putih, boleh lebih terang 3.79:1).
   JANGAN digabung — 78% di banner gagal kontras, 62% di strip ubah visual.
 
+## SOLID FLAT FINAL (2026-08-16 — keluhan Fikih: "masih glass, bukan warna solid, bg aneh, desktop tidak diperhatikan")
+
+Arah visual employee (ESS) dikoreksi dari "pastel tint + gradien kanvas" ke **flat solid**:
+
+- **Kanvas**: `body.user-ui` + `.app-canvas` — gradien radial/linear DICABUT → **flat `--color-primary-100` (#F1F5F9)**. Glow dekoratif `.user-app-backdrop` dihapus (background:none).
+  - **BACKGROUND PER-MODULE (2026-08-16 lanjutan — keputusan Fikih: background bukan putih polos):** `.app-canvas:has(.user-page-header--module-X)` → tint solid opaque module 10% (`color-mix(module 10%, surface)`), flat tanpa gradien. Home/netral tetap primary-100 (halaman multi-hue).
+- **COLORFUL SOLID (2026-08-16 lanjutan — keputusan Fikih: "HRIS harus colorful, bukan putih polos"):** kartu TIDAK putih — setiap kartu memakai **module hue solid opaque**:
+  - Home: `attendance-panel` cyan 18%, `quick-wallet-surface` biru (hr) 18%, `home-command-panel` violet (leave) 18%, `--emerald` hijau (payroll) 18%, `user-content-panel` amber (documents) 18% — semua `color-mix(module X%, surface)` **opaque**; border `color-mix(module 35%, surface)`.
+  - Module pages: `.user-accent-card` bg kini `color-mix(--mod-base 18%, surface)` (dulu `--mod-tint` 10%), `--soft` 12%; strip 4px/2px & `.solid-head` band & `profile-identity` — gradien `deep→base` **di-flat-kan** → solid `--mod-deep`.
+- **Kartu border alpha 0.7 → solid** `--color-primary-200`; `.home-date-context` border 95% → solid.
+- **Native vars**: `--user-native-surface` / `-strong` / `-border` — color-mix transparent → **solid** (`--color-surface` / `--color-primary-300`).
+- **Desktop**: `.user-page-container--wide/--standard` max-width `5xl` → **`6xl` (1152px)**; `.user-home-hero__inner` ikut 6xl — konten lebih lega di layar besar (masih centered).
+- **GLASS DEFINITION STRICT (2026-08-16 lanjutan — definisi Fikih: transparansi 10-40% + blur + border tipis semi-transparan + latar gradien = glass):** semua karakteristik glass di UI user DICABUT:
+  - Banner header module (8 varian): gradien `135deg` → **FLAT solid `color-mix(module 62%, primary-900)`**; border `40% transparent` → **opaque** `color-mix(module 40%, surface)`; strip aksen `:before` (gradien 55%→8% transparent) → **flat module solid**; border ikon `25%` → opaque.
+  - Hero home: gradien biru→cyan → **FLAT solid module-hr deep**; border `40%` → opaque; glow radial dekoratif → **dihapus** (`display:none`).
+  - Topbar strip multi-hue: gradien `75/60/55/50% transparent` → **solid** (4 warna module tanpa alpha).
+  - Panel lain: `.attendance-panel__summary`/`__summary-icon`/`__badge--done` gradien → solid; `__action-copy` text alpha → solid; border 70%/60% di `attendance-panel`/`__worktime`/`__step`/`quick-wallet-surface`/`home-compact-group` → solid `primary-200`.
+  - Login: 4 blob `blur-3xl` dihapus; chip logo `bg-module-hr/10` → solid.
+- **Warna TETAP ada (supaya tidak membosankan):** flat module colors pekat (deep 62%) di banner/hero/strip, `.solid-head` band, eyebrow/badge module — semua **solid opaque tanpa gradien**.
+
+Verifikasi 2026-08-16: computed styles di browser — kartu `rgb(255,255,255)`, border `#E2E8F0` solid, kanvas `#F1F5F9` flat tanpa bg-image; `token:check` PASS, `ui-rules` PASS, smoke user+admin 10/10.
+
 ## Ops & Security Notes (2026-08-06)
 
 ### CSP map tile — Leaflet butuh subdomain (commit `a4fe411`)

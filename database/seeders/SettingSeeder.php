@@ -12,7 +12,7 @@ class SettingSeeder extends Seeder
         // Seeder dasar untuk memastikan setting aplikasi ada
         Setting::updateOrCreate(
             ['key' => 'app_name'],
-            ['value' => 'HRConnect Enterprise']
+            ['value' => 'PT Daya Cipta Mandiri Solusi']
         );
 
         Setting::updateOrCreate(

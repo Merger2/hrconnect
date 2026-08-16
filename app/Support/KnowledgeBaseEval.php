@@ -37,23 +37,37 @@ final class KnowledgeBaseEval
     }
 
     /**
-     * Coverage: proporsi keyword yang muncul di jawaban (>= 1.0 = semua).
+     * Coverage: proporsi keyword yang muncul di output pipeline (>= 1.0 = semua).
+     *
+     * Output diukur dari jawaban PENUH pipeline: teks jawaban + konten sumber
+     * yang dikutip (title + snippet). Sejak fallback tidak lagi menyertakan
+     * dump konten mentah di teks jawaban (2026-08-16 — jawaban profesional,
+     * konten ditampilkan via citation/sources), coverage harus mencakup materi
+     * yang benar-benar diretri eval — konsisten dengan gate "citation pada
+     * setiap jawaban".
      *
      * @param  array<int, string>  $keywords
+     * @param  array<int, array{id?: int|string, title?: string, snippet?: string}>  $sources
      */
-    public static function coverage(string $answer, array $keywords): float
+    public static function coverage(string $answer, array $keywords, array $sources = []): float
     {
         if ($keywords === []) {
             return 1.0;
         }
 
-        $normalizedAnswer = self::normalize($answer);
+        $material = $answer;
+
+        foreach ($sources as $source) {
+            $material .= ' '.($source['title'] ?? '').' '.($source['snippet'] ?? '');
+        }
+
+        $normalizedMaterial = self::normalize($material);
         $matched = 0;
 
         foreach ($keywords as $keyword) {
             $normalizedKeyword = self::normalize($keyword);
 
-            if ($normalizedKeyword !== '' && str_contains($normalizedAnswer, $normalizedKeyword)) {
+            if ($normalizedKeyword !== '' && str_contains($normalizedMaterial, $normalizedKeyword)) {
                 $matched++;
             }
         }
@@ -147,7 +161,7 @@ final class KnowledgeBaseEval
         array $expectedSources,
         float $coverageThreshold = 0.8,
     ): array {
-        $coverage = self::coverage($answer, $keywords);
+        $coverage = self::coverage($answer, $keywords, $sources);
         $citation = self::citation($sources, $expectedSources);
 
         return [

@@ -111,7 +111,7 @@ class AiCostGuard
             'budget' => $this->budget(),
         ]);
 
-        return 'Kuota penggunaan AI harian telah tercapai untuk hari ini. Berikut hasil pencarian yang mungkin relevan:';
+        return 'Kuota penggunaan AI harian untuk hari ini telah tercapai.';
     }
 
     protected function cacheKey(): string

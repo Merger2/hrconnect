@@ -38,7 +38,7 @@ if (! function_exists('calculate_distance')) {
 if (! function_exists('app_name')) {
     function app_name(): string
     {
-        return config('app.name', 'HRConnect');
+        return config('app.name', 'PT Daya Cipta Mandiri Solusi');
     }
 }
 
@@ -160,6 +160,42 @@ if (! function_exists('format_time')) {
         }
 
         return $time->format($formatString);
+    }
+}
+
+if (! function_exists('is_greeting_question')) {
+    /**
+     * Deteksi sapaan/obrolan ringan murni ("halo", "selamat sore", "apa kabar",
+     * "terima kasih") vs pertanyaan substantif ("halo, bagaimana cara cuti?").
+     * Dipakai KB chat: sapaan murni dijawab tanpa retrieval → tanpa panel Source
+     * (mencegah dokumen tidak relevan tampil saat user sekadar menyapa).
+     */
+    function is_greeting_question(string $question): bool
+    {
+        $normalized = mb_strtolower(preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $question) ?? '');
+        $tokens = preg_split('/\s+/u', trim($normalized)) ?: [];
+
+        if ($tokens === []) {
+            return false;
+        }
+
+        $greetings = [
+            'halo', 'hai', 'hi', 'hello', 'hey', 'yo',
+            'salam', 'assalamualaikum', 'assalamualikum', 'permisi', 'pagi',
+            'siang', 'sore', 'malam', 'selamat',
+            'apa', 'kabar', 'baik', 'terima', 'kasih', 'makasih', 'thanks', 'thank',
+            'good', 'morning', 'afternoon', 'evening',
+            'min', 'kak', 'bang', 'bu', 'pak', 'mbak', 'mas', 'bro', 'om', 'tante', 'admin',
+            'ya', 'nih', 'dong', 'sih', 'deh', 'yaa', 'dll',
+        ];
+
+        foreach ($tokens as $token) {
+            if (! in_array($token, $greetings, true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 

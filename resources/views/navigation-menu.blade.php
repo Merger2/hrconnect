@@ -461,6 +461,18 @@
                                     <x-heroicon-o-user-circle class="h-5 w-5" />
                                 @endif
                             </a>
+
+                            {{-- Log Out untuk employee (user-ui) — 2026-08-16: dulu hanya admin
+                                 yang punya tombol logout (dropdown), employee tidak punya. --}}
+                            <form method="POST" action="{{ route('logout') }}" x-data class="inline-flex">
+                                @csrf
+                                <button type="submit"
+                                    class="wcag-touch-target flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gray-200/80 bg-white text-gray-600 shadow-sm transition hover:border-gray-300 hover:text-gray-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+                                    aria-label="{{ __('Log Out') }}"
+                                    title="{{ __('Log Out') }}">
+                                    <x-heroicon-o-arrow-right-on-rectangle class="h-5 w-5" />
+                                </button>
+                            </form>
                         @endif
                     </div>
 

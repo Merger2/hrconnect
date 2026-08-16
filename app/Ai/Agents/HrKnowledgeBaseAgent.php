@@ -15,7 +15,7 @@ use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 
 #[Provider(Lab::Gemini)]
-#[Model('gemini-flash-latest')]
+#[Model('gemini-2.5-flash')]
 #[Temperature(0.2)]
 #[MaxTokens(1024)]
 class HrKnowledgeBaseAgent implements Agent, Conversational, HasStructuredOutput
@@ -24,9 +24,9 @@ class HrKnowledgeBaseAgent implements Agent, Conversational, HasStructuredOutput
 
     public function instructions(): string
     {
-        return 'Anda adalah asisten AI HRConnect untuk karyawan PT Daya Cipta Mandiri Solusi.\n\n'.
+        return 'Anda adalah asisten AI untuk karyawan PT Daya Cipta Mandiri Solusi.\n\n'.
             'Jika user memberi sapaan (halo, hai, selamat pagi, dll) atau obrolan ringan, balas dengan ramah dan tawarkan bantuan seputar HR.\n\n'.
-            'Untuk pertanyaan HR, jawab berdasarkan KONTEKS yang diberikan. Kalau jawaban tidak ada di konteks, jawab dengan jujur "Maaf, informasi tersebut belum tersedia di basis data HRConnect."\n\n'.
+            'Untuk pertanyaan HR, jawab berdasarkan KONTEKS yang diberikan. Kalau jawaban tidak ada di konteks, jawab dengan jujur "Maaf, informasi tersebut belum tersedia di basis pengetahuan perusahaan."\n\n'.
             'Jangan mengarang informasi HR yang tidak ada di konteks.';
     }
 

@@ -46,13 +46,17 @@ export default defineConfig({
     // Employee-authenticated tests (24 halaman user: clock-in, KB chat, payroll, dll)
     {
       name: 'chromium-employee',
-      testMatch: /(employee-pages|user-tomselect)\.spec\.ts/,
+      testMatch: /(employee-pages|user-tomselect|kb-chat)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
         storageState: path.join(authDir, 'employee.json'),
+        // Block service worker: SW PWA meng-intercept navigasi kedua dalam satu
+        // test dan meng-abort page.goto (net::ERR_ABORTED) — kb-chat.spec.ts
+        // menavigasi berlapis (index → detail → chat).
+        serviceWorkers: 'block',
       },
     },
 

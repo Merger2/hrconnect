@@ -7,7 +7,7 @@
                     <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
                         <x-heroicon-o-academic-cap class="h-6 w-6" />
                     </span>
-                    <span class="text-xl font-bold tracking-tight text-slate-900">{{ config('app.name', 'HRConnect') }}</span>
+                    <span class="text-xl font-bold tracking-tight text-slate-900">{{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }}</span>
                 </a>
             </div>
 
@@ -75,7 +75,7 @@
 
             {{-- Footer --}}
             <p class="mt-6 text-center text-xs text-slate-400">
-                &copy; {{ date('Y') }} {{ config('app.name', 'HRConnect') }}. {{ __('All rights reserved.') }}
+                &copy; {{ date('Y') }} {{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }}. {{ __('All rights reserved.') }}
             </p>
         </div>
     </div>
