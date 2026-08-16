@@ -8,7 +8,7 @@ class TestErrorController extends Controller
 {
     public function __invoke(string $code): never
     {
-        if (! app()->environment(['local', 'testing']) && ! config('app.debug')) {
+        if (! app()->environment(['local', 'testing'])) {
             abort(404);
         }
 
