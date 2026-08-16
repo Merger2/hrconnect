@@ -105,7 +105,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{leave}', 'show');
-        Route::put('/{leave}', 'update');
         Route::delete('/{leave}', 'destroy');
     });
 
@@ -121,7 +120,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{overtime}', 'show');
-        Route::put('/{overtime}', 'update');
         Route::delete('/{overtime}', 'destroy');
     });
 
@@ -130,7 +128,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('/', 'store');
         Route::get('/{loan}', 'show');
         Route::put('/{loan}', 'update');
-        Route::post('/{loan}/installments', 'payInstallment');
         Route::delete('/{loan}', 'destroy');
     });
 

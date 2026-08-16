@@ -57,7 +57,8 @@ class ActivityLog extends Model
 
     public static function record($action, $description = null)
     {
-        // Open Core: Delegate to Service (Community = No-op, Enterprise = Logged)
+        // Open Core: Delegate ke service (CommunityAuditService menulis entri
+        // nyata; komentar lama "Community = No-op" salah — lihat audit 2026-08-16).
         $service = app(AuditServiceInterface::class);
 
         try {

@@ -162,7 +162,6 @@ class RoleAndPermissionSeeder extends Seeder
             // Settings (full system access)
             PermissionEnum::VIEW_ADMIN_SETTINGS,
             PermissionEnum::MANAGE_SYSTEM_SETTINGS,
-            PermissionEnum::MANAGE_ENTERPRISE_LICENSE,
             // System management
             PermissionEnum::MANAGE_USER_SESSIONS,
             PermissionEnum::MANAGE_API_INTEGRATIONS,

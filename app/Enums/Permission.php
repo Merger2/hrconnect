@@ -127,7 +127,6 @@ enum Permission: string
     // – System Settings (2) –
     case VIEW_ADMIN_SETTINGS = 'view_admin_settings';
     case MANAGE_SYSTEM_SETTINGS = 'manage_system_settings';
-    case MANAGE_ENTERPRISE_LICENSE = 'manage_enterprise_license';
 
     // – Integrations (1) –
     case MANAGE_API_INTEGRATIONS = 'manage_api_integrations';
@@ -264,7 +263,7 @@ enum Permission: string
             'Reports' => [self::VIEW_OPERATIONAL_REPORTS, self::EXPORT_ATTENDANCES, self::EXPORT_USERS, self::IMPORT_ATTENDANCES, self::IMPORT_USERS, self::EXPORT_ADMIN_REPORTS, self::EXPORT_ACTIVITY_LOGS, self::VIEW_ATTENDANCE_REPORTS, self::VIEW_USER_IMPORT_EXPORT, self::VIEW_ATTENDANCE_IMPORT_EXPORT],
             'Audit' => [self::VIEW_ACTIVITY_LOGS, self::VIEW_AUDIT_LOGS],
             'User Session' => [self::MANAGE_USER_SESSIONS],
-            'Settings' => [self::VIEW_ADMIN_SETTINGS, self::MANAGE_SYSTEM_SETTINGS, self::MANAGE_ENTERPRISE_LICENSE, self::MANAGE_SYSTEM_MAINTENANCE, self::MANAGE_KPI_SETTINGS, self::MANAGE_CUSTOM_FORMS],
+            'Settings' => [self::VIEW_ADMIN_SETTINGS, self::MANAGE_SYSTEM_SETTINGS, self::MANAGE_SYSTEM_MAINTENANCE, self::MANAGE_KPI_SETTINGS, self::MANAGE_CUSTOM_FORMS],
             'Integration' => [self::MANAGE_API_INTEGRATIONS],
             'RBAC' => [self::MANAGE_RBAC, self::ASSIGN_ROLES],
             'Notifications' => [self::MANAGE_ADMIN_NOTIFICATIONS],

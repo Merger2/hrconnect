@@ -510,15 +510,6 @@ return [
                 'manage' => ['label' => 'Manage', 'permission' => 'admin.system_settings.manage'],
             ],
         ],
-        'enterprise_license' => [
-            'label' => 'Enterprise License',
-            'section' => 'system',
-            'enterprise' => true,
-            'description' => 'Enterprise license management.',
-            'actions' => [
-                'manage' => ['label' => 'Manage', 'permission' => 'admin.enterprise_license.manage'],
-            ],
-        ],
         'system_maintenance' => [
             'label' => 'System Maintenance',
             'section' => 'system',

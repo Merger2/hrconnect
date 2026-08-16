@@ -140,13 +140,7 @@ class LoanController extends Controller
         ]);
     }
 
-    public function payInstallment(Request $request, Loan $loan): JsonResponse
-    {
-        $this->authorize('update', $loan);
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Pay installment via API not supported. Use web interface.',
-        ], 400);
-    }
+    // Mock-miss fix (2026-08-16): method `payInstallment()` stub-400 (selalu
+    // "Pay installment via API not supported") dihapus bersama route POST-nya —
+    // angsuran kasbon dipotong via payroll, bukan API bayar manual.
 }

@@ -10,7 +10,6 @@
         'notification' => 'notif',
         'payroll' => 'payroll',
         'appraisal' => 'appraisal',
-        'enterprise' => 'enterprise',
     ];
 
     $tabCounts = [
@@ -21,7 +20,6 @@
         'notif' => 0,
         'payroll' => 0,
         'appraisal' => 0,
-        'enterprise' => 0,
     ];
 
     foreach ($groups as $group => $settings) {
@@ -34,14 +32,6 @@
     }
 
     $canManageSystemSettings = auth()->user()->can('manageSystemSettings');
-    $canManageEnterpriseLicense = auth()->user()->can('manageEnterpriseLicense');
-    $licenseStatus = $licenseValidation ?? [
-        'valid' => false,
-        'code' => 'missing_key',
-        'message' => __('No enterprise license key saved yet.'),
-    ];
-    $licenseStatusValid = $licenseStatus['valid'] ?? false;
-    $licenseStatusCode = $licenseStatus['code'] ?? 'missing_key';
 @endphp
 
 <x-admin.page-shell :title="__('Application Settings')" :description="__('Manage your application configuration and preferences.')" x-data="{
@@ -54,8 +44,7 @@
         { id: 'leave', label: '{{ __('Leave & Time Off') }}', icon: 'calendar', count: {{ $tabCounts['leave'] }} },
         { id: 'notif', label: '{{ __('Notifications') }}', icon: 'bell', count: {{ $tabCounts['notif'] }} },
         { id: 'payroll', label: '{{ __('Payroll') }}', icon: 'banknotes', count: {{ $tabCounts['payroll'] }} },
-        { id: 'appraisal', label: '{{ __('Appraisal') }}', icon: 'chart', count: {{ $tabCounts['appraisal'] }} },
-        { id: 'enterprise', label: '{{ __('Enterprise') }}', icon: 'briefcase', count: {{ $tabCounts['enterprise'] }} }
+        { id: 'appraisal', label: '{{ __('Appraisal') }}', icon: 'chart', count: {{ $tabCounts['appraisal'] }} }
     ],
     normalize(value) {
         return (value || '').toString().toLowerCase();
@@ -87,8 +76,7 @@
             }
         });
     }
-}"
-    x-on:enterprise-license-applied.window="if ($event.detail.reload) window.location.reload()">
+}">
     <x-slot name="toolbar">
         <x-admin.page-tools grid-class="grid grid-cols-1 items-end gap-3 xl:grid-cols-4">
 
@@ -265,57 +253,9 @@
                                                 {{ __('Read-only mode') }}
                                             </span>
                                         @endunless
-                                        @if ($group === 'enterprise')
-                                            @if ($licenseStatusValid && isset($licenseInfo['expires_at']))
-                                                <div
-                                                    class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white px-3 py-2">
-                                                    <div class="text-right">
-                                                        <p class="text-sm font-medium text-gray-900">
-                                                            {{ __('License active') }}</p>
-                                                        <p class="text-xs text-gray-500">
-                                                            {{ __('Until') }}:
-                                                            <span class="text-emerald-600">
-                                                                {{ \Carbon\Carbon::parse($licenseInfo['expires_at'])->format('d M Y') }}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div
-                                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
-                                                        <x-heroicon-o-check-circle class="h-5 w-5 text-emerald-600" />
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <span class="@class([
-                                                    'inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold',
-                                                    'border-slate-200 bg-slate-50 text-slate-600' =>
-                                                        $licenseStatusCode === 'missing_key',
-                                                    'border-rose-200 bg-rose-50 text-rose-700' =>
-                                                        $licenseStatusCode !== 'missing_key',
-                                                ])">
-                                                    {{ __('License status') }}
-                                                </span>
-                                            @endif
-                                        @endif
 
                                     </div>
                                 </div>
-
-                                @if ($group === 'enterprise')
-                                    <x-admin.alert tone="warning"
-                                        class="flex flex-col items-start justify-between gap-3 rounded-none rounded-b-none border-x-0 border-t-0 px-4 py-3 sm:flex-row sm:items-center">
-                                        <div>
-                                            <h4 class="text-sm font-medium text-yellow-800">Server
-                                                Hardware ID (HWID)</h4>
-                                            <p class="sr-only">
-                                                {{ __('Please give this code to Developer if you want to request Enterprise License for this server.') }}
-                                            </p>
-                                        </div>
-                                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                                            <code
-                                                class="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-sm rounded border border-yellow-200 font-mono select-all w-full sm:w-auto text-center">{{ $hwid }}</code>
-                                        </div>
-                                    </x-admin.alert>
-                                @endif
 
                                 <div class="space-y-4 p-4">
                                     @foreach ($settings as $setting)
@@ -350,31 +290,7 @@
                                                 </div>
 
                                                 <div class="w-full shrink-0 md:w-auto">
-                                                    @if ($setting->key === 'enterprise_license_key')
-                                                        <div class="w-full max-w-3xl space-y-3 md:min-w-[18rem]">
-
-                                                            <x-forms.textarea wire:model.defer="enterpriseLicenseDraft"
-                                                                rows="3" :disabled="!$canManageEnterpriseLicense"
-                                                                class="block w-full font-mono text-xs sm:text-sm"></x-forms.textarea>
-
-                                                            <div class="flex items-center justify-end gap-3">
-                                                                <div class="h-4 w-4" wire:loading
-                                                                    wire:target="applyEnterpriseLicense">
-                                                                    <x-heroicon-o-arrow-path class="h-4 w-4 animate-spin text-primary-600" />
-                                                                </div>
-
-                                                                @if ($canManageEnterpriseLicense)
-                                                                    <x-actions.button
-                                                                        wire:click="applyEnterpriseLicense"
-                                                                        wire:loading.attr="disabled"
-                                                                        class="justify-center"
-                                                                        wire:target="applyEnterpriseLicense">
-                                                                        {{ __('Apply') }}
-                                                                    </x-actions.button>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    @elseif ($setting->type === 'boolean')
+                                                    @if ($setting->type === 'boolean')
                                                         <x-forms.switch
                                                             wire:click="updateValue({{ $setting->id }}, {{ $setting->value == '1' ? '0' : '1' }})"
                                                             :checked="$setting->value == '1'" :label="$setting->description ?? $setting->key" :disabled="!$canManageSystemSettings" />

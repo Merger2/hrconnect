@@ -17,63 +17,12 @@ $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 $password = getenv('APK_SCREENSHOT_PASSWORD') ?: '12345678';
-$userEmail = getenv('APK_SCREENSHOT_USER_EMAIL') ?: 'apk.demo.user@paspapan.test';
-$adminEmail = getenv('APK_SCREENSHOT_ADMIN_EMAIL') ?: 'apk.demo.superadmin@paspapan.test';
+$userEmail = getenv('APK_SCREENSHOT_USER_EMAIL') ?: 'apk.demo.user@hrconnect.test';
+$adminEmail = getenv('APK_SCREENSHOT_ADMIN_EMAIL') ?: 'apk.demo.superadmin@hrconnect.test';
 
-function screenshotEnterprisePrivateKey(): ?string
-{
-    $candidate = getenv('TEST_ENTERPRISE_LICENSE_PRIVATE_KEY_PATH') ?: storage_path('license_private.key');
-
-    if (! is_file($candidate)) {
-        return null;
-    }
-
-    $key = file_get_contents($candidate);
-
-    return is_string($key) && trim($key) !== '' ? trim($key) : null;
-}
-
-function screenshotEnterpriseLicense(): ?string
-{
-    $privateKey = screenshotEnterprisePrivateKey();
-
-    if ($privateKey === null) {
-        return null;
-    }
-
-    $payload = [
-        'schema_version' => 1,
-        'license_id' => 'SCREENSHOT-'.strtoupper(bin2hex(random_bytes(6))),
-        'client' => 'PT. PasPapan Indonesia',
-        'support_contact' => 'https://t.me/RiprLutuk',
-        'domain' => '*',
-        'hwid' => '*',
-        'expires_at' => now()->addMonth()->toDateString(),
-        'issued_at' => now()->toIso8601String(),
-        'not_before' => now()->subMinutes(5)->toIso8601String(),
-        'features' => [
-            'attendance',
-            'face_verification',
-            'payroll',
-            'cash_advance',
-            'reporting',
-            'audit',
-            'analytics',
-            'asset_management',
-            'appraisal',
-            'system_backup',
-            'document_requests',
-        ],
-        'max_users' => 0,
-        'author' => 'RiprLutuk(https://riprlutuk.github.io)',
-        'salt' => bin2hex(random_bytes(16)),
-    ];
-
-    $json = json_encode($payload, JSON_THROW_ON_ERROR);
-    openssl_sign($json, $signature, $privateKey, OPENSSL_ALGO_SHA256);
-
-    return base64_encode($json).'.'.base64_encode($signature);
-}
+// Mock-miss fix (2026-08-16): fitur lisensi enterprise (validasi palsu
+// strlen >= 32) dihapus total — licensing = non-goal PRD. Fungsi
+// screenshotEnterpriseLicense()/screenshotEnterprisePrivateKey() ikut dihapus.
 
 foreach ([
     'app.company_name' => ['value' => 'PT. PasPapan Indonesia', 'group' => 'identity', 'type' => 'text'],
@@ -81,16 +30,6 @@ foreach ([
 ] as $key => $payload) {
     Setting::query()->updateOrCreate(['key' => $key], $payload);
     Setting::flushCache($key);
-}
-
-$license = screenshotEnterpriseLicense();
-
-if ($license !== null) {
-    Setting::query()->updateOrCreate(
-        ['key' => 'enterprise_license_key'],
-        ['value' => $license, 'group' => 'enterprise', 'type' => 'textarea'],
-    );
-    Setting::flushCache('enterprise_license_key');
 }
 
 $basePayload = [
@@ -129,7 +68,7 @@ $admin = User::query()->updateOrCreate(
 );
 
 $subordinate = User::query()->updateOrCreate(
-    ['email' => 'apk.demo.subordinate@paspapan.test'],
+    ['email' => 'apk.demo.subordinate@hrconnect.test'],
     $basePayload + [
         'nip' => 'APK-DEMO-SUB',
         'name' => 'APK Demo Subordinate',

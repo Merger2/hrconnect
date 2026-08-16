@@ -42,17 +42,6 @@ test('grouped settings returns settings grouped by group ordered by id', functio
         ->and($grouped->get('a')->pluck('key')->all())->toBe(['a_key', 'a_key_2']);
 });
 
-test('hardware id is generated once and persisted', function () {
-    $service = app(SettingsManagementService::class);
-
-    $first = $service->hardwareId();
-    $second = $service->hardwareId();
-
-    expect($first)->toBe($second)
-        ->and(strlen($first))->toBe(32)
-        ->and(Setting::where('key', '_hardware_id')->exists())->toBeTrue();
-});
-
 test('updateValue updates setting value and clears its cache', function () {
     $service = app(SettingsManagementService::class);
 
@@ -63,37 +52,4 @@ test('updateValue updates setting value and clears its cache', function () {
 
     expect($setting->fresh()->value)->toBe('Baru')
         ->and(Cache::has('setting.app_name'))->toBeFalse();
-});
-
-test('enterprise license state reports valid license for 32+ char key', function () {
-    $service = app(SettingsManagementService::class);
-
-    Setting::create(['key' => 'enterprise_license', 'value' => str_repeat('A', 32)]);
-
-    $state = $service->enterpriseLicenseState();
-
-    expect($state['validation']['valid'])->toBeTrue()
-        ->and($state['validation']['license']['type'])->toBe('enterprise');
-});
-
-test('enterprise license state reports invalid for short key', function () {
-    $service = app(SettingsManagementService::class);
-
-    Setting::create(['key' => 'enterprise_license', 'value' => 'short']);
-
-    $state = $service->enterpriseLicenseState();
-
-    expect($state['validation']['valid'])->toBeFalse()
-        ->and($state['validation']['license'])->toBeNull();
-});
-
-test('apply enterprise license persists only valid keys', function () {
-    $service = app(SettingsManagementService::class);
-
-    $service->applyEnterpriseLicense('too-short');
-    expect(Setting::where('key', 'enterprise_license')->exists())->toBeFalse();
-
-    $result = $service->applyEnterpriseLicense(str_repeat('B', 32));
-    expect($result['setting'])->not->toBeNull()
-        ->and($result['license_state']['validation']['valid'])->toBeTrue();
 });
