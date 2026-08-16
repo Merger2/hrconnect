@@ -29,7 +29,12 @@ class ProcessAttendanceImportRun implements ShouldQueue
     {
         $run = ImportExportRun::query()->findOrFail($this->runId);
 
-        if (! $run->file_path || ! Storage::disk('local')->exists($run->file_path)) {
+        // File input disimpan service di `source_path` (bukan `file_path` —
+        // kolom itu dipakai export utk output). Pakai source_path agar import
+        // tidak selalu gagal 'Import file not found'.
+        $sourcePath = $run->source_path;
+
+        if (! $sourcePath || ! Storage::disk('local')->exists($sourcePath)) {
             $run->update(['status' => 'failed', 'error_message' => 'Import file not found']);
 
             return;
@@ -37,11 +42,14 @@ class ProcessAttendanceImportRun implements ShouldQueue
 
         try {
             $import = new AttendanceImport;
-            Excel::import($import, $run->file_path, 'local');
+            Excel::import($import, $sourcePath, 'local');
+
+            $rowCount = $import->getRowCount();
 
             $run->update([
                 'status' => 'completed',
-                'row_count' => $import->getRowCount(),
+                'total_rows' => $rowCount,
+                'processed_rows' => $rowCount,
                 'completed_at' => now(),
             ]);
         } catch (ValidationException $e) {

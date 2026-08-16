@@ -96,7 +96,6 @@ $legacyWarningFindings = [
     ['resources/views/livewire/admin/master-data/job-title.blade.php', 'mobile_layout_red_flag', 70, 'overflow-x-auto can hide underlying mobile layout issues.'],
     ['resources/views/livewire/admin/master-data/leave-types.blade.php', 'mobile_layout_red_flag', 37, 'overflow-x-auto can hide underlying mobile layout issues.'],
     ['resources/views/livewire/admin/master-data/shift.blade.php', 'mobile_layout_red_flag', 77, 'overflow-x-auto can hide underlying mobile layout issues.'],
-    ['resources/views/livewire/admin/payroll-manager.blade.php', 'missing_form_label', 282, 'Possible missing label or aria-label for <textarea>.'],
     ['resources/views/livewire/admin/payroll-manager.blade.php', 'hardcoded_ui_text', 22, 'Possible hardcoded UI text: "Semua"'],
     ['resources/views/livewire/admin/payroll-manager.blade.php', 'hardcoded_ui_text', 48, 'Possible hardcoded UI text: "Total Payroll"'],
     ['resources/views/livewire/admin/payroll-manager.blade.php', 'hardcoded_ui_text', 50, 'Possible hardcoded UI text: "Semua status & filter"'],

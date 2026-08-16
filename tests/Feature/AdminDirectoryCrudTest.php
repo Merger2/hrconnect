@@ -54,7 +54,7 @@ test('superadmin can create admin account from admin directory', function () {
         ->set('form.nip', '909090')
         ->set('form.email', 'finance-admin@example.com')
         ->set('form.phone', '09090909')
-        ->set('credential', 'admin123')
+        ->set('credential', 'Admin!2026x')
         ->set('form.gender', 'male')
         ->set('form.address', 'Jl. Jend. Sudirman No. 1')
         ->set('form.group', 'admin')
@@ -88,7 +88,7 @@ test('admin directory create validates required name and email before insert', f
     Livewire::test(AdminDirectory::class)
         ->set('form.nip', '808080')
         ->set('form.phone', '08080808')
-        ->set('credential', 'admin123')
+        ->set('credential', 'Admin!2026x')
         ->set('form.address', 'Jl. Veteran No. 2')
         ->set('form.group', 'superadmin')
         ->call('create')
@@ -149,12 +149,12 @@ test('superadmin can reset own password from admin directory', function () {
     Livewire::test(AdminDirectory::class)
         ->call('edit', $superadmin->id)
         ->set('form.gender', 'male')
-        ->set('credential', 'new-own-password')
-        ->assertSet('credential', 'new-own-password')
+        ->set('credential', 'NewOwn!2026x')
+        ->assertSet('credential', 'NewOwn!2026x')
         ->call('update')
         ->assertHasNoErrors();
 
-    expect(Hash::check('new-own-password', $superadmin->fresh()->password))->toBeTrue();
+    expect(Hash::check('NewOwn!2026x', $superadmin->fresh()->password))->toBeTrue();
 });
 
 test('admin directory assigns one selected access role', function () {

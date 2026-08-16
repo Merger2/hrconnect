@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Livewire\Form;
 
@@ -101,7 +102,10 @@ class UserForm extends Form
                 Rule::unique('users')->ignore($this->user),
             ],
             'phone' => [$requiredOrNullable, 'string', 'min:5', 'max:255'],
-            'password' => ['nullable', 'string', 'min:4', 'max:255'],
+            // Password wajib saat create; opsional saat update (hanya diubah
+            // bila diisi). Kekuatan mengikuti Password::defaults() — prod:
+            // min 12 + huruf/angka/simbol + uncompromised (AppServiceProvider).
+            'password' => [$this->user ? 'nullable' : 'required', 'string', Password::defaults(), 'max:255'],
             'gender' => [$requiredOrNullable, 'in:male,female'],
             'marital_status' => ['nullable', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'address' => [$requiredOrNullable, 'string', 'max:255'],
@@ -203,7 +207,7 @@ class UserForm extends Form
             $user = User::create([
                 'name' => $this->name,
                 'email' => $this->email,
-                'password' => Hash::make($this->password ?? 'password'),
+                'password' => Hash::make($this->password),
                 'group' => $this->group,
                 'manager_id' => $this->manager_id,
                 'company_id' => auth()->user()->company_id,

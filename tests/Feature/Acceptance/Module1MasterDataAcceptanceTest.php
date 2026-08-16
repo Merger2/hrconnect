@@ -41,6 +41,7 @@ test('M1 acceptance: superadmin creates employee — atomic user+employee record
         ->set('form.nip', 'ACC-'.now()->format('Y').'-0001')
         ->set('form.email', 'acceptance.m1@hrconnect.test')
         ->set('form.phone', '081234567890')
+        ->set('form.password', 'Acc!2026pass')
         ->set('form.gender', 'male')
         ->set('form.address', 'Jl. Acceptance No. 1')
         ->set('form.provinsi_kode', '11')
@@ -61,7 +62,7 @@ test('M1 acceptance: superadmin creates employee — atomic user+employee record
     expect($user->employee)->not->toBeNull()
         ->and($user->employee->full_name)->toBe('Acceptance Karyawan')
         ->and($user->employee->company_id)->toBe($company->id)
-        ->and(Hash::check('password', $user->password))->toBeTrue();
+        ->and(Hash::check('Acc!2026pass', $user->password))->toBeTrue();
 });
 
 test('M1 acceptance: validation rejects missing required fields — no partial insert', function () {
@@ -71,7 +72,7 @@ test('M1 acceptance: validation rejects missing required fields — no partial i
 
     Livewire::test(EmployeeCreate::class)
         ->call('store')
-        ->assertHasErrors(['form.name', 'form.email', 'form.nip', 'form.phone', 'form.gender', 'form.join_date']);
+        ->assertHasErrors(['form.name', 'form.email', 'form.nip', 'form.phone', 'form.gender', 'form.join_date', 'form.password']);
 
     $this->assertDatabaseCount('employees', 0);
 });

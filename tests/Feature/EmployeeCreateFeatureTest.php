@@ -42,6 +42,7 @@ test('superadmin can create an employee with atomic user and employee records', 
         ->set('form.nip', '1990010120250001')
         ->set('form.email', 'budi.santoso@hrconnect.test')
         ->set('form.phone', '081234567890')
+        ->set('form.password', 'Budi!2026pass')
         ->set('form.gender', 'male')
         ->set('form.address', 'Jl. Merdeka No. 1')
         ->set('form.provinsi_kode', '11')
@@ -62,10 +63,10 @@ test('superadmin can create an employee with atomic user and employee records', 
 
     $user = User::where('email', 'budi.santoso@hrconnect.test')->firstOrFail();
 
-    // User record: group user, company scoped, default password.
+    // User record: group user, company scoped, password wajib diisi admin.
     expect($user->group)->toBe('user')
         ->and($user->company_id)->toBe($company->id)
-        ->and(Hash::check('password', $user->password))->toBeTrue()
+        ->and(Hash::check('Budi!2026pass', $user->password))->toBeTrue()
         ->and($user->manager_id)->toBe($manager->id);
 
     // Employee record: ter-create atomik bersama user (bukan orphan).

@@ -72,7 +72,7 @@ class EmployeeComponent extends Component
         $this->form->resetErrorBag();
         $this->form->reset();
         $this->creating = true;
-        $this->form->password = 'password';
+        // Password WAJIB diketik admin (2026-08-16) — hapus default 'password'.
         $this->form->employment_status = Employee::EMPLOYMENT_STATUS_ACTIVE;
     }
 

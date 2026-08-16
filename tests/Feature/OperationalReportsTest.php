@@ -129,3 +129,44 @@ test('payroll summary report export returns an excel download', function () {
     $response->assertOk();
     expect($response->headers->get('content-disposition'))->toContain('payroll-summary-report-');
 });
+
+test('payroll report export works without status filter and with status=all', function () {
+    $finance = User::factory()->admin(true)->create();
+    $employee = User::factory()->create();
+
+    Payroll::create([
+        'employee_id' => Employee::factory()->create(['user_id' => $employee->id])->id,
+        'period' => now()->format('Y-m'),
+        'basic_salary' => 5000000,
+        'total_allowance' => 500000,
+        'gross_salary' => 5500000,
+        'overtime_pay' => 250000,
+        'pph21' => 0,
+        'bpjs_health' => 0,
+        'bpjs_employment' => 0,
+        'loan_deduction' => 0,
+        'attendance_penalty' => 0,
+        'total_deduction' => 100000,
+        'net_salary' => 5650000,
+        'status' => 'paid',
+    ]);
+
+    // Regresi: tanpa status filter dulu 500 (Undefined array key "status");
+    // dan status=all dulu menghasilkan workbook kosong diam-diam.
+    $noStatus = $this->actingAs($finance)
+        ->get(route('admin.reports.payrolls.export', [
+            'month' => now()->month,
+            'year' => now()->year,
+        ]));
+    $noStatus->assertOk();
+    expect(strlen($noStatus->streamedContent()))->toBeGreaterThan(0);
+
+    $all = $this->actingAs($finance)
+        ->get(route('admin.reports.payrolls.export', [
+            'month' => now()->month,
+            'year' => now()->year,
+            'status' => 'all',
+        ]));
+    $all->assertOk();
+    expect(strlen($all->streamedContent()))->toBeGreaterThan(0);
+});

@@ -25,7 +25,7 @@
                     <div class="sm:col-span-2">
                         <x-forms.label for="create_password" value="{{ __('Password') }}" />
                         <x-forms.input id="create_password" type="password" class="mt-1 block w-full"
-                            wire:model="form.password" placeholder="{{ __('Leave blank for default: password') }}" />
+                            wire:model="form.password" />
                         <x-forms.input-error for="form.password" class="mt-2" />
                     </div>
 

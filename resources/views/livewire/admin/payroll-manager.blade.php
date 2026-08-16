@@ -130,6 +130,9 @@
                                     }">
                                         {{ $payroll->status?->label() }}
                                     </x-admin.status-badge>
+                                    @if($payroll->status === \App\Enums\PayrollStatus::PAID && $payroll->payment_date)
+                                        <div class="mt-1 text-xs text-slate-500">{{ __('Tgl transfer') }}: {{ $payroll->payment_date->format('d M Y') }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex justify-end gap-2">
@@ -205,6 +208,9 @@
                             }">
                                 {{ $payroll->status?->label() }}
                             </x-admin.status-badge>
+                            @if($payroll->status === \App\Enums\PayrollStatus::PAID && $payroll->payment_date)
+                                <div class="mt-1 text-[11px] text-slate-500">{{ __('Tgl transfer') }}: {{ $payroll->payment_date->format('d M Y') }}</div>
+                            @endif
                         </div>
 
                         <dl class="mt-3 grid grid-cols-2 gap-2">
@@ -279,7 +285,8 @@
                     x-trap.inert.noscroll="true">
                     <h3 id="payroll-reject-title" class="text-lg font-semibold">Tolak Payroll</h3>
                     <p class="text-sm text-zinc-500">Berikan alasan penolakan payroll ini.</p>
-                    <textarea wire:model="rejectionReason" rows="3" class="w-full rounded-md border-zinc-300" placeholder="Alasan penolakan..."></textarea>
+                    <label for="payroll-reject-reason" class="sr-only">{{ __('Alasan penolakan') }}</label>
+                    <textarea id="payroll-reject-reason" wire:model="rejectionReason" rows="3" class="w-full rounded-md border-zinc-300" placeholder="Alasan penolakan..."></textarea>
                     @error('rejectionReason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                     <div class="flex justify-end gap-2">
                         <button wire:click="cancelReject" class="px-4 py-2 text-sm rounded-md border border-zinc-300 hover:bg-zinc-50">Batal</button>

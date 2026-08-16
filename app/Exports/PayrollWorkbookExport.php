@@ -36,7 +36,7 @@ class PayrollWorkbookExport implements WithMultipleSheets
     protected function getPayrolls(): Collection
     {
         return Payroll::with('employee')
-            ->where('status', $this->filters['status'])
+            ->when(isset($this->filters['status']), fn ($q) => $q->where('status', $this->filters['status']))
             ->where('period', sprintf('%04d-%02d', $this->filters['year'], $this->filters['month']))
             ->get();
     }

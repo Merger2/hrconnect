@@ -23,7 +23,8 @@ class EmployeeCreate extends Component
     {
         Gate::authorize('manageUserRecord', [null, 'user']);
 
-        $this->form->password = 'password';
+        // Password WAJIB diketik admin (2026-08-16) — hapus default 'password'.
+        // Validasi UserForm (Password::defaults) menolak kosong saat create.
         $this->form->employment_status = Employee::EMPLOYMENT_STATUS_ACTIVE;
     }
 

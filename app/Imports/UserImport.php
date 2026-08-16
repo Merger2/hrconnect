@@ -35,7 +35,11 @@ class UserImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, WithVa
 
                 $user->name = $row['name'] ?? $email;
                 $user->password = Hash::make($row['password'] ?? 'password123');
-                $user->password_changed_at = now();
+                // Default import ('password123') bersifat sementara: biarkan
+                // password_changed_at null → CheckPasswordExpired Tier 3 memaksa
+                // ganti password saat login pertama. Bila password eksplisit
+                // diberikan, hitung masa berlaku normal dari hari ini.
+                $user->password_changed_at = ! empty($row['password']) ? now() : null;
                 $user->save();
 
                 // Sync roles

@@ -38,7 +38,8 @@ class ProcessUserExportRun implements ShouldQueue
         $run->update([
             'status' => 'completed',
             'file_path' => $path,
-            'row_count' => $rowCount,
+            'total_rows' => $rowCount,
+            'processed_rows' => $rowCount,
             'completed_at' => now(),
         ]);
     }

@@ -349,7 +349,6 @@
                         <x-forms.input id="create_password" class="mt-1 block w-full" type="password"
                             wire:model="credential" placeholder="{{ __('New Password') }}" required
                             autocomplete="new-password" />
-                        <p class="text-sm">{{ __('Default password admin') }}</p>
                         @error('form.password')
                             <x-forms.input-error for="form.password" class="mt-2" message="{{ $message }}" />
                         @enderror

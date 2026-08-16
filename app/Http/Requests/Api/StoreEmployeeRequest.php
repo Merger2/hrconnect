@@ -7,6 +7,7 @@ use App\Enums\MaritalStatus;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class StoreEmployeeRequest extends FormRequest
 {
@@ -20,7 +21,7 @@ class StoreEmployeeRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', Password::defaults(), 'max:255'],
             'employee_number' => ['required', 'string', 'max:50', Rule::unique('employees', 'employee_number')],
             'full_name' => ['required', 'string', 'max:255'],
             'company_id' => ['required', 'integer', 'exists:companies,id'],

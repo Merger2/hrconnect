@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\RequestStatus;
 use App\Models\Overtime;
 use App\Models\User;
 use App\Notifications\OvertimeStatusUpdated;
@@ -87,7 +88,10 @@ class OvertimeApprovalService
 
     private function ensurePending(Overtime $overtime): void
     {
-        if ($overtime->status !== 'pending') {
+        // regresi 2026-08-16: status di-cast ke RequestStatus enum, jadi
+        // bandingkan dengan enum — string 'pending' selalu != enum → semua
+        // approve/reject overtime lempar 'already been reviewed'.
+        if ($overtime->status !== RequestStatus::PENDING) {
             throw new AuthorizationException(__('This overtime request has already been reviewed.'));
         }
     }

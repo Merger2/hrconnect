@@ -64,7 +64,9 @@ class Admin extends Component
         $this->form->reset();
         $this->creating = true;
         $this->form->group = 'admin';
-        $this->credential = 'admin';
+        // Password WAJIB diketik admin (2026-08-16) — hapus default 'admin'
+        // (kredensial lemah). Validasi form (Password::defaults) menolak kosong.
+        $this->credential = null;
     }
 
     public function create()

@@ -42,6 +42,10 @@ class SendPayrollPayslipEmail implements ShouldQueue
         // harus memasukkan PIN payslip-nya; PDF di-enkripsi dengan PIN plaintext.
         Mail::to($payroll->employee->user->email)->send(new PayrollPayslipPdfMail($payroll));
 
-        $payroll->forceFill(['pdf_emailed_at' => now()])->save();
+        // Guard `Payroll::booted()` memblokir SEMUA update model berstatus PAID
+        // (regresi 2026-08-13: `$payroll->save()` selalu BusinessRuleException →
+        // job gagal + email duplikat 3× via retry). Update via query builder
+        // membypass model event — satu-satunya kolom yang diubah: pdf_emailed_at.
+        Payroll::query()->whereKey($payroll->id)->update(['pdf_emailed_at' => now()]);
     }
 }
