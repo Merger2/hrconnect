@@ -16,9 +16,9 @@ namespace App\Enums;
  * - `process_*`  → operasi khusus (mis. process_payroll oleh Finance)
  * - `download_*` → export/download dengan re-auth password
  *
- * Mapping ke 5 role di RoleAndPermissionSeeder:
- * - super-admin : semua permission (executive override)
- * - hr-manager  : view all + manage employees/HR + approve L2 leaves/OT + KB
+ * Mapping ke 5 role di RoleAndPermissionSeeder (selaras struktur PT DCMS):
+ * - super-admin : semua permission (executive override) — Owner & IT Support
+ * - admin       : full HR + admin panel + system settings + RBAC + payroll — HRD
  * - finance     : process payroll + approve L2 reimbursement + view payslip + tax/bpjs
  * - manager     : approve L1 + view team data
  * - employee    : view own data + dashboard
@@ -30,9 +30,6 @@ enum Permission: string
 {
     // – Dashboard (1) –
     case VIEW_DASHBOARD = 'view_dashboard';
-
-    // – Command Center / Overview (1) –
-    case VIEW_COMMAND_CENTER = 'view_command_center';
 
     // – Document Requests (1) — admin panel visibility –
     case VIEW_ADMIN_DOCUMENT_REQUESTS = 'view_admin_document_requests';
@@ -130,7 +127,6 @@ enum Permission: string
     // – System Settings (2) –
     case VIEW_ADMIN_SETTINGS = 'view_admin_settings';
     case MANAGE_SYSTEM_SETTINGS = 'manage_system_settings';
-    case MANAGE_ENTERPRISE_LICENSE = 'manage_enterprise_license';
 
     // – Integrations (1) –
     case MANAGE_API_INTEGRATIONS = 'manage_api_integrations';
@@ -210,7 +206,6 @@ enum Permission: string
         return [
             'Document Requests' => [self::VIEW_ADMIN_DOCUMENT_REQUESTS],
             'Dashboard' => [self::VIEW_DASHBOARD],
-            'Command Center' => [self::VIEW_COMMAND_CENTER],
             'Company' => [self::VIEW_COMPANIES, self::MANAGE_COMPANIES],
             'Branch' => [self::VIEW_BRANCHES, self::MANAGE_BRANCHES],
             'Division' => [self::VIEW_DIVISIONS, self::MANAGE_DIVISIONS],
@@ -268,7 +263,7 @@ enum Permission: string
             'Reports' => [self::VIEW_OPERATIONAL_REPORTS, self::EXPORT_ATTENDANCES, self::EXPORT_USERS, self::IMPORT_ATTENDANCES, self::IMPORT_USERS, self::EXPORT_ADMIN_REPORTS, self::EXPORT_ACTIVITY_LOGS, self::VIEW_ATTENDANCE_REPORTS, self::VIEW_USER_IMPORT_EXPORT, self::VIEW_ATTENDANCE_IMPORT_EXPORT],
             'Audit' => [self::VIEW_ACTIVITY_LOGS, self::VIEW_AUDIT_LOGS],
             'User Session' => [self::MANAGE_USER_SESSIONS],
-            'Settings' => [self::VIEW_ADMIN_SETTINGS, self::MANAGE_SYSTEM_SETTINGS, self::MANAGE_ENTERPRISE_LICENSE, self::MANAGE_SYSTEM_MAINTENANCE, self::MANAGE_KPI_SETTINGS, self::MANAGE_CUSTOM_FORMS],
+            'Settings' => [self::VIEW_ADMIN_SETTINGS, self::MANAGE_SYSTEM_SETTINGS, self::MANAGE_SYSTEM_MAINTENANCE, self::MANAGE_KPI_SETTINGS, self::MANAGE_CUSTOM_FORMS],
             'Integration' => [self::MANAGE_API_INTEGRATIONS],
             'RBAC' => [self::MANAGE_RBAC, self::ASSIGN_ROLES],
             'Notifications' => [self::MANAGE_ADMIN_NOTIFICATIONS],

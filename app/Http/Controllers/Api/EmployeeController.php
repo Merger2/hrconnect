@@ -17,6 +17,8 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 #[Group('Employees')]
 class EmployeeController extends Controller
@@ -38,7 +40,7 @@ class EmployeeController extends Controller
         $query = Employee::query()
             ->with([
                 'branch:id,name',
-                'department:id,name',
+                'division:id,name',
                 'position:id,name,grade',
             ])
             ->orderBy('full_name');
@@ -82,7 +84,7 @@ class EmployeeController extends Controller
         $employee->load([
             'user:id,email,email_verified_at',
             'branch:id,name',
-            'department:id,name',
+            'division:id,name',
             'position:id,name,grade,basic_salary',
             'shift:id,name',
             'manager:id,full_name',
@@ -119,7 +121,7 @@ class EmployeeController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => Hash::make($data['password']),
             'group' => 'user',
         ]);
 
@@ -137,8 +139,17 @@ class EmployeeController extends Controller
             'birth_date' => $data['birth_date'],
             'join_date' => $data['join_date'],
             'salary_type' => $data['salary_type'],
+            // employees.status nullable tanpa default — karyawan baru selalu active
+            // (EmployeeResource membaca status->value, null akan crash).
+            'status' => EmployeeStatus::ACTIVE,
             'nip' => $data['nip'] ?? null,
-            'phone' => $data['phone'] ?? null,
+            'phone' => $data['phone'],
+            // employees.phone & employees.nik NOT NULL tanpa default — ikuti
+            // pola UserForm (web): phone required, nik di-generate fallback.
+            'nik' => $data['nik'] ?? 'NIK-'.Str::random(12),
+            'education_level' => $data['education_level'],
+            'institution_name' => $data['institution_name'],
+            'graduation_year' => $data['graduation_year'],
             'basic_salary' => $data['basic_salary'] ?? 0,
             'address_detail' => $data['address_detail'] ?? null,
             'bank_name' => $data['bank_name'] ?? null,
@@ -192,7 +203,7 @@ class EmployeeController extends Controller
             'status' => 'success',
             'message' => 'Data karyawan berhasil diperbarui',
             'data' => EmployeeResource::make($employee->fresh()->load([
-                'user', 'branch', 'department', 'position', 'shift', 'manager',
+                'user', 'branch', 'division', 'position', 'shift', 'manager',
             ]))->resolve($request),
         ]);
     }

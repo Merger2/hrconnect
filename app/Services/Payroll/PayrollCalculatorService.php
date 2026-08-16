@@ -241,8 +241,15 @@ class PayrollCalculatorService
      */
     public function calculateAnnualPPh21Progressive(Employee $employee, float $annualGrossIncome): float
     {
+        // Biaya jabatan (PMK 168/2023 + KEP-101/PJ/2024): 5% dari penghasilan
+        // bruto setahun, maksimal Rp 6.000.000 (Rp 500.000/bulan).
+        // Keputusan Fikih 2026-08-05 (AUDIT M2): deviasi "biarkan dulu" dicabut —
+        // biaya jabatan DITERAPKAN pada true-up progresif Pasal 17.
+        // Catatan: basis TER bulanan (PP 58/2023) sudah memperhitungkan biaya
+        // jabatan secara implisit di tarif — tidak diubah.
+        $biayaJabatan = min(0.05 * $annualGrossIncome, 6_000_000);
         $ptkp = $this->getPtkpAmount($employee);
-        $pkp = max(0, $annualGrossIncome - $ptkp);
+        $pkp = max(0, $annualGrossIncome - $biayaJabatan - $ptkp);
 
         if ($pkp <= 0) {
             return 0.0;
@@ -281,7 +288,8 @@ class PayrollCalculatorService
     {
         $year = substr($currentPeriod, 0, 4);
 
-        return Payroll::where('employee_id', $employee->id)
+        // pgsql SUM() mengembalikan string — cast float (golden test PR-12/13/14 menemukan TypeError).
+        return (float) Payroll::where('employee_id', $employee->id)
             ->where('period', 'like', "$year-%")
             ->where('period', '<', $currentPeriod)
             ->sum('pph21');
@@ -289,15 +297,31 @@ class PayrollCalculatorService
 
     /**
      * Akumulasi penghasilan bruto year-to-date.
+     *
+     * Temuan audit M1: `gross_salary` yang tersimpan SUDAH mencakup
+     * `overtime_pay` (generatePayroll menyimpan taxableIncome = prorata +
+     * lembur, kemudian ditambah reimbursement). Menjumlahkan keduanya lagi
+     * double-count lembur di true-up Desember/terminasi. Reimbursement juga
+     * tidak dipajaki di basis TER bulanan, jadi harus dikeluarkan dari basis
+     * annual agar konsisten.
      */
     private function getYtdGrossIncome(Employee $employee, string $currentPeriod): float
     {
         $year = substr($currentPeriod, 0, 4);
 
-        return Payroll::where('employee_id', $employee->id)
+        $payrolls = Payroll::where('employee_id', $employee->id)
             ->where('period', 'like', "$year-%")
             ->where('period', '<', $currentPeriod)
-            ->sum(DB::raw('gross_salary + COALESCE(overtime_pay, 0)'));
+            ->get(['id', 'gross_salary']);
+
+        $gross = (float) $payrolls->sum('gross_salary');
+
+        // gross_salary sudah termasuk reimbursement — kurangi agar konsisten
+        // dengan basis TER bulanan (reimbursement tidak masuk dasar pajak).
+        $reimbursementInYtd = (float) Reimbursement::whereIn('payroll_id', $payrolls->pluck('id'))
+            ->sum('amount');
+
+        return $gross - $reimbursementInYtd;
     }
 
     /**
@@ -345,15 +369,18 @@ class PayrollCalculatorService
     }
 
     /**
-     * Menghitung pesangon berdasarkan UU Cipta Kerja (PRD Appendix C + §26.3).
+     * Menghitung pesangon berdasarkan PP 35/2021 Pasal 40 Ayat 2.
      *
-     * Tabel pesangon:
-     *   < 1 thn = 0, 1 thn = 1, 2 thn = 2, 3 thn = 3, 4 thn = 4,
-     *   5 thn = 5, ≥ 6 thn = 6 bulan gaji.
+     * Tabel pesangon (PP 35/2021):
+     *   < 1 thn = 1, 1 thn = 2, 2 thn = 3, 3 thn = 4, 4 thn = 5,
+     *   5 thn = 6, 6 thn = 7, 7 thn = 8, ≥ 8 thn = 9 bulan gaji.
+     *   (Sebelumnya UU 13/2003 — disesuaikan 2026-08-05, keputusan compliance P0.)
      *
      * Multiplier variant (phk_variant):
      *   dismissed       = 1.0×
-     *   dismissed_severe = 2.0×
+     *   dismissed_severe = 1.0× (keputusan Fikih 2026-08-05 — AUDIT M3:
+     *                   multiplier 2.0× internal DIHAPUS, pakai tabel standar
+     *                   PP 35/2021 yang sama dengan dismissed)
      *   mutual          = 0.5×
      *   resign          = 1.0× (default)
      */
@@ -366,18 +393,16 @@ class PayrollCalculatorService
         $years = (int) ($employee->join_date->diffInMonths(now()) / 12);
 
         $monthMultiplier = match (true) {
-            $years < 1 => 0,
-            $years === 1 => 1,
-            $years === 2 => 2,
-            $years === 3 => 3,
-            $years === 4 => 4,
-            $years === 5 => 5,
-            default => 6,
+            $years < 1 => 1,
+            $years === 1 => 2,
+            $years === 2 => 3,
+            $years === 3 => 4,
+            $years === 4 => 5,
+            $years === 5 => 6,
+            $years === 6 => 7,
+            $years === 7 => 8,
+            default => 9,
         };
-
-        if ($monthMultiplier === 0) {
-            return 0.0;
-        }
 
         $monthlySalary = $this->getMonthlySalary($employee);
         $variantMultiplier = $this->getPhkVariantMultiplier($employee->phk_variant);
@@ -437,7 +462,10 @@ class PayrollCalculatorService
             return 0.0;
         }
 
-        $bulanKerja = $employee->join_date->diffInMonths($endDate);
+        // Cast (int) konsisten dengan calculatePesangon — Carbon 3 diffInMonths
+        // mengembalikan float; kompensasi PKWT dihitung per bulan penuh (PP 35/2021).
+        // Temuan golden test CP-06.
+        $bulanKerja = (int) $employee->join_date->diffInMonths($endDate);
 
         if ($bulanKerja < 1) {
             return 0.0;
@@ -493,8 +521,10 @@ class PayrollCalculatorService
 
     private function getPhkVariantMultiplier(?string $phkVariant): float
     {
+        // M3 AUDIT (keputusan Fikih 2026-08-05): dismissed_severe TIDAK lagi 2.0×
+        // — standarkan ke tabel PP 35/2021 (sama dengan dismissed). Hanya mutual
+        // yang tetap 0.5× (kesepakatan PHK).
         return match ($phkVariant) {
-            'dismissed_severe' => 2.0,
             'mutual' => 0.5,
             default => 1.0,
         };
@@ -603,7 +633,11 @@ class PayrollCalculatorService
                 $bpjsKesehatanDeduction = $bpjsComponents['bpjs_kesehatan']['employee'];
                 $bpjsEmploymentDeduction = $bpjsComponents['bpjs_jht']['employee'] + $bpjsComponents['bpjs_jp']['employee'];
                 $terCategory = $this->getTERCategory($employee);
-                $pph21Deduction = $this->calculatePPh21($employee, ($taxableIncome - $attendancePenalty), $terCategory);
+                // Denda kehadiran BUKAN pengurang penghasilan bruto pajak (PMK 168/2023:
+                // pengurang terbatas pada biaya jabatan/iuran pensiun/JHT). Konsisten dengan
+                // annual true-up (getYtdGrossIncome) yang juga tidak mengurangi denda.
+                // Temuan golden test PR-09/PR-15 — sebelum: taxableIncome - attendancePenalty.
+                $pph21Deduction = $this->calculatePPh21($employee, $taxableIncome, $terCategory);
 
                 // PP 58/2023: Desember/bulan terminasi wajib true-up progresif Pasal 17
                 $isTerminationMonth = $employee->resign_date && CarbonImmutable::parse($employee->resign_date)->format('Y-m') === $period;

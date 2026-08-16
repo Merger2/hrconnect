@@ -16,10 +16,8 @@
                 <div class="lg:col-span-2">
                     <x-forms.label for="job-title-search" value="{{ __('Search job titles') }}" class="mb-1.5 block" />
                     <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z" clip-rule="evenodd" />
-                            </svg>
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                            <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                         </span>
                         <x-forms.input
                             id="job-title-search"
@@ -53,10 +51,10 @@
         </x-slot>
 
         <x-admin.panel>
-            <div class="flex flex-col gap-2 border-b border-gray-200/70 px-4 py-3 dark:border-gray-700/70 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-2 border-b border-gray-200/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Job Title Directory') }}</h2>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <h2 class="text-lg font-semibold text-slate-950">{{ __('Job Title Directory') }}</h2>
+                    <p class="mt-1 text-sm text-slate-500">
                         @if ($jobTitles->count())
                             {{ __('Showing :from-:to of :total job titles.', ['from' => $jobTitles->firstItem(), 'to' => $jobTitles->lastItem(), 'total' => $jobTitles->total()]) }}
                         @else
@@ -71,7 +69,7 @@
             @if ($jobTitles->count())
                 <div class="hidden overflow-x-auto lg:block">
                     <table class="w-full whitespace-nowrap text-left text-sm">
-                        <thead class="bg-gray-50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                        <thead class="bg-gray-50 text-gray-500">
                             <tr>
                                 <th scope="col" class="px-4 py-3 font-medium">{{ __('Job Title') }}</th>
                                 <th scope="col" class="px-4 py-3 font-medium">{{ __('Division') }}</th>
@@ -79,14 +77,14 @@
                                 <th scope="col" class="px-4 py-3 text-right font-medium">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-100">
                             @foreach ($jobTitles as $jobTitle)
-                                <tr class="group transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                <tr class="group transition-colors hover:bg-gray-50">
                                     <td class="px-4 py-3">
-                                        <div class="font-semibold text-slate-900 dark:text-white">{{ $jobTitle->name }}</div>
-                                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('Approval and organization structure reference.') }}</div>
+                                        <div class="font-semibold text-slate-900">{{ $jobTitle->name }}</div>
+                                        <div class="mt-1 text-xs text-slate-500">{{ __('Approval and organization structure reference.') }}</div>
                                     </td>
-                                    <td class="px-4 py-3 text-slate-500 dark:text-slate-400">
+                                    <td class="px-4 py-3 text-slate-500">
                                         {{ $jobTitle->division->name ?? '-' }}
                                     </td>
                                     <td class="px-4 py-3">
@@ -94,12 +92,12 @@
                                             <span
                                                 class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
                                                 {{ $jobTitle->jobLevel->rank == 1
-                                                    ? 'bg-purple-50 text-purple-700 ring-purple-700/10 dark:bg-purple-400/10 dark:text-purple-400 dark:ring-purple-400/30'
+                                                    ? 'bg-purple-50 text-purple-700 ring-purple-700/10'
                                                     : ($jobTitle->jobLevel->rank == 2
-                                                        ? 'bg-indigo-50 text-indigo-700 ring-indigo-700/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/30'
+                                                        ? 'bg-indigo-50 text-indigo-700 ring-indigo-700/10'
                                                         : ($jobTitle->jobLevel->rank == 3
-                                                            ? 'bg-blue-50 text-blue-700 ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30'
-                                                            : 'bg-gray-50 text-gray-600 ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20')) }}">
+                                                            ? 'bg-blue-50 text-blue-700 ring-blue-700/10'
+                                                            : 'bg-gray-50 text-gray-600 ring-gray-500/10')) }}">
                                                 {{ $jobTitle->jobLevel->name }} ({{ __('Rank') }} {{ $jobTitle->jobLevel->rank }})
                                             </span>
                                         @else
@@ -122,13 +120,13 @@
                     </table>
                 </div>
 
-                <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-700 lg:hidden">
+                <div class="grid grid-cols-1 divide-y divide-gray-200 lg:hidden">
                     @foreach ($jobTitles as $jobTitle)
                         <div class="p-4">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                    <h3 class="font-semibold text-slate-950 dark:text-white">{{ $jobTitle->name }}</h3>
-                                    <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ $jobTitle->division->name ?? '-' }}</p>
+                                    <h3 class="font-semibold text-slate-950">{{ $jobTitle->name }}</h3>
+                                    <p class="mt-1 truncate text-xs text-slate-500">{{ $jobTitle->division->name ?? '-' }}</p>
                                 </div>
 
                                 @if ($jobTitle->jobLevel)
@@ -137,15 +135,15 @@
                             </div>
 
                             @if ($jobTitle->jobLevel)
-                                <div class="mt-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-900/60">
-                                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Level') }}</p>
-                                    <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                                <div class="mt-4 rounded-xl bg-slate-50 p-3">
+                                    <p class="text-xs uppercase tracking-wide text-slate-500">{{ __('Level') }}</p>
+                                    <p class="mt-1 text-sm font-semibold text-slate-900">
                                         {{ $jobTitle->jobLevel->name }}
                                     </p>
                                 </div>
                             @endif
 
-                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700/50">
+                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-gray-100 pt-4">
                                 <x-actions.button type="button" wire:click="edit({{ $jobTitle->id }})" variant="soft-primary" size="sm" label="{{ __('Edit job title') }}: {{ $jobTitle->name }}">{{ __('Edit') }}</x-actions.button>
                                 <x-actions.button type="button" wire:click="confirmDeletion({{ $jobTitle->id }})" variant="soft-danger" size="sm" label="{{ __('Delete job title') }}: {{ $jobTitle->name }}">{{ __('Delete') }}</x-actions.button>
                             </div>
@@ -154,7 +152,7 @@
                 </div>
 
                 @if ($jobTitles->hasPages())
-                    <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-2.5 dark:border-gray-700/60 dark:bg-gray-900/40">
+                    <div class="border-t border-gray-200/60 bg-gray-50 px-4 py-2.5">
                         {{ $jobTitles->onEachSide(1)->links() }}
                     </div>
                 @endif
@@ -164,10 +162,10 @@
                     :description="filled($search) || $divisionFilter !== 'all'
                         ? __('Try changing the keyword or division filter to see more results.')
                         : __('Add job titles to define roles, levels, and approval structures.')"
-                    class="m-4 border-0 bg-transparent p-4 shadow-none dark:bg-transparent"
+                    class="m-4 border-0 bg-transparent p-4 shadow-none"
                 >
                     <x-slot name="icon">
-                        <x-heroicon-o-briefcase class="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                        <x-heroicon-o-briefcase class="h-12 w-12 text-slate-300" />
                     </x-slot>
 
                     <x-slot name="actions">

@@ -35,7 +35,7 @@ class LeaveStatusUpdated extends Notification implements ShouldQueue
             ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? '']))
             ->line(__('Your leave request status has been updated.'))
             ->line(__('Status: **:status**', ['status' => $statusLabel]))
-            ->line(__('Date: :date', ['date' => $this->attendance->date?->format('d M Y') ?? '-']))
+            ->line(__('Date: :date', ['date' => $this->attendance->date->format('d M Y') ?? '-']))
             ->action(__('View Details'), route('apply-leave'));
     }
 

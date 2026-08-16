@@ -5,9 +5,13 @@
                 :back-href="route('home')"
                 :title="__('Document Requests')"
                 title-id="document-request-title"
+                module="documents"
                 class="border-b-0">
+                <x-slot name="icon">
+                    <x-heroicon-o-document-text class="h-5 w-5" />
+                </x-slot>
                 <x-slot name="actions">
-                    <button type="button" wire:click="create" class="wcag-touch-target inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-none transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-primary-400 dark:text-slate-950 dark:hover:bg-primary-300 dark:focus-visible:ring-offset-slate-950" aria-label="{{ __('New Request') }}">
+                    <button type="button" wire:click="create" class="wcag-touch-target inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-none transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white" aria-label="{{ __('New Request') }}">
                         <x-heroicon-o-plus class="h-5 w-5" />
                     </button>
                 </x-slot>
@@ -81,7 +85,7 @@
 
                                     <p class="document-request-card__purpose">{{ $request->purpose }}</p>
 
-                                    @if ($request->requester && $request->requested_by !== $request->user_id)
+                                    @if ($request->requester && $request->requested_by !== $request->employee?->user_id)
                                         <p class="document-request-card__meta">{{ __('Requested by') }} {{ $request->requester->name }}</p>
                                     @endif
 
@@ -146,10 +150,10 @@
     </div>
 
     @if ($showModal)
-        <div class="fixed inset-0 z-[90] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="document-request-modal-title">
-            <div class="flex min-h-[100dvh] items-start justify-center px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]">
-                <div class="fixed inset-0 z-0 bg-slate-950/70 backdrop-blur-sm" wire:click="close"></div>
-                <form wire:submit="store" class="user-ui document-request-modal relative z-10 w-full max-w-xl" wire:click.stop>
+        <template x-teleport="body">
+            <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]" role="dialog" aria-modal="true" aria-labelledby="document-request-modal-title">
+                <div class="fixed inset-0 z-0 bg-slate-950/70" wire:click="close"></div>
+                <form wire:submit="store" class="user-ui document-request-modal relative z-10 w-full max-w-xl sm:mx-auto" wire:click.stop x-trap.inert.noscroll="true">
                     <div class="document-request-modal__header">
                         <div class="min-w-0">
                             <p class="document-request-modal__eyebrow">{{ __('Documents') }}</p>
@@ -198,14 +202,14 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </template>
     @endif
 
     @if ($uploadingRequestId)
-        <div class="fixed inset-0 z-[90] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="document-upload-modal-title">
-            <div class="flex min-h-[100dvh] items-start justify-center px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]">
-                <div class="fixed inset-0 z-0 bg-slate-950/70 backdrop-blur-sm" wire:click="cancelUpload"></div>
-                <form wire:submit="upload" class="user-ui document-request-modal relative z-10 w-full max-w-lg" wire:click.stop data-e2e="document-upload-form">
+        <template x-teleport="body">
+            <div class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]" role="dialog" aria-modal="true" aria-labelledby="document-upload-modal-title">
+                <div class="fixed inset-0 z-0 bg-slate-950/70" wire:click="cancelUpload"></div>
+                <form wire:submit="upload" class="user-ui document-request-modal relative z-10 w-full max-w-lg sm:mx-auto" wire:click.stop data-e2e="document-upload-form" x-trap.inert.noscroll="true">
                     <div class="document-request-modal__header">
                         <div class="min-w-0">
                             <p class="document-request-modal__eyebrow">{{ __('Upload') }}</p>
@@ -226,8 +230,8 @@
                             <input id="document-upload-file" wire:model="attachment" type="file" data-e2e="document-upload-file" class="sr-only" />
                         </label>
                         <x-forms.input-error for="attachment" class="mt-1" />
-                        <p class="text-sm font-semibold text-sky-700 dark:text-sky-300" wire:loading wire:target="attachment">{{ __('Uploading file...') }}</p>
-                        <p class="text-sm font-semibold text-sky-700 dark:text-sky-300" wire:loading wire:target="upload">{{ __('Processing upload...') }}</p>
+                        <p class="text-sm font-semibold text-sky-700" wire:loading wire:target="attachment">{{ __('Uploading file...') }}</p>
+                        <p class="text-sm font-semibold text-sky-700" wire:loading wire:target="upload">{{ __('Processing upload...') }}</p>
                     </div>
 
                     <div class="document-request-modal__footer">
@@ -241,6 +245,6 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </template>
     @endif
 </div>

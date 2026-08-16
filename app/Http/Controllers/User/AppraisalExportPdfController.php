@@ -18,6 +18,6 @@ class AppraisalExportPdfController extends Controller
         $companyName = Setting::getValue('app.company_name', config('app.name'));
         $pdf = Pdf::loadView('pdf.appraisal-report', compact('appraisal', 'companyName'));
 
-        return $pdf->download("appraisal-{$appraisal->user->name}-{$appraisal->period_month}-{$appraisal->period_year}.pdf");
+        return $pdf->download("appraisal-{$appraisal->user->name}-{$appraisal->period}.pdf");
     }
 }

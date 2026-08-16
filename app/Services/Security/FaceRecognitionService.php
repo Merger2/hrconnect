@@ -18,6 +18,18 @@ class FaceRecognitionService
     public const SIMILARITY_THRESHOLD = 85.0;
 
     /**
+     * Similarity threshold (%) derived from config('hrconnect.face_distance_threshold').
+     * Config menyimpan batas jarak cosine (0.0–1.0); 0.15 ≈ 85% similarity.
+     * Default 0.15 menjaga perilaku lama (85.0).
+     */
+    public static function similarityThreshold(): float
+    {
+        $distance = (float) config('hrconnect.face_distance_threshold', 0.15);
+
+        return (1 - $distance) * 100;
+    }
+
+    /**
      * Verify a face embedding against registered employees.
      *
      * @param  array<float>  $embedding
@@ -27,6 +39,7 @@ class FaceRecognitionService
      */
     public function verifyFace(Employee $employee, array $embedding): array
     {
+        $embedding = $this->normalizeEmbedding($embedding);
         $this->validateEmbedding($embedding);
 
         $descriptor = $employee->faceDescriptors()->first();
@@ -49,7 +62,7 @@ class FaceRecognitionService
         $similarity = 1 - $this->cosineDistance($match->embedding, $vector);
         $similarityPercentage = $similarity * 100;
 
-        if ($similarityPercentage < self::SIMILARITY_THRESHOLD) {
+        if ($similarityPercentage < self::similarityThreshold()) {
             throw new FaceNotRecognizedException(
                 "Wajah tidak dikenali (similarity: {$similarityPercentage}%)"
             );
@@ -63,6 +76,7 @@ class FaceRecognitionService
 
     public function saveFaceDescriptor(Employee $employee, array $embedding): void
     {
+        $embedding = $this->normalizeEmbedding($embedding);
         $this->validateEmbedding($embedding);
 
         FaceDescriptor::updateOrCreate(
@@ -90,6 +104,22 @@ class FaceRecognitionService
     }
 
     /**
+     * Normalize embedding: strip 129→128 jika elemen pertama adalah marker (2).
+     *
+     * @param  array<float>  $embedding
+     * @return array<float>
+     */
+    private function normalizeEmbedding(array $embedding): array
+    {
+        // Geometry descriptor dari face-api.js punya marker [2] di index[0] (129 total).
+        if (count($embedding) === 129 && ($embedding[0] === 2 || $embedding[0] === 3)) {
+            return array_slice($embedding, 1);
+        }
+
+        return $embedding;
+    }
+
+    /**
      * @param  array<float>  $embedding
      *
      * @throws BusinessRuleException
@@ -98,7 +128,7 @@ class FaceRecognitionService
     {
         if (count($embedding) !== self::EMBEDDING_DIMENSION) {
             throw new BusinessRuleException(
-                'Vector embedding harus 128D, diterima '.count($embedding).'D.'
+                'Vector embedding harus '.self::EMBEDDING_DIMENSION.'D, diterima '.count($embedding).'D.'
             );
         }
 

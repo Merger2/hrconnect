@@ -11,8 +11,8 @@ class CompanySettingSeeder extends Seeder
     public function run(): void
     {
         $company = Company::firstOrCreate(
-            ['code' => 'HRCONNECT'],
-            ['name' => 'HRConnect Indonesia', 'is_active' => true]
+            ['code' => 'DKMS-2025'],
+            ['name' => 'PT Daya Cipta Mandiri Solusi', 'is_active' => true]
         );
 
         $settings = [

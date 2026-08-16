@@ -58,7 +58,7 @@ class EducationComponent extends Component
 
     public function create()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageEducations');
         $this->validate();
         Education::create(['name' => trim($this->name)]);
         $this->creating = false;
@@ -78,7 +78,7 @@ class EducationComponent extends Component
 
     public function update()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageEducations');
         $this->validate();
         $education = Education::query()->findOrFail($this->selectedId);
         $education->update(['name' => trim($this->name)]);
@@ -98,7 +98,7 @@ class EducationComponent extends Component
 
     public function delete()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageEducations');
         $education = Education::query()->findOrFail($this->selectedId);
         $education->delete();
         $this->confirmingDeletion = false;

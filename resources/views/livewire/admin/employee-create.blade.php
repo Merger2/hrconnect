@@ -2,7 +2,7 @@
     <x-admin.page-shell :title="__('Create Employee')" :description="__('Add a new employee to the organization.')">
         <form wire:submit="store">
             @csrf
-            <div class="space-y-6 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700/50 dark:bg-slate-800/50">
+            <div class="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <x-forms.label for="create_name" value="{{ __('Full Name') }}" />
@@ -25,7 +25,7 @@
                     <div class="sm:col-span-2">
                         <x-forms.label for="create_password" value="{{ __('Password') }}" />
                         <x-forms.input id="create_password" type="password" class="mt-1 block w-full"
-                            wire:model="form.password" placeholder="{{ __('Leave blank for default: password') }}" />
+                            wire:model="form.password" />
                         <x-forms.input-error for="form.password" class="mt-2" />
                     </div>
 
@@ -48,6 +48,32 @@
                             </label>
                         </div>
                         <x-forms.input-error for="form.gender" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-forms.label for="create_join_date" value="{{ __('Join Date') }}" />
+                        <x-forms.input id="create_join_date" type="date" class="mt-1 block w-full" wire:model="form.join_date" />
+                        <x-forms.input-error for="form.join_date" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-forms.label for="create_employment_type" value="{{ __('Employment Type') }}" />
+                        <x-forms.select id="create_employment_type" wire:model="form.employment_type" class="mt-1 block w-full">
+                            <option value="permanent">{{ __('Permanent') }}</option>
+                            <option value="contract">{{ __('Contract') }}</option>
+                            <option value="intern">{{ __('Intern') }}</option>
+                        </x-forms.select>
+                        <x-forms.input-error for="form.employment_type" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-forms.label for="create_marital_status" value="{{ __('Marital Status') }}" />
+                        <x-forms.select id="create_marital_status" wire:model="form.marital_status" class="mt-1 block w-full">
+                            @foreach (\App\Enums\MaritalStatus::cases() as $marital)
+                                <option value="{{ $marital->value }}" @selected($form->marital_status === $marital->value)>{{ $marital->label() }}</option>
+                            @endforeach
+                        </x-forms.select>
+                        <x-forms.input-error for="form.marital_status" class="mt-2" />
                     </div>
 
                     <div class="sm:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -103,14 +129,14 @@
                             <x-forms.input-error for="form.division_id" class="mt-2" />
                         </div>
                         <div>
-                            <x-forms.label for="create_jobTitle" value="{{ __('Job Title') }}" />
-                            <div class="mt-1" wire:key="create-job-title-wrapper-{{ $form->division_id ?? 'all' }}">
-                                <x-forms.tom-select id="create_jobTitle" wire:model.live="form.job_title_id"
-                                    placeholder="{{ __('Select Job Title') }}" :options="$availableJobTitles
+                            <x-forms.label for="create_position" value="{{ __('Position') }}" />
+                            <div class="mt-1" wire:key="create-position-wrapper-{{ $form->division_id ?? 'all' }}">
+                                <x-forms.tom-select id="create_position" wire:model.live="form.position_id"
+                                    placeholder="{{ __('Select Position') }}" :options="$availablePositions
                                         ->map(fn($j) => ['id' => $j->id, 'name' => $j->name])
                                         ->values()" />
                             </div>
-                            <x-forms.input-error for="form.job_title_id" class="mt-2" />
+                            <x-forms.input-error for="form.position_id" class="mt-2" />
                         </div>
                         <div>
                             <x-forms.label for="create_manager" value="{{ __('Direct Manager') }}" />
@@ -122,7 +148,7 @@
                         </div>
                     </div>
 
-                    <div class="sm:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
                         <div x-data="{
                             displayValue: '',
                             model: @entangle('form.basic_salary'),
@@ -139,29 +165,36 @@
                         }" x-init="displayValue = format(model); $watch('model', value => displayValue = format(value))">
                             <x-forms.label for="create_basic_salary" value="{{ __('Basic Salary (Rp)') }}" />
                             <x-forms.input id="create_basic_salary" type="text" class="mt-1 block w-full"
-                                x-model="displayValue" @input="update" placeholder="e.g. 5.000.000" />
+                                x-model="displayValue" @input="update" placeholder="{{ __('e.g. 5.000.000') }}" />
                             <x-forms.input-error for="form.basic_salary" class="mt-2" />
                         </div>
+                    </div>
 
-                        <div x-data="{
-                            displayValue: '',
-                            model: @entangle('form.hourly_rate'),
-                            format(value) {
-                                if (!value) return '';
-                                return new Intl.NumberFormat('id-ID').format(value);
-                            },
-                            update(event) {
-                                let val = event.target.value.replace(/\./g, '');
-                                if (isNaN(val)) val = 0;
-                                this.model = val;
-                                this.displayValue = this.format(val);
-                            }
-                        }" x-init="displayValue = format(model); $watch('model', value => displayValue = format(value))">
-                            <x-forms.label for="create_hourly_rate" value="{{ __('Hourly Rate (Rp)') }}" />
-                            <x-forms.input id="create_hourly_rate" type="text" class="mt-1 block w-full"
-                                x-model="displayValue" @input="update" placeholder="e.g. 25.000" />
-                            <p class="mt-1 text-xs text-gray-500">{{ __('Leave blank to auto-calc (Salary / 173)') }}</p>
-                            <x-forms.input-error for="form.hourly_rate" class="mt-2" />
+                    <div class="sm:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <x-forms.label for="create_education_level" value="{{ __('Education Level') }}" />
+                            <x-forms.select id="create_education_level" wire:model="form.education_level" class="mt-1 block w-full">
+                                <option value="sd">{{ __('SD / Sederajat') }}</option>
+                                <option value="smp">{{ __('SMP / Sederajat') }}</option>
+                                <option value="sma">{{ __('SMA / Sederajat') }}</option>
+                                <option value="smk">{{ __('SMK / Sederajat') }}</option>
+                                <option value="diploma">{{ __('Diploma (D1-D4)') }}</option>
+                                <option value="bachelor">{{ __('Sarjana (S1)') }}</option>
+                                <option value="master">{{ __('Magister (S2)') }}</option>
+                                <option value="doctorate">{{ __('Doktor (S3)') }}</option>
+                                <option value="other">{{ __('Lainnya') }}</option>
+                            </x-forms.select>
+                            <x-forms.input-error for="form.education_level" class="mt-2" />
+                        </div>
+                        <div>
+                            <x-forms.label for="create_institution_name" value="{{ __('Institution') }}" />
+                            <x-forms.input id="create_institution_name" type="text" class="mt-1 block w-full" wire:model="form.institution_name" />
+                            <x-forms.input-error for="form.institution_name" class="mt-2" />
+                        </div>
+                        <div>
+                            <x-forms.label for="create_graduation_year" value="{{ __('Graduation Year') }}" />
+                            <x-forms.input id="create_graduation_year" type="number" class="mt-1 block w-full" wire:model="form.graduation_year" min="1970" max="{{ now()->year }}" />
+                            <x-forms.input-error for="form.graduation_year" class="mt-2" />
                         </div>
                     </div>
 
@@ -179,7 +212,7 @@
                     @endif
                 </div>
 
-                <div class="flex items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-700/50">
+                <div class="flex items-center gap-3 border-t border-slate-200 pt-6">
                     <x-actions.button type="submit" wire:loading.attr="disabled">
                         {{ __('Create Employee') }}
                     </x-actions.button>

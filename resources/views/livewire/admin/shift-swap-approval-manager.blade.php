@@ -4,7 +4,7 @@
             <div class="md:col-span-2 xl:col-span-8">
                 <x-forms.label for="shift-swap-search" value="{{ __('Search shift swap requests') }}" class="mb-1.5 block" />
                 <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                     </span>
                     <x-forms.input id="shift-swap-search" type="search" wire:model.live.debounce.300ms="search"
@@ -28,16 +28,16 @@
         @if ($requests->isEmpty())
             <div class="p-4">
                 <x-admin.empty-state :title="__('No shift swap requests')" :description="__('No shift swap requests found for this filter.')"
-                    class="border-0 bg-transparent shadow-none dark:bg-transparent">
+                    class="border-0 bg-transparent shadow-none">
                     <x-slot name="icon">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-700/50">
-                            <x-heroicon-o-arrows-right-left class="h-6 w-6 text-gray-300 dark:text-gray-500" />
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50">
+                            <x-heroicon-o-arrows-right-left class="h-6 w-6 text-gray-300" />
                         </div>
                     </x-slot>
                 </x-admin.empty-state>
             </div>
         @else
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-100">
                 @foreach ($requests as $swapRequest)
                     @php
                         $date = $swapRequest->effectiveScheduleDate();
@@ -48,10 +48,10 @@
                         };
                     @endphp
 
-                    <div class="flex flex-col gap-2.5 p-3 transition hover:bg-gray-50 dark:hover:bg-gray-700/50 xl:flex-row xl:items-center xl:justify-between">
+                    <div class="flex flex-col gap-2.5 p-3 transition hover:bg-gray-50 xl:flex-row xl:items-center xl:justify-between">
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <h4 class="truncate text-sm font-bold text-gray-900 dark:text-white">
+                                <h4 class="truncate text-sm font-bold text-gray-900">
                                     {{ $swapRequest->user?->name ?? '-' }}
                                 </h4>
                                 <x-admin.status-badge :tone="$statusTone" pill="true">
@@ -59,35 +59,35 @@
                                 </x-admin.status-badge>
                             </div>
 
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-1 text-xs text-gray-500">
                                 {{ $swapRequest->user?->nip ?? '-' }} /
                                 {{ $swapRequest->user?->division?->name ?? '-' }} /
                                 {{ $swapRequest->user?->jobTitle?->name ?? '-' }}
                             </p>
 
-                            <div class="mt-2 grid gap-1.5 text-xs text-gray-600 dark:text-gray-300 md:grid-cols-3">
+                            <div class="mt-2 grid gap-1.5 text-xs text-gray-600 md:grid-cols-3">
                                 <div>
-                                    <span class="block text-[11px] font-semibold uppercase text-gray-400 dark:text-gray-500">{{ __('Schedule Date') }}</span>
+                                    <span class="block text-[11px] font-semibold uppercase text-gray-400">{{ __('Schedule Date') }}</span>
                                     <span>{{ $date?->format('d M Y') ?? '-' }}</span>
                                 </div>
                                 <div>
-                                    <span class="block text-[11px] font-semibold uppercase text-gray-400 dark:text-gray-500">{{ __('Current Shift') }}</span>
+                                    <span class="block text-[11px] font-semibold uppercase text-gray-400">{{ __('Current Shift') }}</span>
                                     <span>{{ $swapRequest->currentShift?->name ?? $swapRequest->schedule?->shift?->name ?? __('No current schedule') }}</span>
                                 </div>
                                 <div>
-                                    <span class="block text-[11px] font-semibold uppercase text-gray-400 dark:text-gray-500">{{ __('Requested Shift') }}</span>
+                                    <span class="block text-[11px] font-semibold uppercase text-gray-400">{{ __('Requested Shift') }}</span>
                                     <span>{{ $swapRequest->requestedShift?->name ?? '-' }}</span>
                                 </div>
                             </div>
 
-                            <div class="mt-1.5 grid gap-1.5 text-xs text-gray-600 dark:text-gray-300 md:grid-cols-2">
+                            <div class="mt-1.5 grid gap-1.5 text-xs text-gray-600 md:grid-cols-2">
                                 <p>
-                                    <span class="font-semibold text-gray-700 dark:text-gray-200">{{ __('Replacement') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('Replacement') }}:</span>
                                     {{ $swapRequest->replacementUser?->name ?? __('Not specified') }}
                                 </p>
                                 @if ($swapRequest->reviewer)
                                     <p>
-                                        <span class="font-semibold text-gray-700 dark:text-gray-200">{{ __('Reviewed by') }}:</span>
+                                        <span class="font-semibold text-gray-700">{{ __('Reviewed by') }}:</span>
                                         {{ $swapRequest->reviewer->name }}
                                     </p>
                                 @endif
@@ -100,7 +100,7 @@
                             @endif
 
                             @if ($swapRequest->rejection_note)
-                                <p class="mt-1.5 text-xs text-red-600 dark:text-red-400">
+                                <p class="mt-1.5 text-xs text-red-600">
                                     {{ __('Rejection note') }}: {{ $swapRequest->rejection_note }}
                                 </p>
                             @endif
@@ -117,7 +117,7 @@
                                     <x-heroicon-m-x-circle class="h-6 w-6" />
                                 </x-actions.icon-button>
                             @else
-                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <span class="text-xs text-gray-500">
                                     {{ $swapRequest->reviewed_at?->format('d M Y H:i') ?? '-' }}
                                 </span>
                             @endif
@@ -126,7 +126,7 @@
                 @endforeach
             </div>
 
-            <div class="border-t border-gray-200/60 bg-gray-50/70 px-4 py-3 dark:border-gray-700/60 dark:bg-gray-900/40">
+            <div class="border-t border-gray-200/60 bg-gray-50 px-4 py-3">
                 {{ $requests->links() }}
             </div>
         @endif

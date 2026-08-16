@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\ImportExport;
 
+use App\Enums\EducationLevel;
+use App\Exports\AttendanceImportTemplateExport;
 use App\Models\Attendance;
 use App\Models\Division;
-use App\Models\Education;
 use App\Models\ImportExportRun;
 use App\Models\JobTitle;
 use App\Support\ImportExportRunService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Component;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component as LivewireComponent;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-#[Component('admin.import-export.attendance')]
+// Q1: #[Component('admin.import-export.attendance')] dihapus — atribut
+// `Livewire\Attributes\Component` TIDAK ADA di Livewire 4 (cek vendor);
+// nama komponen sudah resolve otomatis dari namespace ke kebab-case
+// (App\Livewire\Admin\ImportExport\AttendanceImportExport → admin.import-export.attendance).
 #[Layout('layouts.app')]
 final class AttendanceImportExport extends LivewireComponent
 {
@@ -67,7 +73,10 @@ final class AttendanceImportExport extends LivewireComponent
             'attendances' => $attendances,
             'divisions' => Division::orderBy('name')->get(['id', 'name']),
             'jobTitles' => JobTitle::orderBy('name')->get(['id', 'name']),
-            'educations' => Education::orderBy('name')->get(['id', 'name']),
+            'educations' => collect(EducationLevel::cases())->map(fn (EducationLevel $level) => (object) [
+                'id' => $level->value,
+                'name' => $level->label(),
+            ]),
             'recentRuns' => ImportExportRun::query()
                 ->where('resource', 'attendance')
                 ->where('requested_by_user_id', auth()->id())
@@ -95,7 +104,7 @@ final class AttendanceImportExport extends LivewireComponent
             'end_date' => 'required|date|after_or_equal:start_date',
             'division' => ['nullable', 'integer'],
             'job_title' => ['nullable', 'integer'],
-            'education' => ['nullable', 'integer'],
+            'education' => ['nullable', Rule::in(array_column(EducationLevel::cases(), 'value'))],
         ]);
 
         $run = app(ImportExportRunService::class)->queueAttendanceExport(auth()->user(), [
@@ -125,11 +134,13 @@ final class AttendanceImportExport extends LivewireComponent
         $this->dispatch('notify', type: 'success', message: __('Attendance import queued. Track progress from run #:id.', ['id' => $run->id]));
     }
 
-    public function downloadTemplate(): void
+    public function downloadTemplate(): BinaryFileResponse
     {
         $this->authorize('importAttendances');
 
-        $this->dispatch('notify', type: 'info', message: __('Download the template from the import section.'));
+        // Mock-miss fix (2026-08-16): sebelumnya hanya toast info tanpa file
+        // nyata. Kini mengunduh template header yang sesuai kontrak AttendanceImport.
+        return Excel::download(new AttendanceImportTemplateExport, 'attendance-import-template.xlsx');
     }
 
     protected function previewQuery(): Builder
@@ -139,7 +150,7 @@ final class AttendanceImportExport extends LivewireComponent
             ->whereBetween('date', [$this->start_date, $this->end_date])
             ->when($this->division, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('division_id', $v)))
             ->when($this->job_title, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('job_title_id', $v)))
-            ->when($this->education, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('education_id', $v)))
+            ->when($this->education, fn ($q, $v) => $q->whereHas('user.employee', fn ($q) => $q->where('education_level', $v)))
             ->orderBy('date', 'desc');
     }
 }

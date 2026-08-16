@@ -66,6 +66,10 @@ class ShiftSwapRequestService
 
         $request = ShiftSwapRequest::create([
             'user_id' => $user->id,
+            'requester_id' => $user->employee?->id,
+            'target_id' => $payload['replacement_user_id']
+                ? User::query()->find($payload['replacement_user_id'])?->employee?->id
+                : $user->employee?->id,
             'schedule_id' => $schedule?->id,
             'schedule_date' => $schedule?->date?->toDateString() ?? $requestDate,
             'current_shift_id' => $schedule?->shift_id,
@@ -158,8 +162,10 @@ class ShiftSwapRequestService
     {
         return ShiftSwapRequest::query()
             ->with([
-                'user.division',
-                'user.jobTitle',
+                // User exposes division/jobTitle as accessor proxies to the
+                // Employee relations, so eager-load the actual relations.
+                'user.employee.division',
+                'user.employee.position',
                 'schedule.shift',
                 'currentShift',
                 'requestedShift',
@@ -176,9 +182,15 @@ class ShiftSwapRequestService
                         ->orWhereHas('user', function (Builder $userQuery) use ($search): void {
                             $userQuery
                                 ->where('name', 'like', '%'.$search.'%')
-                                ->orWhere('nip', 'like', '%'.$search.'%')
-                                ->orWhereHas('division', fn (Builder $divisionQuery) => $divisionQuery->where('name', 'like', '%'.$search.'%'))
-                                ->orWhereHas('jobTitle', fn (Builder $jobTitleQuery) => $jobTitleQuery->where('name', 'like', '%'.$search.'%'));
+                                // nip/division/jobTitle live on the Employee
+                                // record (User exposes them as proxy accessors),
+                                // so search through the actual relations.
+                                ->orWhereHas('employee', function (Builder $employeeQuery) use ($search): void {
+                                    $employeeQuery
+                                        ->where('nip', 'like', '%'.$search.'%')
+                                        ->orWhereHas('division', fn (Builder $divisionQuery) => $divisionQuery->where('name', 'like', '%'.$search.'%'))
+                                        ->orWhereHas('position', fn (Builder $positionQuery) => $positionQuery->where('name', 'like', '%'.$search.'%'));
+                                });
                         })
                         ->orWhereHas('requestedShift', fn (Builder $shiftQuery) => $shiftQuery->where('name', 'like', '%'.$search.'%'));
                 });

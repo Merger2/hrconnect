@@ -5,6 +5,7 @@
                 :back-href="route('home')"
                 :title="__('My Performance')"
                 title-id="my-performance-title"
+                module="reports"
                 class="border-b-0">
                 <x-slot name="actions">
                     <span class="performance-live-pill" aria-label="{{ __('Auto refresh') }}">
@@ -28,7 +29,7 @@
                     <div class="performance-hero__content">
                         <p class="performance-eyebrow">{{ __('Performance') }}</p>
                         <h2 class="performance-hero__title">
-                            {{ $latestAppraisal ? \Carbon\Carbon::createFromDate($latestAppraisal->period_year, $latestAppraisal->period_month, 1)->translatedFormat('F Y') : __('No review period yet') }}
+                            {{ $latestAppraisal ? \Carbon\Carbon::createFromFormat('Y-m', $latestAppraisal->period)->translatedFormat('F Y') : __('No review period yet') }}
                         </h2>
                         <p class="performance-hero__copy">
                             {{ __('Track review progress, self assessment, 1-on-1 schedule, and final score from one place.') }}
@@ -59,7 +60,7 @@
                 @if($appraisals->isEmpty())
                     <div class="user-empty-state">
                         <div class="user-empty-state__icon">
-                            <x-heroicon-o-chart-bar-square class="h-8 w-8" />
+                            <x-heroicon-o-chart-pie class="h-8 w-8" />
                         </div>
                         <h3 class="user-empty-state__title">{{ __('No performance reviews found.') }}</h3>
                         <p class="user-empty-state__copy">{{ __('Your managers have not initiated any appraisals yet.') }}</p>
@@ -68,7 +69,7 @@
                     <div class="performance-timeline">
                         @foreach($appraisals as $appraisal)
                             @php
-                                $period = \Carbon\Carbon::createFromDate($appraisal->period_year, $appraisal->period_month, 1);
+                                $period = \Carbon\Carbon::createFromFormat('Y-m', $appraisal->period);
                                 $statusTone = match ($appraisal->status) {
                                     'completed' => 'performance-status--success',
                                     'manager_review', '1on1_scheduled' => 'performance-status--info',

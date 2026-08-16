@@ -56,12 +56,16 @@ class ApprovalService
         }
     }
 
-    public function approve(Approval $approval): void
+    public function approve(Approval $approval, string $notes = ''): void
     {
         $approval->load('approvable');
 
         if ($approval->status !== ApprovalStatus::PENDING) {
             throw new BusinessRuleException('Approval sudah diproses');
+        }
+
+        if ($notes !== '') {
+            $approval->notes = $notes;
         }
 
         // Check if previous levels are approved
@@ -111,8 +115,8 @@ class ApprovalService
             }
         }
 
-        // L2: HR Manager
-        $hrUsers = User::role('hr-manager')->get();
+        // L2: HR (role admin — HRD; role hr-manager dihapus)
+        $hrUsers = User::role('admin')->get();
         foreach ($hrUsers as $hrUser) {
             if ($hrUser->employee) {
                 $approvers[] = ['employee' => $hrUser->employee, 'level' => ApprovalLevel::L2_MANAGER];

@@ -4,7 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperCashAdvance
+ */
 class CashAdvance extends Model
 {
     use HasFactory;
@@ -37,22 +41,22 @@ class CashAdvance extends Model
         'finance_approved_at' => 'datetime',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function approver()
+    public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function headApprover()
+    public function headApprover(): BelongsTo
     {
         return $this->belongsTo(User::class, 'head_approved_by');
     }
 
-    public function financeApprover()
+    public function financeApprover(): BelongsTo
     {
         return $this->belongsTo(User::class, 'finance_approved_by');
     }

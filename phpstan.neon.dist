@@ -7,3 +7,15 @@ parameters:
     paths:
         - app/
     tmpDir: storage/framework/phpstan
+    # File generated laravel-ide-helper (app/Models/_ide_helper_models.php) hanya
+    # memberi @mixin untuk model — isinya TIDAK boleh dianalisis PHPStan
+    # (error generics.notSubtype palsu pada class IdeHelper*).
+    # - bootstrapFiles: require file-nya supaya kelas IdeHelper* (untuk
+    #   @mixin) ter-resolve oleh ReflectionProvider.
+    # - excludePaths: tetap exclude dari analisis (paths app/ mencakupnya).
+    # File ini sengaja TIDAK di composer autoload.files (menyebabkan redeclare
+    # error di runtime — class IdeHelper* extends model yang sudah di-autoload).
+    bootstrapFiles:
+        - app/Models/_ide_helper_models.php
+    excludePaths:
+        - app/Models/_ide_helper_models.php

@@ -7,6 +7,7 @@ namespace App\Services\Security;
 use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\KnowledgeBase;
+use App\Support\AiCostGuard;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Ai\Embeddings;
@@ -20,6 +21,21 @@ class EmbeddingService
     protected const CHUNK_OVERLAP = 200;
 
     protected const EMBEDDING_DIMENSION = 768;
+
+    /**
+     * Stopword umum Bahasa Indonesia — kata fungsi bernoise tinggi yang tidak
+     * dijadikan token pencarian keyword. Token konten seperti "perusahaan",
+     * "karyawan", "keterlambatan" TIDAK masuk daftar ini.
+     *
+     * @var array<int, string>
+     */
+    protected const KEYWORD_STOPWORDS = [
+        'ada', 'agar', 'akan', 'anda', 'apa', 'apakah', 'apabila', 'atau',
+        'bagaimana', 'bisa', 'dalam', 'dan', 'dapat', 'dari', 'di', 'dimana',
+        'dengan', 'ini', 'itu', 'juga', 'kapan', 'kami', 'ke', 'mengapa',
+        'mohon', 'pada', 'saja', 'saya', 'siapa', 'sudah', 'supaya', 'tidak',
+        'untuk', 'yang',
+    ];
 
     public function __construct() {}
 
@@ -54,6 +70,16 @@ class EmbeddingService
             throw new BusinessRuleException('Teks untuk embedding harus 1-30000 karakter.');
         }
 
+        // Hard gate cost limit: tolak sebelum memanggil Gemini bila kuota
+        // token harian habis. Pemanggil (chat/job) menangani dengan fallback
+        // atau status ERROR — tidak ada degradasi senyap.
+        $cost = app(AiCostGuard::class);
+        $estimatedTokens = $cost->estimateTokens($text);
+
+        if (! $cost->canSpend($estimatedTokens)) {
+            throw new BusinessRuleException('Kuota penggunaan AI harian telah tercapai (cost limit). Coba lagi besok.');
+        }
+
         // Test mode: return deterministic fake embedding
         if (app()->runningUnitTests()) {
             return Embeddings::fakeEmbedding(self::EMBEDDING_DIMENSION);
@@ -64,6 +90,8 @@ class EmbeddingService
         $response = Embeddings::for([$text])
             ->dimensions(self::EMBEDDING_DIMENSION)
             ->generate(Lab::Gemini, config('ai.providers.gemini.embedding_model', 'gemini-embedding-001'));
+
+        $cost->record($estimatedTokens);
 
         $vector = $response->first();
 
@@ -83,7 +111,11 @@ class EmbeddingService
         }
 
         try {
-            $embedding = $this->embed($kb->content);
+            // Judul ikut di-embed (title + content) — judul adalah sinyal
+            // relevansi kuat (mis. "Profil Perusahaan PT Daya Cipta Mandiri
+            // Solusi", "SOP Pengajuan Cuti"); tanpanya vektor hanya mewakili
+            // isi dokumen dan pertanyaan yang menyebut topik judul sulit match.
+            $embedding = $this->embed($kb->title."\n\n".$kb->content);
             $vectorString = $this->formatVector($embedding);
 
             DB::statement(
@@ -96,31 +128,155 @@ class EmbeddingService
         }
     }
 
-    public function searchSimilar(array $queryVector, int $topK = 5): Collection
+    public function searchSimilar(array $queryVector, int $topK = 5, ?float $minSimilarity = null): Collection
     {
         if (count($queryVector) !== self::EMBEDDING_DIMENSION) {
-            // Re-generate or fallback if dimension mismatches
-            $queryVector = Embeddings::fakeEmbedding(self::EMBEDDING_DIMENSION);
+            // Mock-miss fix (2026-08-16): sebelumnya diam-diam mengganti vector
+            // dengan fake embedding random → retrieval sampah tanpa error.
+            // Hard gate AGENTS.md "embedding 768D nyata (jangan fake/random)"
+            // + no-silent-degradation: dimensi salah = gagal keras, bukan
+            // substitusi random.
+            throw new BusinessRuleException(
+                'Query vector untuk pencarian semantik harus '.self::EMBEDDING_DIMENSION.'D, diterima '.count($queryVector).'D.'
+            );
         }
 
         $vectorString = $this->formatVector($queryVector);
 
-        return KnowledgeBase::query()
+        $results = KnowledgeBase::query()
             ->where('status', KnowledgeBaseStatus::READY)
             ->whereNotNull('embedding')
             ->selectRaw('*, 1 - (embedding <=> ?::vector) as similarity', [$vectorString])
             ->orderByDesc('similarity')
             ->limit($topK)
             ->get();
+
+        // Filter relevansi: buang dokumen yang kemiripannya di bawah ambang
+        // (mis. "Komponen Gaji" muncul saat tanya cuti). Kalau hasil tersaring
+        // kurang dari 2, pertahankan 2 teratas apa adanya agar jawaban tidak
+        // pernah kehilangan semua konteks (graceful degradation).
+        if ($minSimilarity !== null && $results->count() > 2) {
+            $filtered = $results->filter(fn (KnowledgeBase $kb) => ($kb->similarity ?? 0) >= $minSimilarity);
+
+            if ($filtered->count() >= 2) {
+                return $filtered->values();
+            }
+        }
+
+        return $results;
     }
 
+    /**
+     * Token-based keyword search (fallback pg_trgm → ILIKE).
+     *
+     * Pertanyaan natural panjang di-tokenize (lowercase, split whitespace,
+     * buang token < 3 karakter + stopword umum), lalu chunk dicari dengan
+     * OR match per token. Hasil di-scoring di PHP berdasarkan jumlah token
+     * yang muncul di content (desc), diambil topK.
+     *
+     * Perbaikan bug 2026-08-05: sebelumnya `$keyword` utuh dipakai sebagai
+     * substring persis (ILIKE %kalimat%) → pertanyaan kalimat penuh ("bagaimana
+     * keterlambatan kerja di perusahaan ini") tidak pernah match content
+     * → fallback gagal menemukan chunk padahal corpus punya topiknya.
+     */
     public function searchByKeyword(string $keyword, int $topK = 5): Collection
     {
-        return KnowledgeBase::query()
+        $tokens = $this->keywordTokens($keyword);
+
+        if ($tokens === []) {
+            return new Collection;
+        }
+
+        $candidates = KnowledgeBase::query()
             ->where('status', KnowledgeBaseStatus::READY)
-            ->where('content', 'ILIKE', "%{$keyword}%")
-            ->limit($topK)
+            ->where(function ($query) use ($tokens): void {
+                $query->where('content', 'ILIKE', '%'.$tokens[0].'%');
+
+                foreach (array_slice($tokens, 1) as $token) {
+                    $query->orWhere('content', 'ILIKE', '%'.$token.'%');
+                }
+            })
+            ->limit(20)
             ->get();
+
+        if ($candidates->isEmpty()) {
+            return $candidates;
+        }
+
+        // Eloquent Collection::map() otomatis turun ke base Collection saat item
+        // bukan Model (array skor) — bungkus ulang agar return type terjaga.
+        // Skor = token match di content (word boundary) + 2× token match di TITLE
+        // (judul dokumen = sinyal relevansi kuat; tanpa ini chunk bertopik spesifik
+        // kalah oleh token generik, mis. "keterlambatan" vs "kerja/perusahaan").
+        // Tie-break: (score desc, id asc) — uasort/sortByDesc tidak stabil di PHP.
+        $ranked = $candidates
+            ->map(fn (KnowledgeBase $kb) => [
+                'kb' => $kb,
+                'score' => $this->countTokenMatches($tokens, mb_strtolower($kb->content))
+                    + (2 * $this->countTokenMatches($tokens, mb_strtolower($kb->title))),
+            ])
+            ->filter(fn (array $row) => $row['score'] > 0)
+            ->sortBy(fn (array $row) => [-$row['score'], $row['kb']->id])
+            ->take($topK)
+            ->map(fn (array $row) => $row['kb'])
+            ->values();
+
+        return new Collection($ranked->all());
+    }
+
+    /**
+     * Tokenize query pencarian: lowercase, split whitespace, strip tanda baca,
+     * buang token < 3 karakter dan stopword umum Bahasa Indonesia (kata fungsi
+     * bernoise tinggi). Token panjang seperti "perusahaan" TIDAK dibuang —
+     * hanya kata fungsi pendek yang hilang.
+     *
+     * @return array<int, string>
+     */
+    protected function keywordTokens(string $keyword): array
+    {
+        $tokens = preg_split('/\s+/u', mb_strtolower(trim($keyword))) ?: [];
+
+        return array_values(array_filter(array_map(
+            fn (string $token) => $this->cleanToken($token),
+            $tokens,
+        )));
+    }
+
+    /**
+     * Bersihkan token: strip tanda baca, buang yang < 3 karakter atau stopword.
+     *
+     * @return string|false token bersih, atau false jika token tidak layak
+     */
+    protected function cleanToken(string $token): string|false
+    {
+        $clean = preg_replace('/[^\p{L}\p{N}]+/u', '', $token) ?? '';
+
+        if (mb_strlen($clean) < 3 || in_array($clean, self::KEYWORD_STOPWORDS, true)) {
+            return false;
+        }
+
+        return $clean;
+    }
+
+    /**
+     * Hitung jumlah token yang muncul sebagai kata utuh di content
+     * (case-insensitive, word boundary). Substring insidental seperti "kerja"
+     * di dalam "Ketenagakerjaan" TIDAK dihitung — scoring mencerminkan relevansi
+     * kata kunci, bukan kemiripan ejaan.
+     *
+     * @param  array<int, string>  $tokens
+     */
+    protected function countTokenMatches(array $tokens, string $content): int
+    {
+        $matches = 0;
+
+        foreach ($tokens as $token) {
+            if (preg_match('/\b'.preg_quote($token, '/').'\b/u', $content)) {
+                $matches++;
+            }
+        }
+
+        return $matches;
     }
 
     public function extractTextFromPdf(string $filePath): string

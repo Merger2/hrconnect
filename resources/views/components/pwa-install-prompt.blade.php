@@ -14,20 +14,20 @@
     x-data="pwaInstall()"
     x-show="show"
     x-cloak
-    class="fixed bottom-6 right-6 z-50 max-w-sm"
+    class="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 max-w-sm"
     role="alert"
     aria-live="polite"
 >
-    <div class="bg-canvas dark:bg-surface-container-high rounded-2xl shadow-2xl border border-outline-variant p-4 max-w-sm">
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 max-w-sm">
         <div class="flex items-start gap-3">
             <div class="flex-shrink-0">
-                <img src="/icon-192.svg" alt="HRConnect" class="w-12 h-12 rounded-xl" />
+                <img src="/icon-192.svg" alt="{{ config('app.name') }}" class="w-12 h-12 rounded-xl" />
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-ink dark:text-on-surface">
-                    {{ __('Install HRConnect') }}
+                <p class="text-sm font-semibold text-gray-900">
+                    {{ __('Install :app', ['app' => config('app.name')]) }}
                 </p>
-                <p class="text-xs text-on-surface-variant dark:text-on-surface-variant mt-0.5">
+                <p class="text-xs text-gray-500 mt-0.5">
                     {{ __('Akses cepat dari layar utama perangkat Anda') }}
                 </p>
                 <div class="flex items-center gap-2 mt-3">
@@ -38,21 +38,19 @@
                         {{ __('Install') }}
                     </button>
                     <button
-                        @click="show = false"
-                        class="text-xs text-on-surface-variant hover:text-ink dark:hover:text-on-surface transition-colors"
+                        @click="dismiss()"
+                        class="text-xs text-gray-500 hover:text-gray-900 transition-colors"
                     >
                         {{ __('Nanti') }}
                     </button>
                 </div>
             </div>
             <button
-                @click="show = false"
-                class="flex-shrink-0 p-1 text-on-surface-variant hover:text-ink dark:hover:text-on-surface transition-colors"
+                @click="dismiss()"
+                class="flex-shrink-0 p-1 text-gray-500 hover:text-gray-900 transition-colors"
                 aria-label="{{ __('Tutup') }}"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <x-heroicon-o-x-mark class="w-4 h-4" />
             </button>
         </div>
     </div>
@@ -63,7 +61,7 @@
         @click="showInstallGuide()"
         class="mt-2 w-full text-xs text-center text-primary hover:text-primary/80 transition-colors"
     >
-        {{ __('Pelajari cara install HRConnect') }}
+        {{ __('Pelajari cara install :app', ['app' => config('app.name')]) }}
     </button>
 </div>
 
@@ -76,9 +74,21 @@ function pwaInstall() {
         installed: localStorage.getItem('pwa-installed'),
 
         init() {
+            // JANGAN tampilkan prompt di localhost/development — menyebalkan
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return;
+            }
+
+            // Cek dismissal — kalo pengguna klik "Nanti", jangan munculin lagi selama 7 hari
+            const dismissed = localStorage.getItem('pwa-dismissed-at');
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+            if (dismissed && Date.now() - parseInt(dismissed, 10) < sevenDays) {
+                return;
+            }
+
             // Tampilkan prompt jika belum terinstall dan bukan standalone
             if (!this.isStandalone && !this.installed) {
-                // Tunggu 5 detik sebelum muncul
+                // Tunggu 10 detik sebelum muncul
                 setTimeout(() => { this.show = true; }, 10000);
             }
 
@@ -92,8 +102,14 @@ function pwaInstall() {
                 this.installed = true;
                 this.show = false;
                 localStorage.setItem('pwa-installed', 'true');
+                localStorage.removeItem('pwa-dismissed-at');
                 this.deferredPrompt = null;
             });
+        },
+
+        dismiss() {
+            this.show = false;
+            localStorage.setItem('pwa-dismissed-at', String(Date.now()));
         },
 
         installApp() {
@@ -112,6 +128,7 @@ function pwaInstall() {
         },
 
         showInstallGuide() {
+            this.dismiss();
             alert('{{ __("Buka menu browser, pilih \"Install\" atau \"Add to Home Screen\"") }}');
         }
     };

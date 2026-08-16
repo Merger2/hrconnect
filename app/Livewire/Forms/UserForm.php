@@ -3,16 +3,21 @@
 namespace App\Livewire\Forms;
 
 use App\Actions\Hr\SyncUserRoles;
+use App\Enums\EducationLevel;
+use App\Enums\MaritalStatus;
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\User;
 use App\Support\ManagerHierarchyGuard;
 use App\Support\SecureUploadPolicy;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Livewire\Form;
 
@@ -32,9 +37,9 @@ class UserForm extends Form
 
     public $gender = null;
 
-    public $address = '';
+    public $marital_status = 'single';
 
-    public $city = '';
+    public $address = '';
 
     public $provinsi_kode = null;
 
@@ -52,9 +57,7 @@ class UserForm extends Form
 
     public $division_id = null;
 
-    public $education_id = null;
-
-    public $job_title_id = null;
+    public $position_id = null;
 
     public $manager_id = null;
 
@@ -62,9 +65,17 @@ class UserForm extends Form
 
     public $basic_salary = 0;
 
-    public $hourly_rate = 0;
-
     public $employment_status = Employee::EMPLOYMENT_STATUS_ACTIVE;
+
+    public $join_date = null;
+
+    public $employment_type = 'permanent';
+
+    public $education_level = null;
+
+    public $institution_name = '';
+
+    public $graduation_year = null;
 
     public array $role_ids = [];
 
@@ -90,20 +101,29 @@ class UserForm extends Form
                 'max:255',
                 Rule::unique('users')->ignore($this->user),
             ],
-            'phone' => ['required',  'string', 'min:5', 'max:255'],
-            'password' => ['nullable', 'string', 'min:4', 'max:255'],
-            'gender' => ['required', 'in:male,female'],
+            'phone' => [$requiredOrNullable, 'string', 'min:5', 'max:255'],
+            // Password wajib saat create; opsional saat update (hanya diubah
+            // bila diisi). Kekuatan mengikuti Password::defaults() — prod:
+            // min 12 + huruf/angka/simbol + uncompromised (AppServiceProvider).
+            'password' => [$this->user ? 'nullable' : 'required', 'string', Password::defaults(), 'max:255'],
+            'gender' => [$requiredOrNullable, 'in:male,female'],
+            'marital_status' => ['nullable', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'address' => [$requiredOrNullable, 'string', 'max:255'],
-            'provinsi_kode' => [$requiredOrNullable, 'string', 'max:13'],
-            'kabupaten_kode' => [$requiredOrNullable, 'string', 'max:13'],
-            'kecamatan_kode' => [$requiredOrNullable, 'string', 'max:13'],
-            'kelurahan_kode' => [$requiredOrNullable, 'string', 'max:13'],
+            // Wilayah (provinsi→kelurahan) OPSIONAL: konsisten dengan kolom DB
+            // nullable, StoreEmployeeRequest (API) dan UpdateUserProfileInformation
+            // (Fortify) yang semuanya nullable. Sebelumnya dipaksa required untuk
+            // group 'user' padahal tabel wilayah bisa kosong (tanpa seeder) dan
+            // data karyawan lama tidak punya alamat wilayah → form edit/create
+            // user-group TIDAK PERNAH bisa disimpan di UI (P1).
+            'provinsi_kode' => ['nullable', 'string', 'max:13'],
+            'kabupaten_kode' => ['nullable', 'string', 'max:13'],
+            'kecamatan_kode' => ['nullable', 'string', 'max:13'],
+            'kelurahan_kode' => ['nullable', 'string', 'max:13'],
             'group' => ['nullable', 'string', 'max:255', Rule::in(User::$groups)],
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'division_id' => ['nullable', 'exists:divisions,id'],
-            'education_id' => ['nullable', 'exists:educations,id'],
-            'job_title_id' => ['nullable', 'exists:job_titles,id'],
+            'position_id' => ['nullable', 'exists:positions,id'],
             'manager_id' => [
                 'nullable',
                 'string',
@@ -116,16 +136,16 @@ class UserForm extends Form
             ],
             'photo' => ['nullable', ...app(SecureUploadPolicy::class)->rules('image')],
             'basic_salary' => ['nullable', 'numeric', 'min:0'],
-            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
             'employment_status' => ['required', 'string', Rule::in(array_keys(Employee::employmentStatuses()))],
+            'join_date' => [$requiredOrNullable, 'date'],
+            'employment_type' => [$requiredOrNullable, 'string', Rule::in(['permanent', 'contract', 'intern'])],
+            'education_level' => [$requiredOrNullable, 'string', Rule::in(array_column(EducationLevel::cases(), 'value'))],
+            'institution_name' => [$requiredOrNullable, 'string', 'max:255'],
+            'graduation_year' => [$requiredOrNullable, 'integer', 'min:1970', 'max:'.now()->year],
             'role_id' => ['nullable', 'string', 'exists:roles,id'],
             'role_ids' => ['array', 'max:1'],
             'role_ids.*' => ['string', 'exists:roles,id'],
         ];
-
-        if ($this->supportsCityColumn()) {
-            $rules['city'] = ['required', 'string', 'max:255'];
-        }
 
         return $rules;
     }
@@ -139,10 +159,8 @@ class UserForm extends Form
         $this->phone = $user->phone;
         $this->password = null;
         $this->gender = $user->gender;
+        $this->marital_status = $user->employee?->marital_status->value ?? 'single';
         $this->address = $user->address;
-        $this->city = $this->supportsCityColumn()
-            ? (string) $user->getAttribute('city')
-            : '';
         $this->provinsi_kode = $user->provinsi_kode;
         $this->kabupaten_kode = $user->kabupaten_kode;
         $this->kecamatan_kode = $user->kecamatan_kode;
@@ -153,17 +171,20 @@ class UserForm extends Form
             : null;
         $this->birth_place = $user->birth_place;
         $this->division_id = $user->division_id;
-        $this->education_id = $user->education_id;
-        $this->job_title_id = $user->job_title_id;
+        $this->position_id = $user->employee?->position_id;
         $this->manager_id = $user->manager_id;
         $this->basic_salary = $user->basic_salary;
-        $this->hourly_rate = $user->hourly_rate;
         $this->employment_status = $user->employment_status ?: Employee::EMPLOYMENT_STATUS_ACTIVE;
+        $this->join_date = $user->employee?->join_date?->format('Y-m-d');
+        $this->employment_type = $user->employee?->employment_type->value ?? 'permanent';
+        $this->education_level = $user->employee?->education_level?->value;
+        $this->institution_name = $user->employee->institution_name ?? '';
+        $this->graduation_year = $user->employee?->graduation_year;
         $this->role_ids = $user->roles()
             ->orderByDesc('roles.is_super_admin')
             ->orderBy('roles.name')
+            ->limit(1)
             ->pluck('roles.id')
-            ->take(1)
             ->all();
         $this->role_id = $this->role_ids[0] ?? null;
         $this->original_role_id = $this->role_id;
@@ -182,11 +203,33 @@ class UserForm extends Form
         $this->ensureManagerDoesNotCreateCycle();
         $this->sanitize();
 
-        /** @var User $user */
-        $user = User::create([
-            ...$this->payload(),
-            'password' => Hash::make($this->password ?? 'password'),
-        ]);
+        $user = DB::transaction(function () {
+            $user = User::create([
+                'name' => $this->name,
+                'email' => $this->email,
+                'password' => Hash::make($this->password),
+                'group' => $this->group,
+                'manager_id' => $this->manager_id,
+                'company_id' => auth()->user()->company_id,
+            ]);
+
+            $employeeData = $this->employeePayload();
+            $employeeData['user_id'] = $user->id;
+            $employeeData['company_id'] = auth()->user()->company_id;
+            $employeeData['branch_id'] = $this->getDefaultBranchId($employeeData['company_id']);
+            $employeeData['employee_number'] = $this->generateEmployeeNumber();
+            $employeeData['salary_type'] = 'monthly';
+            // Form tidak punya field nik (hanya nip); kolom employees.nik NOT NULL tanpa default.
+            $employeeData['nik'] = $this->nip ?: 'NIK-'.Str::random(12);
+            $employeeData['manager_id'] = $this->manager_id
+                ? User::find($this->manager_id)?->employee?->id
+                : null;
+
+            Employee::create($employeeData);
+
+            return $user;
+        });
+
         $this->syncRoles($user);
         if (isset($this->photo)) {
             $user->updateProfilePhoto($this->photo);
@@ -205,11 +248,14 @@ class UserForm extends Form
                 throw new AuthorizationException(__('You cannot change your own account group.'));
             }
 
-            $requestedRoleIds = array_values(array_unique($this->role_ids));
-            $originalRoleIds = $this->user
+            // Normalize both sides to strings: normalizeSingleRoleSelection() casts
+            // role ids to string, while pluck() returns native types (int on pgsql,
+            // string on sqlite). Strict === comparison would false-fail otherwise.
+            $requestedRoleIds = array_map('strval', array_values(array_unique($this->role_ids)));
+            $originalRoleIds = array_map('strval', $this->user
                 ->roles()
                 ->pluck('roles.id')
-                ->all();
+                ->all());
             sort($requestedRoleIds);
             sort($originalRoleIds);
 
@@ -237,10 +283,30 @@ class UserForm extends Form
         $newPassword = filled($this->password) ? (string) $this->password : null;
         $this->sanitize();
 
-        $payload = $this->payload();
-        unset($payload['password']);
+        DB::transaction(function () {
+            $this->user->update([
+                'name' => $this->name,
+                'email' => $this->email,
+                'group' => $this->group,
+                'manager_id' => $this->manager_id,
+            ]);
 
-        $this->user->update($payload);
+            $employeePayload = $this->employeePayload();
+            $employeePayload['manager_id'] = $this->manager_id
+                ? User::find($this->manager_id)?->employee?->id
+                : null;
+
+            if ($this->user->employee) {
+                $this->user->employee->update($employeePayload);
+            } elseif ($this->group === 'user') {
+                $employeePayload['user_id'] = $this->user->id;
+                $employeePayload['company_id'] = auth()->user()->company_id;
+                $employeePayload['branch_id'] = $this->getDefaultBranchId($employeePayload['company_id']);
+                $employeePayload['employee_number'] = $this->generateEmployeeNumber();
+                $employeePayload['salary_type'] = 'monthly';
+                $this->user->employee()->create($employeePayload);
+            }
+        });
 
         $this->syncRoles($this->user);
 
@@ -259,30 +325,23 @@ class UserForm extends Form
     protected function sanitize()
     {
         $this->division_id = $this->division_id ?: null;
-        $this->job_title_id = $this->job_title_id ?: null;
+        $this->position_id = $this->position_id ?: null;
         $this->manager_id = $this->manager_id ?: null;
-        $this->education_id = $this->education_id ?: null;
         $this->employment_status = $this->employment_status ?: Employee::EMPLOYMENT_STATUS_ACTIVE;
+        $this->marital_status = $this->marital_status ?: 'single';
         $this->provinsi_kode = $this->provinsi_kode ?: null;
         $this->kabupaten_kode = $this->kabupaten_kode ?: null;
         $this->kecamatan_kode = $this->kecamatan_kode ?: null;
         $this->kelurahan_kode = $this->kelurahan_kode ?: null;
         $this->birth_date = $this->birth_date ?: null;
-        if ($this->supportsCityColumn()) {
-            $this->city = trim((string) $this->city);
-        }
+        $this->join_date = $this->join_date ?: null;
+        $this->graduation_year = $this->graduation_year ?: null;
         $this->address = trim((string) $this->address);
         $this->birth_place = trim((string) $this->birth_place);
+        $this->institution_name = trim((string) $this->institution_name);
     }
 
-    public function supportsCityColumn(): bool
-    {
-        static $supportsCity;
-
-        return $supportsCity ??= Schema::hasColumn('users', 'city');
-    }
-
-    public function deleteProfilePhoto()
+    public function deleteProfilePhoto(): void
     {
         $this->authorizeMutation();
 
@@ -290,7 +349,7 @@ class UserForm extends Form
             throw new AuthorizationException(__('Default user profile cannot be modified in demo mode.'));
         }
 
-        return $this->user->deleteProfilePhoto();
+        $this->user->deleteProfilePhoto();
     }
 
     public function delete()
@@ -336,17 +395,59 @@ class UserForm extends Form
         }
     }
 
-    private function payload(): array
+    private function employeePayload(): array
     {
-        $payload = $this->all();
+        return [
+            'full_name' => $this->name,
+            'nip' => $this->nip,
+            'phone' => $this->phone,
+            'gender' => $this->gender === 'male' ? 'L' : 'P',
+            'marital_status' => $this->marital_status,
+            'address_detail' => $this->address,
+            'provinsi_kode' => $this->provinsi_kode,
+            'kabupaten_kode' => $this->kabupaten_kode,
+            'kecamatan_kode' => $this->kecamatan_kode,
+            'kelurahan_kode' => $this->kelurahan_kode,
+            'birth_date' => $this->birth_date,
+            'birth_place' => $this->birth_place,
+            'division_id' => $this->division_id,
+            'position_id' => $this->position_id,
+            'basic_salary' => $this->basic_salary ?: 0,
+            'employment_status' => $this->employment_status,
+            'join_date' => $this->join_date,
+            'employment_type' => $this->employment_type,
+            'education_level' => $this->education_level,
+            'institution_name' => $this->institution_name,
+            'graduation_year' => $this->graduation_year,
+        ];
+    }
 
-        if (! $this->supportsCityColumn()) {
-            unset($payload['city']);
+    private function getDefaultBranchId(int $companyId): int
+    {
+        $branch = Branch::where('company_id', $companyId)
+            ->where('is_main', true)
+            ->first();
+
+        return $branch->id ?? Branch::where('company_id', $companyId)->first()->id ?? 1;
+    }
+
+    private function generateEmployeeNumber(): string
+    {
+        $year = now()->format('Y');
+        $prefix = "EMP-{$year}-";
+
+        $latest = Employee::where('employee_number', 'like', "{$prefix}%")
+            ->orderBy('employee_number', 'desc')
+            ->first();
+
+        if ($latest) {
+            $lastSeq = (int) substr($latest->employee_number, strlen($prefix));
+            $seq = str_pad((string) ($lastSeq + 1), 4, '0', STR_PAD_LEFT);
+        } else {
+            $seq = '0001';
         }
 
-        unset($payload['role_id'], $payload['original_role_id'], $payload['role_ids'], $payload['original_role_ids']);
-
-        return $payload;
+        return "{$prefix}{$seq}";
     }
 
     private function ensureManagerDoesNotCreateCycle(): void

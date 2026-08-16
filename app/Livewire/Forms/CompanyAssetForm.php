@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Models\CompanyAsset;
+use App\Models\CompanyAssetHistory;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
@@ -76,6 +77,27 @@ class CompanyAssetForm extends Form
         $this->validate([
             'serial_number' => ['nullable', 'string', 'max:255', Rule::unique('company_assets', 'serial_number')->ignore($this->companyAsset)],
         ]);
+
+        // Menandai asset sebagai available = melepas penugasan: user dan
+        // tanggal penugasan dikosongkan. Konsisten dengan alur return OTP
+        // (UserAssetService) yang membersihkan ketiganya.
+        if ($this->status === CompanyAsset::STATUS_AVAILABLE) {
+            $previousUser = $this->companyAsset->user;
+
+            $this->user_id = null;
+            $this->date_assigned = null;
+            $this->return_date = null;
+
+            // Catat riwayat penarikan oleh admin (paritas dengan alur return
+            // OTP user di UserAssetService::verifyReturnOtp).
+            CompanyAssetHistory::create([
+                'company_asset_id' => $this->companyAsset->id,
+                'action' => 'returned',
+                'from_employee_id' => $previousUser?->employee?->id,
+                'notes' => __('Retrieved by Admin and marked ready for reassignment.'),
+                'created_by' => auth()->user()?->employee?->id,
+            ]);
+        }
 
         $this->companyAsset->update($this->all());
 

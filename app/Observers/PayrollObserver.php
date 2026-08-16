@@ -29,7 +29,7 @@ class PayrollObserver
             'user_id' => $actorId,
             'action' => $action,
             'description' => "Perubahan payroll pada Employee #{$payroll->employee_id}, Periode {$payroll->period}",
-            'ip_address' => request()?->ip(),
+            'ip_address' => request()->ip(),
         ]);
 
         foreach ($changed as $field) {
@@ -39,14 +39,14 @@ class PayrollObserver
             ActivityLogDetail::create([
                 'activity_log_id' => $activityLog->id,
                 'entity_type' => Payroll::class,
-                'entity_id' => (string) $payroll->id,
+                'entity_id' => $payroll->id,
                 'field' => $field,
                 'old_value' => ['value' => $oldValue],
                 'new_value' => ['value' => $newValue],
                 'integrity_hash' => hash_hmac('sha256', json_encode([
                     'activity_log_id' => $activityLog->id,
                     'entity_type' => Payroll::class,
-                    'entity_id' => (string) $payroll->id,
+                    'entity_id' => $payroll->id,
                     'field' => $field,
                     'old_value' => ['value' => $oldValue],
                     'new_value' => ['value' => $newValue],

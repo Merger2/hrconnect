@@ -25,6 +25,13 @@ class AttendanceController extends Controller
         protected SecureUploadPolicy $secureUploadPolicy,
     ) {}
 
+    public function scan(): View
+    {
+        $this->authorize('create', Attendance::class);
+
+        return view('attendances.scan');
+    }
+
     public function applyLeave(Request $request): View
     {
         $this->authorize('create', Attendance::class);
@@ -90,7 +97,7 @@ class AttendanceController extends Controller
                 ->with('success', __('Pengajuan izin berhasil dibuat.'));
         } catch (\Throwable $th) {
             Log::error('Failed to submit leave request.', [
-                'user_id' => $user?->getAuthIdentifier(),
+                'user_id' => $user->getAuthIdentifier(),
                 'exception' => $th->getMessage(),
             ]);
 

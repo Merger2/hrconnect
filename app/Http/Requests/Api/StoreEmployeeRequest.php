@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\EducationLevel;
+use App\Enums\MaritalStatus;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class StoreEmployeeRequest extends FormRequest
 {
@@ -18,7 +21,7 @@ class StoreEmployeeRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', Password::defaults(), 'max:255'],
             'employee_number' => ['required', 'string', 'max:50', Rule::unique('employees', 'employee_number')],
             'full_name' => ['required', 'string', 'max:255'],
             'company_id' => ['required', 'integer', 'exists:companies,id'],
@@ -26,13 +29,17 @@ class StoreEmployeeRequest extends FormRequest
             'division_id' => ['required', 'integer', 'exists:divisions,id'],
             'position_id' => ['required', 'integer', 'exists:positions,id'],
             'gender' => ['required', 'in:L,P'],
-            'marital_status' => ['required', 'string', 'max:50'],
+            'marital_status' => ['required', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'employment_type' => ['required', Rule::in(['permanent', 'contract', 'probation', 'intern'])],
             'birth_date' => ['required', 'date', 'before:today'],
             'join_date' => ['required', 'date'],
             'salary_type' => ['required', Rule::in(['monthly', 'daily', 'hourly'])],
             'nip' => ['nullable', 'string', 'max:50'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:20'],
+            'nik' => ['nullable', 'string', 'max:50'],
+            'education_level' => ['required', Rule::in(array_column(EducationLevel::cases(), 'value'))],
+            'institution_name' => ['required', 'string', 'max:255'],
+            'graduation_year' => ['required', 'integer', 'min:1970', 'max:'.now()->year],
             'basic_salary' => ['nullable', 'numeric', 'min:0'],
             'address_detail' => ['nullable', 'string', 'max:500'],
             'bank_name' => ['nullable', 'string', 'max:100'],
@@ -64,6 +71,7 @@ class StoreEmployeeRequest extends FormRequest
             'gender.required' => 'Jenis kelamin wajib dipilih.',
             'gender.in' => 'Jenis kelamin harus L atau P.',
             'marital_status.required' => 'Status pernikahan wajib diisi.',
+            'marital_status.in' => 'Status pernikahan tidak valid.',
             'employment_type.required' => 'Tipe karyawan wajib dipilih.',
             'employment_type.in' => 'Tipe karyawan tidak valid.',
             'birth_date.required' => 'Tanggal lahir wajib diisi.',

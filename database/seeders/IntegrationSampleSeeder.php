@@ -13,6 +13,13 @@ class IntegrationSampleSeeder extends Seeder
 {
     public function run(): void
     {
+        // Demo/test-only: client integrasi palsu (pas-papan.hrconnect.local)
+        // dengan secret hardcoded (secret-key-123 / DKMS-TEST-001) — jangan
+        // pernah di-seed di production. (Guard kedua: DatabaseSeeder juga skip.)
+        if (app()->isProduction()) {
+            return;
+        }
+
         $company = Company::firstOrFail();
 
         $client = IntegrationClient::firstOrCreate(
@@ -24,7 +31,7 @@ class IntegrationSampleSeeder extends Seeder
                 'name' => 'Talent Management ERP (PasPapan-legacy)',
                 'contact_name' => 'Admin PasPapan',
                 'contact_email' => 'admin@pas-papan.local',
-                'api_key_hash' => 'sha256='.hash('sha256', 'HRCONNECT-TEST-001'),
+                'api_key_hash' => 'sha256='.hash('sha256', 'DKMS-TEST-001'),
                 'secret_encrypted' => Crypt::encryptString('secret-key-123'),
                 'abilities' => ['integration:attendance.read', 'integration:attendance.write'],
                 'allowed_sources' => ['erp', 'mobile'],

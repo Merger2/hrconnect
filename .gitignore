@@ -31,11 +31,16 @@ test_results.txt
 update.sh
 
 # Storage generated files
+/storage/app/private/
 /storage/app/private/imports/
 /storage/app/private/payslips/
+/storage/app/purifier/
 /storage/framework/testing/
 /storage/framework/views/*.php
 /storage/logs/*.log
+
+# Output harness screenshots (scripts/apk-*, desktop/ios-page-screenshots)
+/screenshots/
 
 # Playwright
 /test-results/
@@ -52,11 +57,12 @@ tests/e2e/.auth/
 /.agents/
 /.claude/
 /.codex/
-/.gemini/
 /.github/
+/.gemini/
+/.opencode/
+/graphify-out/
 /docs/**
 !/docs/api/api.json
-/tests/
 /_ide_helper.php
 /_ide_helper_models.php
 /phpstan.neon
@@ -65,3 +71,23 @@ tests/e2e/.auth/
 storage/logs/*.log
 storage/logs/
 storage/framework/views/*.php
+
+# Testing env berisi kredensial DB asli — local-only, JANGAN commit
+.env.testing
+
+# Codemap skill (local-only maps — jangan commit, branch main tetap ramping)
+/.slim/
+codemap.md
+
+# Graphify cache & local state — jangan commit (konvensi "delete cache folder")
+graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+
+# Runtime artifacts (test output) — jangan commit
+/storage/app/private/attachments/
+/storage/app/private/import-export/
+
+# Laravel Excel / framework cache (runtime artifacts)
+/storage/framework/cache/
+/storage/app/private/maintenance-backups/

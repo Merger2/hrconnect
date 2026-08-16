@@ -13,6 +13,7 @@ use App\Models\Company;
 use App\Models\Division;
 use App\Models\Employee;
 use App\Models\Position;
+use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -42,16 +43,16 @@ class E2eTestSeeder extends Seeder
         $employeeRole = Role::where('name', 'employee')->first();
 
         $testUsers = [
-            ['email' => 'employee@hrconnect.test',  'name' => 'Test Employee', 'role' => 'employee',   'password' => 'Employee1234'],
-            ['email' => 'hr@hrconnect.test',        'name' => 'Test HR',       'role' => 'hr-manager', 'password' => 'HRmanager1234'],
-            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'Employee1234'],
+            ['email' => 'employee@hrconnect.test',  'name' => 'Test Employee', 'role' => 'employee',   'password' => 'password'],
+            ['email' => 'hr@hrconnect.test',        'name' => 'Test HR',       'role' => 'admin',      'password' => 'password'],
+            ['email' => 'test@hrconnect.test',      'name' => 'Test User',     'role' => 'employee',   'password' => 'password'],
             ['email' => 'admin@hrconnect.local',    'name' => 'Super Admin',   'role' => 'super-admin', 'password' => 'ChangeMe!2026'],
             ['email' => 'manager@hrconnect.test',   'name' => 'Test Manager',  'role' => 'manager',    'password' => 'Manager1234!!'],
             ['email' => 'finance@hrconnect.test',   'name' => 'Test Finance',  'role' => 'finance',    'password' => 'Finance1234!!'],
             ['email' => 'it-support@hrconnect.test','name' => 'IT Support',    'role' => 'it-support', 'password' => 'ITsupport1234'],
         ];
 
-        $company = Company::where('code', 'HRCONNECT')->firstOrFail();
+        $company = Company::where('code', 'DKMS-2025')->firstOrFail();
         $branch = Branch::where('company_id', $company->id)->where('is_main', true)->firstOrFail();
 
         $divMap = [
@@ -61,13 +62,13 @@ class E2eTestSeeder extends Seeder
             'ops' => Division::where('code', 'OPS')->firstOrFail(),
         ];
 
-        $posMap = Position::whereIn('code', ['IT-STAFF', 'HR-MGR', 'HR-STAFF', 'FIN-STAFF', 'OPS-STAFF'])->get()->keyBy('code');
+        $posMap = Position::whereIn('code', ['IT-STAFF', 'HR-MGR', 'IT-MGR', 'FIN-STAFF', 'OPS-MGR'])->get()->keyBy('code');
 
         $employeeData = [
             'employee@hrconnect.test' => ['div' => 'it',  'pos' => 'IT-STAFF',   'emp_no' => 'EMP-E2E-001', 'full_name' => 'Test Employee', 'nik' => '3276010000000001', 'npwp' => '99.999.999.9-999.001', 'phone' => '081900000001'],
             'hr@hrconnect.test' => ['div' => 'hr',  'pos' => 'HR-MGR',     'emp_no' => 'EMP-E2E-002', 'full_name' => 'Test HR',       'nik' => '3276010000000002', 'npwp' => '99.999.999.9-999.002', 'phone' => '081900000002'],
             'test@hrconnect.test' => ['div' => 'it',  'pos' => 'IT-STAFF',   'emp_no' => 'EMP-E2E-003', 'full_name' => 'Test User',     'nik' => '3276010000000003', 'npwp' => '99.999.999.9-999.003', 'phone' => '081900000003'],
-            'manager@hrconnect.test' => ['div' => 'ops', 'pos' => 'OPS-STAFF',  'emp_no' => 'EMP-E2E-004', 'full_name' => 'Test Manager',  'nik' => '3276010000000004', 'npwp' => '99.999.999.9-999.004', 'phone' => '081900000004'],
+            'manager@hrconnect.test' => ['div' => 'ops', 'pos' => 'OPS-MGR',   'emp_no' => 'EMP-E2E-004', 'full_name' => 'Test Manager',  'nik' => '3276010000000004', 'npwp' => '99.999.999.9-999.004', 'phone' => '081900000004'],
             'finance@hrconnect.test' => ['div' => 'fin', 'pos' => 'FIN-STAFF',  'emp_no' => 'EMP-E2E-005', 'full_name' => 'Test Finance',  'nik' => '3276010000000005', 'npwp' => '99.999.999.9-999.005', 'phone' => '081900000005'],
         ];
 
@@ -96,6 +97,15 @@ class E2eTestSeeder extends Seeder
             }
 
             if ($roleName === 'super-admin') {
+                // Aksesor isSuperadmin/isAdmin berbasis kolom `group` (legacy
+                // PasPapan), bukan role. Tanpa group='superadmin', akun ini
+                // kehilangan global admin scope (managedBy -> kosong) dan
+                // dashboard admin tampil tanpa data. Konsisten dengan
+                // SuperAdminSeeder. (fix 2026-08-06)
+                if ($user->group !== 'superadmin') {
+                    $user->update(['group' => 'superadmin']);
+                }
+
                 continue;
             }
 
@@ -103,6 +113,10 @@ class E2eTestSeeder extends Seeder
             if ($emp === null) {
                 continue;
             }
+
+            // Cari parent_id dari IT Manager (untuk approval flow E2E)
+            $itManager = User::where('email', 'employee1@hrconnect.local')->first();
+            $parentId = $itManager?->employee?->id;
 
             Employee::firstOrCreate(
                 ['user_id' => $user->id],
@@ -117,17 +131,20 @@ class E2eTestSeeder extends Seeder
                     'npwp' => $emp['npwp'],
                     'phone' => $emp['phone'],
                     'gender' => Gender::LAKI_LAKI,
-                    'marital_status' => MaritalStatus::SINGLE,
+                    'marital_status' => $emp['pos'] === 'OPS-MGR' ? MaritalStatus::MARRIED : MaritalStatus::SINGLE,
                     'blood_type' => BloodType::O_PLUS,
                     'status' => EmployeeStatus::ACTIVE,
                     'birth_date' => '1995-06-15',
                     'join_date' => '2024-01-01',
                     'education_level' => EducationLevel::BACHELOR,
-                    'institution_name' => 'Universitas Indonesia',
-                    'major' => 'Teknik Informatika',
+                    'institution_name' => ['Universitas Indonesia', 'Institut Teknologi Bandung', 'BINUS University'][array_rand(['Universitas Indonesia', 'Institut Teknologi Bandung', 'BINUS University'])],
+                    'major' => $emp['div'] === 'fin' ? 'Akuntansi' : ($emp['div'] === 'hr' ? 'Psikologi' : 'Teknik Informatika'),
                     'graduation_year' => 2018,
                     'salary_type' => SalaryType::MONTHLY,
-                    'address_detail' => 'Jl. Test No. 1, Jakarta',
+                    'shift_id' => Shift::where('name', 'Office Hour')->first()?->id,
+                    'address_detail' => 'Jl. Test No. '.rand(1, 50).', Jakarta',
+                    'pin' => Hash::make('123456'),
+                    'parent_id' => $emp['pos'] === 'OPS-MGR' || $emp['pos'] === 'HR-MGR' ? null : $parentId,
                 ]
             );
         }

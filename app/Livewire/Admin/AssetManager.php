@@ -133,7 +133,7 @@ class AssetManager extends Component
             'types' => $types,
             'statuses' => $statuses,
             'users' => $users,
-            'assetHistories' => $this->viewingHistoryAsset?->histories ?? collect(),
+            'assetHistories' => $this->viewingHistoryAsset->histories ?? collect(),
             'editMode' => (bool) $this->selectedCompanyAssetId,
         ]);
     }

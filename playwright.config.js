@@ -5,6 +5,12 @@ import { fileURLToPath } from 'url';
 /**
  * Playwright configuration for HRConnect E2E tests
  * @see https://playwright.dev/docs/test-configuration
+ *
+ * Catatan 2026-08-10: project role yang mereferensikan spec legacy Paspapan /
+ * email dev (approval-workflow, main-smoke, payroll, login-critical, profile,
+ * post-login, test-profile, login_and_dashboard_check) dihapus bersama
+ * spec-nya — kredensialnya tidak ada di DB seeder, tidak akan pernah hijau.
+ * Hanya project dengan spec nyata yang dipertahankan.
  */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const authDir = path.join(__dirname, 'tests/e2e/.auth');
@@ -37,83 +43,41 @@ export default defineConfig({
       },
     },
 
-    // Employee-authenticated tests (clock-in, KB chat, loans, overtime, full role coverage)
+    // Employee-authenticated tests (24 halaman user: clock-in, KB chat, payroll, dll)
     {
       name: 'chromium-employee',
-      testMatch: /employee-pages\.spec\.ts/,
+      testMatch: /(employee-pages|user-tomselect|kb-chat)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
         storageState: path.join(authDir, 'employee.json'),
+        // Block service worker: SW PWA meng-intercept navigasi kedua dalam satu
+        // test dan meng-abort page.goto (net::ERR_ABORTED) — kb-chat.spec.ts
+        // menavigasi berlapis (index → detail → chat).
+        serviceWorkers: 'block',
       },
     },
 
-    // HR-authenticated tests (face enrollment, master data, full role coverage)
-    {
-      name: 'chromium-hr',
-      testMatch: /(face-enrollment|master-data|role-hr)\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'hr.json'),
-      },
-    },
-
-    // Manager-authenticated tests
-    {
-      name: 'chromium-manager',
-      testMatch: /role-manager\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'manager.json'),
-      },
-    },
-
-    // Finance-authenticated tests
-    {
-      name: 'chromium-finance',
-      testMatch: /role-finance\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        storageState: path.join(authDir, 'finance.json'),
-      },
-    },
-
-    // Super-Admin authenticated tests (employee admin, payroll settings, approval, reimbursement)
+    // Admin-authenticated regression tests (tom-select persistence, dll)
     {
       name: 'chromium-admin',
-      testMatch: /(employee|payroll-settings|reimbursement|approval|monitoring|payroll-config|auth-enhanced|face-recognition-api|approval-workflow|role-super-admin)\.spec\.ts/,
+      testMatch: /admin-tomselect\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
         storageState: path.join(authDir, 'admin.json'),
+        // Block service worker: SW PWA meng-intercept navigasi kedua dalam satu
+        // test dan meng-abort page.goto (net::ERR_ABORTED). Test ini untuk
+        // regresi form/tom-select, bukan PWA (pwa.spec.ts khusus SW).
+        serviceWorkers: 'block',
       },
     },
 
-    // Cross-role console, page-error, and network audit
-    {
-      name: 'chromium-audit',
-      testMatch: /console-network-audit\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
+    // PWA: manifest + service worker (guest, tanpa login)
     {
       name: 'chromium-pwa',
       testMatch: /pwa\.spec\.ts/,
@@ -124,30 +88,11 @@ export default defineConfig({
       },
     },
 
-    {
-      name: 'chromium-ux',
-      testMatch: /user-experience\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
-    {
-      name: 'chromium-profile',
-      testMatch: /profile\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-      },
-    },
-
+    // Auth-flow regression (email verification + 2FA + password reset): login
+    // sendiri tanpa storageState — user dibuat helper PHP (serial mode di spec).
     {
       name: 'chromium-auth',
-      testMatch: /auth\.spec\.ts/,
+      testMatch: /(email-verify|twofa|password-reset|register)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],

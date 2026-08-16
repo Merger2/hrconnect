@@ -13,16 +13,13 @@ use App\Exceptions\AntiFakeGPSException;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\FaceNotRecognizedException;
 use App\Exceptions\FaceNotRegisteredException;
-use App\Exceptions\InvalidPinException;
 use App\Exceptions\NotClockedInException;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Services\Security\FaceRecognitionService;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class AttendanceService
@@ -58,11 +55,8 @@ class AttendanceService
             $data['_geofence_distance'] = $geofenceResult['distance'] ?? null;
         }
 
-        // B12 fix: tiered verification (Face → PIN → Manual) per error-handling-strategy §1.
-        // Tangani 3 skenario terpisah:
-        //   1. Face embedding tidak ada → fallback PIN
-        //   2. Face embedding ada tapi tidak match → fallback PIN
-        //   3. Tidak ada face embedding & PIN → throw BusinessRuleException
+        // Face-only policy (PRD §1/§4): tanpa PIN fallback.
+        // Wajah wajib terdaftar & terverifikasi; gagal = tolak + arahkan ke koreksi HR.
         [$verificationMethod, $faceSimilarityScore] = $this->resolveVerification($employee, $data);
 
         try {
@@ -98,11 +92,7 @@ class AttendanceService
                     'status' => $status,
                 ]);
 
-                if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
-                    $this->logBypass($employee, $this->pinBypassReason($employee, 'clock_in'));
-                }
-
-                $geofenceRadius = $employee->branch?->radius;
+                $geofenceRadius = $employee->branch->radius;
                 $riskResult = $this->riskScorer->score($attendance, $employee->shift, 'check_in', [
                     'gps_accuracy' => $data['accuracy'] ?? null,
                     'gps_variance' => $data['gps_variance'] ?? null,
@@ -129,75 +119,54 @@ class AttendanceService
     }
 
     /**
-     * B12 fix: tiered verification (Face → PIN → throw).
+     * Face-only verification (PRD §1/§4) — tanpa PIN fallback.
      * Mengembalikan [verification_method, similarity_score|null].
      *
-     * Tier 1: Face Recognition (jika face_embedding ada di DB & client kirim embedding).
-     * Tier 2: PIN fallback (kalau face gagal/belum register & PIN dikirim).
-     * Tier 3: Throw BusinessRuleException kalau tidak ada satupun yang valid.
+     * - Face belum terdaftar → throw BusinessRuleException (arahkan ke HRD untuk registrasi).
+     * - Face terdaftar tapi tanpa/tidak match embedding → throw BusinessRuleException
+     *   (tolak; user dapat mengajukan koreksi absensi ke HRD).
+     * - Payload `pin` DIABAIKAN: tidak diproses, tidak divalidasi, tidak disimpan.
      *
      * Pakai getRawOriginal() untuk hindari trigger pgvector cast saat unit test.
      */
     private function resolveVerification(Employee $employee, array $data): array
     {
-        $hasFaceEnrolled = $this->faceRecognitionService->hasFaceEnrolled($employee);
-        $hasFacePayload = ! empty($data['face_embedding']);
-        $hasPinPayload = ! empty($data['pin']);
-
-        // Tier 1: Face Recognition (jika kedua sisi siap)
-        if ($hasFaceEnrolled && $hasFacePayload) {
-            try {
-                $faceResult = $this->faceRecognitionService->verifyFace(
-                    $employee,
-                    $data['face_embedding']
-                );
-
-                // B-37: Reset PIN streak on successful face verification
-                Cache::forget("pin_streak:{$employee->id}");
-
-                return [
-                    VerificationMethod::FACE_VERIFIED->value,
-                    $faceResult['similarity_percentage'],
-                ];
-            } catch (FaceNotRegisteredException $e) {
-                // Race: embedding hilang antara cek dan verifikasi → coba PIN
-                Log::warning('Face embedding hilang saat verifikasi: '.$e->getMessage());
-            } catch (FaceNotRecognizedException $e) {
-                // Wajah tidak match → coba PIN. Skor tetap ditolak silently di sini,
-                // surface-nya via attendance.face_similarity_score=null & verification=pin.
-                Log::warning('Verifikasi wajah gagal: '.$e->getMessage());
-            }
-        }
-
-        // Tier 2: PIN fallback
-        if ($hasPinPayload) {
-            // B-37: PIN fallback rate limit — max 5 consecutive PIN-only days
-            $pinStreakKey = "pin_streak:{$employee->id}";
-            $pinStreak = (int) Cache::get($pinStreakKey, 0);
-            if ($pinStreak >= 5) {
-                throw new BusinessRuleException(
-                    'Anda sudah 5 hari berturut-turut menggunakan PIN. Silakan hubungi atasan untuk aktivasi ulang face recognition.'
-                );
-            }
-
-            $this->verifyPin($employee, $data['pin']);
-
-            // Increment PIN streak
-            Cache::put($pinStreakKey, $pinStreak + 1, now()->addWeek());
-
-            return [VerificationMethod::PIN_VERIFIED->value, null];
-        }
-
-        // Tier 3: Tidak ada verifikasi valid
-        if (! $hasFaceEnrolled) {
+        if (! $this->faceRecognitionService->hasFaceEnrolled($employee)) {
             throw new BusinessRuleException(
-                'Wajah Anda belum terdaftar. Hubungi HRD untuk registrasi atau gunakan PIN sebagai fallback.'
+                'Wajah Anda belum terdaftar. Hubungi HRD untuk registrasi wajah sebelum melakukan absensi.'
             );
         }
 
-        throw new BusinessRuleException(
-            'Verifikasi gagal. Pastikan wajah terdeteksi dengan jelas atau gunakan PIN sebagai fallback.'
-        );
+        if (empty($data['face_embedding'])) {
+            throw new BusinessRuleException(
+                'Verifikasi wajah diperlukan untuk absensi. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.'
+            );
+        }
+
+        try {
+            $faceResult = $this->faceRecognitionService->verifyFace(
+                $employee,
+                $data['face_embedding']
+            );
+
+            return [
+                VerificationMethod::FACE_VERIFIED->value,
+                $faceResult['similarity_percentage'],
+            ];
+        } catch (FaceNotRegisteredException $e) {
+            // Race: embedding hilang antara cek dan verifikasi → tolak (bukan PIN fallback)
+            Log::warning('Face embedding hilang saat verifikasi: '.$e->getMessage());
+
+            throw new BusinessRuleException(
+                'Verifikasi wajah gagal. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.'
+            );
+        } catch (FaceNotRecognizedException $e) {
+            Log::warning('Verifikasi wajah gagal: '.$e->getMessage());
+
+            throw new BusinessRuleException(
+                'Verifikasi wajah gagal. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.'
+            );
+        }
     }
 
     public function clockOut(Employee $employee, array $data): Attendance
@@ -240,87 +209,55 @@ class AttendanceService
                 'photo_selfie_out' => $data['photo_selfie'] ?? null,
             ]);
 
-            if ($verificationMethod === VerificationMethod::PIN_VERIFIED->value) {
-                $this->logBypass($employee, $this->pinBypassReason($employee, 'clock_out'));
-            }
-
             return $lockedAttendance->fresh();
         });
     }
 
     /**
-     * Tiered verification untuk clock-out (Face → PIN → throw).
+     * Verifikasi face-only untuk clock-out (PRD §1/§4) — tanpa PIN fallback.
      * Mengembalikan [verification_method, similarity_score|null].
+     *
+     * - Face belum terdaftar → throw BusinessRuleException (arahkan ke HRD untuk registrasi).
+     * - Face gagal/tidak match → throw BusinessRuleException (tolak; koreksi via HRD).
+     * - Payload `pin` DIABAIKAN: tidak diproses, tidak divalidasi.
      */
     private function resolveClockOutVerification(Employee $employee, array $data): array
     {
-        $hasFaceEnrolled = $this->faceRecognitionService->hasFaceEnrolled($employee);
-        $hasFacePayload = ! empty($data['face_embedding']);
-        $hasPinPayload = ! empty($data['pin']);
-
-        // Tier 1: Face Recognition (jika kedua sisi siap)
-        if ($hasFaceEnrolled && $hasFacePayload) {
-            try {
-                $faceResult = $this->faceRecognitionService->verifyFace(
-                    $employee,
-                    $data['face_embedding']
-                );
-
-                return [
-                    VerificationMethod::FACE_VERIFIED->value,
-                    $faceResult['similarity_percentage'],
-                ];
-            } catch (FaceNotRegisteredException $e) {
-                Log::warning('Face embedding hilang saat clock-out: '.$e->getMessage());
-            } catch (FaceNotRecognizedException $e) {
-                Log::warning('Verifikasi wajah clock-out gagal: '.$e->getMessage());
-            }
-        }
-
-        // Tier 2: PIN fallback
-        if ($hasPinPayload) {
-            $this->verifyPin($employee, $data['pin']);
-
-            return [VerificationMethod::PIN_VERIFIED->value, null];
-        }
-
-        // Tier 3: Tidak ada verifikasi valid
-        if (! $hasFaceEnrolled) {
+        if (! $this->faceRecognitionService->hasFaceEnrolled($employee)) {
             throw new BusinessRuleException(
-                'Wajah belum terdaftar. Gunakan PIN sebagai fallback untuk clock-out.'
+                'Wajah Anda belum terdaftar. Hubungi HRD untuk registrasi wajah sebelum melakukan absensi.'
             );
         }
 
-        throw new BusinessRuleException(
-            'Verifikasi clock-out gagal. Pastikan wajah terdeteksi dengan jelas atau gunakan PIN sebagai fallback.'
-        );
-    }
-
-    private function verifyPin(Employee $employee, string $pin): void
-    {
-        if (empty($employee->pin) || ! Hash::check($pin, $employee->pin)) {
-            throw new InvalidPinException('PIN yang Anda masukkan salah.');
+        if (empty($data['face_embedding'])) {
+            throw new BusinessRuleException(
+                'Verifikasi wajah diperlukan untuk clock-out. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.'
+            );
         }
-    }
 
-    private function logBypass(Employee $employee, string $method): void
-    {
-        activity()
-            ->causedBy($employee->user)
-            ->performedOn($employee)
-            ->withProperties([
-                'ip' => app()->bound('request') ? request()->ip() : null,
-                'method' => $method,
-            ])
-            ->log('Melakukan bypass absensi menggunakan '.$method);
-    }
+        try {
+            $faceResult = $this->faceRecognitionService->verifyFace(
+                $employee,
+                $data['face_embedding']
+            );
 
-    private function pinBypassReason(Employee $employee, string $direction): string
-    {
-        $hasFaceEnrolled = $this->faceRecognitionService->hasFaceEnrolled($employee);
+            return [
+                VerificationMethod::FACE_VERIFIED->value,
+                $faceResult['similarity_percentage'],
+            ];
+        } catch (FaceNotRegisteredException $e) {
+            // Race: embedding hilang antara cek dan verifikasi → tolak (bukan PIN fallback)
+            Log::warning('Face embedding hilang saat clock-out: '.$e->getMessage());
 
-        return $hasFaceEnrolled
-            ? "pin_verified_{$direction}_face_failed"
-            : "pin_verified_{$direction}_face_not_enrolled";
+            throw new BusinessRuleException(
+                'Verifikasi wajah gagal. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.'
+            );
+        } catch (FaceNotRecognizedException $e) {
+            Log::warning('Verifikasi wajah clock-out gagal: '.$e->getMessage());
+
+            throw new BusinessRuleException(
+                'Verifikasi wajah gagal. Silakan coba lagi, atau ajukan koreksi absensi ke HRD.'
+            );
+        }
     }
 }

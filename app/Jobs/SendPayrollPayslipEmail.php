@@ -6,7 +6,6 @@ namespace App\Jobs;
 
 use App\Mail\PayrollPayslipPdfMail;
 use App\Models\Payroll;
-use App\Services\Payroll\PayslipPdfService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -23,7 +22,7 @@ class SendPayrollPayslipEmail implements ShouldQueue
 
     public function __construct(public int $payrollId) {}
 
-    public function handle(PayslipPdfService $pdfService): void
+    public function handle(): void
     {
         $payroll = Payroll::query()
             ->with('employee.user')
@@ -35,15 +34,18 @@ class SendPayrollPayslipEmail implements ShouldQueue
             return;
         }
 
-        $password = $payroll->employee->payslip_password;
+        // Keputusan Fikih 2026-08-11 ("Minta PIN saat download — paling aman"):
+        // PDF payslip TIDAK lagi dilampirkan ke email. Sebelumnya PDF di-enkripsi
+        // dengan hash argon2id payslip_password (tidak bisa dibuka siapa pun),
+        // dan melampirkan gaji plaintext ke email tidak aman.
+        // Email sekarang berisi link ke route web `payslip.download` — pemilik
+        // harus memasukkan PIN payslip-nya; PDF di-enkripsi dengan PIN plaintext.
+        Mail::to($payroll->employee->user->email)->send(new PayrollPayslipPdfMail($payroll));
 
-        $pdfContent = $pdfService->generate($payroll, $password);
-
-        Mail::to($payroll->employee->user->email)->send(new PayrollPayslipPdfMail(
-            $payroll,
-            $pdfContent,
-        ));
-
-        $payroll->forceFill(['pdf_emailed_at' => now()])->save();
+        // Guard `Payroll::booted()` memblokir SEMUA update model berstatus PAID
+        // (regresi 2026-08-13: `$payroll->save()` selalu BusinessRuleException →
+        // job gagal + email duplikat 3× via retry). Update via query builder
+        // membypass model event — satu-satunya kolom yang diubah: pdf_emailed_at.
+        Payroll::query()->whereKey($payroll->id)->update(['pdf_emailed_at' => now()]);
     }
 }

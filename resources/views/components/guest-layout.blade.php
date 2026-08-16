@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="PasPapan">
+    <meta name="apple-mobile-web-app-title" content="{{ $appName ?? config('app.name', 'HRConnect') }}">
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -59,21 +59,43 @@
         }
     </script>
 
-    <script>
-        if (localStorage.getItem('isDark') === 'true' || (!('isDark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
+    <!-- Material Symbols (icon font) — non-blocking: preload + async stylesheet.
+         Dulu @import di app.css (render-blocking). display=block untuk icon font. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+    <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+    </noscript>
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Critical CSS inline (di-generate via scripts/extract-critical-css.mjs,
+         disimpan di resources/css/critical-guest.css) — menghilangkan
+         render-blocking CSS 622KB dari critical path. Full CSS di-defer async
+         (media=print onload) + fallback noscript. CSP: style-src unsafe-inline OK. --}}
+    @if (file_exists(resource_path('css/critical-guest.css')))
+        {{-- {!! !!} (bukan {{ }}) — file_get_contents CSS harus RAW: {{ }} = htmlspecialchars
+             meng-escape " → &quot; dll yang merusak aturan CSS (font-family, content, url).
+             Sumber di resources/css/critical-guest.css (git-tracked) BUKAN public/build
+             (gitignored). Regen: node scripts/extract-critical-css.mjs --urls /login
+               --guest --out resources/css/critical-guest.css --}}
+        <style>{!! file_get_contents(resource_path('css/critical-guest.css')) !!}</style>
+        @php($fullCss = Vite::asset('resources/css/app.css'))
+        <link rel="stylesheet" href="{{ $fullCss }}" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="{{ $fullCss }}"></noscript>
+        @vite(['resources/js/app.js'])
+    @else
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 
     <!-- Styles -->
     @livewireStyles
 </head>
-<body class="font-sans antialiased text-ink bg-canvas">
+<body class="font-sans antialiased text-gray-900 bg-surface">
     <main>
         {{ $slot }}
     </main>

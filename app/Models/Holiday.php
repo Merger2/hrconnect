@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 /**
  * @mixin IdeHelperHoliday
  */
-#[Fillable(['date', 'name', 'is_active'])]
+#[Fillable(['date', 'name', 'is_active', 'is_recurring'])]
 class Holiday extends Model
 {
     use HasFactory;
@@ -22,6 +22,7 @@ class Holiday extends Model
         return [
             'date' => 'date',
             'is_active' => 'boolean',
+            'is_recurring' => 'boolean',
         ];
     }
 

@@ -4,7 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperAttendanceOfflineSubmission
+ */
 class AttendanceOfflineSubmission extends Model
 {
     use HasFactory;
@@ -32,7 +36,7 @@ class AttendanceOfflineSubmission extends Model
         ];
     }
 
-    public function employee()
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }

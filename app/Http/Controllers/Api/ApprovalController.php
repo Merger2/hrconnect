@@ -56,7 +56,9 @@ class ApprovalController extends Controller
             ->where('status', ApprovalStatus::PENDING);
 
         if ($request->boolean('all')) {
-            // HR/Admin: show all pending across org
+            // HR/Admin: show all pending across org — WAJIB role admin/superadmin
+            // (sebelumnya kosong tanpa gate → data exposure lintas org, temuan K1 AUDIT-2026-08-04)
+            abort_unless($user->isSuperadmin || $user->isAdmin, 403);
         } elseif ($request->input('scope') === 'own') {
             // Employee: show their own submitted requests
             $query->whereHasMorph('approvable', ['*'], fn ($q) => $q->where('employee_id', $employee->id));

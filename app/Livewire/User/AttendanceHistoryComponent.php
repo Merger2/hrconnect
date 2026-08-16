@@ -71,12 +71,22 @@ class AttendanceHistoryComponent extends Component
 
         $cached = Cache::remember(
             "attendance-$user->id-$date->month-$date->year",
-            now()->addMinutes(5),
-            function () use ($user) {
-                return Attendance::filter(
-                    month: $this->month,
-                    userId: $user->id,
-                )->get(['id', 'status', 'date', 'time_in', 'time_out', 'latitude_in', 'longitude_in', 'latitude_out', 'longitude_out', 'attachment', 'note', 'approval_status'])->toArray();
+            now()->addMinutes(1),
+            function () use ($user, $date) {
+                return Attendance::whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
+                    ->whereYear('date', $date->year)
+                    ->whereMonth('date', $date->month)
+                    ->get(['id', 'status', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'photo_selfie_in', 'photo_selfie_out', 'note', 'approval_status'])
+                    // toArray() men-serialize atribut date cast ke ISO-UTC (mis.
+                    // 2026-03-31T17:00Z untuk 2026-04-01 WIB) — hydrate dari cache
+                    // lalu menggeser tanggal -1 hari → hitungan absen & tampilan
+                    // kalender salah. Normalisasi ke 'Y-m-d' agar round-trip cache
+                    // aman terhadap timezone.
+                    ->map(fn (Attendance $attendance) => [
+                        ...$attendance->toArray(),
+                        'date' => $attendance->date->format('Y-m-d'),
+                    ])
+                    ->all();
             }
         ) ?? [];
 
@@ -84,7 +94,7 @@ class AttendanceHistoryComponent extends Component
         $attendanceByDate = $attendances->keyBy(fn (Attendance $attendance) => $attendance->date->format('Y-m-d'));
 
         // Calculate Counts
-        $presentCount = $attendances->where('status', AttendanceStatus::PRESENT->value)->count();
+        $presentCount = $attendances->where('status', AttendanceStatus::ON_TIME->value)->count();
         $lateCount = $attendances->where('status', AttendanceStatus::LATE->value)->count();
         $excusedCount = $attendances->where('status', AttendanceStatus::EXCUSED->value)->count();
         $sickCount = $attendances->where('status', AttendanceStatus::SICK->value)->count();
@@ -142,7 +152,7 @@ class AttendanceHistoryComponent extends Component
             'holidays' => $holidays,
             'workingDaysCount' => $workingDays->count(),
             'counts' => [
-                AttendanceStatus::PRESENT->value => $presentCount,
+                AttendanceStatus::ON_TIME->value => $presentCount,
                 AttendanceStatus::LATE->value => $lateCount,
                 AttendanceStatus::EXCUSED->value => $excusedCount,
                 AttendanceStatus::SICK->value => $sickCount,

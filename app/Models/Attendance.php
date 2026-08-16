@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonImmutable $date
  * @property CarbonImmutable|null $clock_in Null jika status=absent dari DetectAlphaAttendanceCommand
  * @property CarbonImmutable|null $clock_out
+ * @property-read CarbonImmutable|null $time_in Accessor — alias clock_in
+ * @property-read CarbonImmutable|null $time_out Accessor — alias clock_out
  * @property numeric|null $lat_in
  * @property numeric|null $long_in
  * @property bool $clock_in_is_mocked
@@ -141,6 +143,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Attendance withoutTrashed()
  *
  * @mixin \Eloquent
+ * @mixin IdeHelperAttendance
  */
 #[Fillable(['employee_id', 'shift_id', 'date', 'clock_in', 'clock_out', 'lat_in', 'long_in', 'lat_out', 'long_out', 'clock_in_is_mocked', 'clock_in_accuracy', 'clock_out_is_mocked', 'clock_out_accuracy', 'device_fingerprint', 'face_similarity_score', 'clock_out_face_similarity_score', 'status', 'is_wfa', 'status_wfa', 'approval_status', 'exception_type', 'exception_notes', 'approved_late_by', 'photo_selfie_in', 'photo_selfie_out', 'late_minutes', 'verification_method', 'clock_out_verification_method', 'wfa_note', 'leave_type_id', 'note'])]
 class Attendance extends Model
@@ -203,6 +206,11 @@ class Attendance extends Model
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
+    }
+
+    public function leaveType(): BelongsTo
+    {
+        return $this->belongsTo(LeaveType::class);
     }
 
     public function overtime(): HasOne

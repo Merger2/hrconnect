@@ -14,9 +14,9 @@
     }
 
     .ts-wrapper-user .ts-control {
-        background-color: rgba(248, 250, 252, 0.82) !important;
-        border: 1px solid rgba(203, 213, 225, 0.8) !important;
-        color: #0f172a !important;
+        background-color: color-mix(in srgb, var(--color-primary-50) 82%, transparent) !important;
+        border: 1px solid var(--color-primary-300) !important;
+        color: var(--color-primary-900) !important;
         border-radius: 1rem !important;
         padding: 0 2.5rem 0 1rem !important;
         box-shadow: none !important;
@@ -42,7 +42,7 @@
         width: 1ch !important;
         max-width: 100% !important;
         min-width: 1ch !important;
-        color: #0f172a !important;
+        color: var(--color-primary-900) !important;
         font-size: 1rem !important;
         font-weight: 500 !important;
         vertical-align: middle !important;
@@ -63,18 +63,18 @@
     .ts-wrapper-user .ts-wrapper.focus .ts-control,
     .ts-wrapper-user .ts-wrapper.input-active .ts-control,
     .ts-wrapper-user .ts-wrapper.dropdown-active .ts-control {
-        border-color: #6ab45b !important; /* primary-500 */
+        border-color: var(--color-primary-700) !important; /* primary-700 (slate) */
         outline: 2px solid transparent;
         outline-offset: 2px;
-        background-color: #ffffff !important;
-        box-shadow: 0 0 0 4px rgba(106, 180, 91, 0.18) !important;
+        background-color: var(--color-surface) !important;
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary-700) 18%, transparent) !important;
     }
 
     /* Dropdown */
     .ts-wrapper-user .ts-dropdown {
-        background-color: #ffffff !important;
-        border-color: #e5e7eb;
-        color: #111827;
+        background-color: var(--color-surface) !important;
+        border-color: var(--color-primary-200);
+        color: var(--color-primary-900);
         border-radius: 1rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
         z-index: 99999 !important;
@@ -88,38 +88,8 @@
     }
 
     .ts-wrapper-user .ts-dropdown .active {
-        background-color: #f3f4f6;
-        color: #111827;
-    }
-
-    /* Dark Mode */
-    .dark .ts-wrapper-user .ts-control {
-        background-color: rgba(2, 6, 23, 0.45) !important;
-        border-color: #1e293b !important;
-        color: #f8fafc !important;
-    }
-
-    .dark .ts-wrapper-user .ts-control input {
-        color: #f8fafc !important;
-    }
-
-    .dark .ts-wrapper-user .ts-wrapper.focus .ts-control,
-    .dark .ts-wrapper-user .ts-wrapper.input-active .ts-control,
-    .dark .ts-wrapper-user .ts-wrapper.dropdown-active .ts-control {
-        border-color: #6ab45b !important; /* primary-500 */
-        background-color: #020617 !important;
-        box-shadow: 0 0 0 4px rgba(106, 180, 91, 0.24) !important;
-    }
-
-    .dark .ts-wrapper-user .ts-dropdown {
-        background-color: #0f172a !important;
-        border-color: #1e293b !important;
-        color: #e2e8f0 !important;
-    }
-
-    .dark .ts-wrapper-user .ts-dropdown .active {
-        background-color: #374151 !important;
-        color: #ffffff !important;
+        background-color: var(--color-primary-100);
+        color: var(--color-primary-900);
     }
 
     .user-ui .ts-wrapper-user .ts-control,
@@ -153,25 +123,38 @@
 </style>
 @endonce
 
+{{-- Inisialisasi TomSelect DIHAPUS dari x-data (fix race 2026-08-11, lihat
+     komponen forms.tom-select untuk penjelasan lengkap) — init sepenuhnya di
+     initUiPickers (resources/js/app.js). --}}
 <div wire:ignore
-     x-data="tomSelectInput(
-        @js($options), 
-        @js($placeholder),
-        @if(isset($__livewire) && $attributes->wire('model')->value()) @entangle($attributes->wire('model')) @else @js($selected) @endif,
-        {{ $disabled ? 'true' : 'false' }},
-        null,
-        false,
-        false,
-        'auto',
-        @js($dropdownParent)
-     )"
+     x-data="{ value: @if(isset($__livewire) && $attributes->wire('model')->value()) @entangle($attributes->wire('model')) @else @js($selected) @endif }"
+     data-ui-tomselect-root
      class="w-full ts-wrapper-user relative">
     
     <select
         x-ref="select"
+        data-ui-tomselect
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $attributes->whereDoesntStartWith('wire:model')->except(['options', 'placeholder', 'aria-label']) }}
         placeholder="{{ $placeholder }}">
+        {{-- Render :options (fix 2026-08-11: $options sebelumnya tidak pernah
+             dirender → dropdown berbasis options kosong). Bentuk didukung:
+             list ['id'=>, 'name'=>] (attendance-history, shift-swap) dan
+             asosiatif value=>label. Slot tetap dirender setelahnya. --}}
+        @if (count($options))
+            @foreach ($options as $optionKey => $option)
+                @php
+                    if (is_array($option)) {
+                        $optionValue = $option['id'] ?? $optionKey;
+                        $optionLabel = $option['name'] ?? $optionValue;
+                    } else {
+                        $optionValue = $optionKey;
+                        $optionLabel = $option;
+                    }
+                @endphp
+                <option value="{{ $optionValue }}" @selected((string) $optionValue === (string) $selected)>{{ $optionLabel }}</option>
+            @endforeach
+        @endif
         {{ $slot }}
     </select>
 </div>

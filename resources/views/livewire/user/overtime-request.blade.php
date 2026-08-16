@@ -5,15 +5,14 @@
                 :back-href="!$showModal ? route('home') : null"
                 :title="$showModal ? __('New Request') : __('Overtime Request')"
                 title-id="overtime-request-title"
+                module="leave"
                 class="border-b-0">
                 <x-slot name="icon">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-sky-50 text-indigo-700 ring-1 ring-inset ring-indigo-100 shadow-sm dark:from-indigo-900/30 dark:via-gray-800 dark:to-sky-900/20 dark:text-indigo-300 dark:ring-indigo-800/60">
-                        <x-heroicon-o-clock class="h-5 w-5" />
-                    </div>
+                    <x-heroicon-o-clock class="h-5 w-5" />
                 </x-slot>
                 <x-slot name="actions">
                     @if($showModal)
-                        <button wire:click="close" class="wcag-touch-target inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                        <button wire:click="close" class="wcag-touch-target inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50">
                             <x-heroicon-o-arrow-left class="h-5 w-5" />
                             <span>{{ __('Back') }}</span>
                         </button>
@@ -72,7 +71,7 @@
                                 placeholder="{{ __('e.g. Project Deadline') }}"
                             />
 
-                            <div class="flex flex-col-reverse items-stretch gap-2 border-t border-gray-100 pt-3 dark:border-gray-700 sm:flex-row sm:justify-end">
+                            <div class="flex flex-col-reverse items-stretch gap-2 border-t border-gray-100 pt-3 sm:flex-row sm:justify-end">
                                 <x-actions.secondary-button wire:click="close" wire:loading.attr="disabled">
                                     {{ __('Cancel') }}
                                 </x-actions.secondary-button>
@@ -100,15 +99,15 @@
                                 <article class="user-list-card">
                                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
                                             <x-heroicon-o-clock class="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <h4 class="text-sm font-semibold capitalize text-gray-900 dark:text-white">
+                                            <h4 class="text-sm font-semibold capitalize text-gray-900">
                                                 {{ $overtime->date->format('d M Y') }}
                                             </h4>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
-                                                {{ $overtime->start_time->format('H:i') }} - {{ $overtime->end_time->format('H:i') }}
+                                            <p class="text-xs text-gray-500 mb-0.5">
+                                                {{ \Carbon\Carbon::parse($overtime->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($overtime->end_time)->format('H:i') }}
                                                 <span class="mx-1">•</span>
                                                 {{ $overtime->duration_text }}
                                             </p>
@@ -117,10 +116,10 @@
                                     </div>
                                     <div class="text-right">
                                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                            @if($overtime->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400
-                                            @elseif($overtime->status === 'rejected') bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400
-                                            @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400 @endif">
-                                            {{ ucfirst($overtime->status) }}
+                                            @if($overtime->status === 'approved') bg-green-100 text-green-800
+                                            @elseif($overtime->status === 'rejected') bg-red-100 text-red-800
+                                            @else bg-yellow-100 text-yellow-800 @endif">
+                                            {{ $overtime->status instanceof \BackedEnum ? $overtime->status->label() : __(ucfirst((string) $overtime->status)) }}
                                         </span>
                                     </div>
                                     </div>

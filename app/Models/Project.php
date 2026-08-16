@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin IdeHelperProject
+ */
 class Project extends Model
 {
     use HasFactory;
@@ -54,7 +57,7 @@ class Project extends Model
 
     public function branch(): BelongsTo
     {
-        return $this->belongsTo(Branch::class, 'branch_id');
+        return $this->belongsTo(CompanyBranch::class, 'branch_id');
     }
 
     public function manager(): BelongsTo

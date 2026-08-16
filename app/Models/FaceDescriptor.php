@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Pgvector\Laravel\HasNeighbors;
 use Pgvector\Laravel\Vector;
 
+/**
+ * @mixin IdeHelperFaceDescriptor
+ */
 class FaceDescriptor extends Model
 {
     use HasFactory, HasNeighbors;

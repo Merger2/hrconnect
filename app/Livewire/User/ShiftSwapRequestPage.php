@@ -153,12 +153,10 @@ class ShiftSwapRequestPage extends Component
     {
         $user = Auth::user();
         $replacementUsers = User::query()
-            ->with('jobTitle')
             ->where('group', 'user')
             ->whereKeyNot($user->id)
-            ->orderByRaw('division_id = ? desc', [$user->division_id ?? 0])
             ->orderBy('name')
-            ->get(['id', 'name', 'division_id', 'job_title_id']);
+            ->get(['id', 'name']);
 
         return view('livewire.user.shift-swap-request-page', [
             'requests' => $this->shiftSwapRequests->paginateForUser($user),

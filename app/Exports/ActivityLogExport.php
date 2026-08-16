@@ -29,32 +29,26 @@ class ActivityLogExport implements FromCollection, WithColumnWidths, WithHeading
     {
         return [
             'ID',
-            'Log Name',
+            'Action',
             'Description',
-            'Subject Type',
-            'Subject ID',
-            'Causer Type',
-            'Causer ID',
-            'Causer Name',
-            'Properties',
+            'User',
+            'IP Address',
+            'Count',
             'Created At',
         ];
     }
 
     public function map($log): array
     {
-        $causer = $log->causer;
+        $user = $log->user;
 
         return [
             $log->id,
-            $log->log_name,
-            $log->description,
-            $log->subject_type ?? '-',
-            $log->subject_id ?? '-',
-            $log->causer_type ?? '-',
-            $log->causer_id ?? '-',
-            $causer?->name ?? $causer?->email ?? '-',
-            json_encode($log->properties ?? []),
+            $log->action ?? '-',
+            $log->description ?? '-',
+            $user?->name ?? $user?->email ?? '-',
+            $log->ip_address ?? '-',
+            (int) ($log->count ?? 1),
             $log->created_at?->format('Y-m-d H:i:s') ?? '-',
         ];
     }

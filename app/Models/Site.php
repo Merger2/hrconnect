@@ -9,6 +9,9 @@ use ParagonIE\CipherSweet\EncryptedRow;
 use Spatie\LaravelCipherSweet\Concerns\UsesCipherSweet;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
 
+/**
+ * @mixin IdeHelperSite
+ */
 class Site extends Model implements CipherSweetEncrypted
 {
     use HasFactory, UsesCipherSweet;

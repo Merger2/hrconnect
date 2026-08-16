@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\AttendanceServiceInterface;
 use App\Contracts\AuditServiceInterface;
+use App\Livewire\Admin\ImportExport\AttendanceImportExport;
+use App\Livewire\Admin\ImportExport\UserImportExport;
 use App\Models\Attendance;
 use App\Models\BpjsConfig;
 use App\Models\CompanySetting;
@@ -11,6 +13,7 @@ use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Payroll;
+use App\Models\Role;
 use App\Observers\AttendanceObserver;
 use App\Observers\BpjsConfigObserver;
 use App\Observers\CompanySettingObserver;
@@ -18,6 +21,7 @@ use App\Observers\EmployeeObserver;
 use App\Observers\HolidayObserver;
 use App\Observers\LeaveObserver;
 use App\Observers\PayrollObserver;
+use App\Observers\RoleObserver;
 use App\Services\Attendance\CommunityService;
 use App\Services\Attendance\GeofenceService;
 use App\Services\Audit\CommunityAuditService;
@@ -30,6 +34,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Livewire;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -63,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
         PgvectorSchema::register();
         $this->registerObservers();
         $this->registerViewComposers();
+        $this->registerLivewireAliases();
     }
 
     /**
@@ -134,6 +140,18 @@ class AppServiceProvider extends ServiceProvider
         CompanySetting::observe(CompanySettingObserver::class);
         Leave::observe(LeaveObserver::class);
         Payroll::observe(PayrollObserver::class);
+        Role::observe(RoleObserver::class);
+    }
+
+    /**
+     * Register explicit Livewire component aliases for routes that reference
+     * kebab names that do not match class auto-discovery (e.g. the
+     * import-export pages whose classes live in the ImportExport namespace).
+     */
+    protected function registerLivewireAliases(): void
+    {
+        app('livewire')->component('admin.import-export.user', UserImportExport::class);
+        app('livewire')->component('admin.import-export.attendance', AttendanceImportExport::class);
     }
 
     /**

@@ -10,7 +10,7 @@ class MailBranding
 {
     public static function companyName(): string
     {
-        return (string) Setting::getValue('app.company_name', config('app.name', 'PasPapan'));
+        return (string) Setting::getValue('app.company_name', config('app.name', 'PT Daya Cipta Mandiri Solusi'));
     }
 
     public static function fromAddress(): string

@@ -26,10 +26,10 @@
 @once
     <style>
         .ts-control {
-            background-color: rgba(248, 250, 252, 0.82);
+            background-color: color-mix(in srgb, var(--color-primary-50) 82%, transparent);
             border: 0 !important;
-            box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.8);
-            color: #0f172a;
+            box-shadow: inset 0 0 0 1px var(--color-primary-300);
+            color: var(--color-primary-900);
             border-radius: 1rem;
             padding: 0 2.5rem 0 1rem;
             font-size: 1rem;
@@ -79,7 +79,7 @@
             max-width: 100% !important;
             min-width: 1ch !important;
             height: auto !important;
-            color: #0f172a !important;
+            color: var(--color-primary-900) !important;
             font-size: 1rem !important;
             font-weight: 500 !important;
             line-height: 1.5rem !important;
@@ -102,15 +102,15 @@
         .ts-wrapper.focus .ts-control,
         .ts-wrapper.input-active .ts-control,
         .ts-wrapper.dropdown-active .ts-control {
-            background-color: #ffffff !important;
-            box-shadow: inset 0 0 0 1px #6ab45b, 0 0 0 4px rgba(106, 180, 91, 0.18) !important;
+            background-color: var(--color-surface) !important;
+            box-shadow: inset 0 0 0 1px var(--color-primary-700), 0 0 0 4px color-mix(in srgb, var(--color-primary-700) 18%, transparent) !important;
         }
 
         /* Dropdown */
         .ts-dropdown {
-            background-color: #ffffff !important;
-            border-color: #e5e7eb;
-            color: #111827;
+            background-color: var(--color-surface) !important;
+            border-color: var(--color-primary-200);
+            color: var(--color-primary-900);
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
             z-index: 99999 !important;
@@ -118,7 +118,7 @@
         }
 
         .ts-dropdown .ts-dropdown-content {
-            background-color: #ffffff !important;
+            background-color: var(--color-surface) !important;
         }
 
         .ts-dropdown .option {
@@ -128,53 +128,9 @@
         }
 
         .ts-dropdown .active {
-            background-color: #f3f4f6;
+            background-color: var(--color-primary-100);
             /* gray-100 */
-            color: #111827;
-        }
-
-        /* Dark Mode - Root selector to ensure specificity */
-        .dark .ts-control {
-            background-color: rgba(2, 6, 23, 0.45) !important;
-            box-shadow: inset 0 0 0 1px #1e293b !important;
-            color: #f8fafc !important;
-        }
-
-        .dark .ts-control input {
-            color: #f8fafc !important;
-        }
-
-        .dark .ts-wrapper.focus .ts-control,
-        .dark .ts-wrapper.input-active .ts-control,
-        .dark .ts-wrapper.dropdown-active .ts-control {
-            background-color: #020617 !important;
-            box-shadow: inset 0 0 0 1px #6ab45b, 0 0 0 4px rgba(106, 180, 91, 0.24) !important;
-        }
-
-        .dark .ts-dropdown {
-            background-color: #0f172a !important;
-            border-color: #1e293b !important;
-            color: #e2e8f0 !important;
-        }
-
-        .dark .ts-dropdown .ts-dropdown-content {
-            background-color: #0f172a !important;
-        }
-
-        .dark .ts-dropdown .option {
-            color: #e2e8f0 !important;
-        }
-
-        .dark .ts-dropdown .active {
-            background-color: #374151 !important;
-            /* bg-gray-700 */
-            color: #ffffff !important;
-        }
-
-        .dark .ts-dropdown .option:hover,
-        .dark .ts-dropdown .option.active {
-            background-color: #374151 !important;
-            color: #ffffff !important;
+            color: var(--color-primary-900);
         }
 
         .user-ui .ts-wrapper-user .ts-control,
@@ -195,8 +151,8 @@
         .user-ui .profile-modal .ts-wrapper.focus .ts-control,
         .user-ui .profile-modal .ts-wrapper.input-active .ts-control,
         .user-ui .profile-modal .ts-wrapper.dropdown-active .ts-control {
-            border-color: #6ab45b !important;
-            box-shadow: 0 0 0 4px rgba(106, 180, 91, 0.22) !important;
+            border-color: var(--color-primary-700) !important;
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary-700) 22%, transparent) !important;
         }
 
         .user-ui .ts-wrapper-user .ts-dropdown,
@@ -204,11 +160,6 @@
             background-color: var(--user-native-surface-strong) !important;
             border-color: var(--user-native-border) !important;
             color: inherit !important;
-        }
-
-        /* Input placeholder color in dark mode */
-        .dark .ts-control ::placeholder {
-            color: #64748b !important;
         }
 
         /* Chevron Arrow */
@@ -230,11 +181,6 @@
             /* Heroicons Chevron Down - Gray 500 */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9' /%3E%3C/svg%3E");
             background-size: contain;
-        }
-
-        .dark .ts-wrapper::after {
-            /* Heroicons Chevron Down - Gray 400 */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%239ca3af' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9' /%3E%3C/svg%3E");
         }
 
         /* High Z-Index for Dropdown */
@@ -261,23 +207,47 @@
 
 
 
-<div wire:ignore x-data="tomSelectInput(
-    @js($options),
-    @js($placeholder),
-    @if (isset($__livewire) && $wireModel) @entangle($attributes->wire('model')) @else @js($selected) @endif,
-    @js((bool) $disabled),
-    @js($wireModel),
-    @js((bool) $submitOnChange),
-    @js((bool) $livewireSetLive),
-    @js($dropdownDirection)
-)" class="{{ $wrapperClass }}" @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
+{{-- Inisialisasi TomSelect DIHAPUS dari x-data (fix race 2026-08-11): sebelumnya
+     `x-data="window.tomSelectInput ? tomSelectInput(...) : {}"` — kalau module
+     app.js belum selesai load saat Alpine mengevaluasi ekspresi ini, hasilnya `{}`
+     (silent) → dropdown tanpa handler sync (change tidak tersimpan, submit-on-change
+     mati). Sekarang x-data HANYA membawa model (entangle/x-modelable), dan init
+     TomSelect sepenuhnya di `initUiPickers` (resources/js/app.js, DOM-ready +
+     hook Livewire) yang deterministik. `value` = entangle (interceptor) atau
+     @js($selected) statis. --}}
+<div wire:ignore
+     x-data="{ value: @if (isset($__livewire) && $wireModel) @entangle($attributes->wire('model')) @else @js($selected) @endif }"
+     data-ui-tomselect-root
+     class="{{ $wrapperClass }}"
+     @if ($alpineModelAttributes->isNotEmpty()) x-modelable="value" {{ $alpineModelAttributes }} @endif>
 
     <select
         x-ref="select"
+        data-ui-tomselect
+        @if ($submitOnChange) data-submit-on-change="1" @endif
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $disabled ? 'disabled' : '' }}
         {{ $attributes->whereDoesntStartWith(['wire:model', 'x-model'])->except(['options', 'placeholder', 'selected', 'class', 'aria-label']) }}
         placeholder="{{ $placeholder }}">
+        {{-- Render :options (fix 2026-08-11: sebelumnya $options diterima tapi tidak
+             pernah dirender → dropdown berbasis options kosong, filter admin 0 opsi).
+             Bentuk didukung: list ['id'=>, 'name'=>] (mayoritas caller) dan asosiatif
+             value=>label. Slot ({{ $slot }}) tetap dirender setelahnya utk caller yang
+             mengirim option manual (mis. shift-swap empty option). --}}
+        @if (count($options))
+            @foreach ($options as $optionKey => $option)
+                @php
+                    if (is_array($option)) {
+                        $optionValue = $option['id'] ?? $optionKey;
+                        $optionLabel = $option['name'] ?? $optionValue;
+                    } else {
+                        $optionValue = $optionKey;
+                        $optionLabel = $option;
+                    }
+                @endphp
+                <option value="{{ $optionValue }}" @selected((string) $optionValue === (string) $selected)>{{ $optionLabel }}</option>
+            @endforeach
+        @endif
         {{ $slot }}
     </select>
 </div>

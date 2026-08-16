@@ -30,7 +30,7 @@ class WarmCacheCommand extends Command
     public function handle(): int
     {
         try {
-            $this->info('Warming HRConnect SSOT caches...');
+            $this->info('Warming application caches...');
             $this->newLine();
 
             // 1. Tarif TER (warm dengan query first bracket — DB will cache pages)

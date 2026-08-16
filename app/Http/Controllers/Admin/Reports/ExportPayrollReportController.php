@@ -22,8 +22,20 @@ class ExportPayrollReportController extends Controller
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
+        // Default tahun/bulan = periode berjalan; status hanya difilter bila
+        // eksplisit dan bukan 'all' (fix 500 Undefined array key "status" saat
+        // export dipanggil tanpa status + export kosong diam-diam saat 'all').
+        $filters = [
+            'year' => $validated['year'] ?? now()->year,
+            'month' => $validated['month'] ?? now()->month,
+        ];
+
+        if (! empty($validated['status']) && $validated['status'] !== 'all') {
+            $filters['status'] = $validated['status'];
+        }
+
         $filename = 'payroll-summary-report-'.now()->format('Ymd-His').'.xlsx';
 
-        return Excel::download(new PayrollWorkbookExport($request->user(), $validated), $filename);
+        return Excel::download(new PayrollWorkbookExport($request->user(), $filters), $filename);
     }
 }

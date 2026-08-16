@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use App\Support\DesignTokens;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -159,5 +160,63 @@ if (! function_exists('format_time')) {
         }
 
         return $time->format($formatString);
+    }
+}
+
+if (! function_exists('is_greeting_question')) {
+    /**
+     * Deteksi sapaan/obrolan ringan murni ("halo", "selamat sore", "apa kabar",
+     * "terima kasih") vs pertanyaan substantif ("halo, bagaimana cara cuti?").
+     * Dipakai KB chat: sapaan murni dijawab tanpa retrieval → tanpa panel Source
+     * (mencegah dokumen tidak relevan tampil saat user sekadar menyapa).
+     */
+    function is_greeting_question(string $question): bool
+    {
+        $normalized = mb_strtolower(preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $question) ?? '');
+        $tokens = preg_split('/\s+/u', trim($normalized)) ?: [];
+
+        if ($tokens === []) {
+            return false;
+        }
+
+        $greetings = [
+            'halo', 'hai', 'hi', 'hello', 'hey', 'yo',
+            'salam', 'assalamualaikum', 'assalamualikum', 'permisi', 'pagi',
+            'siang', 'sore', 'malam', 'selamat',
+            'apa', 'kabar', 'baik', 'terima', 'kasih', 'makasih', 'thanks', 'thank',
+            'good', 'morning', 'afternoon', 'evening',
+            'min', 'kak', 'bang', 'bu', 'pak', 'mbak', 'mas', 'bro', 'om', 'tante', 'admin',
+            'ya', 'nih', 'dong', 'sih', 'deh', 'yaa', 'dll',
+        ];
+
+        foreach ($tokens as $token) {
+            if (! in_array($token, $greetings, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+if (! function_exists('design_token')) {
+    /**
+     * Hex literal dari DesignTokens (renderer non-CSS: PDF Dompdf & email).
+     * Token-only rule (design.md): template pdf/email TIDAK boleh hardcode
+     * hex — selalu lewat token PHP ini.
+     */
+    function design_token(string $key, ?string $fallback = null): string
+    {
+        return DesignTokens::get($key, $fallback);
+    }
+}
+
+if (! function_exists('design_rgba')) {
+    /**
+     * Token hex → rgba(..) dengan alpha (email client mendukung rgba).
+     */
+    function design_rgba(string $key, float $alpha): string
+    {
+        return DesignTokens::rgba($key, $alpha);
     }
 }

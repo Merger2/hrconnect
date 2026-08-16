@@ -2,10 +2,16 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Employee;
 use App\Services\Security\FaceRecognitionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property Employee $resource
+ *
+ * @mixin Employee
+ */
 class ProfileResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -17,11 +23,11 @@ class ProfileResource extends JsonResource
             'full_name' => $this->full_name,
             'email' => $request->user()?->email,
             'phone' => $this->maskPhone($this->phone),
-            'join_date' => $this->join_date?->toDateString(),
-            'employment_type' => $this->employment_type?->value,
-            'status' => $this->status?->value,
-            'marital_status' => $this->marital_status?->value,
-            'gender' => $this->gender?->value,
+            'join_date' => $this->join_date->toDateString(),
+            'employment_type' => $this->employment_type->value,
+            'status' => $this->status->value,
+            'marital_status' => $this->marital_status->value,
+            'gender' => $this->gender->value,
             'blood_type' => $this->blood_type?->value,
             'branch' => BranchResource::make($this->whenLoaded('branch')),
             'division' => DivisionResource::make($this->whenLoaded('division')),

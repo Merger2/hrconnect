@@ -49,7 +49,7 @@ class UpcomingEventsWidget extends Component
         $this->selectedEvent = [
             'type' => __('Holiday'),
             'title' => $holiday->name,
-            'subtitle' => $holiday->date?->translatedFormat('l, d F Y'),
+            'subtitle' => $holiday->date->translatedFormat('l, d F Y'),
             'body' => __('National holiday or company calendar reminder.'),
             'tone' => 'danger',
         ];

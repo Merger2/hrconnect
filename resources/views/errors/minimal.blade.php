@@ -7,7 +7,7 @@
         <title>@yield('title') | {{ config('app.name') }}</title>
         <style>
             :root {
-                color-scheme: light dark;
+                color-scheme: light;
                 --bg: #f6faf4;
                 --surface: #ffffff;
                 --border: #e2e8f0;
@@ -15,18 +15,6 @@
                 --text-muted: #475569;
                 --accent: #57944a;
                 --accent-soft: #edf7ea;
-            }
-
-            @media (prefers-color-scheme: dark) {
-                :root {
-                    --bg: #020617;
-                    --surface: #0f172a;
-                    --border: #1e293b;
-                    --text: #f8fafc;
-                    --text-muted: #cbd5e1;
-                    --accent: #9bd28d;
-                    --accent-soft: rgba(155, 210, 141, 0.12);
-                }
             }
 
             * {

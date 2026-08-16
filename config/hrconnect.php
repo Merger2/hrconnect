@@ -15,7 +15,7 @@ return [
      * 0.15 ≈ 85% similarity. Lower = stricter matching.
      * Can be overridden via CompanySetting key 'face_distance_threshold'.
      */
-    'face_distance_threshold' => (float) env('FACE_DISTANCE_THRESHOLD', 0.4),
+    'face_distance_threshold' => (float) env('FACE_DISTANCE_THRESHOLD', 0.15),
 
     /*
      * Payroll: monthly working hours for hourly rate calculation.

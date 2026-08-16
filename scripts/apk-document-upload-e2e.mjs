@@ -4,10 +4,10 @@ import net from 'node:net';
 
 const appUrl = process.env.APP_URL || 'http://127.0.0.1:8000';
 const cdpPort = Number(process.env.CDP_PORT || 9222);
-const email = process.env.E2E_EMAIL || 'apk.e2e.user@paspapan.test';
+const email = process.env.E2E_EMAIL || 'apk.e2e.user@hrconnect.test';
 const password = process.env.E2E_PASSWORD || '12345678';
 const loginToken = process.env.E2E_LOGIN_TOKEN || 'local-apk-e2e';
-const filePath = process.env.E2E_FILE_PATH || '/tmp/paspapan-apk-document-upload-e2e.pdf';
+const filePath = process.env.E2E_FILE_PATH || '/tmp/hrconnect-apk-document-upload-e2e.pdf';
 const requestId = process.env.E2E_REQUEST_ID;
 
 if (!requestId) {
@@ -260,8 +260,8 @@ const uploadResult = await cdp.evaluate(`(async () => {
   const csrf = document.querySelector('meta[name="csrf-token"]').content;
   const body = new FormData();
   const file = new File(
-    ['%PDF-1.4\\n% PasPapan APK document upload E2E fixture\\n1 0 obj <<>> endobj\\ntrailer <<>>\\n%%EOF\\n'],
-    'paspapan-apk-document-upload-e2e.pdf',
+    ['%PDF-1.4\\n% HRConnect APK document upload E2E fixture\\n1 0 obj <<>> endobj\\ntrailer <<>>\\n%%EOF\\n'],
+    'hrconnect-apk-document-upload-e2e.pdf',
     { type: 'application/pdf' },
   );
 

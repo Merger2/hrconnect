@@ -18,7 +18,7 @@
         <x-admin.page-tools>
             <x-slot name="actions">
                 <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $maintenanceMode ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' }}">
+                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $maintenanceMode ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700' }}">
                     {{ $maintenanceMode ? __('Maintenance mode active') : __('System available') }}
                 </span>
             </x-slot>
@@ -28,12 +28,8 @@
                     class="mb-1.5 block" />
                 <div class="relative">
                     <span
-                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
-                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M9 3.5a5.5 5.5 0 1 0 3.472 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0a4 4 0 0 1-8 0Z"
-                                clip-rule="evenodd" />
-                        </svg>
+                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                        <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                     </span>
                     <x-forms.input id="maintenance-search" type="search" x-model.debounce.200ms="search"
                         placeholder="{{ __('Search cleanup, cache, backup, or recovery tasks...') }}"
@@ -58,42 +54,42 @@
         <dl class="grid grid-cols-3 gap-2 md:grid-cols-3 xl:grid-cols-6" role="region" aria-label="{{ __('System Statistics') }}">
             @foreach ($systemStats as $stat)
                 <div @class([
-                    'rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 dark:border-slate-700/80 dark:bg-slate-900/85',
+                    'rounded-xl border border-slate-200/80 bg-white px-3 py-2.5',
                 ])>
-                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-600">
                         {{ $stat['label'] }}
                     </dt>
-                    <dd class="mt-1 text-sm font-bold text-slate-950 dark:text-white">{{ $stat['value'] }}</dd>
+                    <dd class="mt-1 text-sm font-bold text-slate-950">{{ $stat['value'] }}</dd>
                 </div>
             @endforeach
         </dl>
 
         <div class="grid gap-3 xl:grid-cols-[minmax(0,1.45fr)_minmax(17rem,1fr)]">
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                    <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('System Health') }}</h2>
+                <div class="border-b border-slate-200/70 px-4 py-3">
+                    <h2 class="text-sm font-bold text-slate-950">{{ __('System Health') }}</h2>
                 </div>
                 <div class="grid gap-2 px-4 py-3 md:grid-cols-2">
                     @foreach ($healthChecks as $check)
                         <div wire:key="health-check-{{ \Illuminate\Support\Str::slug($check['label']) }}" @class([
-                            'rounded-lg border bg-white p-3 dark:bg-slate-900/70',
-                            'border-emerald-200/70 dark:border-emerald-900/30' => $check['status'] === 'success',
-                            'border-amber-200/70 dark:border-amber-900/30' => $check['status'] === 'warning',
-                            'border-rose-200/70 dark:border-rose-900/30' => $check['status'] === 'danger',
-                            'border-slate-200/70 dark:border-slate-700/70' => ! in_array($check['status'], ['success', 'warning', 'danger'], true),
+                            'rounded-lg border bg-white p-3',
+                            'border-emerald-200/70' => $check['status'] === 'success',
+                            'border-amber-200/70' => $check['status'] === 'warning',
+                            'border-rose-200/70' => $check['status'] === 'danger',
+                            'border-slate-200/70' => ! in_array($check['status'], ['success', 'warning', 'danger'], true),
                         ])>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span @class([
                                         'h-2 w-2 rounded-full',
-                                        'bg-emerald-500 dark:bg-emerald-400' => $check['status'] === 'success',
-                                        'bg-amber-500 dark:bg-amber-400' => $check['status'] === 'warning',
-                                        'bg-rose-500 dark:bg-rose-400' => $check['status'] === 'danger',
-                                        'bg-slate-400 dark:bg-slate-500' => ! in_array($check['status'], ['success', 'warning', 'danger'], true),
+                                        'bg-emerald-500' => $check['status'] === 'success',
+                                        'bg-amber-500' => $check['status'] === 'warning',
+                                        'bg-rose-500' => $check['status'] === 'danger',
+                                        'bg-slate-400' => ! in_array($check['status'], ['success', 'warning', 'danger'], true),
                                     ])  role="img" aria-label="{{ ucfirst($check['status']) }}"></span>
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">{{ $check['label'] }}</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">{{ $check['label'] }}</p>
                                 </div>
-                                <p class="text-sm font-bold text-slate-950 dark:text-white">{{ $check['value'] }}</p>
+                                <p class="text-sm font-bold text-slate-950">{{ $check['value'] }}</p>
                             </div>
                         </div>
                     @endforeach
@@ -102,28 +98,28 @@
 
             <div class="space-y-3">
                 <x-admin.insight-panel class="overflow-hidden">
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Runtime Profile') }}</h2>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-sm font-bold text-slate-950">{{ __('Runtime Profile') }}</h2>
                     </div>
                     <dl class="grid gap-x-4 gap-y-2 px-4 py-3 sm:grid-cols-2">
                         @foreach ($environmentSummary as $label => $value)
                             <div wire:key="env-summary-{{ \Illuminate\Support\Str::slug($label) }}">
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">{{ $label }}</dt>
-                                <dd class="mt-1 text-xs font-medium text-slate-900 dark:text-white">{{ $value }}</dd>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-600">{{ $label }}</dt>
+                                <dd class="mt-1 text-xs font-medium text-slate-900">{{ $value }}</dd>
                             </div>
                         @endforeach
                     </dl>
                 </x-admin.insight-panel>
 
                 <x-admin.insight-panel class="overflow-hidden">
-                    <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                        <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Operator Notes') }}</h2>
+                    <div class="border-b border-slate-200/70 px-4 py-3">
+                        <h2 class="text-sm font-bold text-slate-950">{{ __('Operator Notes') }}</h2>
                     </div>
                     @if (count($recommendedActions) > 0)
-                        <ul class="space-y-1.5 px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
+                        <ul class="space-y-1.5 px-4 py-3 text-xs text-slate-600">
                             @foreach ($recommendedActions as $action)
                                 <li wire:key="recommended-action-{{ md5($action) }}" class="flex items-start gap-2">
-                                    <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                    <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span>
                                     <span>{{ $action }}</span>
                                 </li>
                             @endforeach
@@ -137,59 +133,59 @@
 
         <div x-show="matchesPanel('ops', 'Operations Console', 'Control maintenance mode, clear framework caches, and inspect backup readiness.')">
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-4 py-3 dark:border-slate-800">
-                    <h2 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Operations Console') }}</h2>
+                <div class="border-b border-slate-200/70 px-4 py-3">
+                    <h2 class="text-sm font-bold text-slate-950">{{ __('Operations Console') }}</h2>
                 </div>
                 <div class="grid gap-3 px-4 py-3 lg:items-start lg:grid-cols-3">
                     {{-- Maintenance Mode --}}
-                    <div class="rounded-lg border border-slate-200/70 bg-slate-50/60 p-3 dark:border-slate-700/70 dark:bg-slate-900/40">
+                    <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3">
                         <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-xs font-bold text-slate-950 dark:text-white">{{ __('Maintenance Mode') }}</h3>
+                            <h3 class="text-xs font-bold text-slate-950">{{ __('Maintenance Mode') }}</h3>
                             @if ($canManageMaintenance)
                                 <x-forms.switch wire:click="toggleMaintenanceMode" :checked="$maintenanceMode" size="lg"
                                     :label="__('Toggle maintenance mode')" checked-class="bg-amber-500"
                                     unchecked-class="bg-emerald-500" />
                             @else
-                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ __('Read-only') }}</span>
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{{ __('Read-only') }}</span>
                             @endif
                         </div>
                         <x-admin.alert :tone="$maintenanceMode ? 'warning' : 'success'">
-                            <p class="text-xs {{ $maintenanceMode ? 'text-amber-800 dark:text-amber-200' : 'text-emerald-800 dark:text-emerald-200' }}">
+                            <p class="text-xs {{ $maintenanceMode ? 'text-amber-800' : 'text-emerald-800' }}">
                                 {{ $maintenanceMode ? __('App paused. Admins can still operate.') : __('Application is open to all users.') }}
                             </p>
                         </x-admin.alert>
                     </div>
 
                     {{-- Cache Toolkit --}}
-                    <div class="rounded-lg border border-slate-200/70 bg-white p-3 dark:border-slate-700/70 dark:bg-slate-900/80">
-                        <h3 class="text-xs font-bold text-slate-950 dark:text-white mb-2">{{ __('Cache Toolkit') }}</h3>
+                    <div class="rounded-lg border border-slate-200/70 bg-white p-3">
+                        <h3 class="text-xs font-bold text-slate-950 mb-2">{{ __('Cache Toolkit') }}</h3>
                         @if ($canManageMaintenance)
                             <x-actions.button type="button" wire:click="clearApplicationCaches" class="w-full justify-center" size="sm">
                                 {{ __('Clear All Caches') }}
                             </x-actions.button>
                         @else
-                            <p class="text-xs text-slate-600 dark:text-slate-300">{{ __('Read-only access') }}</p>
+                            <p class="text-xs text-slate-600">{{ __('Read-only access') }}</p>
                         @endif
                     </div>
 
                     {{-- Backup Readiness --}}
-                    <div class="rounded-lg border border-slate-200/70 bg-slate-50/60 p-3 dark:border-slate-700/70 dark:bg-slate-900/40">
+                    <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3">
                         <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-xs font-bold text-slate-950 dark:text-white">{{ __('Backup Readiness') }}</h3>
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ $backupOverview['files'] }} {{ __('files') }}</span>
+                            <h3 class="text-xs font-bold text-slate-950">{{ __('Backup Readiness') }}</h3>
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{{ $backupOverview['files'] }} {{ __('files') }}</span>
                         </div>
                         <dl class="grid grid-cols-3 gap-2" aria-label="{{ __('Backup Details') }}">
-                            <div class="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700/70">
-                                <dt class="text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">{{ __('Retained') }}</dt>
-                                <dd class="text-xs font-bold text-slate-950 dark:text-white">{{ $backupOverview['files'] }}</dd>
+                            <div class="rounded-md bg-white px-2 py-1.5 border border-slate-200/70">
+                                <dt class="text-xs font-semibold uppercase text-slate-600">{{ __('Retained') }}</dt>
+                                <dd class="text-xs font-bold text-slate-950">{{ $backupOverview['files'] }}</dd>
                             </div>
-                            <div class="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700/70">
-                                <dt class="text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">{{ __('Storage') }}</dt>
-                                <dd class="text-xs font-bold text-slate-950 dark:text-white">{{ $backupOverview['size'] }}</dd>
+                            <div class="rounded-md bg-white px-2 py-1.5 border border-slate-200/70">
+                                <dt class="text-xs font-semibold uppercase text-slate-600">{{ __('Storage') }}</dt>
+                                <dd class="text-xs font-bold text-slate-950">{{ $backupOverview['size'] }}</dd>
                             </div>
-                            <div class="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700/70">
-                                <dt class="text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">{{ __('Freshness') }}</dt>
-                                <dd class="text-xs font-bold text-slate-950 dark:text-white">{{ $backupOverview['latest_age'] }}</dd>
+                            <div class="rounded-md bg-white px-2 py-1.5 border border-slate-200/70">
+                                <dt class="text-xs font-semibold uppercase text-slate-600">{{ __('Freshness') }}</dt>
+                                <dd class="text-xs font-bold text-slate-950">{{ $backupOverview['latest_age'] }}</dd>
                             </div>
                         </dl>
                     </div>
@@ -199,35 +195,35 @@
 
         <div x-show="matchesPanel('cleanup', 'Database Cleanup', 'Delete obsolete records, queue artifacts, cache rows, and managed file uploads.')">
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Database Cleanup') }}</h2>
+                <div class="border-b border-slate-200/70 px-5 py-4">
+                    <h2 class="text-lg font-semibold text-slate-950">{{ __('Database Cleanup') }}</h2>
                 </div>
 
                 <div class="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,1fr)]">
                     <div class="grid gap-4 sm:grid-cols-2">
                         @foreach ($cleanupTargets as $target)
-                            <label wire:key="cleanup-target-{{ $target['model'] }}" class="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900/80">
+                            <label wire:key="cleanup-target-{{ $target['model'] }}" class="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-white p-4">
                                 <x-forms.checkbox wire:model="{{ $target['model'] }}" class="mt-1" />
                                 <span class="min-w-0 flex-1">
                                     <span class="flex flex-wrap items-center gap-2">
-                                        <span class="block text-sm font-semibold text-slate-950 dark:text-white">{{ $target['label'] }}</span>
-                                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                        <span class="block text-sm font-semibold text-slate-950">{{ $target['label'] }}</span>
+                                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
                                             {{ number_format($target['count']) }} {{ $target['unit'] }}
                                         </span>
                                         @if (!empty($target['meta']))
-                                            <span class="rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                                            <span class="rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
                                                 {{ $target['meta'] }}
                                             </span>
                                         @endif
                                     </span>
-                                    <span class="mt-1 block text-sm text-slate-600 dark:text-slate-300">{{ $target['description'] }}</span>
+                                    <span class="mt-1 block text-sm text-slate-600">{{ $target['description'] }}</span>
                                 </span>
                             </label>
                         @endforeach
                     </div>
 
-                    <div class="space-y-4 rounded-xl border border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-700/70 dark:bg-slate-900/40">
-                        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">{{ __('Destructive Guardrail') }}</h3>
+                    <div class="space-y-4 rounded-xl border border-slate-200/70 bg-slate-50 p-4">
+                        <h3 class="text-base font-semibold text-slate-900">{{ __('Destructive Guardrail') }}</h3>
                         <p class="sr-only">
                             {{ __('Type CLEAN before executing any destructive task. Admin and superadmin accounts are never removed by the employee cleanup option.') }}
                         </p>
@@ -264,29 +260,29 @@
 
         <div x-show="matchesPanel('backup', 'Backup Center', 'Create signed SQL backups and manage retained maintenance snapshots.')" wire:poll.15s>
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Backup Center') }}</h2>
+                <div class="border-b border-slate-200/70 px-5 py-4">
+                    <h2 class="text-lg font-semibold text-slate-950">{{ __('Backup Center') }}</h2>
                 </div>
 
                 <div class="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)]">
-                    <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-3.5 dark:border-slate-700/70 dark:bg-slate-900/40">
-                        <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Create Backup') }}</h3>
+                    <div class="rounded-xl border border-slate-200/70 bg-slate-50 p-3.5">
+                        <h3 class="text-base font-semibold text-slate-950">{{ __('Create Backup') }}</h3>
                         <p class="sr-only">
                             {{ __('Run direct downloads for immediate SQL export or queue longer backup jobs in the background.') }}
                         </p>
 
                         <div class="mt-3 grid gap-2.5 sm:grid-cols-3">
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Retained') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ $backupOverview['files'] }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Retained') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ $backupOverview['files'] }}</p>
                             </div>
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Backup Storage') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ $backupOverview['size'] }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Backup Storage') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ $backupOverview['size'] }}</p>
                             </div>
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Latest Age') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ $backupOverview['latest_age'] }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Latest Age') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ $backupOverview['latest_age'] }}</p>
                             </div>
                         </div>
 
@@ -320,7 +316,7 @@
                         </div>
 
                         @if ($latestBackup)
-                            <div class="mt-3 rounded-lg border border-slate-200/70 bg-white px-3.5 py-3 text-sm text-slate-700 dark:border-slate-700/70 dark:bg-slate-900/80 dark:text-slate-200">
+                            <div class="mt-3 rounded-lg border border-slate-200/70 bg-white px-3.5 py-3 text-sm text-slate-700">
                                 <p class="font-semibold">{{ __('Latest retained backup') }}</p>
                                 <p class="mt-1">{{ $latestBackup['filename'] }}</p>
                                 <p class="mt-1 text-xs">{{ $latestBackup['type_label'] }} · {{ $latestBackup['size_human'] }} · {{ $latestBackup['completed_at_human'] }}</p>
@@ -328,28 +324,28 @@
                         @endif
 
                         <div class="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Queued') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ number_format($backupJobSummary['queued']) }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Queued') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ number_format($backupJobSummary['queued']) }}</p>
                             </div>
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Running') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ number_format($backupJobSummary['running']) }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Running') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ number_format($backupJobSummary['running']) }}</p>
                             </div>
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Completed') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ number_format($backupJobSummary['completed']) }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Completed') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ number_format($backupJobSummary['completed']) }}</p>
                             </div>
-                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/80">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{{ __('Failed') }}</p>
-                                <p class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{{ number_format($backupJobSummary['failed']) }}</p>
+                            <div class="rounded-lg border border-slate-200/70 bg-white px-3 py-2.5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Failed') }}</p>
+                                <p class="mt-2 text-sm font-semibold text-slate-950">{{ number_format($backupJobSummary['failed']) }}</p>
                             </div>
                         </div>
 
-                        <form wire:submit.prevent="saveBackupAutomationSettings" class="mt-3 space-y-3.5 rounded-xl border border-slate-200/70 bg-white p-3.5 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <form wire:submit.prevent="saveBackupAutomationSettings" class="mt-3 space-y-3.5 rounded-xl border border-slate-200/70 bg-white p-3.5">
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
-                                    <h4 class="text-sm font-semibold text-slate-950 dark:text-white">{{ __('Backup Automation') }}</h4>
+                                    <h4 class="text-sm font-semibold text-slate-950">{{ __('Backup Automation') }}</h4>
                                     <p class="sr-only">
                                         {{ __('Schedule routine backups and prune retained artifacts automatically.') }}
                                     </p>
@@ -357,7 +353,7 @@
 
                                 <label class="flex items-center gap-3">
                                     <x-forms.checkbox wire:model.live="backupScheduleEnabled" />
-                                    <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('Automation enabled') }}</span>
+                                    <span class="text-sm font-medium text-slate-700">{{ __('Automation enabled') }}</span>
                                 </label>
                             </div>
 
@@ -410,9 +406,9 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-lg border border-slate-200/70 bg-slate-50/80 px-3.5 py-3 text-sm text-slate-600 dark:border-slate-700/70 dark:bg-slate-950/40 dark:text-slate-300">
+                            <div class="rounded-lg border border-slate-200/70 bg-slate-50 px-3.5 py-3 text-sm text-slate-600">
                                 @if ($backupScheduleSummary['enabled'])
-                                    <p class="font-medium text-slate-900 dark:text-white">
+                                    <p class="font-medium text-slate-900">
                                         {{ __('Next run: :time', ['time' => $backupScheduleSummary['next_run_human'] ?? __('Not available')]) }}
                                     </p>
                                     <p class="mt-1">
@@ -422,7 +418,7 @@
                                         @endif
                                     </p>
                                 @else
-                                    <p class="font-medium text-slate-900 dark:text-white">{{ __('Disabled') }}</p>
+                                    <p class="font-medium text-slate-900">{{ __('Disabled') }}</p>
                                     <p class="sr-only">{{ __('Automation is disabled. Manual backups remain available, but no scheduled snapshots or retention cleanup will run.') }}</p>
                                 @endif
                             </div>
@@ -436,15 +432,15 @@
                     </div>
 
                     <div class="space-y-3">
-                        <div class="rounded-xl border border-slate-200/70 bg-white p-3.5 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <div class="rounded-xl border border-slate-200/70 bg-white p-3.5">
                             <div class="flex items-center justify-between gap-4">
                                 <div>
-                                    <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Retained Backups') }}</h3>
+                                    <h3 class="text-base font-semibold text-slate-950">{{ __('Retained Backups') }}</h3>
                                     <p class="sr-only">
                                         {{ __('Completed backup artifacts available for later download or cleanup.') }}
                                     </p>
                                 </div>
-                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                                     {{ count($backups) }} {{ __('files') }}
                                 </span>
                             </div>
@@ -452,15 +448,15 @@
                             @if (count($backups) > 0)
                                 <div class="mt-3 space-y-2.5">
                                     @foreach ($backups as $backup)
-                                        <div wire:key="retained-backup-{{ $backup['id'] }}" class="flex flex-col gap-3 rounded-lg border border-slate-200/70 px-4 py-3 dark:border-slate-700/70 sm:flex-row sm:items-center sm:justify-between">
+                                        <div wire:key="retained-backup-{{ $backup['id'] }}" class="flex flex-col gap-3 rounded-lg border border-slate-200/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                                             <div class="min-w-0">
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <p class="truncate text-sm font-semibold text-slate-950 dark:text-white">{{ $backup['filename'] }}</p>
-                                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                    <p class="truncate text-sm font-semibold text-slate-950">{{ $backup['filename'] }}</p>
+                                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
                                                         {{ $backup['type_label'] }}
                                                     </span>
                                                 </div>
-                                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                <p class="mt-1 text-xs text-slate-500">
                                                     {{ $backup['size_human'] }} · {{ $backup['completed_at_human'] }} @if ($backup['requested_by']) · {{ $backup['requested_by'] }} @endif
                                                 </p>
                                             </div>
@@ -488,15 +484,15 @@
                             @endif
                         </div>
 
-                        <div class="rounded-xl border border-slate-200/70 bg-white p-3.5 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <div class="rounded-xl border border-slate-200/70 bg-white p-3.5">
                             <div class="flex items-center justify-between gap-4">
                                 <div>
-                                    <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Backup Job Runs') }}</h3>
+                                    <h3 class="text-base font-semibold text-slate-950">{{ __('Backup Job Runs') }}</h3>
                                     <p class="sr-only">
                                         {{ __('Recent queued backup activity across database and application snapshots.') }}
                                     </p>
                                 </div>
-                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                                     {{ count($backupRuns) }} {{ __('runs') }}
                                 </span>
                             </div>
@@ -506,35 +502,35 @@
                                     @foreach ($backupRuns as $run)
                                         @php
                                             $statusClasses = match ($run['status']) {
-                                                'completed' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-                                                'failed' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
-                                                'running' => 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
-                                                'queued' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-                                                'deleted' => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-                                                default => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                                                'completed' => 'bg-emerald-100 text-emerald-700',
+                                                'failed' => 'bg-rose-100 text-rose-700',
+                                                'running' => 'bg-sky-100 text-sky-700',
+                                                'queued' => 'bg-amber-100 text-amber-700',
+                                                'deleted' => 'bg-slate-100 text-slate-700',
+                                                default => 'bg-slate-100 text-slate-700',
                                             };
                                         @endphp
-                                        <div wire:key="backup-run-{{ $run['id'] }}" class="rounded-lg border border-slate-200/70 px-4 py-3 dark:border-slate-700/70">
+                                        <div wire:key="backup-run-{{ $run['id'] }}" class="rounded-lg border border-slate-200/70 px-4 py-3">
                                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                                 <div class="min-w-0">
                                                     <div class="flex flex-wrap items-center gap-2">
-                                                        <p class="text-sm font-semibold text-slate-950 dark:text-white">{{ $run['type_label'] }}</p>
+                                                        <p class="text-sm font-semibold text-slate-950">{{ $run['type_label'] }}</p>
                                                         <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $statusClasses }}">
                                                             {{ \Illuminate\Support\Str::headline($run['status']) }}
                                                         </span>
                                                     </div>
-                                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                    <p class="mt-1 text-xs text-slate-500">
                                                         {{ $run['created_at_human'] }} @if ($run['requested_by']) · {{ $run['requested_by'] }} @endif @if ($run['size_human']) · {{ $run['size_human'] }} @endif
                                                     </p>
                                                     @if ($run['file_name'])
-                                                        <p class="mt-2 truncate text-sm text-slate-600 dark:text-slate-300">{{ $run['file_name'] }}</p>
+                                                        <p class="mt-2 truncate text-sm text-slate-600">{{ $run['file_name'] }}</p>
                                                     @endif
                                                     @if ($run['error_message'])
-                                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $run['error_message'] }}</p>
+                                                        <p class="mt-2 text-sm text-rose-600">{{ $run['error_message'] }}</p>
                                                     @endif
                                                 </div>
 
-                                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ $run['updated_at_human'] }}</p>
+                                                <p class="text-xs text-slate-500">{{ $run['updated_at_human'] }}</p>
                                             </div>
                                         </div>
                                     @endforeach
@@ -552,15 +548,15 @@
 
         <div x-show="matchesPanel('restore', 'Restore Center', 'Recover the database from a signed SQL backup with explicit confirmation.')">
             <x-admin.insight-panel class="overflow-hidden">
-                <div class="border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Restore Center') }}</h2>
+                <div class="border-b border-slate-200/70 px-5 py-4">
+                    <h2 class="text-lg font-semibold text-slate-950">{{ __('Restore Center') }}</h2>
                 </div>
 
                 <div class="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,1fr)]">
                     @if ($canManageBackups)
                         <form wire:submit.prevent="restoreDatabase" class="space-y-4">
                             <x-admin.alert tone="danger">
-                                <p class="text-xs font-semibold text-rose-800 dark:text-rose-200">{{ __('Danger') }}</p>
+                                <p class="text-xs font-semibold text-rose-800">{{ __('Danger') }}</p>
                                 <p class="sr-only">
                                     {{ __('Restoring a database will overwrite current records. Confirm the target environment and backup origin before continuing.') }}
                                 </p>
@@ -602,8 +598,8 @@
                         </x-admin.alert>
                     @endif
 
-                    <div class="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4 dark:border-slate-700/70 dark:bg-slate-900/40">
-                        <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ __('Restore Requirements') }}</h3>
+                    <div class="rounded-xl border border-slate-200/70 bg-slate-50 p-4">
+                        <h3 class="text-base font-semibold text-slate-950">{{ __('Restore Requirements') }}</h3>
                         <ul class="sr-only">
                             <li>{{ __('Only `.sql` backups generated and signed by this application are accepted.') }}</li>
                             <li>{{ __('Foreign key checks are disabled only during replay and re-enabled automatically afterward.') }}</li>

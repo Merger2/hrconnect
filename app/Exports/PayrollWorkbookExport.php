@@ -36,7 +36,7 @@ class PayrollWorkbookExport implements WithMultipleSheets
     protected function getPayrolls(): Collection
     {
         return Payroll::with('employee')
-            ->where('status', $this->filters['status'])
+            ->when(isset($this->filters['status']), fn ($q) => $q->where('status', $this->filters['status']))
             ->where('period', sprintf('%04d-%02d', $this->filters['year'], $this->filters['month']))
             ->get();
     }
@@ -57,8 +57,8 @@ class PayrollSummarySheet implements FromCollection, WithHeadings, WithTitle
             $employee = $payroll->employee;
 
             return [
-                'Employee Name' => $employee?->full_name ?? '',
-                'NIP' => $employee?->nip ?? '',
+                'Employee Name' => $employee->full_name ?? '',
+                'NIP' => $employee->nip ?? '',
                 'Period' => $payroll->period,
                 'Basic Salary' => (float) $payroll->basic_salary,
                 'Allowances' => (float) $payroll->total_allowance,
@@ -169,8 +169,8 @@ class CoretaxPph21Sheet implements FromCollection, WithHeadings, WithTitle
             $taxable = $gross - $nonTaxable;
 
             return [
-                'Employee NIP' => $employee?->nip ?? '',
-                'Employee Name' => $employee?->full_name ?? '',
+                'Employee NIP' => $employee->nip ?? '',
+                'Employee Name' => $employee->full_name ?? '',
                 'Period' => $payroll->period,
                 'Gross Income' => $gross,
                 'Taxable Income' => max(0, $taxable),

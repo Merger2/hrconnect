@@ -111,7 +111,7 @@ class ReimbursementController extends Controller
         $query = Reimbursement::with('employee:id,employee_number,full_name', 'category:id,name')
             ->orderBy('created_at', 'desc');
 
-        if (! $user->hasRole(['super-admin', 'hr-manager', 'finance'])) {
+        if (! $user->hasRole(['super-admin', 'admin', 'finance'])) {
             if ($user->can('approve_reimbursements_l1') && $user->employee) {
                 $query->where(function ($q) use ($user) {
                     $q->where('employee_id', $user->employee->id)
@@ -188,6 +188,8 @@ class ReimbursementController extends Controller
     #[Endpoint(title: 'List Reimbursement Categories', description: 'Get active reimbursement categories.')]
     public function categories(): JsonResponse
     {
+        $this->authorize('viewAny', Reimbursement::class);
+
         $categories = ReimbursementCategory::where('is_active', true)
             ->orderBy('name')
             ->get();

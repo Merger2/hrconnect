@@ -54,7 +54,7 @@ class AppraisalForm extends Form
         $this->evaluator_id = $appraisal->evaluator_id;
         $this->calibrator_id = $appraisal->calibrator_id;
         $this->period = $appraisal->period;
-        $this->review_date = $appraisal->review_date?->format('Y-m-d');
+        $this->review_date = $appraisal->review_date->format('Y-m-d');
         $this->meeting_date = $appraisal->meeting_date?->format('Y-m-d');
         $this->final_score = $appraisal->final_score;
         $this->status = $appraisal->status;

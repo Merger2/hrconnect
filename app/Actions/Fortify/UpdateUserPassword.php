@@ -27,6 +27,11 @@ class UpdateUserPassword implements UpdatesUserPasswords
 
         $user->forceFill([
             'password' => Hash::make($input['password']),
+            // Password baru = terakhir diubah sekarang — konsisten dengan
+            // ResetUserPassword & ProfileService::changePassword, supaya
+            // CheckPasswordExpired tidak menganggap password expired setelah
+            // user baru saja menggantinya lewat halaman profile.
+            'password_changed_at' => now(),
         ])->save();
     }
 }

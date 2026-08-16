@@ -12,10 +12,10 @@
 ]) }}
 
 <div class="email-section" style="text-align: center;">
-    <p style="margin-bottom: 8px; color: #44733a; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em;">
+    <p style="margin-bottom: 8px; color: {{ design_token('brand-green-700') }}; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em;">
         {{ __('Verification Code') }}
     </p>
-    <p style="margin: 0; color: #163020; font-size: 28px; font-family: 'Courier New', monospace; font-weight: 800; line-height: 1.2; letter-spacing: 0.32em;">
+    <p style="margin: 0; color: {{ design_token('brand-green-950') }}; font-size: 28px; font-family: 'Courier New', monospace; font-weight: 800; line-height: 1.2; letter-spacing: 0.32em;">
         {{ $otp }}
     </p>
 </div>

@@ -14,7 +14,7 @@ class HrChecklistTaskAttachmentController extends Controller
     {
         $this->authorize('downloadAttachment', $task);
 
-        abort_unless($task->attachment_path, 404);
+        abort_unless((bool) $task->attachment_path, 404);
 
         $path = (string) $task->attachment_path;
         abort_unless($validator->isSafeRelativePath($path), 404);

@@ -68,7 +68,7 @@ class OvertimeController extends Controller
         $query = Overtime::with('employee:id,employee_number,full_name')
             ->orderBy('date', 'desc');
 
-        if (! $user->hasRole(['super-admin', 'hr-manager'])) {
+        if (! $user->hasRole(['super-admin', 'admin'])) {
             if ($user->can('approve_overtimes_l1') && $user->employee) {
                 $query->where(function ($q) use ($user) {
                     $q->where('employee_id', $user->employee->id)
@@ -119,7 +119,7 @@ class OvertimeController extends Controller
         $this->authorize('delete', $overtime);
 
         DB::transaction(function () use ($overtime): void {
-            $overtime->details()->delete();
+            $overtime->approvals()->delete();
             $overtime->delete();
         });
 
@@ -129,11 +129,7 @@ class OvertimeController extends Controller
         ]);
     }
 
-    public function update(Request $request, Overtime $overtime): JsonResponse
-    {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Update overtime via API not supported.',
-        ], 400);
-    }
+    // Mock-miss fix (2026-08-16): method `update()` stub-400 (selalu
+    // "Update overtime via API not supported") dihapus bersama route PUT-nya —
+    // operasi yang tidak didukung tidak boleh tampil di permukaan API.
 }

@@ -30,27 +30,27 @@
     </div>
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm">
             <x-forms.checkbox class="mt-1" wire:model="counts_against_quota" @disabled($category === \App\Models\LeaveType::CATEGORY_SICK) />
             <span>
-                <span class="block font-semibold text-slate-900 dark:text-white">{{ __('Uses annual quota') }}</span>
-                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ __('Sick leave always ignores quota.') }}</span>
+                <span class="block font-semibold text-slate-900">{{ __('Uses annual quota') }}</span>
+                <span class="mt-0.5 block text-xs text-slate-500">{{ __('Sick leave always ignores quota.') }}</span>
             </span>
         </label>
 
-        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm">
             <x-forms.checkbox class="mt-1" wire:model="requires_attachment" />
             <span>
-                <span class="block font-semibold text-slate-900 dark:text-white">{{ __('Requires attachment') }}</span>
-                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ __('Useful for sick, birth, umrah, or permit documents.') }}</span>
+                <span class="block font-semibold text-slate-900">{{ __('Requires attachment') }}</span>
+                <span class="mt-0.5 block text-xs text-slate-500">{{ __('Useful for sick, birth, umrah, or permit documents.') }}</span>
             </span>
         </label>
 
-        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm">
             <x-forms.checkbox class="mt-1" wire:model="is_active" />
             <span>
-                <span class="block font-semibold text-slate-900 dark:text-white">{{ __('Active') }}</span>
-                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ __('Inactive types are hidden from employee requests.') }}</span>
+                <span class="block font-semibold text-slate-900">{{ __('Active') }}</span>
+                <span class="mt-0.5 block text-xs text-slate-500">{{ __('Inactive types are hidden from employee requests.') }}</span>
             </span>
         </label>
     </div>

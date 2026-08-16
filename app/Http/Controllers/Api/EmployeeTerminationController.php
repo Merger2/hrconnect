@@ -25,9 +25,11 @@ class EmployeeTerminationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
+        // Status terminasi memakai enum EmployeeStatus (TERMINATED='terminated');
+        // 'dismissed' tetap disertakan untuk kompatibilitas data legacy.
         $terminations = Employee::query()
             ->whereNotNull('status')
-            ->whereIn('status', ['resigned', 'dismissed', 'deceased'])
+            ->whereIn('status', ['resigned', 'terminated', 'dismissed', 'deceased'])
             ->when(! $user->can('view_employees'), fn ($q) => $q->where('company_id', $user->company_id))
             ->get(['id', 'full_name', 'status', 'resign_date', 'termination_reason']);
 

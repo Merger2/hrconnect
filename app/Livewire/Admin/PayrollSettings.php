@@ -106,8 +106,10 @@ final class PayrollSettings extends Component
         $this->name = $component->name;
         $this->type = $component->type;
         $this->calculation_type = $component->calculation_type ?? 'fixed';
-        $this->amount = $component->amount;
-        $this->percentage = $component->percentage;
+        // Cast decimal:2 mengembalikan string — harus float untuk typed ?float
+        // (regresi 2026-08-16: TypeError 500 saat edit komponen ber-amount).
+        $this->amount = $component->amount === null ? null : (float) $component->amount;
+        $this->percentage = $component->percentage === null ? null : (float) $component->percentage;
         $this->is_taxable = $component->is_taxable;
 
         $this->showModal = true;

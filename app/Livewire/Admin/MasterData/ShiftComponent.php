@@ -49,7 +49,7 @@ class ShiftComponent extends Component
 
     public function mount(): void
     {
-        Gate::authorize('manage_attendances');
+        Gate::authorize('manageShifts');
     }
 
     public function create()

@@ -17,7 +17,10 @@ return [
         // Features::twoFactorAuthentication() removed — Jetstream v5 removed this method.
         // 2FA is still configured via config/fortify.php using Laravel\Fortify\Features.
         Features::accountDeletion(),
-        Features::teams(),
+        // Features::teams() removed (2026-08-16) — HRConnect single-company HRIS,
+        // team workspace di luar scope PRD (7 modul). Tanpa App\Models\Team,
+        // route /teams/create 500 (Class not found). Tabel teams/team_user/team_invitations
+        // dari scaffold awal dibiarkan (harmless); route team tidak lagi terdaftar.
     ],
     'profile_photo_disk' => 'public',
 

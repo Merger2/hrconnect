@@ -4,7 +4,6 @@
     $showUserDetail = true;
 
     // Export Logic
-    $isLocked = false;
     $exportUrl = route('admin.attendances.report', [
         'startDate' => $startDate,
         'endDate' => $endDate,
@@ -18,12 +17,6 @@
         'jobTitle' => $jobTitle,
         'format' => 'excel',
     ]);
-    $lockAction =
-        "\$dispatch('feature-lock', { title: " .
-        json_encode(__('Export Locked')) .
-        ', message: ' .
-        json_encode(__('This feature is available in the Enterprise Edition. Please upgrade.')) .
-        ' })';
     $attendanceStatusMeta = static function (?string $status): array {
         $enum = $status ? \App\Enums\AttendanceStatus::tryFrom($status) : null;
 
@@ -31,8 +24,8 @@
             return [
                 'label' => '-',
                 'dot' => 'bg-slate-400',
-                'color' => 'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400',
-                'cell' => 'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400',
+                'color' => 'bg-slate-50 text-slate-600 ring-slate-500/10',
+                'cell' => 'bg-slate-50 text-slate-600 ring-slate-500/10',
                 'short' => '-',
             ];
         }
@@ -49,17 +42,17 @@
         return match ($level) {
             'high' => [
                 'label' => __('High risk'),
-                'color' => 'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-900/20 dark:text-rose-300',
+                'color' => 'bg-rose-50 text-rose-700 ring-rose-600/20',
                 'short' => 'R'.$score,
             ],
             'medium' => [
                 'label' => __('Medium risk'),
-                'color' => 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-300',
+                'color' => 'bg-amber-50 text-amber-700 ring-amber-600/20',
                 'short' => 'R'.$score,
             ],
             default => [
                 'label' => __('Low risk'),
-                'color' => 'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400',
+                'color' => 'bg-slate-50 text-slate-600 ring-slate-500/10',
                 'short' => 'R'.$score,
             ],
         };
@@ -67,14 +60,6 @@
 @endphp
 <x-admin.page-shell :title="__('Attendance Data')" :description="__('Monitor employee attendance, shifts, and status.')">
     <x-slot name="actions">
-        @if ($isLocked)
-            <x-actions.button type="button" variant="secondary" x-on:click.prevent="{{ $lockAction }}"
-                class="w-full sm:w-auto">
-                <x-heroicon-o-printer class="h-5 w-5" />
-                {{ __('Export Report') }}
-                <x-heroicon-o-lock-closed class="h-4 w-4" />
-            </x-actions.button>
-        @else
             <div x-data="{
                 start: @entangle('startDate'),
                 end: @entangle('endDate'),
@@ -88,7 +73,7 @@
                 }
             }" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <div x-show="showWarning" x-transition
-                    class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-400">
+                    class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
                     <x-heroicon-m-exclamation-triangle class="h-4 w-4" />
                     {{ __('Range > 1 Month: Excel Recommended') }}
                 </div>
@@ -98,10 +83,7 @@
                         <x-actions.button type="button" variant="secondary" class="w-full sm:w-auto">
                             <x-heroicon-o-printer class="h-5 w-5" />
                             {{ __('Export Report') }}
-                            <svg class="ms-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                            </svg>
+                            <x-heroicon-o-chevron-down class="ms-1 h-4 w-4" />
                         </x-actions.button>
                     </x-slot>
 
@@ -119,7 +101,6 @@
                     </x-slot>
                 </x-navigation.dropdown>
             </div>
-        @endif
     </x-slot>
 
     <x-slot name="toolbar">
@@ -170,7 +151,7 @@
                     </div>
                     <x-forms.input id="attendance-search" type="text" wire:model.live.debounce.500ms="search"
                         placeholder="{{ __('Search name or NIP...') }}"
-                        class="block w-full border-0 py-2.5 pl-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6" />
+                        class="block w-full border-0 py-2.5 pl-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" />
                 </div>
             </div>
         </x-admin.page-tools>
@@ -185,7 +166,7 @@
         <!-- Desktop Table -->
         <div class="hidden lg:block lg:overflow-x-auto">
             <table class="w-full whitespace-nowrap text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                <thead class="bg-gray-50 text-gray-500">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium">{{ __('Employee') }}</th>
                         @if ($showUserDetail)
@@ -204,10 +185,10 @@
                                         ? ($date->isSunday()
                                             ? 'text-red-500 font-bold'
                                             : 'text-green-600 font-bold')
-                                        : 'text-gray-900 dark:text-white';
+                                        : 'text-gray-900';
                             @endphp
                             <th scope="col"
-                                class="px-2 py-4 text-center font-medium border-l border-gray-100 dark:border-gray-700 {{ $textClass }}">
+                                class="px-2 py-4 text-center font-medium border-l border-gray-100 {{ $textClass }}">
                                 @if ($isPerDayFilter)
                                     {{ __('Status') }}
                                 @else
@@ -224,7 +205,7 @@
                         @if (!$isPerDayFilter)
                             @foreach (['H', 'T', 'I', 'S', 'A'] as $_st)
                                 <th scope="col"
-                                    class="px-2 py-4 text-center font-medium border-l border-gray-100 dark:border-gray-700">
+                                    class="px-2 py-4 text-center font-medium border-l border-gray-100">
                                     {{ __($_st) }}</th>
                             @endforeach
                         @endif
@@ -234,25 +215,25 @@
                         @endif
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100">
                     @forelse ($employees as $employee)
                         @php $attendances = $employee->attendances; @endphp
                         <tr wire:key="{{ $employee->id }}"
-                            class="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                            class="group hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 font-medium text-gray-900">
                                 {{ $employee->name }}
                             </td>
                             @if ($showUserDetail)
-                                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $employee->nip }}</td>
-                                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 text-gray-500">{{ $employee->nip }}</td>
+                                <td class="px-4 py-3 text-gray-500">
                                     {{ $employee->division?->name ?? '-' }}</td>
-                                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 text-gray-500">
                                     {{ $employee->jobTitle?->name ?? '-' }}</td>
                                 @if ($isPerDayFilter)
                                     @php
                                         $attendance = $employee->attendances->first();
                                     @endphp
-                                    <td class="px-4 py-3 text-gray-900 dark:text-white">
+                                    <td class="px-4 py-3 text-gray-900">
                                         {{ $attendance['shift'] ?? '-' }}</td>
                                 @endif
                             @endif
@@ -300,7 +281,7 @@
                                     }
                                 @endphp
 
-                                <td class="px-2 py-4 text-center border-l border-gray-100 dark:border-gray-700">
+                                <td class="px-2 py-4 text-center border-l border-gray-100">
                                     @if ($attendance && ($attendance['attachment'] || $attendance['coordinates']))
                                         <button type="button" wire:click="show({{ $attendance['id'] }})"
                                             aria-label="{{ __('View attendance details') }}: {{ $employee->name }}, {{ $date->format('Y-m-d') }}"
@@ -351,8 +332,8 @@
                                     $timeIn = $dailyAttendance ? format_time($dailyAttendance->time_in) : null;
                                     $timeOut = $dailyAttendance ? format_time($dailyAttendance->time_out) : null;
                                 @endphp
-                                <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $timeIn ?? '-' }}</td>
-                                <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $timeOut ?? '-' }}</td>
+                                <td class="px-4 py-3 text-gray-900">{{ $timeIn ?? '-' }}</td>
+                                <td class="px-4 py-3 text-gray-900">{{ $timeOut ?? '-' }}</td>
                                 <td class="px-4 py-3 text-right">
                                     @if ($attendance && ($attendance['attachment'] || $attendance['coordinates']))
                                         <div class="flex justify-end">
@@ -363,7 +344,7 @@
                                             </x-actions.icon-button>
                                         </div>
                                     @else
-                                        <span class="text-gray-400">-</span>
+                                        <span class="text-slate-500">-</span>
                                     @endif
                                 </td>
                             @endif
@@ -371,7 +352,7 @@
                             @if (!$isPerDayFilter)
                                 @foreach ([$presentCount, $lateCount, $excusedCount, $sickCount, $absentCount] as $count)
                                     <td
-                                        class="px-2 py-4 text-center border-l border-gray-100 dark:border-gray-700 font-medium text-gray-700 dark:text-gray-300">
+                                        class="px-2 py-4 text-center border-l border-gray-100 font-medium text-gray-700">
                                         {{ $count }}
                                     </td>
                                 @endforeach
@@ -381,11 +362,11 @@
                     @empty
                         <tr>
                             <td colspan="{{ count($dates) + ($isPerDayFilter ? 8 : 10) }}"
-                                class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                class="px-4 py-6 text-center text-gray-500">
                                 <x-admin.empty-state :title="__('No attendance records found')"
-                                    class="border-0 bg-transparent p-0 shadow-none dark:bg-transparent">
+                                    class="border-0 bg-transparent p-0 shadow-none">
                                     <x-slot name="icon">
-                                        <x-heroicon-o-calendar class="h-12 w-12 text-gray-300 dark:text-gray-600" />
+                                        <x-heroicon-o-calendar class="h-12 w-12 text-gray-300" />
                                     </x-slot>
                                 </x-admin.empty-state>
                             </td>
@@ -396,12 +377,12 @@
         </div>
 
         <!-- Mobile Card View (Optimized) -->
-        <div class="grid grid-cols-1 lg:hidden divide-y divide-gray-200 dark:divide-gray-700">
+        <div class="grid grid-cols-1 lg:hidden divide-y divide-gray-200">
             @foreach ($employees as $employee)
                 <div class="p-4">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h4 class="font-bold text-gray-900 dark:text-white">{{ $employee->name }}</h4>
+                            <h4 class="font-bold text-gray-900">{{ $employee->name }}</h4>
                             <p class="text-xs text-gray-500">{{ $employee->division?->name }} •
                                 {{ $employee->jobTitle?->name }}</p>
                         </div>
@@ -477,12 +458,12 @@
                             <div>
                                 <span class="text-gray-500 text-xs block">{{ __('Time In') }}</span>
                                 <span
-                                    class="font-mono text-gray-900 dark:text-white">{{ $att['time_in'] ?? '-' }}</span>
+                                    class="font-mono text-gray-900">{{ $att['time_in'] ?? '-' }}</span>
                             </div>
                             <div>
                                 <span class="text-gray-500 text-xs block">{{ __('Time Out') }}</span>
                                 <span
-                                    class="font-mono text-gray-900 dark:text-white">{{ $att['time_out'] ?? '-' }}</span>
+                                    class="font-mono text-gray-900">{{ $att['time_out'] ?? '-' }}</span>
                             </div>
                         </div>
                         @if ($att && ($att['attachment'] || $att['coordinates']))
@@ -499,12 +480,11 @@
         </div>
 
         @if ($employees->hasPages())
-            <div class="border-t border-gray-200 bg-gray-50 px-4 py-2.5 dark:border-gray-700 dark:bg-gray-800">
+            <div class="border-t border-gray-200 bg-gray-50 px-4 py-2.5">
                 {{ $employees->links() }}
             </div>
         @endif
     </x-admin.panel>
 
     <x-shared.attendance-detail-modal :current-attendance="$currentAttendance" />
-    @stack('attendance-detail-scripts')
 </x-admin.page-shell>

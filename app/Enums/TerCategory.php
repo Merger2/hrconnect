@@ -28,7 +28,7 @@ enum TerCategory: string
 
     public static function resolveFromStatus(MaritalStatus $status, int $dependents): self
     {
-        $dependents = min($dependents, 3);
+        $dependents = max(0, min($dependents, 3));
 
         if (in_array($status, [MaritalStatus::SINGLE, MaritalStatus::DIVORCED, MaritalStatus::WIDOWED])) {
             return match ($dependents) {

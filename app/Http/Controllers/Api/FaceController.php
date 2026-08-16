@@ -30,6 +30,10 @@ class FaceController extends Controller
             ], 404);
         }
 
+        // Defense-in-depth: EmployeePolicy::view mengizinkan self-access
+        // (employee.id === user.employee.id) — tidak memblokir enrollment sendiri.
+        $this->authorize('view', $employee);
+
         $this->faceService->saveFaceDescriptor($employee, $data['embedding']);
 
         return response()->json([
@@ -56,6 +60,9 @@ class FaceController extends Controller
             ], 404);
         }
 
+        // Defense-in-depth: EmployeePolicy::view mengizinkan self-access.
+        $this->authorize('view', $employee);
+
         // Check if face is enrolled first
         if (! $this->faceService->hasFaceEnrolled($employee)) {
             return response()->json([
@@ -70,7 +77,7 @@ class FaceController extends Controller
             'status' => 'success',
             'message' => 'Wajah dikenali',
             'data' => [
-                'valid' => $result['valid'],
+                'valid' => $result['similarity_percentage'] >= FaceRecognitionService::SIMILARITY_THRESHOLD,
                 'similarity_percentage' => round($result['similarity_percentage'], 2),
             ],
         ]);

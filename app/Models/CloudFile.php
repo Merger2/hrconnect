@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperCloudFile
+ */
 class CloudFile extends Model
 {
     use HasFactory;
@@ -45,6 +48,11 @@ class CloudFile extends Model
     public function thread(): BelongsTo
     {
         return $this->belongsTo(ChatThread::class, 'chat_thread_id');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function owner(): BelongsTo

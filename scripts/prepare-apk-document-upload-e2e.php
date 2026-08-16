@@ -15,7 +15,7 @@ require __DIR__.'/../vendor/autoload.php';
 $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
-$email = getenv('E2E_EMAIL') ?: 'apk.e2e.user@paspapan.test';
+$email = getenv('E2E_EMAIL') ?: 'apk.e2e.user@hrconnect.test';
 $password = getenv('E2E_PASSWORD') ?: '12345678';
 $marker = getenv('E2E_MARKER') ?: 'APK E2E document upload';
 

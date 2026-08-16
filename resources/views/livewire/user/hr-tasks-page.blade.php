@@ -5,13 +5,13 @@
                 :back-href="route('home')"
                 :title="__('HR Tasks')"
                 :description="__('Complete onboarding and offboarding follow-ups assigned to you.')"
-                title-id="hr-tasks-title">
+                title-id="hr-tasks-title" module="hr">
                 <x-slot name="icon">
                     <x-heroicon-o-clipboard-document-check class="h-5 w-5" />
                 </x-slot>
             </x-user.page-header>
 
-            <div class="user-page-body bg-gray-50/50 dark:bg-gray-900/20">
+            <div class="user-page-body pt-0">
                 <x-feedback.alert-messages />
 
                 <div class="user-compact-filter mb-4">
@@ -36,19 +36,19 @@
                     @forelse ($tasks as $task)
                         @php
                             $taskTone = match ($task->status) {
-                                \App\Models\HrChecklistTask::STATUS_DONE => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200',
-                                \App\Models\HrChecklistTask::STATUS_SKIPPED => 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200',
-                                \App\Models\HrChecklistTask::STATUS_BLOCKED => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
-                                default => $task->isOverdue() ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' : 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-200',
+                                \App\Models\HrChecklistTask::STATUS_DONE => 'bg-emerald-100 text-emerald-800',
+                                \App\Models\HrChecklistTask::STATUS_SKIPPED => 'bg-gray-100 text-gray-700',
+                                \App\Models\HrChecklistTask::STATUS_BLOCKED => 'bg-red-100 text-red-800',
+                                default => $task->isOverdue() ? 'bg-amber-100 text-amber-800' : 'bg-primary-100 text-primary-800',
                             };
                         @endphp
                         <article class="user-list-card overflow-hidden">
-                            <div class="border-b border-slate-200/70 p-4 dark:border-slate-800/80">
+                            <div class="border-b border-slate-200/70 p-4">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
-                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ $task->case->template->typeLabel() }}</p>
-                                        <h2 class="mt-1 text-lg font-bold leading-tight text-gray-950 dark:text-white">{{ __($task->title) }}</h2>
-                                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ __($task->description ?? '') }}</p>
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $task->case->template->typeLabel() }}</p>
+                                        <h2 class="mt-1 text-lg font-bold leading-tight text-gray-950">{{ __($task->title) }}</h2>
+                                        <p class="mt-1 text-sm text-gray-600">{{ __($task->description ?? '') }}</p>
                                     </div>
                                     <span class="shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide {{ $taskTone }}">
                                         {{ $task->statusLabel() }}
@@ -58,23 +58,23 @@
 
                             <div class="space-y-4 p-4">
                                 <dl class="grid gap-3 text-sm sm:grid-cols-3">
-                                    <div class="rounded-xl bg-slate-50/70 p-3 dark:bg-slate-950/35">
-                                        <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Employee') }}</dt>
-                                        <dd class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $task->case->user->name }}</dd>
+                                    <div class="rounded-xl bg-slate-50 p-3">
+                                        <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Employee') }}</dt>
+                                        <dd class="mt-1 font-semibold text-gray-900">{{ $task->case->user->name }}</dd>
                                     </div>
-                                    <div class="rounded-xl bg-slate-50/70 p-3 dark:bg-slate-950/35">
-                                        <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Due Date') }}</dt>
-                                        <dd class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $task->due_date?->translatedFormat('d M Y') ?? '-' }}</dd>
+                                    <div class="rounded-xl bg-slate-50 p-3">
+                                        <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Due Date') }}</dt>
+                                        <dd class="mt-1 font-semibold text-gray-900">{{ $task->due_date?->translatedFormat('d M Y') ?? '-' }}</dd>
                                     </div>
-                                    <div class="rounded-xl bg-slate-50/70 p-3 dark:bg-slate-950/35">
-                                        <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Effective Date') }}</dt>
-                                        <dd class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $task->case->effective_date->translatedFormat('d M Y') }}</dd>
+                                    <div class="rounded-xl bg-slate-50 p-3">
+                                        <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Effective Date') }}</dt>
+                                        <dd class="mt-1 font-semibold text-gray-900">{{ $task->case->effective_date->translatedFormat('d M Y') }}</dd>
                                     </div>
                                 </dl>
 
                                 @if ($task->attachment_path)
                                     @can('downloadAttachment', $task)
-                                        <a href="{{ route('hr-checklist.task-attachment.download', $task) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-700 ring-1 ring-inset ring-sky-600/20 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-primary-600 dark:bg-sky-900/20 dark:text-sky-300">
+                                        <a href="{{ route('hr-checklist.task-attachment.download', $task) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-700 ring-1 ring-inset ring-sky-600/20 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-primary-600">
                                             <x-heroicon-m-paper-clip class="h-4 w-4" />
                                             {{ $task->attachment_original_name ?? __('Download attachment') }}
                                         </a>
@@ -98,7 +98,7 @@
                     @empty
                         <div class="user-empty-state">
                             <div class="user-empty-state__icon">
-                                <x-heroicon-o-clipboard-document-check class="h-12 w-12 text-gray-300 dark:text-gray-500" />
+                                <x-heroicon-o-clipboard-document-check class="h-12 w-12 text-gray-300" />
                             </div>
                             <h3 class="user-empty-state__title">{{ __('No HR tasks found') }}</h3>
                             <p class="user-empty-state__copy">{{ __('Assigned checklist tasks will appear here when HR starts an onboarding or offboarding case.') }}</p>

@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperJobTitle
+ */
 class JobTitle extends Model
 {
     use HasFactory;
@@ -38,9 +41,12 @@ class JobTitle extends Model
     protected static function booted(): void
     {
         static::deleting(function (JobTitle $jobTitle): void {
-            User::query()
-                ->where('job_title_id', $jobTitle->id)
-                ->update(['job_title_id' => null]);
+            // Users do not have a job_title_id column; job titles are linked via
+            // employees.position_id (Position model). Clear those references so
+            // soft-deleted job titles are not re-linked accidentally.
+            Employee::query()
+                ->where('position_id', $jobTitle->id)
+                ->update(['position_id' => null]);
         });
     }
 }

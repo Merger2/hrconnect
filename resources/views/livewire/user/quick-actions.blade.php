@@ -3,7 +3,6 @@
     $canReviewSubordinateRequests = $user->can('reviewSubordinateRequests');
     $hasFaceRegistered = $user->hasFaceRegistered();
     $canRequestKasbon = (float) ($user->basic_salary ?? 0) > 0;
-    $cashAdvanceLocked = false;
 
     $primaryItems = [
         [
@@ -12,7 +11,7 @@
             'label' => __('History'),
             'description' => __('Review attendance records.'),
             'icon' => 'history',
-            'tone' => 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200',
+            'tone' => 'bg-sky-100 text-sky-700',
         ],
         [
             'kind' => 'link',
@@ -20,7 +19,7 @@
             'label' => __('Correction'),
             'description' => __('Fix missing or wrong attendance.'),
             'icon' => 'correction',
-            'tone' => 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200',
+            'tone' => 'bg-violet-100 text-violet-700',
         ],
         [
             'kind' => 'link',
@@ -28,7 +27,7 @@
             'label' => __('Leave'),
             'description' => __('Send leave requests.'),
             'icon' => 'leave',
-            'tone' => 'bg-teal-100 text-teal-700 dark:bg-teal-950/40 dark:text-teal-200',
+            'tone' => 'bg-teal-100 text-teal-700',
         ],
         [
             'kind' => 'link',
@@ -36,7 +35,7 @@
             'label' => __('Claim'),
             'description' => __('Submit reimbursement.'),
             'icon' => 'reimbursement',
-            'tone' => 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-200',
+            'tone' => 'bg-rose-100 text-rose-700',
         ],
         [
             'kind' => 'link',
@@ -44,7 +43,7 @@
             'label' => __('Overtime'),
             'description' => __('Track overtime requests.'),
             'icon' => 'clock',
-            'tone' => 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200',
+            'tone' => 'bg-amber-100 text-amber-700',
         ],
     ];
 
@@ -56,7 +55,7 @@
                 'label' => __('My Schedule'),
                 'description' => __('Check shifts and work hours.'),
                 'icon' => 'calendar',
-                'tone' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-200',
+                'tone' => 'bg-cyan-100 text-cyan-700',
                 'locked' => false,
             ],
             [
@@ -65,7 +64,7 @@
                 'label' => __('Shift Swap'),
                 'description' => __('Request schedule changes.'),
                 'icon' => 'swap',
-                'tone' => 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200',
+                'tone' => 'bg-sky-100 text-sky-700',
                 'locked' => false,
             ],
             [
@@ -74,7 +73,7 @@
                 'label' => __('WFH'),
                 'description' => __('Request work-from-home approval.'),
                 'icon' => 'home',
-                'tone' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
+                'tone' => 'bg-emerald-100 text-emerald-700',
                 'locked' => false,
             ],
         ],
@@ -85,7 +84,7 @@
                 'label' => __('HR Tasks'),
                 'description' => __('Complete onboarding and offboarding follow-ups.'),
                 'icon' => 'tasks',
-                'tone' => 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/40 dark:text-fuchsia-200',
+                'tone' => 'bg-fuchsia-100 text-fuchsia-700',
                 'locked' => false,
             ],
             [
@@ -94,7 +93,7 @@
                 'label' => __('Operational Tasks'),
                 'description' => __('Follow client, project, and field-work tasks.'),
                 'icon' => 'tasks',
-                'tone' => 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200',
+                'tone' => 'bg-blue-100 text-blue-700',
                 'locked' => false,
             ],
             [
@@ -103,7 +102,7 @@
                 'label' => __('Team Chat'),
                 'description' => __('Open conversations and shared files.'),
                 'icon' => 'chat',
-                'tone' => 'bg-teal-100 text-teal-700 dark:bg-teal-950/40 dark:text-teal-200',
+                'tone' => 'bg-teal-100 text-teal-700',
                 'locked' => false,
             ],
             [
@@ -112,60 +111,71 @@
                 'label' => __('Forms'),
                 'description' => __('Submit HR and operations forms.'),
                 'icon' => 'forms',
-                'tone' => 'bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-200',
+                'tone' => 'bg-purple-100 text-purple-700',
                 'locked' => false,
             ],
         ],
         __('Finance & Asset') => [
+        [
+            'kind' => 'link',
+            'href' => route('my-payslips'),
+            'label' => __('Payslip'),
+            'description' => __('Open salary statements.'),
+            'icon' => 'payslip',
+            'tone' => 'bg-emerald-100 text-emerald-700',
+            'locked' => false,
+        ],
             [
-                'kind' => false ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::payrollLocked() ? null : route('my-payslips'),
-                'label' => __('Payslip'),
-                'description' => __('Open salary statements.'),
-                'icon' => 'payslip',
-                'tone' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
-                'locked' => \App\Helpers\Editions::payrollLocked(),
-            ],
-            [
-                'kind' => $cashAdvanceLocked ? 'button' : (!$canRequestKasbon ? 'disabled' : 'link'),
-                'href' => ($cashAdvanceLocked || !$canRequestKasbon) ? null : route('my-kasbon'),
+                'kind' => !$canRequestKasbon ? 'disabled' : 'link',
+                'href' => !$canRequestKasbon ? null : route('my-kasbon'),
                 'label' => __('Kasbon'),
                 'description' => __('Track cash advance requests.'),
                 'icon' => 'kasbon',
                 'tone' => !$canRequestKasbon
-                    ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
-                    : 'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-200',
-                'locked' => $cashAdvanceLocked,
+                    ? 'bg-gray-100 text-gray-400'
+                    : 'bg-orange-100 text-orange-700',
+                'locked' => false,
                 'disabledMessage' => __('Kasbon is available after your basic salary has been updated.'),
             ],
             [
-                'kind' => \App\Helpers\Editions::assetLocked() ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::assetLocked() ? null : route('my-assets'),
+                'kind' => 'link',
+                'href' => route('my-assets'),
                 'label' => __('Assets'),
                 'description' => __('Review assigned company assets.'),
                 'icon' => 'assets',
-                'tone' => 'bg-stone-100 text-stone-700 dark:bg-stone-900/50 dark:text-stone-200',
-                'locked' => \App\Helpers\Editions::assetLocked(),
+                'tone' => 'bg-stone-100 text-stone-700',
+                'locked' => false,
             ],
         ],
         __('HR & Document') => [
             [
-                'kind' => \App\Helpers\Editions::documentRequestsLocked() ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::documentRequestsLocked() ? null : route('document-requests'),
+                'kind' => 'link',
+                'href' => route('document-requests'),
                 'label' => __('Documents'),
                 'description' => __('Request and upload HR documents.'),
                 'icon' => 'document',
-                'tone' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-200',
-                'locked' => \App\Helpers\Editions::documentRequestsLocked(),
+                'tone' => 'bg-indigo-100 text-indigo-700',
+                'locked' => false,
             ],
             [
-                'kind' => \App\Helpers\Editions::appraisalLocked() ? 'button' : 'link',
-                'href' => \App\Helpers\Editions::appraisalLocked() ? null : route('my-performance'),
+                'kind' => 'link',
+                'href' => route('my-performance'),
                 'label' => __('Performance'),
                 'description' => __('Check KPI and appraisal results.'),
                 'icon' => 'performance',
-                'tone' => 'bg-lime-100 text-lime-700 dark:bg-lime-950/40 dark:text-lime-200',
-                'locked' => \App\Helpers\Editions::appraisalLocked(),
+                'tone' => 'bg-lime-100 text-lime-700',
+                'locked' => false,
+            ],
+        ],
+        __('Knowledge Base') => [
+            [
+                'kind' => 'link',
+                'href' => route('knowledge-base.chat'),
+                'label' => __('KB Chat'),
+                'description' => __('Ask questions about company policies and HR.'),
+                'icon' => 'chat',
+                'tone' => 'bg-emerald-100 text-emerald-700',
+                'locked' => false,
             ],
         ],
     ];
@@ -186,7 +196,7 @@
                 'label' => __('Team Approvals'),
                 'description' => __('Review pending team requests.'),
                 'icon' => 'approvals',
-                'tone' => 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200',
+                'tone' => 'bg-blue-100 text-blue-700',
                 'locked' => false,
             ],
             [
@@ -195,17 +205,17 @@
                 'label' => __('Team Attendance'),
                 'description' => __('Review attendance corrections and leave requests.'),
                 'icon' => 'attendance',
-                'tone' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-200',
+                'tone' => 'bg-cyan-100 text-cyan-700',
                 'locked' => false,
             ],
             [
-                'kind' => $cashAdvanceLocked ? 'button' : 'link',
-                'href' => $cashAdvanceLocked ? null : route('team-kasbon'),
+                'kind' => 'link',
+                'href' => route('team-kasbon'),
                 'label' => __('Team Kasbon'),
                 'description' => __('Follow team cash advance requests.'),
                 'icon' => 'team',
-                'tone' => 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-200',
-                'locked' => $cashAdvanceLocked,
+                'tone' => 'bg-green-100 text-green-700',
+                'locked' => false,
             ],
         ];
     }
@@ -243,7 +253,7 @@
                 <button type="button" class="quick-wallet-action" :aria-expanded="showMore.toString()"
                     aria-haspopup="dialog" aria-controls="quick-access-more-panel" @click="showMore = !showMore">
                     <div
-                        class="quick-wallet-action__icon bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-200">
+                        class="quick-wallet-action__icon bg-blue-100 text-blue-700">
                         <x-user.quick-menu-icon name="more" />
                     </div>
                     <div class="quick-wallet-action__label">{{ __('More') }}</div>
@@ -262,7 +272,6 @@
                 <ul class="quick-wallet-team__grid" role="list">
                     @foreach ($teamItems as $item)
                         <li>
-                            @if ($item['kind'] === 'link')
                                 <a href="{{ $item['href'] }}" class="quick-wallet-team-card"
                                     aria-label="{{ $item['label'] }}. {{ $item['description'] }}">
                                     <span class="quick-wallet-team-card__icon {{ $item['tone'] }}" aria-hidden="true">
@@ -272,22 +281,8 @@
                                         <strong>{{ $item['label'] }}</strong>
                                         <span>{{ $item['description'] }}</span>
                                     </span>
-                                    <x-heroicon-o-chevron-right class="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                                    <x-heroicon-o-chevron-right class="h-4 w-4 text-slate-400" aria-hidden="true" />
                                 </a>
-                            @else
-                                <button type="button" class="quick-wallet-team-card"
-                                    aria-label="{{ $item['label'] }}. {{ $item['description'] }}"
-                                    @click.prevent="$dispatch('feature-lock', { title: @js($item['lockTitle']), message: @js($item['lockMessage']) })">
-                                    <span class="quick-wallet-team-card__icon {{ $item['tone'] }}" aria-hidden="true">
-                                        <x-user.quick-menu-icon :name="$item['icon']" class="h-5 w-5" />
-                                    </span>
-                                    <span class="quick-wallet-team-card__body">
-                                        <strong>{{ $item['label'] }}</strong>
-                                        <span>{{ $item['description'] }}</span>
-                                    </span>
-                                    <x-heroicon-o-lock-closed class="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
-                                </button>
-                            @endif
                         </li>
                     @endforeach
                 </ul>
@@ -295,22 +290,28 @@
         @endif
     </section>
 
-    <div id="quick-access-more-panel" x-cloak x-show="showMore" x-trap.inert.noscroll="showMore"
-        x-on:keydown.escape.window="showMore = false" class="quick-wallet-modal" role="dialog" aria-modal="true"
-        aria-labelledby="quick-access-more-title" style="display: none;">
-        <div class="quick-wallet-modal__backdrop" x-on:click="showMore = false"></div>
+    <template x-teleport="body">
+    <div id="quick-access-more-panel" x-show="showMore"
+        x-on:keydown.escape.window="showMore = false"
+        class="jetstream-modal fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto px-4 py-[calc(1rem+env(safe-area-inset-top))] sm:items-center sm:px-6 sm:py-[calc(1.5rem+env(safe-area-inset-top))]"
+        style="display: none;">
+        <div x-show="showMore" class="fixed inset-0 z-0 transform transition-all" x-on:click="showMore = false"
+            x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
 
-        <div class="quick-wallet-modal__frame" x-show="showMore"
-            x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-150"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-            <div class="quick-wallet-modal__panel" x-show="showMore" x-transition:enter="ease-out duration-200"
-                x-transition:enter-start="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100"
-                x-transition:leave="ease-in duration-150"
-                x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
-                x-transition:leave-end="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95">
-                <div class="quick-wallet-modal__header">
+        <div x-show="showMore"
+            class="relative z-10 w-full transform overflow-y-auto rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:max-w-2xl"
+            style="max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
+            role="dialog" aria-modal="true" aria-labelledby="quick-access-more-title"
+            x-on:click.stop x-trap.inert.noscroll="showMore"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="quick-wallet-modal__header">
                     <div>
                         <h4 id="quick-access-more-title" class="quick-wallet-modal__title">{{ __('More Menu') }}</h4>
                         <p class="quick-wallet-modal__copy">
@@ -350,4 +351,5 @@
             </div>
         </div>
     </div>
+    </template>
 </div>

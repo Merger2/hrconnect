@@ -2,7 +2,13 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Attendance;
+use App\Models\AttendanceCorrection;
+use App\Models\Employee;
+use App\Models\Schedule;
 use App\Models\Shift;
+use App\Models\ShiftSwapRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
@@ -43,7 +49,7 @@ class ShiftForm extends Form
 
     public function store()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageShifts');
         $this->validate();
         Shift::create($this->payload());
         $this->reset();
@@ -51,7 +57,7 @@ class ShiftForm extends Form
 
     public function update()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageShifts');
         $this->validate();
         $this->shift->update($this->payload());
         $this->reset();
@@ -59,8 +65,25 @@ class ShiftForm extends Form
 
     public function delete()
     {
-        Gate::authorize('manageMasterData');
-        $this->shift->delete();
+        Gate::authorize('manageShifts');
+
+        DB::transaction(function () {
+            // Detach referensi ke shift yang di-soft-delete supaya tidak menggantung
+            // (MasterDataDeleteFlowTest: attendances.shift_id harus null).
+            Attendance::query()->where('shift_id', $this->shift->id)->update(['shift_id' => null]);
+            Employee::query()->where('shift_id', $this->shift->id)->update(['shift_id' => null]);
+            AttendanceCorrection::query()->where('requested_shift_id', $this->shift->id)->update(['requested_shift_id' => null]);
+            ShiftSwapRequest::query()->where('current_shift_id', $this->shift->id)->update(['current_shift_id' => null]);
+            ShiftSwapRequest::query()->where('requested_shift_id', $this->shift->id)->update(['requested_shift_id' => null]);
+
+            // schedules dihapus (ekspektasi MasterDataDeleteFlowTest).
+            // M11 (2026-08-06): shift_schedules legacy sudah di-drop —
+            // schedules = satu-satunya tabel jadwal.
+            Schedule::query()->where('shift_id', $this->shift->id)->delete();
+
+            $this->shift->delete();
+        });
+
         $this->reset();
     }
 

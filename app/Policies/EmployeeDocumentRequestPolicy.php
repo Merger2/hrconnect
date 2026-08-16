@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Employee;
 use App\Models\EmployeeDocumentRequest;
 use App\Models\User;
 use App\Support\MultiCompanyService;
@@ -132,29 +131,14 @@ final class EmployeeDocumentRequestPolicy
 
     protected function sameCompany(User $actor, EmployeeDocumentRequest $request): bool
     {
-        return $request->employee !== null
-            && $this->employeeHasAccess($actor, $request->employee);
-    }
+        // M21 AUDIT: dulu custom employeeHasAccess() (list role hardcoded:
+        // super-admin/admin/manager + company match) — inkonsisten dengan 9+
+        // policy lain yang memakai MultiCompanyService::canAccessUser().
+        // canAccessUser menutup celah: manager/admin lintas company tidak lagi
+        // otomatis dapat akses (hanya superadmin + same-company).
+        $request->loadMissing('employee.user');
 
-    private function employeeHasAccess(User $actor, Employee $employee): bool
-    {
-        // Direct employee access (own profile)
-        if ($employee->user_id === $actor->id) {
-            return true;
-        }
-
-        // Elevated roles: super-admin, admin, hr-manager, manager
-        $elevatedRoles = ['super-admin', 'admin', 'hr-manager', 'manager'];
-
-        if ($actor->hasAnyRole($elevatedRoles)) {
-            return true;
-        }
-
-        // Company-level access: same company
-        if ($employee->company_id && $actor->company_id) {
-            return $employee->company_id === $actor->company_id;
-        }
-
-        return false;
+        return $request->employee?->user !== null
+            && $this->multiCompany->canAccessUser($actor, $request->employee->user);
     }
 }

@@ -23,10 +23,13 @@ class ExportReportPdfController extends Controller
             'year' => ['nullable', 'integer', 'between:2000,2100'],
         ]);
 
+        // ⚠️ JANGAN tertukar: signature service adalah (year, month). Regresi
+        // 2026-08-16: controller mengirim (month, year) → meta run tahun=8
+        // bulan=2026, report salah periode diam-diam.
         $run = app(ImportExportRunService::class)->queueMonthlyAttendanceReport(
             $request->user(),
-            (int) ($validated['month'] ?? now()->month),
             (int) ($validated['year'] ?? now()->year),
+            (int) ($validated['month'] ?? now()->month),
         );
 
         return to_route('admin.dashboard')

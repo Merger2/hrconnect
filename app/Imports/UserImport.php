@@ -35,14 +35,21 @@ class UserImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, WithVa
 
                 $user->name = $row['name'] ?? $email;
                 $user->password = Hash::make($row['password'] ?? 'password123');
-                $user->password_changed_at = now();
+                // Default import ('password123') bersifat sementara: biarkan
+                // password_changed_at null → CheckPasswordExpired Tier 3 memaksa
+                // ganti password saat login pertama. Bila password eksplisit
+                // diberikan, hitung masa berlaku normal dari hari ini.
+                $user->password_changed_at = ! empty($row['password']) ? now() : null;
                 $user->save();
 
                 // Sync roles
                 if (! empty($row['role'])) {
                     $role = Role::where('name', $row['role'])->first();
                     if ($role) {
-                        $user->syncRoles([$role->name]);
+                        // Q1: `syncRoles()` tidak ada di User (bukan Spatie HasRoles —
+                        // lihat HasRolePermissions trait). Pakai roles()->sync()
+                        // (pola AdminDirectory) untuk replace role.
+                        $user->roles()->sync([$role->id]);
                     }
                 }
 

@@ -118,11 +118,9 @@
         ],
     ];
     $platformSignalCards = array_values(array_filter($platformSignalCards, fn (array $item): bool => $item['visible']));
-    $exportLockTitle = __('Export Locked');
-    $exportLockMessage = __('Advanced reporting is an Enterprise feature. Please upgrade.');
 @endphp
 
-<x-admin.page-shell :title="__('Attendance Overview')" :description="$date->translatedFormat('l, d F Y')">
+<x-admin.page-shell :title="__('Attendance Overview')" :description="$date->translatedFormat('l, d F Y')" data-dashboard-charts-root>
     <x-slot name="actions">
         <div class="flex flex-wrap items-center justify-end gap-2">
             <label for="selectedDate" class="sr-only">{{ __('Date') }}</label>
@@ -133,7 +131,7 @@
                     wire:model.live="selectedDate"
                     value="{{ $selectedDate }}"
                     max="{{ now()->toDateString() }}"
-                    class="border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                    class="border-slate-200 bg-white px-3 py-2" />
             </div>
 
             @unless ($isToday)
@@ -144,7 +142,7 @@
 
             @if ($activeHolidaysCount > 0)
                 <span
-                    class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+                    class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
                     <x-heroicon-o-sparkles class="h-4 w-4" />
                     {{ $isToday ? __('Holiday Today') : __('Holiday') }}
                 </span>
@@ -158,18 +156,18 @@
         <x-admin.insight-panel class="p-3 lg:hidden">
             <div class="flex items-center justify-between gap-3">
                 <div class="min-w-0">
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Pending Queue') }}</p>
-                    <p class="mt-0.5 truncate text-sm font-semibold text-slate-900 dark:text-white">{{ __('What still needs attention') }}</p>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">{{ __('Pending Queue') }}</p>
+                    <p class="mt-0.5 truncate text-sm font-semibold text-slate-900">{{ __('What still needs attention') }}</p>
                 </div>
-                <span class="rounded-full bg-primary-50 px-3 py-1 text-sm font-bold text-primary-700 dark:bg-primary-900/20 dark:text-primary-300">
+                <span class="rounded-full bg-primary-50 px-3 py-1 text-sm font-bold text-primary-700">
                     {{ $actionQueueCount }}
                 </span>
             </div>
             <div class="mt-3 grid grid-cols-2 gap-2">
                 @foreach ($queueLinks as $item)
-                    <a href="{{ $item['route'] }}" class="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 transition hover:border-primary-300 hover:bg-primary-50 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-primary-900/20">
-                        <span class="min-w-0 truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{{ $item['label'] }}</span>
-                        <span class="shrink-0 text-sm font-bold text-slate-950 dark:text-white">{{ $item['value'] }}</span>
+                    <a href="{{ $item['route'] }}" class="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 transition hover:border-primary-300 hover:bg-primary-50">
+                        <span class="min-w-0 truncate text-xs font-semibold text-slate-700">{{ $item['label'] }}</span>
+                        <span class="shrink-0 text-sm font-bold text-slate-950">{{ $item['value'] }}</span>
                     </a>
                 @endforeach
             </div>
@@ -177,12 +175,12 @@
 
         <div class="hidden gap-3 lg:grid lg:grid-cols-5">
             @foreach ($queueLinks as $item)
-                <a href="{{ $item['route'] }}" class="relative overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm transition hover:border-primary-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80">
+                <a href="{{ $item['route'] }}" class="relative overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm transition hover:border-primary-300 hover:shadow-md">
                     <div class="flex items-center justify-between">
-                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ $item['label'] }}</p>
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500">{{ $item['label'] }}</p>
                         <x-heroicon-o-arrow-right class="h-4 w-4 text-slate-400" />
                     </div>
-                    <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ $item['value'] }}</p>
+                    <p class="mt-2 text-2xl font-bold text-slate-900">{{ $item['value'] }}</p>
                     <div class="absolute bottom-0 left-0 h-1 bg-primary-500" style="width: 100%"></div>
                 </a>
             @endforeach
@@ -193,14 +191,14 @@
             <x-admin.insight-panel class="p-3 sm:p-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary-600 dark:text-primary-300">
+                        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary-600">
                             {{ __('Platform Signals') }}
                         </p>
-                        <h3 class="mt-1 text-sm font-bold text-slate-900 dark:text-white sm:text-base">
+                        <h3 class="mt-1 text-sm font-bold text-slate-900 sm:text-base">
                             {{ __('Cross-module work that needs attention') }}
                         </h3>
                     </div>
-                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
                         {{ collect($platformSignalCards)->sum('value') }}
                     </span>
                 </div>
@@ -209,17 +207,17 @@
                     @foreach ($platformSignalCards as $item)
                         <a
                             href="{{ $item['route'] ?? '#' }}"
-                            class="group min-h-20 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2.5 transition hover:border-primary-300 hover:bg-primary-50 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-primary-900/20"
+                            class="group min-h-20 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2.5 transition hover:border-primary-300 hover:bg-primary-50"
                         >
                             <div class="flex items-start justify-between gap-2">
-                                <p class="min-w-0 text-xs font-semibold leading-4 text-slate-600 dark:text-slate-300">
+                                <p class="min-w-0 text-xs font-semibold leading-4 text-slate-600">
                                     {{ $item['label'] }}
                                 </p>
                                 <x-heroicon-o-arrow-up-right class="h-3.5 w-3.5 shrink-0 text-slate-400 transition group-hover:text-primary-500" />
                             </div>
                             <div class="mt-2 flex items-end justify-between gap-2">
-                                <span class="text-2xl font-bold text-slate-950 dark:text-white">{{ $item['value'] }}</span>
-                                <span class="truncate text-[10px] font-medium text-slate-500 dark:text-slate-400">{{ $item['hint'] }}</span>
+                                <span class="text-2xl font-bold text-slate-950">{{ $item['value'] }}</span>
+                                <span class="truncate text-[10px] font-medium text-slate-500">{{ $item['hint'] }}</span>
                             </div>
                         </a>
                     @endforeach
@@ -231,36 +229,36 @@
         <div class="grid gap-4 md:grid-cols-2">
             <x-admin.insight-panel class="p-3 sm:p-4">
                 <div class="mb-3 flex items-center justify-between gap-3 sm:mb-4">
-                    <h3 class="min-w-0 text-sm font-bold text-slate-900 dark:text-white sm:text-base">{{ $isToday ? __('Team readiness for today') : __('Team readiness on :date', ['date' => $date->translatedFormat('d M Y')]) }}</h3>
-                    <span class="shrink-0 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700 dark:bg-primary-900/20 dark:text-primary-300">{{ $attendanceCoverage }}%</span>
+                    <h3 class="min-w-0 text-sm font-bold text-slate-900 sm:text-base">{{ $isToday ? __('Team readiness for today') : __('Team readiness on :date', ['date' => $date->translatedFormat('d M Y')]) }}</h3>
+                    <span class="shrink-0 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700">{{ $attendanceCoverage }}%</span>
                 </div>
                 <div class="grid grid-cols-[84px_1fr] items-center gap-3 sm:grid-cols-[120px_1fr] sm:gap-4">
                     <div class="h-[76px] w-[76px] sm:h-[100px] sm:w-[100px]" x-data="snapshotDonutChart()" x-init="initChart()" wire:ignore>
                         <canvas x-ref="canvas"></canvas>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="flex justify-between rounded-lg bg-emerald-50 px-2 py-1.5 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 sm:p-2"><span class="truncate font-medium">{{ __('Present') }}</span><span class="font-bold">{{ $presentCount }}</span></div>
-                        <div class="flex justify-between rounded-lg bg-amber-50 px-2 py-1.5 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 sm:p-2"><span class="truncate font-medium">{{ __('Late') }}</span><span class="font-bold">{{ $lateCount }}</span></div>
-                        <div class="flex justify-between rounded-lg bg-sky-50 px-2 py-1.5 dark:bg-sky-900/10 text-sky-700 dark:text-sky-400 sm:p-2"><span class="truncate font-medium">{{ __('Excused') }}</span><span class="font-bold">{{ $excusedCount }}</span></div>
-                        <div class="flex justify-between rounded-lg bg-violet-50 px-2 py-1.5 dark:bg-violet-900/10 text-violet-700 dark:text-violet-400 sm:p-2"><span class="truncate font-medium">{{ __('Sick') }}</span><span class="font-bold">{{ $sickCount }}</span></div>
-                        <div class="flex justify-between rounded-lg bg-rose-50 px-2 py-1.5 dark:bg-rose-900/10 text-rose-700 dark:text-rose-400 col-span-2 sm:p-2"><span class="truncate font-medium">{{ __('No Record') }}</span><span class="font-bold">{{ $absentCount }}</span></div>
+                        <div class="flex justify-between rounded-lg bg-emerald-50 px-2 py-1.5 text-emerald-700 sm:p-2"><span class="truncate font-medium">{{ __('Present') }}</span><span class="font-bold">{{ $presentCount }}</span></div>
+                        <div class="flex justify-between rounded-lg bg-amber-50 px-2 py-1.5 text-amber-700 sm:p-2"><span class="truncate font-medium">{{ __('Late') }}</span><span class="font-bold">{{ $lateCount }}</span></div>
+                        <div class="flex justify-between rounded-lg bg-sky-50 px-2 py-1.5 text-sky-700 sm:p-2"><span class="truncate font-medium">{{ __('Excused') }}</span><span class="font-bold">{{ $excusedCount }}</span></div>
+                        <div class="flex justify-between rounded-lg bg-violet-50 px-2 py-1.5 text-violet-700 sm:p-2"><span class="truncate font-medium">{{ __('Sick') }}</span><span class="font-bold">{{ $sickCount }}</span></div>
+                        <div class="flex justify-between rounded-lg bg-rose-50 px-2 py-1.5 text-rose-700 col-span-2 sm:p-2"><span class="truncate font-medium">{{ __('No Record') }}</span><span class="font-bold">{{ $absentCount }}</span></div>
                     </div>
                 </div>
             </x-admin.insight-panel>
 
             <x-admin.insight-panel class="p-3 sm:p-4">
                 <div class="mb-3 flex items-center justify-between sm:mb-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white sm:text-base">{{ __('Attention Signals') }}</h3>
+                    <h3 class="text-sm font-bold text-slate-900 sm:text-base">{{ __('Attention Signals') }}</h3>
                     <x-heroicon-o-bell-alert class="h-5 w-5 text-amber-500" />
                 </div>
                 <div class="grid grid-cols-2 gap-2 sm:block sm:space-y-3">
-                    <div class="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2 dark:bg-amber-900/20 dark:border-amber-900/40 sm:p-3">
-                        <span class="text-xs font-semibold text-amber-900 dark:text-amber-200 sm:text-sm">{{ __('Face Enrollment Gap') }}</span>
-                        <span class="text-base font-bold text-amber-700 dark:text-amber-300 sm:text-lg">{{ $missingFaceDataCount }}</span>
+                    <div class="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 sm:p-3">
+                        <span class="text-xs font-semibold text-amber-900 sm:text-sm">{{ __('Face Enrollment Gap') }}</span>
+                        <span class="text-base font-bold text-amber-700 sm:text-lg">{{ $missingFaceDataCount }}</span>
                     </div>
-                    <div class="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50/70 px-3 py-2 dark:bg-rose-900/20 dark:border-rose-900/40 sm:p-3">
-                        <span class="text-xs font-semibold text-rose-900 dark:text-rose-200 sm:text-sm">{{ __('Open Overdue Checkout') }}</span>
-                        <span class="text-base font-bold text-rose-700 dark:text-rose-300 sm:text-lg">{{ $overdueUsers->count() }}</span>
+                    <div class="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 sm:p-3">
+                        <span class="text-xs font-semibold text-rose-900 sm:text-sm">{{ __('Open Overdue Checkout') }}</span>
+                        <span class="text-base font-bold text-rose-700 sm:text-lg">{{ $overdueUsers->count() }}</span>
                     </div>
                 </div>
             </x-admin.insight-panel>
@@ -268,11 +266,11 @@
 
         <x-admin.insight-panel class="p-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Attendance Charts') }}</h3>
+                <h3 class="text-base font-bold text-slate-900">{{ __('Attendance Charts') }}</h3>
                 <div class="w-full sm:w-48">
                     <label for="chartFilter" class="sr-only">{{ __('Chart Range') }}</label>
                     <x-forms.select id="chartFilter" wire:model.live="chartFilter"
-                        class="block w-full border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white py-1 text-sm">
+                        class="block w-full border-slate-200 bg-white py-1 text-sm">
                         <option value="week_1">{{ __('1 Week') }}</option>
                         <option value="week_2">{{ __('2 Weeks') }}</option>
                         <option value="week_3">{{ __('3 Weeks') }}</option>
@@ -284,10 +282,10 @@
             </div>
 
             <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-                <div class="rounded-xl border border-slate-200/70 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/60" x-data="attendanceMovementChart()" x-init="initChart()">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-3" x-data="attendanceMovementChart()" x-init="initChart()">
                     <div class="h-[240px] lg:h-[280px]" wire:ignore><canvas x-ref="canvas"></canvas></div>
                 </div>
-                <div class="rounded-xl border border-slate-200/70 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/60" x-data="attendanceMixChart()" x-init="initChart()">
+                <div class="rounded-xl border border-slate-200/70 bg-white p-3" x-data="attendanceMixChart()" x-init="initChart()">
                     <div class="h-[210px] lg:h-[280px]" wire:ignore><canvas x-ref="canvas"></canvas></div>
                 </div>
             </div>
@@ -297,23 +295,23 @@
             <!-- User Access Donut -->
             <x-admin.insight-panel class="flex h-full flex-col p-4">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('User Access Status') }}</h3>
-                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ $employeesCount }}</span>
+                    <h3 class="text-sm font-bold text-slate-900">{{ __('User Access Status') }}</h3>
+                    <span class="text-lg font-bold text-primary-600">{{ $employeesCount }}</span>
                 </div>
                 <div class="grid flex-1 grid-cols-[100px_1fr] items-center gap-4">
                     <div class="h-[90px] w-[90px]" x-data="userAccessDonutChart()" x-init="initChart()" wire:ignore>
                         <canvas x-ref="canvas"></canvas>
                     </div>
                     <div class="space-y-2 text-xs">
-                        <div class="flex justify-between rounded-lg bg-emerald-50 p-2 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400">
+                        <div class="flex justify-between rounded-lg bg-emerald-50 p-2 text-emerald-700">
                             <span class="font-medium">{{ __('Logged In') }}</span>
                             <span class="font-bold">{{ $loggedInUsersCount }}</span>
                         </div>
-                        <div class="flex justify-between rounded-lg bg-amber-50 p-2 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400">
+                        <div class="flex justify-between rounded-lg bg-amber-50 p-2 text-amber-700">
                             <span class="font-medium">{{ __('Not Logged In') }}</span>
                             <span class="font-bold">{{ $notLoggedInUsersCount }}</span>
                         </div>
-                        <div class="flex justify-between rounded-lg bg-rose-50 p-2 dark:bg-rose-900/10 text-rose-700 dark:text-rose-400">
+                        <div class="flex justify-between rounded-lg bg-rose-50 p-2 text-rose-700">
                             <span class="font-medium">{{ __('Never Logged In') }}</span>
                             <span class="font-bold">{{ $neverLoggedInCount }}</span>
                         </div>
@@ -324,8 +322,8 @@
             <!-- Pending Approvals Chart -->
             <x-admin.insight-panel class="flex h-full flex-col p-4">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Pending Queue') }}</h3>
-                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ $pendingLeavesCount + $pendingAttendanceCorrectionsCount + $pendingReimbursementsCount + $pendingOvertimesCount + $pendingKasbonCount }} {{ __('total') }}</span>
+                    <h3 class="text-sm font-bold text-slate-900">{{ __('Pending Queue') }}</h3>
+                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">{{ $actionQueueCount }} {{ __('total') }}</span>
                 </div>
                 <div class="min-h-[120px] flex-1" x-data="pendingQueueChart()" x-init="initChart()" wire:ignore>
                     <canvas x-ref="canvas"></canvas>
@@ -334,35 +332,35 @@
 
             <!-- Workforce Summary -->
             <x-admin.insight-panel class="flex h-full flex-col p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4">{{ __('Workforce Snapshot') }}</h3>
+                <h3 class="text-sm font-bold text-slate-900 mb-4">{{ __('Workforce Snapshot') }}</h3>
                 <div class="grid flex-1 content-between gap-2">
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 dark:border-slate-700/50 dark:bg-slate-800/60">
+                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-users class="h-4 w-4 text-primary-500" />
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('Total Employees') }}</span>
+                            <span class="text-sm font-medium text-slate-700">{{ __('Total Employees') }}</span>
                         </div>
-                        <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $employeesCount }}</span>
+                        <span class="text-sm font-bold text-slate-900">{{ $employeesCount }}</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-2.5 dark:border-emerald-900/30 dark:bg-emerald-900/10">
+                    <div class="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-check-badge class="h-4 w-4 text-emerald-500" />
-                            <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">{{ __('Coverage Rate') }}</span>
+                            <span class="text-sm font-medium text-emerald-700">{{ __('Coverage Rate') }}</span>
                         </div>
-                        <span class="text-sm font-bold text-emerald-700 dark:text-emerald-300">{{ $attendanceCoverage }}%</span>
+                        <span class="text-sm font-bold text-emerald-700">{{ $attendanceCoverage }}%</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-sky-100 bg-sky-50/60 px-3 py-2.5 dark:border-sky-900/30 dark:bg-sky-900/10">
+                    <div class="flex items-center justify-between rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-arrow-left-end-on-rectangle class="h-4 w-4 text-sky-500" />
-                            <span class="text-sm font-medium text-sky-700 dark:text-sky-300">{{ __('Early Checkout') }}</span>
+                            <span class="text-sm font-medium text-sky-700">{{ __('Early Checkout') }}</span>
                         </div>
-                        <span class="text-sm font-bold text-sky-700 dark:text-sky-300">{{ $earlyCheckoutCount }}</span>
+                        <span class="text-sm font-bold text-sky-700">{{ $earlyCheckoutCount }}</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2.5 dark:border-violet-900/30 dark:bg-violet-900/10">
+                    <div class="flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50 px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-calendar-days class="h-4 w-4 text-violet-500" />
-                            <span class="text-sm font-medium text-violet-700 dark:text-violet-300">{{ __('Active Holidays') }}</span>
+                            <span class="text-sm font-medium text-violet-700">{{ __('Active Holidays') }}</span>
                         </div>
-                        <span class="text-sm font-bold text-violet-700 dark:text-violet-300">{{ $activeHolidaysCount }}</span>
+                        <span class="text-sm font-bold text-violet-700">{{ $activeHolidaysCount }}</span>
                     </div>
                 </div>
             </x-admin.insight-panel>
@@ -370,10 +368,10 @@
 
         <section wire:poll.10s class="space-y-3" aria-labelledby="user-access-activity-title">
             <div class="flex items-center justify-between gap-3">
-                <h3 id="user-access-activity-title" class="text-base font-bold text-slate-900 dark:text-white">{{ __('User Access & Activity') }}</h3>
+                <h3 id="user-access-activity-title" class="text-base font-bold text-slate-900">{{ __('User Access & Activity') }}</h3>
                 <div class="flex gap-2">
                     @if ($notificationsHref)
-                        <a href="{{ $notificationsHref }}" class="rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                        <a href="{{ $notificationsHref }}" class="rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary-700">
                             {{ $unreadNotificationsCount }} {{ __('Notifs') }}
                         </a>
                     @endif
@@ -383,12 +381,12 @@
             <div class="grid items-start gap-4 lg:grid-cols-2">
                 <!-- Live Activity Feed -->
                 <x-admin.insight-panel class="flex h-[22rem] min-w-0 flex-col p-4">
-                    <h4 class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">{{ __('Live Activity') }}</h4>
+                    <h4 class="mb-3 text-sm font-semibold text-slate-900">{{ __('Live Activity') }}</h4>
                     <div class="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
                         @forelse (collect($recentUserActivities)->take(12) as $activity)
-                            <div class="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2 dark:border-slate-700/50 dark:bg-slate-800/50">
+                            <div class="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2">
                                 <div class="flex items-center justify-between gap-2">
-                                    <p class="truncate text-xs font-medium text-slate-900 dark:text-white">{{ $activity['user_name'] }}</p>
+                                    <p class="truncate text-xs font-medium text-slate-900">{{ $activity['user_name'] }}</p>
                                     <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium {{ $activity['badge_class'] }}">{{ $activity['badge'] }}</span>
                                 </div>
                                 <p class="mt-0.5 truncate text-[10px] leading-4 text-slate-500">{{ $activity['summary'] }} • {{ $activity['created_at']->diffForHumans() }}</p>
@@ -401,13 +399,13 @@
 
                 <x-admin.insight-panel class="flex h-[22rem] min-w-0 flex-col p-4">
                     <div class="mb-3 flex items-center justify-between gap-3">
-                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Not Logged In') }}</h4>
+                        <h4 class="text-sm font-semibold text-slate-900">{{ __('Not Logged In') }}</h4>
                         <span class="shrink-0 text-xs font-medium text-slate-500">{{ $notLoggedInUsersCount }}</span>
                     </div>
                     <div class="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
                         @forelse ($notLoggedInUsers as $user)
-                            <div class="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2 dark:border-slate-700/50 dark:bg-slate-800/50">
-                                <p class="truncate text-xs font-medium text-slate-900 dark:text-white">{{ $user->name }}</p>
+                            <div class="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2">
+                                <p class="truncate text-xs font-medium text-slate-900">{{ $user->name }}</p>
                             </div>
                         @empty
                             <p class="text-xs text-slate-500">{{ __('Everyone logged in.') }}</p>
@@ -416,12 +414,12 @@
                 </x-admin.insight-panel>
 
                 <x-admin.insight-panel class="flex min-h-32 min-w-0 flex-col p-4">
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ __('Overdue Checkout') }}</h4>
+                    <h4 class="text-sm font-bold text-slate-900 mb-3">{{ __('Overdue Checkout') }}</h4>
                     <div class="max-h-56 space-y-2 overflow-y-auto pr-1">
                         @forelse ($overdueUsers as $overdue)
-                            <div class="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 dark:border-rose-900/20 dark:bg-rose-900/10">
+                            <div class="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2">
                                 <div class="min-w-0">
-                                    <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ $overdue->user->name }}</p>
+                                    <p class="truncate text-sm font-bold text-slate-900">{{ $overdue->user->name }}</p>
                                     <p class="text-[10px] text-slate-500">{{ __('Shift End') }}: {{ $overdue->shift->end_time }}</p>
                                 </div>
                                 <x-actions.button type="button" wire:click="notifyUser('{{ $overdue->id }}')"
@@ -438,7 +436,7 @@
 
                 <x-admin.insight-panel class="flex min-h-32 min-w-0 flex-col p-4">
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Upcoming Leaves') }}</h4>
+                        <h4 class="text-sm font-bold text-slate-900">{{ __('Upcoming Leaves') }}</h4>
                         @if ($reportExportHref)
                             <x-actions.button href="{{ $reportExportHref }}" target="_system" variant="ghost" size="sm">
                                 {{ __('Export') }}
@@ -447,12 +445,12 @@
                     </div>
                     <div class="max-h-56 space-y-2 overflow-y-auto pr-1">
                         @forelse ($calendarLeaves->take(4) as $leave)
-                            <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-700/50 dark:bg-slate-800/50">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                            <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 font-bold text-primary-700">
                                     {{ \Carbon\Carbon::parse($leave['start_date'])->format('d') }}
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ $leave['title'] }}</p>
+                                    <p class="truncate text-sm font-bold text-slate-900">{{ $leave['title'] }}</p>
                                     <p class="text-[10px] text-slate-500">{{ $leave['date_display'] }}</p>
                                 </div>
                             </div>
@@ -476,9 +474,9 @@
         <x-admin.insight-panel id="team-attendance-section" class="p-4">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         {{ __('Team Attendance') }}</p>
-                    <h3 class="mt-1 text-base font-semibold text-slate-950 dark:text-white">
+                    <h3 class="mt-1 text-base font-semibold text-slate-950">
                         {{ __('View attendance by employee') }}</h3>
                     <p class="sr-only">
                         {{ __('Search the team list to review shift, attendance status, and supporting details for the selected date.') }}
@@ -492,7 +490,7 @@
                         </div>
                         <x-forms.input type="text" wire:model.live.debounce.300ms="search"
                             placeholder="{{ __('Search employee or NIP') }}"
-                            class="block w-full border-slate-200 bg-white pl-10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500" />
+                            class="block w-full border-slate-200 bg-white pl-10" />
                     </div>
 
                     @if ($employeesHref)
@@ -518,47 +516,47 @@
                             case 'present':
                                 $statusLabel = __('Present');
                                 $statusColor =
-                                    'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-300';
+                                    'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
                                 break;
                             case 'late':
                                 $statusLabel = __('Late');
                                 $statusColor =
-                                    'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300';
+                                    'bg-amber-50 text-amber-700 ring-amber-600/20';
                                 break;
                             case 'excused':
                                 $statusLabel = __('Excused');
                                 $statusColor =
-                                    'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-900/30 dark:text-sky-300';
+                                    'bg-sky-50 text-sky-700 ring-sky-600/20';
                                 break;
                             case 'sick':
                                 $statusLabel = __('Sick');
                                 $statusColor =
-                                    'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-900/30 dark:text-purple-300';
+                                    'bg-purple-50 text-purple-700 ring-purple-600/20';
                                 break;
                             case 'absent':
                                 $statusLabel = __('Absent');
                                 $statusColor =
-                                    'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-900/30 dark:text-rose-300';
+                                    'bg-rose-50 text-rose-700 ring-rose-600/20';
                                 break;
                             default:
                                 $statusLabel = '-';
                                 $statusColor =
-                                    'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400';
+                                    'bg-slate-50 text-slate-600 ring-slate-500/10';
                                 break;
                         }
                     @endphp
 
-                    <x-admin.tone-panel class="p-3 bg-slate-50/60 dark:bg-slate-800/60">
+                    <x-admin.tone-panel class="p-3 bg-slate-50">
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                                    class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
                                     {{ substr($employee->name, 0, 1) }}
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                                    <p class="truncate text-sm font-semibold text-slate-900">
                                         {{ $employee->name }}</p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    <p class="text-xs text-slate-500">
                                         {{ $employee->jobTitle?->name ?? __('Staff') }}</p>
                                 </div>
                             </div>
@@ -573,21 +571,21 @@
                         </div>
 
                         <div
-                            class="mt-3 grid grid-cols-2 gap-3 border-t border-slate-200 pt-2.5 dark:border-slate-700">
+                            class="mt-3 grid grid-cols-2 gap-3 border-t border-slate-200 pt-2.5">
                             <div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Time In') }}</p>
-                                <p class="mt-0.5 font-mono text-sm font-medium text-slate-900 dark:text-white">
+                                <p class="text-xs text-slate-500">{{ __('Time In') }}</p>
+                                <p class="mt-0.5 font-mono text-sm font-medium text-slate-900">
                                     {{ $timeIn ?? '--:--' }}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Time Out') }}</p>
-                                <p class="mt-0.5 font-mono text-sm font-medium text-slate-900 dark:text-white">
+                                <p class="text-xs text-slate-500">{{ __('Time Out') }}</p>
+                                <p class="mt-0.5 font-mono text-sm font-medium text-slate-900">
                                     {{ $timeOut ?? '--:--' }}</p>
                             </div>
                         </div>
 
                         @if ($attendance && ($attendance->attachment || $attendance->note || $attendance->lat_lng))
-                            <div class="mt-3 border-t border-slate-200 pt-2.5 dark:border-slate-700">
+                            <div class="mt-3 border-t border-slate-200 pt-2.5">
                                 <x-actions.button type="button" wire:click="show({{ $attendance->id }})"
                                     variant="soft-primary" size="sm" class="w-full justify-center">
                                     {{ __('View Details') }}
@@ -599,31 +597,31 @@
             </div>
 
             <div
-                class="mt-4 hidden rounded-xl border border-slate-200/70 lg:block dark:border-slate-800">
-                <table class="w-full divide-y divide-slate-200 dark:divide-slate-800">
-                    <thead class="bg-slate-50/90 dark:bg-slate-900/70">
+                class="mt-4 hidden rounded-xl border border-slate-200/70 lg:block">
+                <table class="w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
                         <tr>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Employee') }}</th>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Shift') }}</th>
                             <th
-                                class="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Status') }}</th>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Time In') }}</th>
                             <th
-                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Time Out') }}</th>
                             <th
-                                class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Detail') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900/40">
+                    <tbody class="divide-y divide-slate-200 bg-white">
                         @foreach ($employees as $employee)
                             @php
                                 $attendance = $employee->attendance;
@@ -638,59 +636,59 @@
                                         $statusLabel = __('Present');
                                         $statusDot = 'bg-emerald-500';
                                         $statusColor =
-                                            'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-300';
+                                            'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
                                         break;
                                     case 'late':
                                         $statusLabel = __('Late');
                                         $statusDot = 'bg-amber-500';
                                         $statusColor =
-                                            'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-300';
+                                            'bg-amber-50 text-amber-700 ring-amber-600/20';
                                         break;
                                     case 'excused':
                                         $statusLabel = __('Excused');
                                         $statusDot = 'bg-sky-500';
                                         $statusColor =
-                                            'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-900/20 dark:text-sky-300';
+                                            'bg-sky-50 text-sky-700 ring-sky-600/20';
                                         break;
                                     case 'sick':
                                         $statusLabel = __('Sick');
                                         $statusDot = 'bg-purple-500';
                                         $statusColor =
-                                            'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-900/20 dark:text-purple-300';
+                                            'bg-purple-50 text-purple-700 ring-purple-600/20';
                                         break;
                                     case 'absent':
                                         $statusLabel = __('Absent');
                                         $statusDot = 'bg-rose-500';
                                         $statusColor =
-                                            'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-900/20 dark:text-rose-300';
+                                            'bg-rose-50 text-rose-700 ring-rose-600/20';
                                         break;
                                     default:
                                         $statusLabel = '-';
                                         $statusDot = 'bg-slate-400';
                                         $statusColor =
-                                            'bg-slate-50 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400';
+                                            'bg-slate-50 text-slate-600 ring-slate-500/10';
                                         break;
                                 }
                             @endphp
 
                             <tr wire:key="{{ $employee->id }}"
-                                class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                                class="transition hover:bg-slate-50">
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
                                             {{ substr($employee->name, 0, 1) }}
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                                            <p class="truncate text-sm font-semibold text-slate-900">
                                                 {{ $employee->name }}</p>
-                                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">
+                                            <p class="truncate text-xs text-slate-500">
                                                 {{ $employee->jobTitle?->name ?? __('Staff') }} •
                                                 {{ $employee->division?->name ?? '-' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+                                <td class="px-4 py-3 text-sm text-slate-600">
                                     {{ $attendance->shift?->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     <span
@@ -703,9 +701,9 @@
                                         @endif
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 font-mono text-sm text-slate-600 dark:text-slate-300">
+                                <td class="px-4 py-3 font-mono text-sm text-slate-600">
                                     {{ $timeIn ?? '-' }}</td>
-                                <td class="px-4 py-3 font-mono text-sm text-slate-600 dark:text-slate-300">
+                                <td class="px-4 py-3 font-mono text-sm text-slate-600">
                                     {{ $timeOut ?? '-' }}</td>
                                 <td class="px-4 py-3 text-right">
                                     @if ($attendance && ($attendance->attachment || $attendance->note || $attendance->lat_lng))
@@ -748,32 +746,32 @@
         <x-slot name="content">
             <div class="space-y-3 lg:hidden">
                 @forelse ($detailList as $item)
-                    <article class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/50">
+                    <article class="rounded-xl border border-slate-200 bg-white p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                                <p class="truncate text-sm font-semibold text-slate-900">
                                     {{ isset($item->user) ? $item->user->name : $item->name }}
                                 </p>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                <p class="mt-1 text-xs text-slate-500">
                                     {{ __('NIP') }}: {{ isset($item->user) ? $item->user->nip : $item->nip }}
                                 </p>
                             </div>
                             @if ($selectedStatType !== 'absent')
                                 <span
                                     class="inline-flex shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $item->status === 'present'
-                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                                        ? 'bg-emerald-50 text-emerald-700'
                                         : ($item->status === 'late'
-                                            ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
+                                            ? 'bg-amber-50 text-amber-700'
                                             : ($item->status === 'sick'
-                                                ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
-                                                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300')) }}">
+                                                ? 'bg-purple-50 text-purple-700'
+                                                : 'bg-slate-100 text-slate-700')) }}">
                                     {{ __(ucfirst($item->status)) }}
                                 </span>
                             @endif
                         </div>
 
                         @if ($selectedStatType !== 'absent')
-                            <p class="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                            <p class="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-500">
                                 {{ __('Time') }}:
                                 <span class="font-mono">
                                     {{ $item->time_in ? format_time($item->time_in) : '-' }}
@@ -785,51 +783,51 @@
                         @endif
                     </article>
                 @empty
-                    <x-admin.empty-state :title="__('No data found.')" class="border border-dashed border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50" />
+                    <x-admin.empty-state :title="__('No data found.')" class="border border-dashed border-slate-200 bg-white" />
                 @endforelse
             </div>
 
             <div class="hidden lg:block">
-                <table class="w-full divide-y divide-slate-200 dark:divide-slate-800">
-                    <thead class="bg-slate-50 dark:bg-slate-900">
+                <table class="w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
                         <tr>
                             <th
-                                class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('Name') }}</th>
                             <th
-                                class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                 {{ __('NIP') }}</th>
                             @if ($selectedStatType !== 'absent')
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                    class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                     {{ __('Status') }}</th>
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                    class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                     {{ __('Time') }}</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900/50">
+                    <tbody class="divide-y divide-slate-200 bg-white">
                         @forelse ($detailList as $item)
                             <tr>
-                                <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">
+                                <td class="px-4 py-3 text-sm font-medium text-slate-900">
                                     {{ isset($item->user) ? $item->user->name : $item->name }}</td>
-                                <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                                <td class="px-4 py-3 text-sm text-slate-500">
                                     {{ isset($item->user) ? $item->user->nip : $item->nip }}</td>
                                 @if ($selectedStatType !== 'absent')
-                                    <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                                    <td class="px-4 py-3 text-sm text-slate-500">
                                         <span
                                             class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $item->status === 'present'
-                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                                                ? 'bg-emerald-50 text-emerald-700'
                                                 : ($item->status === 'late'
-                                                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
+                                                    ? 'bg-amber-50 text-amber-700'
                                                     : ($item->status === 'sick'
-                                                        ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
-                                                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300')) }}">
+                                                        ? 'bg-purple-50 text-purple-700'
+                                                        : 'bg-slate-100 text-slate-700')) }}">
                                             {{ __(ucfirst($item->status)) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                                    <td class="px-4 py-3 text-sm text-slate-500">
                                         {{ $item->time_in ? format_time($item->time_in) : '-' }}
                                         @if ($item->time_out)
                                             - {{ format_time($item->time_out) }}
@@ -840,7 +838,7 @@
                         @empty
                             <tr>
                                 <td colspan="{{ $selectedStatType !== 'absent' ? 4 : 2 }}"
-                                    class="px-4 py-5 text-center text-sm text-slate-500 dark:text-slate-400">
+                                    class="px-4 py-5 text-center text-sm text-slate-500">
                                     {{ __('No data found.') }}
                                 </td>
                             </tr>
@@ -856,8 +854,6 @@
             </x-actions.secondary-button>
         </x-slot>
     </x-overlays.dialog-modal>
-
-    @stack('attendance-detail-scripts')
 
     <script>
         window.dashboardChartData = @json($chartData);
@@ -900,8 +896,8 @@
                     });
 
                     const presentGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 360);
-                    presentGradient.addColorStop(0, 'rgba(22, 163, 74, 0.22)');
-                    presentGradient.addColorStop(1, 'rgba(22, 163, 74, 0)');
+                    presentGradient.addColorStop(0, window.colorWithAlpha(window.cssVar('--color-module-payroll'), 0.22));
+                    presentGradient.addColorStop(1, window.colorWithAlpha(window.cssVar('--color-module-payroll'), 0));
 
                     chart = new Chart(ctx, {
                         type: 'line',
@@ -910,7 +906,7 @@
                             datasets: [{
                                     label: '{{ __('Present') }}',
                                     data: window.dashboardChartData.present,
-                                    borderColor: '#16a34a',
+                                    borderColor: window.cssVar('--color-module-payroll'),
                                     backgroundColor: presentGradient,
                                     fill: true,
                                     tension: 0.35,
@@ -920,7 +916,7 @@
                                 {
                                     label: '{{ __('Late') }}',
                                     data: window.dashboardChartData.late,
-                                    borderColor: '#f59e0b',
+                                    borderColor: window.cssVar('--color-module-documents'),
                                     backgroundColor: 'transparent',
                                     tension: 0.35,
                                     pointRadius: 2,
@@ -929,7 +925,7 @@
                                 {
                                     label: '{{ __('Excused') }}',
                                     data: window.dashboardChartData.excused,
-                                    borderColor: '#0ea5e9',
+                                    borderColor: window.cssVar('--color-module-attendance'),
                                     backgroundColor: 'transparent',
                                     borderDash: [6, 6],
                                     tension: 0.35,
@@ -939,7 +935,7 @@
                                 {
                                     label: '{{ __('Sick') }}',
                                     data: window.dashboardChartData.sick,
-                                    borderColor: '#8b5cf6',
+                                    borderColor: window.cssVar('--color-module-leave'),
                                     backgroundColor: 'transparent',
                                     borderDash: [3, 5],
                                     tension: 0.35,
@@ -949,7 +945,7 @@
                                 {
                                     label: '{{ __('No Record') }}',
                                     data: window.dashboardChartData.absent,
-                                    borderColor: '#e11d48',
+                                    borderColor: window.cssVar('--color-module-finance'),
                                     backgroundColor: 'transparent',
                                     tension: 0.35,
                                     pointRadius: 1,
@@ -1022,7 +1018,7 @@
                             labels: ['{{ __("Logged In") }}', '{{ __("Not Logged In") }}', '{{ __("Never Logged In") }}'],
                             datasets: [{
                                 data: [{{ $loggedInUsersCount }}, {{ $notLoggedInUsersCount }}, {{ $neverLoggedInCount }}],
-                                backgroundColor: ['#10b981', '#f59e0b', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-finance')],
                                 borderWidth: 0,
                                 hoverOffset: 4
                             }]
@@ -1059,7 +1055,7 @@
                             labels: ['{{ __("Leave") }}', '{{ __("Correction") }}', '{{ __("Reimburse") }}', '{{ __("Overtime") }}', '{{ __("Kasbon") }}'],
                             datasets: [{
                                 data: [{{ $pendingLeavesCount }}, {{ $pendingAttendanceCorrectionsCount }}, {{ $pendingReimbursementsCount }}, {{ $pendingOvertimesCount }}, {{ $pendingKasbonCount }}],
-                                backgroundColor: ['#8b5cf6', '#0ea5e9', '#f59e0b', '#10b981', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-leave'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-payroll'), window.cssVar('--color-module-finance')],
                                 borderRadius: 6,
                                 barThickness: 18
                             }]
@@ -1116,7 +1112,7 @@
                                     {{ $sickCount }},
                                     {{ $absentCount }},
                                 ],
-                                backgroundColor: ['#10b981', '#f59e0b', '#0ea5e9', '#8b5cf6', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-finance')],
                                 borderWidth: 0,
                                 hoverOffset: 4
                             }]
@@ -1179,7 +1175,7 @@
                             ],
                             datasets: [{
                                 data: valuesFrom(window.dashboardChartData),
-                                backgroundColor: ['#16a34a', '#f59e0b', '#0ea5e9', '#8b5cf6', '#e11d48'],
+                                backgroundColor: [window.cssVar('--color-module-payroll'), window.cssVar('--color-module-documents'), window.cssVar('--color-module-attendance'), window.cssVar('--color-module-leave'), window.cssVar('--color-module-finance')],
                                 borderWidth: 0,
                             }]
                         },

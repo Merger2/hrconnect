@@ -16,7 +16,7 @@ class RedirectAdminProfileRequests
     {
         $user = $request->user();
 
-        if ($request->isMethod('GET') && $user?->can('accessAdminPanel')) {
+        if ($request->isMethod('GET') && $user?->canAccessAdminPanel()) {
             if ($request->routeIs('profile.show')) {
                 return redirect()->route('admin.profile.show');
             }

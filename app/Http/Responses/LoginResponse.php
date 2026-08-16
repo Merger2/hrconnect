@@ -13,8 +13,15 @@ class LoginResponse implements LoginResponseContract
         }
 
         $user = $request->user();
+        $intendedUrl = session()->pull('url.intended');
 
         if ($user && ! $user->hasVerifiedEmail()) {
+            // Let a user resume an email-verification flow they started before
+            // logging in (e.g. clicked a verification link while a guest).
+            if ($intendedUrl && str_contains($intendedUrl, '/email/verify')) {
+                return redirect()->to($intendedUrl);
+            }
+
             return redirect()->to(route('verification.notice'));
         }
 
@@ -22,7 +29,6 @@ class LoginResponse implements LoginResponseContract
             return redirect()->to(route('home'));
         }
 
-        $intendedUrl = session()->pull('url.intended');
         $ssePath = parse_url(route('sse.notifications'), PHP_URL_PATH);
 
         if ($intendedUrl && str_contains($intendedUrl, $ssePath)) {

@@ -4,7 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperAppraisalEvaluation
+ */
 class AppraisalEvaluation extends Model
 {
     use HasFactory;
@@ -17,12 +21,12 @@ class AppraisalEvaluation extends Model
         'comments',
     ];
 
-    public function appraisal()
+    public function appraisal(): BelongsTo
     {
         return $this->belongsTo(Appraisal::class);
     }
 
-    public function kpiTemplate()
+    public function kpiTemplate(): BelongsTo
     {
         return $this->belongsTo(KpiTemplate::class);
     }

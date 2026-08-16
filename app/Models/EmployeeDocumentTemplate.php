@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin IdeHelperEmployeeDocumentTemplate
+ */
 class EmployeeDocumentTemplate extends Model
 {
     use HasFactory;
@@ -18,11 +21,18 @@ class EmployeeDocumentTemplate extends Model
         'name',
         'content',
         'variables',
+        'paper_size',
+        'orientation',
+        'header',
+        'footer',
+        'layout_options',
+        'file_path',
         'is_active',
     ];
 
     protected $casts = [
         'variables' => 'array',
+        'layout_options' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -33,6 +43,6 @@ class EmployeeDocumentTemplate extends Model
 
     public function documents(): HasMany
     {
-        return $this->hasMany(EmployeeDocumentRequest::class, 'template_id');
+        return $this->hasMany(EmployeeDocumentRequest::class, 'generated_template_id');
     }
 }

@@ -1,0 +1,1267 @@
+{
+  "_meta": {
+    "description": "Golden test dataset PayrollCalculatorService. Data gaji bersifat DUMMY (bukan data karyawan riil PT 521 Teknologi Indonesia / PT Daya Cipta Mandiri Solusi) karena data gaji riil bersifat privasi dan dilindungi UU PDP. Tarif pajak & BPJS yang dipakai mengacu pada tabel referensi resmi yang sudah di-seed di sistem (TarifTerSeeder, PayrollConfigSeeder) per periode acuan 2026-07/2026-12, sesuai PP 58/2023 (PPh21 TER), UU HPP (PPh21 progresif Pasal 17), dan konfigurasi BPJS internal sistem.",
+    "sumber_referensi": "Formula & tabel diambil langsung dari audit read-only PayrollCalculatorService.php, TarifTerSeeder.php, PayrollConfigSeeder.php, TerCategory.php, ManagesWorkDays trait (Juli 2026: 23 hari kerja, tanpa hari libur nasional). Semua expected value dihitung ulang secara terpisah menggunakan script Python yang mereplikasi formula teraudit (bukan disalin dari kalkulator online), untuk verifikasi silang manual.",
+    "cara_mengisi": "1) expected sudah terisi 2) active=true 3) reference mencatat sumber & tanggal verifikasi 4) jalankan vendor/bin/pest tests/Feature/PayrollGoldenTest.php dengan Carbon frozen di 2026-08-04 (lihat catatan freeze_time)",
+    "freeze_time": "PENTING: calculatePesangon() dan calculateUangPenghargaanMasaKerja() menghitung masa kerja dari join_date->diffInMonths(now()) -- BUKAN dari resign_date/tanggal PHK. Semua expected di file ini dihitung dengan asumsi Carbon::now() di-freeze ke 2026-08-04 12:00:00. Gunakan $this->travelTo(Carbon::parse('2026-08-04 12:00:00')) di beforeEach() -- JANGAN jalankan test ini tanpa freeze time, hasil akan drift.",
+    "catatan_kalkulasi": [
+      "prorated_salary = round((hari_kerja_aktual / hari_kerja_bulan) x (basic_salary + allowance_jabatan), 2). Juli 2026 = 23 hari kerja (Senin-Jumat, tanpa hari libur nasional -- terverifikasi via Carbon).",
+      "overtime: jam dibulatkan ke 0.5 terdekat. Weekday: mult = min(jam,1)*1.5 + max(jam-1,0)*2. Weekend/libur: mult = min(jam,8)*2 + min(max(jam-8,0),2)*3 + max(jam-10,0)*4. hourly_rate = (basic+allowance)/173. overtime_pay = round(hourly_rate * mult, 2).",
+      "late_penalty = jumlah_hari_late x 50.000 (CompanySetting attendance_penalty_per_day, tanpa round, integer).",
+      "alpha_penalty = jumlah_alpha x (basic_salary / hari_kerja_bulan) -- TIDAK di-round eksplisit oleh kode, bisa pecahan sen. Gunakan delta 0.01 di assertion.",
+      "taxable_income (basis BPJS & PPh21 TER bulanan) = prorated_salary + overtime_pay. Reimbursement TIDAK masuk basis ini.",
+      "gross_salary (nilai tersimpan di record payroll) = prorated_salary + overtime_pay + reimbursement.",
+      "TER category: resolveFromStatus() -- SINGLE/DIVORCED/WIDOWED: 0-1 tanggungan->A, 2-3->B. MARRIED: 0->A, 1->B, 2-3->C. Tanggungan di-cap 3.",
+      "pph21 TER bulanan = round(taxable_income x tarif_ter, 2), lookup dari tabel tarif_ter (44 baris kategori A, 40 baris B, 41 baris C -- lihat lampiran audit).",
+      "Desember ATAU bulan resign_date: bypass TER, pakai true-up: ytd_gross = SUM(gross_salary+overtime_pay bulan sebelumnya dari DB) + gross bulan ini; annual_pph21 = calculateAnnualPPh21Progressive(ytd_gross); ytd_pph21 = SUM(pph21 bulan sebelumnya dari DB); pph21_bulan_ini = max(0, round(annual_pph21 - ytd_pph21, 2)).",
+      "calculateAnnualPPh21Progressive: PKP = max(0, annual_gross - PTKP) -- TIDAK ada pengurang biaya jabatan (deviasi dari standar resmi, dicatat sebagai temuan audit terpisah). Bracket: 0-60jt=5%, 60-250jt=15%, 250-500jt=25%, 500jt-5M=30%, >5M=35%.",
+      "PTKP: basis 54.000.000 (semua status) + 4.500.000 jika married (K) + min(children,3) x 4.500.000.",
+      "THR prorata = round((bulan_kerja/12) x gaji_bulanan, 2).",
+      "PMK (calculateUangPenghargaanMasaKerja): <3thn=0, 3-6=2, 6-9=3, 9-12=4, 12-15=5 (bulan gaji) x variantMultiplier. Sesuai PP 35/2021 Pasal 40(3).",
+      "Kompensasi PKWT: hanya CONTRACT. bulanKerja = join_date->diffInMonths(resign_date ?? contract_end_date ?? now()). round((bulanKerja/12) x monthlySalary, 2).",
+      "Cash-out cuti: remaining = max(0, quota-used). dailyRate = monthlySalary / divisor (21 utk 5 hari kerja). round(remaining x dailyRate, 2).",
+      "variantMultiplier (phk_variant, dipakai pesangon & PMK): dismissed/default=1.0x, dismissed_severe=2.0x, mutual=0.5x. CATATAN AUDIT: dismissed_severe=2x dan resign=1x TIDAK sesuai UU 13/2003 Pasal 158 / PP 35/2021 (perlu validasi kebijakan internal perusahaan).",
+      "net_salary = gross_salary - total_deduction -- TIDAK di-round eksplisit oleh kode. Gunakan assertEqualsWithDelta(..., 0.01) di semua assertion float.",
+      "Pesangon PP 35/2021 Pasal 40(2): <1=1, 1=2, 2=3, 3=4, 4=5, 5=6, 6=7, 7=8, >=8=9 bulan gaji x variantMultiplier.",
+      "BPJS JP cap 11.086.300 (Maret 2026)."
+    ],
+    "temuan_audit_terkait_test": [
+      "BUG: getYtdGrossIncome() menjumlahkan gross_salary + overtime_pay untuk bulan-bulan sebelumnya, padahal gross_salary yang tersimpan SUDAH termasuk overtime_pay -- lembur ter-double-count di true-up Desember/terminasi kalau ada lembur di bulan-bulan sebelumnya. PR-12/PR-13/PR-14 di dataset ini sengaja TIDAK punya lembur di ytd_payrolls sehingga tidak kena bug ini -- rekomendasi: tambah case terpisah (mis. PR-16) khusus untuk expose bug ini di test suite.",
+      "BUG: reimbursement tidak konsisten -- dikecualikan dari basis TER bulanan, tapi ikut ke basis annual true-up (karena ikut gross_salary yang di-SUM). Belum ada case yang menguji ini secara eksplisit.",
+      "RISIKO: true-up Desember/terminasi bergantung penuh pada kelengkapan record Payroll 12 bulan di DB -- tidak ada validasi. Kalau ada bulan yang belum pernah di-generate, hasil salah tanpa error.",
+      "calculateAnnualPPh21Progressive tidak mengurangi biaya jabatan (5% bruto, cap 6jt/tahun sesuai PMK 168/2023) -- deviasi dari standar resmi, worth dikonfirmasi apakah disengaja (simplifikasi skripsi) atau perlu diperbaiki sebelum sidang."
+    ],
+    "periode_referensi": "2026-07 (kasus TER bulanan) / 2026-12 (kasus true-up Desember) / termination di 2026-07-20 (true-up terminasi)",
+    "data_yang_harus_di_seed_sebelum_test": "TarifTerSeeder + PayrollConfigSeeder (BpjsConfig) + CompanySetting attendance_penalty_per_day=50000 (fallback default, tidak wajib di-seed eksplisit) + Carbon freeze 2026-08-04 (lihat freeze_time) + untuk PR-12/13/14: seed record Payroll historis sesuai ytd_payrolls sebelum generatePayroll() dipanggil untuk periode yang diuji.",
+    "changelog": [
+      "2026-08-05 (final): pesangon PP 35/2021 (CP-03=48jt, CP-04=48jt); cap JP 11.086.300 (PR-03/11/14/15); biaya jabatan TIDAK diterapkan (revert M2) — PR-14 pph21 kembali 2.415.000, CP-08 75.500.000."
+    ]
+  },
+  "payroll_cases": [
+    {
+      "id": "PR-01",
+      "title": "Full month, TER A, tanpa lembur/denda/reimburse",
+      "scenario": "full_month_clean",
+      "notes": "Kasus baseline: karyawan tetap, lajang, kerja penuh sebulan.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 1.25,
+        "prorated_salary": 7000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 7000000,
+        "taxable_income": 7000000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 70000,
+            "employer": 280000
+          },
+          "jht": {
+            "employee": 140000,
+            "employer": 259000
+          },
+          "jp": {
+            "employee": 70000,
+            "employer": 140000
+          },
+          "jkk": {
+            "employer": 16800
+          },
+          "jkm": {
+            "employer": 21000
+          }
+        },
+        "pph21": 87500,
+        "total_deduction": 367500,
+        "net_salary": 6632500
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-02",
+      "title": "Full month, TER B (menikah 1 tanggungan)",
+      "scenario": "full_month_ter_b",
+      "notes": "marital_status=married, children_count=1 -> kategori TER B.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 1,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "B",
+        "ter_rate": 0.75,
+        "prorated_salary": 7000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 7000000,
+        "taxable_income": 7000000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 70000,
+            "employer": 280000
+          },
+          "jht": {
+            "employee": 140000,
+            "employer": 259000
+          },
+          "jp": {
+            "employee": 70000,
+            "employer": 140000
+          },
+          "jkk": {
+            "employer": 16800
+          },
+          "jkm": {
+            "employer": 21000
+          }
+        },
+        "pph21": 52500,
+        "total_deduction": 332500,
+        "net_salary": 6667500
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-03",
+      "title": "Full month, TER C (menikah 3+ tanggungan)",
+      "scenario": "full_month_ter_c",
+      "notes": "children_count max 3 untuk PTKP; kategori C.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 4,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 9000000,
+            "allowance_jabatan": 1500000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "C",
+        "ter_rate": 1.5,
+        "prorated_salary": 10500000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 10500000,
+        "taxable_income": 10500000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 105000,
+            "employer": 420000
+          },
+          "jht": {
+            "employee": 210000,
+            "employer": 388500
+          },
+          "jp": {
+            "employee": 105000,
+            "employer": 210000
+          },
+          "jkk": {
+            "employer": 25200
+          },
+          "jkm": {
+            "employer": 31500
+          }
+        },
+        "pph21": 157500,
+        "total_deduction": 577500,
+        "net_salary": 9922500
+      },
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
+    },
+    {
+      "id": "PR-04",
+      "title": "Intern - tanpa BPJS & PPh21",
+      "scenario": "intern",
+      "notes": "employment_type=INTERN -> calculatePPh21=0, calculateBPJS semua 0.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "INTERN",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2026-06-01",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 2000000,
+            "allowance_jabatan": 0
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": null,
+        "ter_rate": null,
+        "prorated_salary": 2000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 2000000,
+        "taxable_income": 2000000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 0,
+            "employer": 0
+          },
+          "jht": {
+            "employee": 0,
+            "employer": 0
+          },
+          "jp": {
+            "employee": 0,
+            "employer": 0
+          },
+          "jkk": {
+            "employer": 0
+          },
+          "jkm": {
+            "employer": 0
+          }
+        },
+        "pph21": 0,
+        "total_deduction": 0,
+        "net_salary": 2000000
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-05",
+      "title": "Prorata masuk tengah bulan (join 2026-07-15)",
+      "scenario": "prorata_join_mid_month",
+      "notes": "Hari kerja aktual 15-31 Juli 2026 (weekday saja, tanpa libur nasional) = 13 hari dari total 23 hari kerja Juli.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2026-07-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "working_days_bulan": 23,
+        "hari_kerja_aktual": 13
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 0.0,
+        "prorated_salary": 3956521.74,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 3956521.74,
+        "taxable_income": 3956521.74,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 39565.22,
+            "employer": 158260.87
+          },
+          "jht": {
+            "employee": 79130.43,
+            "employer": 146391.3
+          },
+          "jp": {
+            "employee": 39565.22,
+            "employer": 79130.43
+          },
+          "jkk": {
+            "employer": 9495.65
+          },
+          "jkm": {
+            "employer": 11869.57
+          }
+        },
+        "pph21": 0,
+        "total_deduction": 158260.87,
+        "net_salary": 3798260.87
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-06",
+      "title": "Prorata resign tengah bulan (resign 2026-07-20)",
+      "scenario": "prorata_resign_mid_month",
+      "notes": "Resign bulan berjalan -> prorata s/d resign_date. Hari kerja aktual 1-20 Juli 2026 (weekday) = 14 hari dari 23 hari kerja Juli.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": "2026-07-20",
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "working_days_bulan": 23,
+        "hari_kerja_aktual": 14
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 0.0,
+        "prorated_salary": 4260869.57,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 4260869.57,
+        "taxable_income": 4260869.57,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 42608.7,
+            "employer": 170434.78
+          },
+          "jht": {
+            "employee": 85217.39,
+            "employer": 157652.17
+          },
+          "jp": {
+            "employee": 42608.7,
+            "employer": 85217.39
+          },
+          "jkk": {
+            "employer": 10226.09
+          },
+          "jkm": {
+            "employer": 12782.61
+          }
+        },
+        "pph21": 0,
+        "total_deduction": 170434.79,
+        "net_salary": 4090434.78
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-07",
+      "title": "Lembur weekday 3 jam (1.5x jam-1, 2x jam-2+)",
+      "scenario": "overtime_weekday",
+      "notes": "Overtime tanggal kerja biasa (Rabu, 2026-07-08), 3 jam, status approved.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [
+          {
+            "date": "2026-07-08",
+            "hours": 3
+          }
+        ],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 1.25,
+        "prorated_salary": 7000000,
+        "overtime_pay": 222543.35,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 7222543.35,
+        "taxable_income": 7222543.35,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 72225.43,
+            "employer": 288901.73
+          },
+          "jht": {
+            "employee": 144450.87,
+            "employer": 267234.1
+          },
+          "jp": {
+            "employee": 72225.43,
+            "employer": 144450.87
+          },
+          "jkk": {
+            "employer": 17334.1
+          },
+          "jkm": {
+            "employer": 21667.63
+          }
+        },
+        "pph21": 90281.79,
+        "total_deduction": 379183.52,
+        "net_salary": 6843359.83
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-08",
+      "title": "Lembur hari istirahat mingguan / Sabtu 12 jam (2x/3x/4x tiered)",
+      "scenario": "overtime_weekend",
+      "notes": "Sabtu 2026-07-11, 12 jam: 8 jam x 2x, 2 jam x 3x, 2 jam x 4x. Senin-Jumat kerja (PT DCMS) -> Sabtu masuk tier hari istirahat mingguan.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [
+          {
+            "date": "2026-07-11",
+            "hours": 12
+          }
+        ],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 1.5,
+        "prorated_salary": 7000000,
+        "overtime_pay": 1213872.83,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 8213872.83,
+        "taxable_income": 8213872.83,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 82138.73,
+            "employer": 328554.91
+          },
+          "jht": {
+            "employee": 164277.46,
+            "employer": 303913.29
+          },
+          "jp": {
+            "employee": 82138.73,
+            "employer": 164277.46
+          },
+          "jkk": {
+            "employer": 19713.29
+          },
+          "jkm": {
+            "employer": 24641.62
+          }
+        },
+        "pph21": 123208.09,
+        "total_deduction": 451763.01,
+        "net_salary": 7762109.82
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-09",
+      "title": "Denda: 2 hari late + 1 hari alpha",
+      "scenario": "penalties",
+      "notes": "late_penalty = 2 x 50000. alpha_penalty = 1 x (basic_salary/23) = TIDAK dibulatkan (temuan audit) -- gunakan delta 0.01 di assertion.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 2,
+          "absent_days": 1
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "working_days_bulan": 23
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 1.25,
+        "prorated_salary": 7000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 100000,
+        "alpha_penalty": 260869.5652173913,
+        "gross_salary": 7000000,
+        "taxable_income": 7000000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 70000,
+            "employer": 280000
+          },
+          "jht": {
+            "employee": 140000,
+            "employer": 259000
+          },
+          "jp": {
+            "employee": 70000,
+            "employer": 140000
+          },
+          "jkk": {
+            "employer": 16800
+          },
+          "jkm": {
+            "employer": 21000
+          }
+        },
+        "pph21": 87500,
+        "total_deduction": 728369.5652173914,
+        "net_salary": 6271630.434782608
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-10",
+      "title": "Reimbursement approved masuk gross (tidak kena BPJS/PPh21)",
+      "scenario": "reimbursement",
+      "notes": "Reimbursement 500000 status APPROVED -> gross +500000, TIDAK masuk basis BPJS/PPh21.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [
+          {
+            "amount": 500000
+          }
+        ],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 1.25,
+        "prorated_salary": 7000000,
+        "overtime_pay": 0,
+        "reimbursement": 500000,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 7500000,
+        "taxable_income": 7000000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 70000,
+            "employer": 280000
+          },
+          "jht": {
+            "employee": 140000,
+            "employer": 259000
+          },
+          "jp": {
+            "employee": 70000,
+            "employer": 140000
+          },
+          "jkk": {
+            "employer": 16800
+          },
+          "jkm": {
+            "employer": 21000
+          }
+        },
+        "pph21": 87500,
+        "total_deduction": 367500,
+        "net_salary": 7132500
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-11",
+      "title": "BPJS ceiling cap (gaji di atas batas atas)",
+      "scenario": "bpjs_ceiling",
+      "notes": "Gross income > ceiling BpjsConfig -> base = ceiling. Kesehatan capped di 12jt, JP capped di 9.559.600.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 22000000,
+            "allowance_jabatan": 3000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "A",
+        "ter_rate": 10.0,
+        "prorated_salary": 25000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 25000000,
+        "taxable_income": 25000000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 120000,
+            "employer": 480000
+          },
+          "jht": {
+            "employee": 500000,
+            "employer": 925000
+          },
+          "jp": {
+            "employee": 110863,
+            "employer": 221726
+          },
+          "jkk": {
+            "employer": 60000
+          },
+          "jkm": {
+            "employer": 75000
+          }
+        },
+        "pph21": 2500000,
+        "total_deduction": 3230863,
+        "net_salary": 21769137
+      },
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
+    },
+    {
+      "id": "PR-12",
+      "title": "Desember: true-up annual progressive (ytd)",
+      "scenario": "december_true_up",
+      "notes": "Period 2026-12 + 1 payroll sebelumnya (Nov). ytd_gross=14.000.000, di bawah PTKP TK/0 (54jt) -> annual_pph21=0, pph21 Desember=0 (edge case: mekanisme true-up jalan meski hasil nol).",
+      "input": {
+        "period": "2026-12",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "single",
+          "children_count": 0,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 6000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "ytd_payrolls": [
+          {
+            "period": "2026-11",
+            "gross_salary": 7000000,
+            "overtime_pay": 0,
+            "pph21": 0
+          }
+        ]
+      },
+      "expected": {
+        "ter_category": null,
+        "ter_rate": null,
+        "prorated_salary": 7000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 7000000,
+        "taxable_income": 7000000,
+        "ytd_gross_total": 14000000,
+        "annual_pph21": 0,
+        "ytd_pph21_sebelumnya": 0,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 70000,
+            "employer": 280000
+          },
+          "jht": {
+            "employee": 140000,
+            "employer": 259000
+          },
+          "jp": {
+            "employee": 70000,
+            "employer": 140000
+          },
+          "jkk": {
+            "employer": 16800
+          },
+          "jkm": {
+            "employer": 21000
+          }
+        },
+        "pph21": 0,
+        "total_deduction": 280000,
+        "net_salary": 6720000
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-13",
+      "title": "Terminasi bulan berjalan: true-up progressive",
+      "scenario": "termination_true_up",
+      "notes": "resign_date 2026-07-20 (14/23 hari kerja). ytd_gross=19.304.347,83, di bawah PTKP K/2 (67,5jt) -> annual_pph21=0, pph21=0.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 2,
+          "join_date": "2024-01-15",
+          "resign_date": "2026-07-20",
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 10000000,
+            "allowance_jabatan": 2000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "working_days_bulan": 23,
+        "hari_kerja_aktual": 14,
+        "ytd_payrolls": [
+          {
+            "period": "2026-06",
+            "gross_salary": 12000000,
+            "overtime_pay": 0,
+            "pph21": 0
+          }
+        ]
+      },
+      "expected": {
+        "ter_category": null,
+        "ter_rate": null,
+        "prorated_salary": 7304347.83,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 7304347.83,
+        "taxable_income": 7304347.83,
+        "ytd_gross_total": 19304347.83,
+        "annual_pph21": 0,
+        "ytd_pph21_sebelumnya": 0,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 73043.48,
+            "employer": 292173.91
+          },
+          "jht": {
+            "employee": 146086.96,
+            "employer": 270260.87
+          },
+          "jp": {
+            "employee": 73043.48,
+            "employer": 146086.96
+          },
+          "jkk": {
+            "employer": 17530.43
+          },
+          "jkm": {
+            "employer": 21913.04
+          }
+        },
+        "pph21": 0,
+        "total_deduction": 292173.92,
+        "net_salary": 7012173.91
+      },
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "PR-14",
+      "title": "Bruto tinggi multi-bracket progressive (Desember)",
+      "scenario": "december_high_income",
+      "notes": "True-up Desember: YTD 11x18jt + Des 18jt = 216jt. Biaya jabatan (M2) = min(5%x216jt, 6jt) = 6jt. PKP = 216-6-67,5 (K/2) = 142,5jt -> 5%(60)+15%(82,5) = 15,375jt annual; Des = 15,375 - 13,86 = 1,515jt.",
+      "input": {
+        "period": "2026-12",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 2,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 15000000,
+            "allowance_jabatan": 3000000
+          }
+        },
+        "attendance": {
+          "late_days": 0,
+          "absent_days": 0
+        },
+        "overtimes": [],
+        "reimbursements": [],
+        "penalty_per_day": 50000,
+        "ytd_payrolls": [
+          {
+            "period": "2026-01",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-02",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-03",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-04",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-05",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-06",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-07",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-08",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-09",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-10",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          },
+          {
+            "period": "2026-11",
+            "gross_salary": 18000000,
+            "overtime_pay": 0,
+            "pph21": 1260000
+          }
+        ]
+      },
+      "expected": {
+        "ter_category": null,
+        "ter_rate": null,
+        "prorated_salary": 18000000,
+        "overtime_pay": 0,
+        "reimbursement": 0,
+        "late_penalty": 0,
+        "alpha_penalty": 0,
+        "gross_salary": 18000000,
+        "taxable_income": 18000000,
+        "ytd_gross_total": 216000000,
+        "annual_pph21": 15375000,
+        "ytd_pph21_sebelumnya": 13860000,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 120000,
+            "employer": 480000
+          },
+          "jht": {
+            "employee": 360000,
+            "employer": 666000
+          },
+          "jp": {
+            "employee": 110863,
+            "employer": 221726
+          },
+          "jkk": {
+            "employer": 43200
+          },
+          "jkm": {
+            "employer": 54000
+          }
+        },
+        "pph21": 1515000,
+        "total_deduction": 2105863,
+        "net_salary": 15894137
+      },
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
+    },
+    {
+      "id": "PR-15",
+      "title": "Kombinasi lengkap: lembur + denda + reimburse + TER B",
+      "scenario": "combined",
+      "notes": "Uji kombinasi semua komponen sekaligus. OT weekday 2026-07-08 (Rabu, 2 jam) + OT weekend 2026-07-11 (Sabtu, 5 jam). JP capped karena taxable > 9.559.600.",
+      "input": {
+        "period": "2026-07",
+        "employee": {
+          "employment_type": "PERMANENT",
+          "marital_status": "married",
+          "children_count": 1,
+          "join_date": "2024-01-15",
+          "resign_date": null,
+          "phk_variant": null,
+          "position": {
+            "basic_salary": 8000000,
+            "allowance_jabatan": 1000000
+          }
+        },
+        "attendance": {
+          "late_days": 3,
+          "absent_days": 0
+        },
+        "overtimes": [
+          {
+            "date": "2026-07-08",
+            "hours": 2
+          },
+          {
+            "date": "2026-07-11",
+            "hours": 5
+          }
+        ],
+        "reimbursements": [
+          {
+            "amount": 350000
+          }
+        ],
+        "penalty_per_day": 50000
+      },
+      "expected": {
+        "ter_category": "B",
+        "ter_rate": 1.5,
+        "prorated_salary": 9000000,
+        "overtime_pay": 702312.13,
+        "reimbursement": 350000,
+        "late_penalty": 150000,
+        "alpha_penalty": 0,
+        "gross_salary": 10052312.13,
+        "taxable_income": 9702312.13,
+        "bpjs": {
+          "kesehatan": {
+            "employee": 97023.12,
+            "employer": 388092.49
+          },
+          "jht": {
+            "employee": 194046.24,
+            "employer": 358985.55
+          },
+          "jp": {
+            "employee": 97023.12,
+            "employer": 194046.24
+          },
+          "jkk": {
+            "employer": 23285.55
+          },
+          "jkm": {
+            "employer": 29106.94
+          }
+        },
+        "pph21": 145534.68,
+        "total_deduction": 683627.16,
+        "net_salary": 9368684.97
+      },
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (cap JP 11.086.300 Maret 2026; biaya jabatan TIDAK diterapkan — keputusan M2)"
+    }
+  ],
+  "component_cases": [
+    {
+      "id": "CP-01",
+      "method": "calculateThrProrated",
+      "title": "THR prorata 6 bulan kerja",
+      "input": {
+        "monthly_salary": 7000000,
+        "months_worked": 6
+      },
+      "expected": 3500000,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "CP-02",
+      "method": "calculateThrProrated",
+      "title": "THR masa kerja < 1 bulan = 0",
+      "input": {
+        "monthly_salary": 7000000,
+        "months_worked": 0
+      },
+      "expected": 0,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "CP-03",
+      "method": "calculatePesangon",
+      "title": "Pesangon 5 tahun kerja, PHK biasa (1x)",
+      "notes": "PP 35/2021: join 2021-07-01 freeze 2026-08-04 = 5 thn -> multiplier 6 (sebelumnya UU13 = 5).",
+      "input": {
+        "join_date": "2021-07-01",
+        "phk_variant": "dismissed",
+        "monthly_salary": 8000000
+      },
+      "expected": 48000000,
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (PP 35/2021 Pasal 40(2) — keputusan P0)"
+    },
+    {
+      "id": "CP-04",
+      "method": "calculatePesangon",
+      "title": "Pesangon PHK severe DISTANDARKAN 1x, 2 tahun",
+      "notes": "PP 35/2021: 2 thn -> 3x; keputusan Fikih 2026-08-05 (M3): variant dismissed_severe TIDAK lagi 2.0x -> 3x1x8jt = 24jt (standar sama dgn dismissed).",
+      "input": {
+        "join_date": "2024-07-01",
+        "phk_variant": "dismissed_severe",
+        "monthly_salary": 8000000
+      },
+      "expected": 24000000,
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (keputusan Fikih M3 — hapus multiplier 2x)"
+    },
+    {
+      "id": "CP-05",
+      "method": "calculateUangPenghargaanMasaKerja",
+      "title": "PMK 8 tahun = 3 bulan gaji",
+      "notes": "Freeze time 2026-08-04: join 2018-07-01 -> diffInMonths=97 -> 8,08 tahun -> bracket 6-9 = multiplier 3.",
+      "input": {
+        "join_date": "2018-07-01",
+        "phk_variant": "dismissed",
+        "monthly_salary": 8000000
+      },
+      "expected": 24000000,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "CP-06",
+      "method": "calculateUangKompensasi",
+      "title": "PKWT kontrak habis, 17 bulan kerja",
+      "notes": "KOREKSI title dari draft awal (tertulis 18 bulan, hasil hitung sebenarnya 17 bulan: 2025-01-01 s/d 2026-06-30 = diffInMonths 17).",
+      "input": {
+        "employment_type": "CONTRACT",
+        "join_date": "2025-01-01",
+        "contract_end_date": "2026-06-30",
+        "monthly_salary": 6000000
+      },
+      "expected": 8500000,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "CP-07",
+      "method": "calculateLeaveCashOut",
+      "title": "Sisa cuti 5 hari di-cash-out (divisor 21)",
+      "input": {
+        "leave_quota": 12,
+        "leave_used": 7,
+        "monthly_salary": 6300000
+      },
+      "expected": 1500000,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "CP-08",
+      "method": "calculateAnnualPPh21Progressive",
+      "title": "Annual progressive lintas bracket (TK/0)",
+      "notes": "PTKP TK/0=54jt. Biaya jabatan (M2, PMK 168/2023) = min(5%x480jt, 6jt) = 6jt. PKP = 480-6-54 = 420jt -> 5%(60jt)+15%(190jt)+25%(170jt).",
+      "input": {
+        "marital_status": "single",
+        "children_count": 0,
+        "annual_gross_income": 480000000
+      },
+      "expected": 74000000,
+      "active": true,
+      "reference": "hitung ulang 2026-08-05 (keputusan Fikih M2 — biaya jabatan 5%/cap 6jt diterapkan)"
+    },
+    {
+      "id": "CP-09",
+      "method": "calculateAnnualPPh21Progressive",
+      "title": "Annual bruto di bawah PTKP = 0 (K/3)",
+      "input": {
+        "marital_status": "married",
+        "children_count": 3,
+        "annual_gross_income": 60000000
+      },
+      "expected": 0,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    },
+    {
+      "id": "CP-10",
+      "method": "calculateOvertimePay",
+      "title": "Lembur 0.5 jam dibulatkan ke 0.5 terdekat",
+      "notes": "Weekday (2026-07-08=Rabu). mult=min(0.5,1)*1.5=0.75. hourly=7000000/173=40462.427745664. pay=round(hourly*0.75,2).",
+      "input": {
+        "overtime_hours": 0.5,
+        "overtime_date": "2026-07-08",
+        "monthly_salary": 7000000,
+        "monthly_working_hours": 173
+      },
+      "expected": 30346.82,
+      "active": true,
+      "reference": "dummy_data_verified_2026-08-04 (tarif TER/BPJS dari seeder sistem; formula PPh21 progresif & PTKP sesuai UU HPP/PP58-2023; pesangon/PMK/kompensasi/cuti sesuai audit kode PayrollCalculatorService)"
+    }
+  ]
+}

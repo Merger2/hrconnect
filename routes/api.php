@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReimbursementController;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Middleware\EnsureEmployeeDeviceApiAccount;
+use App\Models\Payroll;
 use App\Support\ApiTokenPermission;
 use Illuminate\Support\Facades\Route;
 
@@ -104,7 +105,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{leave}', 'show');
-        Route::put('/{leave}', 'update');
         Route::delete('/{leave}', 'destroy');
     });
 
@@ -120,7 +120,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{overtime}', 'show');
-        Route::put('/{overtime}', 'update');
         Route::delete('/{overtime}', 'destroy');
     });
 
@@ -129,13 +128,13 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('/', 'store');
         Route::get('/{loan}', 'show');
         Route::put('/{loan}', 'update');
-        Route::post('/{loan}/installments', 'payInstallment');
         Route::delete('/{loan}', 'destroy');
     });
 
     // Approval queue (user sebagai approver)
     Route::controller(ApprovalController::class)->prefix('approvals')->group(function () {
         Route::get('/', 'index');
+        Route::get('/history', 'history');
         Route::put('/{approval}/approve', 'approve');
         Route::put('/{approval}/reject', 'reject');
     });
@@ -169,8 +168,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::controller(EmployeeTerminationController::class)->prefix('employee-terminations')->group(function () {
         Route::get('/', 'index')->can('manage_employees');
-        Route::post('/{employee}', 'store')->can('manage_employees');
+        // Literal route HARUS sebelum {employee}, kalau tidak "process-contract-end"
+        // ter-binding ke parameter model employee → 500 (SQL bigint).
         Route::post('/process-contract-end', 'processContractEnd')->can('manage_employees');
+        Route::post('/{employee}', 'store')->can('manage_employees');
     });
 
     Route::controller(AssetController::class)->prefix('assets')->group(function () {
@@ -178,13 +179,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('/', 'store')->can('manage_assets');
         Route::get('/{asset}', 'show')->can('view_assets');
         Route::put('/{asset}', 'update')->can('manage_assets');
+        Route::post('/{asset}/handover', 'handover')->can('manage_assets');
+        Route::post('/{handover}/return', 'return')->can('manage_assets');
         Route::delete('/{asset}', 'destroy')->can('manage_assets');
     });
 
     Route::controller(PayrollController::class)->prefix('payrolls')->group(function () {
-        Route::get('/', 'index')->can('view_payrolls');
+        Route::get('/', 'index')->can('viewAny', Payroll::class);
         Route::post('/generate', 'generate')->can('process_payroll');
-        Route::get('/{payroll}', 'show')->can('view_payrolls');
+        Route::get('/{payroll}', 'show')->can('view', 'payroll');
         Route::get('/{payroll}/payslip', 'payslip')->can('view_payslip');
         Route::post('/{payroll}/export-monthly', 'exportMonthly')->can('process_payroll');
         Route::post('/{payroll}/export-1721a1', 'export1721A1')->can('process_payroll');

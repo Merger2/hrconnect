@@ -30,6 +30,7 @@ final class CashAdvanceManager extends Component
     public function mount(): void
     {
         Gate::authorize('manageCashAdvances');
+        $this->activeTab = in_array($this->activeTab, ['requests', 'users'], true) ? $this->activeTab : 'requests';
     }
 
     public function render(): View

@@ -7,8 +7,8 @@ cd "$ROOT_DIR"
 DEVICE_NAME="${IOS_SIMULATOR_NAME:-iPhone 17 Pro}"
 SCREENSHOT_DIR="${IOS_SCREENSHOT_DIR:-screenshots/ios-simulator}"
 SCREENSHOT_NAME="${IOS_SCREENSHOT_NAME:-01-ios-launch.png}"
-DERIVED_DATA="${IOS_DERIVED_DATA:-/tmp/paspapan-ios-simulator-build}"
-BUNDLE_ID="com.pandanteknik.paspapan"
+DERIVED_DATA="${IOS_DERIVED_DATA:-/tmp/hrconnect-ios-simulator-build}"
+BUNDLE_ID="com.hrconnect.app"
 USES_CUSTOM_SERVER_URL=0
 
 if [[ -n "${CAP_SERVER_URL:-}" ]]; then
@@ -59,7 +59,7 @@ xcodebuild \
   -destination "id=$DEVICE_ID" \
   -derivedDataPath "$DERIVED_DATA" \
   CODE_SIGNING_ALLOWED=NO \
-  build >/tmp/paspapan-ios-screenshot-xcodebuild.log
+  build >/tmp/hrconnect-ios-screenshot-xcodebuild.log
 
 xcrun simctl boot "$DEVICE_ID" >/dev/null 2>&1 || true
 xcrun simctl bootstatus "$DEVICE_ID" -b

@@ -26,12 +26,12 @@
             width: 100% !important;
             height: 100%;
             -webkit-text-size-adjust: none;
-            background-color: #f5faf4;
-            color: #163020;
+            background-color: {{ design_token('brand-green-50') }};
+            color: {{ design_token('brand-green-950') }};
         }
 
         a {
-            color: #57944a;
+            color: {{ design_token('brand-green-600') }};
             text-decoration: none;
         }
 
@@ -40,7 +40,7 @@
         ol,
         blockquote {
             margin: 0 0 16px;
-            color: #466351;
+            color: {{ design_token('muted-green-700') }};
             font-size: 15px;
             line-height: 1.75;
             text-align: left;
@@ -48,7 +48,7 @@
 
         h1 {
             margin: 0 0 18px;
-            color: #163020;
+            color: {{ design_token('brand-green-950') }};
             font-size: 28px;
             font-weight: 800;
             line-height: 1.2;
@@ -58,7 +58,7 @@
 
         h2 {
             margin: 28px 0 12px;
-            color: #163020;
+            color: {{ design_token('brand-green-950') }};
             font-size: 18px;
             font-weight: 800;
             line-height: 1.35;
@@ -67,7 +67,7 @@
 
         h3 {
             margin: 20px 0 10px;
-            color: #163020;
+            color: {{ design_token('brand-green-950') }};
             font-size: 15px;
             font-weight: 700;
             line-height: 1.45;
@@ -77,8 +77,8 @@
         .wrapper {
             width: 100%;
             background:
-                radial-gradient(circle at top left, rgba(87, 148, 74, 0.10), transparent 32%),
-                #f5faf4;
+                radial-gradient(circle at top left, {{ design_rgba('brand-green-600', 0.10) }}, transparent 32%),
+                {{ design_token('brand-green-50') }};
             margin: 0;
             padding: 32px 12px;
         }
@@ -111,12 +111,12 @@
             border-radius: 14px;
             display: block;
             object-fit: cover;
-            border: 1px solid rgba(87, 148, 74, 0.15);
-            box-shadow: 0 16px 28px -24px rgba(34, 64, 41, 0.45);
+            border: 1px solid {{ design_rgba('brand-green-600', 0.15) }};
+            box-shadow: 0 16px 28px -24px {{ design_rgba('brand-green-950', 0.45) }};
         }
 
         .brand-name {
-            color: #163020;
+            color: {{ design_token('brand-green-950') }};
             font-size: 18px;
             font-weight: 800;
             letter-spacing: -0.02em;
@@ -134,15 +134,15 @@
             max-width: 600px;
             margin: 0 auto;
             border-radius: 24px;
-            background: #ffffff;
-            border: 1px solid rgba(87, 148, 74, 0.14);
-            box-shadow: 0 26px 60px -38px rgba(34, 64, 41, 0.32);
+            background: {{ design_token('surface') }};
+            border: 1px solid {{ design_rgba('brand-green-600', 0.14) }};
+            box-shadow: 0 26px 60px -38px {{ design_rgba('brand-green-950', 0.32) }};
             overflow: hidden;
         }
 
         .body-accent {
             height: 6px;
-            background: linear-gradient(90deg, #6ab45b 0%, #57944a 50%, #44733a 100%);
+            background: linear-gradient(90deg, {{ design_token('brand-green-500') }} 0%, {{ design_token('brand-green-600') }} 50%, {{ design_token('brand-green-700') }} 100%);
         }
 
         .content-cell {
@@ -154,8 +154,8 @@
             margin-bottom: 16px;
             padding: 8px 12px;
             border-radius: 999px;
-            background: #e2f0df;
-            color: #44733a;
+            background: {{ design_token('brand-green-100') }};
+            color: {{ design_token('brand-green-700') }};
             font-size: 12px;
             font-weight: 800;
             letter-spacing: 0.12em;
@@ -166,12 +166,12 @@
             margin: 22px 0 0;
             padding: 18px 20px;
             border-radius: 18px;
-            background: #f8fcf7;
-            border: 1px solid #d5ead1;
+            background: {{ design_token('brand-green-50') }};
+            border: 1px solid {{ design_token('brand-green-200') }};
         }
 
         .email-section--subtle {
-            background: #ffffff;
+            background: {{ design_token('surface') }};
             border-style: dashed;
         }
 
@@ -184,7 +184,7 @@
         .email-data-table td {
             padding: 9px 0;
             vertical-align: top;
-            border-bottom: 1px solid #edf5ea;
+            border-bottom: 1px solid {{ design_token('brand-green-50') }};
             font-size: 14px;
             line-height: 1.65;
             word-break: break-word;
@@ -197,12 +197,12 @@
         .email-data-label {
             width: 150px;
             padding-right: 16px !important;
-            color: #5d7766;
+            color: {{ design_token('muted-green-600') }};
             font-weight: 700;
         }
 
         .email-data-value {
-            color: #163020;
+            color: {{ design_token('brand-green-950') }};
             font-weight: 600;
         }
 
@@ -210,17 +210,17 @@
             margin: 18px 0 0;
             padding: 16px 18px;
             border-radius: 16px;
-            border-left: 4px solid #57944a;
-            background: #f8fcf7;
-            color: #355340;
+            border-left: 4px solid {{ design_token('brand-green-600') }};
+            background: {{ design_token('brand-green-50') }};
+            color: {{ design_token('muted-green-800') }};
             font-size: 14px;
             line-height: 1.7;
         }
 
         .email-note--warning {
-            border-left-color: #b7791f;
-            background: #fff9eb;
-            color: #744210;
+            border-left-color: {{ design_token('warning') }};
+            background: {{ design_token('warning-soft') }};
+            color: {{ design_token('warning-deep') }};
         }
 
         .email-steps {
@@ -239,8 +239,8 @@
             height: 34px;
             border-radius: 999px;
             display: inline-block;
-            background: linear-gradient(135deg, #6ab45b 0%, #44733a 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, {{ design_token('brand-green-500') }} 0%, {{ design_token('brand-green-700') }} 100%);
+            color: {{ design_token('surface') }};
             font-size: 14px;
             font-weight: 800;
             line-height: 34px;
@@ -252,14 +252,14 @@
         }
 
         .email-step-title {
-            color: #163020;
+            color: {{ design_token('brand-green-950') }};
             font-size: 14px;
             font-weight: 700;
             margin: 0 0 4px;
         }
 
         .email-step-text {
-            color: #466351;
+            color: {{ design_token('muted-green-700') }};
             font-size: 13px;
             line-height: 1.65;
             margin: 0;
@@ -269,28 +269,28 @@
             display: inline-block;
             padding: 9px 18px;
             border-radius: 999px;
-            background: linear-gradient(135deg, #6ab45b 0%, #44733a 100%);
-            color: #ffffff !important;
+            background: linear-gradient(135deg, {{ design_token('brand-green-500') }} 0%, {{ design_token('brand-green-700') }} 100%);
+            color: {{ design_token('surface') }} !important;
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.08em;
             line-height: 1.15;
             text-transform: uppercase;
-            box-shadow: 0 14px 28px -22px rgba(68, 115, 58, 0.8);
+            box-shadow: 0 14px 28px -22px {{ design_rgba('brand-green-700', 0.8) }};
             text-decoration: none;
             white-space: nowrap;
             word-break: keep-all;
         }
 
         .subcopy {
-            border-top: 1px solid #e2efe0;
+            border-top: 1px solid {{ design_token('brand-green-100') }};
             margin-top: 26px;
             padding-top: 18px;
         }
 
         .subcopy p {
             margin-bottom: 10px;
-            color: #5d7766;
+            color: {{ design_token('muted-green-600') }};
             font-size: 12px;
             line-height: 1.65;
         }
@@ -307,7 +307,7 @@
 
         .footer p {
             margin: 18px 0 0;
-            color: #6b7f71;
+            color: {{ design_token('muted-green-500') }};
             font-size: 12px;
             line-height: 1.7;
             text-align: center;

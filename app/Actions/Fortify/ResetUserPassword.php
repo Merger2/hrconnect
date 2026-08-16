@@ -25,6 +25,11 @@ class ResetUserPassword implements ResetsUserPasswords
 
         $user->forceFill([
             'password' => Hash::make($input['password']),
+            // Password baru = password terakhir diubah sekarang. Konsisten dgn
+            // ProfileService::changePassword — kalau tidak, user yang baru reset
+            // tetap dianggap "belum ganti password"/"expired" oleh
+            // CheckPasswordExpired (Tier 3/4) dan di-redirect lagi ke profile.
+            'password_changed_at' => now(),
         ])->save();
 
         if ($user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {

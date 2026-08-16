@@ -67,7 +67,10 @@ class AttendancePolicy
             return true;
         }
 
-        return $user->employee?->subordinates->contains('id', $attendance->employee_id);
+        // User tanpa employee (mis. admin non-staf) → null-safe chain mengembalikan
+        // null, melanggar return type bool → TypeError 500. Pastikan bool.
+        return $user->employee !== null
+            && $user->employee->subordinates->contains('id', $attendance->employee_id);
     }
 
     protected function sameCompany(User $actor, Attendance $attendance): bool

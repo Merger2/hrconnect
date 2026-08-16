@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\ReimbursementStatus;
 use App\Models\Reimbursement;
 use App\Models\User;
 use App\Support\ApprovalMatrixService;
@@ -74,7 +75,7 @@ class ReimbursementPolicy
             return true;
         }
 
-        return $this->isFinanceHead($user) && $reimbursement->status === 'pending_finance';
+        return $this->isFinanceHead($user) && $reimbursement->status === ReimbursementStatus::PENDING_FINANCE;
     }
 
     private function isFinanceHead(User $user): bool
@@ -91,8 +92,8 @@ class ReimbursementPolicy
             return false;
         }
 
-        $rank = $position->jobLevel?->rank ?? 99;
-        $divisionName = $position->division?->name ?? '';
+        $rank = $position->jobLevel->rank ?? 99;
+        $divisionName = $position->division->name ?? '';
 
         return (int) $rank <= 2 && strtolower((string) $divisionName) === 'finance';
     }

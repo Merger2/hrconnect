@@ -94,11 +94,14 @@ class ApprovalMatrixService
         $approverId = $step['approver_id'] ?? null;
         $approverRoleId = $step['approver_role_id'] ?? null;
 
-        if ($approverId !== null && (int) $approverId === $actor->id) {
+        // approver_id is stored as the approver's EMPLOYEE id (see ApprovalService),
+        // so compare against both the actor's user id and employee id.
+        if ($approverId !== null
+            && ((int) $approverId === $actor->id || (int) $approverId === $actor->employee?->id)) {
             return true;
         }
 
-        if ($approverRoleId !== null && $actor->hasRole($approverRoleId)) {
+        if ($approverRoleId !== null && $actor->roles()->whereKey($approverRoleId)->exists()) {
             return true;
         }
 

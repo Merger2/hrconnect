@@ -6,34 +6,34 @@
     $tone = $tone ?? 'primary';
     $toneClasses = match ($tone) {
         'amber' => [
-            'badge' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/35 dark:text-amber-100 dark:ring-amber-900/60',
-            'icon' => 'bg-amber-100 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-900/60',
-            'dot' => 'bg-amber-500 dark:bg-amber-300',
-            'panel' => 'border-amber-100 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/15',
+            'badge' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-200',
+            'icon' => 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
+            'dot' => 'bg-amber-500',
+            'panel' => 'border-amber-100 bg-amber-50',
         ],
         'red' => [
-            'badge' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-200 dark:bg-rose-950/35 dark:text-rose-100 dark:ring-rose-900/60',
-            'icon' => 'bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-200 dark:ring-rose-900/60',
-            'dot' => 'bg-red-600 dark:bg-red-300',
-            'panel' => 'border-rose-100 bg-rose-50/50 dark:border-rose-900/50 dark:bg-rose-950/15',
+            'badge' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-200',
+            'icon' => 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
+            'dot' => 'bg-red-600',
+            'panel' => 'border-rose-100 bg-rose-50',
         ],
         'blue' => [
-            'badge' => 'bg-sky-50 text-sky-800 ring-1 ring-sky-200 dark:bg-sky-950/35 dark:text-sky-100 dark:ring-sky-900/60',
-            'icon' => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200 dark:bg-sky-950/40 dark:text-sky-200 dark:ring-sky-900/60',
-            'dot' => 'bg-sky-600 dark:bg-sky-300',
-            'panel' => 'border-sky-100 bg-sky-50/50 dark:border-sky-900/50 dark:bg-sky-950/15',
+            'badge' => 'bg-sky-50 text-sky-800 ring-1 ring-sky-200',
+            'icon' => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
+            'dot' => 'bg-sky-600',
+            'panel' => 'border-sky-100 bg-sky-50',
         ],
         'slate' => [
-            'badge' => 'bg-slate-100 text-slate-800 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700',
-            'icon' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700',
-            'dot' => 'bg-slate-600 dark:bg-slate-300',
-            'panel' => 'border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/45',
+            'badge' => 'bg-slate-100 text-slate-800 ring-1 ring-slate-200',
+            'icon' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            'dot' => 'bg-slate-600',
+            'panel' => 'border-slate-200 bg-slate-50',
         ],
         default => [
-            'badge' => 'bg-primary-50 text-primary-800 ring-1 ring-primary-200 dark:bg-primary-950/35 dark:text-primary-100 dark:ring-primary-900/60',
-            'icon' => 'bg-primary-100 text-primary-800 ring-1 ring-primary-200 dark:bg-primary-950/40 dark:text-primary-200 dark:ring-primary-900/60',
-            'dot' => 'bg-primary-700 dark:bg-primary-300',
-            'panel' => 'border-primary-100 bg-primary-50/50 dark:border-primary-900/50 dark:bg-primary-950/15',
+            'badge' => 'bg-primary-50 text-primary-800 ring-1 ring-primary-200',
+            'icon' => 'bg-primary-100 text-primary-800 ring-1 ring-primary-200',
+            'dot' => 'bg-primary-700',
+            'panel' => 'border-primary-100 bg-primary-50',
         ],
     };
 
@@ -54,8 +54,8 @@
             </span>
 
             <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">{{ $eyebrow ?? __('System notice') }}</p>
-                <h1 id="error-page-title" class="mt-2 text-2xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{{ $eyebrow ?? __('System notice') }}</p>
+                <h1 id="error-page-title" class="mt-2 text-2xl font-semibold leading-tight tracking-tight text-slate-950">
                     {{ $titleText }}
                 </h1>
             </div>
@@ -67,20 +67,20 @@
     </div>
 
     <div class="rounded-[1.5rem] border p-4 {{ $toneClasses['panel'] }}">
-        <p class="text-base leading-7 text-slate-700 dark:text-slate-200">
+        <p class="text-base leading-7 text-slate-700">
             {{ $summary }}
         </p>
     </div>
 
     @if ($details !== [])
         <section aria-labelledby="error-details-title" class="space-y-3">
-            <h2 id="error-details-title" class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+            <h2 id="error-details-title" class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                 {{ __('What this usually means') }}
             </h2>
 
-            <ul class="space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <ul class="space-y-2 text-sm leading-6 text-slate-600">
                 @foreach ($details as $detail)
-                    <li class="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/55">
+                    <li class="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
                         <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full {{ $toneClasses['dot'] }}" aria-hidden="true"></span>
                         <span>{{ $detail }}</span>
                     </li>
@@ -92,23 +92,21 @@
     <div class="grid gap-3" aria-label="{{ __('Available actions') }}">
         @if ($primaryAction)
             <a href="{{ $primaryAction['href'] }}"
-               class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center rounded-[1.35rem] bg-primary-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-150 ease-in-out hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 dark:bg-primary-400 dark:text-slate-950 dark:hover:bg-primary-300 dark:focus-visible:ring-primary-300 dark:focus-visible:ring-offset-slate-900">
+               class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center rounded-[1.35rem] bg-primary-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-150 ease-in-out hover:bg-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2">
                 {{ $primaryAction['label'] }}
             </a>
         @endif
 
         @if ($secondaryAction)
             <a href="{{ $secondaryAction['href'] }}"
-               class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center rounded-[1.35rem] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition duration-150 ease-in-out hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus-visible:ring-slate-500 dark:focus-visible:ring-offset-slate-900">
+               class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center rounded-[1.35rem] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition duration-150 ease-in-out hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
                 {{ $secondaryAction['label'] }}
             </a>
         @endif
 
         <a href="{{ url()->previous() !== url()->current() ? url()->previous() : url('/') }}"
-            class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center gap-2 rounded-[1.35rem] px-4 py-3 text-sm font-semibold text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:text-slate-100">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
+            class="wcag-touch-target inline-flex min-h-[3.35rem] items-center justify-center gap-2 rounded-[1.35rem] px-4 py-3 text-sm font-semibold text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
+            <x-heroicon-o-arrow-left class="h-4 w-4" />
             <span>{{ __('Go back') }}</span>
         </a>
     </div>

@@ -57,7 +57,7 @@ class ProfileController extends Controller
             'message' => 'Profil berhasil diperbarui',
             'data' => ProfileResource::make($employee->fresh()->load([
                 'branch:id,name',
-                'department:id,name',
+                'division:id,name',
                 'position:id,name,grade',
                 'shift:id,name',
                 'manager:id,full_name',

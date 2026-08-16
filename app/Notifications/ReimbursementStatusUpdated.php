@@ -23,7 +23,7 @@ class ReimbursementStatusUpdated extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $statusLabel = $this->reimbursement->status?->label() ?? $this->reimbursement->status;
+        $statusLabel = $this->reimbursement->status->label() ?? $this->reimbursement->status;
         $amount = number_format((float) $this->reimbursement->amount, 0, ',', '.');
 
         return (new MailMessage)
@@ -41,10 +41,10 @@ class ReimbursementStatusUpdated extends Notification implements ShouldQueue
             'type' => 'reimbursement_status',
             'reimbursement_id' => $this->reimbursement->id,
             'title' => $this->reimbursement->title,
-            'status' => $this->reimbursement->status?->value,
-            'status_label' => $this->reimbursement->status?->label(),
+            'status' => $this->reimbursement->status->value,
+            'status_label' => $this->reimbursement->status->label(),
             'message' => 'Status reimbursement "'.$this->reimbursement->title.'" menjadi '
-                .$this->reimbursement->status?->label(),
+                .$this->reimbursement->status->label(),
         ];
     }
 }

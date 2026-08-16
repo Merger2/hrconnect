@@ -50,11 +50,15 @@ class UserExport implements FromCollection, WithColumnWidths, WithHeadings, With
             $user->id,
             $user->name,
             $user->email,
-            $user->getRoleNames()->implode(', '),
+            // BUG FIX (2026-08-08): UserExport memanggil getRoleNames() — method
+            // Spatie laravel-permission yang TIDAK ada di User (project ini pakai
+            // HasRolePermissions + morphToMany roles). Sebelumnya export users
+            // selalu 500 (BadMethodCallException).
+            $user->roles->pluck('name')->implode(', '),
             $employee->employee_number ?? '-',
             $employee->full_name ?? '-',
-            $employee->department?->name ?? '-',
-            $employee->position?->name ?? '-',
+            $employee->division->name ?? '-',
+            $employee->position->name ?? '-',
             $employee->status ?? '-',
             $user->email_verified_at ? 'Yes' : 'No',
             $user->created_at?->format('Y-m-d H:i:s') ?? '-',

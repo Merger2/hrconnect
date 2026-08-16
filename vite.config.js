@@ -66,7 +66,7 @@ export default defineConfig({
             manifest: {
                 name: 'HRConnect',
                 short_name: 'HRConnect',
-                description: 'Enterprise HRIS — Attendance, Leave, Payroll, Knowledge Base',
+                description: 'HRIS HRConnect — Attendance, Leave, Payroll, Knowledge Base',
                 theme_color: '#0a0a0a',
                 background_color: '#0a0a0a',
                 display: 'standalone',

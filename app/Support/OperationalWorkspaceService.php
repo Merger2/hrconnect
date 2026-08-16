@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Client;
 use App\Models\Company;
 use App\Models\CompanyBranch;
 use App\Models\Invoice;
@@ -40,10 +41,21 @@ class OperationalWorkspaceService implements ScopesCompanies
     /**
      * @param  array<string, mixed>  $data
      */
+    public function createClient(User $actor, array $data): Client
+    {
+        $this->assertCompanyAccess($actor, (int) $data['company_id']);
+
+        return Client::query()->create($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function createProject(User $actor, array $data): Project
     {
         $this->assertCompanyAccess($actor, (int) $data['company_id']);
         $this->assertBelongsToCompany(CompanyBranch::class, $data['branch_id'] ?? null, (int) $data['company_id']);
+        $this->assertBelongsToCompany(Client::class, $data['client_id'] ?? null, (int) $data['company_id']);
         $this->assertUserScope($actor, $data['manager_id'] ?? null, (int) $data['company_id']);
 
         return Project::query()->create($data);
@@ -164,9 +176,9 @@ class OperationalWorkspaceService implements ScopesCompanies
 
         return collect($projectIds)
             ->mapWithKeys(function (int $projectId) use ($invoiceRows, $pipelineRows): array {
-                $invoiced = round((float) ($invoiceRows->get($projectId)?->invoiced_total ?? 0), 2);
-                $paid = round((float) ($invoiceRows->get($projectId)?->paid_total ?? 0), 2);
-                $pipeline = round((float) ($pipelineRows->get($projectId)?->weighted_pipeline ?? 0), 2);
+                $invoiced = round((float) ($invoiceRows->get($projectId)->invoiced_total ?? 0), 2);
+                $paid = round((float) ($invoiceRows->get($projectId)->paid_total ?? 0), 2);
+                $pipeline = round((float) ($pipelineRows->get($projectId)->weighted_pipeline ?? 0), 2);
 
                 return [
                     $projectId => [

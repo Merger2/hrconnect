@@ -8,7 +8,7 @@
 
 @if (!empty($verificationCode))
 <div style="text-align: center; margin-top: 24px; margin-bottom: 24px;">
-    <div style="display: inline-block; padding: 16px 22px; border-radius: 16px; border: 1px solid #d5ead1; background: #f8fcf7; color: #163020; font-size: 28px; font-weight: 800; letter-spacing: 0.18em;">
+    <div style="display: inline-block; padding: 16px 22px; border-radius: 16px; border: 1px solid {{ design_token('brand-green-200') }}; background: {{ design_token('brand-green-50') }}; color: {{ design_token('brand-green-950') }}; font-size: 28px; font-weight: 800; letter-spacing: 0.18em;">
         {{ $verificationCode }}
     </div>
 </div>

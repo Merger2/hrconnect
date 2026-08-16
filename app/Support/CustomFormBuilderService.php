@@ -163,7 +163,11 @@ class CustomFormBuilderService implements ScopesCompanies
         $normalized = [];
         $errors = [];
 
-        foreach ($template->fields as $field) {
+        // fields ber-cast 'array' — anotasi eksplisit utk PHPStan.
+        /** @var array<int, array<string, mixed>> $fields */
+        $fields = $template->fields;
+
+        foreach ($fields as $field) {
             $key = (string) $field['key'];
             $value = $payload[$key] ?? null;
             $value = is_string($value) ? trim($value) : $value;
@@ -221,7 +225,10 @@ class CustomFormBuilderService implements ScopesCompanies
 
     private function runAutomation(User $actor, CustomFormTemplate $template, CustomFormSubmission $submission): void
     {
-        $automation = $template->metadata['automation'] ?? null;
+        // metadata ber-cast 'array' — anotasi eksplisit utk PHPStan.
+        /** @var array<string, mixed> $metadata */
+        $metadata = $template->metadata;
+        $automation = $metadata['automation'] ?? null;
 
         if (! is_array($automation) || ($automation['type'] ?? null) !== 'project_task') {
             return;
@@ -292,10 +299,16 @@ class CustomFormBuilderService implements ScopesCompanies
 
     private function automationTaskDescription(CustomFormTemplate $template, CustomFormSubmission $submission): string
     {
-        $lines = collect($template->fields)
-            ->map(function (array $field) use ($submission): string {
+        // fields/payload ber-cast 'array' — anotasi eksplisit utk PHPStan.
+        /** @var array<int, array<string, mixed>> $fields */
+        $fields = $template->fields;
+        /** @var array<string, mixed> $payload */
+        $payload = $submission->payload;
+
+        $lines = collect($fields)
+            ->map(function (array $field) use ($payload): string {
                 $key = (string) $field['key'];
-                $value = $submission->payload[$key] ?? '-';
+                $value = $payload[$key] ?? '-';
 
                 return ($field['label'] ?? $key).': '.(is_array($value) ? json_encode($value) : ($value ?: '-'));
             })

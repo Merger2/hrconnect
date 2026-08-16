@@ -93,7 +93,7 @@ Dibangun dengan **Laravel 13**, **Livewire 4**, **PostgreSQL + pgvector**, **fac
 | [Livewire](https://livewire.laravel.com) | 4.x | Reactive UI Components |
 | [Flux UI](https://fluxui.dev) | 2.x | UI Component Library |
 | [Fortify](https://laravel.com/docs/fortify) | 1.x | Authentication Backend |
-| [Spatie Permission](https://spatie.be/docs/laravel-permission) | Latest | Role-Based Access Control (RBAC) |
+| [Permission Trait](https://spatie.be/docs/laravel-permission) | Custom | RBAC via `HasRolePermissions` trait + `permission_keys` JSON column (bukan Spatie pivot) |
 | [CipherSweet](https://ciphersweet.paragonie.com) | Latest | Field-Level Encryption + Blind Indexing |
 
 ### Frontend
@@ -117,7 +117,7 @@ Dibangun dengan **Laravel 13**, **Livewire 4**, **PostgreSQL + pgvector**, **fac
 | Technology | Purpose |
 |------------|---------|
 | **face-api.js** (FaceNet) | Client-side face detection & 128D embedding |
-| **Google Gemini** (text-embedding-004) | PDF chunk embedding → vector(768) |
+| **Google Gemini** (gemini-embedding-001) | PDF chunk embedding → vector(768) |
 | **Google Gemini 2.5 Flash** | RAG Knowledge Base Q&A |
 
 ---
@@ -190,7 +190,7 @@ DB_PASSWORD=your_password
 RAG_MOCK_MODE=true
 GOOGLE_AI_API_KEY=AIza...
 GEMINI_MODEL=gemini-2.5-flash
-GEMINI_EMBEDDING_MODEL=text-embedding-004
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
 ### 4. Database Setup
@@ -256,75 +256,81 @@ php artisan queue:work --queue=default,payroll_high,notifications
 
 ---
 
-## 📁 Project Structure
+> 🗺️ **Single Source of Truth: [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md)** — Livewire component map, full route list, service layer, database schema, design system, conventions, and latest fixes.
+>
+> 📋 **Other key references:**
+> - [`docs/FEATURES.md`](docs/FEATURES.md) — Feature status (✅/⚠️/❌) with latest fixes
+> - [`docs/AUDIT-MAP.md`](docs/AUDIT-MAP.md) — Quick finding index for developers
+> - [`AGENTS.md`](AGENTS.md) — **Must-read** for AI coding agents (FK patterns, CSS rules, gotchas)
+
+## 📁 Project Structure (Overview)
 
 ```text
 hrconnect/
-├── app/
-│   ├── Console/Commands/     # Artisan commands (detect-alpha, reset-quota)
-│   ├── Enums/               # 30+ enum files (EmploymentType, RequestStatus, dll)
-│   ├── Exceptions/          # Custom exceptions (GeofenceViolation, BusinessRule)
+├── app/                          # ~596 PHP files
+│   ├── Actions/                  # Fortify, Hr, Reimbursement actions
+│   ├── Ai/                       # AI agents (Laravel AI SDK)
+│   ├── Console/Commands/         # Artisan commands
+│   ├── Enums/                    # 28 PHP enums
+│   ├── Exceptions/               # Custom exceptions
 │   ├── Http/
-│   │   ├── Middleware/      # CheckPasswordExpired, EnsureSecurityHeaders, DeviceDetection
-│   │   └── Requests/        # Form request validation
-│   ├── Jobs/                # Background jobs (payroll, embeddings, notifications)
-│   ├── Livewire/            # Reactive components (ESS, HRD, Finance, Admin)
-│   ├── Models/              # Eloquent models (35 total, CipherSweet encrypted PII)
-│   ├── Notifications/       # Mail & database notifications
-│   ├── Observers/           # Model observers (Employee, Attendance, Leave)
-│   ├── Policies/            # Authorization policies
-│   └── Services/            # Business logic layer
-│       ├── AttendanceService      # Clock-in/out, WFA, risk scoring
-│       ├── LeaveService           # Quota, balance, carry-forward
-│       ├── PayrollCalculatorService # PPh21 TER, BPJS, prorata, THR
-│       ├── ApprovalService        # Multi-level approval matrix
-│       ├── GeofenceService        # Haversine, anti-fake GPS
-│       ├── EmbeddingService       # pgvector + RAG search
-│       ├── FaceRecognitionService # 128D face descriptors
-│       ├── PayslipPdfService      # E-Payslip PDF generation
-│       └── EmployeeTerminationService # PHK, pesangon calc
+│   │   ├── Controllers/          # API & Web controllers
+│   │   ├── Middleware/           # 8+ middleware
+│   │   └── Requests/             # Form request validation
+│   ├── Jobs/                     # Background queue jobs
+│   ├── Livewire/                 # 86 reactive components (User/Admin/Shared/Profile/Forms)
+│   ├── Models/                   # 101 Eloquent models (CipherSweet encrypted PII)
+│   ├── Notifications/            # Mail & database notifications
+│   ├── Observers/                # Model observers
+│   ├── Policies/                 # 20 authorization policies
+│   ├── Providers/                # 6 service providers
+│   ├── Queries/                  # Query builder classes
+│   └── Services/                 # 11 service directories
+│       ├── Attendance/           # Clock-in/out, WFA, face registration
+│       ├── Payroll/              # PPh21 TER, BPJS, prorata, THR, payslip PDF
+│       ├── Security/             # Face recognition, embeddings
+│       ├── KnowledgeBase/        # RAG engine
+│       ├── Location/             # Geofencing, Haversine
+│       ├── HR/                   # Leave, termination
+│       └── ...                   # Admin, Audit, Integrations, Rag, Reporting, Support
 ├── database/
-│   ├── factories/           # 25+ model factories
-│   ├── migrations/          # 50+ migrations (PostgreSQL extensions)
-│   └── seeders/             # 12 seeders (RoleAndPermission, SuperAdmin, E2eTest)
-├── docs/                    # 20+ documentation files
-│   ├── PRD.md               # Product Requirements Document v3.1
-│   ├── architecture/        # ERD, SRS, SDD, class/sequence diagrams
-│   ├── planning/            # Sprint strategy, pages-masterplan
-│   ├── api/                 # OpenAPI spec (63 paths, 84 operations)
-│   ├── security/            # Security config, caching strategy
-│   ├── testing/             # Testing strategy
-│   └── deployment/          # Deployment guide
+│   ├── factories/                # Model factories
+│   ├── migrations/               # 153 migrations
+│   └── seeders/                  # 22 seeders
+├── docs/                         # Documentation hub
+│   ├── PROJECT-MAP.md            # ← Comprehensive project map (start here)
+│   ├── FEATURES.md               # Feature status list
+│   ├── FEATURE-INVENTORY.md      # Component existence map
+│   ├── AUDIT-MAP.md              # Audit finding index
+│   ├── ROLES-PERMISSIONS.md      # RBAC matrix
+│   ├── PRD.md                    # Product Requirements Document
+│   └── ...                       # Architecture, API, security, testing, deployment
+├── lang/
+│   ├── en.json                   # English translations
+│   └── id.json                   # Indonesian translations
 ├── resources/
-│   ├── css/app.css          # Tailwind v4 + HP Electric Blue design system
-│   ├── js/                  # face-recognition.js, gps-locator.js
-│   └── views/               # Blade templates + Livewire components
-│       ├── layouts/app/     # Sidebar + header layout
-│       ├── pages/auth/      # Login, 2FA, password reset
-│       └── livewire/        # Master data CRUD components
+│   ├── css/app.css               # Tailwind v4 + BEM design system (~6600 lines)
+│   ├── js/                       # Alpine, face-api, GPS locator, SSE, PWA
+│   └── views/                    # Blade templates (layouts, components, livewire, pages)
 ├── routes/
-│   ├── web.php              # Main routes (dashboard, employee)
-│   ├── attendance.php       # Attendance routes (clock-in, face registration)
-│   ├── leave.php            # Leave management routes
-│   ├── overtime.php         # Overtime routes (apply, history)
-│   ├── reimbursement.php    # Reimbursement routes
-│   ├── loan.php             # Loan/Kasbon routes
-│   ├── payroll.php          # Payroll + E-Payslip routes
-│   ├── master-data.php      # Branch, Department, Position, Shift, Holiday, LeaveType
-│   ├── knowledge-base.php   # RAG AI chat routes
-│   ├── settings.php         # Profile, security, appearance
-│   ├── api.php              # REST API routes
-│   └── approval.php         # Approval workflow routes
+│   ├── api.php                   # 219 REST API routes
+│   ├── web.php                   # 15 web routes (requires 5 sub-files: system, files, user, payroll, admin)
+│   ├── jetstream.php             # Jetstream auth (login, 2FA, password)
+│   ├── knowledge-base.php        # KB management + RAG chat
+│   ├── channels.php              # Reverb broadcasting
+│   └── console.php               # Artisan commands
 ├── tests/
-│   ├── Feature/             # 50+ Pest test files (API + feature tests)
-│   │   ├── Api/             # ProofTest + EndpointTest (per-module API coverage)
-│   │   ├── Auth/            # Auth flows (2FA, password, registration)
-│   │   └── Services/        # Service-level tests
-│   ├── Unit/                # 25+ unit tests (models, services, jobs)
-│   ├── Integration/Postgres/ # PostgreSQL integration tests (41 tests)
-│   └── e2e/                 # 27 Playwright E2E tests
-└── .github/workflows/       # CI: postgres + sqlite + quality
+│   ├── Feature/                  # 40+ Pest tests
+│   ├── Unit/                     # Unit tests
+│   ├── Integration/Postgres/     # PostgreSQL integration tests
+│   └── e2e/                      # 8 Playwright E2E specs
+├── AGENTS.md                     # Critical guidance for AI coding agents
+├── CONVENTIONS.md                # Coding conventions & patterns
+├── AUDIT-2026-07-24.md           # Master audit (280+ findings)
+└── .github/workflows/            # CI: postgres + sqlite + quality
 ```
+
+👉 **Start reading [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md)** — the single source of truth for all developer reference.
 
 ---
 
@@ -333,7 +339,7 @@ hrconnect/
 | Feature | Implementation |
 |---------|---------------|
 | **Field Encryption** | CipherSweet blind indexing untuk NIK, phone, NPWP, bank account |
-| **Role-Based Access** | Spatie Permission (5 roles: Super Admin, HRD, Finance, Manager, Employee) + 44 permissions |
+| **Role-Based Access** | `HasRolePermissions` trait + `permission_keys` JSON column (6 roles × 38 permission gates + 8 admin bypass) |
 | **2FA TOTP** | Laravel Fortify dengan Google Authenticator |
 | **Force Password Change** | Middleware `CheckPasswordExpired` — wajib ganti password saat login pertama |
 | **Security Headers** | `EnsureSecurityHeaders` — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy |
@@ -410,7 +416,36 @@ Setiap push/PR menjalankan 3 job paralel:
 | Roles & Permissions | ✅ | — | Complete |
 | Security & Compliance | ✅ | — | Complete (CipherSweet, CSP, 2FA) |
 
-**Totals:** 1,189 BE tests + 27 E2E tests = **1,216 passing**.
+**Totals:** ~1,189 BE tests + 27 E2E tests = **~1,216 passing**.
+
+---
+
+## 📚 Development Quick Reference
+
+### Before Coding
+
+1. **Baca `AGENTS.md`** — kritis: schema FK pattern, Role/Permission, CSS rules, Livewire quirks
+2. **Cek `AUDIT-2026-07-24.md`** — jangan re-fix known issues
+3. **Cari 1-2 contoh existing** dengan pola yang sama
+4. **Lihat `docs/PROJECT-MAP.md`** untuk navigasi komponen
+
+### Commands
+
+```bash
+composer run dev              # Full dev: server + queue + logs + Vite
+composer run test             # config:clear → pint → php artisan test
+vendor/bin/pint --dirty --format agent  # WAJIB setelah tiap perubahan PHP
+php artisan test --compact --filter=KnowledgeBase  # Test spesifik
+npm run build                 # Build assets
+npx playwright test employee-pages.spec.ts --project=chromium-employee  # E2E
+```
+
+### Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Employee | `employee@hrconnect.test` | `password` |
+| Super Admin | `admin@hrconnect.local` | `ChangeMe!2026` |
 
 ---
 

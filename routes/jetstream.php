@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\TermsOfServiceController;
+use App\Http\Middleware\RedirectAdminProfileRequests;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Http\Controllers\CurrentTeamController;
 use Laravel\Jetstream\Http\Controllers\Livewire\ApiTokenController;
@@ -26,7 +27,9 @@ Route::group(['middleware' => config('jetstream.middleware', ['web'])], function
 
     Route::group(['middleware' => array_values(array_filter([$authMiddleware, $authSessionMiddleware]))], function () {
         // User & Profile...
-        Route::get('/user/profile', [UserProfileController::class, 'show'])->name('profile.show');
+        Route::get('/user/profile', [UserProfileController::class, 'show'])
+            ->middleware(RedirectAdminProfileRequests::class)
+            ->name('profile.show');
 
         Route::group(['middleware' => 'verified'], function () {
             // API...

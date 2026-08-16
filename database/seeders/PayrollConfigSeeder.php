@@ -28,7 +28,7 @@ class PayrollConfigSeeder extends Seeder
                 'name' => BpjsType::JP,
                 'employer_rate' => 0.02,
                 'employee_rate' => 0.01,
-                'ceiling' => 9559600,
+                'ceiling' => 11086300, // cap JP per Maret 2026 (sebelumnya 9.559.600 rate 2025 — update compliance P0)
             ],
             [
                 'name' => BpjsType::JKK,

@@ -135,8 +135,8 @@ class CashAdvanceApprovalService
     {
         if ($activeTab === 'requests') {
             $query = CashAdvance::query()->with([
-                'user.jobTitle.jobLevel',
-                'user.kabupaten',
+                'user.employee.position',
+                'user.employee.city',
                 'approver',
                 'headApprover',
                 'financeApprover',
@@ -160,16 +160,16 @@ class CashAdvanceApprovalService
                             $builder->where('status', 'pending_finance')
                                 ->orWhere('status', 'pending_matrix')
                                 ->orWhereHas('user', function (Builder $userQuery) use ($myDivisionId, $myRank) {
-                                    $userQuery->where('division_id', $myDivisionId)
-                                        ->whereHas('jobTitle.jobLevel', fn (Builder $levelQuery) => $levelQuery->where('rank', '>', $myRank));
+                                    $userQuery->whereHas('employee', fn (Builder $divisionQuery) => $divisionQuery->where('division_id', $myDivisionId))
+                                        ->whereHas('employee.position.jobTitle.jobLevel', fn (Builder $levelQuery) => $levelQuery->where('rank', '>', $myRank));
                                 });
                         });
                     } else {
                         $query->where(function (Builder $builder) use ($myDivisionId, $myRank) {
                             $builder->where('status', 'pending_matrix')
                                 ->orWhereHas('user', function (Builder $userQuery) use ($myDivisionId, $myRank) {
-                                    $userQuery->where('division_id', $myDivisionId)
-                                        ->whereHas('jobTitle.jobLevel', fn (Builder $levelQuery) => $levelQuery->where('rank', '>', $myRank));
+                                    $userQuery->whereHas('employee', fn (Builder $divisionQuery) => $divisionQuery->where('division_id', $myDivisionId))
+                                        ->whereHas('employee.position.jobTitle.jobLevel', fn (Builder $levelQuery) => $levelQuery->where('rank', '>', $myRank));
                                 });
                         });
                     }
@@ -185,8 +185,8 @@ class CashAdvanceApprovalService
         }
 
         $query = User::query()->with([
-            'jobTitle',
-            'kabupaten',
+            'employee.position',
+            'employee.city',
             'cashAdvances' => fn ($query) => $query->whereIn('status', ['approved', 'paid', 'pending', 'pending_finance', 'rejected']),
         ])->whereHas('cashAdvances');
 
@@ -198,7 +198,7 @@ class CashAdvanceApprovalService
             $myRank = $user->jobTitle?->jobLevel?->rank;
 
             if ($myRank && $myRank <= 2) {
-                $query->whereHas('jobTitle.jobLevel', fn (Builder $builder) => $builder->where('rank', '>', $myRank));
+                $query->whereHas('employee.position.jobTitle.jobLevel', fn (Builder $builder) => $builder->where('rank', '>', $myRank));
             } else {
                 $query->where('id', 0);
             }
@@ -250,14 +250,16 @@ class CashAdvanceApprovalService
         $nextStep = $this->approvalMatrix->currentStep($steps, $completed);
         $payload = $this->matrixPayload($advance, $steps, $completed, $nextStep);
 
+        // approval_level-based matrix steps carry numeric keys ('1', '2'), so a
+        // literal 'finance'/'finance_head' key check never fires for them. Mirror
+        // rejectWithMatrix()'s convention: any non-direct-manager step is the
+        // finance approval, so record the finance approver alongside the step.
         if (($currentStep['key'] ?? '') === 'direct_manager') {
             $payload += [
                 'head_approved_by' => $actor->id,
                 'head_approved_at' => now(),
             ];
-        }
-
-        if (in_array(($currentStep['key'] ?? ''), ['finance', 'finance_head'], true)) {
+        } else {
             $payload += [
                 'finance_approved_by' => $actor->id,
                 'finance_approved_at' => now(),

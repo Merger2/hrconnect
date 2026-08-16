@@ -23,9 +23,9 @@ class ReimbursementRequestedMail extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $employeeName = $this->reimbursement->employee?->full_name ?? 'Karyawan';
+        $employeeName = $this->reimbursement->employee->full_name ?? 'Karyawan';
         $amount = number_format((float) $this->reimbursement->amount, 0, ',', '.');
-        $date = $this->reimbursement->expense_date?->translatedFormat('d M Y') ?? '-';
+        $date = $this->reimbursement->expense_date->translatedFormat('d M Y') ?? '-';
 
         return (new MailMessage)
             ->subject('Pengajuan Reimbursement Baru - '.$employeeName)
@@ -34,9 +34,11 @@ class ReimbursementRequestedMail extends Notification implements ShouldQueue
             ->line('Judul: '.$this->reimbursement->title)
             ->line('Jumlah: Rp '.$amount)
             ->line('Tanggal: '.$date)
-            ->line('Kategori: '.($this->reimbursement->category?->name ?? '-'))
+            ->line('Kategori: '.($this->reimbursement->category->name ?? '-'))
             ->line('Deskripsi: '.($this->reimbursement->description ?? '-'))
-            ->action('Review Pengajuan', url('/api/v1/reimbursement/'.$this->reimbursement->id))
+            // U11 AUDIT: URL lama menunjuk endpoint API (/api/v1/...) — ganti
+            // ke halaman web admin reimbursement untuk review.
+            ->action('Review Pengajuan', route('admin.reimbursements'))
             ->line('Silakan review pengajuan ini.');
     }
 }

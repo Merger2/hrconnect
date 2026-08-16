@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ReimbursementCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property ReimbursementCategory $resource
+ *
+ * @mixin ReimbursementCategory
+ */
 class ReimbursementCategoryResource extends JsonResource
 {
     public function toArray(Request $request): array

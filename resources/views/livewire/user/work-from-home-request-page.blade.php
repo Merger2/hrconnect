@@ -5,7 +5,9 @@
                 :back-href="route('home')"
                 :title="__('WFH Request')"
                 :description="__('Request work-from-home approval with date, time, location, and reason.')"
-                title-id="wfh-request-title">
+                title-id="wfh-request-title"
+                module="attendance"
+                class="border-b-0">
                 <x-slot name="icon">
                     <x-heroicon-o-home-modern class="h-5 w-5" />
                 </x-slot>
@@ -17,7 +19,7 @@
                 </x-slot>
             </x-user.page-header>
 
-            <div class="user-page-body bg-gray-50/50 dark:bg-gray-900/20">
+            <div class="user-page-body bg-gray-50">
                 <x-feedback.alert-messages />
 
                 <div class="wfh-request-summary" aria-label="{{ __('WFH request summary') }}">

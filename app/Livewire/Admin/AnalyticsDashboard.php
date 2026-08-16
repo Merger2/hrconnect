@@ -140,15 +140,17 @@ final class AnalyticsDashboard extends Component
         return User::query()
             ->where('group', 'user')
             ->managedBy($admin)
-            ->whereNotNull('kabupaten_id')
-            ->with('kabupaten:id,name,latitude,longitude')
+            ->join('employees', 'users.id', '=', 'employees.user_id')
+            ->join('wilayah', 'employees.kabupaten_kode', '=', 'wilayah.kode')
+            ->whereNotNull('employees.kabupaten_kode')
+            ->select('users.name', 'wilayah.nama')
+            ->distinct()
             ->get()
-            ->filter(fn (User $u) => $u->kabupaten && $u->kabupaten->latitude && $u->kabupaten->longitude)
-            ->map(fn (User $u) => [
-                'region' => $u->kabupaten->name,
-                'lat' => (float) $u->kabupaten->latitude,
-                'lng' => (float) $u->kabupaten->longitude,
-                'name' => $u->name,
+            ->map(fn ($row) => [
+                'region' => $row->nama,
+                'lat' => 0.0,
+                'lng' => 0.0,
+                'name' => $row->name,
             ])
             ->values()
             ->toArray();
@@ -162,9 +164,10 @@ final class AnalyticsDashboard extends Component
         $counts = User::query()
             ->where('group', 'user')
             ->managedBy($admin)
+            ->join('employees', 'users.id', '=', 'employees.user_id')
             ->selectRaw("
-                SUM(CASE WHEN gender = 'male' THEN 1 ELSE 0 END) as male,
-                SUM(CASE WHEN gender = 'female' THEN 1 ELSE 0 END) as female
+                SUM(CASE WHEN employees.gender = 'L' THEN 1 ELSE 0 END) as male,
+                SUM(CASE WHEN employees.gender = 'P' THEN 1 ELSE 0 END) as female
             ")
             ->first();
 
@@ -264,7 +267,7 @@ final class AnalyticsDashboard extends Component
             ->join('shifts', 'attendances.shift_id', '=', 'shifts.id')
             ->whereBetween('attendances.date', [$monthStart->toDateString(), $monthEnd->toDateString()])
             ->whereNotNull('attendances.clock_out')
-            ->whereRaw('attendances.clock_out < shifts.end_time')
+            ->whereRaw('attendances.clock_out::time < shifts.end_time')
             ->selectRaw('users.name, COUNT(*) as early_leave_count')
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('early_leave_count')

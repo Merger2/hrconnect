@@ -23,7 +23,7 @@
         <div class="attendance-panel__badge attendance-panel__badge--live" role="status" aria-live="polite">
             <span class="relative flex h-2 w-2">
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-400 opacity-75"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-primary-700 dark:bg-primary-300"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-primary-700"></span>
             </span>
             <span>{{ __('Live') }}</span>
         </div>
@@ -36,7 +36,7 @@
         <div class="min-w-0">
             <p class="attendance-panel__worktime-label">{{ $shiftName }}</p>
             <p class="attendance-panel__worktime-copy">
-                {{ __('Working hours') }}: <span class="font-semibold text-slate-950 dark:text-white">{{ $workHours }}</span>
+                {{ __('Working hours') }}: <span class="font-semibold text-slate-950">{{ $workHours }}</span>
                 @if ($shiftDuration)
                     <span class="text-slate-400">•</span>
                     {{ $shiftDuration }}
@@ -102,13 +102,13 @@
             <template x-if="endTime && remaining > 0">
                 <p>
                     {{ __('Shift ends in') }}:
-                    <span class="font-mono font-bold text-primary-600 dark:text-primary-400" x-text="formatted"></span>
+                    <span class="font-mono font-bold text-primary-600" x-text="formatted"></span>
                 </p>
             </template>
             <template x-if="endTime && remaining <= 0">
                 <p
                     class="animate-pulse"
-                    :class="hasApprovedOvertime ? 'text-amber-500 dark:text-amber-400' : 'text-orange-500 dark:text-orange-400'">
+                    :class="hasApprovedOvertime ? 'text-amber-500' : 'text-orange-500'">
                     <span x-text="hasApprovedOvertime ? '{{ __('Overtime') }}' : '{{ __('Clock Out Pending') }}'"></span>
                 </p>
             </template>

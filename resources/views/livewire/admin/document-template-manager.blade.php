@@ -27,7 +27,7 @@
         }
 
         .document-template-live-preview .employee-document-page {
-            box-shadow: 0 22px 55px rgba(15, 23, 42, .28);
+            box-shadow: var(--shadow-doc-preview);
             margin: 0;
         }
 
@@ -85,11 +85,11 @@
                 <x-admin.panel class="p-4">
                     <div class="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                         <div class="min-w-0">
-                            <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800 dark:bg-primary-950/40 dark:text-primary-100">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800">
                                 <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-white">1</span>
                                 {{ __('Choose Document') }}
                             </div>
-                            <h2 class="mt-3 break-words text-base font-semibold text-gray-950 dark:text-white sm:text-lg">
+                            <h2 class="mt-3 break-words text-base font-semibold text-gray-950 sm:text-lg">
                                 {{ $currentType?->name ?? __('Select document type') }}
                             </h2>
                             <p class="sr-only">
@@ -120,29 +120,29 @@
                             </x-forms.select>
                             @if ($currentType)
                                 <div class="mt-3 flex flex-wrap gap-2 text-xs">
-                                    <span class="max-w-full truncate rounded-full bg-gray-100 px-2.5 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">{{ $currentType->code }}</span>
-                                    <span class="rounded-full {{ $currentType->employee_requestable ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' }} px-2.5 py-1 font-medium">{{ __('Employee') }}</span>
-                                    <span class="rounded-full {{ $currentType->admin_requestable ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' }} px-2.5 py-1 font-medium">{{ __('Admin') }}</span>
-                                    <span class="rounded-full {{ $currentType->auto_generate_enabled ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' }} px-2.5 py-1 font-medium">{{ __('PDF') }}</span>
+                                    <span class="max-w-full truncate rounded-full bg-gray-100 px-2.5 py-1 font-medium text-gray-700">{{ $currentType->code }}</span>
+                                    <span class="rounded-full {{ $currentType->employee_requestable ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500' }} px-2.5 py-1 font-medium">{{ __('Employee') }}</span>
+                                    <span class="rounded-full {{ $currentType->admin_requestable ? 'bg-sky-50 text-sky-700' : 'bg-gray-100 text-gray-500' }} px-2.5 py-1 font-medium">{{ __('Admin') }}</span>
+                                    <span class="rounded-full {{ $currentType->auto_generate_enabled ? 'bg-primary-50 text-primary-700' : 'bg-gray-100 text-gray-500' }} px-2.5 py-1 font-medium">{{ __('PDF') }}</span>
                                 </div>
                             @endif
                         </div>
-                        <div class="rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900">
-                            <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Active Template') }}</div>
-                            <div class="mt-1 text-sm font-semibold text-gray-950 dark:text-white">
+                        <div class="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                            <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Active Template') }}</div>
+                            <div class="mt-1 text-sm font-semibold text-gray-950">
                                 {{ $activeTemplate?->name ?? __('Not set') }}
                             </div>
-                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <div class="mt-1 text-xs text-gray-500">
                                 {{ $templatesForCurrentType->count() }} {{ __('saved versions') }}
                             </div>
                         </div>
                     </div>
 
                     @if ($editingDocumentType)
-                    <div class="mt-4 rounded-xl border border-primary-100 bg-white p-4 dark:border-primary-900/60 dark:bg-gray-900">
+                    <div class="mt-4 rounded-xl border border-primary-100 bg-white p-4">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                <h3 class="text-sm font-semibold text-gray-900">
                                     {{ blank($documentTypeForm['id'] ?? null) ? __('Create Document Type') : __('Edit Document Type') }}
                                 </h3>
                                 <p class="sr-only">
@@ -177,7 +177,7 @@
                                 <x-forms.label for="doc-type-desc" value="{{ __('Description') }}" class="mb-1.5 block" />
                                 <x-forms.input id="doc-type-desc" wire:model.live="documentTypeForm.description" class="w-full" />
                             </div>
-                            <div class="grid gap-2 text-sm text-gray-700 dark:text-gray-200 lg:col-span-2 sm:grid-cols-2 xl:grid-cols-5">
+                            <div class="grid gap-2 text-sm text-gray-700 lg:col-span-2 sm:grid-cols-2 xl:grid-cols-5">
                                 <label class="flex items-center gap-2"><x-forms.checkbox wire:model.live="documentTypeForm.employee_requestable" /> <span>{{ __('Employee request') }}</span></label>
                                 <label class="flex items-center gap-2"><x-forms.checkbox wire:model.live="documentTypeForm.admin_requestable" /> <span>{{ __('Admin request') }}</span></label>
                                 <label class="flex items-center gap-2"><x-forms.checkbox wire:model.live="documentTypeForm.requires_employee_upload" /> <span>{{ __('Need upload') }}</span></label>
@@ -197,11 +197,11 @@
                 <x-admin.panel class="p-4">
                     <div class="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                         <div class="min-w-0">
-                            <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800 dark:bg-primary-950/40 dark:text-primary-100">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800">
                                 <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-white">2</span>
                                 {{ __('Write Template') }}
                             </div>
-                            <h2 class="mt-3 text-base font-semibold text-gray-950 dark:text-white sm:text-lg">{{ __('Content and format') }}</h2>
+                            <h2 class="mt-3 text-base font-semibold text-gray-950 sm:text-lg">{{ __('Content and format') }}</h2>
                             <p class="sr-only">{{ __('Use presets for common letters, or switch to HTML only when custom formatting is needed.') }}</p>
                         </div>
                         <div class="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap">
@@ -215,8 +215,8 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 sm:px-4">
-                        <span class="font-semibold text-gray-900 dark:text-white">
+                    <div class="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-sm text-gray-600 sm:px-4">
+                        <span class="font-semibold text-gray-900">
                             {{ blank($documentTemplateForm['id'] ?? null) ? __('Creating new template') : __('Editing saved template') }}
                         </span>
                         <span class="hidden text-gray-400 sm:mx-1 sm:inline">·</span>
@@ -244,32 +244,32 @@
                                 <option value="landscape">{{ __('Landscape') }}</option>
                             </x-forms.select>
                         </div>
-                        <label class="flex items-end gap-2 pb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+                        <label class="flex items-end gap-2 pb-2 text-sm font-medium text-gray-700">
                             <x-forms.checkbox wire:model.live="documentTemplateForm.is_active" />
                             <span>{{ __('Set active') }}</span>
                         </label>
                     </div>
 
-                    <div class="mt-5 flex w-full max-w-md rounded-xl border border-gray-200 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-900">
+                    <div class="mt-5 flex w-full max-w-md rounded-xl border border-gray-200 bg-gray-50 p-1">
                         <button type="button" wire:click="setTemplateEditorMode('builder')"
-                            class="flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition {{ $templateEditorMode === 'builder' ? 'bg-white text-primary-700 shadow-sm dark:bg-gray-800 dark:text-primary-200' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100' }}">
+                            class="flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition {{ $templateEditorMode === 'builder' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-800' }}">
                             {{ __('Builder') }}
                         </button>
                         <button type="button" wire:click="setTemplateEditorMode('html')"
-                            class="flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition {{ $templateEditorMode === 'html' ? 'bg-white text-primary-700 shadow-sm dark:bg-gray-800 dark:text-primary-200' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100' }}">
+                            class="flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition {{ $templateEditorMode === 'html' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-800' }}">
                             {{ __('HTML') }}
                         </button>
                     </div>
 
-                    <div class="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900">
+                    <div class="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
-                                <h3 class="text-sm font-semibold text-gray-950 dark:text-white">{{ __('Header & Footer') }}</h3>
+                                <h3 class="text-sm font-semibold text-gray-950">{{ __('Header & Footer') }}</h3>
                                 <p class="sr-only">
                                     {{ __('These fields control the letterhead and fixed footer for this template.') }}
                                 </p>
                             </div>
-                            <div class="grid gap-2 text-xs font-medium text-gray-700 dark:text-gray-200 sm:grid-cols-3">
+                            <div class="grid gap-2 text-xs font-medium text-gray-700 sm:grid-cols-3">
                                 <label class="flex items-center gap-2"><x-forms.checkbox wire:model.live="documentTemplateForm.layout_options.show_logo" /> <span>{{ __('Logo') }}</span></label>
                                 <label class="flex items-center gap-2"><x-forms.checkbox wire:model.live="documentTemplateForm.layout_options.show_accents" /> <span>{{ __('Accent') }}</span></label>
                                 <label class="flex items-center gap-2"><x-forms.checkbox wire:model.live="documentTemplateForm.layout_options.show_document_meta" /> <span>{{ __('No/Date') }}</span></label>
@@ -340,13 +340,13 @@
                         </div>
                     @endif
 
-                    <details class="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900">
-                        <summary class="cursor-pointer text-sm font-semibold text-gray-800 dark:text-gray-100">{{ __('Available placeholders') }}</summary>
+                    <details class="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                        <summary class="cursor-pointer text-sm font-semibold text-gray-800">{{ __('Available placeholders') }}</summary>
                         <div class="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                             @foreach ($documentTemplateVariables as $variable)
-                                <div class="rounded-lg bg-white p-2 text-xs dark:bg-gray-800">
-                                    <div class="font-semibold text-gray-700 dark:text-gray-200">{{ $variable['label'] }}</div>
-                                    <code class="mt-1 block text-primary-700 dark:text-primary-200">{{ $variable['placeholder'] }}</code>
+                                <div class="rounded-lg bg-white p-2 text-xs">
+                                    <div class="font-semibold text-gray-700">{{ $variable['label'] }}</div>
+                                    <code class="mt-1 block text-primary-700">{{ $variable['placeholder'] }}</code>
                                 </div>
                             @endforeach
                         </div>
@@ -356,7 +356,7 @@
                 <x-admin.panel class="p-4">
                     <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div>
-                            <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800 dark:bg-primary-950/40 dark:text-primary-100">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-800">
                                 <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-white">3</span>
                                 {{ __('Review & Save') }}
                             </div>
@@ -382,19 +382,19 @@
                     <div class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                         @forelse ($templatesForCurrentType->take(6) as $template)
                             <button type="button" wire:click="editDocumentTemplate({{ $template->id }})"
-                                class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-left transition hover:border-primary-200 hover:bg-primary-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-800 dark:hover:bg-primary-950/20">
+                                class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-left transition hover:border-primary-200 hover:bg-primary-50">
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $template->name }}</span>
+                                    <span class="truncate text-sm font-semibold text-gray-900">{{ $template->name }}</span>
                                     @if ($template->is_active)
-                                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">{{ __('Active') }}</span>
+                                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">{{ __('Active') }}</span>
                                     @endif
                                 </div>
-                                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                <div class="mt-1 text-xs text-gray-500">
                                     {{ strtoupper($template->paper_size) }} · {{ $template->orientation }}
                                 </div>
                             </button>
                         @empty
-                            <div class="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400 sm:col-span-2 xl:col-span-3">
+                            <div class="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 sm:col-span-2 xl:col-span-3">
                                 {{ __('No saved templates for this document type yet.') }}
                             </div>
                         @endforelse
@@ -404,11 +404,11 @@
 
             <aside class="min-h-0 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:self-start">
                 <x-admin.panel class="flex max-h-[78vh] min-h-0 flex-col overflow-hidden p-0 xl:max-h-[calc(100vh-7rem)]">
-                    <div class="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="text-sm font-semibold text-gray-950 dark:text-white">{{ __('Live Preview') }}</h3>
-                                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200">
+                                <h3 class="text-sm font-semibold text-gray-950">{{ __('Live Preview') }}</h3>
+                                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
                                     {{ __('Realtime') }}
                                 </span>
                             </div>
@@ -422,7 +422,7 @@
                     <div class="relative min-h-0 flex-1">
                         <div wire:loading.flex
                             wire:target="templateBuilderForm,documentTemplateForm.name,documentTemplateForm.body,documentTemplateForm.footer,documentTemplateForm.paper_size,documentTemplateForm.orientation,documentTemplateForm.layout_options"
-                            class="absolute right-3 top-3 z-10 items-center rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-primary-700 shadow-sm ring-1 ring-primary-100 dark:bg-gray-900/95 dark:text-primary-200 dark:ring-primary-900">
+                            class="absolute right-3 top-3 z-10 items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary-700 shadow-sm ring-1 ring-primary-100">
                             {{ __('Updating preview...') }}
                         </div>
                         <div class="document-template-live-preview h-[62vh] overflow-auto overscroll-contain bg-slate-950 p-4 xl:h-[calc(100vh-12rem)]">

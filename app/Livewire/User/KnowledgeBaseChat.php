@@ -32,9 +32,13 @@ class KnowledgeBaseChat extends Component
     {
         $this->authorize('view_knowledgebase');
 
+        // Prefill dari ?q= (link "Tanya AI" di index/detail dokumen) —
+        // user tinggal menekan kirim.
+        $this->question = (string) request()->query('q', '');
+
         $this->messages[] = [
             'role' => 'assistant',
-            'text' => __('Hello! I can help answer questions about company policies, HR procedures, and more. What would you like to know?'),
+            'text' => __('Halo! Saya asisten AI PT Daya Cipta Mandiri Solusi. Tanyakan apa saja seputar kebijakan dan prosedur kepegawaian.'),
             'sources' => [],
             'is_welcome' => true,
         ];
@@ -51,14 +55,64 @@ class KnowledgeBaseChat extends Component
         $question = trim($this->question);
         $this->question = '';
 
-        // Add user message
+        $this->appendUserAndPlaceholder($question);
+
+        // NOTE: deliberately NO AI call here — this action must return fast so the
+        // browser renders the user message + "Thinking..." placeholder immediately.
+        // The AI call happens in processAnswer() (called from the frontend after
+        // this render completes), so the UI never looks frozen while Gemini thinks.
+    }
+
+    /**
+     * Jalur suggestion chip: kirim pertanyaan + streaming jawaban dalam SATU
+     * request Livewire. (Dua-fase sendMessage → processAnswer tidak bisa
+     * dipakai dari Alpine @click — request processAnswer selalu ditelan
+     * Livewire setelah sendMessage, terlihat lewat E2E 2026-08-16.)
+     */
+    public function ask(string $question): void
+    {
+        $this->authorize('view_knowledgebase');
+
+        $this->question = $question;
+
+        $this->validate([
+            'question' => ['required', 'string', 'min:5', 'max:500'],
+        ]);
+
+        $question = trim($this->question);
+        $this->question = '';
+
+        $this->appendUserAndPlaceholder($question);
+        $this->streamAnswer(count($this->messages) - 1, $question);
+    }
+
+    public function processAnswer(): void
+    {
+        $this->authorize('view_knowledgebase');
+
+        $responseIndex = count($this->messages) - 1;
+
+        if ($responseIndex < 0 || ($this->messages[$responseIndex]['role'] ?? null) !== 'assistant') {
+            $this->isLoading = false;
+
+            return;
+        }
+
+        $question = (string) ($this->messages[$responseIndex - 1]['text'] ?? '');
+
+        $this->streamAnswer($responseIndex, $question);
+    }
+
+    /**
+     * Tambah pesan user + placeholder streaming ke riwayat.
+     */
+    protected function appendUserAndPlaceholder(string $question): void
+    {
         $this->messages[] = [
             'role' => 'user',
             'text' => $question,
         ];
 
-        // Add placeholder for assistant response (streaming)
-        $responseIndex = count($this->messages);
         $this->messages[] = [
             'role' => 'assistant',
             'text' => '',
@@ -67,12 +121,19 @@ class KnowledgeBaseChat extends Component
         ];
 
         $this->isLoading = true;
+    }
 
+    /**
+     * Jalankan chatStream dan stream chunk ke browser, lalu finalisasi pesan.
+     */
+    protected function streamAnswer(int $responseIndex, string $question): void
+    {
         try {
             $answer = '';
             $finalSources = [];
             $newConversationId = null;
             $isFallback = false;
+            $noResults = false;
 
             // Stream via chatStream() generator — pushes chunks to browser progressively
             foreach ($this->kbService->chatStream(
@@ -107,6 +168,10 @@ class KnowledgeBaseChat extends Component
                 if (isset($yield['fallback'])) {
                     $isFallback = (bool) $yield['fallback'];
                 }
+
+                if (isset($yield['no_results'])) {
+                    $noResults = (bool) $yield['no_results'];
+                }
             }
 
             $this->conversationId = $newConversationId;
@@ -117,6 +182,7 @@ class KnowledgeBaseChat extends Component
                 'text' => $answer,
                 'sources' => $finalSources,
                 'fallback' => $isFallback,
+                'no_results' => $noResults,
                 'is_streaming' => false,
             ];
         } catch (\Throwable $e) {
@@ -139,7 +205,7 @@ class KnowledgeBaseChat extends Component
         $this->messages = [
             [
                 'role' => 'assistant',
-                'text' => __('Hello! I can help answer questions about company policies, HR procedures, and more. What would you like to know?'),
+                'text' => __('Halo! Saya asisten AI PT Daya Cipta Mandiri Solusi. Tanyakan apa saja seputar kebijakan dan prosedur kepegawaian.'),
                 'sources' => [],
                 'is_welcome' => true,
             ],

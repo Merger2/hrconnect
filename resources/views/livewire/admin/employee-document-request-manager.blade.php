@@ -1,6 +1,6 @@
 <x-admin.page-shell :title="__('Employee Document Requests')" :description="__('Review employee requests, request employee uploads, and generate HR or finance documents from templates.')">
     <div class="space-y-4">
-        <div class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/80">
+        <div class="rounded-lg border border-slate-200 bg-white p-3">
             <div class="flex flex-col gap-3 xl:flex-row xl:items-end">
                 <div class="grid flex-1 gap-3 md:grid-cols-[minmax(16rem,1.4fr)_minmax(10rem,0.8fr)_minmax(12rem,0.8fr)]">
                     <div>
@@ -38,7 +38,7 @@
 
         @if (count($selectedRequestIds) > 0)
             <x-admin.alert tone="primary" class="flex items-center gap-3">
-                <span class="text-sm font-medium text-primary-700 dark:text-primary-300">
+                <span class="text-sm font-medium text-primary-700">
                     {{ count($selectedRequestIds) }} {{ __('selected') }}
                 </span>
                 <div class="ml-auto flex flex-wrap items-center gap-2">
@@ -60,34 +60,34 @@
 
         <div class="grid gap-3 md:hidden">
             @forelse ($requests as $request)
-                <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div class="flex items-start gap-3">
                         <x-forms.checkbox wire:model.live="selectedRequestIds" value="{{ $request->id }}" class="mt-1" />
                         <div class="min-w-0 flex-1">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0">
-                                    <h3 class="truncate text-sm font-semibold text-slate-950 dark:text-white">{{ $request->user->name }}</h3>
-                                    <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{{ $request->documentTypeLabel() }} · {{ $request->created_at->diffForHumans() }}</p>
+                                    <h3 class="truncate text-sm font-semibold text-slate-950">{{ $request->user->name }}</h3>
+                                    <p class="mt-0.5 truncate text-xs text-slate-500">{{ $request->documentTypeLabel() }} · {{ $request->created_at->diffForHumans() }}</p>
                                 </div>
                                 <span class="shrink-0 rounded-full px-2 py-1 text-[11px] font-medium
                                     {{ $request->status === \App\Models\EmployeeDocumentRequest::STATUS_READY
-                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                        ? 'bg-emerald-100 text-emerald-700'
                                         : ($request->status === \App\Models\EmployeeDocumentRequest::STATUS_REJECTED
-                                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+                                            ? 'bg-rose-100 text-rose-700'
                                             : ($request->status === \App\Models\EmployeeDocumentRequest::STATUS_UPLOADED
-                                                ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300')) }}">
+                                                ? 'bg-sky-100 text-sky-700'
+                                                : 'bg-amber-100 text-amber-700')) }}">
                                     {{ $request->statusLabel() }}
                                 </span>
                             </div>
 
-                            <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs text-slate-600 dark:bg-slate-800/70 dark:text-slate-300">
-                                <div class="font-medium text-slate-900 dark:text-white">{{ $request->purpose }}</div>
+                            <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs text-slate-600">
+                                <div class="font-medium text-slate-900">{{ $request->purpose }}</div>
                                 @if ($request->details)
-                                    <div class="mt-1 line-clamp-3 whitespace-pre-line text-slate-500 dark:text-slate-400">{{ $request->details }}</div>
+                                    <div class="mt-1 line-clamp-3 whitespace-pre-line text-slate-500">{{ $request->details }}</div>
                                 @endif
                                 @if ($request->due_date)
-                                    <div class="mt-1 text-slate-500 dark:text-slate-400">{{ __('Due') }} {{ $request->due_date->format('d M Y') }}</div>
+                                    <div class="mt-1 text-slate-500">{{ __('Due') }} {{ $request->due_date->format('d M Y') }}</div>
                                 @endif
                             </div>
 
@@ -126,11 +126,11 @@
             @endforelse
         </div>
 
-        <div class="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/80 md:block">
+        <div class="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm md:block">
             <div class="overflow-x-scroll">
-                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                    <thead class="bg-slate-50 dark:bg-slate-900/40">
-                        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <th class="w-10 px-4 py-3 text-center">
                                 <x-forms.checkbox wire:model.live="selectAll" />
                             </th>
@@ -141,21 +141,21 @@
                             <th class="px-4 py-3 text-right">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody class="divide-y divide-slate-100">
                         @forelse ($requests as $request)
                             <tr class="align-top">
                                 <td class="px-4 py-3 text-center">
                                     <x-forms.checkbox wire:model.live="selectedRequestIds" value="{{ $request->id }}" />
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="font-semibold">{{ $request->user->name }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->user->nip }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->user->division->name ?? '-' }}</div>
+                                    <div class="text-xs text-slate-500">{{ $request->user->nip }}</div>
+                                    <div class="text-xs text-slate-500">{{ $request->user->division->name ?? '-' }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 text-sm text-slate-700">
                                     <div class="font-semibold">{{ $request->documentTypeLabel() }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->created_at->diffForHumans() }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                                    <div class="text-xs text-slate-500">{{ $request->created_at->diffForHumans() }}</div>
+                                    <div class="text-xs text-slate-500">
                                         {{ ucfirst($request->request_source ?: 'employee') }}
                                         @if ($request->requester)
                                             · {{ $request->requester->name }}
@@ -166,7 +166,7 @@
                                             $isOverdue = $request->due_date->isPast()
                                                 && ! in_array($request->status, ['ready', 'rejected', 'generated'], true);
                                         @endphp
-                                        <div class="text-xs {{ $isOverdue ? 'font-semibold text-rose-600 dark:text-rose-300' : 'text-slate-500 dark:text-slate-400' }}">
+                                        <div class="text-xs {{ $isOverdue ? 'font-semibold text-rose-600' : 'text-slate-500' }}">
                                             {{ __('Due') }} {{ $request->due_date->format('d M Y') }}
                                             @if ($isOverdue)
                                                 · {{ __('Overdue') }}
@@ -174,13 +174,13 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="max-w-md px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                                <td class="max-w-md px-4 py-3 text-sm text-slate-700">
                                     <div class="font-medium">{{ $request->purpose }}</div>
                                     @if ($request->details)
-                                        <div class="mt-1 whitespace-pre-line text-xs text-slate-500 dark:text-slate-400">{{ $request->details }}</div>
+                                        <div class="mt-1 whitespace-pre-line text-xs text-slate-500">{{ $request->details }}</div>
                                     @endif
                                     @if ($request->fulfillment_note || $request->rejection_note)
-                                        <div class="mt-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                        <div class="mt-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-600">
                                             {{ $request->fulfillment_note ?: $request->rejection_note }}
                                         </div>
                                     @endif
@@ -188,16 +188,16 @@
                                 <td class="px-4 py-3 text-sm">
                                     <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
                                         {{ $request->status === \App\Models\EmployeeDocumentRequest::STATUS_READY
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                            ? 'bg-emerald-100 text-emerald-700'
                                             : ($request->status === \App\Models\EmployeeDocumentRequest::STATUS_REJECTED
-                                                ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+                                                ? 'bg-rose-100 text-rose-700'
                                                 : ($request->status === \App\Models\EmployeeDocumentRequest::STATUS_UPLOADED
-                                                    ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300')) }}">
+                                                    ? 'bg-sky-100 text-sky-700'
+                                                    : 'bg-amber-100 text-amber-700')) }}">
                                     {{ $request->statusLabel() }}
                                     </span>
                                     @if ($request->reviewer)
-                                        <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                        <div class="mt-2 text-xs text-slate-500">
                                             {{ __('By :name', ['name' => $request->reviewer->name]) }}
                                         </div>
                                     @endif
@@ -234,7 +234,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
                                     {{ __('No document requests found.') }}
                                 </td>
                             </tr>
@@ -270,17 +270,17 @@
             @endphp
 
             <div class="space-y-4">
-                <ol class="grid gap-2 border-b border-slate-100 pb-4 text-sm dark:border-slate-800 sm:grid-cols-3">
+                <ol class="grid gap-2 border-b border-slate-100 pb-4 text-sm sm:grid-cols-3">
                     <li class="flex items-start gap-2">
                         <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[11px] font-semibold text-white">1</span>
-                        <span class="font-medium text-slate-900 dark:text-white">{{ __('Create request') }}</span>
+                        <span class="font-medium text-slate-900">{{ __('Create request') }}</span>
                     </li>
-                    <li class="flex items-start gap-2 text-slate-700 dark:text-slate-200">
-                        <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">2</span>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">2</span>
                         <span class="font-medium">{{ $flowStepTwo }}</span>
                     </li>
-                    <li class="flex items-start gap-2 text-slate-700 dark:text-slate-200">
-                        <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">3</span>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">3</span>
                         <span class="font-medium">{{ $flowStepThree }}</span>
                     </li>
                 </ol>
@@ -290,10 +290,10 @@
                     <section class="space-y-3">
                         <div class="flex items-center justify-between gap-3">
                             <div>
-                                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Who is this for?') }}</h3>
+                                <h3 class="text-sm font-semibold text-slate-900">{{ __('Who is this for?') }}</h3>
                                 <p class="sr-only">{{ __('One request will be created for each selected employee.') }}</p>
                             </div>
-                            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                 {{ trans_choice(':count employee selected|:count employees selected', $selectedEmployeesCount, ['count' => $selectedEmployeesCount]) }}
                             </span>
                         </div>
@@ -309,7 +309,7 @@
                     <section class="space-y-3">
                         <div class="mb-1.5 flex items-center justify-between gap-3">
                             <div>
-                                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('What document is needed?') }}</h3>
+                                <h3 class="text-sm font-semibold text-slate-900">{{ __('What document is needed?') }}</h3>
                                 <p class="sr-only">{{ __('The document type controls whether the employee uploads a file, the system generates a PDF, or an admin handles it manually.') }}</p>
                             </div>
                             <x-actions.button type="button" size="sm" variant="ghost" wire:click="applyRequestPreset">
@@ -326,7 +326,7 @@
                     </section>
 
                     <section class="space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('What should the employee see?') }}</h3>
+                        <h3 class="text-sm font-semibold text-slate-900">{{ __('What should the employee see?') }}</h3>
                         <x-forms.label for="admin-document-purpose" value="{{ __('Purpose') }}" class="mb-1.5 block" />
                         <x-forms.textarea id="admin-document-purpose" wire:model.live="purpose" rows="3" class="block w-full" placeholder="{{ __('Example: please upload NPWP for payroll tax data.') }}" />
                         <x-forms.input-error for="purpose" class="mt-1" />
@@ -358,7 +358,7 @@
                             </div>
                         </div>
                         @if ($selectedDocumentTypeProfile?->auto_generate_enabled && $selectedDocumentTypeProfile?->activeTemplate())
-                            <label class="mt-7 flex items-start gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
+                            <label class="mt-7 flex items-start gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-800">
                                 <x-forms.checkbox wire:model.live="generateImmediately" />
                                 <span>
                                     <span class="block font-semibold">{{ __('Generate PDF immediately') }}</span>
@@ -369,25 +369,25 @@
                     </div>
                 </div>
 
-                <aside class="border-t border-slate-100 pt-4 dark:border-slate-800 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('What happens after Create Request?') }}</h3>
+                <aside class="border-t border-slate-100 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                    <h3 class="text-sm font-semibold text-gray-900">{{ __('What happens after Create Request?') }}</h3>
 
                     @if ($selectedDocumentTypeProfile)
-                        <div class="mt-4 divide-y divide-slate-100 text-sm dark:divide-slate-800">
+                        <div class="mt-4 divide-y divide-slate-100 text-sm">
                             <div class="pb-3">
-                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Selected document') }}</div>
-                                <div class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $selectedDocumentTypeProfile->name }}</div>
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Selected document') }}</div>
+                                <div class="mt-1 font-semibold text-gray-900">{{ $selectedDocumentTypeProfile->name }}</div>
                                 <div class="text-xs text-gray-500">{{ strtoupper($selectedDocumentTypeProfile->category) }} · {{ $selectedDocumentTypeProfile->code }}</div>
                             </div>
                             <div class="py-3">
-                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Initial status') }}</div>
-                                <div class="mt-1 font-semibold text-gray-900 dark:text-white">
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Initial status') }}</div>
+                                <div class="mt-1 font-semibold text-gray-900">
                                     {{ $selectedDocumentTypeProfile->requires_employee_upload ? __('Waiting for employee upload') : ($generateImmediately ? __('Generated PDF') : __('Pending admin action')) }}
                                 </div>
                             </div>
                             <div class="py-3">
-                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Due date') }}</div>
-                                <div class="mt-1 font-semibold text-gray-900 dark:text-white">
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Due date') }}</div>
+                                <div class="mt-1 font-semibold text-gray-900">
                                     {{ $dueDate ? \Carbon\Carbon::parse($dueDate)->format('d M Y') : __('No deadline') }}
                                 </div>
                             </div>
@@ -395,19 +395,19 @@
                             <div class="space-y-2 py-3">
                                 <div class="flex items-center justify-between gap-3">
                                     <span>{{ __('Employee upload') }}</span>
-                                    <span class="text-xs font-semibold {{ $selectedDocumentTypeProfile->requires_employee_upload ? 'text-amber-600 dark:text-amber-300' : 'text-gray-500 dark:text-gray-400' }}">
+                                    <span class="text-xs font-semibold {{ $selectedDocumentTypeProfile->requires_employee_upload ? 'text-amber-600' : 'text-gray-500' }}">
                                         {{ $selectedDocumentTypeProfile->requires_employee_upload ? __('Required') : __('Not required') }}
                                     </span>
                                 </div>
                                 <div class="flex items-center justify-between gap-3">
                                     <span>{{ __('PDF generation') }}</span>
-                                    <span class="text-xs font-semibold {{ $selectedDocumentTypeProfile->auto_generate_enabled ? 'text-emerald-600 dark:text-emerald-300' : 'text-gray-500 dark:text-gray-400' }}">
+                                    <span class="text-xs font-semibold {{ $selectedDocumentTypeProfile->auto_generate_enabled ? 'text-emerald-600' : 'text-gray-500' }}">
                                         {{ $selectedDocumentTypeProfile->auto_generate_enabled ? __('Enabled') : __('Manual only') }}
                                     </span>
                                 </div>
                                 <div class="flex items-center justify-between gap-3">
                                     <span>{{ __('Active template') }}</span>
-                                    <span class="text-xs font-semibold {{ $selectedDocumentTypeProfile->activeTemplate() ? 'text-emerald-600 dark:text-emerald-300' : 'text-rose-600 dark:text-rose-300' }}">
+                                    <span class="text-xs font-semibold {{ $selectedDocumentTypeProfile->activeTemplate() ? 'text-emerald-600' : 'text-rose-600' }}">
                                         {{ $selectedDocumentTypeProfile->activeTemplate()?->name ?? __('Missing') }}
                                     </span>
                                 </div>
@@ -431,7 +431,7 @@
                             @endif
                         </div>
                     @else
-                        <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Choose a document type to see the workflow.') }}</p>
+                        <p class="mt-3 text-sm text-gray-500">{{ __('Choose a document type to see the workflow.') }}</p>
                     @endif
                 </aside>
                 </div>
@@ -450,9 +450,9 @@
         <x-slot name="content">
             <div class="space-y-4">
                 @if ($reviewRequest)
-                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
-                        <div class="font-semibold text-slate-900 dark:text-white">{{ $reviewRequest->user?->name }} · {{ $reviewRequest->documentTypeLabel() }}</div>
-                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $reviewRequest->purpose }}</div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+                        <div class="font-semibold text-slate-900">{{ $reviewRequest->user?->name }} · {{ $reviewRequest->documentTypeLabel() }}</div>
+                        <div class="mt-1 text-xs text-slate-500">{{ $reviewRequest->purpose }}</div>
                     </div>
                 @endif
                 <p class="sr-only">
@@ -475,9 +475,9 @@
         <x-slot name="content">
             <div class="space-y-4">
                 @if ($reviewRequest)
-                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
-                        <div class="font-semibold text-slate-900 dark:text-white">{{ $reviewRequest->user?->name }} · {{ $reviewRequest->documentTypeLabel() }}</div>
-                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $reviewRequest->purpose }}</div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+                        <div class="font-semibold text-slate-900">{{ $reviewRequest->user?->name }} · {{ $reviewRequest->documentTypeLabel() }}</div>
+                        <div class="mt-1 text-xs text-slate-500">{{ $reviewRequest->purpose }}</div>
                     </div>
                 @endif
                 <p class="sr-only">

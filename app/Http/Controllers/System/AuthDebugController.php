@@ -12,7 +12,7 @@ class AuthDebugController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
-        if (! app()->environment(['local', 'testing']) && ! config('app.debug')) {
+        if (! app()->environment(['local', 'testing'])) {
             abort(404);
         }
 

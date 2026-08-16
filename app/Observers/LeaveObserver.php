@@ -22,6 +22,6 @@ class LeaveObserver
         $employeeId = $leave->employee_id;
         Cache::forget("leave:history:{$employeeId}");
         Cache::forget("leave:pending:{$employeeId}");
-        Cache::forget("leave:summary:{$employeeId}:".$leave->start_date?->format('Y'));
+        Cache::forget("leave:summary:{$employeeId}:".$leave->start_date->format('Y'));
     }
 }

@@ -10,7 +10,6 @@
         'notification' => 'notif',
         'payroll' => 'payroll',
         'appraisal' => 'appraisal',
-        'enterprise' => 'enterprise',
     ];
 
     $tabCounts = [
@@ -21,7 +20,6 @@
         'notif' => 0,
         'payroll' => 0,
         'appraisal' => 0,
-        'enterprise' => 0,
     ];
 
     foreach ($groups as $group => $settings) {
@@ -34,14 +32,6 @@
     }
 
     $canManageSystemSettings = auth()->user()->can('manageSystemSettings');
-    $canManageEnterpriseLicense = auth()->user()->can('manageEnterpriseLicense');
-    $licenseStatus = $licenseValidation ?? [
-        'valid' => false,
-        'code' => 'missing_key',
-        'message' => __('No enterprise license key saved yet.'),
-    ];
-    $licenseStatusValid = $licenseStatus['valid'] ?? false;
-    $licenseStatusCode = $licenseStatus['code'] ?? 'missing_key';
 @endphp
 
 <x-admin.page-shell :title="__('Application Settings')" :description="__('Manage your application configuration and preferences.')" x-data="{
@@ -54,8 +44,7 @@
         { id: 'leave', label: '{{ __('Leave & Time Off') }}', icon: 'calendar', count: {{ $tabCounts['leave'] }} },
         { id: 'notif', label: '{{ __('Notifications') }}', icon: 'bell', count: {{ $tabCounts['notif'] }} },
         { id: 'payroll', label: '{{ __('Payroll') }}', icon: 'banknotes', count: {{ $tabCounts['payroll'] }} },
-        { id: 'appraisal', label: '{{ __('Appraisal') }}', icon: 'chart', count: {{ $tabCounts['appraisal'] }} },
-        { id: 'enterprise', label: '{{ __('Enterprise') }}', icon: 'briefcase', count: {{ $tabCounts['enterprise'] }} }
+        { id: 'appraisal', label: '{{ __('Appraisal') }}', icon: 'chart', count: {{ $tabCounts['appraisal'] }} }
     ],
     normalize(value) {
         return (value || '').toString().toLowerCase();
@@ -87,30 +76,29 @@
             }
         });
     }
-}"
-    x-on:enterprise-license-applied.window="if ($event.detail.reload) window.location.reload()">
+}">
     <x-slot name="toolbar">
         <x-admin.page-tools grid-class="grid grid-cols-1 items-end gap-3 xl:grid-cols-4">
 
             <x-slot name="actions">
                 <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $canManageSystemSettings ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300' }}">
+                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $canManageSystemSettings ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
                     {{ $canManageSystemSettings ? __('Auto-save enabled') : __('Read-only mode') }}
                 </span>
             </x-slot>
 
             <div class="xl:col-span-4">
-                <label for="settings-search" class="mb-1.5 block text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <label for="settings-search" class="mb-1.5 block text-sm font-semibold text-gray-900">
                     {{ __('Search settings') }}
                 </label>
                 <div class="relative">
                     <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <x-forms.input id="settings-search" x-model.debounce.200ms="search" type="text"
                         placeholder="{{ __('Search by setting name or key') }}"
-                        class="w-full border-gray-200 bg-gray-50 py-2.5 pl-9 pr-10 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500" />
+                        class="w-full border-gray-200 bg-gray-50 py-2.5 pl-9 pr-10" />
                     <button x-cloak x-show="search" type="button" @click="clearSearch()"
                         aria-label="{{ __('Clear settings search') }}"
-                        class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:hover:bg-gray-700 dark:hover:text-gray-200 dark:focus:ring-offset-gray-900">
+                        class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2">
                         <x-heroicon-o-x-mark class="h-4 w-4" />
                     </button>
                 </div>
@@ -128,15 +116,15 @@
                         :aria-controls="'settings-panel-' + tab.id" :aria-selected="(activeTab === tab.id).toString()"
                         :tabindex="activeTab === tab.id ? 0 : -1"
                         :class="{
-                            'bg-white dark:bg-gray-800 shadow-sm text-primary-600 dark:text-primary-400 ring-1 ring-gray-900/5 dark:ring-gray-700': activeTab ===
+                            'bg-white shadow-sm text-primary-600 ring-1 ring-gray-900/5': activeTab ===
                                 tab.id,
-                            'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200': activeTab !==
+                            'text-gray-600 hover:bg-gray-50 hover:text-gray-900': activeTab !==
                                 tab.id
                         }"
-                        class="wcag-touch-target group flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium leading-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900 sm:text-sm xl:w-full xl:gap-3 xl:px-3 xl:py-2.5">
+                        class="wcag-touch-target group flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium leading-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 sm:text-sm xl:w-full xl:gap-3 xl:px-3 xl:py-2.5">
                         <span
-                            :class="activeTab === tab.id ? 'text-primary-600 dark:text-primary-400' :
-                                'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300'">
+                            :class="activeTab === tab.id ? 'text-primary-600' :
+                                'text-gray-400 group-hover:text-gray-500'">
                             <x-heroicon-o-home x-show="tab.icon === 'home'" class="h-5 w-5" />
                             <x-heroicon-o-clock x-show="tab.icon === 'clock'" class="h-5 w-5" />
                             <x-heroicon-o-shield-check x-show="tab.icon === 'shield-check'" class="h-5 w-5" />
@@ -148,7 +136,7 @@
                         </span>
                         <span class="min-w-0 flex-1 truncate text-left" x-text="tab.label"></span>
                         <span
-                            class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-300"
+                            class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600"
                             x-text="tab.count"></span>
                     </button>
                 </template>
@@ -165,12 +153,12 @@
                     x-transition:enter-end="opacity-100 translate-y-0">
                     @if ($panelTab === 'app')
                         <x-admin.panel class="relative mb-4 rounded-xl">
-                            <div class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50/50 px-4 py-3 dark:border-gray-700 dark:bg-gray-700/20">
+                            <div class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50 px-4 py-3">
                                 <div>
-                                    <h3 class="text-base font-semibold capitalize text-gray-900 dark:text-white">
+                                    <h3 class="text-base font-semibold capitalize text-gray-900">
                                         {{ __('Branding') }}
                                     </h3>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    <p class="text-xs text-gray-500 mt-0.5">
                                         {{ __('Company logo & identity used in payslips, emails, and documents.') }}
                                     </p>
                                 </div>
@@ -181,9 +169,9 @@
                                     <div class="shrink-0">
                                         @if ($hasLogo && $logoUrl)
                                             <img src="{{ $logoUrl }}" alt="{{ __('Company Logo') }}"
-                                                class="h-20 w-auto rounded-lg border border-gray-200 object-contain dark:border-gray-700">
+                                                class="h-20 w-auto rounded-lg border border-gray-200 object-contain">
                                         @else
-                                            <div class="flex h-20 w-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-800">
+                                            <div class="flex h-20 w-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-xs text-slate-500">
                                                 {{ __('No logo') }}
                                             </div>
                                         @endif
@@ -192,7 +180,7 @@
                                     <div class="flex-1">
                                         <div class="flex flex-wrap items-center gap-3">
                                             <x-forms.input type="file" wire:model="logo" accept="image/jpeg,image/png,image/svg+xml,image/webp"
-                                                class="block w-full max-w-xs text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-primary-900/30 dark:file:text-primary-300" />
+                                                class="block w-full max-w-xs text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" />
                                             <div wire:loading wire:target="logo" class="text-sm text-gray-500">
                                                 <x-heroicon-o-arrow-path class="inline h-4 w-4 animate-spin" />
                                                 {{ __('Uploading...') }}
@@ -216,7 +204,7 @@
                                             @endif
                                         </div>
 
-                                        <p class="mt-2 text-xs text-gray-400">
+                                        <p class="mt-2 text-xs text-slate-500">
                                             {{ __('Recommended: PNG or JPG, max 2MB, transparent background preferred.') }}
                                         </p>
                                     </div>
@@ -248,9 +236,9 @@
                             <x-admin.panel class="relative mb-4 rounded-xl transition-all duration-300">
 
                                 <div
-                                    class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50/50 px-4 py-3 dark:border-gray-700 dark:bg-gray-700/20 sm:flex-row sm:items-center sm:justify-between">
+                                    class="flex flex-col gap-3 rounded-t-xl border-b border-gray-100 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
-                                        <h3 class="text-base font-semibold capitalize text-gray-900 dark:text-white">
+                                        <h3 class="text-base font-semibold capitalize text-gray-900">
                                             {{ $group }} {{ __('Settings') }}
                                         </h3>
                                         <p class="sr-only">
@@ -261,61 +249,13 @@
                                     <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                                         @unless ($canManageSystemSettings)
                                             <span
-                                                class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                                class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
                                                 {{ __('Read-only mode') }}
                                             </span>
                                         @endunless
-                                        @if ($group === 'enterprise')
-                                            @if ($licenseStatusValid && isset($licenseInfo['expires_at']))
-                                                <div
-                                                    class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white px-3 py-2 dark:border-emerald-900/40 dark:bg-gray-800">
-                                                    <div class="text-right">
-                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                            {{ __('License active') }}</p>
-                                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                            {{ __('Until') }}:
-                                                            <span class="text-emerald-600 dark:text-emerald-300">
-                                                                {{ \Carbon\Carbon::parse($licenseInfo['expires_at'])->format('d M Y') }}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div
-                                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-                                                        <x-heroicon-o-check-circle class="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <span class="@class([
-                                                    'inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold',
-                                                    'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300' =>
-                                                        $licenseStatusCode === 'missing_key',
-                                                    'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300' =>
-                                                        $licenseStatusCode !== 'missing_key',
-                                                ])">
-                                                    {{ __('License status') }}
-                                                </span>
-                                            @endif
-                                        @endif
 
                                     </div>
                                 </div>
-
-                                @if ($group === 'enterprise')
-                                    <x-admin.alert tone="warning"
-                                        class="flex flex-col items-start justify-between gap-3 rounded-none rounded-b-none border-x-0 border-t-0 px-4 py-3 sm:flex-row sm:items-center">
-                                        <div>
-                                            <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300">Server
-                                                Hardware ID (HWID)</h4>
-                                            <p class="sr-only">
-                                                {{ __('Please give this code to Developer if you want to request Enterprise License for this server.') }}
-                                            </p>
-                                        </div>
-                                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                                            <code
-                                                class="px-3 py-1.5 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 text-sm rounded border border-yellow-200 dark:border-yellow-700 font-mono select-all w-full sm:w-auto text-center">{{ $hwid }}</code>
-                                        </div>
-                                    </x-admin.alert>
-                                @endif
 
                                 <div class="space-y-4 p-4">
                                     @foreach ($settings as $setting)
@@ -338,10 +278,10 @@
                                                 class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                                 <div class="min-w-0 flex-1">
                                                     <x-forms.label :for="'setting_' . $setting->id" :value="$setting->description ?? $setting->key"
-                                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" />
+                                                        class="text-sm font-medium text-gray-800" />
                                                     <div class="flex items-center gap-2 mt-1">
                                                         <span
-                                                            class="text-xs font-mono text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded select-all">{{ $setting->key }}</span>
+                                                            class="text-xs font-mono text-slate-600 bg-gray-100 px-2 py-0.5 rounded select-all">{{ $setting->key }}</span>
                                                         <div class="h-4 w-4" wire:loading
                                                             wire:target="updateValue({{ $setting->id }})">
                                                             <x-heroicon-o-arrow-path class="h-4 w-4 animate-spin text-primary-600" />
@@ -350,31 +290,7 @@
                                                 </div>
 
                                                 <div class="w-full shrink-0 md:w-auto">
-                                                    @if ($setting->key === 'enterprise_license_key')
-                                                        <div class="w-full max-w-3xl space-y-3 md:min-w-[18rem]">
-
-                                                            <x-forms.textarea wire:model.defer="enterpriseLicenseDraft"
-                                                                rows="3" :disabled="!$canManageEnterpriseLicense"
-                                                                class="block w-full font-mono text-xs sm:text-sm"></x-forms.textarea>
-
-                                                            <div class="flex items-center justify-end gap-3">
-                                                                <div class="h-4 w-4" wire:loading
-                                                                    wire:target="applyEnterpriseLicense">
-                                                                    <x-heroicon-o-arrow-path class="h-4 w-4 animate-spin text-primary-600" />
-                                                                </div>
-
-                                                                @if ($canManageEnterpriseLicense)
-                                                                    <x-actions.button
-                                                                        wire:click="applyEnterpriseLicense"
-                                                                        wire:loading.attr="disabled"
-                                                                        class="justify-center"
-                                                                        wire:target="applyEnterpriseLicense">
-                                                                        {{ __('Apply') }}
-                                                                    </x-actions.button>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    @elseif ($setting->type === 'boolean')
+                                                    @if ($setting->type === 'boolean')
                                                         <x-forms.switch
                                                             wire:click="updateValue({{ $setting->id }}, {{ $setting->value == '1' ? '0' : '1' }})"
                                                             :checked="$setting->value == '1'" :label="$setting->description ?? $setting->key" :disabled="!$canManageSystemSettings" />
@@ -403,7 +319,7 @@
                                                 </div>
                                             </div>
                                             @if (!$loop->last)
-                                                <div class="mt-4 border-t border-gray-100 dark:border-gray-700"></div>
+                                                <div class="mt-4 border-t border-gray-100"></div>
                                             @endif
                                         </div>
                                     @endforeach

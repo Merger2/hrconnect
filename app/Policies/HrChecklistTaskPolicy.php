@@ -30,8 +30,8 @@ class HrChecklistTaskPolicy
 
         return $user->can('viewHrChecklists')
             || $task->assigned_to === $user->id
-            || $task->case?->user_id === $user->id
-            || $task->case?->user?->manager_id === $user->id;
+            || $task->case->user_id === $user->id
+            || $task->case->user->manager_id === $user->id;
     }
 
     public function update(User $user, HrChecklistTask $task): bool
@@ -48,7 +48,7 @@ class HrChecklistTaskPolicy
     protected function sameCompany(User $actor, HrChecklistTask $task): bool
     {
         $task->loadMissing('case.user');
-        $employee = $task->case?->user;
+        $employee = $task->case->user;
 
         return $employee !== null
             && $this->multiCompany->canAccessUser($actor, $employee);

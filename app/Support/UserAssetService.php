@@ -32,9 +32,9 @@ class UserAssetService
     {
         return CompanyAssetHistory::query()
             ->with('asset')
-            ->where('user_id', $userId)
+            ->whereHas('asset', fn ($q) => $q->where('user_id', $userId))
             ->where('action', 'returned')
-            ->latest('date')
+            ->latest()
             ->get();
     }
 
@@ -77,10 +77,9 @@ class UserAssetService
 
         CompanyAssetHistory::create([
             'company_asset_id' => $asset->id,
-            'user_id' => $user->id,
             'action' => 'returned',
             'notes' => __('Returned by user via OTP and marked ready for reassignment.'),
-            'date' => now(),
+            'created_by' => $user->employee?->id,
         ]);
 
         Cache::forget($cacheKey);

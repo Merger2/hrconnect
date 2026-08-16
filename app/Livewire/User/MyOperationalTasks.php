@@ -43,6 +43,14 @@ class MyOperationalTasks extends Component
         $this->operations = $operations;
     }
 
+    public function mount(): void
+    {
+        // Tidak ada policy ProjectTask/ProjectVisitEvidence yang cocok untuk akses
+        // halaman ini (ProjectVisitEvidencePolicy hanya punya view/downloadPhoto
+        // per-instance) — guard minimal: user harus punya employee record.
+        abort_unless(auth()->user()?->employee, 403);
+    }
+
     public function updateTaskStatus(int $taskId, string $status): void
     {
         validator(

@@ -1,0 +1,167 @@
+<?php
+
+use App\Livewire\Admin\AssetManager;
+use App\Livewire\User\MyAssets;
+use App\Models\CompanyAsset;
+use App\Models\CompanyAssetHistory;
+use App\Models\Employee;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Livewire;
+
+beforeEach(function () {});
+
+test('user return flow marks asset ready and clears assignment dates', function () {
+    $user = User::factory()->create();
+
+    $asset = CompanyAsset::create([
+        'name' => 'ThinkPad X1',
+        'type' => 'electronics',
+        'user_id' => $user->id,
+        'date_assigned' => now()->subDays(7)->toDateString(),
+        'return_date' => now()->addDays(7)->toDateString(),
+        'status' => CompanyAsset::STATUS_ASSIGNED,
+    ]);
+
+    $otp = '123456';
+    Cache::put("asset_return_otp_{$asset->id}_{$user->id}", $otp, now()->addMinutes(15));
+
+    $this->actingAs($user);
+
+    Livewire::test(MyAssets::class)
+        ->set('returnAssetId', $asset->id)
+        ->set('otpCode', $otp)
+        ->call('verifyOtp')
+        ->assertHasNoErrors();
+
+    $asset->refresh();
+
+    expect($asset->user_id)->toBeNull()
+        ->and($asset->status)->toBe(CompanyAsset::STATUS_AVAILABLE)
+        ->and($asset->date_assigned)->toBeNull()
+        ->and($asset->return_date)->toBeNull();
+
+    $history = CompanyAssetHistory::query()
+        ->where('company_asset_id', $asset->id)
+        ->latest()
+        ->first();
+
+    expect($history)->not()->toBeNull()
+        ->and($history->action)->toBe('returned')
+        ->and($history->notes)->toContain(__('Returned by user via OTP and marked ready for reassignment.'));
+});
+
+test('admin retrieval marks asset ready and records retrieval note', function () {
+
+    $admin = assetAdmin();
+    // Employee record dibutuhkan supaya CompanyAssetHistory.from_employee_id /
+    // created_by (keduanya FK ke employees) terisi.
+    $adminEmployee = Employee::factory()->create(['user_id' => $admin->id]);
+    $user = User::factory()->create();
+    $userEmployee = Employee::factory()->create(['user_id' => $user->id]);
+
+    $asset = CompanyAsset::create([
+        'name' => 'Toyota Avanza',
+        'type' => 'vehicle',
+        'user_id' => $user->id,
+        'date_assigned' => now()->subDays(10)->toDateString(),
+        'return_date' => now()->addDays(3)->toDateString(),
+        'status' => CompanyAsset::STATUS_ASSIGNED,
+    ]);
+
+    $this->actingAs($admin);
+
+    Livewire::test(AssetManager::class)
+        ->call('editAsset', $asset->id)
+        ->set('form.user_id', '')
+        ->set('form.status', CompanyAsset::STATUS_AVAILABLE)
+        ->call('saveAsset')
+        ->assertHasNoErrors();
+
+    $asset->refresh();
+
+    expect($asset->user_id)->toBeNull()
+        ->and($asset->status)->toBe(CompanyAsset::STATUS_AVAILABLE)
+        ->and($asset->date_assigned)->toBeNull()
+        ->and($asset->return_date)->toBeNull();
+
+    $history = CompanyAssetHistory::query()
+        ->where('company_asset_id', $asset->id)
+        ->where('action', 'returned')
+        ->latest()
+        ->first();
+
+    expect($history)->not()->toBeNull()
+        ->and($history->from_employee_id)->toBe($userEmployee->id)
+        ->and($history->created_by)->toBe($adminEmployee->id)
+        ->and($history->notes)->toContain('Retrieved by Admin')
+        ->and($history->notes)->toContain('ready for reassignment');
+});
+
+test('admin selecting ready automatically releases the assigned user', function () {
+
+    $admin = assetAdmin();
+    $user = User::factory()->create();
+
+    $asset = CompanyAsset::create([
+        'name' => 'Dell Latitude',
+        'type' => 'electronics',
+        'user_id' => $user->id,
+        'date_assigned' => now()->subDays(5)->toDateString(),
+        'return_date' => now()->addDays(2)->toDateString(),
+        'status' => CompanyAsset::STATUS_ASSIGNED,
+    ]);
+
+    $this->actingAs($admin);
+
+    Livewire::test(AssetManager::class)
+        ->call('editAsset', $asset->id)
+        ->set('form.status', CompanyAsset::STATUS_AVAILABLE)
+        ->call('saveAsset')
+        ->assertHasNoErrors();
+
+    $asset->refresh();
+
+    expect($asset->user_id)->toBeNull()
+        ->and($asset->status)->toBe(CompanyAsset::STATUS_AVAILABLE)
+        ->and($asset->date_assigned)->toBeNull()
+        ->and($asset->return_date)->toBeNull();
+});
+
+test('asset admin page auto refreshes pending return otp notifications', function () {
+
+    $admin = assetAdmin();
+
+    $this->actingAs($admin);
+
+    Livewire::test(AssetManager::class)
+        ->assertSeeHtml('wire:poll.visible.10s');
+});
+
+test('employee asset page auto refreshes assigned assets and return history', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    Livewire::test(MyAssets::class)
+        ->assertSeeHtml('wire:poll.visible.15s');
+});
+
+function assetAdmin(): User
+{
+    $admin = User::factory()->admin()->create();
+    $role = Role::create([
+        'name' => 'Asset Test Manager_'.uniqid(),
+        'slug' => 'asset_test_manager__'.uniqid().str()->ulid(),
+        'description' => 'Can manage asset lifecycle tests.',
+        'permission_keys' => [
+            'admin.dashboard.view',
+            'admin.assets.view',
+        ],
+    ]);
+
+    $admin->roles()->sync([$role->id]);
+
+    return $admin;
+}

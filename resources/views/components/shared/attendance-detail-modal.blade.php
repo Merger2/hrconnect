@@ -9,7 +9,7 @@
                 $showMaps = ($hasCheckIn || $hasCheckOut) && !$isExcused;
             @endphp
 
-            <h3 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+            <h3 class="mb-4 text-xl font-semibold text-gray-900">
                 {{ __('Attendance Detail') }} - {{ $currentAttendance['name'] ?? 'N/A' }}
             </h3>
 
@@ -98,14 +98,14 @@
                                         <x-forms.label value="{{ __(ucfirst($key)) }}" class="mb-1" />
                                         <img src="{{ route('attendance.photo', ['attendance' => $currentAttendance['id'], 'type' => is_string($key) ? $key : 'general', 'index' => $key]) }}" 
                                              alt="Attachment {{ $key }}"
-                                             class="max-h-48 w-full object-contain rounded-lg border border-gray-200 dark:border-gray-700">
+                                             class="max-h-48 w-full object-contain rounded-lg border border-gray-200">
                                     </div>
                                 @endforeach
                             </div>
                         @else
                             <img src="{{ route('attendance.photo', ['attendance' => $currentAttendance['id'], 'type' => 'general']) }}" 
                                  alt="Attachment"
-                                 class="mt-2 max-h-64 w-full object-contain rounded-lg border border-gray-200 dark:border-gray-700">
+                                 class="mt-2 max-h-64 w-full object-contain rounded-lg border border-gray-200">
                         @endif
                     </div>
                 @endif
@@ -138,24 +138,24 @@
                 {{-- Location Maps --}}
                 @if ($showMaps)
                     <div class="mt-6">
-                        <h4 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">{{ __('Attendance Location') }}</h4>
+                        <h4 class="mb-4 text-sm font-semibold text-gray-900">{{ __('Attendance Location') }}</h4>
 
                         <div class="grid grid-cols-1 {{ $hasCheckIn && $hasCheckOut ? 'md:grid-cols-2' : '' }} gap-4">
                             {{-- Check In Location --}}
                             @if ($hasCheckIn)
                                 <div class="space-y-3">
                                     <div class="flex items-center gap-2">
-                                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                            <x-heroicon-o-arrow-left-on-rectangle class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        <div class="p-2 bg-blue-100 rounded-lg">
+                                            <x-heroicon-o-arrow-left-on-rectangle class="h-5 w-5 text-blue-600" />
                                         </div>
-                                        <span class="font-semibold text-gray-900 dark:text-white">{{ __('Check In') }}</span>
+                                        <span class="font-semibold text-gray-900">{{ __('Check In') }}</span>
                                     </div>
                                     <a href="#" onclick="window.openMap({{ $currentAttendance['latitude_in'] }}, {{ $currentAttendance['longitude_in'] }}); return false;"
-                                        class="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                        class="block text-sm text-blue-600 hover:underline">
                                         📍 {{ number_format($currentAttendance['latitude_in'], 6) }},
                                         {{ number_format($currentAttendance['longitude_in'], 6) }}
                                     </a>
-                                    <div wire:ignore class="h-64 w-full rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-800"
+                                    <div wire:ignore class="h-64 w-full rounded-lg overflow-hidden border-2 border-blue-200"
                                         id="map_in"></div>
                                 </div>
                             @endif
@@ -164,17 +164,17 @@
                             @if ($hasCheckOut)
                                 <div class="space-y-3">
                                     <div class="flex items-center gap-2">
-                                        <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                                            <x-heroicon-o-arrow-right-on-rectangle class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                                        <div class="p-2 bg-orange-100 rounded-lg">
+                                            <x-heroicon-o-arrow-right-on-rectangle class="h-5 w-5 text-orange-600" />
                                         </div>
-                                        <span class="font-semibold text-gray-900 dark:text-white">{{ __('Check Out') }}</span>
+                                        <span class="font-semibold text-gray-900">{{ __('Check Out') }}</span>
                                     </div>
                                     <a href="#" onclick="window.openMap({{ $currentAttendance['latitude_out'] }}, {{ $currentAttendance['longitude_out'] }}); return false;"
-                                        class="block text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                        class="block text-sm text-blue-600 hover:underline">
                                         📍 {{ number_format($currentAttendance['latitude_out'], 6) }},
                                         {{ number_format($currentAttendance['longitude_out'], 6) }}
                                     </a>
-                                    <div wire:ignore class="h-64 w-full rounded-lg overflow-hidden border-2 border-orange-200 dark:border-orange-800"
+                                    <div wire:ignore class="h-64 w-full rounded-lg overflow-hidden border-2 border-orange-200"
                                         id="map_out"></div>
                                 </div>
                             @endif
@@ -198,16 +198,16 @@
                                 
                                 if ($distance < 1000) {
                                     $distanceText = number_format($distance, 2) . ' meters';
-                                    $colorClass = $distance < 100 ? 'text-green-600 dark:text-green-400' : ($distance < 500 ? 'text-yellow-600 dark:text-yellow-400' : 'text-orange-600 dark:text-orange-400');
+                                    $colorClass = $distance < 100 ? 'text-green-600' : ($distance < 500 ? 'text-yellow-600' : 'text-orange-600');
                                 } else {
                                     $distanceText = number_format($distance / 1000, 2) . ' km';
-                                    $colorClass = 'text-red-600 dark:text-red-400';
+                                    $colorClass = 'text-red-600';
                                 }
                             @endphp
                             <div
-                                class="mt-4 p-3 bg-gradient-to-r from-blue-50 to-orange-50 dark:from-blue-900/30 dark:to-orange-900/30 rounded-lg border border-gray-200 dark:border-gray-700">
+                                class="mt-4 p-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg border border-gray-200">
                                 <div class="flex items-center justify-between">
-                                    <span class="font-semibold text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="font-semibold text-sm text-gray-700">
                                         🗺️ {{ __('Distance Check In - Check Out') }}:
                                     </span>
                                     <span class="font-bold text-sm {{ $colorClass }}">{{ $distanceText }}</span>
@@ -218,7 +218,7 @@
                 @endif
 
                 @if (!empty($currentAttendance['shift']))
-                    <div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+                    <div class="border-t border-gray-200 pt-4">
                         <x-forms.label for="shift" value="{{ __('Shift') }}"></x-forms.label>
                         <x-forms.input class="w-full" type="text" id="shift" disabled
                             value="{{ $currentAttendance['shift']['name'] ?? '-' }}"></x-forms.input>
@@ -227,9 +227,9 @@
             </div>
 
             {{-- Action Buttons --}}
-            <div class="mt-6 flex items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div class="mt-6 flex items-center justify-between gap-3 border-t border-gray-200 pt-4">
                 <a href="{{ route('attendance-corrections', ['date' => $currentAttendance['date'] ?? '']) }}" 
-                   class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-violet-700 hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:text-violet-300 dark:hover:bg-violet-500/10">
+                   class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-violet-700 hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                     <x-heroicon-o-pencil-square class="h-4 w-4" />
                     {{ __('Request Correction') }}
                 </a>
@@ -274,6 +274,13 @@
         });
 
         function initAttendanceMaps(latIn, lngIn, latOut, lngOut) {
+            // Leaflet lazy-load (app.js ensureMaps) — tunggu library lalu render ulang.
+            if (typeof L === 'undefined') {
+                if (window.ensureMaps) {
+                    window.ensureMaps().then(() => initAttendanceMaps(latIn, lngIn, latOut, lngOut));
+                }
+                return;
+            }
             removeAllMaps();
 
             // Check In Map
@@ -289,8 +296,8 @@
                 // Use circleMarker instead of divIcon for reliability
                 L.circleMarker([Number(latIn), Number(lngIn)], {
                     radius: 12,
-                    fillColor: '#3b82f6',
-                    color: '#ffffff',
+                    fillColor: 'var(--color-module-hr)',
+                    color: 'var(--color-surface)',
                     weight: 3,
                     opacity: 1,
                     fillOpacity: 1
@@ -316,8 +323,8 @@
                 // Use circleMarker instead of divIcon for reliability
                 L.circleMarker([Number(latOut), Number(lngOut)], {
                     radius: 12,
-                    fillColor: '#f97316',
-                    color: '#ffffff',
+                    fillColor: 'var(--color-module-documents)',
+                    color: 'var(--color-surface)',
                     weight: 3,
                     opacity: 1,
                     fillOpacity: 1
@@ -349,12 +356,12 @@
                 let text, colorClass;
                 if (distance < 1000) {
                     text = `${distance.toFixed(2)} meters`;
-                    colorClass = distance < 100 ? 'text-green-600 dark:text-green-400' :
-                        distance < 500 ? 'text-yellow-600 dark:text-yellow-400' :
-                        'text-orange-600 dark:text-orange-400';
+                    colorClass = distance < 100 ? 'text-green-600' :
+                        distance < 500 ? 'text-yellow-600' :
+                        'text-orange-600';
                 } else {
                     text = `${(distance / 1000).toFixed(2)} km`;
-                    colorClass = 'text-red-600 dark:text-red-400';
+                    colorClass = 'text-red-600';
                 }
                 distEl.textContent = text;
                 distEl.className = `font-bold text-sm ${colorClass}`;

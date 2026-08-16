@@ -62,7 +62,7 @@ class JobTitleComponent extends Component
 
     public function create()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageJobTitles');
         $this->validate();
         JobTitle::create([
             'name' => trim($this->name),
@@ -90,7 +90,7 @@ class JobTitleComponent extends Component
 
     public function update()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageJobTitles');
         $this->validate();
         $jobTitle = JobTitle::query()->findOrFail($this->selectedId);
         $jobTitle->update([
@@ -116,7 +116,7 @@ class JobTitleComponent extends Component
 
     public function delete()
     {
-        Gate::authorize('manageMasterData');
+        Gate::authorize('manageJobTitles');
         $jobTitle = JobTitle::query()->findOrFail($this->selectedId);
         $jobTitle->delete();
         $this->confirmingDeletion = false;

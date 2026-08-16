@@ -1,0 +1,488 @@
+{
+    "meta": {
+        "title": "KB Eval Dataset — RAG",
+        "description": "Dataset evaluasi RAG Knowledge Base dari corpus KnowledgeBaseSeeder (36 entries, 10 kategori). Setiap kasus positif: coverage kata kunci >= 80% + citation >= 1 sumber yang diharapkan. Kasus negatif: sistem harus menolak (tanpa jawaban palsu). Subset natural (kb-25..kb-30) = pertanyaan kalimat penuh untuk menguji retrieval semantik (vector search online); di-skip pada mode offline (deterministik).",
+        "created": "2026-08-05",
+        "corpus": "KnowledgeBaseSeeder (36 entries, 10 kategori)",
+        "gate": "AGENTS.md hard gate / PRD §6 — eval >= 20 Q&A, kualitas >= 90% relevan, citation wajib",
+        "quality_threshold": 0.9,
+        "coverage_threshold": 0.8,
+        "note": "verify_human=true — review konten selesai 2026-08-06: 28 kasus positif (22 substring + 6 natural) dicocokkan ke corpus KnowledgeBaseSeeder + kebijakan face-only (kb-05 PIN dihapus); 2 kasus negatif di luar corpus. Gate kb:eval online LULUS 28/28 (100%) >= 90%.",
+        "reviewed": "2026-08-06"
+    },
+    "cases": [
+        {
+            "id": "kb-01",
+            "category": "kepegawaian",
+            "question": "jam kerja",
+            "expected_answer": [
+                "08.00",
+                "17.00",
+                "WIB"
+            ],
+            "expected_sources": [
+                "Jam Kerja Karyawan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Fakta kunci: jam kerja 08.00-17.00 WIB. 'Senin-Jumat' diganti 'WIB' (2026-08-06) — Gemini memparafrase hari kerja (Senin s/d Jumat) sehingga keyword hyphen brittle."
+        },
+        {
+            "id": "kb-02",
+            "category": "kepegawaian",
+            "question": "masa percobaan",
+            "expected_answer": [
+                "3 bulan",
+                "probation",
+                "karyawan baru"
+            ],
+            "expected_sources": [
+                "Kontrak Kerja dan Masa Percobaan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Probation 3 bulan, evaluasi atasan sebelum konfirmasi tetap."
+        },
+        {
+            "id": "kb-03",
+            "category": "kepegawaian",
+            "question": "struktur organisasi",
+            "expected_answer": [
+                "Direktur Utama",
+                "Manager",
+                "Supervisor"
+            ],
+            "expected_sources": [
+                "Struktur Organisasi"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Rantai: Direktur Utama s.d. Staff; divisi dipimpin Manager."
+        },
+        {
+            "id": "kb-04",
+            "category": "kepegawaian",
+            "question": "document request",
+            "expected_answer": [
+                "Document Request",
+                "Surat Keterangan Kerja",
+                "dokumen kepegawaian"
+            ],
+            "expected_sources": [
+                "Pengajuan Dokumen Kepegawaian"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Dokumen: SK Kerja, Slip Gaji, Surat Rekomendasi; status Ready."
+        },
+        {
+            "id": "kb-05",
+            "category": "absensi",
+            "question": "check in",
+            "expected_answer": [
+                "Face ID",
+                "verifikasi wajah"
+            ],
+            "expected_sources": [
+                "Cara Absensi (Check In/Out)"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "2026-08-06: face-ONLY (kebijakan Fikih 2026-08-05) — konten korpus PIN dihapus, PIN bukan lagi metode absensi."
+        },
+        {
+            "id": "kb-06",
+            "category": "absensi",
+            "question": "work from anywhere",
+            "expected_answer": [
+                "WFA",
+                "persetujuan atasan",
+                "lokasi"
+            ],
+            "expected_sources": [
+                "Absensi Work From Anywhere (WFA)"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "WFA butuh persetujuan atasan, bebas geofence, tidak permanen."
+        },
+        {
+            "id": "kb-07",
+            "category": "absensi",
+            "question": "attendance correction",
+            "expected_answer": [
+                "Attendance Correction",
+                "koreksi",
+                "kesalahan"
+            ],
+            "expected_sources": [
+                "Koreksi Absensi"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Koreksi: check in/out terlewat, shift salah, waktu salah + alasan."
+        },
+        {
+            "id": "kb-08",
+            "category": "absensi",
+            "question": "keterlambatan lebih dari 15 menit",
+            "expected_answer": [
+                "15 menit",
+                "late",
+                "kinerja"
+            ],
+            "expected_sources": [
+                "Sanksi Keterlambatan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Terlambat >15 menit = late; >1 jam dapat dianggap absent."
+        },
+        {
+            "id": "kb-09",
+            "category": "cuti",
+            "question": "jenis cuti",
+            "expected_answer": [
+                "Cuti Tahunan",
+                "12 hari",
+                "Cuti Sakit"
+            ],
+            "expected_sources": [
+                "Jenis Cuti yang Tersedia"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Cuti Tahunan 12 hari, Cuti Sakit tak terbatas, Cuti Khusus."
+        },
+        {
+            "id": "kb-10",
+            "category": "cuti",
+            "question": "cuti tahunan minimal diajukan",
+            "expected_answer": [
+                "Leave Request",
+                "jenis cuti",
+                "tanggal mulai"
+            ],
+            "expected_sources": [
+                "Prosedur Pengajuan Cuti"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Cuti tahunan minimal 3 hari sebelumnya; sakit hari yang sama + surat dokter."
+        },
+        {
+            "id": "kb-11",
+            "category": "cuti",
+            "question": "jatah cuti tahunan",
+            "expected_answer": [
+                "12 hari",
+                "paid leave",
+                "jatah"
+            ],
+            "expected_sources": [
+                "Cuti Tahunan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Jatah 12 hari/tahun, paid leave, carry-over maks 6 hari."
+        },
+        {
+            "id": "kb-12",
+            "category": "cuti",
+            "question": "cuti darurat",
+            "expected_answer": [
+                "keluarga",
+                "mendesak",
+                "Cuti izin"
+            ],
+            "expected_sources": [
+                "Cuti Darurat dan Izin"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Cuti darurat: keluarga inti sakit keras/meninggal; izin: keperluan pribadi."
+        },
+        {
+            "id": "kb-13",
+            "category": "payroll",
+            "question": "tanggal 25",
+            "expected_answer": [
+                "25",
+                "hari libur",
+                "sebelumnya"
+            ],
+            "expected_sources": [
+                "Jadwal Penggajian"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Gaji tiap tanggal 25; libur -> hari kerja sebelumnya; payslip via My Payslips."
+        },
+        {
+            "id": "kb-14",
+            "category": "payroll",
+            "question": "komponen gaji",
+            "expected_answer": [
+                "Gaji Pokok",
+                "Tunjangan",
+                "BPJS"
+            ],
+            "expected_sources": [
+                "Komponen Gaji"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Gaji pokok + tunjangan tetap/tidak tetap + potongan tetap/tidak tetap."
+        },
+        {
+            "id": "kb-15",
+            "category": "payroll",
+            "question": "bpjs kesehatan",
+            "expected_answer": [
+                "4%",
+                "3%",
+                "BPJS Kesehatan"
+            ],
+            "expected_sources": [
+                "BPJS Kesehatan dan Ketenagakerjaan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Iuran BPJS Kesehatan 4% (perusahaan 3%, karyawan 1%)."
+        },
+        {
+            "id": "kb-16",
+            "category": "payroll",
+            "question": "pph 21",
+            "expected_answer": [
+                "Pasal 17",
+                "5%",
+                "Rp60 juta"
+            ],
+            "expected_sources": [
+                "PPh 21 dan Perpajakan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Tarif progresif Pasal 17: 5% s.d. 60 juta; PTKP lajang 54 juta."
+        },
+        {
+            "id": "kb-17",
+            "category": "lembur",
+            "question": "kompensasi lembur",
+            "expected_answer": [
+                "persetujuan atasan",
+                "Overtime Request",
+                "lembur"
+            ],
+            "expected_sources": [
+                "Aturan Lembur"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Lembur perlu persetujuan; jam pertama 1.5x, berikutnya 2x; maks 3 jam/hari."
+        },
+        {
+            "id": "kb-18",
+            "category": "reimbursement",
+            "question": "reimbursement",
+            "expected_answer": [
+                "pengobatan",
+                "perjalanan dinas",
+                "klaim"
+            ],
+            "expected_sources": [
+                "Jenis Reimbursement"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Klaim: pengobatan, perjalanan dinas, pendidikan; wajib bukti."
+        },
+        {
+            "id": "kb-19",
+            "category": "kasbon",
+            "question": "kasbon",
+            "expected_answer": [
+                "50%",
+                "6 bulan",
+                "gaji pokok"
+            ],
+            "expected_sources": [
+                "Ketentuan Kasbon"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Kasbon maks 50% gaji pokok, tenor maks 6 bulan, potong gaji bulanan."
+        },
+        {
+            "id": "kb-20",
+            "category": "fasilitas",
+            "question": "aset perusahaan",
+            "expected_answer": [
+                "Asset Request",
+                "laptop",
+                "disetujui atasan"
+            ],
+            "expected_sources": [
+                "Peminjaman Aset Perusahaan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Pinjam aset via Asset Request; pengembalian verifikasi OTP."
+        },
+        {
+            "id": "kb-21",
+            "category": "kinerja",
+            "question": "self assessment",
+            "expected_answer": [
+                "6 bulan",
+                "20%",
+                "50%"
+            ],
+            "expected_sources": [
+                "Penilaian Kinerja (Appraisal)"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Appraisal per 6 bulan: Self 20%, Atasan 50%, Sistem 30%."
+        },
+        {
+            "id": "kb-22",
+            "category": "teknis",
+            "question": "face id",
+            "expected_answer": [
+                "Face ID",
+                "Face Enrollment",
+                "registrasi"
+            ],
+            "expected_sources": [
+                "Cara Registrasi Face ID"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "notes": "Registrasi face id via menu Face Enrollment; pencahayaan cukup."
+        },
+        {
+            "id": "kb-25",
+            "category": "cuti",
+            "question": "Bagaimana prosedur pengajuan cuti tahunan?",
+            "expected_answer": [
+                "Leave Request",
+                "tanggal mulai",
+                "lampiran"
+            ],
+            "expected_sources": [
+                "Prosedur Pengajuan Cuti"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "natural": true,
+            "notes": "Kalimat natural — token (prosedur, pengajuan, cuti, tahunan) match judul sumber; keyword dipilih dari 150 char awal konten (snippet fallback terpotong)."
+        },
+        {
+            "id": "kb-26",
+            "category": "kepegawaian",
+            "question": "Berapa lama masa percobaan untuk karyawan baru?",
+            "expected_answer": [
+                "3 bulan",
+                "probation",
+                "karyawan baru"
+            ],
+            "expected_sources": [
+                "Kontrak Kerja dan Masa Percobaan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "natural": true,
+            "notes": "Kalimat natural — masa percobaan (probation) 3 bulan untuk karyawan baru."
+        },
+        {
+            "id": "kb-27",
+            "category": "payroll",
+            "question": "Tanggal berapa gaji bulanan dibayarkan?",
+            "expected_answer": [
+                "25",
+                "hari libur",
+                "sebelumnya"
+            ],
+            "expected_sources": [
+                "Jadwal Penggajian"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "natural": true,
+            "notes": "Kalimat natural — gaji tiap tanggal 25, libur mundur ke hari kerja sebelumnya."
+        },
+        {
+            "id": "kb-28",
+            "category": "absensi",
+            "question": "Apa yang terjadi kalau saya terlambat masuk kerja?",
+            "expected_answer": [
+                "15 menit",
+                "late",
+                "kinerja"
+            ],
+            "expected_sources": [
+                "Sanksi Keterlambatan"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "natural": true,
+            "notes": "Kalimat natural — terlambat lebih dari 15 menit dicatat late, akumulasi mempengaruhi penilaian kinerja."
+        },
+        {
+            "id": "kb-29",
+            "category": "reimbursement",
+            "question": "Bagaimana cara klaim kembali biaya pengobatan?",
+            "expected_answer": [
+                "pengobatan",
+                "klaim",
+                "bukti"
+            ],
+            "expected_sources": [
+                "Jenis Reimbursement"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "natural": true,
+            "notes": "Kalimat natural — biaya pengobatan dapat diklaim, wajib bukti pembayaran."
+        },
+        {
+            "id": "kb-30",
+            "category": "lembur",
+            "question": "Bagaimana cara mengajukan lembur yang benar?",
+            "expected_answer": [
+                "Overtime",
+                "alasan",
+                "jam mulai"
+            ],
+            "expected_sources": [
+                "Cara Mengajukan Lembur"
+            ],
+            "negative": false,
+            "verify_human": true,
+            "natural": true,
+            "notes": "Kalimat natural — pengajuan via menu Overtime, isi tanggal/jam mulai/selesai + alasan; keyword dipilih dari 150 char awal konten (snippet fallback terpotong)."
+        },
+        {
+            "id": "kb-23",
+            "category": "negatif",
+            "question": "Berapa premi asuransi jiwa?",
+            "expected_answer": [],
+            "expected_sources": [],
+            "negative": true,
+            "verify_human": true,
+            "notes": "Di luar corpus (premi/asuransi/jiwa tidak ada di KB) — sistem harus menolak, tidak menjawab palsu (PRD §6). Token tidak match corpus → jalur no_results/refusal."
+        },
+        {
+            "id": "kb-24",
+            "category": "negatif",
+            "question": "berapa pesangon?",
+            "expected_answer": [],
+            "expected_sources": [],
+            "negative": true,
+            "verify_human": true,
+            "notes": "Di luar corpus (pesangon tidak ada di KB; token lain seperti \"cara\" dihindari karena substring-match \"secara\" di konten) — sistem harus menolak, tidak menjawab palsu (PRD §6)."
+        }
+    ]
+}

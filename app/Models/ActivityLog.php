@@ -6,9 +6,14 @@ use App\Contracts\AuditServiceInterface;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @mixin IdeHelperActivityLog
+ */
 class ActivityLog extends Model
 {
     use HasFactory;
@@ -40,19 +45,20 @@ class ActivityLog extends Model
         });
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function details()
+    public function details(): HasMany
     {
         return $this->hasMany(ActivityLogDetail::class);
     }
 
     public static function record($action, $description = null)
     {
-        // Open Core: Delegate to Service (Community = No-op, Enterprise = Logged)
+        // Open Core: Delegate ke service (CommunityAuditService menulis entri
+        // nyata; komentar lama "Community = No-op" salah — lihat audit 2026-08-16).
         $service = app(AuditServiceInterface::class);
 
         try {

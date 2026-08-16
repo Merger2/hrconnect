@@ -9,13 +9,14 @@
                 :back-href="route('home')"
                 :title="__('My Assets')"
                 title-id="my-assets-title"
+                module="finance"
                 class="border-b-0">
                 <x-slot name="actions">
                     <button type="button"
                         wire:click="setAssetFilter('active')"
                         @class([
                             'user-header-icon-action',
-                            'bg-primary-600 text-white hover:bg-primary-700 hover:text-white dark:bg-primary-400 dark:text-slate-950 dark:hover:bg-primary-300' => $assetFilter === 'active',
+                            'bg-primary-600 text-white hover:bg-primary-700 hover:text-white' => $assetFilter === 'active',
                         ])
                         aria-label="{{ __('Active') }}"
                         title="{{ __('Active') }}">
@@ -26,7 +27,7 @@
                         wire:click="setAssetFilter('returned')"
                         @class([
                             'user-header-icon-action',
-                            'bg-primary-600 text-white hover:bg-primary-700 hover:text-white dark:bg-primary-400 dark:text-slate-950 dark:hover:bg-primary-300' => $assetFilter === 'returned',
+                            'bg-primary-600 text-white hover:bg-primary-700 hover:text-white' => $assetFilter === 'returned',
                         ])
                         aria-label="{{ __('Returned') }}"
                         title="{{ __('Returned') }}">

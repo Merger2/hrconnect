@@ -21,6 +21,9 @@ class WorkFromHomeRequestService
         return WorkFromHomeRequest::query()->create([
             'user_id' => $user->id,
             'company_id' => $user->company_id,
+            // start_date/end_date are NOT NULL; default to the requested date.
+            'start_date' => $payload['start_date'] ?? $payload['date'],
+            'end_date' => $payload['end_date'] ?? $payload['date'],
             'date' => $payload['date'],
             'start_time' => $payload['start_time'] ?? null,
             'end_time' => $payload['end_time'] ?? null,

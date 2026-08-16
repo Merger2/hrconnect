@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\PayrollStatus;
 use App\Models\Payroll;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,10 +24,17 @@ class PayrollSubmitted extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        // U11 AUDIT: 'Total karyawan: 1' dulu hardcode — hitung jumlah payroll
+        // yang sudah diajukan untuk periode yang sama (1 baris per karyawan).
+        $employeeCount = Payroll::query()
+            ->where('period', $this->payroll->period)
+            ->where('status', PayrollStatus::SUBMITTED)
+            ->count();
+
         return (new MailMessage)
             ->subject('Pengajuan Payroll Periode '.$this->payroll->period)
             ->line('Payroll periode '.$this->payroll->period.' telah diajukan dan membutuhkan verifikasi.')
-            ->line('Total karyawan: 1')
+            ->line('Total karyawan: '.$employeeCount)
             ->action('Lihat Payroll', url('/admin/payrolls'));
     }
 

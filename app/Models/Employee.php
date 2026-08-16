@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\BloodType;
 use App\Enums\EducationLevel;
 use App\Enums\EmployeeStatus;
+use App\Enums\EmploymentStatus;
 use App\Enums\EmploymentType;
 use App\Enums\FamilyRelationship;
 use App\Enums\Gender;
@@ -20,10 +21,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravolt\Indonesia\Models\City;
-use Laravolt\Indonesia\Models\District;
-use Laravolt\Indonesia\Models\Province;
-use Laravolt\Indonesia\Models\Village;
 use ParagonIE\CipherSweet\BlindIndex;
 use ParagonIE\CipherSweet\EncryptedRow;
 use Pgvector\Laravel\HasNeighbors;
@@ -38,7 +35,7 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
     'province_id', 'city_id', 'district_id', 'village_id', 'postal_code', 'address_detail',
     'employee_number', 'full_name', 'phone', 'bank_account_number', 'bank_name', 'bank_account_holder',
     'npwp', 'nik', 'marital_status', 'blood_type', 'gender', 'status',
-    'birth_date', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
+    'birth_date', 'birth_place', 'join_date', 'employment_type', 'contract_start_date', 'contract_end_date',
     'resign_date', 'deceased_date', 'termination_type', 'termination_reason', 'phk_variant', 'photo',
     'education_level', 'institution_name', 'major', 'graduation_year', 'salary_type',
     'payslip_password', 'ptkp_status', 'nip', 'basic_salary',
@@ -52,6 +49,7 @@ use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
     'bank_account_name', 'emergency_contact_name', 'emergency_contact_phone',
     'emergency_contact_relation', 'bpjs_kesehatan', 'bpjs_ketenagakerjaan',
     'tarif_ter_id', 'kategori_ter_id', 'kode_karyawan',
+    'provinsi_kode', 'kabupaten_kode', 'kecamatan_kode', 'kelurahan_kode',
 ])]
 #[Hidden(['pin', 'nik', 'phone', 'npwp', 'bank_account_number', 'bank_account_name', 'emergency_contact_phone', 'bpjs_kesehatan', 'bpjs_ketenagakerjaan', 'payslip_password'])]
 class Employee extends Model implements CipherSweetEncrypted
@@ -132,7 +130,7 @@ class Employee extends Model implements CipherSweetEncrypted
             'account_auto_disable_at' => 'datetime',
             'account_deletion_requested_at' => 'datetime',
             'account_deletion_reviewed_at' => 'datetime',
-            'employment_status' => EmployeeStatus::class,
+            'employment_status' => EmploymentStatus::class,
         ];
     }
 
@@ -235,22 +233,22 @@ class Employee extends Model implements CipherSweetEncrypted
 
     public function province(): BelongsTo
     {
-        return $this->belongsTo(Province::class, 'province_id');
+        return $this->belongsTo(Wilayah::class, 'provinsi_kode', 'kode');
     }
 
     public function city(): BelongsTo
     {
-        return $this->belongsTo(City::class, 'city_id');
+        return $this->belongsTo(Wilayah::class, 'kabupaten_kode', 'kode');
     }
 
     public function district(): BelongsTo
     {
-        return $this->belongsTo(District::class, 'district_id');
+        return $this->belongsTo(Wilayah::class, 'kecamatan_kode', 'kode');
     }
 
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'village_id');
+        return $this->belongsTo(Wilayah::class, 'kelurahan_kode', 'kode');
     }
 
     public function creator(): BelongsTo
@@ -347,14 +345,9 @@ class Employee extends Model implements CipherSweetEncrypted
         return $this->hasMany(Device::class);
     }
 
-    public function shiftSchedules(): HasMany
-    {
-        return $this->hasMany(ShiftSchedule::class);
-    }
-
     public function getHrApprover(): ?Employee
     {
-        return User::role('hr-manager')->first()?->employee;
+        return User::role('admin')->first()?->employee;
     }
 
     public function hasClockedInToday(): bool
@@ -426,11 +419,13 @@ class Employee extends Model implements CipherSweetEncrypted
     }
 
     /**
-     * Blade convenience accessor: NIP maps to employee_number.
+     * Blade convenience accessor: returns the real `nip` column when set,
+     * falling back to `employee_number` so existing views keep working for
+     * records that only carry a generated employee number.
      */
     public function getNipAttribute(): ?string
     {
-        return $this->attributes['employee_number'] ?? null;
+        return $this->attributes['nip'] ?? ($this->attributes['employee_number'] ?? null);
     }
 
     /**

@@ -52,15 +52,15 @@ class CollaborationWorkspaceService implements ScopesCompanies
                 'created_by' => $actor->id,
             ]);
 
-            $members = collect([$actor->id, ...$memberIds])
+            $memberIds = collect([$actor->id, ...$memberIds])
                 ->filter()
                 ->unique()
-                ->mapWithKeys(fn (string $userId): array => [
-                    $userId => ['role' => $userId === $actor->id ? 'owner' : 'member'],
-                ])
+                ->values()
                 ->all();
 
-            $thread->members()->syncWithoutDetaching($members);
+            // chat_thread_user TIDAK punya kolom `role` — hanya id + last_read_at
+            // (lihat komentar ChatThread::members()).
+            $thread->members()->syncWithoutDetaching($memberIds);
 
             return $thread->fresh(['members']);
         });
@@ -102,7 +102,6 @@ class CollaborationWorkspaceService implements ScopesCompanies
 
             $thread->members()->syncWithoutDetaching([
                 $actor->id => [
-                    'role' => 'member',
                     'last_read_at' => now(),
                 ],
             ]);

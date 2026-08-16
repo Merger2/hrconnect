@@ -1,4 +1,4 @@
-<div>
+<div wire:poll.30s="checkAttendanceStatus">
     @if ($approvedAbsence)
         <section aria-labelledby="attendance-status-date" class="attendance-panel">
             <div class="attendance-panel__header">
@@ -11,7 +11,7 @@
                 </div>
 
                 <div class="attendance-panel__badge attendance-panel__badge--done" role="status" aria-live="polite">
-                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-brand-500 text-white">
+                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-500 text-white">
                         <x-heroicon-o-check class="h-3 w-3" />
                     </span>
                     <span>{{ __(ucfirst($approvedAbsence->status)) }}</span>
@@ -60,32 +60,17 @@
                 </div>
             </div>
 
-            @if (false)
-                <button type="button"
-                    aria-label="{{ __('Register Face ID Now') }}"
-                    @click.prevent="$dispatch('feature-lock', { title: @js(__('Face ID Locked')), message: @js(__('Face ID Biometrics is an Enterprise Feature. Please Upgrade.')) })"
-                    class="attendance-panel__cta attendance-panel__cta--primary">
-                    <span class="attendance-panel__cta-icon">
-                        <x-heroicon-o-lock-closed class="h-5 w-5" />
-                    </span>
-                    <span class="min-w-0">
-                        <span class="attendance-panel__cta-label">{{ __('Register Face ID Now') }}</span>
-                        <span class="attendance-panel__cta-copy">{{ __('Face ID Locked') }}</span>
-                    </span>
-                </button>
-            @else
-                <a href="{{ route('face.enrollment') }}"
-                    aria-label="{{ __('Register Face ID Now') }}"
-                    class="attendance-panel__cta attendance-panel__cta--primary">
-                    <span class="attendance-panel__cta-icon">
-                        <x-heroicon-o-camera class="h-5 w-5" />
-                    </span>
-                    <span class="min-w-0">
-                        <span class="attendance-panel__cta-label">{{ __('Register Face ID Now') }}</span>
-                        <span class="attendance-panel__cta-copy">{{ __('Secure attendance') }}</span>
-                    </span>
-                </a>
-            @endif
+            <a href="{{ route('face.enrollment') }}"
+                aria-label="{{ __('Register Face ID Now') }}"
+                class="attendance-panel__cta attendance-panel__cta--primary">
+                <span class="attendance-panel__cta-icon">
+                    <x-heroicon-o-camera class="h-5 w-5" />
+                </span>
+                <span class="min-w-0">
+                    <span class="attendance-panel__cta-label">{{ __('Register Face ID Now') }}</span>
+                    <span class="attendance-panel__cta-copy">{{ __('Secure attendance') }}</span>
+                </span>
+            </a>
         </section>
     @elseif($hasCheckedIn && $hasCheckedOut)
         <x-user.attendance-hero-card :attendance="$attendance" />

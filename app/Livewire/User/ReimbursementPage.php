@@ -35,7 +35,7 @@ class ReimbursementPage extends Component
     // Form Fields
     public $date;
 
-    public $type = 'medical';
+    public $type = 'transport';
 
     public $amount;
 
@@ -47,7 +47,7 @@ class ReimbursementPage extends Component
     {
         return [
             'date' => 'required|date',
-            'type' => 'required|string|in:medical,transport,optical,dental,project,other',
+            'type' => 'required|string|in:transport,meals,lodging,communication,education,equipment,other',
             'amount' => 'required|numeric|min:1',
             'description' => 'required|string|max:500',
             'attachment' => ['nullable', ...$this->secureUploadPolicy->rules('document')],
@@ -71,7 +71,7 @@ class ReimbursementPage extends Component
     {
         $this->reset(['amount', 'description', 'attachment']);
         $this->date = now()->format('Y-m-d');
-        $this->type = 'medical';
+        $this->type = 'transport';
         $this->isCreating = true;
     }
 
@@ -108,7 +108,7 @@ class ReimbursementPage extends Component
 
     public function setTypeFilter(string $type): void
     {
-        if (! in_array($type, ['all', 'medical', 'transport', 'project', 'optical', 'dental', 'other'], true)) {
+        if (! in_array($type, ['all', 'transport', 'meals', 'lodging', 'communication', 'education', 'equipment', 'other'], true)) {
             return;
         }
 

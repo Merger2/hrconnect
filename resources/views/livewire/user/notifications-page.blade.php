@@ -7,7 +7,8 @@
             <x-user.page-header
                 :back-href="$backRoute"
                 :title="__('Notifications')"
-                title-id="notifications-title">
+                title-id="notifications-title"
+                module="hr">
                 <x-slot name="icon">
                     <x-heroicon-o-bell class="h-5 w-5" />
                 </x-slot>

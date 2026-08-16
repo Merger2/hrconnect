@@ -10,7 +10,7 @@ $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 $state = $argv[1] ?? null;
-$userEmail = getenv('APK_SCREENSHOT_USER_EMAIL') ?: 'apk.demo.user@paspapan.test';
+$userEmail = getenv('APK_SCREENSHOT_USER_EMAIL') ?: 'apk.demo.user@hrconnect.test';
 $user = User::query()->where('email', $userEmail)->firstOrFail();
 
 match ($state) {

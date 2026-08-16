@@ -15,7 +15,7 @@
                 <div class="sm:col-span-2 lg:col-span-1">
                     <x-forms.label for="role-search" value="{{ __('Search roles') }}" class="mb-1.5 block" />
                     <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                             <x-heroicon-m-magnifying-glass class="h-5 w-5" />
                         </span>
                         <x-forms.input
@@ -28,14 +28,14 @@
                     </div>
                 </div>
 
-                <div class="flex min-h-12 items-center rounded-xl border border-indigo-100 bg-indigo-50/80 px-3 py-2 text-sm text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/30 dark:text-indigo-100">
+                <div class="flex min-h-12 items-center rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm text-indigo-900">
                     <p class="font-semibold">{{ __('Admin-first scope') }}</p>
                     <p class="sr-only">
                         {{ __('This page currently manages admin menu access and admin-side actions only.') }}
                     </p>
                 </div>
 
-                <div class="flex min-h-12 items-center rounded-xl border border-emerald-100 bg-emerald-50/80 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-100">
+                <div class="flex min-h-12 items-center rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
                     <p class="font-semibold">{{ __('Role assignment') }}</p>
                     <p class="sr-only">
                         {{ __('Role assignment is enforced separately so normal admins do not gain access automatically.') }}
@@ -46,8 +46,8 @@
 
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.75fr)]">
             <x-admin.panel>
-                <div class="border-b border-gray-200/70 px-4 py-3 dark:border-gray-700/70">
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Role Directory') }}</h2>
+                <div class="border-b border-gray-200/70 px-4 py-3">
+                    <h2 class="text-lg font-semibold text-slate-950">{{ __('Role Directory') }}</h2>
                     <p class="sr-only">
                         {{ __('System roles can be updated, while custom roles can also be removed.') }}
                     </p>
@@ -55,11 +55,11 @@
 
                 <div class="grid grid-cols-1 gap-4 p-4">
                     @forelse ($roles as $role)
-                        <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="space-y-2">
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <h3 class="text-base font-semibold text-slate-950 dark:text-white">{{ $role->name }}</h3>
+                                        <h3 class="text-base font-semibold text-slate-950">{{ $role->name }}</h3>
                                         @if ($role->grantsFullAdminAccess())
                                             <x-admin.status-badge tone="danger">{{ __('Super Admin') }}</x-admin.status-badge>
                                         @endif
@@ -68,15 +68,15 @@
                                         @endif
                                     </div>
 
-                                    <p class="text-xs uppercase tracking-[0.22em] text-slate-400">{{ $role->slug }}</p>
+                                    <p class="text-xs uppercase tracking-[0.22em] text-slate-600">{{ $role->slug }}</p>
 
                                     @if ($role->description)
                                         <p class="sr-only">{{ $role->description }}</p>
                                     @endif
 
-                                    <div class="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                    <div class="flex flex-wrap gap-3 text-xs text-slate-500">
                                         <span>{{ __('Users assigned: :count', ['count' => $role->users_count]) }}</span>
-                                        <span>{{ __('Permissions: :count', ['count' => count($role->permissions ?? $allPermissions)]) }}</span>
+                                        <span>{{ __('Permissions: :count', ['count' => count($role->grantsFullAdminAccess() ? $allPermissions : ($role->permission_keys ?? []))]) }}</span>
                                     </div>
 
                                     @php
@@ -84,17 +84,17 @@
                                     @endphp
 
                                     @if ($previewModules !== [])
-                                        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/50">
-                                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Role can access') }}</p>
+                                        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Role can access') }}</p>
                                             <div class="mt-2 flex flex-wrap gap-2">
                                                 @foreach (array_slice($previewModules, 0, 6) as $module)
-                                                    <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+                                                    <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
                                                         {{ $module['label'] }}
-                                                        <span class="ml-1 text-slate-400">({{ implode(', ', array_slice($module['actions'], 0, 2)) }})</span>
+                                                        <span class="ml-1 text-slate-600">({{ implode(', ', array_slice($module['actions'], 0, 2)) }})</span>
                                                     </span>
                                                 @endforeach
                                                 @if (count($previewModules) > 6)
-                                                    <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+                                                    <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700">
                                                         +{{ count($previewModules) - 6 }}
                                                     </span>
                                                 @endif
@@ -130,10 +130,10 @@
                         <x-admin.empty-state
                             :title="__('No roles found')"
                             :description="__('Create your first checklist role to start assigning menu-based access.')"
-                            class="border-0 bg-transparent p-4 shadow-none dark:bg-transparent"
+                            class="border-0 bg-transparent p-4 shadow-none"
                         >
                             <x-slot name="icon">
-                                <x-heroicon-o-shield-check class="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                                <x-heroicon-o-shield-check class="h-12 w-12 text-slate-300" />
                             </x-slot>
                         </x-admin.empty-state>
                     @endforelse
@@ -141,8 +141,8 @@
             </x-admin.panel>
 
             <x-admin.panel>
-                <div class="border-b border-gray-200/70 px-4 py-3 dark:border-gray-700/70">
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">{{ __('Permission Matrix Preview') }}</h2>
+                <div class="border-b border-gray-200/70 px-4 py-3">
+                    <h2 class="text-lg font-semibold text-slate-950">{{ __('Permission Matrix Preview') }}</h2>
                     <p class="sr-only">
                         {{ __('The checklist below mirrors the real admin modules found in the repository.') }}
                     </p>
@@ -150,9 +150,9 @@
 
                 <div class="space-y-3 p-4">
                     @foreach ($groupedModules as $section)
-                        <section class="rounded-xl border border-gray-100 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                        <section class="rounded-xl border border-gray-100 bg-gray-50 p-4">
                             <div class="mb-4">
-                                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
+                                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                                     {{ __($section['meta']['label']) }}
                                 </h3>
                                 @if (! empty($section['meta']['description']))
@@ -162,9 +162,9 @@
 
                             <div class="space-y-3">
                                 @foreach ($section['modules'] as $module)
-                                    <div class="rounded-xl border border-white/80 bg-white/90 p-3 shadow-sm dark:border-gray-800 dark:bg-gray-950/70">
+                                    <div class="rounded-xl border border-white/80 bg-white p-3 shadow-sm">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <h4 class="font-semibold text-slate-900 dark:text-white">{{ __($module['label']) }}</h4>
+                                            <h4 class="font-semibold text-slate-900">{{ __($module['label']) }}</h4>
                                             @if ($module['enterprise'])
                                                 <x-admin.status-badge tone="warning">{{ __('Enterprise') }}</x-admin.status-badge>
                                             @endif
@@ -173,7 +173,7 @@
 
                                         <div class="mt-2 flex flex-wrap gap-2">
                                             @foreach ($module['actions'] as $action)
-                                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                                                     {{ __($action['label']) }}
                                                 </span>
                                             @endforeach
@@ -221,7 +221,7 @@
                 </div>
 
                 @if ($editingRole?->grantsFullAdminAccess())
-                    <div class="rounded-xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-100">
+                    <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                         <p class="font-semibold">{{ __('Super Admin role stays full access.') }}</p>
                                         <p class="sr-only">
                                             {{ __('The super admin preset always keeps every admin permission enabled.') }}
@@ -230,16 +230,16 @@
                 @else
                     <div class="space-y-4">
                         <div>
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Permission Checklist') }}</h3>
+                            <h3 class="text-sm font-semibold text-slate-900">{{ __('Permission Checklist') }}</h3>
                             <p class="sr-only">
                                 {{ __('Select the menus and actions this role can open or perform.') }}
                             </p>
                         </div>
 
                         @foreach ($groupedModules as $sectionKey => $section)
-                            <section class="rounded-xl border border-gray-100 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                            <section class="rounded-xl border border-gray-100 bg-gray-50 p-4">
                                 <div class="mb-4">
-                                    <h4 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
+                                    <h4 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                                         {{ __($section['meta']['label']) }}
                                     </h4>
                                     @if (! empty($section['meta']['description']))
@@ -249,9 +249,9 @@
 
                                 <div class="space-y-4">
                                     @foreach ($section['modules'] as $moduleKey => $module)
-                                        <div class="rounded-xl border border-white/90 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-950/80">
+                                        <div class="rounded-xl border border-white/90 bg-white p-3 shadow-sm">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <h5 class="font-semibold text-slate-900 dark:text-white">{{ __($module['label']) }}</h5>
+                                                <h5 class="font-semibold text-slate-900">{{ __($module['label']) }}</h5>
                                                 @if ($module['enterprise'])
                                                     <x-admin.status-badge tone="warning">{{ __('Enterprise') }}</x-admin.status-badge>
                                                 @endif
@@ -260,15 +260,15 @@
 
                                             <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
                                                 @foreach ($module['actions'] as $actionKey => $action)
-                                                    <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-3 text-sm text-slate-700 transition hover:border-primary-300 hover:bg-primary-50/50 dark:border-gray-700 dark:bg-gray-900/70 dark:text-slate-200 dark:hover:border-primary-700 dark:hover:bg-primary-950/20">
+                                                    <label class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-slate-700 transition hover:border-primary-300 hover:bg-primary-50">
                                                         <x-forms.checkbox
                                                             wire:model="permissions"
                                                             value="{{ $action['permission'] }}"
                                                             class="mt-0.5"
                                                         />
                                                         <span>
-                                                            <span class="block font-medium text-slate-900 dark:text-white">{{ __($action['label']) }}</span>
-                                                            <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">{{ $action['permission'] }}</span>
+                                                            <span class="block font-medium text-slate-900">{{ __($action['label']) }}</span>
+                                                            <span class="mt-1 block text-xs text-slate-500">{{ $action['permission'] }}</span>
                                                         </span>
                                                     </label>
                                                 @endforeach

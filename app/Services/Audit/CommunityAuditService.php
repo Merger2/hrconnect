@@ -9,11 +9,15 @@ use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Community Edition Audit Service — lightweight stub.
- * Records audit entries to the activity_log table with minimal processing.
+ * Community Edition Audit Service — implementasi nyata audit trail.
  *
- * In the Enterprise edition this would include integrity verification,
- * blockchain anchoring, and read-replica query routing.
+ * Mock-miss audit (2026-08-16): sebelumnya berlabel "lightweight stub" —
+ * klaim itu keliru. Service ini benar-benar menulis entri ke tabel
+ * activity_log (user_id, action, description, ip_address) dan membaca trail
+ * dengan filter; ActivityLog model juga append-only + integrity hash HMAC.
+ * Catatan: fitur enterprise (integrity verification eksternal, anchoring,
+ * read-replica routing) memang tidak ada di edisi ini — bukan berarti
+ * implementasi community-nya palsu.
  */
 class CommunityAuditService implements AuditServiceInterface
 {

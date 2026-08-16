@@ -2,9 +2,9 @@
     'checked' => false,
     'label' => null,
     'size' => 'md',
-    'checkedClass' => 'bg-accent',
-    'uncheckedClass' => 'bg-rule',
-    'focusClass' => 'focus-visible:ring-accent',
+    'checkedClass' => 'bg-primary-600',
+    'uncheckedClass' => 'bg-gray-200',
+    'focusClass' => 'focus-visible:ring-primary-500',
 ])
 
 @php
@@ -36,5 +36,5 @@
         'class' => 'relative inline-flex shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ' . $focusClass . ' ' . $sizeClasses['track'] . ' ' . ($checked ? $checkedClass : $uncheckedClass),
     ]) }}
 >
-    <span class="pointer-events-none inline-block transform rounded-full bg-paper shadow ring-0 transition duration-200 ease-in-out {{ $sizeClasses['thumb'] }} {{ $checked ? $sizeClasses['translate'] : 'translate-x-0' }}"></span>
+    <span class="pointer-events-none inline-block transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $sizeClasses['thumb'] }} {{ $checked ? $sizeClasses['translate'] : 'translate-x-0' }}"></span>
 </button>

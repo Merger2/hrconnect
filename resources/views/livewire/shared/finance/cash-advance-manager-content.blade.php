@@ -23,32 +23,32 @@
     </div>
 
     @if ($activeTab === 'requests')
-    <div id="cash-advance-requests-panel" role="tabpanel" aria-labelledby="cash-advance-requests-tab" tabindex="0" class="hidden overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 md:block">
+    <div id="cash-advance-requests-panel" role="tabpanel" aria-labelledby="cash-advance-requests-tab" tabindex="0" class="hidden overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm md:block">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Employee') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Date / Purpose') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Amount') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Deduction Target') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Status') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Actions') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                <tbody class="divide-y divide-gray-200 bg-white">
                     @forelse($advances as $advance)
                     <tr>
                         <td class="whitespace-nowrap px-4 py-3">
@@ -57,30 +57,30 @@
                                     <img class="h-10 w-10 rounded-full object-cover" src="{{ $advance->user->profile_photo_url }}" alt="{{ $advance->user->name }}">
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $advance->user->name }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="text-sm font-medium text-gray-900">{{ $advance->user->name }}</div>
+                                    <div class="text-xs text-gray-500">
                                         {{ $advance->user->jobTitle->name ?? '-' }} ({{ __('Rank') }} {{ $advance->user->jobTitle->jobLevel->rank ?? '-' }})
                                     </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <td class="px-4 py-3 text-sm text-gray-500">
                             <div>{{ $advance->created_at->translatedFormat('d M Y') }}</div>
                             <div class="sr-only">{{ $advance->purpose }}</div>
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
                             Rp {{ number_format($advance->amount, 0, ',', '.') }}
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                             {{ \Carbon\Carbon::create()->month((int) $advance->payment_month)->translatedFormat('F') }} {{ $advance->payment_year }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3">
                             <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                                @if($advance->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                @elseif($advance->status === 'paid') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                @elseif($advance->status === 'rejected') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                @elseif($advance->status === 'pending_finance') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
-                                @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                @if($advance->status === 'approved') bg-green-100 text-green-800
+                                @elseif($advance->status === 'paid') bg-blue-100 text-blue-800
+                                @elseif($advance->status === 'rejected') bg-red-100 text-red-800
+                                @elseif($advance->status === 'pending_finance') bg-purple-100 text-purple-800
+                                @else bg-yellow-100 text-yellow-800
                                 @endif">
                                 {{ __($advance->status === 'pending' ? 'Pending' : ($advance->status === 'pending_finance' ? 'Pending Finance' : ($advance->status === 'approved' ? 'Approved' : ($advance->status === 'paid' ? 'Paid' : 'Rejected')))) }}
                             </span>
@@ -122,7 +122,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                             {{ __('No cash advance data found.') }}
                         </td>
                     </tr>
@@ -134,21 +134,21 @@
 
     <div id="cash-advance-requests-panel-mobile" role="tabpanel" aria-labelledby="cash-advance-requests-tab" tabindex="0" class="space-y-3 md:hidden">
         @forelse($advances as $advance)
-        <div class="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
             <div class="flex items-start gap-3">
                 <div class="flex min-w-0 flex-1 items-center">
                     <img class="h-10 w-10 rounded-full object-cover" src="{{ $advance->user->profile_photo_url }}" alt="{{ $advance->user->name }}">
                     <div class="ml-3 min-w-0">
-                        <div class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ $advance->user->name }}</div>
-                        <div class="truncate text-xs text-gray-500 dark:text-gray-400">{{ $advance->user->jobTitle->name ?? '-' }}</div>
+                        <div class="truncate text-sm font-medium text-gray-900">{{ $advance->user->name }}</div>
+                        <div class="truncate text-xs text-gray-500">{{ $advance->user->jobTitle->name ?? '-' }}</div>
                     </div>
                 </div>
                 <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                    @if($advance->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                    @elseif($advance->status === 'paid') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                    @elseif($advance->status === 'rejected') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                    @elseif($advance->status === 'pending_finance') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
-                    @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                    @if($advance->status === 'approved') bg-green-100 text-green-800
+                    @elseif($advance->status === 'paid') bg-blue-100 text-blue-800
+                    @elseif($advance->status === 'rejected') bg-red-100 text-red-800
+                    @elseif($advance->status === 'pending_finance') bg-purple-100 text-purple-800
+                    @else bg-yellow-100 text-yellow-800
                     @endif">
                     {{ __($advance->status === 'pending' ? 'Pending' : ($advance->status === 'pending_finance' ? 'Pending Finance' : ($advance->status === 'approved' ? 'Approved' : ($advance->status === 'paid' ? 'Paid' : 'Rejected')))) }}
                 </span>
@@ -156,30 +156,30 @@
 
             <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                 <div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Date') }}</div>
-                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $advance->created_at->translatedFormat('d M Y') }}</div>
+                    <div class="text-xs text-gray-500">{{ __('Date') }}</div>
+                    <div class="mt-1 font-medium text-gray-900">{{ $advance->created_at->translatedFormat('d M Y') }}</div>
                 </div>
                 <div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Amount') }}</div>
-                    <div class="mt-1 font-semibold text-gray-900 dark:text-white">Rp {{ number_format($advance->amount, 0, ',', '.') }}</div>
+                    <div class="text-xs text-gray-500">{{ __('Amount') }}</div>
+                    <div class="mt-1 font-semibold text-gray-900">Rp {{ number_format($advance->amount, 0, ',', '.') }}</div>
                 </div>
                 <div class="col-span-2">
                     <div class="sr-only">{{ __('Purpose') }}</div>
                     <div class="sr-only">{{ $advance->purpose }}</div>
                 </div>
                 <div class="col-span-2">
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Deduction Target') }}</div>
-                    <div class="mt-1 text-sm text-gray-900 dark:text-white">{{ \Carbon\Carbon::create()->month((int) $advance->payment_month)->translatedFormat('F') }} {{ $advance->payment_year }}</div>
+                    <div class="text-xs text-gray-500">{{ __('Deduction Target') }}</div>
+                    <div class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::create()->month((int) $advance->payment_month)->translatedFormat('F') }} {{ $advance->payment_year }}</div>
                 </div>
             </div>
 
             @if($advance->status !== 'pending')
             <div class="mt-3 space-y-1">
                 @if($advance->head_approved_by)
-                <div class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Head') }}: {{ $advance->headApprover->name ?? '-' }}</div>
+                <div class="text-[11px] text-gray-500">{{ __('Head') }}: {{ $advance->headApprover->name ?? '-' }}</div>
                 @endif
                 @if($advance->finance_approved_by || $advance->approved_by)
-                <div class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Finance') }}: {{ $advance->financeApprover->name ?? $advance->approver->name ?? '-' }}</div>
+                <div class="text-[11px] text-gray-500">{{ __('Finance') }}: {{ $advance->financeApprover->name ?? $advance->approver->name ?? '-' }}</div>
                 @endif
             </div>
             @endif
@@ -222,31 +222,31 @@
     </div>
 
     @if($advances->hasPages())
-    <div class="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
         {{ $advances->links() }}
     </div>
     @endif
     @else
-    <div id="cash-advance-users-panel" role="tabpanel" aria-labelledby="cash-advance-users-tab" tabindex="0" class="hidden overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 md:block">
+    <div id="cash-advance-users-panel" role="tabpanel" aria-labelledby="cash-advance-users-tab" tabindex="0" class="hidden overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm md:block">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Employee') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Total Kasbon') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Deduction Breakdown') }}
                         </th>
-                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                             {{ __('Recent History') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                <tbody class="divide-y divide-gray-200 bg-white">
                     @forelse($userGrouped as $user)
                     <tr>
                         <td class="px-4 py-3 align-top">
@@ -255,12 +255,12 @@
                                     <img class="h-10 w-10 rounded-full object-cover" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}">
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->jobTitle->name ?? '-' }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $user->jobTitle->name ?? '-' }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
                             Rp {{ number_format($user->cashAdvances->whereIn('status', ['paid', 'approved', 'pending'])->sum('amount'), 0, ',', '.') }}
                         </td>
                         <td class="px-4 py-3 align-top">
@@ -275,8 +275,8 @@
                             <div class="space-y-2">
                                 @foreach($groupedByMonth as $key => $items)
                                 <div class="flex items-center gap-3 text-sm">
-                                    <span class="w-24 text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y') }}</span>
-                                    <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($items->sum('amount'), 0, ',', '.') }}</span>
+                                    <span class="w-24 text-gray-500">{{ \Carbon\Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y') }}</span>
+                                    <span class="font-medium text-gray-900">Rp {{ number_format($items->sum('amount'), 0, ',', '.') }}</span>
                                 </div>
                                 @endforeach
                             </div>
@@ -284,15 +284,15 @@
                         <td class="px-4 py-3 align-top">
                             <div class="space-y-3">
                                 @foreach($user->cashAdvances->sortByDesc('created_at')->take(3) as $hist)
-                                <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/40">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $hist->created_at->translatedFormat('d M') }} ({{ __('Deduction') }} {{ \Carbon\Carbon::create()->month((int) $hist->payment_month)->translatedFormat('F') }})</div>
-                                    <div class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Rp {{ number_format($hist->amount, 0, ',', '.') }}</div>
+                                <div class="rounded-xl bg-gray-50 p-3">
+                                    <div class="text-xs text-gray-500">{{ $hist->created_at->translatedFormat('d M') }} ({{ __('Deduction') }} {{ \Carbon\Carbon::create()->month((int) $hist->payment_month)->translatedFormat('F') }})</div>
+                                    <div class="mt-1 text-sm font-medium text-gray-900">Rp {{ number_format($hist->amount, 0, ',', '.') }}</div>
                                     <div class="mt-1">
                                         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                                            @if($hist->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                            @elseif($hist->status === 'paid') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                            @elseif($hist->status === 'rejected') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                            @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                            @if($hist->status === 'approved') bg-green-100 text-green-800
+                                            @elseif($hist->status === 'paid') bg-blue-100 text-blue-800
+                                            @elseif($hist->status === 'rejected') bg-red-100 text-red-800
+                                            @else bg-yellow-100 text-yellow-800
                                             @endif">
                                             {{ __($hist->status === 'pending' ? 'Pending' : ($hist->status === 'approved' ? 'Approved' : ($hist->status === 'paid' ? 'Paid' : 'Rejected'))) }}
                                         </span>
@@ -304,7 +304,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
                             {{ __('No kasbon data found.') }}
                         </td>
                     </tr>
@@ -316,18 +316,18 @@
 
     <div id="cash-advance-users-panel-mobile" role="tabpanel" aria-labelledby="cash-advance-users-tab" tabindex="0" class="space-y-3 md:hidden">
         @forelse($userGrouped as $user)
-        <div class="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
             <div class="flex items-center gap-3">
                 <img class="h-10 w-10 rounded-full object-cover" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}">
                 <div class="min-w-0">
-                    <div class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
-                    <div class="truncate text-xs text-gray-500 dark:text-gray-400">{{ $user->jobTitle->name ?? '-' }}</div>
+                    <div class="truncate text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                    <div class="truncate text-xs text-gray-500">{{ $user->jobTitle->name ?? '-' }}</div>
                 </div>
             </div>
 
             <div class="mt-3">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('Total Kasbon') }}</div>
-                <div class="mt-1 text-base font-semibold text-gray-900 dark:text-white">Rp {{ number_format($user->cashAdvances->whereIn('status', ['paid', 'approved', 'pending'])->sum('amount'), 0, ',', '.') }}</div>
+                <div class="text-xs text-gray-500">{{ __('Total Kasbon') }}</div>
+                <div class="mt-1 text-base font-semibold text-gray-900">Rp {{ number_format($user->cashAdvances->whereIn('status', ['paid', 'approved', 'pending'])->sum('amount'), 0, ',', '.') }}</div>
             </div>
 
             @php
@@ -339,30 +339,30 @@
                     ->sortKeysDesc();
             @endphp
             <div class="mt-3">
-                <div class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Deduction Breakdown') }}</div>
+                <div class="mb-2 text-xs text-gray-500">{{ __('Deduction Breakdown') }}</div>
                 <div class="space-y-2">
                     @foreach($groupedByMonth as $key => $items)
-                    <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm dark:bg-gray-900/40">
-                        <span class="text-gray-600 dark:text-gray-300">{{ \Carbon\Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y') }}</span>
-                        <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($items->sum('amount'), 0, ',', '.') }}</span>
+                    <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm">
+                        <span class="text-gray-600">{{ \Carbon\Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y') }}</span>
+                        <span class="font-medium text-gray-900">Rp {{ number_format($items->sum('amount'), 0, ',', '.') }}</span>
                     </div>
                     @endforeach
                 </div>
             </div>
 
             <div class="mt-3">
-                <div class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Recent History') }}</div>
+                <div class="mb-2 text-xs text-gray-500">{{ __('Recent History') }}</div>
                 <div class="space-y-3">
                     @foreach($user->cashAdvances->sortByDesc('created_at')->take(3) as $hist)
-                    <div class="rounded-xl border border-gray-100 p-3 dark:border-gray-700">
-                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $hist->created_at->translatedFormat('d M') }} ({{ __('Deduction') }} {{ \Carbon\Carbon::create()->month((int) $hist->payment_month)->translatedFormat('F') }})</div>
-                        <div class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Rp {{ number_format($hist->amount, 0, ',', '.') }}</div>
+                    <div class="rounded-xl border border-gray-100 p-3">
+                        <div class="text-xs text-gray-500">{{ $hist->created_at->translatedFormat('d M') }} ({{ __('Deduction') }} {{ \Carbon\Carbon::create()->month((int) $hist->payment_month)->translatedFormat('F') }})</div>
+                        <div class="mt-1 text-sm font-medium text-gray-900">Rp {{ number_format($hist->amount, 0, ',', '.') }}</div>
                         <div class="mt-2">
                             <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                                @if($hist->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                @elseif($hist->status === 'paid') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                @elseif($hist->status === 'rejected') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                @else bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                @if($hist->status === 'approved') bg-green-100 text-green-800
+                                @elseif($hist->status === 'paid') bg-blue-100 text-blue-800
+                                @elseif($hist->status === 'rejected') bg-red-100 text-red-800
+                                @else bg-yellow-100 text-yellow-800
                                 @endif">
                                 {{ __($hist->status === 'pending' ? 'Pending' : ($hist->status === 'approved' ? 'Approved' : ($hist->status === 'paid' ? 'Paid' : 'Rejected'))) }}
                             </span>
@@ -384,7 +384,7 @@
     </div>
 
     @if($userGrouped->hasPages())
-    <div class="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
         {{ $userGrouped->links() }}
     </div>
     @endif

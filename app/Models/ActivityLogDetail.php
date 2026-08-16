@@ -5,7 +5,11 @@ namespace App\Models;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperActivityLogDetail
+ */
 class ActivityLogDetail extends Model
 {
     use HasFactory;
@@ -27,7 +31,7 @@ class ActivityLogDetail extends Model
         'metadata' => 'json',
     ];
 
-    public function activityLog()
+    public function activityLog(): BelongsTo
     {
         return $this->belongsTo(ActivityLog::class);
     }

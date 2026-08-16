@@ -334,43 +334,43 @@ class ManagerInbox extends Component
         return match ($this->activeTab) {
             'overtime' => Overtime::query()
                 ->with('user')
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->where('status', 'pending')
                 ->tap($applyInboxFilters)
                 ->latest(),
             'attendance_corrections' => AttendanceCorrection::query()
                 ->with(['user', 'requestedShift'])
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->whereIn('status', [AttendanceCorrection::STATUS_PENDING, AttendanceCorrection::STATUS_PENDING_ADMIN])
                 ->tap($applyInboxFilters)
                 ->latest(),
             'reimbursements' => Reimbursement::query()
                 ->with('user')
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->where('status', 'pending')
                 ->tap($applyInboxFilters)
                 ->latest(),
             'cash_advances' => CashAdvance::query()
                 ->with('user')
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->where('status', 'pending')
                 ->tap($applyInboxFilters)
                 ->latest(),
             'shift_swaps' => ShiftSwapRequest::query()
                 ->with(['user', 'schedule.shift', 'requestedShift'])
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->where('status', ShiftSwapRequest::STATUS_PENDING)
                 ->tap($applyInboxFilters)
                 ->latest(),
             'wfh_requests' => WorkFromHomeRequest::query()
                 ->with('user')
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->where('status', WorkFromHomeRequest::STATUS_PENDING)
                 ->tap($applyInboxFilters)
                 ->latest(),
             'document_requests' => EmployeeDocumentRequest::query()
-                ->with('user')
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->with('employee.user')
+                ->whereHas('employee.user', fn ($query) => $query->managedBy($admin))
                 ->whereIn('status', [EmployeeDocumentRequest::STATUS_PENDING, EmployeeDocumentRequest::STATUS_REQUESTED])
                 ->tap($applyInboxFilters)
                 ->latest(),
@@ -394,13 +394,15 @@ class ManagerInbox extends Component
                 ->latest(),
             'leaves' => Attendance::query()
                 ->with(['user', 'leaveType'])
-                ->whereHas('user', fn (Builder $query) => $query->managedBy($admin))
+                ->whereHas('user', fn ($query) => $query->managedBy($admin))
                 ->where('approval_status', 'pending')
                 ->whereNotNull('leave_type_id')
                 ->tap($applyInboxFilters)
                 ->latest(),
             'custom_forms' => CustomFormSubmission::query()
-                ->with(['template:id,title,category', 'submitter:id,name,email,profile_photo_path,job_title_id,company_id'])
+                // users tidak punya kolom job_title_id (job title di-proxy via
+                // employee.position.jobTitle) — seleksi kolom nyata saja.
+                ->with(['template:id,title,category', 'submitter:id,name,email,profile_photo_path,company_id'])
                 ->whereHas('submitter', fn (Builder $query) => $query->managedBy($admin))
                 ->where('status', CustomFormSubmission::STATUS_SUBMITTED)
                 ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $nested) use ($search): void {

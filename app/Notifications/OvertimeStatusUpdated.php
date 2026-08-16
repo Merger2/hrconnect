@@ -29,7 +29,7 @@ class OvertimeStatusUpdated extends Notification implements ShouldQueue
             ->subject(__('Overtime Request: :status', ['status' => $statusLabel]))
             ->greeting(__('Hello :name,', ['name' => $notifiable->name ?? '']))
             ->line(__('Your overtime request status has been updated.'))
-            ->line(__('Date: :date', ['date' => $this->overtime->date?->format('d M Y') ?? '-']))
+            ->line(__('Date: :date', ['date' => $this->overtime->date->format('d M Y') ?? '-']))
             ->line(__('Status: **:status**', ['status' => $statusLabel]))
             ->action(__('View Details'), url('/overtime'));
     }

@@ -26,7 +26,7 @@ class Leave extends Model
         // B-20: Refund quota when deleting approved leave
         static::deleting(function (Leave $leave) {
             // B-20: Use getOriginal() karena controller mengubah status ke CANCELLED sebelum delete
-            if ($leave->getOriginal('status') === RequestStatus::APPROVED && $leave->leaveType?->deductsFromQuota()) {
+            if ($leave->getOriginal('status') === RequestStatus::APPROVED && $leave->leaveType->deductsFromQuota()) {
                 $balance = LeaveBalance::where('employee_id', $leave->employee_id)
                     ->where('leave_type_id', $leave->leave_type_id)
                     ->where('year', CarbonImmutable::parse($leave->start_date)->year)
@@ -76,7 +76,7 @@ class Leave extends Model
 
     public function validateQuota(): bool
     {
-        if (! $this->leaveType?->deducts_from_quota || ! $this->start_date) {
+        if (! $this->leaveType->deducts_from_quota || ! $this->start_date) {
             return true;
         }
 

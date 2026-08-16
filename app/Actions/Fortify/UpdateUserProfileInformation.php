@@ -2,6 +2,8 @@
 
 namespace App\Actions\Fortify;
 
+use App\Enums\MaritalStatus;
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
@@ -13,28 +15,33 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
     /**
      * Validate and update the given user's profile information.
      *
+     * Note: columns like nip, phone, gender, address, provinsi_kode, division_id,
+     * job_title_id etc. live on the `employees` table (proxied via $user->employee),
+     * so they are persisted there, not on `users`.
+     *
      * @param  array<string, mixed>  $input
      */
     public function update(User $user, array $input): void
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'nip' => ['string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:1024'],
-            'phone' => ['required', 'string', 'max:64', Rule::unique('users')->ignore($user->id)],
-            'gender' => ['required', 'string', 'in:male,female'],
-            'address' => ['required', 'string', 'max:255'],
+            'nip' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:64'],
+            'gender' => ['nullable', 'string', 'in:male,female'],
+            'marital_status' => ['nullable', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
+            'address' => ['nullable', 'string', 'max:255'],
             'provinsi_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
             'kabupaten_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
             'kecamatan_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
             'kelurahan_kode' => ['nullable', 'string', 'max:13', 'exists:wilayah,kode'],
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
-            'education_id' => ['nullable', 'exists:educations,id'],
+            // education_id TIDAK ada di tabel mana pun (phantom — tidak pernah
+            // di-persist); tidak ada rule utk kolom yang tidak ada.
             'division_id' => ['nullable', 'exists:divisions,id'],
             'job_title_id' => ['nullable', 'exists:job_titles,id'],
-            'language' => ['nullable', 'string', 'in:id,en'],
         ])->validateWithBag('updateProfileInformation');
 
         if (isset($input['photo'])) {
@@ -45,33 +52,49 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             return $value === '' ? null : $value;
         }, $input);
 
-        $input['language'] = $input['language'] ?? $user->language ?? 'id';
+        $userData = ['name' => $input['name']];
 
-        if (
-            $input['email'] !== $user->email &&
-            $user instanceof MustVerifyEmail
-        ) {
+        if ($input['email'] !== $user->email && $user instanceof MustVerifyEmail) {
             $this->updateVerifiedUser($user, $input);
         } else {
-            $user->forceFill([
-                'name' => $input['name'],
-                'nip' => $input['nip'],
-                'email' => $input['email'],
-                'phone' => $input['phone'],
-                'gender' => $input['gender'],
-                'address' => $input['address'],
-                'provinsi_kode' => $input['provinsi_kode'],
-                'kabupaten_kode' => $input['kabupaten_kode'],
-                'kecamatan_kode' => $input['kecamatan_kode'],
-                'kelurahan_kode' => $input['kelurahan_kode'],
-                'birth_date' => $input['birth_date'],
-                'birth_place' => $input['birth_place'],
-                'education_id' => $input['education_id'],
-                'division_id' => $input['division_id'],
-                'job_title_id' => $input['job_title_id'],
-                'language' => $input['language'],
-            ])->save();
+            $user->forceFill(['name' => $input['name'], 'email' => $input['email']])->save();
         }
+
+        $this->syncEmployeeProfile($user, $input);
+    }
+
+    /**
+     * Persist employee-owned profile columns on the `employees` table.
+     */
+    protected function syncEmployeeProfile(User $user, array $input): void
+    {
+        $employee = $user->employee;
+
+        if (! $employee) {
+            // Users without an employee record (e.g. admin-only accounts) cannot
+            // persist employee columns — skip silently instead of failing.
+            return;
+        }
+
+        // State profil sekarang di-mount LENGKAP dari employees (lihat
+        // UpdateProfileInformationForm::mount) — null di sini berarti user
+        // benar-benar menghapus/reset field, jadi tetap ditulis. Jangan
+        // array_filter: itu akan mengunci nilai lama dan membatalkan reset.
+        // marital_status fallback 'single' karena kolom NOT NULL (default).
+        $employee->update([
+            'nip' => $input['nip'] ?? null,
+            'phone' => $input['phone'] ?? null,
+            'gender' => isset($input['gender']) ? ($input['gender'] === 'male' ? 'L' : 'P') : null,
+            'marital_status' => $input['marital_status'] ?? 'single',
+            'address_detail' => $input['address'] ?? null,
+            'provinsi_kode' => $input['provinsi_kode'] ?? null,
+            'kabupaten_kode' => $input['kabupaten_kode'] ?? null,
+            'kecamatan_kode' => $input['kecamatan_kode'] ?? null,
+            'kelurahan_kode' => $input['kelurahan_kode'] ?? null,
+            'birth_date' => $input['birth_date'] ?? null,
+            'birth_place' => $input['birth_place'] ?? null,
+            'division_id' => $input['division_id'] ?? null,
+        ]);
     }
 
     /**
@@ -83,22 +106,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
     {
         $user->forceFill([
             'name' => $input['name'],
-            'nip' => $input['nip'],
             'email' => $input['email'],
             'email_verified_at' => null,
-            'phone' => $input['phone'],
-            'gender' => $input['gender'],
-            'address' => $input['address'],
-            'provinsi_kode' => $input['provinsi_kode'],
-            'kabupaten_kode' => $input['kabupaten_kode'],
-            'kecamatan_kode' => $input['kecamatan_kode'],
-            'kelurahan_kode' => $input['kelurahan_kode'],
-            'birth_date' => $input['birth_date'],
-            'birth_place' => $input['birth_place'],
-            'education_id' => $input['education_id'],
-            'division_id' => $input['division_id'],
-            'job_title_id' => $input['job_title_id'],
-            'language' => $input['language'],
         ])->save();
 
         $user->sendEmailVerificationNotification();

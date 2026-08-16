@@ -26,7 +26,10 @@ class ProcessAttendanceReportExportRun implements ShouldQueue
     public function handle(): void
     {
         $run = ImportExportRun::query()->findOrFail($this->runId);
-        $meta = $run->meta ?? [];
+        // meta ber-cast 'array' (ImportExportRun::casts) — anotasi eksplisit utk
+        // PHPStan (tanpa IdeHelper mixin, larastan tidak melihat casts()).
+        /** @var array<string, mixed> $meta */
+        $meta = $run->meta;
         $format = ($meta['format'] ?? 'pdf') === 'excel' ? 'excel' : 'pdf';
 
         [$data, $rowCount] = $this->reportData($run, $meta);
@@ -61,6 +64,9 @@ class ProcessAttendanceReportExportRun implements ShouldQueue
 
     private function reportData(ImportExportRun $run, array $meta): array
     {
+        // requestedBy = relasi belongsTo ImportExportRun (Model|null tanpa
+        // IdeHelper mixin) — anotasi eksplisit utk PHPStan.
+        /** @var User|null $requester */
         $requester = $run->requestedBy ?: User::query()->where('group', 'superadmin')->first();
         $carbon = new Carbon;
         $start = null;
@@ -100,7 +106,7 @@ class ProcessAttendanceReportExportRun implements ShouldQueue
             ->when($requester, fn (Builder $query) => $query->managedBy($requester))
             ->when($meta['division'] ?? null, fn (Builder $query) => $query->where('division_id', $meta['division']))
             ->when($jobTitleFilter, fn (Builder $query) => $query->where('job_title_id', $jobTitleFilter))
-            ->with(['division', 'jobTitle'])
+            ->with(['employee.division', 'employee.position'])
             ->orderBy('name')
             ->get();
 
@@ -125,7 +131,7 @@ class ProcessAttendanceReportExportRun implements ShouldQueue
 
         return [[
             'employees' => $employees,
-            'dates' => $dates ?? [],
+            'dates' => $dates,
             'date' => $meta['date'] ?? null,
             'month' => $meta['month'] ?? null,
             'week' => $meta['week'] ?? null,

@@ -9,7 +9,7 @@
         <div class="mb-3 flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
             <div class="min-w-0 max-w-2xl">
                 @if ($title)
-                    <h2 class="text-sm font-semibold text-slate-900 dark:text-white">{{ $title }}</h2>
+                    <h2 class="text-sm font-semibold text-slate-900">{{ $title }}</h2>
                 @endif
 
                 @if ($description)

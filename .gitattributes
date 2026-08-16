@@ -9,3 +9,7 @@
 CHANGELOG.md export-ignore
 README.md export-ignore
 .github/workflows/browser-tests.yml export-ignore
+
+# Deploy: exclude dev-only tooling from production archives (git archive / zip-download / rsync --exclude)
+# Catatan: composer ci:check (dev/CI only) tetap jalan karena scripts/ ada di repo git, bukan di archive deploy.
+scripts/ export-ignore

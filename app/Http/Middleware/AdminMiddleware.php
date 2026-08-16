@@ -32,6 +32,17 @@ class AdminMiddleware
 
         Log::info('AdminMiddleware checked request.', $context);
 
+        if ($user?->isAdmin) {
+            $response = $next($request);
+
+            Log::info('AdminMiddleware completed request.', [
+                ...$context,
+                'response_status' => $response->getStatusCode(),
+            ]);
+
+            return $response;
+        }
+
         if ($user?->can('accessAdminPanel')) {
             $response = $next($request);
 
@@ -46,6 +57,7 @@ class AdminMiddleware
         // Check for admin-like permissions
         $adminPermissions = [
             'accessAdminPanel',
+            'view_admin_dashboard',
             'manage_employees',
             'view_attendances',
             'view_payrolls',

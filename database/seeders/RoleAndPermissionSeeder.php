@@ -9,22 +9,26 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
- * RoleAndPermissionSeeder — 5 roles × 67 permissions sesuai SRS §3.2.2.
+ * RoleAndPermissionSeeder — 5 roles × 94 permissions (jumlah case PermissionEnum).
  *
  * Idempotent: aman dijalankan berkali-kali (firstOrCreate + syncPermissions).
  *
- * 5 Roles:
- * - super-admin : all 67 permissions (executive override)
- * - hr-manager  : view all + manage HR + approve L2 leaves/OT + KB + schedules + checklists
- * - admin       : full HR + admin panel access + system settings + RBAC
- * - finance     : payroll + tax/BPJS + approve L2 reimbursement + financial reports
+ * 5 Roles (selaras struktur PT DCMS):
+ * - super-admin : semua permission (executive override) — Owner & IT Support
+ * - admin       : full HR + admin panel + system settings + RBAC + payroll — HRD
+ * - finance     : payroll + tax/BPJS + approve L2 reimbursement — staf Finance
  * - manager     : approve L1 + view team data + shift swap + overtime + HR checklists
  * - employee    : view diri sendiri + dashboard
  *
  * Default guard: 'web' (sesuai Spatie Permission default).
  *
- * Verifikasi: setelah seed, super-admin harus punya 67 permission,
+ * Verifikasi: setelah seed, super-admin harus punya 94 permission,
  * employee minimal punya `view_dashboard`.
+ *
+ * ⚠️ Migrasi dari role hr-manager (sebelum 2026-08-05): baris role `hr-manager`
+ * lama di DB produksi TIDAK dihapus otomatis (firstOrCreate). Reassign user lama
+ * yang ber-role hr-manager ke `admin`, lalu hapus role hr-manager dari tabel roles
+ * (manual/sekali jalan) supaya RBAC UI bersih.
  */
 class RoleAndPermissionSeeder extends Seeder
 {
@@ -42,9 +46,8 @@ class RoleAndPermissionSeeder extends Seeder
         }
 
         // Step 2: Buat & sinkronkan permission per role
-        // Role aktual di DB: super-admin, hr (HRD), manager, employee, finance
+        // Role aktual di DB: super-admin, admin (HRD), finance, manager, employee
         $this->syncRole('super-admin', $this->superAdminPermissions());
-        $this->syncRole('hr-manager', $this->hrPermissions());
         $this->syncRole('finance', $this->financePermissions());
         $this->syncRole('admin', $this->adminPermissions());
         $this->syncRole('manager', $this->managerPermissions());
@@ -72,6 +75,11 @@ class RoleAndPermissionSeeder extends Seeder
             array_map(fn (PermissionEnum $p) => $p->value, $permissions)
         );
 
+        // Also update the permission_keys JSON column used by HasRolePermissions trait.
+        // This is the ACTUAL permission check mechanism — NOT the Spatie pivot table.
+        $role->permission_keys = array_map(fn (PermissionEnum $p) => $p->value, $permissions);
+        $role->save();
+
         return $role;
     }
 
@@ -84,77 +92,8 @@ class RoleAndPermissionSeeder extends Seeder
         return PermissionEnum::cases();
     }
 
-    private function hrPermissions(): array
-    {
-        return [
-            PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
-            PermissionEnum::VIEW_ADMIN_DOCUMENT_REQUESTS,
-            // View master data (CRUD)
-            PermissionEnum::VIEW_BRANCHES,
-            PermissionEnum::VIEW_DIVISIONS,
-            PermissionEnum::MANAGE_DIVISIONS,
-            PermissionEnum::VIEW_POSITIONS,
-            PermissionEnum::MANAGE_JOB_TITLES,
-            PermissionEnum::MANAGE_EDUCATIONS,
-            PermissionEnum::MANAGE_SHIFTS,
-            PermissionEnum::MANAGE_LEAVE_TYPES,
-            PermissionEnum::MANAGE_LEAVE_ENTITLEMENTS,
-            PermissionEnum::VIEW_ADMIN_ACCOUNTS,
-            PermissionEnum::VIEW_COMPANIES,
-            PermissionEnum::MANAGE_COMPANIES,
-            // Employee management
-            PermissionEnum::VIEW_EMPLOYEES,
-            PermissionEnum::MANAGE_EMPLOYEES,
-            // Attendance
-            PermissionEnum::VIEW_ATTENDANCES,
-            PermissionEnum::MANAGE_ATTENDANCES,
-            PermissionEnum::MANAGE_SCHEDULES,
-            PermissionEnum::MANAGE_HOLIDAYS,
-            PermissionEnum::MANAGE_SHIFT_SWAP_APPROVALS,
-            // Leave
-            PermissionEnum::VIEW_LEAVES,
-            PermissionEnum::MANAGE_LEAVE_APPROVALS,
-            PermissionEnum::APPROVE_LEAVES_L2,
-            // Overtime
-            PermissionEnum::VIEW_OVERTIMES,
-            PermissionEnum::MANAGE_OVERTIME,
-            PermissionEnum::APPROVE_OVERTIMES_L2,
-            // Reimbursement (view only — Finance yang approve L2)
-            PermissionEnum::VIEW_REIMBURSEMENTS,
-            // WFA
-            PermissionEnum::APPROVE_WFA,
-            PermissionEnum::VIEW_WFA_PENDING,
-            // Loan/Asset (view + manage)
-            PermissionEnum::VIEW_LOANS,
-            PermissionEnum::MANAGE_LOANS,
-            PermissionEnum::VIEW_ASSETS,
-            PermissionEnum::MANAGE_ASSETS,
-            // Announcement + HR Checklists
-            PermissionEnum::MANAGE_ANNOUNCEMENTS,
-            PermissionEnum::VIEW_HR_CHECKLISTS,
-            PermissionEnum::MANAGE_HR_CHECKLISTS,
-            // Operations
-            PermissionEnum::VIEW_OPERATIONS_WORKSPACE,
-            PermissionEnum::VIEW_COLLABORATION_WORKSPACE,
-            PermissionEnum::VIEW_CUSTOM_FORMS,
-            // Reports
-            PermissionEnum::VIEW_OPERATIONAL_REPORTS,
-            // Settings
-            PermissionEnum::VIEW_ADMIN_SETTINGS,
-            // Notifications
-            PermissionEnum::MANAGE_ADMIN_NOTIFICATIONS,
-            // Audit
-            PermissionEnum::VIEW_ACTIVITY_LOGS,
-            PermissionEnum::VIEW_AUDIT_LOGS,
-            // KnowledgeBase
-            PermissionEnum::VIEW_KNOWLEDGEBASE,
-            PermissionEnum::MANAGE_KNOWLEDGEBASE,
-        ];
-    }
-
     /**
-     * Admin: full HR + admin panel access (non-superadmin).
+     * Admin: full HR + admin panel access (non-superadmin) — dipakai HRD.
      */
     private function adminPermissions(): array
     {
@@ -163,7 +102,6 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::ACCESS_ADMIN_PANEL,
             PermissionEnum::VIEW_ADMIN_DASHBOARD,
             PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
             PermissionEnum::VIEW_ADMIN_DOCUMENT_REQUESTS,
             // Master data (full CRUD)
             PermissionEnum::VIEW_BRANCHES,
@@ -199,6 +137,13 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::VIEW_REIMBURSEMENTS,
             PermissionEnum::APPROVE_WFA,
             PermissionEnum::VIEW_WFA_PENDING,
+            // Payroll (keputusan: HRD sebagai admin ikut proses payroll)
+            PermissionEnum::VIEW_PAYSLIP,
+            PermissionEnum::DOWNLOAD_PAYSLIP,
+            PermissionEnum::PROCESS_PAYROLL,
+            PermissionEnum::VIEW_PAYROLLS,
+            PermissionEnum::MANAGE_TAX_CONFIGS,
+            PermissionEnum::MANAGE_BPJS_CONFIGS,
             // Loan/Asset
             PermissionEnum::VIEW_LOANS,
             PermissionEnum::MANAGE_LOANS,
@@ -217,7 +162,6 @@ class RoleAndPermissionSeeder extends Seeder
             // Settings (full system access)
             PermissionEnum::VIEW_ADMIN_SETTINGS,
             PermissionEnum::MANAGE_SYSTEM_SETTINGS,
-            PermissionEnum::MANAGE_ENTERPRISE_LICENSE,
             // System management
             PermissionEnum::MANAGE_USER_SESSIONS,
             PermissionEnum::MANAGE_API_INTEGRATIONS,
@@ -235,14 +179,12 @@ class RoleAndPermissionSeeder extends Seeder
 
     /**
      * Finance: payroll processing + tax/BPJS configs + approve L2 reimbursement.
-     * View employee untuk konteks payroll.
-     * NOTE: finance role tidak dipakai di DB — permission ini bisa dipakai kalau nanti ada role finance.
+     * View employee untuk konteks payroll. Dipakai staf Finance PT DCMS.
      */
     private function financePermissions(): array
     {
         return [
             PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
             // View context
             PermissionEnum::VIEW_EMPLOYEES,
             PermissionEnum::VIEW_ATTENDANCES,
@@ -279,7 +221,6 @@ class RoleAndPermissionSeeder extends Seeder
     {
         return [
             PermissionEnum::VIEW_DASHBOARD,
-            PermissionEnum::VIEW_COMMAND_CENTER,
             PermissionEnum::VIEW_EMPLOYEES,
             PermissionEnum::VIEW_KNOWLEDGEBASE,
             PermissionEnum::VIEW_HR_CHECKLISTS,
