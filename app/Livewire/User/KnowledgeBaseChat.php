@@ -38,7 +38,7 @@ class KnowledgeBaseChat extends Component
 
         $this->messages[] = [
             'role' => 'assistant',
-            'text' => __('Halo! Saya asisten AI perusahaan. Tanyakan apa saja seputar kebijakan dan prosedur kepegawaian.'),
+            'text' => __('Halo! Saya asisten AI PT Daya Cipta Mandiri Solusi. Tanyakan apa saja seputar kebijakan dan prosedur kepegawaian.'),
             'sources' => [],
             'is_welcome' => true,
         ];
@@ -205,7 +205,7 @@ class KnowledgeBaseChat extends Component
         $this->messages = [
             [
                 'role' => 'assistant',
-                'text' => __('Halo! Saya asisten AI perusahaan. Tanyakan apa saja seputar kebijakan dan prosedur kepegawaian.'),
+                'text' => __('Halo! Saya asisten AI PT Daya Cipta Mandiri Solusi. Tanyakan apa saja seputar kebijakan dan prosedur kepegawaian.'),
                 'sources' => [],
                 'is_welcome' => true,
             ],

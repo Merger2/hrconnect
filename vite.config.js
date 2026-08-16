@@ -64,9 +64,9 @@ export default defineConfig({
             registerType: 'autoUpdate',
             includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'offline.html'],
             manifest: {
-                name: 'PT Daya Cipta Mandiri Solusi',
-                short_name: 'HRIS',
-                description: 'HRIS PT Daya Cipta Mandiri Solusi — Attendance, Leave, Payroll, Knowledge Base',
+                name: 'HRConnect',
+                short_name: 'HRConnect',
+                description: 'HRIS HRConnect — Attendance, Leave, Payroll, Knowledge Base',
                 theme_color: '#0a0a0a',
                 background_color: '#0a0a0a',
                 display: 'standalone',

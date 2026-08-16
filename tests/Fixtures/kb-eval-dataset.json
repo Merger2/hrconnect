@@ -1,9 +1,9 @@
 {
     "meta": {
         "title": "KB Eval Dataset — RAG",
-        "description": "Dataset evaluasi RAG Knowledge Base dari corpus KnowledgeBaseSeeder (31 entries, 10 kategori). Setiap kasus positif: coverage kata kunci >= 80% + citation >= 1 sumber yang diharapkan. Kasus negatif: sistem harus menolak (tanpa jawaban palsu). Subset natural (kb-25..kb-30) = pertanyaan kalimat penuh untuk menguji retrieval semantik (vector search online); di-skip pada mode offline (deterministik).",
+        "description": "Dataset evaluasi RAG Knowledge Base dari corpus KnowledgeBaseSeeder (36 entries, 10 kategori). Setiap kasus positif: coverage kata kunci >= 80% + citation >= 1 sumber yang diharapkan. Kasus negatif: sistem harus menolak (tanpa jawaban palsu). Subset natural (kb-25..kb-30) = pertanyaan kalimat penuh untuk menguji retrieval semantik (vector search online); di-skip pada mode offline (deterministik).",
         "created": "2026-08-05",
-        "corpus": "KnowledgeBaseSeeder (31 entries, 10 kategori)",
+        "corpus": "KnowledgeBaseSeeder (36 entries, 10 kategori)",
         "gate": "AGENTS.md hard gate / PRD §6 — eval >= 20 Q&A, kualitas >= 90% relevan, citation wajib",
         "quality_threshold": 0.9,
         "coverage_threshold": 0.8,

@@ -111,7 +111,11 @@ class EmbeddingService
         }
 
         try {
-            $embedding = $this->embed($kb->content);
+            // Judul ikut di-embed (title + content) — judul adalah sinyal
+            // relevansi kuat (mis. "Profil Perusahaan PT Daya Cipta Mandiri
+            // Solusi", "SOP Pengajuan Cuti"); tanpanya vektor hanya mewakili
+            // isi dokumen dan pertanyaan yang menyebut topik judul sulit match.
+            $embedding = $this->embed($kb->title."\n\n".$kb->content);
             $vectorString = $this->formatVector($embedding);
 
             DB::statement(

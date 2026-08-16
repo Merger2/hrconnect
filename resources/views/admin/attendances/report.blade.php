@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }} | {{ $date ?? ($week ?? $month) }}</title>
+    <title>{{ config('app.name', 'HRConnect') }} | {{ $date ?? ($week ?? $month) }}</title>
     <style>
         /* Payslip Header Styles */
         .header-table {

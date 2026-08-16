@@ -80,6 +80,11 @@ class KnowledgeBaseSeeder extends Seeder
                 'title' => 'Data Pribadi Karyawan',
                 'content' => 'Karyawan wajib memperbarui data pribadi secara berkala melalui menu Profile. Data yang harus dijaga akurasinya meliputi: alamat domisili, nomor telepon, status pernikahan, jumlah tanggungan (untuk perhitungan PPh 21), dan data keluarga. Perubahan status pernikahan dan kelahiran anak harus dilaporkan maksimal 30 hari.',
             ],
+            [
+                'category_id' => $catKepegawaian,
+                'title' => 'Profil Perusahaan PT Daya Cipta Mandiri Solusi',
+                'content' => 'Berikut profil perusahaan tempat Anda bekerja. Nama perusahaan: PT Daya Cipta Mandiri Solusi. Alamat kantor / lokasi kantor pusat: Jl. Pegambiran No. 292B, RT.15/RW.8, Rawamangun, Kec. Pulo Gadung, Kota Jakarta Timur, DKI Jakarta 13220. Perusahaan ini bergerak sebagai penyedia solusi teknologi informasi (software house) dengan bidang usaha utama pengembangan perangkat lunak, integrasi sistem, dan layanan teknologi informasi untuk mendukung operasional bisnis klien. Seluruh kebijakan kepegawaian yang berlaku bagi karyawan mengacu pada peraturan perusahaan dan ketentuan perundang-undangan ketenagakerjaan Indonesia.',
+            ],
             // ── Absensi ──────────────────────────────────────
             [
                 'category_id' => $catAbsensi,
@@ -215,6 +220,32 @@ class KnowledgeBaseSeeder extends Seeder
                 'category_id' => $catTeknis,
                 'title' => 'Aplikasi Mobile Karyawan',
                 'content' => 'Aplikasi ini tersedia sebagai PWA (Progressive Web App) yang dapat diinstal di perangkat Android dan iOS. Buka aplikasi melalui browser Chrome/Safari, lalu pilih "Install" atau "Add to Home Screen". Fitur yang tersedia: absensi Face ID, GPS tracking, pengajuan cuti/lembur, payslip, notifikasi, dan asisten AI tanya-jawab.',
+            ],
+            // ── SOP (Standard Operating Procedure) PT Daya Cipta Mandiri Solusi ──
+            [
+                'category_id' => $catAbsensi,
+                'title' => 'SOP Absensi Karyawan',
+                'content' => 'Prosedur standar (SOP) absensi karyawan PT Daya Cipta Mandiri Solusi: 1) Pastikan wajah sudah terdaftar di menu Face Enrollment. 2) Buka aplikasi pada perangkat masing-masing. 3) Lakukan check in dengan verifikasi wajah (Face ID) saat tiba di lokasi kantor — absensi tanpa PIN fallback. 4) Pastikan GPS aktif karena geolokasi memverifikasi Anda berada dalam radius 50 meter dari kantor. 5) Lakukan check out dengan verifikasi wajah yang sama saat pulang. 6) Jika terjadi kendala teknis, ajukan koreksi absensi melalui menu Attendance Correction maksimal 1x24 jam.',
+            ],
+            [
+                'category_id' => $catCuti,
+                'title' => 'SOP Pengajuan Cuti',
+                'content' => 'Prosedur standar pengajuan cuti di PT Daya Cipta Mandiri Solusi: 1) Buka menu Leave Request. 2) Pilih jenis cuti (tahunan, sakit, khusus, darurat, atau izin). 3) Isi tanggal mulai dan selesai, alasan, serta lampiran pendukung (jika diperlukan). 4) Cuti tahunan diajukan minimal 3 hari sebelumnya; cuti sakit dapat diajukan di hari yang sama dengan melampirkan surat dokter. 5) Kirim pengajuan — akan diverifikasi atasan langsung melalui menu Approvals. 6) Pantau status pengajuan; cuti dianggap sah setelah disetujui.',
+            ],
+            [
+                'category_id' => $catLembur,
+                'title' => 'SOP Pengajuan Lembur',
+                'content' => 'Prosedur standar pengajuan lembur di PT Daya Cipta Mandiri Solusi: 1) Buka menu Overtime. 2) Isi tanggal, jam mulai, jam selesai, dan alasan lembur. 3) Ajukan sebelum atau pada hari yang sama sebelum jam kerja berakhir. 4) Lembur harus disetujui atasan langsung agar dibayarkan. 5) Setelah disetujui, Finance memproses kompensasi sesuai ketentuan (jam pertama 1.5x upah, jam berikutnya 2x upah). 6) Lembur tanpa persetujuan tidak akan dibayarkan.',
+            ],
+            [
+                'category_id' => $catReimbursement,
+                'title' => 'SOP Klaim Reimbursement',
+                'content' => 'Prosedur standar klaim reimbursement di PT Daya Cipta Mandiri Solusi: 1) Buka menu Reimbursement Request. 2) Pilih jenis klaim (pengobatan, perjalanan dinas, pendidikan/pelatihan, operasional). 3) Isi jumlah dan deskripsi, lalu unggah bukti pembayaran (struk/kwitansi/faktur) yang sah. 4) Klaim diajukan maksimal 30 hari setelah tanggal pengeluaran. 5) Klaim diverifikasi atasan langsung, lalu diproses Finance. 6) Pembayaran masuk ke slip gaji bulan berikutnya.',
+            ],
+            [
+                'category_id' => $catKasbon,
+                'title' => 'SOP Pengajuan Kasbon',
+                'content' => 'Prosedur standar pengajuan kasbon di PT Daya Cipta Mandiri Solusi: 1) Buka menu Cash Advance. 2) Isi jumlah yang diajukan (maksimal 50% dari gaji pokok), alasan, dan tenor pembayaran (maksimal 6 bulan). 3) Kirim pengajuan — melalui approval atasan langsung → Finance → Payroll. 4) Kasbon yang disetujui dipotong dari gaji setiap bulan sesuai tenor. 5) Pastikan total angsuran tidak melebihi 30% dari gaji bulanan.',
             ],
         ];
 

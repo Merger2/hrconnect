@@ -15,7 +15,7 @@
                     <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-md">
                         <x-app-logo-icon class="size-8 fill-current text-brand-700" />
                     </div>
-                    <h1 class="text-3xl font-bold text-white">{{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }}</h1>
+                    <h1 class="text-3xl font-bold text-white">{{ config('app.name', 'HRConnect') }}</h1>
                 </div>
 
                 <!-- Main headline -->
@@ -69,7 +69,7 @@
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-module-hr text-white">
                         <x-app-logo-icon class="size-5 fill-current" />
                     </div>
-                    <h1 class="text-xl font-bold text-slate-900">{{ config('app.name', 'PT Daya Cipta Mandiri Solusi') }}</h1>
+                    <h1 class="text-xl font-bold text-slate-900">{{ config('app.name', 'HRConnect') }}</h1>
                 </div>
 
                 <div class="mb-8">

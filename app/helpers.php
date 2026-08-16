@@ -38,7 +38,7 @@ if (! function_exists('calculate_distance')) {
 if (! function_exists('app_name')) {
     function app_name(): string
     {
-        return config('app.name', 'PT Daya Cipta Mandiri Solusi');
+        return config('app.name', 'HRConnect');
     }
 }
 

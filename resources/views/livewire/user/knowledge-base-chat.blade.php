@@ -1,6 +1,6 @@
 <div class="user-page-shell" x-data="kbChat()" x-init="init()">
     <div class="user-page-container user-page-container--wide">
-        <section aria-labelledby="kb-chat-title" class="user-page-surface relative flex flex-col" style="min-height: calc(100vh - 10rem);">
+        <section aria-labelledby="kb-chat-title" class="user-page-surface kb-chat-surface relative flex flex-col">
             <x-user.page-header
                 :back-href="route('home')"
                 :title="__('Knowledge Base Chat')"
@@ -86,10 +86,10 @@
                             <p class="mb-2 text-xs font-medium text-slate-500">{{ __('Pertanyaan cepat') }}</p>
                             <div class="flex flex-wrap gap-2">
                                 @foreach([
+                                    __('Apa profil perusahaan?'),
                                     __('Apa itu cuti tahunan?'),
                                     __('Bagaimana cara absensi?'),
                                     __('Kapan jadwal penggajian?'),
-                                    __('Bagaimana mengajukan lembur?'),
                                 ] as $suggestion)
                                     <button type="button"
                                         @click="askSuggestion(@js($suggestion))"
