@@ -314,6 +314,37 @@ test('backup restore drill command fails cleanly when the drill cannot run', fun
         ->assertExitCode(1);
 });
 
+test('strip extension statements removes DROP/CREATE/COMMENT ON EXTENSION from dumps', function () {
+    $service = app(SystemBackupService::class);
+
+    $sql = <<<'SQL'
+-- Name: vector; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
+
+--
+-- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
+
+DROP EXTENSION IF EXISTS pg_trgm;
+
+CREATE TABLE users (id bigint);
+SQL;
+
+    $stripped = $service->stripExtensionStatements($sql);
+
+    expect($stripped)
+        ->not->toContain('CREATE EXTENSION')
+        ->not->toContain('DROP EXTENSION')
+        ->not->toContain('COMMENT ON EXTENSION')
+        ->not->toContain('Type: EXTENSION')
+        ->toContain('CREATE TABLE users')
+        ->toContain('bigint');
+});
+
 test('database backup drill verification accepts only signed application backups', function () {
     $service = app(SystemBackupService::class);
 

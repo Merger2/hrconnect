@@ -214,6 +214,48 @@ class SystemBackupService
     }
 
     /**
+     * Remove PostgreSQL extension management statements (DROP/CREATE/COMMENT
+     * ON EXTENSION) from a dump. Extensions (pgcrypto, vector, pg_trgm) are
+     * installed once at the server level (template1) by the superuser, so a
+     * non-superuser restore role (DB_DRILL_USERNAME, checklist 1.9) cannot
+     * re-run them — and does not need to. Keeps only the data/schema replay.
+     */
+    public function stripExtensionStatements(string $sql): string
+    {
+        $lines = explode("\n", $sql);
+        $keep = [];
+        $skipBlock = false;
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            // Lewati blok komentar pg_dump untuk tipe EXTENSION ("-- Name: vector; Type: EXTENSION").
+            if (str_starts_with($trimmed, '--') && str_contains($trimmed, 'Type: EXTENSION')) {
+                $skipBlock = true;
+
+                continue;
+            }
+
+            if ($skipBlock) {
+                // Akhiri blok saat baris kosong (pg_dump memberi satu baris kosong setelah blok).
+                if ($trimmed === '') {
+                    $skipBlock = false;
+                }
+
+                continue;
+            }
+
+            if (preg_match('/^(DROP|CREATE|COMMENT ON)\s+EXTENSION(?:\s+IF EXISTS)?\s+/i', $trimmed)) {
+                continue;
+            }
+
+            $keep[] = $line;
+        }
+
+        return implode("\n", $keep);
+    }
+
+    /**
      * Verify the HMAC-SHA256 signature appended by signDatabaseBackup() and
      * return the SQL content without the signature line. Single source of
      * truth for the SystemMaintenance restore flow and the restore drill.
@@ -284,7 +326,11 @@ class SystemBackupService
 
         try {
             File::ensureDirectoryExists($tmpDir, 0700);
-            file_put_contents($sqlFile, $sql);
+            // Extension (pgcrypto/vector/pg_trgm) di-install SEKALI di level
+            // server (template1) oleh superuser — statement DROP/CREATE/COMMENT
+            // EXTENSION butuh superuser dan akan gagal dipakai role drill
+            // (non-superuser, checklist 1.9). Strip dari dump saat restore.
+            file_put_contents($sqlFile, $this->stripExtensionStatements($sql));
             // Entri pgpass untuk maintenance DB (CREATE/DROP) dan temp DB (restore).
             file_put_contents(
                 $pgpassFile,

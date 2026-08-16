@@ -359,7 +359,9 @@ class SystemMaintenance extends Component
 
         try {
             File::ensureDirectoryExists($tmpDir, 0700);
-            file_put_contents($sqlFile, $sql);
+            // Strip statement EXTENSION (butuh superuser; sudah ter-install di
+            // server) — konsisten dengan drill restore SystemBackupService.
+            file_put_contents($sqlFile, app(SystemBackupService::class)->stripExtensionStatements($sql));
             file_put_contents($pgpassFile, "{$dbHost}:{$dbPort}:{$dbName}:{$dbUser}:{$dbPass}");
             chmod($pgpassFile, 0600);
 
