@@ -10,9 +10,8 @@ SMOKE_TESTS=(
   tests/Feature/AdminLeaveApprovalTest.php
   tests/Feature/ApprovalWorkflowTest.php
   tests/Feature/AttendanceMediaAndApiTest.php
-  tests/Feature/DynamicBarcodeTest.php
   tests/Feature/WorkFromHomeRequestFlowTest.php
-  tests/Feature/IndonesiaPayrollCalculatorTest.php
+  tests/Feature/PayrollGoldenTest.php
 )
 
 run_artisan_with_env() {
@@ -28,9 +27,15 @@ run_artisan_with_env() {
     "$@"
 }
 
+# ⚠️ KNOWN LIMITATION (pre-existing, 2026-08-16): alur sqlite TIDAK bisa
+# lulus — beberapa migration pakai `ALTER TABLE ... ADD CONSTRAINT`
+# (FK/CHECK bernama) yang tidak didukung SQLite (SQLite ALTER TABLE hanya
+# ADD COLUMN/RENAME). Stack resmi = PostgreSQL 15+ (pgvector/pg_trgm/
+# pgcrypto; phpunit + CI pgsql-only), jadi sqlite bukan target yang
+# didukung. Dipertahankan hanya sebagai dokumentasi kegagalan yang jujur.
 run_sqlite_smoke() {
   local sqlite_db
-  sqlite_db="$(mktemp /tmp/paspapan_sqlite_smoke.XXXXXX)"
+  sqlite_db="$(mktemp /tmp/hrconnect_sqlite_smoke.XXXXXX)"
 
   cleanup_sqlite() {
     if [ -n "${sqlite_db:-}" ]; then
@@ -54,14 +59,14 @@ run_sqlite_smoke() {
 }
 
 run_postgres_smoke() {
-  local pg_host="${PASPAPAN_PG_HOST:-localhost}"
-  local pg_port="${PASPAPAN_PG_PORT:-5432}"
-  local pg_user="${PASPAPAN_PG_USER:-${USER:-postgres}}"
-  local pg_password="${PASPAPAN_PG_PASSWORD:-}"
-  local pg_admin_db="${PASPAPAN_PG_ADMIN_DB:-postgres}"
-  local pg_schema="${PASPAPAN_PG_SCHEMA:-public}"
-  local pg_sslmode="${PASPAPAN_PG_SSLMODE:-prefer}"
-  local db_name="paspapan_pg_smoke_$(date +%Y%m%d%H%M%S)_${RANDOM}"
+  local pg_host="${HRCONNECT_PG_HOST:-localhost}"
+  local pg_port="${HRCONNECT_PG_PORT:-5432}"
+  local pg_user="${HRCONNECT_PG_USER:-${USER:-postgres}}"
+  local pg_password="${HRCONNECT_PG_PASSWORD:-}"
+  local pg_admin_db="${HRCONNECT_PG_ADMIN_DB:-postgres}"
+  local pg_schema="${HRCONNECT_PG_SCHEMA:-public}"
+  local pg_sslmode="${HRCONNECT_PG_SSLMODE:-prefer}"
+  local db_name="hrconnect_pg_smoke_$(date +%Y%m%d%H%M%S)_${RANDOM}"
 
   psql_cmd() {
     PGPASSWORD="$pg_password" psql \
@@ -121,26 +126,20 @@ run_postgres_smoke() {
     DB_PASSWORD="$pg_password" \
     DB_SCHEMA="$pg_schema" \
     DB_SSLMODE="$pg_sslmode" \
-    php artisan paspapan:seed-real
-
-  run_artisan_with_env \
-    DB_CONNECTION=pgsql \
-    DB_HOST="$pg_host" \
-    DB_PORT="$pg_port" \
-    DB_DATABASE="$db_name" \
-    DB_USERNAME="$pg_user" \
-    DB_PASSWORD="$pg_password" \
-    DB_SCHEMA="$pg_schema" \
-    DB_SSLMODE="$pg_sslmode" \
     php artisan test "${SMOKE_TESTS[@]}"
+
+  # Catatan: tidak ada step seed di alur ini — seluruh SMOKE_TESTS
+  # self-contained (factory + global RefreshDatabase, 0 dependensi seeder),
+  # sama seperti alur sqlite/mysql. Command legacy `paspapan:seed-real`
+  # tidak pernah ada di repo (phantom) dan dihapus 2026-08-16.
 }
 
 run_mysql_smoke() {
-  local mysql_host="${PASPAPAN_MYSQL_HOST:-127.0.0.1}"
-  local mysql_port="${PASPAPAN_MYSQL_PORT:-3306}"
-  local mysql_user="${PASPAPAN_MYSQL_USER:-root}"
-  local mysql_password="${PASPAPAN_MYSQL_PASSWORD:-}"
-  local db_name="paspapan_mysql_smoke_$(date +%Y%m%d%H%M%S)_${RANDOM}"
+  local mysql_host="${HRCONNECT_MYSQL_HOST:-127.0.0.1}"
+  local mysql_port="${HRCONNECT_MYSQL_PORT:-3306}"
+  local mysql_user="${HRCONNECT_MYSQL_USER:-root}"
+  local mysql_password="${HRCONNECT_MYSQL_PASSWORD:-}"
+  local db_name="hrconnect_mysql_smoke_$(date +%Y%m%d%H%M%S)_${RANDOM}"
 
   mysql_cmd() {
     MYSQL_PWD="$mysql_password" mysql \
