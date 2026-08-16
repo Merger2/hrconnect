@@ -34,9 +34,13 @@ update.sh
 /storage/app/private/
 /storage/app/private/imports/
 /storage/app/private/payslips/
+/storage/app/purifier/
 /storage/framework/testing/
 /storage/framework/views/*.php
 /storage/logs/*.log
+
+# Output harness screenshots (scripts/apk-*, desktop/ios-page-screenshots)
+/screenshots/
 
 # Playwright
 /test-results/
@@ -56,6 +60,7 @@ tests/e2e/.auth/
 /.github/
 /.gemini/
 /.opencode/
+/graphify-out/
 /docs/**
 !/docs/api/api.json
 /_ide_helper.php
