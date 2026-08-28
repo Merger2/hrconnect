@@ -99,6 +99,63 @@ export default defineConfig({
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
       },
     },
+
+    // Screenshot all pages for documentation (5 roles × 2 viewports)
+    {
+      name: 'screenshot-employee',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        storageState: path.join(authDir, 'employee.json'),
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
+    {
+      name: 'screenshot-manager',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        storageState: path.join(authDir, 'manager.json'),
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
+    {
+      name: 'screenshot-finance',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        storageState: path.join(authDir, 'finance.json'),
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
+    {
+      name: 'screenshot-admin',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        storageState: path.join(authDir, 'admin.json'),
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
+    {
+      name: 'screenshot-superadmin',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        storageState: path.join(authDir, 'admin.json'),
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
   ],
 
   // webServer disabled - server runs separately on localhost:8000

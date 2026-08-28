@@ -95,7 +95,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::controller(KnowledgeBaseController::class)->prefix('knowledge-base')->group(function () {
         Route::get('/', 'index')->can('view_knowledgebase');
         Route::get('/{knowledgeBase}', 'show')->can('view_knowledgebase');
-        Route::post('/chat', 'chat')->can('view_knowledgebase');
+        Route::post('/chat', 'chat');
         Route::post('/upload', 'upload')->can('manage_knowledgebase');
         Route::delete('/{knowledgeBase}', 'destroy')->can('manage_knowledgebase');
     });

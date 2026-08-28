@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <name>HRConnect</name>
+    <description>OWASP ZAP context for HRConnect security testing</description>
+
+    <!-- URL Patterns to Include -->
+    <url regex="http://localhost:8000/.*"/>
+
+    <!-- URL Patterns to Exclude (safe scan) -->
+    <url regex="http://localhost:8000/logout"/>
+    <url regex="http://localhost:8000/__e2e-login"/>
+    <url regex="http://localhost:8000/api/v1/health"/>
+
+    <!-- Authentication Method: Form-Based -->
+    <authentication>
+        <method>
+            <type>form-based</type>
+            <parameters>
+                <loginUrl>http://localhost:8000/login</loginUrl>
+                <loginRequestData>email={%username%}&amp;password={%password%}&amp;_token={%csrfToken%}</loginRequestData>
+            </parameters>
+        </method>
+        <verification>
+            <loggedInRegex>\Qhttp://localhost:8000/home\E</loggedInRegex>
+            <loggedInRegex>Logout</loggedInRegex>
+            <loggedOutRegex>\Qhttp://localhost:8000/login\E</loggedOutRegex>
+        </verification>
+    </authentication>
+
+    <!-- Session Management: Cookie-Based -->
+    <sessionManagement>
+        <method>
+            <type>cookie-based</type>
+            <parameters>
+                <cookieName>hrconnect-session</cookieName>
+            </parameters>
+        </method>
+    </sessionManagement>
+
+    <!-- Users for Authenticated Scanning -->
+    <users>
+        <user name="k6-employee" enabled="true">
+            <credentials>
+                <username>email</username>
+                <password>password</password>
+                <usernameValue>k6.employee@hrconnect.test</usernameValue>
+                <passwordValue>password</passwordValue>
+            </credentials>
+        </user>
+        <user name="k6-admin" enabled="true">
+            <credentials>
+                <username>email</username>
+                <password>password</password>
+                <usernameValue>k6.admin@hrconnect.test</usernameValue>
+                <passwordValue>password</passwordValue>
+            </credentials>
+        </user>
+    </users>
+
+    <!-- Spider Configuration -->
+    <spider>
+        <scope>
+            <text>http://localhost:8000</text>
+        </scope>
+        <maxDepth>5</maxDepth>
+        <maxChildren>0</maxChildren>
+        <parseComments>false</parseComments>
+        <parseSitemapXml>true</parseSitemapXml>
+        <parseRobotsTxt>true</parseRobotsTxt>
+        <postForm>false</postForm>
+        <processForms>false</processForms>
+    </spider>
+
+    <!-- Scan Policy -->
+    <scanPolicy>
+        <name>HRConnect Full Scan</name>
+        <scanner>
+            <!-- Passive Scan Rules -->
+            <rule>
+                <id>10010</id>
+                <name>Cookie No HttpOnly Flag</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10011</id>
+                <name>Cookie Without Secure Flag</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10015</id>
+                <name>Incomplete or No Cache-control</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10017</id>
+                <name>Cross-Domain JavaScript Source Inclusion</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10020</id>
+                <name>X-Frame-Options Header Scanner</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10021</id>
+                <name>X-Content-Type-Options Header Missing</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10023</id>
+                <name>Information Disclosure - Debug Error Messages</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10024</id>
+                <name>Information Disclosure - Sensitive Information in URL</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10025</id>
+                <name>Information Disclosure - Sensitive Information in HTTP Referrer Header</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10027</id>
+                <name>Information Disclosure - Suspicious Comments</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10040</id>
+                <name>Secure Pages Include Mixed Content</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10105</id>
+                <name>Weak Authentication Method</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>10202</id>
+                <name>Absence of Anti-CSRF Tokens</name>
+                <level>WARN</level>
+            </rule>
+
+            <!-- Active Scan Rules -->
+            <rule>
+                <id>40012</id>
+                <name>Cross Site Scripting (Reflected)</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>40014</id>
+                <name>Cross Site Scripting (Persistent)</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>40018</id>
+                <name>SQL Injection</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>40019</id>
+                <name>SQL Injection (MySQL)</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>40020</id>
+                <name>SQL Injection (Hypersonic)</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>40021</id>
+                <name>SQL Injection (Oracle)</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>40022</id>
+                <name>SQL Injection (PostgreSQL)</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>90021</id>
+                <name>XPath Injection</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>90023</id>
+                <name>XML External Entity Attack</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>90024</id>
+                <name>Generic Padding Oracle</name>
+                <level>WARN</level>
+            </rule>
+            <rule>
+                <id>90025</id>
+                <name>Expression Language Injection</name>
+                <level>WARN</level>
+            </rule>
+        </scanner>
+    </scanPolicy>
+</configuration>

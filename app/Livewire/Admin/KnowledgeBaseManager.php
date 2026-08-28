@@ -141,7 +141,7 @@ class KnowledgeBaseManager extends Component
             ->paginate(12);
 
         $detailDoc = $this->detailDocumentId
-            ? KnowledgeBase::with(['chunks' => fn ($q) => $q->select('id', 'knowledge_base_id', 'content', 'page_number', 'created_at')])
+            ? KnowledgeBase::with(['chunks' => fn ($q) => $q->select('id', 'knowledge_base_id', 'chunk_text', 'chunk_index', 'created_at')])
                 ->select('id', 'title', 'category', 'status', 'source_document', 'file_size', 'chunk_count', 'is_indexed', 'created_at')
                 ->find($this->detailDocumentId)
             : null;

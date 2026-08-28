@@ -49,7 +49,7 @@ class KnowledgeBaseController extends Controller
     #[Endpoint(title: 'Show Document', description: 'Get single knowledge base document details with its chunks.')]
     public function show(Request $request, KnowledgeBase $knowledgeBase): JsonResponse
     {
-        $knowledgeBase->load(['chunks' => fn ($q) => $q->select('id', 'knowledge_base_id', 'content', 'page_number', 'created_at')]);
+        $knowledgeBase->load(['chunks' => fn ($q) => $q->select('id', 'knowledge_base_id', 'chunk_text', 'chunk_index', 'created_at')]);
 
         return response()->json([
             'status' => 'success',
@@ -70,7 +70,7 @@ class KnowledgeBaseController extends Controller
     #[BodyParameter(name: 'conversation_id', description: 'Optional conversation ID to continue existing chat', required: false, type: 'string')]
     public function chat(ChatRequest $request): JsonResponse
     {
-        $this->authorize('chat', KnowledgeBase::class);
+        abort_unless($request->user()->can('view_knowledgebase'), 403);
 
         $data = $request->validated();
 
@@ -89,7 +89,7 @@ class KnowledgeBaseController extends Controller
     #[Endpoint(title: 'Chat Stream (SSE)', description: 'Streaming RAG answer via Server-Sent Events. Returns text/event-stream with text delta events. Fallback to sync /chat endpoint jika streaming gagal.')]
     public function chatStream(ChatStreamRequest $request): StreamedResponse
     {
-        $this->authorize('chat', KnowledgeBase::class);
+        abort_unless($request->user()->can('view_knowledgebase'), 403);
 
         $data = $request->validated();
 

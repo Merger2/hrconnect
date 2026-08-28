@@ -8,7 +8,9 @@ class ChatRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        // Auth already handled by auth:sanctum middleware + can() route middleware.
+        // auth()->check() returns false for Sanctum bearer tokens (guard mismatch).
+        return true;
     }
 
     public function rules(): array
