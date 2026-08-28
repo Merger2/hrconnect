@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 CompanyEmployeesSeeder::class,   // 50 karyawan demo (owner+manager+staff)
                 DemoAttendanceSeeder::class,     // 30 hari absensi demo utk user demo
+                DemoUseCaseSeeder::class,        // use case demo (leave, overtime, reimbursement, dll)
                 E2eTestSeeder::class,            // akun test E2E (employee/hr/manager/finance)
                 K6PerformanceTestSeeder::class,  // akun K6 performance testing (5 role, password seragam)
                 IntegrationSampleSeeder::class,  // client integrasi palsu (pas-papan)
