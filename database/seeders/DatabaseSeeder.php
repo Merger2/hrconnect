@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             TarifTerSeeder::class,
             BranchSeeder::class,
             KnowledgeBaseSeeder::class,
+            EmployeeDocumentTemplateSeeder::class,
         ]);
 
         // Guard ganda (defense-in-depth): 4 seeder demo/test di bawah berisi
