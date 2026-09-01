@@ -88,6 +88,19 @@ export default defineConfig({
       },
     },
 
+    // Screenshot all pages: handles auth internally (loads storageState per role)
+    {
+      name: 'chromium-screenshot',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
+
     // Auth-flow regression (email verification + 2FA + password reset): login
     // sendiri tanpa storageState — user dibuat helper PHP (serial mode di spec).
     {

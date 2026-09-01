@@ -240,6 +240,8 @@ class RoleAndPermissionSeeder extends Seeder
             // WFA approval (Manager only)
             PermissionEnum::APPROVE_WFA,
             PermissionEnum::VIEW_WFA_PENDING,
+            // Team approval access (enables /approvals page)
+            PermissionEnum::REVIEW_SUBORDINATE_REQUESTS,
         ];
     }
 
