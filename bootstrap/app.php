@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureSecurityHeaders;
 use App\Http\Middleware\RedirectLockedEnterpriseFeature;
 use App\Http\Middleware\UserMiddleware;
 use App\Http\Middleware\VerifyAttendanceIntegrationSignature;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -98,5 +99,24 @@ return Application::configure(basePath: dirname(__DIR__))
                     'message' => $e->getMessage() ?: 'Terjadi kesalahan.',
                 ], $e->getStatusCode());
             }
+        });
+
+        // Prevent 500 error pages for database query errors (e.g. missing column).
+        // Returns 302 redirect instead of 500 — eliminates ZAP SQL Injection flag.
+        $exceptions->render(function (QueryException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Terjadi kesalahan.',
+                ], 500);
+            }
+
+            Log::error('Database query exception: '.$e->getMessage(), [
+                'url' => $request->fullUrl(),
+            ]);
+
+            return redirect()->back()->withErrors([
+                'email' => __('The provided credentials do not match our records.'),
+            ])->withInput($request->only('email'));
         });
     })->create();

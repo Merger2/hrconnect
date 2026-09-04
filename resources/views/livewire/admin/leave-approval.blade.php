@@ -31,10 +31,6 @@
                     @foreach ($leaveTypes as $leaveType)
                         <option value="{{ $leaveType->id }}">{{ $leaveType->name }}</option>
                     @endforeach
-                    <option value="leave">{{ __('Legacy Leave') }}</option>
-                    <option value="permission">{{ __('Legacy Permission') }}</option>
-                    <option value="sick">{{ __('Legacy Sick') }}</option>
-                    <option value="excused">{{ __('Legacy Excused') }}</option>
                 </x-forms.select>
             </div>
         </x-admin.page-tools>
@@ -42,10 +38,10 @@
 
     @php
         $allLeaves = $groupedLeaves->getCollection();
-        $pendingLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status?->value === 'pending')->count();
-        $approvedLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status?->value === 'approved')->count();
-        $rejectedLeaves = $allLeaves->filter(fn($group) => $group->first()?->approval_status?->value === 'rejected')->count();
-        $totalDays = $allLeaves->sum(fn($group) => $group->count());
+        $pendingLeaves = $allLeaves->filter(fn($group) => in_array($group->first()?->status?->value, ['pending', 'approved_l1'], true))->count();
+        $approvedLeaves = $allLeaves->filter(fn($group) => $group->first()?->status?->value === 'approved')->count();
+        $rejectedLeaves = $allLeaves->filter(fn($group) => $group->first()?->status?->value === 'rejected')->count();
+        $totalDays = $allLeaves->sum(fn($group) => (float) $group->first()?->total_days);
     @endphp
 
     <dl class="flex flex-wrap gap-2 mb-4" role="region" aria-label="{{ __('Leave Summary') }}">
@@ -71,27 +67,27 @@
         <div class="space-y-3 p-4 lg:hidden">
             @forelse ($groupedLeaves as $groupKey => $group)
                 @php
-                    $orderedGroup = $group->sortBy('date')->values();
+                    $orderedGroup = $group->sortBy('start_date')->values();
                     $firstLeave = $orderedGroup->first();
                     $lastLeave = $orderedGroup->last();
                     $leaveIds = $orderedGroup->pluck('id')->toArray();
                     if ($group->count() > 1) {
-                        $dateDisplay = $firstLeave->date->format('M Y') == $lastLeave->date->format('M Y')
-                            ? $firstLeave->date->format('d').' - '.$lastLeave->date->format('d M Y').' ('.$orderedGroup->count().' days)'
-                            : $firstLeave->date->format('d M').' - '.$lastLeave->date->format('d M Y').' ('.$orderedGroup->count().' days)';
+                        $dateDisplay = $firstLeave->start_date->format('M Y') == $lastLeave->end_date->format('M Y')
+                            ? $firstLeave->start_date->format('d').' - '.$lastLeave->end_date->format('d M Y').' ('.$firstLeave->total_days.' days)'
+                            : $firstLeave->start_date->format('d M').' - '.$lastLeave->end_date->format('d M Y').' ('.$firstLeave->total_days.' days)';
                     } else {
-                        $dateDisplay = $firstLeave->date->format('d M Y');
+                        $dateDisplay = $firstLeave->start_date->format('d M Y').' - '.$firstLeave->end_date->format('d M Y');
                     }
                 @endphp
                 <article class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                     <div class="flex items-start gap-3">
-                        <img src="{{ $firstLeave->user->profile_photo_url }}" alt="{{ $firstLeave->user->name }}" class="h-10 w-10 rounded-full object-cover">
+                        <img src="{{ $firstLeave->employee->user->profile_photo_url ?? '' }}" alt="{{ $firstLeave->employee->user->name ?? $firstLeave->employee->full_name }}" class="h-10 w-10 rounded-full object-cover">
                         <div class="min-w-0 flex-1">
-                            <h3 class="truncate text-sm font-semibold text-gray-900">{{ $firstLeave->user->name }}</h3>
-                            <p class="truncate text-xs text-gray-500">{{ $firstLeave->user->jobTitle->name ?? '-' }}</p>
+                            <h3 class="truncate text-sm font-semibold text-gray-900">{{ $firstLeave->employee->user->name ?? $firstLeave->employee->full_name }}</h3>
+                            <p class="truncate text-xs text-gray-500">{{ $firstLeave->employee->position?->name ?? '-' }}</p>
                         </div>
-                        <x-admin.status-badge :tone="($firstLeave->status?->value ?? $firstLeave->status) === 'sick' ? 'warning' : 'info'">
-                            {{ $firstLeave->leaveType?->name ?? ($firstLeave->status instanceof \BackedEnum ? $firstLeave->status->label() : __(ucfirst((string) $firstLeave->status))) }}
+                        <x-admin.status-badge :tone="$firstLeave->status?->color() ?? 'info'">
+                            {{ $firstLeave->status?->label() ?? __('Updated') }}
                         </x-admin.status-badge>
                     </div>
 
@@ -103,8 +99,8 @@
                         <div>
                             <dt class="text-xs text-gray-500">{{ __('Attachment') }}</dt>
                             <dd class="mt-1">
-                                @if ($firstLeave->attachment)
-                                    <a href="{{ $firstLeave->attachment_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-primary-600">
+                                @if ($firstLeave->proof_file)
+                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($firstLeave->proof_file) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-primary-600">
                                         <x-heroicon-m-paper-clip class="h-4 w-4" /> {{ __('View') }}
                                     </a>
                                 @else
@@ -114,17 +110,17 @@
                         </div>
                     </dl>
 
-                    @if ($firstLeave->note || (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'rejected' && $firstLeave->rejection_note))
+                    @if ($firstLeave->reason || ($firstLeave->status === \App\Enums\RequestStatus::REJECTED && $firstLeave->rejection_reason))
                         <div class="mt-3 rounded-xl bg-gray-50 p-3 text-sm text-gray-600">
-                            {{ $firstLeave->note }}
-                            @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'rejected' && $firstLeave->rejection_note)
-                                <div class="mt-1 text-xs text-red-500">{{ __('Reason') }}: {{ $firstLeave->rejection_note }}</div>
+                            {{ $firstLeave->reason }}
+                            @if ($firstLeave->status === \App\Enums\RequestStatus::REJECTED && $firstLeave->rejection_reason)
+                                <div class="mt-1 text-xs text-red-500">{{ __('Reason') }}: {{ $firstLeave->rejection_reason }}</div>
                             @endif
                         </div>
                     @endif
 
                     <div class="mt-4 flex justify-end gap-2">
-                        @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'pending')
+                        @if (in_array($firstLeave->status?->value, ['pending', 'approved_l1'], true))
                             <x-actions.icon-button wire:click="approve({{ json_encode($leaveIds) }})" variant="success" label="{{ __('Approve leave request') }}">
                                 <x-heroicon-m-check-circle class="h-6 w-6" />
                             </x-actions.icon-button>
@@ -132,8 +128,8 @@
                                 <x-heroicon-m-x-circle class="h-6 w-6" />
                             </x-actions.icon-button>
                         @else
-                            <x-admin.status-badge :tone="($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'approved' ? 'success' : 'danger'" pill="true" class="capitalize">
-                                {{ __($firstLeave->approval_status?->value ?? $firstLeave->approval_status) }}
+                            <x-admin.status-badge :tone="$firstLeave->status?->color() ?? 'info'" pill="true" class="capitalize">
+                                {{ $firstLeave->status?->label() ?? __('Updated') }}
                             </x-admin.status-badge>
                         @endif
                     </div>
@@ -162,45 +158,45 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($groupedLeaves as $groupKey => $group)
                         @php
-                            $orderedGroup = $group->sortBy('date')->values();
+                            $orderedGroup = $group->sortBy('start_date')->values();
                             $firstLeave = $orderedGroup->first();
                             $lastLeave = $orderedGroup->last();
                             $leaveIds = $orderedGroup->pluck('id')->toArray();
                             // Format Date Range
                             if ($group->count() > 1) {
-                                if ($firstLeave->date->format('M Y') == $lastLeave->date->format('M Y')) {
+                                if ($firstLeave->start_date->format('M Y') == $lastLeave->end_date->format('M Y')) {
                                     $dateDisplay =
-                                        $firstLeave->date->format('d') .
+                                        $firstLeave->start_date->format('d') .
                                         ' - ' .
-                                        $lastLeave->date->format('d M Y') .
+                                        $lastLeave->end_date->format('d M Y') .
                                         ' (' .
-                                        $orderedGroup->count() .
+                                        $firstLeave->total_days .
                                         ' days)';
                                 } else {
                                     $dateDisplay =
-                                        $firstLeave->date->format('d M') .
+                                        $firstLeave->start_date->format('d M') .
                                         ' - ' .
-                                        $lastLeave->date->format('d M Y') .
+                                        $lastLeave->end_date->format('d M Y') .
                                         ' (' .
-                                        $orderedGroup->count() .
+                                        $firstLeave->total_days .
                                         ' days)';
                                 }
                             } else {
-                                $dateDisplay = $firstLeave->date->format('d M Y');
+                                $dateDisplay = $firstLeave->start_date->format('d M Y').' - '.$firstLeave->end_date->format('d M Y');
                             }
                         @endphp
                         <tr class="group hover:bg-gray-50 transition-colors">
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
                                     <div class="h-9 w-9 overflow-hidden rounded-full bg-gray-100">
-                                        <img src="{{ $firstLeave->user->profile_photo_url }}"
-                                            alt="{{ $firstLeave->user->name }}" class="h-full w-full object-cover">
+                                        <img src="{{ $firstLeave->employee->user->profile_photo_url ?? '' }}"
+                                            alt="{{ $firstLeave->employee->user->name ?? $firstLeave->employee->full_name }}" class="h-full w-full object-cover">
                                     </div>
                                     <div>
                                         <div class="font-medium text-gray-900">
-                                            {{ $firstLeave->user->name }}</div>
+                                            {{ $firstLeave->employee->user->name ?? $firstLeave->employee->full_name }}</div>
                                         <div class="text-xs text-gray-500">
-                                            {{ $firstLeave->user->jobTitle->name ?? '-' }}</div>
+                                            {{ $firstLeave->employee->position?->name ?? '-' }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -208,20 +204,20 @@
                                 {{ $dateDisplay }}
                             </td>
                             <td class="px-4 py-3">
-                                <x-admin.status-badge :tone="($firstLeave->status?->value ?? $firstLeave->status) === 'sick' ? 'warning' : 'info'">
-                                    {{ $firstLeave->leaveType?->name ?? ($firstLeave->status instanceof \BackedEnum ? $firstLeave->status->label() : __(ucfirst((string) $firstLeave->status))) }}
+                                <x-admin.status-badge :tone="$firstLeave->status?->color() ?? 'info'">
+                                    {{ $firstLeave->leaveType?->name ?? __('Leave') }}
                                 </x-admin.status-badge>
                             </td>
                             <td class="px-4 py-3 text-gray-600 max-w-xs truncate">
-                                {{ $firstLeave->note }}
-                                @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'rejected' && $firstLeave->rejection_note)
+                                {{ $firstLeave->reason }}
+                                @if ($firstLeave->status === \App\Enums\RequestStatus::REJECTED && $firstLeave->rejection_reason)
                                     <div class="text-xs text-red-500 mt-1">{{ __('Reason') }}:
-                                        {{ $firstLeave->rejection_note }}</div>
+                                        {{ $firstLeave->rejection_reason }}</div>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-gray-600">
-                                @if ($firstLeave->attachment)
-                                    <a href="{{ $firstLeave->attachment_url }}" target="_blank"
+                                @if ($firstLeave->proof_file)
+                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($firstLeave->proof_file) }}" target="_blank"
                                         rel="noopener noreferrer"
                                         class="wcag-touch-target flex items-center gap-1 rounded text-primary-600 transition-colors hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2">
                                         <x-heroicon-m-paper-clip class="h-4 w-4" />
@@ -232,7 +228,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right">
-                                @if (($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'pending')
+                                @if (in_array($firstLeave->status?->value, ['pending', 'approved_l1'], true))
                                     <div class="flex justify-end gap-2">
                                         <x-actions.icon-button wire:click="approve({{ json_encode($leaveIds) }})"
                                             variant="success" label="{{ __('Approve leave request') }}">
@@ -244,8 +240,8 @@
                                         </x-actions.icon-button>
                                     </div>
                                 @else
-                                    <x-admin.status-badge :tone="($firstLeave->approval_status?->value ?? $firstLeave->approval_status) === 'approved' ? 'success' : 'danger'" pill="true" class="capitalize">
-                                        {{ __($firstLeave->approval_status?->value ?? $firstLeave->approval_status) }}
+                                    <x-admin.status-badge :tone="$firstLeave->status?->color() ?? 'info'" pill="true" class="capitalize">
+                                        {{ $firstLeave->status?->label() ?? __('Updated') }}
                                     </x-admin.status-badge>
                                 @endif
                             </td>

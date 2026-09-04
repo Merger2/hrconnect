@@ -77,6 +77,48 @@ export default defineConfig({
       },
     },
 
+    // Manager-authenticated interactive tests (team approvals)
+    {
+      name: 'chromium-manager',
+      testMatch: /manager-approvals\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'manager.json'),
+        serviceWorkers: 'block',
+      },
+    },
+
+    // Finance-authenticated tests (reimbursement, attendance, reports, payslip)
+    {
+      name: 'chromium-finance',
+      testMatch: /finance-role\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'finance.json'),
+        serviceWorkers: 'block',
+      },
+    },
+
+    // Superadmin-authenticated tests (dashboard, employees, settings, RBAC, all admin pages)
+    {
+      name: 'chromium-superadmin',
+      testMatch: /(superadmin-settings|admin-role)\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'admin.json'),
+        serviceWorkers: 'block',
+      },
+    },
+
     // PWA: manifest + service worker (guest, tanpa login)
     {
       name: 'chromium-pwa',

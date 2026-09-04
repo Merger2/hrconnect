@@ -13,6 +13,7 @@ use App\Models\KnowledgeBase;
 use App\Models\User;
 use App\Services\Security\EmbeddingService;
 use App\Support\AiCostGuard;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -121,15 +122,11 @@ PROMPT;
                 $chunks = $this->embedding->searchByKeyword($question, topK: 5);
 
                 if ($chunks->isNotEmpty()) {
-                    yield ['text' => 'Maaf, asisten AI sedang tidak tersedia saat ini. Berikut informasi yang ditemukan di basis pengetahuan perusahaan:'];
+                    yield ['text' => $this->buildExtractiveFallbackAnswer($chunks, $this->fallbackIntro())];
 
                     yield [
                         'conversation_id' => $conversationId ?? (string) Str::uuid(),
-                        'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
-                            'id' => $kb->id,
-                            'title' => $kb->title,
-                            'snippet' => $this->excerpt($kb->content),
-                        ])->all(),
+                        'sources' => $this->fallbackSources($chunks),
                         'fallback' => true,
                     ];
 
@@ -392,19 +389,16 @@ PROMPT;
             ];
         }
 
-        $answer = $budgetExceeded
-            ? app(AiCostGuard::class)->exhaustedMessage().' Berikut informasi yang ditemukan di basis pengetahuan perusahaan:'
-            : 'Maaf, asisten AI sedang tidak tersedia saat ini. Berikut informasi yang ditemukan di basis pengetahuan perusahaan:';
+        $answer = $this->buildExtractiveFallbackAnswer(
+            $chunks,
+            $budgetExceeded
+                ? app(AiCostGuard::class)->exhaustedMessage().' Berikut ringkasan dari basis pengetahuan perusahaan:'
+                : $this->fallbackIntro(),
+        );
 
         return [
             'answer' => $answer,
-            'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
-                'id' => $kb->id,
-                'title' => $kb->title,
-                'snippet' => $this->excerpt($kb->content),
-                'page_number' => $kb->page_number,
-                'source_document' => $kb->source_document,
-            ])->all(),
+            'sources' => $this->fallbackSources($chunks),
             'confidence' => 'low',
             'fallback' => true,
             'model' => 'pg_trgm',
@@ -427,15 +421,11 @@ PROMPT;
             yield ['text' => $message];
 
             if ($chunks->isNotEmpty()) {
+                yield ['text' => "\n\n".$this->buildExtractiveFallbackAnswer($chunks, 'Berikut ringkasan dari basis pengetahuan perusahaan:')];
+
                 yield [
                     'conversation_id' => $conversationId ?? (string) Str::uuid(),
-                    'sources' => $chunks->map(fn (KnowledgeBase $kb) => [
-                        'id' => $kb->id,
-                        'title' => $kb->title,
-                        'snippet' => $this->excerpt($kb->content),
-                        'page_number' => $kb->page_number,
-                        'source_document' => $kb->source_document,
-                    ])->all(),
+                    'sources' => $this->fallbackSources($chunks),
                     'fallback' => true,
                 ];
 
@@ -451,6 +441,44 @@ PROMPT;
             'conversation_id' => $conversationId ?? (string) Str::uuid(),
             'fallback' => true,
         ];
+    }
+
+    protected function fallbackIntro(): string
+    {
+        return 'Maaf, asisten AI sedang tidak tersedia saat ini. Berikut ringkasan dari basis pengetahuan perusahaan:';
+    }
+
+    /**
+     * Buat jawaban fallback yang tetap berguna saat Gemini gagal/rate-limited:
+     * ekstraktif dari chunk KB yang ditemukan, dengan citation inline.
+     *
+     * @param  Collection<int, KnowledgeBase>  $chunks
+     */
+    protected function buildExtractiveFallbackAnswer(Collection $chunks, string $intro): string
+    {
+        $lines = [$intro];
+
+        foreach ($chunks->take(3)->values() as $index => $kb) {
+            $sourceNumber = $index + 1;
+            $lines[] = sprintf('- %s [Sumber %d]', $this->excerpt($kb->content, 220), $sourceNumber);
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * @param  Collection<int, KnowledgeBase>  $chunks
+     * @return array<int, array{id: int, title: string, snippet: string, page_number: int|null, source_document: string|null}>
+     */
+    protected function fallbackSources(Collection $chunks): array
+    {
+        return $chunks->map(fn (KnowledgeBase $kb) => [
+            'id' => $kb->id,
+            'title' => $kb->title,
+            'snippet' => $this->excerpt($kb->content),
+            'page_number' => $kb->page_number,
+            'source_document' => $kb->source_document,
+        ])->all();
     }
 
     /**

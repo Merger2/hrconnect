@@ -1,7 +1,7 @@
 <?php
 
+use App\Enums\RequestStatus;
 use App\Livewire\Admin\ManagerInbox;
-use App\Models\Attendance;
 use App\Models\CashAdvance;
 use App\Models\CustomFormSubmission;
 use App\Models\CustomFormTemplate;
@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\HrChecklistCase;
 use App\Models\HrChecklistTask;
 use App\Models\HrChecklistTemplate;
+use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\Role;
 use App\Models\User;
@@ -114,14 +115,15 @@ test('manager inbox summarizes and filters overdue approvals', function () {
 
     $admin->roles()->sync([$role->id]);
 
-    $attendance = Attendance::create([
+    $leave = Leave::factory()->create([
         'employee_id' => $employeeRecord->id,
-        'date' => now()->toDateString(),
-        'status' => 'excused',
-        'approval_status' => 'pending',
         'leave_type_id' => $leaveType->id,
+        'start_date' => now()->addDay()->toDateString(),
+        'end_date' => now()->addDay()->toDateString(),
+        'status' => RequestStatus::APPROVED_L1,
+        'reason' => 'Overdue leave approval',
     ]);
-    $attendance->forceFill([
+    $leave->forceFill([
         'created_at' => now()->subDays(3),
         'updated_at' => now()->subDays(3),
     ])->save();

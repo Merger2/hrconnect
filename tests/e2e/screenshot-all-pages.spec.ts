@@ -486,12 +486,19 @@ async function navigateToPage(page: Page, route: string, storageState?: object):
   }
 
   const response = await page.goto(`${BASE_URL}${route}`, {
-    waitUntil: 'domcontentloaded',
+    waitUntil: 'networkidle',
     timeout: 30000,
   });
 
   // Wait for Livewire to finish loading
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(4000);
+
+  // Disable Livewire polling to prevent mid-screenshot re-renders
+  await page.evaluate(() => {
+    document.querySelectorAll('[wire\\:poll]').forEach((el) => {
+      el.removeAttribute('wire:poll');
+    });
+  }).catch(() => {});
 
   // Wait for loading spinners to disappear
   try {
@@ -615,10 +622,10 @@ for (const roleConfig of ROLE_CONFIGS) {
         if (page.url().includes('/login')) {
           await page.context().addCookies((storageState as any).cookies || []);
           await page.goto(`${BASE_URL}${pageDef.route}`, {
-            waitUntil: 'domcontentloaded',
+            waitUntil: 'networkidle',
             timeout: 30000,
           });
-          await page.waitForTimeout(2000);
+          await page.waitForTimeout(4000);
         }
 
         const result = await takeScreenshot(page, role, pageDef.filename, 'desktop');
@@ -653,10 +660,10 @@ for (const roleConfig of ROLE_CONFIGS) {
         if (page.url().includes('/login')) {
           await page.context().addCookies((storageState as any).cookies || []);
           await page.goto(`${BASE_URL}${pageDef.route}`, {
-            waitUntil: 'domcontentloaded',
+            waitUntil: 'networkidle',
             timeout: 30000,
           });
-          await page.waitForTimeout(2000);
+          await page.waitForTimeout(4000);
         }
 
         const result = await takeScreenshot(page, role, `${pageDef.filename}-mobile`, 'mobile');

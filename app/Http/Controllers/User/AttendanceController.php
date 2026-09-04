@@ -8,6 +8,7 @@ use App\Models\LeaveType;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Attendance\LeaveRequestService;
+use App\Services\HR\LeaveService;
 use App\Support\FileAccessService;
 use App\Support\SecureUploadPolicy;
 use Illuminate\Contracts\View\View;
@@ -21,6 +22,7 @@ class AttendanceController extends Controller
 {
     public function __construct(
         protected LeaveRequestService $leaveRequestService,
+        protected LeaveService $leaveService,
         protected FileAccessService $fileAccessService,
         protected SecureUploadPolicy $secureUploadPolicy,
     ) {}
@@ -72,26 +74,37 @@ class AttendanceController extends Controller
         ]);
 
         try {
+            $employee = $user->employee;
+            abort_unless($employee, 404, 'Employee profile not found.');
+
             $fromDate = Carbon::parse($request->string('from'));
             $toDate = Carbon::parse($request->input('to', $fromDate->toDateString()));
 
-            $result = $this->leaveRequestService->submitLeaveRequest(
-                user: $user,
-                status: $request->string('status', 'excused')->toString(),
-                note: $request->string('note')->toString(),
-                fromDate: $fromDate,
-                toDate: $toDate,
-                attachment: $request->file('attachment'),
-                lat: $request->filled('lat') ? (float) $request->input('lat') : null,
-                lng: $request->filled('lng') ? (float) $request->input('lng') : null,
-                leaveType: $leaveType,
-            );
+            // Determine leave type: explicit leave_type_id or map status code to leave type
+            $resolvedLeaveType = $leaveType;
+            if (! $resolvedLeaveType && $request->filled('status')) {
+                $statusCode = $request->string('status')->toString();
+                $sickCode = Setting::getValue('leave_sick_code', 'sick');
+                $typeCode = $statusCode === 'sick' ? $sickCode : $statusCode;
+                $resolvedLeaveType = LeaveType::where('code', $typeCode)->active()->first();
 
-            if (! $result->ok) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', $result->error);
+                if (! $resolvedLeaveType) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', __('Leave type not found for status: '.$statusCode));
+                }
             }
+
+            abort_unless($resolvedLeaveType, 422, 'Leave type is required.');
+
+            $this->leaveService->applyLeave($employee, [
+                'start_date' => $fromDate->toDateString(),
+                'end_date' => $toDate->toDateString(),
+                'leave_type_id' => $resolvedLeaveType->id,
+                'day_type' => 'full_day',
+                'reason' => $request->string('note')->toString(),
+                'proof_file' => $request->file('attachment'),
+            ]);
 
             return redirect(route('home'))
                 ->with('success', __('Pengajuan izin berhasil dibuat.'));
@@ -103,7 +116,7 @@ class AttendanceController extends Controller
 
             return redirect()->back()
                 ->withInput()
-                ->with('error', __('Terjadi kesalahan saat membuat pengajuan izin. Silakan coba lagi.'));
+                ->with('error', $th->getMessage() ?: __('Terjadi kesalahan saat membuat pengajuan izin. Silakan coba lagi.'));
         }
     }
 

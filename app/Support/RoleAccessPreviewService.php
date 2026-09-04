@@ -39,7 +39,12 @@ class RoleAccessPreviewService
 
         foreach (RbacRegistry::modules() as $module) {
             $actions = collect($module['actions'] ?? [])
-                ->filter(fn (array $action): bool => in_array($action['permission'] ?? null, $rolePermissions, true))
+                ->filter(function (array $action) use ($rolePermissions): bool {
+                    $enumPermission = RbacRegistry::dotNotationToEnum($action['permission'] ?? '');
+
+                    return $enumPermission !== null
+                        && in_array($enumPermission, $rolePermissions, true);
+                })
                 ->map(fn (array $action): string => (string) __($action['label'] ?? 'Action'))
                 ->values()
                 ->all();

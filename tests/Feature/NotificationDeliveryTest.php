@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalLevel;
+use App\Enums\ApprovalStatus;
 use App\Enums\PayrollStatus;
+use App\Enums\RequestStatus;
 use App\Livewire\Admin\PayrollManager;
-use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Payroll;
 use App\Models\Role;
@@ -122,25 +125,35 @@ test('leave approval notifies requesting employee with status update', function 
     $employeeUser = User::factory()->create();
     $employee = Employee::factory()->create(['user_id' => $employeeUser->id]);
 
-    $leave = Attendance::create([
+    $leave = Leave::factory()->create([
         'employee_id' => $employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'late',
-        'approval_status' => Attendance::STATUS_PENDING,
-        'note' => 'Cuti sakit',
+        'status' => RequestStatus::APPROVED_L1,
+        'reason' => 'Cuti sakit',
     ]);
 
     $admin = User::factory()->admin(true)->create();
+    $adminEmployee = Employee::factory()->create(['user_id' => $admin->id]);
     $role = Role::create([
         'name' => 'Leave Approval Admin_'.uniqid(),
         'slug' => 'leave_approval_admin_'.uniqid(),
         'permission_keys' => ['admin.leave_approvals.manage'],
     ]);
     $admin->roles()->sync([$role->id]);
+    $leave->approvals()->create([
+        'approver_id' => $employee->id,
+        'level' => ApprovalLevel::L1_SUPERVISOR,
+        'status' => ApprovalStatus::APPROVED,
+        'approved_at' => now(),
+    ]);
+    $leave->approvals()->create([
+        'approver_id' => $adminEmployee->id,
+        'level' => ApprovalLevel::L2_MANAGER,
+        'status' => ApprovalStatus::PENDING,
+    ]);
 
     app(LeaveApprovalService::class)->approve([$leave->id], $admin);
 
-    expect($leave->refresh()->approval_status->value)->toBe(Attendance::STATUS_APPROVED);
+    expect($leave->refresh()->status)->toBe(RequestStatus::APPROVED);
 
     Notification::assertSentTo($employeeUser, LeaveStatusUpdated::class);
 });

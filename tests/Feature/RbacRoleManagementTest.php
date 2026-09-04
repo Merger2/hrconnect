@@ -5,6 +5,7 @@ use App\Livewire\Admin\AppraisalManager;
 use App\Livewire\Admin\AttendanceCorrectionManager;
 use App\Livewire\Admin\MasterData\Admin as AdminDirectory;
 use App\Livewire\Admin\ReimbursementManager;
+use App\Livewire\Admin\RolePermissionManager;
 use App\Models\ActivityLog;
 use App\Models\Appraisal;
 use App\Models\Attendance;
@@ -20,7 +21,9 @@ use App\Models\SystemBackupRun;
 use App\Models\User;
 use App\Notifications\CashAdvanceRequested;
 use App\Support\EnterpriseRuntime;
+use App\Support\RbacRegistry;
 use App\Support\UserNotificationRecipientService;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -113,6 +116,22 @@ test('legacy roleless admins can still access the dashboard', function (bool $su
         ->get(route('admin.dashboard'))
         ->assertOk();
 })->with([false, true]);
+
+test('seeded admin role has release one hr approval permissions', function () {
+    $this->seed(RoleAndPermissionSeeder::class);
+
+    $admin = User::factory()->admin()->create();
+    $adminRole = Role::query()->where('slug', 'admin')->firstOrFail();
+    $admin->roles()->sync([$adminRole->id]);
+
+    expect($adminRole->permission_keys)->toContain('manage_leave_approvals')
+        ->and($adminRole->permission_keys)->toContain('approve_leaves_l2')
+        ->and($adminRole->permission_keys)->toContain('manage_attendance_corrections')
+        ->and($adminRole->permission_keys)->toContain('manage_cash_advances')
+        ->and(Gate::forUser($admin->fresh())->allows('manageLeaveApprovals'))->toBeTrue()
+        ->and(Gate::forUser($admin->fresh())->allows('manageAttendanceCorrections'))->toBeTrue()
+        ->and(Gate::forUser($admin->fresh())->allows('manageCashAdvances'))->toBeTrue();
+});
 
 test('legacy roleless admins do not receive unrelated RBAC permissions', function () {
     $admin = User::factory()->admin()->create();
@@ -839,4 +858,57 @@ test('view-only activity log admins do not see export action', function () {
     $response->assertOk()
         ->assertSee(__('Read-only audit access'))
         ->assertDontSee(route('admin.activity-logs.export'));
+});
+
+test('role editor shows correct permissions for non-superadmin role', function () {
+    $admin = User::factory()->admin()->create();
+    $accessRole = Role::create([
+        'name' => 'RBAC Access_'.uniqid(),
+        'slug' => 'rbac_access_'.uniqid(),
+        'description' => 'Can manage roles and permissions.',
+        'permission_keys' => ['view_admin_dashboard', 'manage_rbac'],
+    ]);
+    $admin->roles()->sync([$accessRole->id]);
+
+    $role = Role::create([
+        'name' => 'Test Employee_'.uniqid(),
+        'slug' => 'test_employee_'.uniqid(),
+        'description' => 'Test role with dot-notation permissions.',
+        'permission_keys' => [
+            'admin.dashboard.view',
+            'admin.employees.view',
+            'admin.attendances.view',
+        ],
+    ]);
+
+    $this->actingAs($admin);
+
+    Livewire::test(RolePermissionManager::class)
+        ->call('edit', $role->id)
+        ->assertSet('permissions', ['admin.dashboard.view', 'admin.employees.view', 'admin.attendances.view']);
+});
+
+test('role editor shows all permissions for superadmin role', function () {
+    $admin = User::factory()->admin()->create();
+    $accessRole = Role::create([
+        'name' => 'RBAC Access_'.uniqid(),
+        'slug' => 'rbac_access_'.uniqid(),
+        'description' => 'Can manage roles and permissions.',
+        'permission_keys' => ['view_admin_dashboard', 'manage_rbac'],
+    ]);
+    $admin->roles()->sync([$accessRole->id]);
+
+    $role = Role::create([
+        'name' => 'Super Admin_'.uniqid(),
+        'slug' => 'super_admin_'.uniqid(),
+        'description' => 'Full access role.',
+        'permission_keys' => ['*'],
+        'is_super_admin' => true,
+    ]);
+
+    $this->actingAs($admin);
+
+    Livewire::test(RolePermissionManager::class)
+        ->call('edit', $role->id)
+        ->assertSet('permissions', RbacRegistry::permissionKeys());
 });

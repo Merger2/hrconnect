@@ -151,6 +151,7 @@ function dbml_type(string $pgType): string
             return $dbml.substr($pgType, strlen($pg));
         }
     }
+
     // vector(768), enums, custom types — keep as-is
     return $pgType;
 }
@@ -161,7 +162,7 @@ function dbml_default(?string $expr): ?string
         return null;
     }
     // serial identity
-    if (str_starts_with($expr, "nextval(")) {
+    if (str_starts_with($expr, 'nextval(')) {
         return 'increment';
     }
     $expr = trim($expr);
@@ -203,7 +204,7 @@ $columnCache = [];
 $pkCache = [];
 
 foreach ($tableNames as $table) {
-    $res = pg_query_params($conn, "
+    $res = pg_query_params($conn, '
         SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS type,
                a.attnotnull, a.attnum,
                pg_get_expr(d.adbin, d.adrelid) AS default_expr
@@ -211,15 +212,15 @@ foreach ($tableNames as $table) {
         LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum
         WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped
         ORDER BY a.attnum
-    ", [$table]);
+    ', [$table]);
     $columnCache[$table] = pg_fetch_all($res) ?: [];
 
-    $res = pg_query_params($conn, "
+    $res = pg_query_params($conn, '
         SELECT a.attname
         FROM pg_index i
         JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
         WHERE i.indrelid = $1::regclass AND i.indisprimary
-    ", [$table]);
+    ', [$table]);
     $pkCache[$table] = array_map(fn ($r) => $r['attname'], pg_fetch_all($res) ?: []);
 }
 

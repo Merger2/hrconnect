@@ -80,14 +80,14 @@ test('manager-only user routes declare explicit subordinate review middleware', 
     $routeCollection = collect(Route::getRoutes()->getRoutes())->keyBy(fn ($route) => $route->uri());
 
     foreach ([
-        'approvals',
-        'approvals/history',
-        'team-kasbon',
-    ] as $uri) {
+        'approvals' => 'can:reviewTeamOrHrApprovals',
+        'approvals/history' => 'can:reviewTeamOrHrApprovals',
+        'team-kasbon' => 'can:reviewSubordinateRequests',
+    ] as $uri => $middleware) {
         $route = $routeCollection->get($uri);
 
         expect($route)->not->toBeNull()
-            ->and($route->gatherMiddleware())->toContain('can:reviewSubordinateRequests');
+            ->and($route->gatherMiddleware())->toContain($middleware);
     }
 });
 
@@ -104,6 +104,28 @@ test('subordinate review gate only allows users with subordinates', function () 
 
     expect(Gate::forUser($manager)->allows('reviewSubordinateRequests'))->toBeTrue()
         ->and(Gate::forUser($regularUser)->allows('reviewSubordinateRequests'))->toBeFalse();
+});
+
+test('admin hr role can open approval entry points through hr approval gate', function () {
+    seedUserApprovalCoverageSettings();
+
+    $admin = User::factory()->admin()->create();
+    $role = Role::create([
+        'name' => 'Admin HR Approver_'.uniqid(),
+        'slug' => 'admin_hr_approver_'.uniqid(),
+        'permission_keys' => ['manage_leave_approvals'],
+    ]);
+    $admin->roles()->sync([$role->id]);
+
+    expect(Gate::forUser($admin->fresh())->allows('reviewTeamOrHrApprovals'))->toBeTrue();
+
+    $this->actingAs($admin->fresh())
+        ->get(route('approvals'))
+        ->assertOk();
+
+    $this->actingAs($admin->fresh())
+        ->get(route('approvals.history'))
+        ->assertOk();
 });
 
 test('direct manager assignment overrides inferred division hierarchy for approvals', function () {

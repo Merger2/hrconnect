@@ -25,6 +25,13 @@ Route::middleware([
 ])->group(function () {
     Route::livewire('/notifications', 'user.notifications-page')->name('notifications');
 
+    Route::livewire('/approvals', 'user.team-approvals')
+        ->name('approvals')
+        ->can('reviewTeamOrHrApprovals');
+    Route::livewire('/approvals/history', 'user.team-approvals-history')
+        ->name('approvals.history')
+        ->can('reviewTeamOrHrApprovals');
+
     Route::middleware('user')->group(function () {
         Route::get('/home', HomeController::class)->name('home');
 
@@ -76,12 +83,6 @@ Route::middleware([
         // M23: VIEW_CUSTOM_FORMS ada di enum tapi tidak di-seed ke role employee
         // (akan 403 semua employee) — grup middleware menutup akses.
         Route::livewire('/forms', 'user.my-custom-forms')->name('my-forms');
-        Route::livewire('/approvals', 'user.team-approvals')
-            ->name('approvals')
-            ->can('reviewSubordinateRequests');
-        Route::livewire('/approvals/history', 'user.team-approvals-history')
-            ->name('approvals.history')
-            ->can('reviewSubordinateRequests');
         Route::livewire('/overtime', 'user.overtime-request')->name('overtime')->can('viewAny', Overtime::class);
         Route::livewire('/my-kasbon', 'user.finance.my-cash-advances')->name('my-kasbon')->middleware('feature.lock:cash_advance,user,home')->can('viewAny', CashAdvance::class);
         Route::livewire('/team-kasbon', 'user.finance.team-cash-advance-manager')

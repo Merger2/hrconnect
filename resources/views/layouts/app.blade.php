@@ -7,8 +7,13 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- CSP nonce for Alpine.js inline handlers -->
+        <script nonce="{{ $csp_nonce }}">
+            window.AlpineCspNonce = '{{ $csp_nonce }}';
+        </script>
+
         <!-- Broadcast Configuration for Echo -->
-        <script>
+        <script nonce="{{ $csp_nonce }}">
             window.PasPapanBroadcast = {
                 enabled: {{ config('broadcasting.default') !== 'null' ? 'true' : 'false' }},
                 connection: '{{ config('broadcasting.default') }}',
@@ -43,12 +48,18 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="preload" as="style"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
+            integrity="sha384-Zy5cAR7QPxVY3PSgVMu2oC6kq+ux1nQRUSA9/fpLyFF1hI/3rkmkMHSp5LdpGouE"
+            crossorigin="anonymous">
         <link rel="stylesheet" media="print" onload="this.media='all'"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
+            integrity="sha384-Zy5cAR7QPxVY3PSgVMu2oC6kq+ux1nQRUSA9/fpLyFF1hI/3rkmkMHSp5LdpGouE"
+            crossorigin="anonymous">
         <noscript>
             <link rel="stylesheet"
-                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
+                integrity="sha384-Zy5cAR7QPxVY3PSgVMu2oC6kq+ux1nQRUSA9/fpLyFF1hI/3rkmkMHSp5LdpGouE"
+                crossorigin="anonymous">
         </noscript>
 
         <!-- PWA -->
@@ -59,7 +70,7 @@
         <meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">
         <link rel="apple-touch-icon" href="/apple-icon-180.png">
 
-        <script>
+        <script nonce="{{ $csp_nonce }}">
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', async () => {
                     try {
@@ -94,7 +105,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Styles -->
-        @livewireStyles
+        @livewireStyles(['nonce' => $csp_nonce])
     </head>
     @php $isAdminRoute = request()->routeIs('admin.*'); @endphp
     <body class="font-sans antialiased {{ $isAdminRoute ? 'admin-ui' : 'user-ui' }}">
@@ -120,7 +131,7 @@
 
 @stack('modals')
 
-@livewireScripts
+@livewireScripts(['nonce' => $csp_nonce])
 
 @unless ($isAdminRoute)
     <x-user.app-bottom-navigation />

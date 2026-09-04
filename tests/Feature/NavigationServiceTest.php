@@ -62,7 +62,7 @@ test('navigation service renders manager label_for override', function () {
 });
 
 test('navigation service includes group when at least one item is authorized', function () {
-    $user = navRoleUser('hr', ['view_dashboard', 'view_attendances']);
+    $user = navRoleUser('admin', ['view_dashboard', 'view_attendances']);
 
     $menu = app(NavigationService::class)->build($user);
 
@@ -72,6 +72,22 @@ test('navigation service includes group when at least one item is authorized', f
         ->and($titles)->toContain('SDM')
         // Keuangan butuh view_assets/view_payslip — tanpa itu tidak tampil.
         ->not->toContain('Keuangan');
+});
+
+test('navigation service does not depend on legacy hr role slug', function () {
+    $admin = navRoleUser('admin', ['view_dashboard', 'view_leaves', 'manage_leave_approvals']);
+    $legacyHr = navRoleUser('hr', ['view_dashboard', 'view_leaves', 'manage_leave_approvals']);
+
+    $adminRoutes = collect(app(NavigationService::class)->build($admin))
+        ->flatMap(fn ($group) => array_column($group['items'], 'route'))
+        ->all();
+    $legacyHrRoutes = collect(app(NavigationService::class)->build($legacyHr))
+        ->flatMap(fn ($group) => array_column($group['items'], 'route'))
+        ->all();
+
+    expect($adminRoutes)->toContain('admin.leaves')
+        ->and($adminRoutes)->toContain('approvals')
+        ->and($legacyHrRoutes)->not->toContain('admin.leaves');
 });
 
 test('navigation service returns empty for non-user authenticatable', function () {

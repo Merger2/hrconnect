@@ -27,5 +27,10 @@ class AuthServiceProvider extends ServiceProvider
                 });
             }
         }
+
+        Gate::define('reviewTeamOrHrApprovals', function ($user) {
+            return $user->can('reviewSubordinateRequests')
+                || $user->can('manageLeaveApprovals');
+        });
     }
 }

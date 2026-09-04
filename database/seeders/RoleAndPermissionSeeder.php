@@ -64,12 +64,16 @@ class RoleAndPermissionSeeder extends Seeder
      */
     private function syncRole(string $name, array $permissions): Role
     {
-        $role = Role::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
+        $slug = str($name)->lower()->toString();
 
-        if (! $role->slug) {
-            $role->slug = str($name)->lower();
-            $role->save();
-        }
+        $role = Role::query()
+            ->where('guard_name', 'web')
+            ->where(fn ($query) => $query->where('name', $name)->orWhere('slug', $slug))
+            ->first() ?? new Role(['guard_name' => 'web']);
+
+        $role->name = $name;
+        $role->slug = $slug;
+        $role->save();
 
         $role->syncPermissions(
             array_map(fn (PermissionEnum $p) => $p->value, $permissions)
@@ -124,6 +128,7 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::MANAGE_ATTENDANCES,
             PermissionEnum::MANAGE_SCHEDULES,
             PermissionEnum::MANAGE_HOLIDAYS,
+            PermissionEnum::MANAGE_ATTENDANCE_CORRECTIONS,
             PermissionEnum::MANAGE_SHIFT_SWAP_APPROVALS,
             // Leave
             PermissionEnum::VIEW_LEAVES,
@@ -147,6 +152,7 @@ class RoleAndPermissionSeeder extends Seeder
             // Loan/Asset
             PermissionEnum::VIEW_LOANS,
             PermissionEnum::MANAGE_LOANS,
+            PermissionEnum::MANAGE_CASH_ADVANCES,
             PermissionEnum::VIEW_ASSETS,
             PermissionEnum::MANAGE_ASSETS,
             // Announcement + HR Checklists

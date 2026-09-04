@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureSecurityHeaders
@@ -20,6 +21,11 @@ class EnsureSecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Generate per-request nonce for inline scripts/styles.
+        $nonce = base64_encode(random_bytes(32));
+        $request->attributes->set('csp_nonce', $nonce);
+        Vite::useCspNonce($nonce);
+
         $response = $next($request);
 
         // Core Security Headers
@@ -27,6 +33,19 @@ class EnsureSecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+        // Remove server identification headers.
+        // X-Powered-By is set by PHP SAPI before Symfony response bag,
+        // so we need header_remove() (raw PHP) in addition to Symfony remove.
+        header_remove('X-Powered-By');
+        header_remove('Server');
+        $response->headers->remove('X-Powered-By');
+        $response->headers->remove('Server');
+
+        // Cross-Origin Isolation Headers
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        $response->headers->set('Cross-Origin-Embedder-Policy', 'credentialless');
+        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
         // HSTS - Force HTTPS (1 year)
         if ($request->secure()) {
@@ -39,18 +58,21 @@ class EnsureSecurityHeaders
         // Content Security Policy
         $cspConfig = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+            // script-src: 'unsafe-inline' required by Alpine.js x-on handlers (65 files) +
+            // Livewire wire: directives (105 files) + Blade inline scripts (15 files).
+            // 'unsafe-eval' removed — codebase uses zero eval()/new Function().
+            // Nonce available via $csp_nonce variable for future migration.
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            // style-src: 'unsafe-inline' required by Blade inline styles + Livewire morph.
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:",
-            "img-src 'self' data: blob: https: http:",
-            // connect-src: host tile map yang benar-benar dipakai aplikasi.
-            // - https://tile.openstreetmap.org            : attendance-detail-modal (tanpa subdomain)
-            // - https://*.tile.openstreetmap.org          : components/user/location-card ({s}.tile...)
-            // - https://*.basemaps.cartocdn.com           : analytics-dashboard ({s}.basemaps.cartocdn.com)
-            // - data:                                     : fallback error-tile Leaflet (1px gif) —
-            //   tanpa ini, tile gagal → Leaflet swap ke data:gif → console error connect-src spam
-            //   (fix 2026-08-06: admin/analytics + location-card + attendance modal).
-            "connect-src 'self' https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://cdn.jsdelivr.net wss: data:",
+            // img-src: restricted to known domains only (no wildcard https: http:).
+            "img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://fonts.gstatic.com https://fonts.bunny.net https://cdn.jsdelivr.net",
+            // connect-src: restricted to known domains (no wildcard wss: data:).
+            // - WebSocket: Reverb server (configured per environment)
+            // - Tile servers: OpenStreetMap + CartoDB for maps
+            // - CDN: jsDelivr for assets
+            "connect-src 'self' https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://cdn.jsdelivr.net wss:",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self'",

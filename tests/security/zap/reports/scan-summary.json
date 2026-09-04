@@ -1,0 +1,63 @@
+{
+  "scan_date": "2026-09-03 07:35:45",
+  "target": "http://127.0.0.1:8000",
+  "method": "ZAP Full Active Scan (HIGH strength, LOW threshold)",
+  "roles_scanned": [
+    "employee",
+    "manager",
+    "finance",
+    "hr"
+  ],
+  "results": [
+    {
+      "role": "employee",
+      "total_alerts": 139,
+      "risk_counts": {
+        "High": 1,
+        "Medium": 28,
+        "Low": 37,
+        "Informational": 73
+      },
+      "urls_discovered": 0
+    },
+    {
+      "role": "manager",
+      "total_alerts": 141,
+      "risk_counts": {
+        "High": 1,
+        "Medium": 30,
+        "Low": 37,
+        "Informational": 73
+      },
+      "urls_discovered": 0
+    },
+    {
+      "role": "finance",
+      "total_alerts": 142,
+      "risk_counts": {
+        "High": 1,
+        "Medium": 31,
+        "Low": 37,
+        "Informational": 73
+      },
+      "urls_discovered": 0
+    },
+    {
+      "role": "hr",
+      "total_alerts": 143,
+      "risk_counts": {
+        "High": 1,
+        "Medium": 32,
+        "Low": 37,
+        "Informational": 73
+      },
+      "urls_discovered": 0
+    }
+  ],
+  "combined_risk_summary": {
+    "High": 4,
+    "Medium": 121,
+    "Low": 148,
+    "Informational": 292
+  }
+}

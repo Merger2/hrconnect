@@ -20,9 +20,10 @@ class EnsureNoOtherActiveSessions
     {
         $login = (string) $request->input('email');
 
-        $user = filter_var($login, FILTER_VALIDATE_EMAIL)
-            ? User::where('email', $login)->first()
-            : User::where('phone', $login)->first();
+        // Only support email-based login. The phone column does not exist in
+        // the users table — the previous fallback to User::where('phone', …)
+        // caused a PDOException (HTTP 500) when the input was not a valid email.
+        $user = User::where('email', $login)->first();
 
         if ($user && Hash::check((string) $request->input('password'), $user->password)) {
             // Multi-device default; blokir hanya saat AUTH_SINGLE_DEVICE=true.

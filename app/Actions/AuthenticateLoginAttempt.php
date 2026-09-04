@@ -16,11 +16,10 @@ class AuthenticateLoginAttempt
 
     public function __invoke(Request $request): ?User
     {
-        if (filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
-            $user = User::where('email', $request->email)->first();
-        } else {
-            $user = User::where('phone', $request->email)->first();
-        }
+        // Only email-based login. The phone column does not exist in
+        // the users table — the previous fallback to User::where('phone', …)
+        // caused a PDOException (HTTP 500) when input contained SQL-like characters.
+        $user = User::where('email', $request->email)->first();
 
         if ($user && Hash::check($request->password, $user->password) && $user->canAuthenticate()) {
             // Multi-device diizinkan secara default; blokir hanya jika

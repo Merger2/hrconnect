@@ -30,7 +30,15 @@ class RbacRegistry
                 'label' => ucfirst(str_replace('_', ' ', $section)),
                 'description' => null,
             ];
-            $grouped[$section]['modules'][$key] = $module;
+
+            // Add enum_permission to each action for UI consistency
+            $moduleWithEnum = $module;
+            foreach (($module['actions'] ?? []) as $actionKey => $action) {
+                $moduleWithEnum['actions'][$actionKey]['enum_permission'] =
+                    static::dotNotationToEnum($action['permission'] ?? '');
+            }
+
+            $grouped[$section]['modules'][$key] = $moduleWithEnum;
         }
 
         return $grouped;
@@ -53,6 +61,66 @@ class RbacRegistry
         }
 
         return array_values(array_unique($permissions));
+    }
+
+    /**
+     * Convert a dot-notation permission key (e.g. 'admin.dashboard.view')
+     * to its enum-style equivalent (e.g. 'view_dashboard').
+     *
+     * Returns null when no enum equivalent exists (e.g. 'admin.scope.global').
+     */
+    public static function dotNotationToEnum(string $dot): ?string
+    {
+        // Special cases where the mapping is not mechanical
+        $specialCases = [
+            'admin.rbac.assign' => 'assign_roles',
+            'admin.reports.export' => 'export_admin_reports',
+            'admin.notifications.manage' => 'manage_admin_notifications',
+            'admin.appraisals.view' => 'view_admin_appraisals',
+            'admin.scope.global' => null,
+        ];
+
+        if (array_key_exists($dot, $specialCases)) {
+            return $specialCases[$dot];
+        }
+
+        // Mechanical conversion: admin.{module}.{action} → {action}_{module}
+        $parts = explode('.', $dot);
+
+        if (count($parts) !== 3 || $parts[0] !== 'admin') {
+            return null;
+        }
+
+        [$prefix, $module, $action] = $parts;
+
+        return "{$action}_{$module}";
+    }
+
+    /**
+     * Return all permission keys in enum-style format (snake_case).
+     *
+     * This bridges the gap between config/rbac.php (dot-notation) and
+     * App\Enums\Permission (snake_case) used by the seeder and enforcement layer.
+     */
+    public static function permissionKeysAsEnum(): array
+    {
+        static $enumKeys;
+
+        if ($enumKeys !== null) {
+            return $enumKeys;
+        }
+
+        $enumKeys = [];
+
+        foreach (static::permissionKeys() as $dot) {
+            $enum = static::dotNotationToEnum($dot);
+
+            if ($enum !== null) {
+                $enumKeys[] = $enum;
+            }
+        }
+
+        return array_values(array_unique($enumKeys));
     }
 
     public static function readOnlyPermissionKeys(): array
