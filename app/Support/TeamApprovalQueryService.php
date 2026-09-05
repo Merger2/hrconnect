@@ -125,7 +125,7 @@ class TeamApprovalQueryService
 
     protected function leaveQuery(array $subordinateIds, string $search, bool $history): mixed
     {
-        $query = Leave::query()->with(['employee', 'leaveType'])
+        $query = Leave::query()->with(['employee.user', 'employee.position', 'leaveType'])
             ->whereHas('employee', fn ($q) => $q->whereIn('user_id', $subordinateIds));
 
         if ($history) {

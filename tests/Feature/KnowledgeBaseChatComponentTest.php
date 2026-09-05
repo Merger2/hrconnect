@@ -4,140 +4,67 @@ declare(strict_types=1);
 
 use App\Livewire\User\KnowledgeBaseChat;
 use App\Models\User;
-use App\Services\KnowledgeBase\KnowledgeBaseService;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $this->seed(RoleAndPermissionSeeder::class);
+});
+
 /**
- * Coverage gap: Livewire KnowledgeBaseChat (kirim pertanyaan, citation,
- * error handling). KnowledgeBaseService sendiri sudah ter-cover tebal di
- * Unit/Services/KnowledgeBaseServiceTest + KbEvalDatasetTest + AiCostGuardTest
- * — komponen ini hanya menguji wiring-nya (service di-mock).
+ * Coverage: halaman KB Chat kini SHELL — seluruh logika chat (kirim pesan,
+ * streaming jawaban, sources) dijalankan client-side lewat Alpine + fetch ke
+ * endpoint SSE `knowledge-base.chat.stream` (pola ship-ai-with-laravel),
+ * BUKAN lewat action Livewire. Komponen hanya otorisasi + prefill ?q= +
+ * welcome message. Alur stream di-cover oleh KnowledgeBaseServiceTest
+ * (chatStream) + E2E kb-chat.spec.ts (API Gemini nyata) + feature test
+ * endpoint SSE (fallback pg_trgm deterministic).
  */
-test('chat renders welcome message for authorized user', function () {
+test('chat shell renders for authorized user', function () {
     $admin = User::factory()->admin(true)->create();
 
     Livewire::actingAs($admin)
         ->test(KnowledgeBaseChat::class)
         ->assertOk()
-        ->assertCount('messages', 1)
-        ->assertSet('messages.0.role', 'assistant')
-        ->assertSet('messages.0.is_welcome', true);
+        ->assertSet('welcomeMessage', fn ($value) => str_contains($value, 'asisten AI'))
+        ->assertSet('initialQuestion', '');
 });
 
-test('chat rejects question shorter than 5 characters', function () {
-    $admin = User::factory()->admin(true)->create();
+test('chat shell denies user without view_knowledgebase', function () {
+    // User tanpa role apa pun → tidak punya permission view_knowledgebase.
+    // (Role employee JUST punya view_knowledgebase — lihat
+    // RoleAndPermissionSeeder::employeePermissions.)
+    $user = User::factory()->create();
 
-    Livewire::actingAs($admin)
+    Livewire::actingAs($user)
         ->test(KnowledgeBaseChat::class)
-        ->set('question', 'abc')
-        ->call('sendMessage')
-        ->assertHasErrors(['question']);
+        ->assertForbidden();
 });
 
-test('sendMessage appends user message and streaming placeholder', function () {
-    $admin = User::factory()->admin(true)->create();
+test('chat shell prefills initial question from ?q=', function () {
+    // Route /knowledge-base/chat berada di grup middleware `user` (butuh
+    // group 'user') — pakai employee role (punya view_knowledgebase).
+    $employee = User::factory()->create();
+    $employee->assignRole('employee');
 
-    Livewire::actingAs($admin)
-        ->test(KnowledgeBaseChat::class)
-        ->set('question', 'Apa itu jam kerja?')
-        ->call('sendMessage')
-        ->assertHasNoErrors()
-        ->assertCount('messages', 3)
-        ->assertSet('messages.1.role', 'user')
-        ->assertSet('messages.1.text', 'Apa itu jam kerja?')
-        ->assertSet('messages.2.is_streaming', true)
-        ->assertSet('isLoading', true)
-        ->assertSet('question', '');
+    $this->actingAs($employee)
+        ->get('/knowledge-base/chat?q=Apa+itu+cuti+tahunan')
+        ->assertOk()
+        ->assertSee('data-kb-initial="Apa itu cuti tahunan"', false);
 });
 
-test('ask (suggestion chip) kirim pertanyaan + jawaban + sources dalam satu request', function () {
-    $admin = User::factory()->admin(true)->create();
+test('chat shell renders welcome bubble markup for Alpine init', function () {
+    $employee = User::factory()->create();
+    $employee->assignRole('employee');
 
-    $this->mock(KnowledgeBaseService::class, function ($mock) {
-        $mock->shouldReceive('chatStream')
-            ->once()
-            ->andReturnUsing(function () {
-                yield ['text' => 'Cuti tahunan 12 hari per tahun.', 'sources' => [['title' => 'Cuti Tahunan']]];
-            });
-    });
+    $html = $this->actingAs($employee)
+        ->get('/knowledge-base/chat')
+        ->getContent();
 
-    Livewire::actingAs($admin)
-        ->test(KnowledgeBaseChat::class)
-        ->call('ask', 'Apa itu cuti tahunan?')
-        ->assertHasNoErrors()
-        ->assertSet('isLoading', false)
-        ->assertSet('question', '')
-        ->assertCount('messages', 3)
-        ->assertSet('messages.1.role', 'user')
-        ->assertSet('messages.1.text', 'Apa itu cuti tahunan?')
-        ->assertSet('messages.2.is_streaming', false)
-        ->assertSet('messages.2.text', 'Cuti tahunan 12 hari per tahun.')
-        ->assertSet('messages.2.sources.0.title', 'Cuti Tahunan');
-});
-
-test('ask menolak pertanyaan pendek (< 5 char)', function () {
-    $admin = User::factory()->admin(true)->create();
-
-    Livewire::actingAs($admin)
-        ->test(KnowledgeBaseChat::class)
-        ->call('ask', 'abc')
-        ->assertHasErrors(['question']);
-});
-
-test('processAnswer fills assistant answer with sources', function () {
-    $admin = User::factory()->admin(true)->create();
-
-    $this->mock(KnowledgeBaseService::class, function ($mock) {
-        $mock->shouldReceive('chatStream')
-            ->once()
-            ->andReturnUsing(function () {
-                yield ['text' => 'Jam kerja standar 08:00-17:00 WIB.', 'sources' => [['title' => 'Peraturan Perusahaan']]];
-            });
-    });
-
-    Livewire::actingAs($admin)
-        ->test(KnowledgeBaseChat::class)
-        ->set('question', 'Apa itu jam kerja?')
-        ->call('sendMessage')
-        ->call('processAnswer')
-        ->assertSet('isLoading', false)
-        ->assertSet('messages.2.is_streaming', false)
-        ->assertSet('messages.2.text', 'Jam kerja standar 08:00-17:00 WIB.')
-        ->assertSet('messages.2.sources.0.title', 'Peraturan Perusahaan');
-});
-
-test('processAnswer surfaces error state when service fails', function () {
-    $admin = User::factory()->admin(true)->create();
-
-    $this->mock(KnowledgeBaseService::class, function ($mock) {
-        $mock->shouldReceive('chatStream')
-            ->once()
-            ->andThrow(new RuntimeException('AI provider down'));
-    });
-
-    Livewire::actingAs($admin)
-        ->test(KnowledgeBaseChat::class)
-        ->set('question', 'Apa itu jam kerja?')
-        ->call('sendMessage')
-        ->call('processAnswer')
-        ->assertSet('isLoading', false)
-        ->assertSet('messages.2.error', true)
-        ->assertSet('messages.2.is_streaming', false);
-});
-
-test('startNewChat resets conversation to welcome message', function () {
-    $admin = User::factory()->admin(true)->create();
-
-    Livewire::actingAs($admin)
-        ->test(KnowledgeBaseChat::class)
-        ->set('question', 'Apa itu jam kerja?')
-        ->call('sendMessage')
-        ->call('startNewChat')
-        ->assertCount('messages', 1)
-        ->assertSet('conversationId', null)
-        ->assertSet('question', '')
-        ->assertSet('messages.0.is_welcome', true);
+    expect($html)->toContain('x-data="kbChat()"');
+    expect($html)->toContain('data-kb-welcome=');
+    expect($html)->toContain('/knowledge-base/chat/stream');
 });

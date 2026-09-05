@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Collaboration\DownloadCloudFileController;
+use App\Http\Controllers\KnowledgeBaseChatStreamController;
 use App\Http\Controllers\User\AppraisalExportPdfController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\EmployeeDocumentDownloadController;
@@ -103,6 +104,12 @@ Route::middleware([
         // Knowledge Base Chat
         Route::livewire('/knowledge-base/chat', 'user.knowledge-base-chat')
             ->name('knowledge-base.chat')
+            ->can('view_knowledgebase');
+
+        // SSE streaming endpoint — dipakai halaman chat (full Alpine fetch/reader,
+        // bukan Livewire $this->stream — bug vendor Livewire, AUDIT.md #60).
+        Route::post('/knowledge-base/chat/stream', KnowledgeBaseChatStreamController::class)
+            ->name('knowledge-base.chat.stream')
             ->can('view_knowledgebase');
     });
 });

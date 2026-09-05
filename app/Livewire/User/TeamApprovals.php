@@ -239,7 +239,9 @@ class TeamApprovals extends Component
     {
         $overtime = Overtime::find($id);
 
-        if (! $overtime || ! $this->isSubordinate($overtime->user_id)) {
+        // Overtime hanya punya kolom employee_id (bukan user_id) — guard lama
+        // $overtime->user_id selalu null → approve manager tak pernah jalan.
+        if (! $overtime || ! $this->isSubordinate($overtime->employee?->user_id)) {
             return;
         }
 
@@ -252,7 +254,7 @@ class TeamApprovals extends Component
     {
         $overtime = Overtime::find($id);
 
-        if (! $overtime || ! $this->isSubordinate($overtime->user_id)) {
+        if (! $overtime || ! $this->isSubordinate($overtime->employee?->user_id)) {
             return;
         }
 

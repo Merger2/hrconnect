@@ -21,6 +21,8 @@ class WorkFromHomeRequest extends Model implements CipherSweetEncrypted
 
     public const STATUS_PENDING = 'pending';
 
+    public const STATUS_APPROVED_L1 = 'approved_l1';
+
     public const STATUS_APPROVED = 'approved';
 
     public const STATUS_REJECTED = 'rejected';

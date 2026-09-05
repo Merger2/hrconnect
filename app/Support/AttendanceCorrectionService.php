@@ -60,7 +60,10 @@ class AttendanceCorrectionService
                     $nested->where('reason', 'like', '%'.$search.'%')
                         ->orWhereHas('user', function (Builder $userQuery) use ($search) {
                             $userQuery->where('name', 'like', '%'.$search.'%')
-                                ->orWhere('nip', 'like', '%'.$search.'%');
+                                // nip kolomnya di `employees` (accessor User::nip
+                                // tidak bisa dipakai query builder) — tanpa relasi
+                                // ini search admin 500 SQLSTATE undefined column.
+                                ->orWhereHas('employee', fn (Builder $employeeQuery) => $employeeQuery->where('nip', 'like', '%'.$search.'%'));
                         });
                 });
             })
@@ -316,7 +319,17 @@ class AttendanceCorrectionService
 
     private function needsSupervisorReview(User $user): bool
     {
-        return (bool) optional($user->supervisor)->id;
+        // Konsisten dgn ApprovalActorService::subordinateIds — relasi manajemen
+        // bisa via users.manager_id ATAU employees.parent_id/manager_id (org
+        // tree). Sebelumnya cuma users.manager_id: karyawan hierarki legacy
+        // (parent_id) langsung pending_admin — manager L1 tidak pernah terlibat
+        // padahal card koreksi mereka TAMPIL di tab manager (dan klik approve
+        // di status pending_admin melempar AuthorizationException).
+        $employee = $user->employee;
+
+        return (bool) ($user->manager_id
+            || $employee?->parent_id
+            || $employee?->manager_id);
     }
 
     private function canSupervisorReview(AttendanceCorrection $correction, User $actor): bool

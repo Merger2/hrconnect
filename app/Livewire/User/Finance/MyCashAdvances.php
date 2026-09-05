@@ -6,6 +6,7 @@ namespace App\Livewire\User\Finance;
 
 use App\Models\CashAdvance;
 use App\Models\Employee;
+use App\Support\MoneyInput;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
@@ -18,7 +19,7 @@ final class MyCashAdvances extends Component
 
     public bool $showCreateModal = false;
 
-    public ?float $amount = null;
+    public $amount;
 
     public string $purpose = '';
 
@@ -65,6 +66,8 @@ final class MyCashAdvances extends Component
     public function submit(): void
     {
         $this->authorize('create', CashAdvance::class);
+
+        $this->amount = MoneyInput::digitsOnly($this->amount);
 
         $validated = $this->validate([
             'amount' => ['required', 'numeric', 'min:1'],

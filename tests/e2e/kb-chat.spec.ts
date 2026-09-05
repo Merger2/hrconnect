@@ -36,7 +36,9 @@ test('halaman detail dokumen menampilkan isi lengkap', async ({ page }) => {
   await card.getByRole('link', { name: /Baca selengkapnya|Read more/ }).click();
   await page.waitForURL(/\/knowledge-base\/\d+/, { timeout: 15000 });
 
-  const article = page.locator('article');
+  // Content article di-scope ke kartu detail KB — widget layout (carousel
+  // pengumuman di header app) juga memakai <article>, jadi jangan locator luas.
+  const article = page.locator('section[aria-labelledby="kb-detail-title"] article');
   await expect(article).toBeVisible({ timeout: 15000 });
   const text = (await article.textContent()) ?? '';
   expect(text.trim().length).toBeGreaterThan(10);

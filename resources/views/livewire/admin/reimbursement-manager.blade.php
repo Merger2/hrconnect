@@ -17,8 +17,9 @@
                 <x-forms.label for="reimbursement-status-filter" value="{{ __('Approval Status') }}"
                     class="mb-1.5 block" />
                 <x-forms.select id="reimbursement-status-filter" wire:model.live="statusFilter" class="w-full">
-                    <option value="">{{ __('All statuses') }}</option>
+                    <option value="all">{{ __('All statuses') }}</option>
                     <option value="pending">{{ __('Pending') }}</option>
+                    <option value="pending_finance">{{ __('Pending Finance') }}</option>
                     <option value="approved">{{ __('Approved') }}</option>
                     <option value="rejected">{{ __('Rejected') }}</option>
                 </x-forms.select>

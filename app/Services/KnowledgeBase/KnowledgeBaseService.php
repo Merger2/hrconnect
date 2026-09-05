@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\KnowledgeBase;
 
 use App\Ai\Agents\HrKnowledgeBaseAgent;
+use App\Ai\Agents\HrKnowledgeBaseChatAgent;
 use App\Enums\KnowledgeBaseCategory;
 use App\Enums\KnowledgeBaseStatus;
 use App\Exceptions\BusinessRuleException;
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Ai\Streaming\Events\Error as StreamError;
+use Laravel\Ai\Streaming\Events\TextDelta;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -47,11 +51,14 @@ class KnowledgeBaseService
     /**
      * Chat AI RAG — SSE streaming version.
      *
-     * Yields SSE-compatible arrays for StreamedResponse.
-     * Flow: embed question → vector search top-5 → stream via agent.
+     * Yields SSE-compatible arrays untuk StreamedResponse.
+     * Flow: embed question → vector search top-5 → stream jawaban via agent
+     * (HrKnowledgeBaseChatAgent — TANPA structured output, karena laravel/ai
+     * menolak stream untuk agent ber-schema). Jawaban di-stream per TextDelta
+     * (efek ketik per kata), lalu meta (conversation_id + sources) di akhir.
      *
      * @param  User|null  $user  User to associate conversation with (for memory persistence)
-     * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array}, void, void>
+     * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array, fallback?: bool, no_results?: bool}, void, void>
      */
     public function chatStream(string $question, ?string $conversationId = null, ?User $user = null): \Generator
     {
@@ -92,16 +99,30 @@ PERTANYAAN: {$question}
 JAWABAN:
 PROMPT;
 
-            $agent = $this->prepareAgent($user, $conversationId);
-            // Streaming structured output is not supported by Gemini,
-            // so we use sync prompt() and yield the full answer as a single event.
-            $result = $agent->prompt($agentPrompt, model: $this->model());
+            $agent = $this->prepareStreamingAgent($user, $conversationId);
+            $streamable = $agent->stream($agentPrompt, model: $this->model());
 
-            $this->recordGenerationUsage($cost, $result, $agentPrompt);
+            $newConversationId = $conversationId;
 
-            yield ['text' => $result['answer'] ?? ''];
+            $streamable->then(function ($response) use (&$newConversationId) {
+                $newConversationId = $response->conversationId ?? $newConversationId;
+            });
 
-            $newConversationId = $result->conversationId ?? $conversationId ?? (string) Str::uuid();
+            foreach ($streamable as $event) {
+                if ($event instanceof TextDelta) {
+                    yield ['text' => $event->delta];
+                }
+
+                if ($event instanceof StreamError) {
+                    // No silent degradation: error tengah stream harus terlihat.
+                    // Lempar supaya masuk catch → fallback pg_trgm di bawah.
+                    throw new RuntimeException('Gemini stream error: '.$event->message);
+                }
+            }
+
+            // Usage nyata dari metadata stream (prompt/completion/cache/reasoning)
+            // setelah stream selesai di-iterate.
+            $this->recordGenerationUsage($cost, $streamable, $agentPrompt);
 
             $sources = $chunks->map(fn (KnowledgeBase $kb) => [
                 'id' => $kb->id,
@@ -110,7 +131,7 @@ PROMPT;
             ])->all();
 
             yield [
-                'conversation_id' => $newConversationId,
+                'conversation_id' => $newConversationId ?? (string) Str::uuid(),
                 'sources' => $sources,
             ];
         } catch (Throwable $e) {
@@ -300,21 +321,33 @@ PROMPT;
     }
 
     /**
-     * Versi streaming dari greetingResponse.
+     * Versi streaming dari greetingResponse — teks di-stream per TextDelta.
      *
-     * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array}, void, void>
+     * @return \Generator<int, array{text?: string, conversation_id?: string, sources?: array, fallback?: bool}, void, void>
      */
     protected function streamGreeting(string $question, ?string $conversationId = null, ?User $user = null): \Generator
     {
-        $agent = $this->prepareAgent($user, $conversationId);
+        $agent = $this->prepareStreamingAgent($user, $conversationId);
 
         try {
-            $result = $agent->prompt($question, model: $this->model());
-            $this->recordGenerationUsage(app(AiCostGuard::class), $result, $question);
+            $streamable = $agent->stream($question, model: $this->model());
 
-            yield ['text' => $result['answer'] ?? $this->staticGreeting()];
+            $newConversationId = $conversationId;
+
+            $streamable->then(function ($response) use (&$newConversationId) {
+                $newConversationId = $response->conversationId ?? $newConversationId;
+            });
+
+            foreach ($streamable as $event) {
+                if ($event instanceof TextDelta) {
+                    yield ['text' => $event->delta];
+                }
+            }
+
+            $this->recordGenerationUsage(app(AiCostGuard::class), $streamable, $question);
+
             yield [
-                'conversation_id' => $result->conversationId ?? $conversationId ?? (string) Str::uuid(),
+                'conversation_id' => $newConversationId ?? $conversationId ?? (string) Str::uuid(),
                 'sources' => [],
             ];
         } catch (Throwable $e) {
@@ -355,6 +388,25 @@ PROMPT;
     protected function prepareAgent(?User $user, ?string $conversationId = null): HrKnowledgeBaseAgent
     {
         $agent = new HrKnowledgeBaseAgent;
+
+        if ($user) {
+            if ($conversationId) {
+                return $agent->continue($conversationId, as: $user);
+            }
+
+            return $agent->forUser($user);
+        }
+
+        return $agent;
+    }
+
+    /**
+     * Prepare the streaming agent (tanpa structured output) with optional
+     * conversation memory — dipakai chatStream()/streamGreeting()/SSE endpoint.
+     */
+    protected function prepareStreamingAgent(?User $user, ?string $conversationId = null): HrKnowledgeBaseChatAgent
+    {
+        $agent = new HrKnowledgeBaseChatAgent;
 
         if ($user) {
             if ($conversationId) {

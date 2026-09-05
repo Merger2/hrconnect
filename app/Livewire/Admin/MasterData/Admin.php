@@ -224,7 +224,9 @@ class Admin extends Component
                         ->where('name', 'like', $term)
                         ->orWhere('email', 'like', $term)
                         ->orWhere('phone', 'like', $term)
-                        ->orWhere('nip', 'like', $term)
+                        // nip kolomnya di `employees` — search via relasi
+                        // (users.nip tidak ada → 500 undefined column).
+                        ->orWhereHas('employee', fn ($employeeQuery) => $employeeQuery->where('nip', 'like', $term))
                         ->orWhere('group', 'like', $term);
                 })
             )

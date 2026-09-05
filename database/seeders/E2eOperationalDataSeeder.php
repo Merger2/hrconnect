@@ -196,6 +196,7 @@ class E2eOperationalDataSeeder extends Seeder
                     'major' => 'Teknik Informatika',
                     'graduation_year' => 2018,
                     'salary_type' => SalaryType::MONTHLY,
+                    'basic_salary' => 5_000_000, // dibutuhkan utk fitur kasbon
                     'employment_type' => EmploymentType::PERMANENT,
                     'shift_id' => $this->officeHourShiftId,
                     'address_detail' => 'Jl. Pegambiran No.292 B, Jakarta Timur',

@@ -60,19 +60,27 @@ class EnsureSecurityHeaders
             "default-src 'self'",
             // script-src: 'unsafe-inline' required by Alpine.js x-on handlers (65 files) +
             // Livewire wire: directives (105 files) + Blade inline scripts (15 files).
-            // 'unsafe-eval' removed — codebase uses zero eval()/new Function().
-            // Nonce available via $csp_nonce variable for future migration.
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            // 'unsafe-eval' WAJIB: Alpine.js build standar mengevaluasi SEMUA ekspresi
+            // (x-data/@click/x-show/x-on, termasuk @js() payload) via new Function() —
+            // tanpa 'unsafe-eval', seluruh interaksi Alpine mati diam-diam di browser
+            // (CSP violation "Evaluating a string as JavaScript"), bukan zero eval.
+            // Migrasi ke @alpinejs/csp (build bebas eval) bisa menghapus ini nanti;
+            // nonce tersedia via $csp_nonce untuk migrasi tersebut.
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
             // style-src: 'unsafe-inline' required by Blade inline styles + Livewire morph.
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:",
             // img-src: restricted to known domains only (no wildcard https: http:).
-            "img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://fonts.gstatic.com https://fonts.bunny.net https://cdn.jsdelivr.net",
-            // connect-src: restricted to known domains (no wildcard wss: data:).
+            // ui-avatars.com = avatar default Jetstream untuk user tanpa foto profil —
+            // dipakai di topbar semua halaman user (jangan diblokir, error console).
+            "img-src 'self' data: blob: https://ui-avatars.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://fonts.gstatic.com https://fonts.bunny.net https://cdn.jsdelivr.net",
+            // connect-src: restricted to known domains (no wildcard).
             // - WebSocket: Reverb server (configured per environment)
             // - Tile servers: OpenStreetMap + CartoDB for maps
             // - CDN: jsDelivr for assets
-            "connect-src 'self' https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://cdn.jsdelivr.net wss:",
+            // - data:: fallback error-tile Leaflet (1px gif) — tanpa ini tile gagal dan
+            //   console spam connect-src (fix 2026-08-06, jangan dicabut lagi).
+            "connect-src 'self' https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://cdn.jsdelivr.net wss: data:",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self'",

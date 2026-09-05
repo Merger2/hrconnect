@@ -62,20 +62,18 @@
     <!-- Material Symbols (icon font) — non-blocking: preload + async stylesheet.
          Dulu @import di app.css (render-blocking). display=block untuk icon font.
          SRI: integrity hash for Google Fonts Material Symbols CSS. -->
+    {{-- Google Fonts CSS dinamis → JANGAN pasang integrity SRI (hash selalu mismatch, stylesheet diblokir browser). --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
-        integrity="sha384-Zy5cAR7QPxVY3PSgVMu2oC6kq+ux1nQRUSA9/fpLyFF1hI/3rkmkMHSp5LdpGouE"
         crossorigin="anonymous">
     <link rel="stylesheet" media="print" onload="this.media='all'"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
-        integrity="sha384-Zy5cAR7QPxVY3PSgVMu2oC6kq+ux1nQRUSA9/fpLyFF1hI/3rkmkMHSp5LdpGouE"
         crossorigin="anonymous">
     <noscript>
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
-            integrity="sha384-Zy5cAR7QPxVY3PSgVMu2oC6kq+ux1nQRUSA9/fpLyFF1hI/3rkmkMHSp5LdpGouE"
             crossorigin="anonymous">
     </noscript>
 

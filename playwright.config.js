@@ -154,6 +154,22 @@ export default defineConfig({
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
       },
     },
+
+    // Workflow lintas role (kasus nyata): employee submit → manager approve L1 →
+    // HR approve L2 → verifikasi status. Serial di dalam spec (per test pakai
+    // storageState role berbeda; state default hanya untuk render awal).
+    {
+      name: 'chromium-workflow',
+      testMatch: /workflow-(approvals|modules|extra)\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'employee.json'),
+        serviceWorkers: 'block',
+      },
+    },
   ],
 
   // webServer disabled - server runs separately on localhost:8000
