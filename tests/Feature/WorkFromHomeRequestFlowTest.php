@@ -81,7 +81,7 @@ test('employee can submit work from home request and manager can approve it', fu
 
     $request->refresh();
 
-    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED)
+    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED_L1)
         ->and($request->reviewed_by)->toBe($manager->id)
         ->and($request->reviewed_at)->not->toBeNull();
 });
@@ -124,7 +124,7 @@ test('manager can approve wfh request when hierarchy is via employees.parent_id 
 
     $request->refresh();
 
-    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED)
+    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED_L1)
         ->and($request->reviewed_by)->toBe($manager->id)
         ->and($request->reviewed_at)->not->toBeNull();
 });

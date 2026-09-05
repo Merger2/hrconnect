@@ -234,7 +234,7 @@ test('manager inbox can approve work from home requests', function () {
         ->assertSee('Remote client support')
         ->call('approve', $request->id);
 
-    expect($request->fresh()->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED);
+    expect($request->fresh()->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED_L1);
 });
 
 test('manager inbox can mark custom form submissions reviewed within company scope', function () {

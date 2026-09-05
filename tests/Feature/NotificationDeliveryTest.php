@@ -175,7 +175,7 @@ test('overtime approval notifies employee with status update', function () {
 
     app(OvertimeApprovalService::class)->approve($overtime, $actor);
 
-    expect($overtime->refresh()->status->value)->toBe('approved');
+    expect($overtime->refresh()->status->value)->toBe('approved_l1');
 
     Notification::assertSentTo($employeeUser, OvertimeStatusUpdated::class);
 });

@@ -169,7 +169,7 @@ test('employee can request a shift for an empty schedule date and approval creat
         ->whereDate('date', $requestDate)
         ->first();
 
-    expect($request->status)->toBe(ShiftSwapRequest::STATUS_APPROVED)
+    expect($request->status)->toBe(ShiftSwapRequest::STATUS_APPROVED_L1)
         ->and($request->schedule_id)->toBe($schedule->id)
         ->and($schedule->shift_id)->toBe($requestedShift->id)
         ->and($schedule->is_off)->toBeFalse();
@@ -207,7 +207,7 @@ test('manager approval updates the employee schedule and stores approval history
     $request->refresh();
     $schedule->refresh();
 
-    expect($request->status)->toBe(ShiftSwapRequest::STATUS_APPROVED)
+    expect($request->status)->toBe(ShiftSwapRequest::STATUS_APPROVED_L1)
         ->and($request->reviewed_by)->toBe($manager->id)
         ->and($request->reviewed_at)->not->toBeNull()
         ->and($schedule->shift_id)->toBe($requestedShift->id);
@@ -287,7 +287,7 @@ test('admin approval page can approve empty date shift swap requests', function 
         ->whereDate('date', $requestDate)
         ->first();
 
-    expect($request->status)->toBe(ShiftSwapRequest::STATUS_APPROVED)
+    expect($request->status)->toBe(ShiftSwapRequest::STATUS_APPROVED_L1)
         ->and($request->reviewed_by)->toBe($admin->id)
         ->and($request->schedule_id)->toBe($schedule->id)
         ->and($schedule->shift_id)->toBe($requestedShift->id);
