@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Schedule;
 use App\Models\ShiftSwapRequest;
 use App\Models\User;
+use App\Notifications\ShiftSwapStatusUpdated;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -125,6 +126,8 @@ class ShiftSwapRequestService
                 'rejection_note' => null,
             ]);
 
+            $request->user?->notify(new ShiftSwapStatusUpdated($request));
+
             return __('Shift swap request approved and waiting for final approval.');
         });
     }
@@ -148,6 +151,8 @@ class ShiftSwapRequestService
                 'approved_at' => now(),
             ]);
 
+            $request->user?->notify(new ShiftSwapStatusUpdated($request));
+
             return __('Shift swap request approved and schedule updated.');
         });
     }
@@ -167,6 +172,8 @@ class ShiftSwapRequestService
                 'reviewed_at' => now(),
                 'rejection_note' => $note,
             ]);
+
+            $request->user?->notify(new ShiftSwapStatusUpdated($request));
 
             return __('Shift swap request rejected.');
         });

@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\RequestStatus;
 use App\Models\User;
 use App\Models\WorkFromHomeRequest;
+use App\Notifications\WfhRequestStatusUpdated;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,8 @@ class WorkFromHomeRequestService
             ])->save();
         });
 
+        $request->user?->notify(new WfhRequestStatusUpdated($request));
+
         return __('WFH request approved.');
     }
 
@@ -69,6 +72,8 @@ class WorkFromHomeRequestService
             ])->save();
         });
 
+        $request->user?->notify(new WfhRequestStatusUpdated($request));
+
         return __('WFH request approved.');
     }
 
@@ -87,6 +92,8 @@ class WorkFromHomeRequestService
                 'review_note' => $note,
             ])->save();
         });
+
+        $request->user?->notify(new WfhRequestStatusUpdated($request));
 
         return __('WFH request rejected.');
     }

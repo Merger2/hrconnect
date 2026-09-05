@@ -155,12 +155,23 @@ export default defineConfig({
       },
     },
 
+    // Login UI flow (employee can login via form)
+    {
+      name: 'chromium-login',
+      testMatch: /workflow-login\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
     // Workflow lintas role (kasus nyata): employee submit → manager approve L1 →
     // HR approve L2 → verifikasi status. Serial di dalam spec (per test pakai
     // storageState role berbeda; state default hanya untuk render awal).
     {
       name: 'chromium-workflow',
-      testMatch: /workflow-(approvals|modules|extra)\.spec\.ts/,
+      testMatch: /workflow-(approvals|modules|extra|attendance-presensi)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
