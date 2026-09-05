@@ -19,7 +19,7 @@ class ReimbursementManager extends Component
 
     protected ReviewReimbursement $reviewReimbursement;
 
-    public $statusFilter = 'pending';
+    public $statusFilter = 'all';
 
     public $search = '';
 
