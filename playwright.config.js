@@ -171,7 +171,7 @@ export default defineConfig({
     // storageState role berbeda; state default hanya untuk render awal).
     {
       name: 'chromium-workflow',
-      testMatch: /workflow-(approvals|modules|extra|attendance-presensi|admin-master-data|admin-attendance|import-export|leave-type-holiday)\.spec\.ts/,
+      testMatch: /workflow-(approvals|modules|extra|attendance-presensi|admin-master-data|admin-attendance|import-export|leave-type-holiday|knowledge-base-admin)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
