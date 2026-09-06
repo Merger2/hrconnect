@@ -1,7 +1,7 @@
 @php($allNotificationsUrl = auth()->user()->can('manageAdminNotifications') ? route('admin.notifications') : route('notifications'))
 @php($notificationPollInterval = \App\Support\AnnouncementRefresh::pollInterval())
 
-<div class="notifications-dropdown relative" x-data="{ open: false }" @click.away="open = false" @close.stop="open = false" @if (! \App\Support\AnnouncementRefresh::broadcastingEnabled()) wire:poll.visible.{{ $notificationPollInterval }} @endif>
+<div x-data="{ open: false }" @click.away="open = false" @close.stop="open = false" @notify-toggle.window="open = ! open" @notify-close.window="open = false" @if (! \App\Support\AnnouncementRefresh::broadcastingEnabled()) wire:poll.visible.{{ $notificationPollInterval }} @endif>
     <button type="button" @click="open = ! open" class="notifications-trigger topbar-tool topbar-tool--icon relative"
         :aria-expanded="open.toString()" aria-haspopup="menu" aria-controls="notifications-panel">
         <span class="sr-only">{{ __('View notifications') }}</span>
@@ -15,7 +15,8 @@
         @endif
     </button>
 
-    <div id="notifications-panel" x-show="open"
+    <div x-show="open" x-teleport="body"
+        id="notifications-panel"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="transform opacity-0 scale-95"
         x-transition:enter-end="transform opacity-100 scale-100"
