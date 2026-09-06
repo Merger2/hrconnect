@@ -191,6 +191,7 @@ class RoleAndPermissionSeeder extends Seeder
     {
         return [
             PermissionEnum::VIEW_DASHBOARD,
+            PermissionEnum::ACCESS_ADMIN_PANEL,
             // View context
             PermissionEnum::VIEW_EMPLOYEES,
             PermissionEnum::VIEW_ATTENDANCES,
@@ -214,6 +215,7 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::VIEW_PAYROLLS,
             PermissionEnum::MANAGE_TAX_CONFIGS,
             PermissionEnum::MANAGE_BPJS_CONFIGS,
+            PermissionEnum::MANAGE_PAYROLL_SETTINGS,
         ];
     }
 

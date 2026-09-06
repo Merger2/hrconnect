@@ -293,6 +293,41 @@ test('attendance history summary counts inferred absences for past working days'
     Carbon::setTestNow();
 });
 
+test('attendance history normalizes request dates for calendar indicators', function () {
+    Carbon::setTestNow('2026-04-03 09:00:00');
+
+    $user = User::factory()->create();
+    $this->actingAs($user);
+    $employee = Employee::factory()->create(['user_id' => $user->id]);
+
+    $category = ReimbursementCategory::create([
+        'company_id' => $user->company_id,
+        'name' => 'Transport',
+        'code' => 'transport',
+        'is_active' => true,
+    ]);
+
+    Reimbursement::create([
+        'employee_id' => $employee->id,
+        'category_id' => $category->id,
+        'title' => 'Transport',
+        'expense_date' => '2026-04-02',
+        'amount' => 150000,
+        'description' => 'Transport reimbursement',
+        'status' => 'pending',
+    ]);
+
+    Livewire::test(AttendanceHistoryComponent::class)
+        ->set('selectedYear', '2026')
+        ->set('selectedMonth', '04')
+        ->assertViewHas('requestsByDate', function ($requestsByDate) {
+            return isset($requestsByDate['2026-04-02'])
+                && $requestsByDate['2026-04-02'][0]['type'] === 'reimbursement';
+        });
+
+    Carbon::setTestNow();
+});
+
 test('manager home shows complete team shortcuts', function () {
     $company = Company::create([
         'name' => 'PasPapan Test',

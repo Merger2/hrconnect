@@ -94,7 +94,7 @@ export default defineConfig({
     // Finance-authenticated tests (reimbursement, attendance, reports, payslip)
     {
       name: 'chromium-finance',
-      testMatch: /finance-role\.spec\.ts/,
+      testMatch: /finance-(role|payroll)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],

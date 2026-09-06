@@ -20,7 +20,6 @@ const managerState = path.join(authDir, 'manager.json');
 const hrState = path.join(authDir, 'hr.json');
 const financeState = path.join(authDir, 'finance.json');
 const adminState = hrState; // Test HR = admin yang memegang manageCashAdvances
-const superAdminState = path.join(authDir, 'admin.json'); // Super Admin (bisa finalisasi reimb/kasbon)
 
 test.describe.configure({ mode: 'serial' });
 
@@ -357,12 +356,9 @@ test.describe('workflow reimbursement: manager L1', () => {
     });
 });
 
-// L2 reimbursement (final) butuh canFinalizeReimbursementApproval — di seed ini
-// hanya Super Admin (admin@hrconnect.local) yang memenuhi (role Finance = Staff,
-// tanpa rank & divisi 'Keuangan' ≠ literal 'finance' utk deteksi finance head).
-test.describe('workflow reimbursement: superadmin L2', () => {
-    test.use({ storageState: superAdminState });
-    test('superadmin approve reimbursement di /admin/reimbursements → approved', async ({ page }) => {
+test.describe('workflow reimbursement: finance L2', () => {
+    test.use({ storageState: financeState });
+    test('finance approve reimbursement di /admin/reimbursements → approved', async ({ page }) => {
         await clickAdminApprove(page, '/admin/reimbursements', REIMB_DESC, 3);
     });
 });

@@ -19,6 +19,7 @@ use App\Models\Division;
 use App\Models\Employee;
 use App\Models\EmployeeDocumentRequest;
 use App\Models\EmployeeDocumentTemplate;
+use App\Models\FaceDescriptor;
 use App\Models\Leave;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
@@ -97,6 +98,7 @@ class E2eOperationalDataSeeder extends Seeder
 
         // Step 4: Seed leave balances for current year
         $this->seedLeaveBalances();
+        $this->seedFaceDescriptors();
 
         // Step 5: Seed approval requests (L1/L2 chains)
         $this->seedLeaveRequests();
@@ -368,6 +370,32 @@ class E2eOperationalDataSeeder extends Seeder
                 );
             }
         }
+    }
+
+    // =========================================================================
+    // STEP 4b: Face descriptor fixtures
+    // =========================================================================
+
+    private function seedFaceDescriptors(): void
+    {
+        foreach (['employee@hrconnect.test', 'manager@hrconnect.test', 'finance@hrconnect.test'] as $email) {
+            $employeeId = $this->empMap[$email] ?? null;
+
+            if ($employeeId === null) {
+                continue;
+            }
+
+            FaceDescriptor::updateOrCreate(
+                ['employee_id' => $employeeId],
+                [
+                    'embedding' => array_fill(0, 128, 0.1),
+                    'is_active' => true,
+                    'metadata' => ['source' => 'e2e-fixture'],
+                ]
+            );
+        }
+
+        $this->command?->info('Face descriptors seeded for E2E attendance flows.');
     }
 
     // =========================================================================
@@ -851,6 +879,13 @@ class E2eOperationalDataSeeder extends Seeder
                 );
                 $cursor = $cursor->addDay();
             }
+        }
+
+        if ($employeeUserId = $this->empUserMap[$this->empMap['employee@hrconnect.test'] ?? 0] ?? null) {
+            Schedule::updateOrCreate(
+                ['user_id' => $employeeUserId, 'date' => $this->today->toDateString()],
+                ['shift_id' => $this->officeHourShiftId, 'is_off' => false],
+            );
         }
     }
 

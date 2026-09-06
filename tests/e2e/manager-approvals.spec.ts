@@ -71,6 +71,13 @@ test.describe('Manager Approvals', () => {
         expect(hasRequests || pageContent.includes('Tidak ada') || pageContent.includes('Kosong')).toBeTruthy();
     });
 
+    test('approval queue is scoped to manager subordinates', async ({ page }) => {
+        await page.goto('/approvals', { waitUntil: 'networkidle' });
+
+        await expect(page.locator('.team-approval-card', { hasText: /Test Employee|Budi Santoso|Test Finance|Agus Wijaya/i }).first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.team-approval-card', { hasText: /Test HR|Siti Rahmawati|Super Admin/i })).toHaveCount(0);
+    });
+
     test('should show pending overtime requests from subordinates', async ({ page }) => {
         await page.goto('/approvals', { waitUntil: 'networkidle' });
 

@@ -1,6 +1,6 @@
 <div class="user-page-shell">
     <div class="user-page-container user-page-container--wide">
-        <section aria-labelledby="hr-tasks-title" class="user-page-surface" @if($pollingEnabled) wire:poll.visible.20s @endif>
+        <section aria-labelledby="hr-tasks-title" class="user-page-surface">
             <x-user.page-header
                 :back-href="route('home')"
                 :title="__('HR Tasks')"
@@ -32,6 +32,7 @@
                     </div>
                 </div>
 
+                <div @if($pollingEnabled) wire:poll.visible.20s @endif>
                 <div class="space-y-4">
                     @forelse ($tasks as $task)
                         @php
@@ -108,6 +109,7 @@
 
                 <div class="mt-4">
                     {{ $tasks->links() }}
+                </div>
                 </div>
             </div>
         </section>

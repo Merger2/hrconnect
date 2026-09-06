@@ -5566,8 +5566,12 @@ input[type=range]::-moz-range-thumb {
     padding:1.5rem 2rem 1.75rem;
   }
 }
-.user-home-hero--command .user-home-hero__copy,.user-home-hero--command .user-home-hero__tools {
+.user-home-hero--command .user-home-hero__copy {
   z-index:1;
+  position:relative;
+}
+.user-home-hero--command .user-home-hero__tools {
+  z-index:60;
   position:relative;
 }
 .user-home-hero--command .user-home-hero__greeting {

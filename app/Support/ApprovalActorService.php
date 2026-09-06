@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\Permission;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -68,6 +69,7 @@ class ApprovalActorService
     public function canFinalizeReimbursementApproval(User $user): bool
     {
         return $user->allowsAdminPermission('admin.reimbursements.approve')
+            || $user->can(Permission::APPROVE_REIMBURSEMENTS_L2->value)
             || $this->isFinanceHead($user);
     }
 

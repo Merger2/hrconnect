@@ -9,6 +9,7 @@ use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
+use BackedEnum;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
@@ -119,7 +120,7 @@ class AttendanceHistoryComponent extends Component
                 'title' => $leave->leaveType?->name ?? 'Cuti',
                 'date' => $leave->start_date,
                 'end_date' => $leave->end_date,
-                'status' => $leave->status,
+                'status' => $this->requestStatusValue($leave->status),
                 'reason' => $leave->reason,
                 'approvals' => $leave->approvals->map(fn ($a) => [
                     'level' => $a->pivot->level ?? $a->level ?? null,
@@ -137,7 +138,7 @@ class AttendanceHistoryComponent extends Component
                 'type' => 'overtime',
                 'title' => 'Lembur',
                 'date' => $ot->date,
-                'status' => $ot->status,
+                'status' => $this->requestStatusValue($ot->status),
                 'description' => $ot->description,
                 'approvals' => $ot->approvals->map(fn ($a) => [
                     'level' => $a->pivot->level ?? $a->level ?? null,
@@ -154,7 +155,7 @@ class AttendanceHistoryComponent extends Component
                 'type' => 'reimbursement',
                 'title' => $r->category?->name ?? 'Reimbursement',
                 'date' => $r->expense_date,
-                'status' => $r->status,
+                'status' => $this->requestStatusValue($r->status),
                 'amount' => $r->amount,
                 'approvals' => $r->approvals->map(fn ($a) => [
                     'level' => $a->pivot->level ?? $a->level ?? null,
@@ -170,7 +171,7 @@ class AttendanceHistoryComponent extends Component
         foreach ($requests as $req) {
             $reqDate = $req['date'] ?? null;
             if ($reqDate) {
-                $requestsByDate[$reqDate][] = $req;
+                $requestsByDate[Carbon::parse($reqDate)->toDateString()][] = $req;
             }
         }
 
@@ -242,5 +243,14 @@ class AttendanceHistoryComponent extends Component
             'requests' => $requests,
             'requestsByDate' => $requestsByDate,
         ]);
+    }
+
+    private function requestStatusValue(mixed $status): string
+    {
+        if ($status instanceof BackedEnum) {
+            return (string) $status->value;
+        }
+
+        return (string) $status;
     }
 }

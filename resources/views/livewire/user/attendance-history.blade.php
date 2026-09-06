@@ -43,7 +43,7 @@
             </x-user.page-header>
 
             <div class="user-page-body pt-0">
-                <div wire:poll.30s class="space-y-4">
+                <div class="space-y-4">
                     <section class="user-history-hero" aria-label="{{ __('Attendance summary') }}">
         <div class="min-w-0">
             <p class="user-history-eyebrow">{{ __('Attendance') }}</p>
@@ -64,6 +64,7 @@
         <x-user.tom-select-user id="selectedYear" wire:model.live="selectedYear" placeholder="{{ __('Year') }}" :options="$yearOptions" />
     </section>
 
+    <div wire:poll.30s class="space-y-4">
     <section class="user-history-calendar" aria-label="{{ __('Attendance calendar') }}">
         <div class="user-history-calendar__header">
             <div>
@@ -269,6 +270,7 @@
     </section>
 
     <x-shared.attendance-detail-modal :current-attendance="$currentAttendance" />
+    </div>
                 </div>
             </div>
         </section>

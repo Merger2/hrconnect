@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Permission;
 use App\Enums\ReimbursementStatus;
 use App\Models\Reimbursement;
 use App\Models\User;
@@ -53,6 +54,7 @@ class ReimbursementPolicy
         }
 
         return $user->allowsAdminPermission('admin.reimbursements.approve')
+            || $user->can(Permission::APPROVE_REIMBURSEMENTS_L2->value)
             || $this->canReview($user, $reimbursement);
     }
 

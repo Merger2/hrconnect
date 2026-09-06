@@ -1,6 +1,6 @@
 <div class="user-page-shell">
     <div class="user-page-container user-page-container--wide">
-        <section aria-labelledby="attendance-correction-title" class="user-page-surface" @unless($showCreateModal) wire:poll.visible.20s @endunless>
+        <section aria-labelledby="attendance-correction-title" class="user-page-surface">
             <x-user.page-header :back-href="route('home')" :title="__('Attendance Corrections')" title-id="attendance-correction-title"
                 module="attendance"
                 class="border-b-0">
@@ -42,6 +42,7 @@
                     </div>
                 </div>
 
+                <div @unless($showCreateModal) wire:poll.visible.20s @endunless>
                 <div class="hidden overflow-hidden rounded-2xl border border-gray-200 md:block">
                     <div class="user-desktop-table-scroll">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -216,6 +217,7 @@
                         {{ $corrections->links() }}
                     </div>
                 @endif
+                </div>
             </div>
         </section>
     </div>

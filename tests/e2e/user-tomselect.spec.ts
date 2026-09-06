@@ -92,3 +92,79 @@ test('tom-select-user: pilih bulan di attendance-history → 12 opsi ter-render 
   );
   expect(realErrors).toEqual([]);
 });
+
+const FILTER_DROPDOWNS = [
+  { path: '/attendance-corrections', id: 'correction-status', minOptions: 4 },
+  { path: '/hr-tasks', id: 'hr-task-status', minOptions: 2 },
+  { path: '/my-tasks', id: 'operational-task-status', minOptions: 2 },
+] as const;
+
+for (const { path, id, minOptions } of FILTER_DROPDOWNS) {
+  test(`tom-select-user: filter dropdown tetap visible di ${path}`, async ({ page }) => {
+    const pageErrors: string[] = [];
+
+    page.on('pageerror', (e) => pageErrors.push(e.message));
+    page.on('console', (m) => {
+      if (m.type() === 'error') pageErrors.push(m.text());
+    });
+
+    const resp = await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    expect(resp!.status()).toBeLessThan(500);
+    await page.waitForSelector(`#${id}`, { timeout: 10000 });
+    await expect(page.locator('body')).not.toContainText(/exception|stack trace|server error|whoops/i);
+
+    await expect
+      .poll(() => page.evaluate((selectId) => !!document.getElementById(selectId)?.tomselect, id))
+      .toBe(true);
+
+    const wrapper = page.locator(`[data-ui-tomselect-root]:has(#${id})`);
+    await wrapper.locator('.ts-control').click();
+
+    const options = page.locator('.ts-dropdown .option').filter({ visible: true });
+    await expect.poll(() => options.count(), { timeout: 5000 }).toBeGreaterThanOrEqual(minOptions);
+
+    const zIndex = await page
+      .locator('.ts-dropdown')
+      .filter({ visible: true })
+      .first()
+      .evaluate((el) => window.getComputedStyle(el).zIndex);
+    expect(Number(zIndex)).toBeGreaterThanOrEqual(99999);
+
+    await page.waitForTimeout(1200);
+    await expect(options.first()).toBeVisible();
+
+    const realErrors = pageErrors.filter(
+      (e) => !/favicon|Failed to load resource|Failed to send logs/i.test(e)
+    );
+    expect(realErrors).toEqual([]);
+  });
+}
+
+test('home notification dropdown floats above the employee home cards', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  const resp = await page.goto('/home', { waitUntil: 'domcontentloaded', timeout: 20000 });
+  expect(resp!.status()).toBeLessThan(500);
+
+  const trigger = page.locator('.user-home-hero__tools .notifications-trigger');
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+
+  const panel = page.locator('#notifications-panel').filter({ visible: true });
+  await expect(panel).toBeVisible();
+
+  const layerCheck = await panel.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const x = rect.left + Math.min(rect.width / 2, 24);
+    const y = rect.top + Math.min(rect.height / 2, 48);
+    const topElement = document.elementFromPoint(x, y);
+
+    return {
+      panelZ: Number(window.getComputedStyle(el).zIndex),
+      topElementIsPanel: topElement ? el.contains(topElement) || topElement === el : false,
+    };
+  });
+
+  expect(layerCheck.panelZ).toBeGreaterThanOrEqual(50);
+  expect(layerCheck.topElementIsPanel).toBe(true);
+});
