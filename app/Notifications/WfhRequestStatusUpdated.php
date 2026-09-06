@@ -40,15 +40,15 @@ class WfhRequestStatusUpdated extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)
             ->subject($subject)
-            ->greeting('Halo ' . $notifiable->name . ',')
+            ->greeting('Halo '.$notifiable->name.',')
             ->line('Pengajuan WFH Anda telah diperbarui.')
-            ->line('Tanggal: ' . $this->request->date)
-            ->line('Status: ' . $statusLabel);
+            ->line('Tanggal: '.$this->request->date)
+            ->line('Status: '.$statusLabel);
 
         if ($status === 'rejected' && $this->request->rejection_note) {
-            $mail->line('Alasan: ' . $this->request->rejection_note);
+            $mail->line('Alasan: '.$this->request->rejection_note);
         } elseif ($status === 'approved' && $this->request->final_note) {
-            $mail->line('Catatan: ' . $this->request->final_note);
+            $mail->line('Catatan: '.$this->request->final_note);
         }
 
         return $mail->action('Lihat Detail', url('/wfh-requests'))
@@ -62,7 +62,7 @@ class WfhRequestStatusUpdated extends Notification implements ShouldQueue
             'request_id' => $this->request->id,
             'status' => $this->request->status,
             'date' => $this->request->date?->toDateString(),
-            'message' => 'Pengajuan WFH ' . $this->request->status,
+            'message' => 'Pengajuan WFH '.$this->request->status,
         ];
     }
 }

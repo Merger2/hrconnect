@@ -40,16 +40,16 @@ class CashAdvanceStatusUpdated extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)
             ->subject($subject)
-            ->greeting('Halo ' . $notifiable->name . ',')
+            ->greeting('Halo '.$notifiable->name.',')
             ->line('Pengajuan kasbon Anda telah diperbarui.')
-            ->line('Jumlah: ' . number_format($this->advance->amount, 0, ',', '.'))
-            ->line('Tujuan: ' . $this->advance->purpose)
-            ->line('Status: ' . $statusLabel);
+            ->line('Jumlah: '.number_format($this->advance->amount, 0, ',', '.'))
+            ->line('Tujuan: '.$this->advance->purpose)
+            ->line('Status: '.$statusLabel);
 
         if ($status === 'rejected' && $this->advance->rejection_reason) {
-            $mail->line('Alasan: ' . $this->advance->rejection_reason);
+            $mail->line('Alasan: '.$this->advance->rejection_reason);
         } elseif ($status === 'approved' && $this->advance->notes) {
-            $mail->line('Catatan: ' . $this->advance->notes);
+            $mail->line('Catatan: '.$this->advance->notes);
         }
 
         return $mail->action('Lihat Detail', url('/my-kasbon'))
@@ -63,7 +63,7 @@ class CashAdvanceStatusUpdated extends Notification implements ShouldQueue
             'advance_id' => $this->advance->id,
             'status' => $this->advance->status,
             'amount' => $this->advance->amount,
-            'message' => 'Pengajuan kasbon ' . $this->advance->status,
+            'message' => 'Pengajuan kasbon '.$this->advance->status,
         ];
     }
 }

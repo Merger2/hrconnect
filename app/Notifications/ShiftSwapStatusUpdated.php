@@ -40,15 +40,15 @@ class ShiftSwapStatusUpdated extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)
             ->subject($subject)
-            ->greeting('Halo ' . $notifiable->name . ',')
+            ->greeting('Halo '.$notifiable->name.',')
             ->line('Pengajuan tukar shift Anda telah diperbarui.')
-            ->line('Tanggal: ' . $this->request->schedule_date)
-            ->line('Dari Shift: ' . ($this->request->currentShift?->name ?? 'Tidak ada'))
-            ->line('Ke Shift: ' . ($this->request->requestedShift?->name ?? 'Tidak ada'))
-            ->line('Status: ' . $statusLabel);
+            ->line('Tanggal: '.$this->request->schedule_date)
+            ->line('Dari Shift: '.($this->request->currentShift?->name ?? 'Tidak ada'))
+            ->line('Ke Shift: '.($this->request->requestedShift?->name ?? 'Tidak ada'))
+            ->line('Status: '.$statusLabel);
 
         if ($status === 'rejected' && $this->request->rejection_note) {
-            $mail->line('Alasan: ' . $this->request->rejection_note);
+            $mail->line('Alasan: '.$this->request->rejection_note);
         }
 
         return $mail->action('Lihat Detail', url('/shift-swap-requests'))
@@ -62,7 +62,7 @@ class ShiftSwapStatusUpdated extends Notification implements ShouldQueue
             'request_id' => $this->request->id,
             'status' => $this->request->status,
             'schedule_date' => $this->request->schedule_date?->toDateString(),
-            'message' => 'Pengajuan tukar shift ' . $this->request->status,
+            'message' => 'Pengajuan tukar shift '.$this->request->status,
         ];
     }
 }

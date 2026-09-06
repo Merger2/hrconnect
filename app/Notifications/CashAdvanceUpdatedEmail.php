@@ -27,12 +27,12 @@ class CashAdvanceUpdatedEmail extends Notification implements ShouldQueue
         $statusLabel = $this->getStatusLabel($this->advance->status);
 
         return (new MailMessage)
-            ->subject('Pengajuan Kasbon: ' . $statusLabel)
-            ->greeting('Halo ' . ($notifiable->name ?? '') . ',')
+            ->subject('Pengajuan Kasbon: '.$statusLabel)
+            ->greeting('Halo '.($notifiable->name ?? '').',')
             ->line('Status pengajuan kasbon Anda telah diperbarui.')
-            ->line('Jumlah: Rp ' . $amount)
-            ->line('Tujuan: ' . $this->advance->purpose)
-            ->line('Status: **' . $statusLabel . '**');
+            ->line('Jumlah: Rp '.$amount)
+            ->line('Tujuan: '.$this->advance->purpose)
+            ->line('Status: **'.$statusLabel.'**');
     }
 
     private function getStatusLabel(string $status): string
