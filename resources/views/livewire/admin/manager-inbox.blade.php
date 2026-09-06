@@ -165,6 +165,7 @@
                                 $employee = match($activeTab) {
                                     'hr_tasks' => $item->case?->user,
                                     'custom_forms' => $item->submitter,
+                                    'leaves' => $item->employee?->user,
                                     'document_requests' => $item->employee?->user,
                                     default => $item->user,
                                 };
@@ -204,7 +205,8 @@
                                     <div class="flex flex-col gap-2 text-sm text-gray-600">
                                         @if($activeTab === 'leaves')
                                             <div class="flex justify-between items-center"><span class="text-xs text-gray-400">{{ __('Leave Type') }}</span> <span class="font-bold text-primary-600">{{ $item->leaveType->name }}</span></div>
-                                            <div class="flex justify-between items-center"><span class="text-xs text-gray-400">{{ __('Date') }}</span> <span>{{ \Carbon\Carbon::parse($item->date)->translatedFormat('d M Y') }}</span></div>
+                                            <div class="flex justify-between items-center"><span class="text-xs text-gray-400">{{ __('Date') }}</span> <span>{{ $item->start_date->translatedFormat('d M Y') }} - {{ $item->end_date->translatedFormat('d M Y') }}</span></div>
+                                            <div class="flex justify-between items-center"><span class="text-xs text-gray-400">{{ __('Status') }}</span> <span class="font-bold text-primary-600">{{ $item->status->label() }}</span></div>
                                             @if($item->reason)<div class="mt-2 text-xs text-gray-500 italic border-t border-gray-100 pt-2">{{ $item->reason }}</div>@endif
                                         
                                         @elseif($activeTab === 'overtime')

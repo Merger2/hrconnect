@@ -81,7 +81,50 @@ test('employee can submit work from home request and manager can approve it', fu
 
     $request->refresh();
 
-    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED)
+    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED_L1)
+        ->and($request->reviewed_by)->toBe($manager->id)
+        ->and($request->reviewed_at)->not->toBeNull();
+});
+
+test('manager can approve wfh request when hierarchy is via employees.parent_id only (users.manager_id null)', function () {
+    // Regresi 2026-09-05: policy lama hanya membaca users.manager_id → manager
+    // melihat card di daftar pending (TeamApprovalQueryService via
+    // subordinateIds = employees tree) tapi approve melempar 403.
+    // Pemanggil: E2E workflow-extra.spec.ts (WFH).
+    [$manager, $employee] = createWfhHierarchy();
+
+    // Hapus relasi eksplisit users.manager_id — hierarki hanya lewat employees.
+    $employee->update(['manager_id' => null]);
+
+    $company = app(MultiCompanyService::class)->createCompany('PT WFH OrgTree', $manager);
+    app(MultiCompanyService::class)->assignUser($employee, $company);
+    // Samakan company_id record Employee (factory memakai company acak) supaya
+    // filter company pada subordinateIds tidak mengecualikan bawahan.
+    $employee->employee?->update(['company_id' => $company->id]);
+
+    $request = WorkFromHomeRequest::query()->create([
+        'user_id' => $employee->id,
+        'company_id' => $company->id,
+        'start_date' => now()->addDay(),
+        'end_date' => now()->addDay(),
+        'date' => now()->addDay()->toDateString(),
+        'reason' => 'Remote work for focused documentation session.',
+        'status' => WorkFromHomeRequest::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($manager)
+        ->get(route('approvals').'?activeTab=wfh')
+        ->assertOk();
+
+    Livewire::actingAs($manager)
+        ->test(TeamApprovals::class, ['activeTab' => 'wfh'])
+        ->set('activeTab', 'wfh')
+        ->assertSee('Remote work for focused documentation session.')
+        ->call('approveWfh', $request->id);
+
+    $request->refresh();
+
+    expect($request->status)->toBe(WorkFromHomeRequest::STATUS_APPROVED_L1)
         ->and($request->reviewed_by)->toBe($manager->id)
         ->and($request->reviewed_at)->not->toBeNull();
 });

@@ -1,19 +1,18 @@
 <?php
 
-use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
 /**
- * Base date anchor — pakai tanggal 30 hari di masa lalu agar tidak terkena
- * Attendance::booted() saving hook yang me-reject future dates (perilaku
- * disengaja, lihat tests/Unit/Services/LeaveRequestServiceTest.php).
+ * Use a future date to stay within LeaveService::applyLeave() validation
+ * (rejects dates more than 3 days in the past).
  */
-$baseDate = now()->subDays(30);
+$baseDate = now()->addDays(5);
 
 function createLeaveValidationUser(): User
 {
@@ -32,10 +31,42 @@ function seedLeaveRequestSettings(): void
     Setting::flushCache();
 }
 
+/**
+ * Set up the approval hierarchy (supervisor + admin HR) so that
+ * LeaveService::applyLeave() → ApprovalService::createApprovalWorkflow()
+ * can find both L1 and L2 approvers.
+ */
+function createLeaveApprovalHierarchy(User $employee): void
+{
+    // Admin HR (L2 approver — User::role('admin') queries by slug='admin')
+    $hrUser = User::factory()->admin()->create();
+    Employee::factory()->create(['user_id' => $hrUser->id, 'full_name' => $hrUser->name]);
+    $hrRole = Role::firstOrCreate(
+        ['slug' => 'admin'],
+        ['name' => 'Admin', 'permission_keys' => ['admin.leave_approvals.manage']]
+    );
+    $hrUser->roles()->sync([$hrRole->id]);
+
+    // Supervisor (L1 approver)
+    $supervisor = User::factory()->create();
+    $supervisorEmployee = Employee::factory()->create(['user_id' => $supervisor->id, 'full_name' => $supervisor->name]);
+    $supervisorRole = Role::create([
+        'name' => 'Supervisor_'.uniqid(),
+        'slug' => 'supervisor_'.uniqid(),
+        'permission_keys' => ['review_subordinate_requests'],
+    ]);
+    $supervisor->roles()->sync([$supervisorRole->id]);
+
+    // Link employee to supervisor
+    $employee->employee->update(['parent_id' => $supervisorEmployee->id]);
+}
+
 test('leave request is blocked when annual leave quota is exhausted', function () use ($baseDate) {
     seedLeaveRequestSettings();
 
     $user = createLeaveValidationUser();
+    createLeaveApprovalHierarchy($user);
+
     $annualLeave = LeaveType::create([
         'code' => 'annual_leave',
         'name' => 'Cuti Tahunan',
@@ -68,13 +99,15 @@ test('leave request is blocked when annual leave quota is exhausted', function (
         ->assertSessionHasNoErrors()
         ->assertSessionHas('error');
 
-    expect(session('error'))->toContain('Saldo cuti tidak mencukupi');
+    expect(session('error'))->toContain('Kuota cuti tidak mencukupi');
 });
 
 test('sick leave request does not use annual quota', function () use ($baseDate) {
     seedLeaveRequestSettings();
 
     $user = createLeaveValidationUser();
+    createLeaveApprovalHierarchy($user);
+
     $sickLeave = LeaveType::create([
         'code' => 'sick_leave',
         'name' => 'Cuti Sakit',
@@ -97,12 +130,11 @@ test('sick leave request does not use annual quota', function () use ($baseDate)
 
     $response->assertRedirect(route('home'));
 
-    $this->assertDatabaseHas('attendances', [
+    $this->assertDatabaseHas('leaves', [
         'employee_id' => $user->employee->id,
-        'date' => $date,
-        'status' => 'sick',
         'leave_type_id' => $sickLeave->id,
-        'approval_status' => Attendance::STATUS_PENDING,
+        'status' => 'pending',
+        'reason' => 'Medical rest',
     ]);
 });
 
@@ -110,6 +142,8 @@ test('custom leave type can be requested without annual quota usage', function (
     seedLeaveRequestSettings();
 
     $user = createLeaveValidationUser();
+    createLeaveApprovalHierarchy($user);
+
     $customLeave = LeaveType::create([
         'code' => 'bereavement_leave',
         'name' => 'Cuti Duka',
@@ -131,12 +165,11 @@ test('custom leave type can be requested without annual quota usage', function (
 
     $response->assertRedirect(route('home'));
 
-    $this->assertDatabaseHas('attendances', [
+    $this->assertDatabaseHas('leaves', [
         'employee_id' => $user->employee->id,
-        'date' => $date,
-        'status' => 'excused',
         'leave_type_id' => $customLeave->id,
-        'approval_status' => Attendance::STATUS_PENDING,
+        'status' => 'pending',
+        'reason' => 'Family bereavement',
     ]);
 });
 
@@ -183,7 +216,7 @@ test('leave request rejects unsafe attachment types and invalid coordinates', fu
     );
     Setting::flushCache();
 
-    $date = now()->subDays(5)->toDateString();
+    $date = now()->addDays(5)->toDateString();
 
     $response = $this->actingAs($user)->post(route('store-leave-request'), [
         'status' => 'sick',

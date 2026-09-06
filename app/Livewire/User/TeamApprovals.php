@@ -2,14 +2,18 @@
 
 namespace App\Livewire\User;
 
+use App\Enums\ApprovalLevel;
+use App\Enums\ApprovalStatus;
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\CashAdvance;
+use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
 use App\Models\ShiftSwapRequest;
 use App\Models\WorkFromHomeRequest;
 use App\Support\ApprovalActorService;
+use App\Support\ApprovalService;
 use App\Support\AttendanceCorrectionService;
 use App\Support\CashAdvanceApprovalService;
 use App\Support\OvertimeApprovalService;
@@ -53,6 +57,8 @@ class TeamApprovals extends Component
 
     protected WorkFromHomeRequestService $wfhApprovals;
 
+    protected ApprovalService $approvals;
+
     #[Url(history: true)]
     public $activeTab = 'leaves'; // leaves, attendance-corrections, shift-swaps, reimbursements, overtimes, wfh, kasbons
 
@@ -67,6 +73,7 @@ class TeamApprovals extends Component
         CashAdvanceApprovalService $cashAdvanceApprovals,
         ShiftSwapRequestService $shiftSwapApprovals,
         WorkFromHomeRequestService $wfhApprovals,
+        ApprovalService $approvals,
     ): void {
         $this->teamApprovalQueries = $teamApprovalQueries;
         $this->approvalActors = $approvalActors;
@@ -76,11 +83,12 @@ class TeamApprovals extends Component
         $this->cashAdvanceApprovals = $cashAdvanceApprovals;
         $this->shiftSwapApprovals = $shiftSwapApprovals;
         $this->wfhApprovals = $wfhApprovals;
+        $this->approvals = $approvals;
     }
 
     public function mount()
     {
-        Gate::authorize('reviewSubordinateRequests');
+        Gate::authorize('reviewTeamOrHrApprovals');
         $this->normalizeActiveTab();
     }
 
@@ -107,16 +115,24 @@ class TeamApprovals extends Component
 
     public function approveLeave($id)
     {
-        $leave = Attendance::find($id);
+        $leave = Leave::find($id);
 
-        if (! $leave || ! $this->isSubordinate($leave->user_id)) {
+        if (! $leave || ! $this->isSubordinate($leave->employee?->user_id)) {
             return;
         }
 
-        $leave->update([
-            'approval_status' => 'approved',
-            'approved_by' => Auth::id(),
-        ]);
+        $approval = $leave->approvals()
+            ->where('level', ApprovalLevel::L1_SUPERVISOR)
+            ->where('status', ApprovalStatus::PENDING)
+            ->first();
+
+        if (! $approval) {
+            session()->flash('error', __('No pending L1 approval found for this leave request.'));
+
+            return;
+        }
+
+        $this->approvals->approve($approval);
 
         $this->dispatch('refresh');
         session()->flash('success', __('Leave request approved.'));
@@ -124,16 +140,24 @@ class TeamApprovals extends Component
 
     public function rejectLeave($id)
     {
-        $leave = Attendance::find($id);
+        $leave = Leave::find($id);
 
-        if (! $leave || ! $this->isSubordinate($leave->user_id)) {
+        if (! $leave || ! $this->isSubordinate($leave->employee?->user_id)) {
             return;
         }
 
-        $leave->update([
-            'approval_status' => 'rejected',
-            'approved_by' => Auth::id(),
-        ]);
+        $approval = $leave->approvals()
+            ->where('level', ApprovalLevel::L1_SUPERVISOR)
+            ->where('status', ApprovalStatus::PENDING)
+            ->first();
+
+        if (! $approval) {
+            session()->flash('error', __('No pending L1 approval found for this leave request.'));
+
+            return;
+        }
+
+        $this->approvals->reject($approval, 'Ditolak oleh atasan');
 
         $this->dispatch('refresh');
         session()->flash('success', __('Leave request rejected.'));
@@ -215,7 +239,9 @@ class TeamApprovals extends Component
     {
         $overtime = Overtime::find($id);
 
-        if (! $overtime || ! $this->isSubordinate($overtime->user_id)) {
+        // Overtime hanya punya kolom employee_id (bukan user_id) — guard lama
+        // $overtime->user_id selalu null → approve manager tak pernah jalan.
+        if (! $overtime || ! $this->isSubordinate($overtime->employee?->user_id)) {
             return;
         }
 
@@ -228,7 +254,7 @@ class TeamApprovals extends Component
     {
         $overtime = Overtime::find($id);
 
-        if (! $overtime || ! $this->isSubordinate($overtime->user_id)) {
+        if (! $overtime || ! $this->isSubordinate($overtime->employee?->user_id)) {
             return;
         }
 

@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{ $appName ?? config('app.name', 'HRConnect') }}">
 
-    <script>
+    <script nonce="{{ $csp_nonce }}">
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
                 try {
@@ -60,16 +60,21 @@
     </script>
 
     <!-- Material Symbols (icon font) — non-blocking: preload + async stylesheet.
-         Dulu @import di app.css (render-blocking). display=block untuk icon font. -->
+         Dulu @import di app.css (render-blocking). display=block untuk icon font.
+         SRI: integrity hash for Google Fonts Material Symbols CSS. -->
+    {{-- Google Fonts CSS dinamis → JANGAN pasang integrity SRI (hash selalu mismatch, stylesheet diblokir browser). --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
+        crossorigin="anonymous">
     <link rel="stylesheet" media="print" onload="this.media='all'"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
+        crossorigin="anonymous">
     <noscript>
         <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block">
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,0&display=block"
+            crossorigin="anonymous">
     </noscript>
 
     <!-- Scripts -->
@@ -83,7 +88,7 @@
              Sumber di resources/css/critical-guest.css (git-tracked) BUKAN public/build
              (gitignored). Regen: node scripts/extract-critical-css.mjs --urls /login
                --guest --out resources/css/critical-guest.css --}}
-        <style>{!! file_get_contents(resource_path('css/critical-guest.css')) !!}</style>
+        <style nonce="{{ $csp_nonce }}">{!! file_get_contents(resource_path('css/critical-guest.css')) !!}</style>
         @php($fullCss = Vite::asset('resources/css/app.css'))
         <link rel="stylesheet" href="{{ $fullCss }}" media="print" onload="this.media='all'">
         <noscript><link rel="stylesheet" href="{{ $fullCss }}"></noscript>
@@ -93,13 +98,13 @@
     @endif
 
     <!-- Styles -->
-    @livewireStyles
+    @livewireStyles(['nonce' => $csp_nonce])
 </head>
 <body class="font-sans antialiased text-gray-900 bg-surface">
     <main>
         {{ $slot }}
     </main>
-    @livewireScripts
+    @livewireScripts(['nonce' => $csp_nonce])
     <x-pwa-install-prompt />
 </body>
 </html>

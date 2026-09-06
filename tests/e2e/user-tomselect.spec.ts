@@ -52,20 +52,27 @@ test('tom-select-user: pilih bulan di attendance-history → 12 opsi ter-render 
     .poll(() => page.evaluate(() => !!document.getElementById('selectedMonth')?.tomselect))
     .toBe(true);
 
+  // Nilai awal datang via Alpine entangle SETELAH Livewire hydrate — SSR <select>
+  // sengaja tanpa option selected (wire:ignore). Baca langsung = race (nilai ''),
+  // jadi poll sampai nilai sync dari Livewire sebelum lanjut.
+  await expect
+    .poll(() => readTomSelectValue(page, 'selectedMonth'), { timeout: 5000 })
+    .toMatch(/^\d{2}$/);
   const initialMonth = await readTomSelectValue(page, 'selectedMonth');
-  expect(initialMonth).toMatch(/^\d{2}$/);
 
-  // 3. Buka dropdown → 12 opsi bulan harus ter-render (bug lama: 0 opsi)
+  // 3. Buka dropdown → 12 opsi bulan harus ter-render (bug lama: 0 opsi).
+  //    Dropdown dirender ke <body> (dropdownParent fix 2026-09-05) → opsi
+  //    di-locate page-level, difilter yang visible (hanya satu yg terbuka).
   const monthWrapper = page.locator('[data-ui-tomselect-root]:has(#selectedMonth)');
   await monthWrapper.locator('.ts-control').click();
-  const options = monthWrapper.locator('.ts-dropdown .option');
+  const options = page.locator('.ts-dropdown .option').filter({ visible: true });
   await expect(options).toHaveCount(12, { timeout: 5000 });
   // Opsi 01..12 harus ada di dropdown (bukan cuma placeholder)
-  await expect(monthWrapper.locator('.ts-dropdown .option[data-value="01"]')).toBeVisible();
+  await expect(page.locator('.ts-dropdown .option[data-value="01"]').filter({ visible: true })).toBeVisible();
 
   // 4. Pilih bulan yang BERBEDA dari nilai sekarang
   const target = String((Number(initialMonth) % 12) + 1).padStart(2, '0');
-  await monthWrapper.locator(`.ts-dropdown .option[data-value="${target}"]`).click();
+  await page.locator(`.ts-dropdown .option[data-value="${target}"]`).filter({ visible: true }).click();
 
   // 5. Nilai widget harus tersync (handler change hidup)
   await expect.poll(() => readTomSelectValue(page, 'selectedMonth'), { timeout: 5000 }).toBe(target);

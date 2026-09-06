@@ -73,7 +73,9 @@ class UserOvertimeService
             'start_time' => $start,
             'end_time' => $end,
             'duration' => $duration,
-            'reason' => $data['reason'],
+            // Kolom tabel bernama `description` (bukan `reason`) — key lama
+            // `reason` tidak fillable → alasan HILANG diam-diam dari DB (bug P1).
+            'description' => $data['reason'] ?? null,
             'status' => 'pending',
         ]);
 

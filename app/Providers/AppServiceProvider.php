@@ -69,6 +69,12 @@ class AppServiceProvider extends ServiceProvider
         $this->registerObservers();
         $this->registerViewComposers();
         $this->registerLivewireAliases();
+
+        // Share CSP nonce with all Blade views for nonce-based Content Security Policy.
+        // Uses composer (not share) so it's evaluated per-request after middleware runs.
+        View::composer('*', function ($view) {
+            $view->with('csp_nonce', request()->attributes->get('csp_nonce', ''));
+        });
     }
 
     /**

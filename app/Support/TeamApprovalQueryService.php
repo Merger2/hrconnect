@@ -2,11 +2,12 @@
 
 namespace App\Support;
 
+use App\Enums\RequestStatus;
 use App\Models\Approval;
-use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\CashAdvance;
 use App\Models\Employee;
+use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
 use App\Models\ShiftSwapRequest;
@@ -124,18 +125,24 @@ class TeamApprovalQueryService
 
     protected function leaveQuery(array $subordinateIds, string $search, bool $history): mixed
     {
-        $query = Attendance::query()->with(['user', 'shift'])
-            ->whereHas('employee', fn ($q) => $q->whereIn('user_id', $subordinateIds))
-            ->whereNotNull('leave_type_id');
+        $query = Leave::query()->with(['employee.user', 'employee.position', 'leaveType'])
+            ->whereHas('employee', fn ($q) => $q->whereIn('user_id', $subordinateIds));
 
         if ($history) {
-            $query->whereIn('approval_status', ['approved', 'rejected']);
+            $query->whereIn('status', [
+                RequestStatus::APPROVED->value,
+                RequestStatus::APPROVED_L1->value,
+                RequestStatus::REJECTED->value,
+            ]);
         } else {
-            $query->where('approval_status', 'pending');
+            $query->where('status', RequestStatus::PENDING->value);
         }
 
         if ($search) {
-            $query->whereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"));
+            $query->where(function ($q) use ($search): void {
+                $q->where('reason', 'like', "%{$search}%")
+                    ->orWhereHas('employee', fn ($eq) => $eq->where('full_name', 'like', "%{$search}%"));
+            });
         }
 
         return $query;

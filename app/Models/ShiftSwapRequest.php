@@ -16,6 +16,8 @@ class ShiftSwapRequest extends Model
 
     public const STATUS_PENDING = 'pending';
 
+    public const STATUS_APPROVED_L1 = 'approved_l1';
+
     public const STATUS_APPROVED = 'approved';
 
     public const STATUS_REJECTED = 'rejected';
@@ -92,6 +94,7 @@ class ShiftSwapRequest extends Model
     {
         return [
             self::STATUS_PENDING => __('Pending'),
+            self::STATUS_APPROVED_L1 => __('Approved L1'),
             self::STATUS_APPROVED => __('Approved'),
             self::STATUS_REJECTED => __('Rejected'),
         ];

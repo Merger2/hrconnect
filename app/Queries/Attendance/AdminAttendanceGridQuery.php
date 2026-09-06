@@ -26,7 +26,9 @@ class AdminAttendanceGridQuery
             ->when($search, function (Builder $query) use ($search): void {
                 $query->where(function (Builder $subQuery) use ($search): void {
                     $subQuery->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('nip', 'like', '%'.$search.'%');
+                        // nip kolomnya di `employees` — search via relasi
+                        // (users.nip tidak ada → 500 undefined column).
+                        ->orWhereHas('employee', fn (Builder $employeeQuery) => $employeeQuery->where('nip', 'like', '%'.$search.'%'));
                 });
             })
             ->when($division, fn (Builder $query) => $query->where('division_id', $division))

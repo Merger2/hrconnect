@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Attendance;
+use App\Enums\RequestStatus;
 use App\Models\AttendanceCorrection;
 use App\Models\CashAdvance;
 use App\Models\CustomFormSubmission;
 use App\Models\EmployeeDocumentRequest;
 use App\Models\HrChecklistTask;
+use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
 use App\Models\ShiftSwapRequest;
@@ -392,12 +393,16 @@ class ManagerInbox extends Component
                         ->orWhere('status', HrChecklistTask::STATUS_BLOCKED);
                 }))
                 ->latest(),
-            'leaves' => Attendance::query()
-                ->with(['user', 'leaveType'])
-                ->whereHas('user', fn ($query) => $query->managedBy($admin))
-                ->where('approval_status', 'pending')
-                ->whereNotNull('leave_type_id')
-                ->tap($applyInboxFilters)
+            'leaves' => Leave::query()
+                ->with(['employee.user', 'employee.position', 'leaveType'])
+                ->whereHas('employee.user', fn ($query) => $query->managedBy($admin))
+                ->whereIn('status', [RequestStatus::PENDING->value, RequestStatus::APPROVED_L1->value])
+                ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $nested) use ($search): void {
+                    $nested
+                        ->where('reason', 'like', '%'.$search.'%')
+                        ->orWhereHas('employee.user', fn (Builder $userQuery) => $userQuery->where('name', 'like', '%'.$search.'%'));
+                }))
+                ->when($this->statusFilter === 'overdue', $overdueClosure)
                 ->latest(),
             'custom_forms' => CustomFormSubmission::query()
                 // users tidak punya kolom job_title_id (job title di-proxy via

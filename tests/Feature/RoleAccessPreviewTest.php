@@ -8,8 +8,8 @@ test('role access preview lists modules available to a role', function () {
         'name' => 'HR Preview_'.uniqid(),
         'slug' => 'hr_preview__'.uniqid().uniqid(),
         'permission_keys' => [
-            'admin.employees.view',
-            'admin.hr_checklists.view',
+            'view_employees',
+            'view_hr_checklists',
         ],
     ]);
 

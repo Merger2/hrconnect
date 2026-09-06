@@ -116,33 +116,33 @@
                                 <div class="team-approval-card__main">
                                     <img
                                         class="team-approval-card__avatar"
-                                        src="{{ $leave->user->profile_photo_url }}"
-                                        alt="{{ $leave->user->name }}">
+                                        src="{{ $leave->employee->user->profile_photo_url ?? '' }}"
+                                        alt="{{ $leave->employee->full_name ?? '' }}">
 
                                     <div class="team-approval-card__body">
                                         <div class="team-approval-card__topline">
                                             <div class="min-w-0">
-                                                <h3>{{ $leave->user->name }}</h3>
-                                                <p>{{ $leave->user->jobTitle->name ?? __('N/A') }}</p>
+                                                <h3>{{ $leave->employee->full_name ?? __('N/A') }}</h3>
+                                                <p>{{ $leave->employee->position?->name ?? __('N/A') }}</p>
                                             </div>
 
-                                            <span class="{{ $statusClass($leave->approval_status) }}">
-                                                {{ $statusLabel($leave->approval_status) }}
+                                            <span class="{{ $statusClass($leave->status instanceof \BackedEnum ? $leave->status->value : $leave->status) }}">
+                                                {{ $leave->status instanceof \BackedEnum ? $leave->status->label() : __(str((string) $leave->status)->headline()->toString()) }}
                                             </span>
                                         </div>
 
                                         <div class="team-approval-facts">
                                             <div>
                                                 <span>{{ __('Type') }}</span>
-                                                <strong>{{ __(ucfirst((string) $leave->status)) }}</strong>
+                                                <strong>{{ $leave->leaveType?->name ?? __('N/A') }}</strong>
                                             </div>
                                             <div>
                                                 <span>{{ __('Date') }}</span>
-                                                <strong>{{ \Carbon\Carbon::parse($leave->date)->translatedFormat('d M Y') }}</strong>
+                                                <strong>{{ \Carbon\Carbon::parse($leave->start_date)->translatedFormat('d M Y') }} — {{ \Carbon\Carbon::parse($leave->end_date)->translatedFormat('d M Y') }}</strong>
                                             </div>
                                             <div>
-                                                <span>{{ __('Processed By') }}</span>
-                                                <strong>{{ $leave->approvedBy?->name ?? __('System') }}</strong>
+                                                <span>{{ __('Duration') }}</span>
+                                                <strong>{{ $leave->total_days }} {{ __('day(s)') }}</strong>
                                             </div>
                                             <div>
                                                 <span>{{ __('Submitted') }}</span>
@@ -150,12 +150,8 @@
                                             </div>
                                         </div>
 
-                                        @if ($leave->note)
-                                            <p class="team-approval-note">{{ $leave->note }}</p>
-                                        @endif
-
-                                        @if ($leave->approval_note)
-                                            <p class="team-approval-note team-approval-note--danger">{{ $leave->approval_note }}</p>
+                                        @if ($leave->reason)
+                                            <p class="team-approval-note">{{ $leave->reason }}</p>
                                         @endif
                                     </div>
                                 </div>

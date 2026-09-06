@@ -562,6 +562,8 @@ test('chatStream fallback returns keyword snippets when chunks found', function 
     $texts = collect($yields)->pluck('text')->filter()->implode("\n");
 
     expect($texts)->toContain('asisten AI sedang tidak tersedia saat ini');
+    expect($texts)->toContain('Keterlambatan lebih dari 15 menit');
+    expect($texts)->toContain('[Sumber 1]');
 
     $last = $yields[array_key_last($yields)];
 

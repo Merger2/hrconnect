@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -18,8 +19,29 @@ class ApprovalActorService
             ->when($user->company_id !== null, fn (Builder $query) => $query->where('company_id', $user->company_id))
             ->pluck('id');
 
+        // Hierarki organisasi (employees) — konsisten dengan daftar pending yang
+        // ditampilkan (Employee::subordinates() via parent_id) dan direct manager
+        // eksplisit (employees.manager_id). Sebelumnya hanya users.manager_id yang
+        // dibaca → manager TIDAK bisa approve pengajuan karyawan yang relasinya
+        // via employees.parent_id/manager_id (seed/hierarki legacy): tombol
+        // approve di /approvals gagal diam-diam (silent return di approveLeave).
+        $orgReportIds = collect();
+        if ($user->employee) {
+            $orgReportIds = Employee::query()
+                ->where('user_id', '!=', $user->id)
+                ->whereNotNull('user_id')
+                ->where(function (Builder $query) use ($user): void {
+                    $query->where('parent_id', $user->employee->id)
+                        ->orWhere('manager_id', $user->employee->id);
+                })
+                ->when($user->company_id !== null, fn (Builder $query) => $query->where('company_id', $user->company_id))
+                ->pluck('user_id');
+        }
+
+        $baseIds = $explicitReportIds->merge($orgReportIds)->unique()->values();
+
         if (! $this->canManageDivisionSubordinates($user) || ! $user->division_id || ! $user->jobTitle?->jobLevel) {
-            return $explicitReportIds->unique()->values();
+            return $baseIds;
         }
 
         $rank = (int) $user->jobTitle->jobLevel->rank;
@@ -32,7 +54,7 @@ class ApprovalActorService
             ->whereHas('employee.position.jobTitle.jobLevel', fn (Builder $query) => $query->where('rank', '>', $rank))
             ->pluck('id');
 
-        return $explicitReportIds
+        return $baseIds
             ->merge($divisionReportIds)
             ->unique()
             ->values();

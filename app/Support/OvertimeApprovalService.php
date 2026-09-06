@@ -17,7 +17,8 @@ class OvertimeApprovalService
         return Overtime::query()
             ->with(['employee.division', 'employee.position'])
             ->whereHas('employee')
-            ->when($statusFilter !== 'all', fn (Builder $query) => $query->where('status', $statusFilter))
+            ->when(in_array($statusFilter, ['pending', 'approved_l1'], true), fn (Builder $query) => $query->where('status', $statusFilter))
+            ->when($statusFilter === 'all', fn (Builder $query) => $query->whereIn('status', [RequestStatus::PENDING->value, RequestStatus::APPROVED_L1->value, RequestStatus::APPROVED->value]))
             ->when($search !== '', function (Builder $query) use ($search) {
                 $query->where(function (Builder $subQuery) use ($search) {
                     $subQuery
@@ -44,8 +45,23 @@ class OvertimeApprovalService
             $this->ensurePending($overtime);
 
             $overtime->update([
-                'status' => 'approved',
+                'status' => RequestStatus::APPROVED_L1,
                 'approved_by' => $actor->employee?->id,
+            ]);
+        });
+
+        $this->notifyStatusUpdated($overtime);
+    }
+
+    public function finalize(Overtime $overtime, User $actor): void
+    {
+        DB::transaction(function () use ($overtime): void {
+            $overtime = $this->lock($overtime);
+            $this->ensureApprovedL1($overtime);
+
+            $overtime->update([
+                'status' => RequestStatus::APPROVED,
+                'approved_at' => now(),
             ]);
         });
 
@@ -59,7 +75,7 @@ class OvertimeApprovalService
             $this->ensurePending($overtime);
 
             $overtime->update([
-                'status' => 'rejected',
+                'status' => RequestStatus::REJECTED,
                 'approved_by' => $actor->employee?->id,
                 'rejection_reason' => $rejectionReason,
             ]);
@@ -88,11 +104,15 @@ class OvertimeApprovalService
 
     private function ensurePending(Overtime $overtime): void
     {
-        // regresi 2026-08-16: status di-cast ke RequestStatus enum, jadi
-        // bandingkan dengan enum — string 'pending' selalu != enum → semua
-        // approve/reject overtime lempar 'already been reviewed'.
         if ($overtime->status !== RequestStatus::PENDING) {
             throw new AuthorizationException(__('This overtime request has already been reviewed.'));
+        }
+    }
+
+    private function ensureApprovedL1(Overtime $overtime): void
+    {
+        if ($overtime->status !== RequestStatus::APPROVED_L1) {
+            throw new AuthorizationException(__('This overtime request is not waiting for final approval.'));
         }
     }
 }

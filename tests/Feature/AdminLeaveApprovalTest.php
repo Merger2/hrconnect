@@ -1,8 +1,14 @@
 <?php
 
+use App\Enums\ApprovalLevel;
+use App\Enums\ApprovalStatus;
+use App\Enums\RequestStatus;
 use App\Livewire\Admin\LeaveApproval;
+use App\Models\Approval;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Leave;
+use App\Models\LeaveType;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\LeaveApprovalService;
@@ -33,6 +39,11 @@ function makeLeaveApprovalEmployee(string $name): array
 function makeLeaveApprovalAdmin(): User
 {
     $admin = User::factory()->admin()->create();
+    Employee::factory()->create([
+        'user_id' => $admin->id,
+        'full_name' => $admin->name,
+    ]);
+
     $role = Role::create([
         'name' => 'Leave Approval Admin_'.uniqid(),
         'slug' => 'leave_approval_admin_'.uniqid(),
@@ -43,23 +54,64 @@ function makeLeaveApprovalAdmin(): User
     return $admin;
 }
 
-test('admin leave approvals show all request statuses by default', function () {
+function makeLeaveApprovalRequest(Employee $employee, RequestStatus $status = RequestStatus::APPROVED_L1): Leave
+{
+    $leaveType = LeaveType::factory()->create(['name' => 'Annual Leave']);
+    $leave = Leave::factory()->create([
+        'employee_id' => $employee->id,
+        'leave_type_id' => $leaveType->id,
+        'start_date' => now()->addDay()->toDateString(),
+        'end_date' => now()->addDays(2)->toDateString(),
+        'total_days' => 2,
+        'reason' => 'Family leave',
+        'status' => $status,
+    ]);
+
+    $leave->approvals()->create([
+        'approver_id' => $employee->id,
+        'level' => ApprovalLevel::L1_SUPERVISOR,
+        'status' => ApprovalStatus::APPROVED,
+        'approved_at' => now(),
+    ]);
+
+    $leave->approvals()->create([
+        'approver_id' => User::query()->where('group', 'admin')->first()->employee->id,
+        'level' => ApprovalLevel::L2_MANAGER,
+        'status' => ApprovalStatus::PENDING,
+    ]);
+
+    return $leave;
+}
+
+test('admin leave approvals show leave model requests by default', function () {
     $admin = makeLeaveApprovalAdmin();
     [, $employee] = makeLeaveApprovalEmployee('Leave Request Employee');
 
-    Attendance::create([
-        'employee_id' => $employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'late',
-        'approval_status' => Attendance::STATUS_APPROVED,
-        'note' => 'Approved family leave',
-    ]);
+    makeLeaveApprovalRequest($employee, RequestStatus::APPROVED_L1);
 
     Livewire::actingAs($admin)
         ->test(LeaveApproval::class)
         ->assertSet('statusFilter', 'all')
         ->assertSee('Leave Request Employee')
-        ->assertSee('Approved family leave');
+        ->assertSee('Family leave');
+});
+
+test('admin leave approvals ignore legacy attendance exception records', function () {
+    $admin = makeLeaveApprovalAdmin();
+    [, $employee] = makeLeaveApprovalEmployee('Legacy Attendance Employee');
+
+    Attendance::create([
+        'employee_id' => $employee->id,
+        'date' => now()->toDateString(),
+        'status' => 'late',
+        'approval_status' => Attendance::STATUS_PENDING,
+        'note' => 'Legacy attendance leave exception',
+    ]);
+
+    Livewire::actingAs($admin)
+        ->test(LeaveApproval::class)
+        ->assertDontSee('Legacy Attendance Employee')
+        ->assertDontSee('Legacy attendance leave exception');
 });
 
 test('admin leave approvals are not hidden by regional employee scope', function () {
@@ -71,68 +123,73 @@ test('admin leave approvals are not hidden by regional employee scope', function
         'kabupaten_kode' => '12.01',
     ]);
 
-    Attendance::create([
-        'employee_id' => $employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'late',
-        'approval_status' => Attendance::STATUS_PENDING,
-        'note' => 'Sick leave from another region',
-    ]);
+    makeLeaveApprovalRequest($employee);
 
     Livewire::actingAs($admin)
         ->test(LeaveApproval::class)
         ->assertSee('Different Region Leave Employee')
-        ->assertSee('Sick leave from another region');
+        ->assertSee('Family leave');
 });
 
-test('rejecting leave keeps request type visible under rejected approval filter', function () {
+test('rejecting leave keeps request visible under rejected approval filter', function () {
     Notification::fake();
 
     $admin = makeLeaveApprovalAdmin();
     [, $employee] = makeLeaveApprovalEmployee('Rejected Leave Employee');
 
-    $attendance = Attendance::create([
-        'employee_id' => $employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'late',
-        'approval_status' => Attendance::STATUS_PENDING,
-        'note' => 'Need leave for permit',
-    ]);
+    $leave = makeLeaveApprovalRequest($employee);
 
     Livewire::actingAs($admin)
         ->test(LeaveApproval::class)
-        ->call('confirmReject', [$attendance->id])
+        ->call('confirmReject', [$leave->id])
         ->set('rejectionNote', 'Permit quota is full')
         ->call('reject')
         ->assertDispatched('saved');
 
-    $attendance->refresh();
+    $leave->refresh();
 
-    expect($attendance->status->value)->toBe('late')
-        ->and($attendance->approval_status->value)->toBe(Attendance::STATUS_REJECTED)
-        ->and($attendance->rejection_note)->toBe('Permit quota is full');
+    expect($leave->status)->toBe(RequestStatus::REJECTED)
+        ->and($leave->rejection_reason)->toBe('Permit quota is full');
 
     Livewire::actingAs($admin)
         ->test(LeaveApproval::class)
-        ->set('statusFilter', Attendance::STATUS_REJECTED)
+        ->set('statusFilter', RequestStatus::REJECTED->value)
         ->assertSee('Rejected Leave Employee')
         ->assertSee('Permit quota is full');
 });
 
 test('leave approval service only reviews pending requests', function () {
-    $admin = User::factory()->admin()->create();
+    $admin = makeLeaveApprovalAdmin();
     [, $employee] = makeLeaveApprovalEmployee('Already Approved Employee');
 
-    $attendance = Attendance::create([
+    $leave = Leave::factory()->approved()->create([
         'employee_id' => $employee->id,
-        'date' => now()->toDateString(),
-        'status' => 'late',
-        'approval_status' => Attendance::STATUS_APPROVED,
-        'note' => 'Already approved leave',
+        'reason' => 'Already approved leave',
     ]);
 
-    expect(fn () => app(LeaveApprovalService::class)->approve([$attendance->id], $admin))
+    expect(fn () => app(LeaveApprovalService::class)->approve([$leave->id], $admin))
         ->toThrow(HttpException::class);
 
-    expect($attendance->fresh()->approval_status->value)->toBe(Attendance::STATUS_APPROVED);
+    expect($leave->fresh()->status)->toBe(RequestStatus::APPROVED);
+});
+
+test('admin leave approvals finalize l2 leave workflow', function () {
+    Notification::fake();
+
+    $admin = makeLeaveApprovalAdmin();
+    [, $employee] = makeLeaveApprovalEmployee('L2 Leave Employee');
+    $leave = makeLeaveApprovalRequest($employee);
+
+    Livewire::actingAs($admin)
+        ->test(LeaveApproval::class)
+        ->call('approve', [$leave->id])
+        ->assertDispatched('saved');
+
+    expect($leave->fresh()->status)->toBe(RequestStatus::APPROVED)
+        ->and(Approval::query()
+            ->where('approvable_type', Leave::class)
+            ->where('approvable_id', $leave->id)
+            ->where('level', ApprovalLevel::L2_MANAGER)
+            ->first()
+            ->status)->toBe(ApprovalStatus::APPROVED);
 });

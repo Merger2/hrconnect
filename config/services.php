@@ -36,7 +36,7 @@ return [
     ],
 
     'gemini' => [
-        'api_key' => env('GOOGLE_AI_API_KEY'),
+        'api_key' => env('GEMINI_API_KEY', env('GOOGLE_AI_API_KEY')),
         'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
         // 2026-08-06: text-embedding-004 dihapus Google (404 v1beta) —
         // gemini-embedding-001 + output_dimensionality 768 (selaras config/ai.php).

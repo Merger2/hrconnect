@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Schedule;
 use App\Models\ShiftSwapRequest;
 use App\Models\User;
+use App\Notifications\ShiftSwapStatusUpdated;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -119,11 +120,38 @@ class ShiftSwapRequestService
             $request->update([
                 'schedule_id' => $schedule->id,
                 'schedule_date' => $scheduleDate,
-                'status' => ShiftSwapRequest::STATUS_APPROVED,
+                'status' => ShiftSwapRequest::STATUS_APPROVED_L1,
                 'reviewed_by' => $actor->id,
                 'reviewed_at' => now(),
                 'rejection_note' => null,
             ]);
+
+            $request->user?->notify(new ShiftSwapStatusUpdated($request));
+
+            return __('Shift swap request approved and waiting for final approval.');
+        });
+    }
+
+    public function finalize(ShiftSwapRequest $request, User $actor): string
+    {
+        return DB::transaction(function () use ($request, $actor): string {
+            $request = $this->lock($request);
+
+            if (! $this->canManagerReview($request, $actor)) {
+                return __('You are not allowed to finalize this shift swap request.');
+            }
+
+            if ($request->status !== ShiftSwapRequest::STATUS_APPROVED_L1) {
+                return __('This shift swap request is not waiting for final approval.');
+            }
+
+            $request->update([
+                'status' => ShiftSwapRequest::STATUS_APPROVED,
+                'approved_by' => $actor->id,
+                'approved_at' => now(),
+            ]);
+
+            $request->user?->notify(new ShiftSwapStatusUpdated($request));
 
             return __('Shift swap request approved and schedule updated.');
         });
@@ -145,6 +173,8 @@ class ShiftSwapRequestService
                 'rejection_note' => $note,
             ]);
 
+            $request->user?->notify(new ShiftSwapStatusUpdated($request));
+
             return __('Shift swap request rejected.');
         });
     }
@@ -162,8 +192,6 @@ class ShiftSwapRequestService
     {
         return ShiftSwapRequest::query()
             ->with([
-                // User exposes division/jobTitle as accessor proxies to the
-                // Employee relations, so eager-load the actual relations.
                 'user.employee.division',
                 'user.employee.position',
                 'schedule.shift',
@@ -173,7 +201,8 @@ class ShiftSwapRequestService
                 'reviewer',
             ])
             ->whereHas('user', fn (Builder $query) => $query->managedBy($actor))
-            ->when($statusFilter !== 'all', fn (Builder $query) => $query->where('status', $statusFilter))
+            ->when(in_array($statusFilter, ['pending', 'approved_l1'], true), fn (Builder $query) => $query->where('status', $statusFilter))
+            ->when($statusFilter === 'all', fn (Builder $query) => $query->whereIn('status', [ShiftSwapRequest::STATUS_PENDING, ShiftSwapRequest::STATUS_APPROVED_L1, ShiftSwapRequest::STATUS_APPROVED]))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $subQuery) use ($search): void {
                     $subQuery
@@ -182,9 +211,6 @@ class ShiftSwapRequestService
                         ->orWhereHas('user', function (Builder $userQuery) use ($search): void {
                             $userQuery
                                 ->where('name', 'like', '%'.$search.'%')
-                                // nip/division/jobTitle live on the Employee
-                                // record (User exposes them as proxy accessors),
-                                // so search through the actual relations.
                                 ->orWhereHas('employee', function (Builder $employeeQuery) use ($search): void {
                                     $employeeQuery
                                         ->where('nip', 'like', '%'.$search.'%')
@@ -197,14 +223,14 @@ class ShiftSwapRequestService
             })
             ->orderByRaw('case when status = ? then 0 when status = ? then 1 else 2 end', [
                 ShiftSwapRequest::STATUS_PENDING,
-                ShiftSwapRequest::STATUS_APPROVED,
+                ShiftSwapRequest::STATUS_APPROVED_L1,
             ])
             ->latest('created_at');
     }
 
     private function canManagerReview(ShiftSwapRequest $request, User $actor): bool
     {
-        if ($request->status !== ShiftSwapRequest::STATUS_PENDING) {
+        if ($request->status !== ShiftSwapRequest::STATUS_PENDING && $request->status !== ShiftSwapRequest::STATUS_APPROVED_L1) {
             return false;
         }
 

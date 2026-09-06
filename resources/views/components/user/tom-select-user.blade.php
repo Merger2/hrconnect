@@ -4,6 +4,7 @@
     'selected' => null,
     'disabled' => false,
     'dropdownParent' => 'body',
+    'clearable' => false,
 ])
 
 @once
@@ -92,6 +93,25 @@
         color: var(--color-primary-900);
     }
 
+    {{-- Dropdown body-level (dropdownParent=body): .ts-wrapper-user .ts-dropdown
+         tidak match lagi karena dropdown pindah ke <body>.
+         Gunakan .ts-dropdown langsung sebagai fallback. --}}
+    .ts-dropdown {
+        background-color: var(--color-surface) !important;
+        border-color: var(--color-primary-200);
+        color: var(--color-primary-900);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        z-index: 99999 !important;
+        margin-top: 4px;
+    }
+
+    .ts-dropdown .option {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        line-height: 1.4rem;
+    }
+
     .user-ui .ts-wrapper-user .ts-control,
     .user-ui .profile-modal .ts-wrapper .ts-control {
         background-color: var(--user-native-surface) !important;
@@ -99,7 +119,7 @@
         color: inherit !important;
     }
 
-    .user-ui .ts-wrapper-user .ts-dropdown,
+    .user-ui .ts-dropdown,
     .user-ui .profile-modal .ts-dropdown {
         background-color: var(--user-native-surface-strong) !important;
         border-color: var(--user-native-border) !important;
@@ -134,6 +154,11 @@
     <select
         x-ref="select"
         data-ui-tomselect
+        {{-- Dropdown dirender ke <body> (dropdownParent, lihat initUiPickers) —
+             tanpa ini dropdown hidup di dalam stacking context .user-list-card
+             (position:relative + z-index:0) dan TERTUTUP card berikutnya →
+             opsi tidak bisa diklik di /shift-swap-requests (fix 2026-09-05). --}}
+        data-tomselect-dropdown-parent="body"
         aria-label="{{ $attributes->get('aria-label', $placeholder) }}"
         {{ $attributes->whereDoesntStartWith('wire:model')->except(['options', 'placeholder', 'aria-label']) }}
         placeholder="{{ $placeholder }}">

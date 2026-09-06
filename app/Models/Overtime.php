@@ -18,6 +18,15 @@ use Illuminate\Support\Carbon;
 #[Fillable(['employee_id', 'attendance_id', 'date', 'start_time', 'end_time', 'description', 'total_hours', 'amount', 'insentif', 'approved_by', 'approved_at', 'notes', 'rejection_reason', 'status'])]
 class Overtime extends Model
 {
+    /**
+     * Blade/service lama membaca $overtime->reason (kolom sebenarnya:
+     * description). Accessor ini menjaga kompatibilitas.
+     */
+    public function getReasonAttribute(): ?string
+    {
+        return $this->description;
+    }
+
     use Approvable, HasFactory, SoftDeletes;
 
     protected function casts(): array

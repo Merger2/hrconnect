@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Collaboration\DownloadCloudFileController;
+use App\Http\Controllers\KnowledgeBaseChatStreamController;
 use App\Http\Controllers\User\AppraisalExportPdfController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\EmployeeDocumentDownloadController;
@@ -24,6 +25,13 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::livewire('/notifications', 'user.notifications-page')->name('notifications');
+
+    Route::livewire('/approvals', 'user.team-approvals')
+        ->name('approvals')
+        ->can('reviewTeamOrHrApprovals');
+    Route::livewire('/approvals/history', 'user.team-approvals-history')
+        ->name('approvals.history')
+        ->can('reviewTeamOrHrApprovals');
 
     Route::middleware('user')->group(function () {
         Route::get('/home', HomeController::class)->name('home');
@@ -76,12 +84,6 @@ Route::middleware([
         // M23: VIEW_CUSTOM_FORMS ada di enum tapi tidak di-seed ke role employee
         // (akan 403 semua employee) — grup middleware menutup akses.
         Route::livewire('/forms', 'user.my-custom-forms')->name('my-forms');
-        Route::livewire('/approvals', 'user.team-approvals')
-            ->name('approvals')
-            ->can('reviewSubordinateRequests');
-        Route::livewire('/approvals/history', 'user.team-approvals-history')
-            ->name('approvals.history')
-            ->can('reviewSubordinateRequests');
         Route::livewire('/overtime', 'user.overtime-request')->name('overtime')->can('viewAny', Overtime::class);
         Route::livewire('/my-kasbon', 'user.finance.my-cash-advances')->name('my-kasbon')->middleware('feature.lock:cash_advance,user,home')->can('viewAny', CashAdvance::class);
         Route::livewire('/team-kasbon', 'user.finance.team-cash-advance-manager')
@@ -102,6 +104,12 @@ Route::middleware([
         // Knowledge Base Chat
         Route::livewire('/knowledge-base/chat', 'user.knowledge-base-chat')
             ->name('knowledge-base.chat')
+            ->can('view_knowledgebase');
+
+        // SSE streaming endpoint — dipakai halaman chat (full Alpine fetch/reader,
+        // bukan Livewire $this->stream — bug vendor Livewire, AUDIT.md #60).
+        Route::post('/knowledge-base/chat/stream', KnowledgeBaseChatStreamController::class)
+            ->name('knowledge-base.chat.stream')
             ->can('view_knowledgebase');
     });
 });

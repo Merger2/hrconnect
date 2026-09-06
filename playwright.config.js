@@ -77,6 +77,48 @@ export default defineConfig({
       },
     },
 
+    // Manager-authenticated interactive tests (team approvals)
+    {
+      name: 'chromium-manager',
+      testMatch: /manager-approvals\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'manager.json'),
+        serviceWorkers: 'block',
+      },
+    },
+
+    // Finance-authenticated tests (reimbursement, attendance, reports, payslip)
+    {
+      name: 'chromium-finance',
+      testMatch: /finance-role\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'finance.json'),
+        serviceWorkers: 'block',
+      },
+    },
+
+    // Superadmin-authenticated tests (dashboard, employees, settings, RBAC, all admin pages)
+    {
+      name: 'chromium-superadmin',
+      testMatch: /(superadmin-settings|admin-role)\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        storageState: path.join(authDir, 'admin.json'),
+        serviceWorkers: 'block',
+      },
+    },
+
     // PWA: manifest + service worker (guest, tanpa login)
     {
       name: 'chromium-pwa',
@@ -85,6 +127,19 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         permissions: ['camera', 'geolocation'],
         geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+    // Screenshot all pages: handles auth internally (loads storageState per role)
+    {
+      name: 'chromium-screenshot',
+      testMatch: /screenshot-all-pages\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
       },
     },
 
@@ -100,59 +155,29 @@ export default defineConfig({
       },
     },
 
-    // Screenshot all pages for documentation (5 roles × 2 viewports)
+    // Login UI flow (employee can login via form)
     {
-      name: 'screenshot-employee',
-      testMatch: /screenshot-all-pages\.spec\.ts/,
+      name: 'chromium-login',
+      testMatch: /workflow-login\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+      },
+    },
+
+    // Workflow lintas role (kasus nyata): employee submit → manager approve L1 →
+    // HR approve L2 → verifikasi status. Serial di dalam spec (per test pakai
+    // storageState role berbeda; state default hanya untuk render awal).
+    {
+      name: 'chromium-workflow',
+      testMatch: /workflow-(approvals|modules|extra|attendance-presensi|admin-master-data|admin-attendance|import-export|leave-type-holiday|knowledge-base-admin|reports|hr-checklist|finance-payroll-config|admin-overtime-approve|activity-log|superadmin-system-masterdata|admin-employee-create|face-enrollment-full|admin-payslip|finance-dashboard)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
         storageState: path.join(authDir, 'employee.json'),
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        serviceWorkers: 'block',
-      },
-    },
-    {
-      name: 'screenshot-manager',
-      testMatch: /screenshot-all-pages\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        storageState: path.join(authDir, 'manager.json'),
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        serviceWorkers: 'block',
-      },
-    },
-    {
-      name: 'screenshot-finance',
-      testMatch: /screenshot-all-pages\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        storageState: path.join(authDir, 'finance.json'),
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        serviceWorkers: 'block',
-      },
-    },
-    {
-      name: 'screenshot-admin',
-      testMatch: /screenshot-all-pages\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        storageState: path.join(authDir, 'admin.json'),
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
-        serviceWorkers: 'block',
-      },
-    },
-    {
-      name: 'screenshot-superadmin',
-      testMatch: /screenshot-all-pages\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        storageState: path.join(authDir, 'admin.json'),
-        permissions: ['camera', 'geolocation'],
-        geolocation: { latitude: -6.2088, longitude: 106.8456 },
         serviceWorkers: 'block',
       },
     },

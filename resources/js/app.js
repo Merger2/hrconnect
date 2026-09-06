@@ -189,10 +189,21 @@ const getOrCreateTomSelect = (select, { placeholder }) => {
     let ts = select.tomselect;
 
     if (!ts) {
+        // dropdownParent=body (opt-in via data attribute dari x-user.tom-select-user):
+        // dropdown dirender ke <body> supaya tidak terjebak stacking context
+        // ancestor (mis. .user-list-card position:relative+z-index:0 → card
+        // berikutnya menutup dropdown walau z-index 99999). Default (tanpa
+        // attribute) tetap in-wrapper — perilaku admin tak berubah.
+        const dropdownParent = select.getAttribute('data-tomselect-dropdown-parent') === 'body'
+            ? document.body
+            : null;
+
         ts = new TomSelect(select, {
             placeholder: placeholder || 'Select an option',
             maxOptions: null,
             allowEmptyOption: true,
+            clearable: select.hasAttribute('data-clearable') ? select.getAttribute('data-clearable') !== 'false' : false,
+            ...(dropdownParent ? { dropdownParent } : {}),
         });
         select.tomselect = ts;
     }
@@ -292,7 +303,12 @@ const initFlatpickr = (root = document) => {
 
         try {
             const fp = flatpickr(el, {
-                dateFormat: 'd M Y',
+                // Format per mode: time harus 'H:i' (bukan 'd M Y') supaya value
+                // yang dikirim ke Livewire lolos validasi date_format:H:i.
+                // Regresi lama: semua mode memakai 'd M Y' → time picker mengirim
+                // tanggal → submit lembur/WFH selalu gagal validasi.
+                dateFormat: mode === 'time' ? 'H:i' : mode === 'datetime' ? 'd M Y H:i' : 'd M Y',
+                time_24hr: true,
                 allowInput: false,
                 mode: isRange ? 'range' : 'single',
                 enableTime: mode === 'datetime' || mode === 'time',

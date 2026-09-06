@@ -40,7 +40,7 @@ class TeamApprovalsHistory extends Component
 
     public function mount()
     {
-        Gate::authorize('reviewSubordinateRequests');
+        Gate::authorize('reviewTeamOrHrApprovals');
         $this->normalizeActiveTab();
     }
 

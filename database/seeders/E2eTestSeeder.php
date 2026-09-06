@@ -118,9 +118,10 @@ class E2eTestSeeder extends Seeder
                 continue;
             }
 
-            // Cari parent_id dari IT Manager (untuk approval flow E2E)
-            $itManager = User::where('email', 'employee1@hrconnect.local')->first();
-            $parentId = $itManager?->employee?->id;
+            // Cari parent_id dari E2E Manager (untuk approval flow)
+            // Manager E2E jadi atasan employee + finance supaya /approvals punya data
+            $e2eManager = User::where('email', 'manager@hrconnect.test')->first();
+            $parentId = $e2eManager?->employee?->id;
 
             Employee::firstOrCreate(
                 ['user_id' => $user->id],
@@ -148,7 +149,9 @@ class E2eTestSeeder extends Seeder
                     'shift_id' => Shift::where('name', 'Office Hour')->first()?->id,
                     'address_detail' => 'Jl. Test No. '.rand(1, 50).', Jakarta',
                     'pin' => Hash::make('123456'),
-                    'parent_id' => $emp['pos'] === 'OPS-MGR' || $emp['pos'] === 'HR-MGR' ? null : $parentId,
+                    // Manager (OPS-MGR) dan HR (HR-MGR) = atasan, tidak punya parent_id
+                    // Employee + Finance = bawahan manager → bisa di-approve di /approvals
+                    'parent_id' => in_array($emp['pos'], ['OPS-MGR', 'HR-MGR']) ? null : $parentId,
                 ]
             );
         }

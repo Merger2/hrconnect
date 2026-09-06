@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\WorkFromHomeRequest;
+use App\Support\ApprovalActorService;
 use App\Support\MultiCompanyService;
 
 class WorkFromHomeRequestPolicy
@@ -15,6 +16,7 @@ class WorkFromHomeRequestPolicy
 
     public function __construct(
         private readonly MultiCompanyService $multiCompany,
+        private readonly ApprovalActorService $approvalActors,
     ) {}
 
     public function viewAny(User $user): bool
@@ -29,7 +31,7 @@ class WorkFromHomeRequestPolicy
         }
 
         return $request->user_id === $user->id
-            || $request->user?->manager_id === $user->id
+            || $this->isSubordinate($user, $request)
             || $user->can('manageWfhRequests');
     }
 
@@ -42,12 +44,25 @@ class WorkFromHomeRequestPolicy
     {
         return $request->status === WorkFromHomeRequest::STATUS_PENDING
             && $this->sameCompany($user, $request)
-            && ($request->user?->manager_id === $user->id || $user->can('manageWfhRequests'));
+            && ($this->isSubordinate($user, $request) || $user->can('manageWfhRequests'));
     }
 
     public function reject(User $user, WorkFromHomeRequest $request): bool
     {
         return $this->approve($user, $request);
+    }
+
+    /**
+     * Manager/subordinate check vía hierarki organisasi ATAU users.manager_id
+     * eksplisit — konsisten dgn ApprovalActorService::subordinateIds (dipakai
+     * daftar pending TeamApprovalQueryService). Sebelumnya hanya membaca
+     * users.manager_id → manager TIDAK bisa approve WFH bawahan yg relasinya
+     * via employees.parent_id/manager_id (seed/hierarki legacy): aksi approve
+     * melempar AuthorizationException (403) padahal card tampil di daftar.
+     */
+    private function isSubordinate(User $actor, WorkFromHomeRequest $request): bool
+    {
+        return $this->approvalActors->subordinateIds($actor)->contains($request->user_id);
     }
 
     private function sameCompany(User $actor, WorkFromHomeRequest $request): bool

@@ -136,11 +136,94 @@
                             @if ($timeIn && ! $isHoliday)
                                 <span class="hidden text-[0.62rem] font-semibold leading-none text-slate-400 sm:inline">{{ $timeIn }}</span>
                             @endif
+
+                            {{-- Request indicators (leave, overtime, reimbursement) --}}
+                            @if (isset($requestsByDate[$dateKey]) && is_array($requestsByDate[$dateKey]))
+                                @php
+                                    $reqs = $requestsByDate[$dateKey];
+                                    $reqStatuses = array_unique(array_column($reqs, 'status'));
+                                    $pending = in_array('pending', $reqStatuses) || in_array('PENDING', $reqStatuses) || in_array('PENDING_FINANCE', $reqStatuses);
+                                    $approved = in_array('approved', $reqStatuses) || in_array('APPROVED', $reqStatuses) || in_array('APPROVED_L1', $reqStatuses);
+                                    $rejected = in_array('rejected', $reqStatuses) || in_array('REJECTED', $reqStatuses);
+                                    $showPending = $pending && ! $approved;
+                                    $showApproved = $approved && ! $rejected;
+                                    $showRejected = $rejected;
+                                @endphp
+                                @if ($showPending)
+                                    <span class="inline-flex h-2 w-2 rounded-full bg-amber-400 ring-2 ring-amber-400/30 animate-pulse"></span>
+                                @elseif ($showApproved)
+                                    <span class="inline-flex h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30"></span>
+                                @elseif ($showRejected)
+                                    <span class="inline-flex h-2 w-2 rounded-full bg-rose-400 ring-2 ring-rose-400/30"></span>
+                                @endif
+                            @endif
                         </span>
                     </button>
                 </div>
             @endforeach
         </div>
+    </section>
+
+    {{-- Riwayat Pengajuan --}}
+    <section aria-label="{{ __('Request History') }}" class="user-history-panel mt-4">
+        <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold tracking-tight text-slate-950">{{ __('Request History') }}</h3>
+            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ count($requests) }} pengajuan</span>
+        </div>
+        @if (count($requests) > 0)
+            <div class="mt-3 space-y-2">
+                @foreach ($requests as $req)
+                    @php
+                        $statusColors = [
+                            'pending' => 'bg-amber-100 text-amber-700',
+                            'PENDING' => 'bg-amber-100 text-amber-700',
+                            'PENDING_FINANCE' => 'bg-amber-100 text-amber-700',
+                            'approved' => 'bg-emerald-100 text-emerald-700',
+                            'APPROVED' => 'bg-emerald-100 text-emerald-700',
+                            'APPROVED_L1' => 'bg-emerald-100 text-emerald-700',
+                            'rejected' => 'bg-rose-100 text-rose-700',
+                            'REJECTED' => 'bg-rose-100 text-rose-700',
+                        ];
+                        $statusLabel = match ($req['status'] ?? '') {
+                            'pending', 'PENDING', 'PENDING_FINANCE' => __('Pending'),
+                            'approved', 'APPROVED', 'APPROVED_L1' => __('Approved'),
+                            'rejected', 'REJECTED' => __('Rejected'),
+                            default => $req['status'] ?? __('Unknown'),
+                        };
+                        $colorClass = $statusColors[$req['status']] ?? 'bg-slate-100 text-slate-600';
+                        $typeIcons = [
+                            'leave' => '📋',
+                            'overtime' => '⏰',
+                            'reimbursement' => '💰',
+                        ];
+                        $icon = $typeIcons[$req['type']] ?? '📄';
+                    @endphp
+                    <div class="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50 transition">
+                        <span class="text-base">{{ $icon }}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-slate-900 truncate">{{ $req['title'] ?? $req['type'] }}</p>
+                            <p class="text-xs text-slate-500">{{ \Carbon\Carbon::parse($req['date'])->translatedFormat('d F Y') }} @if (!empty($req['end_date']) && $req['end_date'] !== $req['date']) — {{ \Carbon\Carbon::parse($req['end_date'])->translatedFormat('d F Y') }} @endif</p>
+                            @if (!empty($req['approvals']) && is_array($req['approvals']))
+                                <p class="text-[0.65rem] text-slate-400">
+                                    @foreach ($req['approvals'] as $approval)
+                                        @if (!empty($approval['level']))
+                                            Level {{ $approval['level'] }}: {{ $approval['status'] ?? '-' }}
+                                            @if (!empty($approval['approved_by'])) → @endif
+                                            @if (!empty($approval['approved_by'])) , @endif
+                                        @endif
+                                    @endforeach
+                                </p>
+                            @endif
+                        </div>
+                        <span class="rounded-full px-2 py-0.5 text-xs font-bold {{ $colorClass }}">
+                            {{ $statusLabel }}
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="mt-3 text-sm text-slate-500">{{ __('No requests this month.') }}</p>
+        @endif
     </section>
 
     <section aria-label="{{ __('Attendance summary') }}">

@@ -2,12 +2,13 @@
 
 namespace App\Support;
 
-use App\Models\Attendance;
+use App\Enums\RequestStatus;
 use App\Models\AttendanceCorrection;
 use App\Models\CashAdvance;
 use App\Models\CustomFormSubmission;
 use App\Models\EmployeeDocumentRequest;
 use App\Models\HrChecklistTask;
+use App\Models\Leave;
 use App\Models\Overtime;
 use App\Models\Reimbursement;
 use App\Models\ShiftSwapRequest;
@@ -110,10 +111,9 @@ class ManagerInboxService
         $overdueAt = now()->subDays(self::OVERDUE_AFTER_DAYS);
 
         $counts = [
-            'leaves' => Attendance::query()
-                ->whereHas('user', fn (Builder $q) => $q->managedBy($admin))
-                ->where('approval_status', 'pending')
-                ->whereNotNull('leave_type_id')
+            'leaves' => Leave::query()
+                ->whereHas('employee.user', fn (Builder $q) => $q->managedBy($admin))
+                ->whereIn('status', [RequestStatus::PENDING->value, RequestStatus::APPROVED_L1->value])
                 ->when($overdueOnly, fn (Builder $query) => $query->where('created_at', '<=', $overdueAt))
                 ->count(),
 

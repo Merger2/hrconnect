@@ -4,14 +4,14 @@ return [
     'groups' => [
         [
             'title' => 'Utama',
-            'roles' => ['super-admin', 'hr', 'manager', 'employee'],
+            'roles' => ['super-admin', 'admin', 'manager', 'employee'],
             'items' => [
                 ['label' => 'Dashboard', 'route' => 'home', 'icon' => 'home', 'can' => 'view_dashboard'],
             ],
         ],
         [
             'title' => 'SDM',
-            'roles' => ['super-admin', 'hr', 'manager', 'employee'],
+            'roles' => ['super-admin', 'admin', 'manager', 'employee'],
             'items' => [
                 [
                     'label' => 'Direktori Karyawan',
@@ -29,7 +29,7 @@ return [
         ],
         [
             'title' => 'Keuangan',
-            'roles' => ['super-admin', 'hr', 'employee'],
+            'roles' => ['super-admin', 'admin', 'employee'],
             'items' => [
                 ['label' => 'Aset', 'route' => 'my-assets', 'icon' => 'inventory_2', 'can' => 'view_assets'],
                 ['label' => 'Slip Gaji', 'route' => 'my-payslips', 'icon' => 'payments', 'can' => 'view_payslip'],
@@ -37,7 +37,7 @@ return [
         ],
         [
             'title' => 'Admin',
-            'roles' => ['super-admin', 'hr'],
+            'roles' => ['super-admin', 'admin'],
             'items' => [
                 ['label' => 'Manajemen Penggajian', 'route' => 'admin.payrolls', 'icon' => 'summarize', 'can' => 'view_payrolls'],
                 ['label' => 'Matriks Absensi', 'route' => 'admin.attendances', 'icon' => 'grid_view', 'can' => 'view_attendances'],
@@ -48,28 +48,28 @@ return [
         ],
         [
             'title' => 'Persetujuan',
-            'roles' => ['super-admin', 'hr', 'manager'],
+            'roles' => ['super-admin', 'admin', 'manager'],
             'items' => [
-                ['label' => 'Semua Persetujuan', 'route' => 'approvals', 'icon' => 'approval', 'can' => 'viewAny,App\\Models\\Approval'],
+                ['label' => 'Semua Persetujuan', 'route' => 'approvals', 'icon' => 'approval', 'can' => 'reviewTeamOrHrApprovals'],
             ],
         ],
         [
             'title' => 'Lainnya',
-            'roles' => ['super-admin', 'hr', 'employee'],
+            'roles' => ['super-admin', 'admin', 'employee'],
             'items' => [
                 ['label' => 'Basis Pengetahuan', 'route' => 'knowledge-base.manage', 'icon' => 'menu_book', 'can' => 'manage_knowledgebase'],
             ],
         ],
         [
             'title' => 'Master Data',
-            'roles' => ['super-admin', 'hr'],
+            'roles' => ['super-admin', 'admin'],
             'items' => [
-                ['label' => 'Cabang', 'route' => 'admin.companies', 'icon' => 'location_on', 'can' => 'view_branches'],
+                ['label' => 'Cabang', 'route' => 'admin.companies', 'icon' => 'location_on', 'can' => 'view_companies'],
                 ['label' => 'Departemen', 'route' => 'admin.masters.division', 'icon' => 'account_tree', 'can' => 'view_departments'],
                 ['label' => 'Jabatan', 'route' => 'admin.masters.job-title', 'icon' => 'work', 'can' => 'view_positions'],
-                ['label' => 'Shift Kerja', 'route' => 'admin.masters.shift', 'icon' => 'schedule', 'can' => 'view_branches'],
-                ['label' => 'Hari Libur', 'route' => 'admin.holidays', 'icon' => 'event_busy', 'can' => 'view_branches'],
-                ['label' => 'Tipe Cuti', 'route' => 'admin.masters.leave-types', 'icon' => 'calendar_month', 'can' => 'view_branches'],
+                ['label' => 'Shift Kerja', 'route' => 'admin.masters.shift', 'icon' => 'schedule', 'can' => 'manage_shifts'],
+                ['label' => 'Hari Libur', 'route' => 'admin.holidays', 'icon' => 'event_busy', 'can' => 'manage_holidays'],
+                ['label' => 'Tipe Cuti', 'route' => 'admin.masters.leave-types', 'icon' => 'calendar_month', 'can' => 'manage_leave_types'],
             ],
         ],
     ],

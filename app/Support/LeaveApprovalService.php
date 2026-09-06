@@ -2,21 +2,27 @@
 
 namespace App\Support;
 
-use App\Models\Attendance;
+use App\Enums\ApprovalLevel;
+use App\Enums\ApprovalStatus;
+use App\Enums\RequestStatus;
+use App\Models\Approval;
+use App\Models\Leave;
 use App\Models\User;
 use App\Notifications\LeaveStatusUpdated;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LeaveApprovalService
 {
     public function __construct(
         protected ApprovalActorService $approvalActors,
+        protected ApprovalService $approvals,
     ) {}
 
     /**
-     * @return LengthAwarePaginator<int, Collection<int, Attendance>>
+     * @return LengthAwarePaginator<int, Collection<int, Leave>>
      */
     public function groupedRequests(
         User $actor,
@@ -26,45 +32,23 @@ class LeaveApprovalService
         int $perPage = 15,
     ): LengthAwarePaginator {
         $groups = $this->baseQuery($actor, $statusFilter, $requestTypeFilter, $search)
-            ->selectRaw('employee_id, status, leave_type_id, approval_status, note, MIN(date) as start_date, MAX(date) as end_date, COUNT(*) as day_count')
-            ->groupBy('employee_id', 'status', 'leave_type_id', 'approval_status', 'note')
             ->orderByDesc('end_date')
             ->paginate($perPage);
 
-        $groups->setCollection($groups->getCollection()->map(function ($group) use ($actor, $statusFilter, $requestTypeFilter, $search) {
-            return $this->baseQuery($actor, $statusFilter, $requestTypeFilter, $search)
-                ->with(['user.employee.division', 'user.employee.position', 'leaveType'])
-                ->where('employee_id', $group->employee_id)
-                ->where('status', $group->status)
-                ->where(function (Builder $query) use ($group): void {
-                    $group->leave_type_id === null
-                        ? $query->whereNull('leave_type_id')
-                        : $query->where('leave_type_id', $group->leave_type_id);
-                })
-                ->where('approval_status', $group->approval_status)
-                ->where(function (Builder $query) use ($group): void {
-                    $note = trim((string) $group->note);
-
-                    if ($note === '') {
-                        $query->whereNull('note')->orWhere('note', '');
-
-                        return;
-                    }
-
-                    $query->where('note', $group->note);
-                })
-                ->orderBy('date')
-                ->get();
-        }));
+        $groups->setCollection($groups->getCollection()->map(fn (Leave $leave) => collect([$leave])));
 
         return $groups;
     }
 
     private function baseQuery(User $actor, string $statusFilter, string $requestTypeFilter, string $search): Builder
     {
-        return Attendance::query()
-            ->whereIn('status', Attendance::REQUEST_STATUSES)
-            ->when($statusFilter !== 'all', fn (Builder $query) => $query->where('approval_status', $statusFilter))
+        return Leave::query()
+            ->with(['employee.user', 'employee.division', 'employee.position', 'leaveType', 'approvals'])
+            ->when($statusFilter === RequestStatus::PENDING->value, fn (Builder $query) => $query->whereIn('status', [
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED_L1->value,
+            ]))
+            ->when(in_array($statusFilter, [RequestStatus::APPROVED->value, RequestStatus::REJECTED->value], true), fn (Builder $query) => $query->where('status', $statusFilter))
             ->when(! $actor->can('manageLeaveApprovals'), fn (Builder $query) => $query->whereHas('employee', fn (Builder $q) => $q->whereIn('user_id', $this->approvalActors->subordinateIds($actor))))
             ->when($requestTypeFilter !== 'all', function (Builder $query) use ($requestTypeFilter): void {
                 if (ctype_digit($requestTypeFilter)) {
@@ -73,14 +57,14 @@ class LeaveApprovalService
                     return;
                 }
 
-                $query->where('status', $requestTypeFilter);
+                $query->where('day_type', $requestTypeFilter);
             })
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $subQuery) use ($search): void {
                     $subQuery
-                        ->where('note', 'like', '%'.$search.'%')
-                        ->orWhere('rejection_note', 'like', '%'.$search.'%')
-                        ->orWhereHas('user', function (Builder $userQuery) use ($search): void {
+                        ->where('reason', 'like', '%'.$search.'%')
+                        ->orWhere('rejection_reason', 'like', '%'.$search.'%')
+                        ->orWhereHas('employee.user', function (Builder $userQuery) use ($search): void {
                             $userQuery->where('name', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('employee', function (Builder $employeeQuery) use ($search): void {
@@ -95,21 +79,14 @@ class LeaveApprovalService
      */
     public function approve(array $ids, User $actor): void
     {
-        $authorizedIds = $this->authorizedRequestIds($ids, $actor);
+        $approvals = $this->authorizedPendingApprovals($ids, $actor);
 
-        if (count($authorizedIds) !== count($ids)) {
+        if ($approvals->count() !== count($ids)) {
             abort(403, 'Unauthorized action.');
         }
 
-        Attendance::query()
-            ->whereIn('id', $authorizedIds)
-            ->update([
-                'approval_status' => Attendance::STATUS_APPROVED,
-                'approved_by' => $actor->id,
-                'approved_at' => now(),
-            ]);
-
-        $this->notifyUpdated($authorizedIds);
+        $approvals->each(fn (Approval $approval) => $this->approvals->approve($approval));
+        $this->notifyUpdated($approvals);
     }
 
     /**
@@ -117,22 +94,17 @@ class LeaveApprovalService
      */
     public function reject(array $ids, User $actor, ?string $rejectionNote = null): void
     {
-        $authorizedIds = $this->authorizedRequestIds($ids, $actor);
+        $approvals = $this->authorizedPendingApprovals($ids, $actor);
 
-        if (count($authorizedIds) !== count($ids)) {
+        if ($approvals->count() !== count($ids)) {
             abort(403, 'Unauthorized action.');
         }
 
-        Attendance::query()
-            ->whereIn('id', $authorizedIds)
-            ->update([
-                'approval_status' => Attendance::STATUS_REJECTED,
-                'rejection_note' => $rejectionNote,
-                'approved_by' => $actor->id,
-                'approved_at' => now(),
-            ]);
-
-        $this->notifyUpdated($authorizedIds);
+        $approvals->each(fn (Approval $approval) => $this->approvals->reject(
+            $approval,
+            $rejectionNote ?: __('Rejected by HR.')
+        ));
+        $this->notifyUpdated($approvals);
     }
 
     /**
@@ -141,34 +113,60 @@ class LeaveApprovalService
      */
     public function authorizedRequestIds(array $ids, User $actor): array
     {
-        $query = Attendance::query()
+        return Leave::query()
             ->whereIn('id', $ids)
-            ->whereIn('status', Attendance::REQUEST_STATUSES)
-            ->where('approval_status', Attendance::STATUS_PENDING);
-
-        if ($actor->can('manageLeaveApprovals')) {
-            return $query->pluck('id')->map(fn ($id) => (int) $id)->all();
-        }
-
-        return $query
-            ->whereHas('employee', fn (Builder $q) => $q->whereIn('user_id', $this->approvalActors->subordinateIds($actor)))
+            ->whereIn('status', [RequestStatus::PENDING->value, RequestStatus::APPROVED_L1->value])
+            ->whereHas('approvals', fn (Builder $query) => $this->pendingApprovalScope($query, $actor))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->all();
     }
 
     /**
-     * @param  array<int, int>  $ids
+     * @param  array<int, int|string>  $ids
+     * @return Collection<int, Approval>
      */
-    protected function notifyUpdated(array $ids): void
+    protected function authorizedPendingApprovals(array $ids, User $actor): Collection
     {
-        $attendances = Attendance::query()
-            ->with('user')
-            ->whereIn('id', $ids)
-            ->get();
+        return Approval::query()
+            ->with('approvable')
+            ->where('approvable_type', Leave::class)
+            ->whereIn('approvable_id', $ids)
+            ->where('status', ApprovalStatus::PENDING)
+            ->where(fn (Builder $query) => $this->pendingApprovalScope($query, $actor))
+            ->get()
+            ->unique('approvable_id')
+            ->values();
+    }
 
-        foreach ($attendances as $attendance) {
-            $attendance->user?->notify(new LeaveStatusUpdated($attendance));
+    protected function pendingApprovalScope(Builder $query, User $actor): void
+    {
+        if ($actor->can('manageLeaveApprovals')) {
+            $query->where('level', ApprovalLevel::L2_MANAGER);
+
+            return;
         }
+
+        $employee = $actor->employee;
+
+        if (! $employee) {
+            throw new HttpException(403, 'Unauthorized action.');
+        }
+
+        $query
+            ->where('level', ApprovalLevel::L1_SUPERVISOR)
+            ->where('approver_id', $employee->id);
+    }
+
+    /**
+     * @param  Collection<int, Approval>  $approvals
+     */
+    protected function notifyUpdated(Collection $approvals): void
+    {
+        $approvals
+            ->pluck('approvable')
+            ->filter(fn ($approvable) => $approvable instanceof Leave)
+            ->unique('id')
+            ->each(fn (Leave $leave) => $leave->employee?->user?->notify(new LeaveStatusUpdated($leave)));
     }
 }
