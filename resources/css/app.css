@@ -2047,7 +2047,7 @@ input[type=range]::-moz-range-thumb {
   border:1px solid color-mix(in srgb, var(--color-module-finance) 40%, var(--color-surface));
 }
 .app-topbar {
-  z-index:50;
+  z-index:40;
   background-color:var(--color-surface);
   width:100%;
   position:fixed;
