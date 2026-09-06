@@ -14,12 +14,22 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class ProcessAttendanceReportExportRun implements ShouldQueue
 {
     use Queueable;
+
+    // retry_after database queue = 180 (config/queue.php) — timeout harus di
+    // bawahnya supaya worker tidak me-redispatch job yang masih jalan.
+    public int $tries = 3;
+
+    public int $timeout = 120;
+
+    public array $backoff = [10, 30, 60];
 
     public function __construct(public int $runId) {}
 
@@ -60,6 +70,22 @@ class ProcessAttendanceReportExportRun implements ShouldQueue
             'mime_type' => $mimeType,
             'size_bytes' => Storage::disk('local')->size($filePath),
         ]);
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        // No silent degradation (PRD): kegagalan export harus terlihat di UI
+        // (kolom error_message ImportExportRun) dan di log, bukan run "queued"
+        // yang menggantung selamanya.
+        Log::error('Attendance report export failed permanently', [
+            'run_id' => $this->runId,
+            'error' => $exception?->getMessage() ?? 'Unknown error',
+        ]);
+
+        ImportExportRun::query()
+            ->whereKey($this->runId)
+            ->first()
+            ?->markFailed($exception?->getMessage() ?? 'Unknown error');
     }
 
     private function reportData(ImportExportRun $run, array $meta): array

@@ -224,9 +224,12 @@ const ADMIN_PAGES: PageDefinition[] = [
     description: 'Daftar absensi semua karyawan',
   },
   {
-    route: '/admin/attendances/report',
-    filename: 'admin-report-absensi',
-    description: 'Laporan absensi',
+    // Bukan /admin/attendances/report — itu endpoint export (wajib param tanggal,
+    // tanpa param melakukan redirect()->back() yang bisa mendarat di URL non-HTML
+    // seperti /livewire/livewire.js dan membuat fullPage screenshot timeout).
+    route: '/admin/reports',
+    filename: 'admin-report-center',
+    description: 'Report center - laporan operasional',
   },
   {
     route: '/admin/leaves',
