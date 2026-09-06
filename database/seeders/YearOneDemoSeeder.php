@@ -21,6 +21,7 @@ use App\Services\Payroll\PayrollCalculatorService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Seed SATU TAHUN berjalan (12 bulan kalender terakhir, ha 2025-08 s/d 2026-07)
@@ -188,6 +189,7 @@ class YearOneDemoSeeder extends Seeder
                     if ($leave) {
                         $leaveDateKeys = $this->collectLeaveDateKeys($leaveDateKeys, $leave);
                         $requestCount++;
+                        $this->addLeaveApproval($employee, $leave);
                     }
                 }
             }
@@ -197,6 +199,7 @@ class YearOneDemoSeeder extends Seeder
                 if ($leave) {
                     $leaveDateKeys = $this->collectLeaveDateKeys($leaveDateKeys, $leave);
                     $requestCount++;
+                    $this->addLeaveApproval($employee, $leave);
                 }
             }
         }
@@ -412,7 +415,7 @@ class YearOneDemoSeeder extends Seeder
                 $startHour = 18 + ($t % 2); // 18:00 / 19:00
                 $duration = 1 + (($seed >> 12) % 3); // 1-3 jam
 
-                Overtime::firstOrCreate(
+                $overtime = Overtime::firstOrCreate(
                     [
                         'employee_id' => $employee->id,
                         'date' => $date->toDateString(),
@@ -426,6 +429,7 @@ class YearOneDemoSeeder extends Seeder
                         'approved_at' => $date->addDay()->setTime(9, 0),
                     ]
                 );
+                $this->addOvertimeApproval($employee, $overtime);
                 $count++;
             }
         }
@@ -531,5 +535,78 @@ class YearOneDemoSeeder extends Seeder
         }
 
         return collect($dates);
+    }
+
+    private function getManagerEmployeeId(int $employeeId): ?int
+    {
+        $employee = Employee::find($employeeId);
+        if ($employee && $employee->parent_id) {
+            return $employee->parent_id;
+        }
+
+        // Fallback: find first manager employee
+        return Employee::whereHas('user', fn ($q) => $q->whereHas('roles', fn ($q) => $q->where('name', 'manager')))
+            ->where('id', '!=', $employeeId)
+            ->value('id');
+    }
+
+    private function addLeaveApproval(Employee $employee, Leave $leave): void
+    {
+        $managerId = $this->getManagerEmployeeId($employee->id);
+        if (! $managerId) {
+            return;
+        }
+
+        DB::table('approvals')->insertOrIgnore([
+            'approver_id' => $managerId,
+            'approvable_id' => $leave->id,
+            'approvable_type' => Leave::class,
+            'level' => 1,
+            'status' => 'approved',
+            'approved_at' => now(),
+            'notes' => 'Disetujui oleh manager (demo)',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // L2 approval by HR
+        $hrId = Employee::whereHas('user', fn ($q) => $q->whereHas('roles', fn ($q) => $q->where('name', 'admin')))
+            ->where('id', '!=', $employee->id)
+            ->where('id', '!=', $managerId)
+            ->value('id');
+
+        if ($hrId) {
+            DB::table('approvals')->insertOrIgnore([
+                'approver_id' => $hrId,
+                'approvable_id' => $leave->id,
+                'approvable_type' => Leave::class,
+                'level' => 2,
+                'status' => 'approved',
+                'approved_at' => now()->addDay(),
+                'notes' => 'Disetujui oleh HR (demo)',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+
+    private function addOvertimeApproval(Employee $employee, Overtime $overtime): void
+    {
+        $managerId = $this->getManagerEmployeeId($employee->id);
+        if (! $managerId) {
+            return;
+        }
+
+        DB::table('approvals')->insertOrIgnore([
+            'approver_id' => $managerId,
+            'approvable_id' => $overtime->id,
+            'approvable_type' => Overtime::class,
+            'level' => 1,
+            'status' => 'approved',
+            'approved_at' => $overtime->approved_at ?? now(),
+            'notes' => 'Disetujui oleh manager (demo)',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

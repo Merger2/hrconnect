@@ -4,6 +4,7 @@
     'selected' => null,
     'disabled' => false,
     'dropdownParent' => 'body',
+    'clearable' => false,
 ])
 
 @once

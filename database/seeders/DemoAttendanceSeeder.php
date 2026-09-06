@@ -71,7 +71,7 @@ class DemoAttendanceSeeder extends Seeder
             $shiftId = $employee->shift_id ?? $defaultShiftId;
             $joinDate = $employee->join_date;
 
-            for ($i = 1; $i <= 30; $i++) {
+            for ($i = 1; $i <= 90; $i++) {
                 $date = $today->subDays($i);
 
                 // Hanya hari kerja Senin-Jumat

@@ -202,6 +202,7 @@ const getOrCreateTomSelect = (select, { placeholder }) => {
             placeholder: placeholder || 'Select an option',
             maxOptions: null,
             allowEmptyOption: true,
+            clearable: select.hasAttribute('data-clearable') ? select.getAttribute('data-clearable') !== 'false' : false,
             ...(dropdownParent ? { dropdownParent } : {}),
         });
         select.tomselect = ts;

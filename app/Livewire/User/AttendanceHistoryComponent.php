@@ -6,6 +6,9 @@ use App\Enums\AttendanceStatus;
 use App\Livewire\Traits\AttendanceDetailTrait;
 use App\Models\Attendance;
 use App\Models\Holiday;
+use App\Models\Leave;
+use App\Models\Overtime;
+use App\Models\Reimbursement;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
@@ -24,6 +27,12 @@ class AttendanceHistoryComponent extends Component
     {
         $this->selectedYear = date('Y');
         $this->selectedMonth = date('m');
+        if (empty($this->selectedMonth) || ! is_numeric($this->selectedMonth)) {
+            $this->selectedMonth = date('m');
+        }
+        if (empty($this->selectedYear) || ! is_numeric($this->selectedYear)) {
+            $this->selectedYear = date('Y');
+        }
         $this->month = "{$this->selectedYear}-{$this->selectedMonth}";
     }
 
@@ -39,6 +48,12 @@ class AttendanceHistoryComponent extends Component
 
     public function updateMonth()
     {
+        if (empty($this->selectedMonth) || ! is_numeric($this->selectedMonth)) {
+            $this->selectedMonth = date('m');
+        }
+        if (empty($this->selectedYear) || ! is_numeric($this->selectedYear)) {
+            $this->selectedYear = date('Y');
+        }
         $this->month = "{$this->selectedYear}-{$this->selectedMonth}";
     }
 
@@ -92,6 +107,72 @@ class AttendanceHistoryComponent extends Component
 
         $attendances = Attendance::hydrate($cached);
         $attendanceByDate = $attendances->keyBy(fn (Attendance $attendance) => $attendance->date->format('Y-m-d'));
+
+        // Query requests: leaves, overtimes, reimbursements
+        $userId = $user->id;
+        $leaveRequests = Leave::whereHas('employee', fn ($q) => $q->where('user_id', $userId))
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->with('leaveType', 'approvals')
+            ->get()
+            ->map(fn ($leave) => [
+                'type' => 'leave',
+                'title' => $leave->leaveType?->name ?? 'Cuti',
+                'date' => $leave->start_date,
+                'end_date' => $leave->end_date,
+                'status' => $leave->status,
+                'reason' => $leave->reason,
+                'approvals' => $leave->approvals->map(fn ($a) => [
+                    'level' => $a->pivot->level ?? $a->level ?? null,
+                    'status' => $a->pivot->status ?? $a->status ?? null,
+                    'approved_by' => $a->pivot->approved_by ?? $a->approved_by ?? null,
+                ])->toArray(),
+            ])
+            ->toArray();
+
+        $overtimeRequests = Overtime::whereHas('employee', fn ($q) => $q->where('user_id', $userId))
+            ->whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
+            ->with('approvals')
+            ->get()
+            ->map(fn ($ot) => [
+                'type' => 'overtime',
+                'title' => 'Lembur',
+                'date' => $ot->date,
+                'status' => $ot->status,
+                'description' => $ot->description,
+                'approvals' => $ot->approvals->map(fn ($a) => [
+                    'level' => $a->pivot->level ?? $a->level ?? null,
+                    'status' => $a->pivot->status ?? $a->status ?? null,
+                ])->toArray(),
+            ])
+            ->toArray();
+
+        $reimbursementRequests = Reimbursement::whereHas('employee', fn ($q) => $q->where('user_id', $userId))
+            ->whereBetween('expense_date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
+            ->with('category', 'approvals')
+            ->get()
+            ->map(fn ($r) => [
+                'type' => 'reimbursement',
+                'title' => $r->category?->name ?? 'Reimbursement',
+                'date' => $r->expense_date,
+                'status' => $r->status,
+                'amount' => $r->amount,
+                'approvals' => $r->approvals->map(fn ($a) => [
+                    'level' => $a->pivot->level ?? $a->level ?? null,
+                    'status' => $a->pivot->status ?? $a->status ?? null,
+                ])->toArray(),
+            ])
+            ->toArray();
+
+        $requests = array_merge($leaveRequests, $overtimeRequests, $reimbursementRequests);
+
+        // Build request lookup by date for calendar indicators
+        $requestsByDate = [];
+        foreach ($requests as $req) {
+            $reqDate = $req['date'] ?? null;
+            if ($reqDate) {
+                $requestsByDate[$reqDate][] = $req;
+            }
+        }
 
         // Calculate Counts
         $presentCount = $attendances->where('status', AttendanceStatus::ON_TIME->value)->count();
@@ -158,6 +239,8 @@ class AttendanceHistoryComponent extends Component
                 AttendanceStatus::SICK->value => $sickCount,
                 AttendanceStatus::ABSENT->value => $absentCount,
             ],
+            'requests' => $requests,
+            'requestsByDate' => $requestsByDate,
         ]);
     }
 }
