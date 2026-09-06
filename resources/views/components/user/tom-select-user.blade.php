@@ -93,10 +93,9 @@
         color: var(--color-primary-900);
     }
 
-    {{-- Dropdown body-level (dropdownParent=body): selector descendant
-         .ts-wrapper-user .ts-dropdown tidak match lagi karena dropdown pindah
-         ke <body>. Duplikasi rule utk .ts-dropdown langsung — @once style ini
-         hanya emit di halaman user, tidak bentrok dgn style admin. --}}
+    {{-- Dropdown body-level (dropdownParent=body): .ts-wrapper-user .ts-dropdown
+         tidak match lagi karena dropdown pindah ke <body>.
+         Gunakan .ts-dropdown langsung sebagai fallback. --}}
     .ts-dropdown {
         background-color: var(--color-surface) !important;
         border-color: var(--color-primary-200);
@@ -120,7 +119,7 @@
         color: inherit !important;
     }
 
-    .user-ui .ts-wrapper-user .ts-dropdown,
+    .user-ui .ts-dropdown,
     .user-ui .profile-modal .ts-dropdown {
         background-color: var(--user-native-surface-strong) !important;
         border-color: var(--user-native-border) !important;
