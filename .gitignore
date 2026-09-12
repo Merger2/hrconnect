@@ -98,6 +98,7 @@ docs/pdf/
 # K6 performance test results (local-only)
 tests/performance/results/
 tests/performance/reports/
+tests/performance/lighthouse/
 
 # OWASP ZAP security test results (local-only)
 tests/security/zap/reports/
