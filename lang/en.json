@@ -5574,5 +5574,10 @@
     "used": "used",
     "{0} No active sessions were found.|{1} One session disconnected.|[2,*] :count sessions disconnected.": "{0} No active sessions were found.|{1} One session disconnected.|[2,*] :count sessions disconnected.",
     "{1} :count item needs attention|[2,*] :count items need attention": "{1} :count item needs attention|[2,*] :count items need attention",
-    "{1} :count priority today|[2,*] :count priorities today": "{1} :count priority today|[2,*] :count priorities today"
+    "{1} :count priority today|[2,*] :count priorities today": "{1} :count priority today|[2,*] :count priorities today",
+    "No pending L1 approval found for this leave request.": "No pending L1 approval found for this leave request.",
+    "Request History": "Request History",
+    "No requests this month.": "No requests this month.",
+    "Menunggu jawaban...": "Waiting for an answer...",
+    "day(s)": "day(s)"
 }

@@ -502,7 +502,7 @@ PROMPT;
 
     /**
      * Buat jawaban fallback yang tetap berguna saat Gemini gagal/rate-limited:
-     * ekstraktif dari chunk KB yang ditemukan, dengan citation inline.
+     * ekstraktif dari chunk KB yang ditemukan, tanpa citation inline.
      *
      * @param  Collection<int, KnowledgeBase>  $chunks
      */
@@ -510,9 +510,8 @@ PROMPT;
     {
         $lines = [$intro];
 
-        foreach ($chunks->take(3)->values() as $index => $kb) {
-            $sourceNumber = $index + 1;
-            $lines[] = sprintf('- %s [Sumber %d]', $this->excerpt($kb->content, 220), $sourceNumber);
+        foreach ($chunks->take(3) as $kb) {
+            $lines[] = '- '.$this->excerpt($kb->content, 220);
         }
 
         return implode("\n", $lines);

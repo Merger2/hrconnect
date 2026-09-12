@@ -143,6 +143,20 @@ export default defineConfig({
       },
     },
 
+    // Screenshot 35 use case inti (ESS desktop+mobile, role lain desktop).
+    // Auth ditangani di dalam spec via test.use storageState per role.
+    {
+      name: 'chromium-usecase-shots',
+      testMatch: /use-case-screenshots\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera', 'geolocation'],
+        geolocation: { latitude: -6.2088, longitude: 106.8456 },
+        serviceWorkers: 'block',
+      },
+    },
+
     // Auth-flow regression (email verification + 2FA + password reset): login
     // sendiri tanpa storageState — user dibuat helper PHP (serial mode di spec).
     {

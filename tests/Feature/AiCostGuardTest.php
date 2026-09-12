@@ -89,7 +89,7 @@ test('chatStream falls back to keyword snippets when daily AI budget is exceeded
 
     expect($text)->toContain('Kuota penggunaan AI harian untuk hari ini telah tercapai')
         ->and($text)->toContain('Jam kerja dimulai pukul delapan pagi')
-        ->and($text)->toContain('[Sumber 1]')
+        ->and($text)->not->toContain('[Sumber')
         ->and($last['fallback'] ?? false)->toBeTrue();
 });
 

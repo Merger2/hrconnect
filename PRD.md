@@ -34,7 +34,7 @@ Dokumen ini mencatat kebutuhan dan gate *Release 1* HRConnect. Keputusan berikut
 - **AI provider Release 1:** Gemini menggunakan konfigurasi provider yang sudah ada; corpus dibatasi pada dokumen HR yang disetujui.
 - **Data migration Release 1:** full history, termasuk histori absensi, cuti, payroll, dan dokumen yang disepakati.
 - **Target recovery minimum:** RPO 24 jam dan RTO 4 jam.
-- **Target kualitas AI awal:** minimal 90% jawaban relevan dan setiap jawaban menyertakan citation.
+- **Target kualitas AI awal:** minimal 90% jawaban relevan. Jejak sumber disimpan untuk audit internal, tetapi tidak ditampilkan pada antarmuka chat.
 
 ---
 
@@ -58,7 +58,7 @@ Membangun **HRIS internal terintegrasi** untuk satu perusahaan yang:
 - Menyediakan approval workflow yang jelas dan jejak audit.
 - Mengotomatisasi perhitungan payroll dan payslip sesuai kebijakan perusahaan.
 - Memberikan laporan serta kemampuan impor/ekspor yang andal.
-- Menyediakan AI Knowledge Base yang menjawab dari sumber resmi dan mengutip referensinya.
+- Menyediakan AI Knowledge Base yang menjawab dari corpus resmi perusahaan.
 
 ---
 
@@ -162,7 +162,7 @@ Pemetaan peran PT DCMS ke role teknis di sistem (sumber: `database/seeders/RoleA
 
 - [ ] Admin dapat mengelola knowledge base entries (dokumen, FAQ, policy).
 - [ ] Embedding 768 dimensi dihasilkan secara otomatis dan tersimpan di `pgvector`.
-- [ ] Chat KB menjawab dari corpus internal, mencantumkan sumber/citation.
+- [ ] Chat KB menjawab dari corpus internal. Jejak knowledge entry yang digunakan disimpan untuk audit internal, tanpa menampilkan citation/source pada antarmuka chat.
 - [ ] Jika AI gagal atau corpus tidak relevan, sistem menampilkan error/kegagalan secara jelas, bukan jawaban palsu.
 
 ---
@@ -218,10 +218,9 @@ AI KB memiliki gate tambahan yang wajib lulus.
 - [ ] **Embedding nyata.** Setiap knowledge entry harus memiliki embedding 768 dimensi yang benar-benar dihasilkan oleh model embedding. Tidak boleh ada fake/random embedding diam-diam.
 - [ ] **Failure terlihat.** Jika provider AI gagal, queue gagal, atau embedding tidak terbuat, sistem harus menampilkan error/peringatan di UI dan log; tidak boleh menjawab dengan respons palsu.
 - [ ] **Dataset evaluasi.** Tersedia dataset evaluasi dengan minimal 20 pertanyaan-answer yang telah diverifikasi oleh HR.
-- [ ] **Citation/source.** Setiap jawaban AI harus mencantumkan sumber knowledge entry yang digunakan.
 - [ ] **Permission & isolation.** AI hanya menjawab dari corpus yang boleh diakses oleh user yang bertanya; tenant/company scope harus dijaga.
 - [ ] **Timeout, retry, dan cost limit.** Request AI memiliki timeout, retry policy, dan batasan cost/usage; jika melebihi batas, sistem gagal secara terlihat.
-- [ ] **Quality threshold.** Minimal 90% jawaban evaluasi relevan dan setiap jawaban menyertakan citation sebelum go-live.
+- [ ] **Quality threshold.** Minimal 90% jawaban evaluasi relevan sebelum go-live.
 
 ---
 
@@ -322,7 +321,7 @@ Keputusan berikut harus ditetapkan sebelum finalisasi PRD dan go-live:
 | 1 | **Kebijakan payroll & PPh21:** model gross salary, periode bulanan, TER, dan kalender 5 hari sudah dipilih; komponen, formula detail, dan pengecualian pajak masih harus difinalkan. | Payroll tidak bisa dihitung akurat. | Finance + HR |
 | 2 | **Aturan absensi & geofence:** face-only, radius 50 meter, toleransi 15 menit, penolakan saat face gagal dengan koreksi HR, dan kalender 5 hari sudah dipilih; aturan shift/pengecualian masih harus difinalkan. | Absensi tidak konsisten atau dianggap tidak adil. | HR + Operations |
 | 3 | **Hirarki approval:** alur default Manager → HR sudah dipilih; pengecualian per jenis request dan jalur payroll masih harus difinalkan. | Workflow macet atau tidak valid. | HR + Manager |
-| 4 | **Target AI quality threshold:** target awal minimal 90% jawaban relevan dan setiap jawaban memiliki citation; dataset/provider detail masih harus ditetapkan. | AI KB tidak punya gate yang jelas. | HR + Tech Lead |
+| 4 | **Target AI quality threshold:** target awal minimal 90% jawaban relevan; dataset/provider detail masih harus ditetapkan. Sumber jawaban dicatat untuk audit internal, bukan ditampilkan di chat. | AI KB tidak punya gate yang jelas. | HR + Tech Lead |
 | 5 | **Backup RPO/RTO:** target sudah dipilih RPO 24 jam dan RTO 4 jam; mekanisme backup, lokasi penyimpanan, dan drill masih harus ditetapkan. | Drill restore tidak punya target. | IT/Admin |
 | 6 | **Data migration:** full history sudah dipilih; sumber data, mapping, cleansing, validasi, dan cutover masih harus ditetapkan. | Go-live terhambat karena data tidak lengkap atau tidak konsisten. | HR + IT |
 | 7 | **AI provider & quota:** Gemini dengan konfigurasi saat ini sudah dipilih; quota, budget, model final, dan rate limit masih harus ditetapkan. | AI KB gagal atau over-budget. | Tech Lead + Finance |
@@ -368,7 +367,7 @@ Keputusan berikut harus ditetapkan sebelum finalisasi PRD dan go-live:
 - [ ] Reviewer telah mereview acceptance criteria dan open decisions.
 - [ ] Tujuh modul telah lulus acceptance test per modul.
 - [ ] Production gate lintas sistem telah lulus (P0/P1 clear, auth, test, backup, queue, security).
-- [ ] AI Knowledge Base telah lulus gate khusus (embedding, failure, eval, citation, permission, timeout, quality threshold).
+- [ ] AI Knowledge Base telah lulus gate khusus (embedding, failure, eval, permission, timeout, quality threshold).
 - [ ] Kebijakan payroll, absensi, approval, dan AI telah ditetapkan.
 - [ ] Backup/restore drill telah berhasil.
 - [ ] Data migration plan telah disetujui.

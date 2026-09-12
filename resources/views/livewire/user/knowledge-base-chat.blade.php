@@ -73,32 +73,6 @@
                                     </template>
                                 </div>
 
-                                {{-- Sources --}}
-                                <template x-if="msg.sources.length > 0 && !msg.isStreaming">
-                                    <div class="mt-1.5 px-1">
-                                        <button
-                                            type="button"
-                                            @click="toggleSources(index)"
-                                            class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition"
-                                            :aria-expanded="expandedSources.has(index).toString()"
-                                        >
-                                            <x-heroicon-o-chevron-right class="h-3.5 w-3.5 transition-transform duration-200"
-                                                x-bind:class="{ 'rotate-90': expandedSources.has(index) }" />
-                                            <span>{{ __('Sources') }}</span>
-                                            <span class="text-slate-500" x-text="`(${msg.sources.length})`"></span>
-                                        </button>
-                                        <div x-show="expandedSources.has(index)" class="mt-1 space-y-1">
-                                            <template x-for="(source, sIdx) in msg.sources" :key="sIdx">
-                                                <div class="rounded-lg border border-gray-100 bg-white px-3 py-2 text-xs text-gray-600">
-                                                    <span class="font-medium text-gray-800" x-text="source.title"></span>
-                                                    <template x-if="source.snippet">
-                                                        <p class="mt-0.5 text-gray-500 line-clamp-2" x-text="source.snippet"></p>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
                             </div>
                         </div>
                     </template>
@@ -171,7 +145,6 @@
                 id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
                 role: 'assistant',
                 text: text,
-                sources: [],
                 is_welcome: true,
                 isStreaming: false,
                 fallback: false,
@@ -190,7 +163,6 @@
                 input: '',
                 conversationId: null,
                 isStreaming: false,
-                expandedSources: new Set(),
                 welcomeMessage: '',
 
                 init() {
@@ -235,12 +207,11 @@
                     this.input = '';
                     this.isStreaming = true;
 
-                    this.messages.push({ id: this.uid(), role: 'user', text: question, sources: [] });
+                    this.messages.push({ id: this.uid(), role: 'user', text: question });
                     this.messages.push({
                         id: this.uid(),
                         role: 'assistant',
                         text: '',
-                        sources: [],
                         is_welcome: false,
                         isStreaming: true,
                         fallback: false,
@@ -312,9 +283,6 @@
                                 if (data.conversation_id) {
                                     this.conversationId = data.conversation_id;
                                 }
-                                if (Array.isArray(data.sources)) {
-                                    this.messages[agentIndex].sources = data.sources;
-                                }
                                 if (typeof data.fallback === 'boolean') {
                                     this.messages[agentIndex].fallback = data.fallback;
                                 }
@@ -324,7 +292,6 @@
                                 if (data.error) {
                                     this.messages[agentIndex].text = data.error;
                                     this.messages[agentIndex].error = true;
-                                    this.messages[agentIndex].sources = [];
                                 }
                             }
                         }
@@ -332,7 +299,6 @@
                         console.error('KB chat stream error:', error);
                         this.messages[agentIndex].text = 'Maaf, terjadi kendala koneksi saat menjawab. Silakan coba lagi.';
                         this.messages[agentIndex].error = true;
-                        this.messages[agentIndex].sources = [];
                     } finally {
                         this.messages[agentIndex].isStreaming = false;
                         this.isStreaming = false;
@@ -345,17 +311,8 @@
 
                     this.conversationId = null;
                     this.input = '';
-                    this.expandedSources = new Set();
                     this.messages = [makeWelcome(this.welcomeMessage)];
                     this.$nextTick(() => this.scrollToBottom());
-                },
-
-                toggleSources(index) {
-                    if (this.expandedSources.has(index)) {
-                        this.expandedSources.delete(index);
-                    } else {
-                        this.expandedSources.add(index);
-                    }
                 },
 
                 charCount() {

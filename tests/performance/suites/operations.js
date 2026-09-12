@@ -73,9 +73,9 @@ export default function () {
   });
   sleep(THINK_TIME);
 
-  // ── 8. My forms (employee) ──
+  // ── 8. My forms (employee) — route /my-forms lama sudah jadi /forms ──
   group('operations: my forms', () => {
-    webGet('/my-forms', 'operations_my_forms', 'employee');
+    webGet('/forms', 'operations_my_forms', 'employee');
   });
   sleep(THINK_TIME);
 

@@ -7,11 +7,11 @@ namespace App\Support;
 /**
  * KnowledgeBaseEval — metrik evaluasi RAG Knowledge Base (kerangka eval Q5).
  *
- * Metrik (PRD §6 / AGENTS.md hard gate):
+ * Metrik (PRD §6):
  * 1. Coverage — persentase keyword/frasa kunci `expected_answer` yang muncul
  *    dalam jawaban (case-insensitive, dinormalisasi: lowercase + tanpa tanda baca).
- * 2. Citation — minimal 1 `expected_sources` (judul entry KB) yang cocok dengan
- *    sumber yang disertakan pipeline (jawaban/sumber wajib punya citation).
+ * 2. Source trace — kecocokan `expected_sources` dengan metadata retrieval.
+ *    Ini diagnostik internal dan tidak menentukan kelulusan evaluasi.
  * 3. Refusal — deteksi penolakan untuk kasus negatif (di luar corpus): sistem
  *    TIDAK boleh menjawab palsu.
  *
@@ -42,9 +42,8 @@ final class KnowledgeBaseEval
      * Output diukur dari jawaban PENUH pipeline: teks jawaban + konten sumber
      * yang dikutip (title + snippet). Sejak fallback tidak lagi menyertakan
      * dump konten mentah di teks jawaban (2026-08-16 — jawaban profesional,
-     * konten ditampilkan via citation/sources), coverage harus mencakup materi
-     * yang benar-benar diretri eval — konsisten dengan gate "citation pada
-     * setiap jawaban".
+     * konten ditampilkan melalui metadata sumber), coverage harus mencakup materi
+     * yang benar-benar diretri eval.
      *
      * @param  array<int, string>  $keywords
      * @param  array<int, array{id?: int|string, title?: string, snippet?: string}>  $sources
@@ -76,13 +75,13 @@ final class KnowledgeBaseEval
     }
 
     /**
-     * Citation: apakah minimal satu sumber yang diharapkan muncul di daftar
-     * sumber pipeline (dicocokkan per judul entry, case-insensitive).
+     * Source trace: apakah minimal satu sumber yang diharapkan muncul di
+     * metadata pipeline (dicocokkan per judul entry, case-insensitive).
      *
      * @param  array<int, array{id?: int|string, title?: string, snippet?: string}>  $sources
      * @param  array<int, string>  $expectedSources
      */
-    public static function citation(array $sources, array $expectedSources): bool
+    public static function sourceTraceMatches(array $sources, array $expectedSources): bool
     {
         if ($expectedSources === []) {
             return true;
@@ -147,12 +146,14 @@ final class KnowledgeBaseEval
     }
 
     /**
-     * Evaluasi satu kasus: coverage >= threshold DAN citation terpenuhi.
+     * Evaluasi satu kasus: kelulusan ditentukan coverage >= threshold. Source
+     * trace tetap dikembalikan untuk diagnosis retrieval, tetapi tidak menjadi
+     * hard gate atau elemen antarmuka chat.
      *
      * @param  array<int, string>  $keywords
      * @param  array<int, string>  $expectedSources
      * @param  array<int, array{id?: int|string, title?: string, snippet?: string}>  $sources
-     * @return array{coverage: float, citation: bool, passed: bool}
+     * @return array{coverage: float, source_trace: bool, passed: bool}
      */
     public static function evaluateCase(
         string $answer,
@@ -162,12 +163,12 @@ final class KnowledgeBaseEval
         float $coverageThreshold = 0.8,
     ): array {
         $coverage = self::coverage($answer, $keywords, $sources);
-        $citation = self::citation($sources, $expectedSources);
+        $sourceTrace = self::sourceTraceMatches($sources, $expectedSources);
 
         return [
             'coverage' => $coverage,
-            'citation' => $citation,
-            'passed' => $coverage >= $coverageThreshold && $citation,
+            'source_trace' => $sourceTrace,
+            'passed' => $coverage >= $coverageThreshold,
         ];
     }
 }

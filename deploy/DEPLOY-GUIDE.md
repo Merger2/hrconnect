@@ -192,7 +192,7 @@ php artisan kb:eval
 
 # 8.4 Smoke test — buka di browser:
 #   - https://YOUR_DOMAIN/login → login admin → cek dashboard
-#   - Knowledge Base → tanya "apa itu cuti tahunan?" → jawaban AI + source
+#   - Knowledge Base → tanya "apa itu cuti tahunan?" → jawaban AI tanpa citation/source pada chat
 #   - /scan → coba flow absen (kamera butuh HTTPS)
 
 # 8.5 Deploy ulang ke depan cukup satu perintah:

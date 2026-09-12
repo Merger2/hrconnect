@@ -9,7 +9,7 @@ use Livewire\Component;
 /**
  * Shell halaman KB Chat.
  *
- * Semua logika chat (kirim pesan, streaming jawaban, sources) dijalankan di
+ * Semua logika chat (kirim pesan dan streaming jawaban) dijalankan di
  * CLIENT lewat Alpine + fetch ke endpoint SSE `knowledge-base.chat.stream`
  * (pola ship-ai-with-laravel) — komponen ini hanya otorisasi + prefill ?q=
  * + welcome message. Streaming TIDAK lewat Livewire $this->stream()

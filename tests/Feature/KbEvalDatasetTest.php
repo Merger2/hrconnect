@@ -7,7 +7,7 @@
  * - OFFLINE (selalu jalan): Gemini di-fake down (Http::fake 401) → pipeline nyata
  *   mengambil jalur fallback pg_trgm (searchByKeyword). Retrieval offline bersifat
  *   substring (ILIKE) — deterministik, tanpa API. Memvalidasi: integritas pipeline,
- *   metrik coverage/citation, perilaku tolak kasus negatif, agregat >= 90%.
+ *   metrik coverage/source trace, perilaku tolak kasus negatif, agregat >= 90%.
  * - ONLINE (skip tanpa API key): pipeline RAG penuh (Gemini). Catatan: dalam test
  *   mode, EmbeddingService::embed() selalu mengembalikan fake vector (runningUnitTests),
  *   jadi retrieval vektor di test bersifat arbitrer — eval kualitas retrieval NYATA
@@ -105,12 +105,12 @@ function kbEvalRun(KnowledgeBaseService $service, bool $offline): array
             $positivePassed++;
         } else {
             $failed[] = sprintf(
-                '[%s] GAGAL (mode %s): %s → coverage=%.0f%% citation=%s | sumber: %s | jawaban: %.140s',
+                '[%s] GAGAL (mode %s): %s → coverage=%.0f%% trace=%s | sumber: %s | jawaban: %.140s',
                 $case['id'],
                 $mode,
                 $case['question'],
                 $metrics['coverage'] * 100,
-                $metrics['citation'] ? 'ya' : 'tidak',
+                $metrics['source_trace'] ? 'cocok' : 'tidak cocok',
                 collect($sources)->pluck('title')->implode(', ') ?: '(kosong)',
                 $answer,
             );
@@ -232,6 +232,19 @@ test('offline: pipeline nyata (fallback pg_trgm) — kualitas >= 90%, negatif di
     expect($result['negative_passed'])->toBe($result['negative_total'], 'semua kasus negatif harus ditolak (tanpa jawaban palsu)');
 });
 
+test('source trace adalah diagnostik dan tidak memblokir kelulusan coverage', function () {
+    $metrics = KnowledgeBaseEval::evaluateCase(
+        answer: 'Jawaban yang relevan.',
+        keywords: ['jawaban yang relevan'],
+        sources: [],
+        expectedSources: ['Dokumen yang tidak diretrieval'],
+    );
+
+    expect($metrics['coverage'])->toBe(1.0);
+    expect($metrics['source_trace'])->toBeFalse();
+    expect($metrics['passed'])->toBeTrue();
+});
+
 // ═══════════════════════════════════════════════════════════════════════
 // 3. ONLINE — integritas jalur Gemini (skip otomatis tanpa API key)
 // ═══════════════════════════════════════════════════════════════════════
@@ -255,7 +268,7 @@ test('online: pipeline Gemini merespons semua kasus dengan struktur jawaban+sumb
 
     // Batasan test env: EmbeddingService::embed() selalu mengembalikan fake vector
     // saat runningUnitTests() → retrieval vektor di test bersifat arbitrer, sehingga
-    // skor coverage/citation online TIDAK bermakna secara semantik. Test ini
+    // skor coverage/source trace online TIDAK bermakna secara semantik. Test ini
     // memvalidasi integritas jalur Gemini NYATA (HTTP + structured output + fallback):
     // setiap kasus harus mengembalikan struktur jawaban+sumber yang valid.
     // Gate kualitas >= 90% (PRD §6) dijalankan via `php artisan kb:eval` mode produksi.

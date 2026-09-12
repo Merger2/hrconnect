@@ -5301,5 +5301,10 @@
     "used": "terpakai",
     "{0} No active sessions were found.|{1} One session disconnected.|[2,*] :count sessions disconnected.": "{0} Tidak ada sesi aktif yang ditemukan.|{1} Satu sesi berhasil diputus.|[2,*] :count sesi berhasil diputus.",
     "{1} :count item needs attention|[2,*] :count items need attention": "{1} :count hal perlu dicek|[2,*] :count hal perlu dicek",
-    "{1} :count priority today|[2,*] :count priorities today": "{1} :count prioritas hari ini|[2,*] :count prioritas hari ini"
+    "{1} :count priority today|[2,*] :count priorities today": "{1} :count prioritas hari ini|[2,*] :count prioritas hari ini",
+    "No pending L1 approval found for this leave request.": "Tidak ada persetujuan L1 tertunda untuk pengajuan cuti ini.",
+    "Request History": "Riwayat Pengajuan",
+    "No requests this month.": "Tidak ada pengajuan bulan ini.",
+    "Menunggu jawaban...": "Menunggu jawaban...",
+    "day(s)": "hari"
 }

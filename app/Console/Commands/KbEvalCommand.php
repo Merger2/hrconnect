@@ -17,7 +17,9 @@ use Illuminate\Console\Command;
  * - Online: embedding Gemini + generasi Gemini (butuh GEMINI_API_KEY/GOOGLE_AI_API_KEY).
  * - Tanpa key: pipeline otomatis fallback ke pg_trgm (searchByKeyword) — mode offline.
  *
- * Skor: kualitas = kasus positif lulus (coverage >= 80% + citation) / total positif.
+ * Skor: kualitas = kasus positif lulus (coverage >= 80%) / total positif.
+ * Kecocokan source trace dilaporkan untuk diagnosis retrieval, tetapi tidak
+ * menentukan kelulusan gate.
  * Exit code 0 = kualitas >= 90% DAN semua kasus negatif ditolak; selain itu 1.
  *
  * Eval bersifat manual (gate) — TIDAK terdaftar di scheduler.
@@ -29,7 +31,7 @@ class KbEvalCommand extends Command
         {--coverage-threshold=0.8 : Ambang coverage keyword per kasus}
         {--quality-threshold=0.9 : Ambang kualitas agregat (lulus/total positif)}';
 
-    protected $description = 'Jalankan eval dataset Q&A Knowledge Base (gate PRD §6: >= 90% relevan + citation).';
+    protected $description = 'Jalankan eval dataset Q&A Knowledge Base (gate PRD §6: >= 90% relevan).';
 
     public function handle(KnowledgeBaseService $kbService): int
     {
@@ -124,12 +126,12 @@ class KbEvalCommand extends Command
                 $case['category'],
                 substr($case['question'], 0, 60),
                 $metrics['passed'] ? 'PASS ✓' : 'FAIL ✗',
-                sprintf('%.0f%% / %s', $metrics['coverage'] * 100, $metrics['citation'] ? 'cit ✓' : 'cit ✗'),
+                sprintf('%.0f%% / %s', $metrics['coverage'] * 100, $metrics['source_trace'] ? 'trace ✓' : 'trace ✗'),
                 $model,
             ];
         }
 
-        $this->table(['ID', 'Kategori', 'Pertanyaan', 'Status', 'Coverage/Citation', 'Model'], $rows);
+        $this->table(['ID', 'Kategori', 'Pertanyaan', 'Status', 'Coverage/Trace', 'Model'], $rows);
 
         $quality = $positiveTotal > 0 ? $positivePassed / $positiveTotal : 0.0;
 

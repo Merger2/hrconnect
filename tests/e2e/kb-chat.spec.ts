@@ -9,9 +9,10 @@ test.setTimeout(150_000);
  *
  * - Regression bug P0 (2026-08-16): index hanya menampilkan 1 dokumen karena
  *   `->unique('source_document')` menyatukan semua entry NULL source_document.
- * - Alur chat nyata (suggestion chip → jawaban + sources). Jawaban boleh dari
- *   Gemini (online) atau fallback pg_trgm — dua-duanya menghasilkan teks + sources,
- *   sehingga test tetap deterministik tanpa bergantung kuota AI.
+ * - Alur chat nyata (suggestion chip → jawaban). Jawaban boleh dari Gemini
+ *   (online) atau fallback pg_trgm, sehingga test tetap deterministik tanpa
+ *   bergantung kuota AI. Jejak sumber disimpan untuk audit backend, tetapi tidak
+ *   ditampilkan pada antarmuka chat.
  */
 
 async function openChat(page: Page) {
@@ -51,7 +52,7 @@ test('chat: link "Tanya AI" mengisi pertanyaan (?q= prefill)', async ({ page }) 
   await expect(input).toHaveValue(/cuti/i);
 });
 
-test('chat: suggestion chip mengirim pertanyaan → jawaban + sources muncul', async ({ page }) => {
+test('chat: suggestion chip mengirim pertanyaan → hanya jawaban yang tampil', async ({ page }) => {
   await openChat(page);
 
   const chip = page.getByRole('button', { name: 'Apa itu cuti tahunan?' });
@@ -69,7 +70,6 @@ test('chat: suggestion chip mengirim pertanyaan → jawaban + sources muncul', a
     expect(nonEmpty.length).toBeGreaterThanOrEqual(2);
   }).toPass({ timeout: 90000, intervals: [2000] });
 
-  // Citation — tombol "Source" (terjemahan id dari "Sources") selalu ada;
-  // Gemini & fallback sama-sama mengirim sources.
-  await expect(page.getByRole('button', { name: /Source/ }).first()).toBeVisible({ timeout: 30000 });
+  expect((await assistantBubbles.allTextContents()).join(' ')).not.toMatch(/\[Sumber\s+\d+\]/);
+  await expect(page.getByRole('button', { name: /Source|Sumber/ })).toHaveCount(0);
 });

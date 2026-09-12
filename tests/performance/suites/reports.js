@@ -62,13 +62,14 @@ export default function () {
 
   // ── 6. Reports center page ──
   group('reports: reports center', () => {
-    webGet('/reports', 'reports_center', 'admin');
+    // Bukan /reports — route lama sudah pindah ke /admin/reports (404 di run lama)
+    webGet('/admin/reports', 'reports_center', 'admin');
   });
   sleep(THINK_TIME);
 
-  // ── 7. Admin analytics ──
+  // ── 7. Admin analytics (superadmin-only page) ──
   group('reports: admin analytics', () => {
-    webGet('/admin/analytics', 'reports_admin_analytics', 'admin');
+    webGet('/admin/analytics', 'reports_admin_analytics', 'superadmin');
   });
   sleep(THINK_TIME);
 
@@ -78,9 +79,9 @@ export default function () {
   });
   sleep(THINK_TIME);
 
-  // ── 9. Admin inbox ──
+  // ── 9. Admin inbox (superadmin-only page) ──
   group('reports: admin inbox', () => {
-    webGet('/admin/inbox', 'reports_admin_inbox', 'admin');
+    webGet('/admin/inbox', 'reports_admin_inbox', 'superadmin');
   });
   sleep(THINK_TIME);
 

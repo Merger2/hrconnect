@@ -81,7 +81,7 @@
 - [ ] **[T]** Health: `curl -s https://YOUR_DOMAIN/api/v1/health | jq .` → `"status": "ok"` (HTTP 200; 503 = degraded). Cek komponen: database, cache, **queue** (tabel jobs), storage, **backup freshness** (maks 26h via `BACKUP_MAX_AGE_HOURS`, default 26 — terverifikasi `config/backup.php`).
 - [ ] **[T]** Backup drill (RTO): `php artisan maintenance:backup-restore-drill` → `RESTORE DRILL PASSED` (butuh `DB_DRILL_*` + extension di template1).
 - [ ] **[T]** AI KB gate: `php artisan kb:eval` → relevansi **≥ 90%** (PRD §6; command ada, eval dataset ≥ 20 Q&A).
-- [ ] **[S]** Smoke UI: login admin → dashboard · Knowledge Base → "apa itu cuti tahunan?" → jawaban AI + citation · `/scan` → flow absen (kamera butuh HTTPS).
+- [ ] **[S]** Smoke UI: login admin → dashboard · Knowledge Base → "apa itu cuti tahunan?" → jawaban AI tanpa citation/source pada chat · `/scan` → flow absen (kamera butuh HTTPS).
 - [ ] **[T]** 🔒 E2E/route dev mati di produksi: `curl -s -o /dev/null -w '%{http_code}' https://YOUR_DOMAIN/__e2e-login` → **404** (guard `abort(404)` di luar `local/testing` — terverifikasi di `E2eLoginController` + `E2eDocumentUploadController`). Sama untuk `test-error`, `__auth-debug`, `_boost/browser-logs`.
 - [ ] **[T]** Guard seeder demo: `php scripts/verify-seeder-prod-dryrun.php` (ada di repo) → exit 0.
 - [ ] **[S]** `php artisan about | grep -E 'Environment|Debug'` → `production` / `false`.

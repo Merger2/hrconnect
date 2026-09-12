@@ -16,7 +16,7 @@ beforeEach(function () {
 
 /**
  * Coverage: halaman KB Chat kini SHELL — seluruh logika chat (kirim pesan,
- * streaming jawaban, sources) dijalankan client-side lewat Alpine + fetch ke
+ * streaming jawaban) dijalankan client-side lewat Alpine + fetch ke
  * endpoint SSE `knowledge-base.chat.stream` (pola ship-ai-with-laravel),
  * BUKAN lewat action Livewire. Komponen hanya otorisasi + prefill ?q= +
  * welcome message. Alur stream di-cover oleh KnowledgeBaseServiceTest
@@ -56,7 +56,7 @@ test('chat shell prefills initial question from ?q=', function () {
         ->assertSee('data-kb-initial="Apa itu cuti tahunan"', false);
 });
 
-test('chat shell renders welcome bubble markup for Alpine init', function () {
+test('chat shell renders answer-only interface for Alpine init', function () {
     $employee = User::factory()->create();
     $employee->assignRole('employee');
 
@@ -67,4 +67,6 @@ test('chat shell renders welcome bubble markup for Alpine init', function () {
     expect($html)->toContain('x-data="kbChat()"');
     expect($html)->toContain('data-kb-welcome=');
     expect($html)->toContain('/knowledge-base/chat/stream');
+    expect($html)->not->toContain('toggleSources(');
+    expect($html)->not->toContain("__('Sources')");
 });

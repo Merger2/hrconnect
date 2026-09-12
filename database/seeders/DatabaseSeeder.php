@@ -46,12 +46,17 @@ class DatabaseSeeder extends Seeder
                 CompanyEmployeesSeeder::class,   // 50 karyawan demo (owner+manager+staff)
                 DemoAttendanceSeeder::class,     // 90 hari absensi demo utk user demo
                 DemoUseCaseSeeder::class,        // use case demo (leave, overtime, reimbursement, dll)
-                YearOneDemoSeeder::class,        // 1 tahun jadwal + absensi + cuti + lembur + 12 periode payroll (~33k baris)
                 E2eTestSeeder::class,            // akun test E2E (employee/hr/manager/finance)
                 E2eOperationalDataSeeder::class, // data operasional utk E2E testing
                 K6PerformanceTestSeeder::class,  // akun K6 performance testing (5 role, password seragam)
                 IntegrationSampleSeeder::class,  // client integrasi palsu (pas-papan)
             ]);
+
+            // RefreshDatabase keeps this test transaction open. Seeding the
+            // full year history in that transaction exhausts PostgreSQL locks.
+            if (! app()->runningUnitTests()) {
+                $this->call(YearOneDemoSeeder::class);
+            }
         }
     }
 }

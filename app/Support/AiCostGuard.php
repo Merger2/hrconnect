@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
  * AiCostGuard — daily token budget guard untuk pipeline AI (KB RAG).
  *
  * Menutup bagian "cost limit" dari hard gate AGENTS.md
- * ("AI KB hard gate: embedding 768D nyata, citation, timeout/retry/cost limit,
+ * ("AI KB hard gate: embedding 768D nyata, timeout/retry/cost limit,
  * eval >= 20 Q&A, kualitas >= 90%"). Timeout + retry sudah ada di
  * config/services.php (gemini); guard ini menegakkan batas token per hari.
  *

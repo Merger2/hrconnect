@@ -62,7 +62,9 @@ export default function () {
 
   // ── 6. Admin attendance report ──
   group('attendance: admin report', () => {
-    webGet('/admin/attendances/report', 'attendance_admin_report', 'admin');
+    // Bukan /admin/attendances/report — itu endpoint export (wajib param tanggal,
+    // tanpa param redirect()->back() yang tak stabil). Report Center = /admin/reports.
+    webGet('/admin/reports', 'attendance_admin_report', 'admin');
   });
   sleep(THINK_TIME);
 

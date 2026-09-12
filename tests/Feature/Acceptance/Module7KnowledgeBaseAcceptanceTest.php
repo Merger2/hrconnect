@@ -10,7 +10,7 @@ use App\Models\KnowledgeBase;
  * Cakupan checklist:
  * - [ ] Admin mengelola KB entries (dokumen, FAQ, policy) → KnowledgeBaseManager (suite)
  * - [ ] Embedding 768D otomatis + pgvector → EmbeddingService (suite + prod eval)
- * - [ ] Chat KB menjawab dari corpus internal + citation → KbEvalDatasetTest (30 kasus)
+ * - [ ] Chat KB menjawab dari corpus internal tanpa citation/source di chat → KbEvalDatasetTest (30 kasus)
  * - [ ] AI gagal/corpus tidak relevan → error jelas, BUKAN jawaban palsu → test ini
  *
  * Happy path: entry KB READY ter-index untuk retrieval.

@@ -11,7 +11,9 @@
 #   K6_TOKEN_ADMIN    Sanctum token for admin role
 #   K6_TOKEN_MANAGER  Sanctum token for manager role
 #   K6_VUS            Virtual users per suite (default: 3)
-#   K6_DURATION       Duration per suite (default: 30s)
+#   K6_DURATION       Duration per suite (default: 90s — THINK_TIME 3s berarti
+#                     iterasi suite terpanjang ±40s; 30s lama membuat step
+#                     akhir (submit, dll) tidak pernah tereksekusi)
 #
 set -euo pipefail
 
@@ -30,13 +32,13 @@ echo "╚═══════════════════════�
 echo ""
 echo "BASE_URL:    ${BASE_URL:-http://localhost:8000}"
 echo "VUS:         ${K6_VUS:-3}"
-echo "Duration:    ${K6_DURATION:-30s}"
+echo "Duration:    ${K6_DURATION:-90s}"
 echo ""
 
 # Export env vars for suites
 export BASE_URL="${BASE_URL:-http://localhost:8000}"
 export K6_VUS="${K6_VUS:-3}"
-export K6_DURATION="${K6_DURATION:-30s}"
+export K6_DURATION="${K6_DURATION:-90s}"
 
 # Suite definitions: name, threshold note
 SUITES=(

@@ -4,9 +4,11 @@ use App\Models\Announcement;
 use App\Models\Appraisal;
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
+use App\Models\Branch;
 use App\Models\CashAdvance;
 use App\Models\CloudFile;
 use App\Models\CompanyAsset;
+use App\Models\Division;
 use App\Models\EmployeeDocumentRequest;
 use App\Models\Holiday;
 use App\Models\HrChecklistCase;
@@ -14,6 +16,7 @@ use App\Models\HrChecklistTask;
 use App\Models\ImportExportRun;
 use App\Models\Overtime;
 use App\Models\Payroll;
+use App\Models\Position;
 use App\Models\ProjectVisitEvidence;
 use App\Models\Reimbursement;
 use App\Models\ShiftSwapRequest;
@@ -23,9 +26,11 @@ use App\Policies\AnnouncementPolicy;
 use App\Policies\AppraisalPolicy;
 use App\Policies\AttendanceCorrectionPolicy;
 use App\Policies\AttendancePolicy;
+use App\Policies\BranchPolicy;
 use App\Policies\CashAdvancePolicy;
 use App\Policies\CloudFilePolicy;
 use App\Policies\CompanyAssetPolicy;
+use App\Policies\DivisionPolicy;
 use App\Policies\EmployeeDocumentRequestPolicy;
 use App\Policies\HolidayPolicy;
 use App\Policies\HrChecklistCasePolicy;
@@ -33,6 +38,7 @@ use App\Policies\HrChecklistTaskPolicy;
 use App\Policies\ImportExportRunPolicy;
 use App\Policies\OvertimePolicy;
 use App\Policies\PayrollPolicy;
+use App\Policies\PositionPolicy;
 use App\Policies\ProjectVisitEvidencePolicy;
 use App\Policies\ReimbursementPolicy;
 use App\Policies\ShiftSwapRequestPolicy;
@@ -46,9 +52,11 @@ test('registered policy classes resolve through the gate', function () {
         Appraisal::class => AppraisalPolicy::class,
         Attendance::class => AttendancePolicy::class,
         AttendanceCorrection::class => AttendanceCorrectionPolicy::class,
+        Branch::class => BranchPolicy::class,
         CashAdvance::class => CashAdvancePolicy::class,
         CloudFile::class => CloudFilePolicy::class,
         CompanyAsset::class => CompanyAssetPolicy::class,
+        Division::class => DivisionPolicy::class,
         EmployeeDocumentRequest::class => EmployeeDocumentRequestPolicy::class,
         Holiday::class => HolidayPolicy::class,
         HrChecklistCase::class => HrChecklistCasePolicy::class,
@@ -56,6 +64,7 @@ test('registered policy classes resolve through the gate', function () {
         ImportExportRun::class => ImportExportRunPolicy::class,
         Overtime::class => OvertimePolicy::class,
         Payroll::class => PayrollPolicy::class,
+        Position::class => PositionPolicy::class,
         ProjectVisitEvidence::class => ProjectVisitEvidencePolicy::class,
         Reimbursement::class => ReimbursementPolicy::class,
         ShiftSwapRequest::class => ShiftSwapRequestPolicy::class,
