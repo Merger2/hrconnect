@@ -146,6 +146,14 @@
         update() { const now = new Date(); this.dayName = new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(now); this.fullDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' }).format(now); this.clockTime = [now.getHours(), now.getMinutes(), now.getSeconds()].map((value) => String(value).padStart(2, '0')).join(':'); },
         destroy() { if (this._timer) clearInterval(this._timer); },
     }));
+    window.shiftCountdown = window.shiftCountdown || ((initialEndTime, hasApprovedOvertime = false) => ({
+        endTime: initialEndTime ? new Date(initialEndTime).getTime() : null,
+        now: Date.now(), remaining: 0, timer: null, hasApprovedOvertime,
+        init() { if (this.endTime) { this.check(); this.timer = setInterval(() => this.check(), 1000); } },
+        check() { this.now = Date.now(); this.remaining = this.endTime ? this.endTime - this.now : 0; },
+        get formatted() { if (!this.endTime) return '--:--:--'; if (this.remaining < 0) return this.hasApprovedOvertime ? 'Overtime' : 'Clock Out Pending'; const seconds = Math.floor(this.remaining / 1000); return [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60].map((value) => String(value).padStart(2, '0')).join(':'); },
+        destroy() { if (this.timer) clearInterval(this.timer); },
+    }));
 </script>
 
 {{-- Page-level Alpine factories must register before Livewire boots Alpine. --}}
