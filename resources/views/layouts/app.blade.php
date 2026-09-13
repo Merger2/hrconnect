@@ -130,13 +130,32 @@
 
 @stack('modals')
 
+{{-- Alpine expressions in Livewire-navigated pages are evaluated before the
+     deferred Vite module executes. Keep the small home widgets available at
+     parse time; app.js provides the same factories for subsequent updates. --}}
+<script>
+    window.liveGreeting = window.liveGreeting || ((initial = '') => ({
+        greeting: initial,
+        init() { this.update(); this._timer = setInterval(() => this.update(), 60000); },
+        update() { const hour = new Date().getHours(); this.greeting = hour < 11 ? 'Good morning' : (hour < 15 ? 'Good afternoon' : 'Good evening'); },
+        destroy() { if (this._timer) clearInterval(this._timer); },
+    }));
+    window.liveClock = window.liveClock || (() => ({
+        dayName: '', fullDate: '', clockTime: '',
+        init() { this.update(); this._timer = setInterval(() => this.update(), 1000); },
+        update() { const now = new Date(); this.dayName = new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(now); this.fullDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' }).format(now); this.clockTime = [now.getHours(), now.getMinutes(), now.getSeconds()].map((value) => String(value).padStart(2, '0')).join(':'); },
+        destroy() { if (this._timer) clearInterval(this._timer); },
+    }));
+</script>
+
+{{-- Page-level Alpine factories must register before Livewire boots Alpine. --}}
+@stack('scripts')
+
 @livewireScripts(['nonce' => $csp_nonce])
 
 @unless ($isAdminRoute)
     <x-user.app-bottom-navigation />
 @endunless
-
-@stack('scripts')
 
 <x-pwa-install-prompt />
 
