@@ -98,7 +98,7 @@
                 : null;
         @endphp
 
-        <div x-data="shiftCountdown('{{ $shiftEndTime }}', @js((bool) $hasApprovedOvertime))" class="attendance-panel__helper">
+        <div x-data="window.shiftCountdown('{{ $shiftEndTime }}', @js((bool) $hasApprovedOvertime))" class="attendance-panel__helper">
             <template x-if="endTime && remaining > 0">
                 <p>
                     {{ __('Shift ends in') }}:
