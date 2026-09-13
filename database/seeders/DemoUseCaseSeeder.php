@@ -306,9 +306,11 @@ class DemoUseCaseSeeder extends Seeder
             EmployeeDocumentRequest::firstOrCreate(
                 [
                     'employee_id' => $employee->id,
-                    'document_type_id' => $template->id,
+                    'document_type_id' => $template->document_type_id,
                 ],
                 [
+                    'requested_by' => $employee->user_id,
+                    'request_source' => 'employee',
                     'purpose' => 'Diperlukan untuk keperluan pribadi',
                     'status' => EmployeeDocumentRequest::STATUS_PENDING,
                 ]
