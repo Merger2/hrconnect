@@ -31,7 +31,7 @@ Route::middleware([
         ->middleware('feature.lock:payroll,user,home');
 
     Route::post('/payroll/{payroll}/payslip', [PayslipDownloadController::class, 'store'])
-        ->name('payslip.download')
+        ->name('payslip.download.verify')
         ->middleware(['feature.lock:payroll,user,home', 'throttle:6,1']);
 
     Route::prefix('admin')->middleware(['admin', 'can:accessAdminPanel'])->group(function () {
