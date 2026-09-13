@@ -123,6 +123,25 @@ window.locationCard = () => ({
     refreshLocation() { const parent = this.$el.closest('[wire\\:id]')?._x_dataStack?.[0]; parent?.captureGps?.(); },
 });
 
+window.liveGreeting = (initial = '') => ({
+    greeting: initial,
+    init() { this.update(); this._timer = setInterval(() => this.update(), 60000); },
+    update() { const hour = new Date().getHours(); this.greeting = hour < 11 ? 'Good morning' : (hour < 15 ? 'Good afternoon' : 'Good evening'); },
+    destroy() { if (this._timer) clearInterval(this._timer); },
+});
+
+window.liveClock = () => ({
+    dayName: '', fullDate: '', clockTime: '',
+    init() { this.update(); this._timer = setInterval(() => this.update(), 1000); },
+    update() {
+        const now = new Date();
+        this.dayName = new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(now);
+        this.fullDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+        this.clockTime = [now.getHours(), now.getMinutes(), now.getSeconds()].map((value) => String(value).padStart(2, '0')).join(':');
+    },
+    destroy() { if (this._timer) clearInterval(this._timer); },
+});
+
 // Marker halaman: [data-*-charts-root] → Chart; #employeeOriginsMap /
 // [data-leaflet-map] / #map_in / #map_out → Leaflet.
 const bootLazyLibs = () => {
