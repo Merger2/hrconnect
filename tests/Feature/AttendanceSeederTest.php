@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('it seeds attendance records without relying on the fake helper', function () {
+test('it seeds attendance records without development-only dependencies', function () {
     $employee = Employee::factory()->create();
     Shift::factory()->create();
 

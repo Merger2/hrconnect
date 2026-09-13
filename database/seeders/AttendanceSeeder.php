@@ -7,7 +7,6 @@ use App\Enums\VerificationMethod;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Shift;
-use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -23,7 +22,6 @@ class AttendanceSeeder extends Seeder
         $shiftId = Shift::first()?->id;
         $employees = Employee::all();
         $today = Carbon::today();
-        $faker = Factory::create(config('app.faker_locale'));
         $seeded = 0;
 
         foreach ($employees as $employee) {
@@ -74,10 +72,10 @@ class AttendanceSeeder extends Seeder
                     'date' => $date->toDateString(),
                     'clock_in' => $clockIn,
                     'clock_out' => $clockOut,
-                    'lat_in' => $status === AttendanceStatus::ABSENT ? null : $faker->latitude(-6.3, -6.1),
-                    'long_in' => $status === AttendanceStatus::ABSENT ? null : $faker->longitude(106.7, 106.9),
-                    'lat_out' => $clockOut ? $faker->latitude(-6.3, -6.1) : null,
-                    'long_out' => $clockOut ? $faker->longitude(106.7, 106.9) : null,
+                    'lat_in' => $status === AttendanceStatus::ABSENT ? null : $this->randomFloat(-6.3, -6.1, 6),
+                    'long_in' => $status === AttendanceStatus::ABSENT ? null : $this->randomFloat(106.7, 106.9, 6),
+                    'lat_out' => $clockOut ? $this->randomFloat(-6.3, -6.1, 6) : null,
+                    'long_out' => $clockOut ? $this->randomFloat(106.7, 106.9, 6) : null,
                     'status' => $status,
                     'late_minutes' => $lateMinutes,
                     'is_wfa' => false,
@@ -87,7 +85,7 @@ class AttendanceSeeder extends Seeder
                         : VerificationMethod::FACE_VERIFIED->value,
                     'face_similarity_score' => $status === AttendanceStatus::ABSENT
                         ? null
-                        : $faker->randomFloat(2, 85, 99),
+                        : $this->randomFloat(85, 99),
                 ]);
 
                 $seeded++;
@@ -95,5 +93,15 @@ class AttendanceSeeder extends Seeder
         }
 
         $this->command?->info("AttendanceSeeder: {$seeded} record absensi (1 bulan) untuk ".$employees->count().' karyawan.');
+    }
+
+    private function randomFloat(float $min, float $max, int $precision = 2): float
+    {
+        $multiplier = 10 ** $precision;
+
+        return random_int(
+            (int) round($min * $multiplier),
+            (int) round($max * $multiplier),
+        ) / $multiplier;
     }
 }
