@@ -67,13 +67,11 @@ Route::middleware([
         ->name('sse.notifications');
 });
 
-Livewire::setUpdateRoute(function ($handle) {
-    return Route::post(get_non_root_base_url_path().'/livewire/update', $handle);
+Livewire::setUpdateRoute(function ($handle, string $path) {
+    return Route::post(get_non_root_base_url_path().$path, $handle);
 });
 
-Livewire::setScriptRoute(function ($handle) {
-    $path = config('app.debug') ? '/livewire/livewire.js' : '/livewire/livewire.min.js';
-
+Livewire::setScriptRoute(function ($handle, string $path) {
     return Route::get(get_non_root_base_url_path().$path, $handle);
 });
 
