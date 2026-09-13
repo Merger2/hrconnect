@@ -59,6 +59,70 @@ window.ensureMaps = () => {
     return mapsPromise;
 };
 
+// These Alpine factories are used by the attendance scan screen. They must be
+// global: the scan screen can be reached through wire:navigate, which keeps the
+// layout alive and does not execute scripts pushed by the destination Blade view.
+window.clockInAction = () => ({
+    gpsLoading: false, gpsCaptured: false, gpsAccuracy: null, gpsWarning: '',
+    shiftEndTimestamp: null, hasApprovedOvertime: false, countdownTimer: null, countdownSeconds: 0, faceTimeoutTimer: null,
+    init() {
+        this.updateShiftEnd();
+        this.$wire.$watch('attendance', () => this.updateShiftEnd());
+        this.$wire.$watch('todayShiftSummary', () => this.updateShiftEnd());
+        this.$wire.$watch('hasApprovedOvertime', (value) => { this.hasApprovedOvertime = value; });
+        if (navigator.geolocation) { this.captureGps(); }
+        this.startCountdown();
+    },
+    updateShiftEnd() {
+        const endTime = this.$wire.attendance?.shift?.end_time || this.$wire.todayShiftSummary?.end_time;
+        this.shiftEndTimestamp = endTime ? `${new Date().toISOString().slice(0, 10)} ${endTime}` : null;
+        this.hasApprovedOvertime = this.$wire.hasApprovedOvertime;
+    },
+    get shiftLabel() { return this.$wire.todayShiftSummary?.is_off ? 'Off Day' : (this.$wire.todayShiftSummary?.name || 'No shift assigned'); },
+    get workHours() { const s = this.$wire.todayShiftSummary; return s?.start && s?.end ? `${s.start} - ${s.end}` : 'Flexible'; },
+    get shiftDuration() { return this.$wire.todayShiftSummary?.duration || ''; },
+    get clockInTime() { return this.$wire.clockInTime || (this.$wire.attendance?.clock_in ? new Date(this.$wire.attendance.clock_in).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '--:--'); },
+    get clockOutTime() { return this.$wire.clockOutTime || (this.$wire.attendance?.clock_out ? new Date(this.$wire.attendance.clock_out).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '--:--'); },
+    get formattedCountdown() { if (!this.shiftEndTimestamp) return '--:--:--'; if (this.countdownSeconds <= 0) return this.hasApprovedOvertime ? 'Overtime' : 'Clock Out Now'; return [Math.floor(this.countdownSeconds / 3600), Math.floor((this.countdownSeconds % 3600) / 60), this.countdownSeconds % 60].map((v) => String(v).padStart(2, '0')).join(':'); },
+    captureGps() {
+        if (this.gpsLoading) return;
+        this.gpsLoading = true; this.gpsWarning = '';
+        if (!navigator.geolocation) { this.gpsWarning = 'Geolocation is not available in this browser.'; this.gpsLoading = false; return; }
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude, accuracy } = position.coords; const roundedAccuracy = Math.round(accuracy);
+            this.gpsCaptured = true; this.gpsAccuracy = roundedAccuracy; this.gpsLoading = false;
+            this.$wire.setGps(latitude, longitude, roundedAccuracy);
+            window.dispatchEvent(new CustomEvent('gps-coordinates-updated', { detail: { latitude, longitude, accuracy: roundedAccuracy } }));
+        }, (error) => {
+            this.gpsWarning = error.code === error.PERMISSION_DENIED ? 'GPS permission denied. Please enable location access.' : 'Could not get GPS location.';
+            this.gpsLoading = false;
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+    },
+    onGpsCaptured(detail) { if (detail?.latitude && detail?.longitude) { this.gpsCaptured = true; this.gpsAccuracy = detail.accuracy || null; this.gpsLoading = false; this.$wire.setGps(detail.latitude, detail.longitude, detail.accuracy); window.dispatchEvent(new CustomEvent('gps-coordinates-updated', { detail })); } },
+    onFaceCaptured(detail) { if (!detail?.descriptor || !detail?.action) return; if (this.faceTimeoutTimer) { clearTimeout(this.faceTimeoutTimer); this.faceTimeoutTimer = null; } if (detail.action === 'clock_in') this.$wire.doClockInWithFace(detail.descriptor); else if (detail.action === 'clock_out') this.$wire.doClockOutWithFace(detail.descriptor); else if (detail.action === 'wfa') this.$wire.doWfaClockInWithFace(detail.descriptor); },
+    startCountdown() { this.updateCountdown(); this.countdownTimer = setInterval(() => this.updateCountdown(), 1000); },
+    updateCountdown() { if (this.shiftEndTimestamp) this.countdownSeconds = Math.max(0, Math.floor((new Date(this.shiftEndTimestamp).getTime() - Date.now()) / 1000)); },
+    destroy() { if (this.countdownTimer) clearInterval(this.countdownTimer); },
+});
+
+window.locationCard = () => ({
+    lat: null, lng: null, mapVisible: false, lastUpdated: '', _map: null, _userMarker: null, officeDistance: null, branchLat: null, branchLng: null, branchRadius: null, branchName: '',
+    init() {
+        this.lat = this.safeFloat(this.$wire.latitude); this.lng = this.safeFloat(this.$wire.longitude);
+        this.branchLat = this.safeFloat(this.$wire.branchLatitude); this.branchLng = this.safeFloat(this.$wire.branchLongitude); this.branchRadius = this.safeFloat(this.$wire.branchRadius); this.branchName = this.$wire.branchName || ''; this.calcDistance();
+        this.$wire.$watch('latitude', (value) => this.setCoordinates(value, this.lng)); this.$wire.$watch('longitude', (value) => this.setCoordinates(this.lat, value));
+    },
+    safeFloat(value) { const parsed = Number.parseFloat(value); return Number.isFinite(parsed) ? parsed : null; },
+    setCoordinates(lat, lng) { this.lat = this.safeFloat(lat); this.lng = this.safeFloat(lng); this.calcDistance(); this.updateMap(); },
+    calcDistance() { if (![this.lat, this.lng, this.branchLat, this.branchLng].every((value) => value !== null)) { this.officeDistance = null; return; } const rad = (value) => value * Math.PI / 180; const a = Math.sin(rad(this.branchLat - this.lat) / 2) ** 2 + Math.cos(rad(this.lat)) * Math.cos(rad(this.branchLat)) * Math.sin(rad(this.branchLng - this.lng) / 2) ** 2; this.officeDistance = Math.round(6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))); },
+    get formattedDistance() { return this.officeDistance === null ? '' : (this.officeDistance < 1000 ? `${this.officeDistance} m` : `${(this.officeDistance / 1000).toFixed(1)} km`); },
+    toggle() { this.mapVisible = !this.mapVisible; if (this.mapVisible && this.lat !== null && this.lng !== null) this.$nextTick(() => this.initMap()); },
+    initMap() { if (this._map || !this.$refs.mapContainer) return; if (!window.L) { window.ensureMaps?.().then(() => this.initMap()); return; } this._map = window.L.map(this.$refs.mapContainer).setView([this.lat, this.lng], 15); window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(this._map); this._userMarker = window.L.marker([this.lat, this.lng]).addTo(this._map); },
+    updateMap() { if (this._map && this.lat !== null && this.lng !== null) { this._userMarker?.setLatLng([this.lat, this.lng]); this._map.setView([this.lat, this.lng]); this.lastUpdated = `Updated ${new Date().toLocaleTimeString('id-ID')}`; } else if (this.mapVisible && this.lat !== null && this.lng !== null) { this.$nextTick(() => this.initMap()); } },
+    onCoordsUpdated(detail) { if (detail?.latitude && detail?.longitude) this.setCoordinates(detail.latitude, detail.longitude); },
+    refreshLocation() { const parent = this.$el.closest('[wire\\:id]')?._x_dataStack?.[0]; parent?.captureGps?.(); },
+});
+
 // Marker halaman: [data-*-charts-root] → Chart; #employeeOriginsMap /
 // [data-leaflet-map] / #map_in / #map_out → Leaflet.
 const bootLazyLibs = () => {
@@ -495,4 +559,3 @@ const initUiPickers = (root = document) => {
 };
 
 window.initUiPickers = initUiPickers;
-

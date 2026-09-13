@@ -12,6 +12,24 @@ test.use({ storageState: employeeState });
 test.describe('Employee Presensi - GPS/Geofencing + Face Recognition', () => {
     test.describe.configure({ mode: 'serial' });
 
+    test('Livewire navigation to presensi initializes its Alpine factories', async ({ page }) => {
+        const errors: string[] = [];
+
+        page.on('pageerror', (error) => errors.push(error.message));
+        page.on('console', (message) => {
+            if (message.type() === 'error') {
+                errors.push(message.text());
+            }
+        });
+
+        await page.goto(`${BASE}/home`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await page.locator('a[href="/scan"]').first().click();
+        await expect(page).toHaveURL(/\/scan$/);
+        await expect(page.locator('[wire\\:name="user.clock-in-action"]')).toBeVisible({ timeout: 10000 });
+
+        expect(errors.filter((error) => /clockInAction|locationCard|gpsWarning|mapVisible/.test(error))).toEqual([]);
+    });
+
     test('Employee can access presensi page /scan', async ({ page }) => {
         await page.goto(`${BASE}/scan`, { waitUntil: 'domcontentloaded', timeout: 20000 });
         
