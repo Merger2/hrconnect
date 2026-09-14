@@ -558,13 +558,11 @@
                     @if ($canManageEmployeeStatuses)
                         <div class="sm:col-span-2">
                             <x-forms.label for="create_employment_status" value="{{ __('Employment Status') }}" />
-                            <x-forms.select id="create_employment_status" wire:model="form.employment_status"
-                                class="mt-1 block w-full">
-                                @foreach ($manualEmploymentStatuses as $statusKey)
-                                    <option value="{{ $statusKey }}">{{ __($employmentStatuses[$statusKey]) }}</option>
-                                @endforeach
-                            </x-forms.select>
-                            <x-forms.input-error for="form.employment_status" class="mt-2" />
+                            {{-- Karyawan baru selalu Active (lifecycle-managed) — form edit
+                                 salah salin ke create menampilkan status penghapusan akun. --}}
+                            <x-forms.input id="create_employment_status" type="text" value="{{ __($employmentStatuses[\App\Models\Employee::EMPLOYMENT_STATUS_ACTIVE]) }}"
+                                disabled class="mt-1 block w-full" />
+                            <p class="mt-1 text-xs text-slate-500">{{ __('New employees always start as Active.') }}</p>
                         </div>
                     @endif
 
