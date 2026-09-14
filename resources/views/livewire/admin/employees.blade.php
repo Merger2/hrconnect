@@ -367,6 +367,9 @@
         <x-slot name="content">
             <form wire:submit="create">
                 @csrf
+                @error('form.email')
+                    <p {{ $attributes->merge(['class' => 'mb-4 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error']) }}>{{ $message }}</p>
+                @enderror
                 <!-- Form Fields (Same as original but cleaned up if needed) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Name -->
@@ -399,6 +402,10 @@
                         <x-forms.input id="create_password" type="password" class="mt-1 block w-full"
                             wire:model="form.password" />
                         <x-forms.input-error for="form.password" class="mt-2" />
+                        <x-forms.label for="create_password_confirmation" value="{{ __('Confirm Password') }}" class="mt-3" />
+                        <x-forms.input id="create_password_confirmation" type="password" class="mt-1 block w-full"
+                            wire:model="form.password_confirmation" />
+                        <x-forms.input-error for="form.password_confirmation" class="mt-2" />
                     </div>
 
                     <!-- Phone -->
@@ -430,6 +437,13 @@
                         <x-forms.label for="create_join_date" value="{{ __('Join Date') }}" />
                         <x-forms.input id="create_join_date" type="date" class="mt-1 block w-full" wire:model="form.join_date" />
                         <x-forms.input-error for="form.join_date" class="mt-2" />
+                    </div>
+
+                    <!-- Birth Date -->
+                    <div>
+                        <x-forms.label for="create_birth_date" value="{{ __('Birth Date') }}" />
+                        <x-forms.input id="create_birth_date" type="date" class="mt-1 block w-full" wire:model="form.birth_date" max="{{ now()->subDay()->format('Y-m-d') }}" />
+                        <x-forms.input-error for="form.birth_date" class="mt-2" />
                     </div>
 
                     <!-- Employment Type -->
@@ -646,6 +660,10 @@
                             wire:model="form.password"
                             placeholder="{{ __('Leave blank to keep current password') }}" />
                         <x-forms.input-error for="form.password" class="mt-2" />
+                        <x-forms.label for="edit_password_confirmation" value="{{ __('Confirm Password') }}" class="mt-3" />
+                        <x-forms.input id="edit_password_confirmation" type="password" class="mt-1 block w-full"
+                            wire:model="form.password_confirmation" />
+                        <x-forms.input-error for="form.password_confirmation" class="mt-2" />
                     </div>
 
                     <!-- Phone -->

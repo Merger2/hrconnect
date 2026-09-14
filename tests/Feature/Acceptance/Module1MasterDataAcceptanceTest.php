@@ -42,6 +42,7 @@ test('M1 acceptance: superadmin creates employee — atomic user+employee record
         ->set('form.email', 'acceptance.m1@hrconnect.test')
         ->set('form.phone', '081234567890')
         ->set('form.password', 'Acc!2026pass')
+        ->set('form.password_confirmation', 'Acc!2026pass')
         ->set('form.gender', 'male')
         ->set('form.address', 'Jl. Acceptance No. 1')
         ->set('form.provinsi_kode', '11')

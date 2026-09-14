@@ -43,6 +43,7 @@ test('superadmin can create an employee with atomic user and employee records', 
         ->set('form.email', 'budi.santoso@hrconnect.test')
         ->set('form.phone', '081234567890')
         ->set('form.password', 'Budi!2026pass')
+        ->set('form.password_confirmation', 'Budi!2026pass')
         ->set('form.gender', 'male')
         ->set('form.address', 'Jl. Merdeka No. 1')
         ->set('form.provinsi_kode', '11')
@@ -94,6 +95,103 @@ test('employee create validates required fields before inserting', function () {
     // Tidak ada user/employee baru yang bocor masuk DB saat validasi gagal.
     $this->assertDatabaseCount('users', 1);
     $this->assertDatabaseCount('employees', 0);
+});
+
+test('superadmin without company_id can still create an employee (single-company fallback)', function () {
+    [$company, $branch] = employeeCreateMasterData();
+
+    // Super admin bootstrap (SuperAdminSeeder) tidak terikat company — NULL.
+    // Sebelumnya dioper langsung ke getDefaultBranchId(int) → TypeError 500.
+    $superadmin = User::factory()->admin(true)->create(['company_id' => null]);
+    expect($superadmin->company_id)->toBeNull();
+
+    $this->actingAs($superadmin);
+
+    Livewire::test(EmployeeCreate::class)
+        ->set('form.name', 'Sari Dewi')
+        ->set('form.nip', '1992030120250002')
+        ->set('form.email', 'sari.dewi@hrconnect.test')
+        ->set('form.phone', '081298765432')
+        ->set('form.password', 'Sari!2026pass')
+        ->set('form.password_confirmation', 'Sari!2026pass')
+        ->set('form.gender', 'female')
+        ->set('form.birth_date', '1992-03-01')
+        ->set('form.address', 'Jl. Melati No. 2')
+        ->set('form.provinsi_kode', '11')
+        ->set('form.kabupaten_kode', '11.01')
+        ->set('form.kecamatan_kode', '11.01.01')
+        ->set('form.kelurahan_kode', '11.01.01.1001')
+        ->set('form.join_date', '2026-09-01')
+        ->set('form.employment_type', 'permanent')
+        ->set('form.education_level', 'bachelor')
+        ->set('form.institution_name', 'Universitas Indonesia')
+        ->set('form.graduation_year', 2014)
+        ->set('form.basic_salary', 5500000)
+        ->call('store')
+        ->assertHasNoErrors();
+
+    // Fallback single-company (PRD: non-goal multi-tenant): user + employee
+    // terikat ke satu-satunya company terdaftar, branch = main branch.
+    $user = User::where('email', 'sari.dewi@hrconnect.test')->firstOrFail();
+
+    expect($user->company_id)->toBe($company->id)
+        ->and($user->employee)->not->toBeNull()
+        ->and($user->employee->company_id)->toBe($company->id)
+        ->and($user->employee->branch_id)->toBe($branch->id);
+});
+
+test('employee create fails loud via validation when company has no branch', function () {
+    Company::factory()->create();
+
+    $superadmin = User::factory()->admin(true)->create(['company_id' => null]);
+    $this->actingAs($superadmin);
+
+    Livewire::test(EmployeeCreate::class)
+        ->set('form.name', 'Tanpa Branch')
+        ->set('form.nip', '1994040420250003')
+        ->set('form.email', 'tanpa.branch@hrconnect.test')
+        ->set('form.phone', '081211122233')
+        ->set('form.password', 'Tanpa!2026pass')
+        ->set('form.password_confirmation', 'Tanpa!2026pass')
+        ->set('form.gender', 'male')
+        ->set('form.birth_date', '1994-04-04')
+        ->set('form.address', 'Jl. Kenanga No. 3')
+        ->set('form.provinsi_kode', '11')
+        ->set('form.kabupaten_kode', '11.01')
+        ->set('form.kecamatan_kode', '11.01.01')
+        ->set('form.kelurahan_kode', '11.01.01.1001')
+        ->set('form.join_date', '2026-09-01')
+        ->set('form.employment_type', 'permanent')
+        ->set('form.education_level', 'sma')
+        ->set('form.institution_name', 'SMA Negeri 1')
+        ->set('form.graduation_year', 2012)
+        ->call('store')
+        ->assertHasErrors(['form.email']);
+
+    // Transaksi rollback: tidak ada user/employee yatim.
+    expect(User::where('email', 'tanpa.branch@hrconnect.test')->exists())->toBeFalse()
+        ->and(Employee::where('nip', '1994040420250003')->exists())->toBeFalse();
+});
+
+test('employee create rejects mismatched password confirmation', function () {
+    [$company] = employeeCreateMasterData();
+    $superadmin = User::factory()->admin(true)->create(['company_id' => $company->id]);
+    $this->actingAs($superadmin);
+
+    Livewire::test(EmployeeCreate::class)
+        ->set('form.name', 'Cek Konfirmasi')
+        ->set('form.nip', '1995050520250004')
+        ->set('form.email', 'cek.konfirmasi@hrconnect.test')
+        ->set('form.phone', '081244455566')
+        ->set('form.password', 'Cek!2026pass')
+        ->set('form.password_confirmation', 'Berbeda!2026pass')
+        ->set('form.gender', 'male')
+        ->set('form.birth_date', '1995-05-05')
+        ->set('form.join_date', '2026-09-01')
+        ->call('store')
+        ->assertHasErrors(['form.password']);
+
+    expect(User::where('email', 'cek.konfirmasi@hrconnect.test')->exists())->toBeFalse();
 });
 
 test('employee create denies users without manageUserRecord permission', function () {

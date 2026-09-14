@@ -6,6 +6,7 @@ use App\Actions\Hr\SyncUserRoles;
 use App\Enums\EducationLevel;
 use App\Enums\MaritalStatus;
 use App\Models\Branch;
+use App\Models\Company;
 use App\Models\Employee;
 use App\Models\User;
 use App\Support\ManagerHierarchyGuard;
@@ -34,6 +35,8 @@ class UserForm extends Form
     public $phone = '';
 
     public $password = null;
+
+    public $password_confirmation = null;
 
     public $gender = null;
 
@@ -105,7 +108,10 @@ class UserForm extends Form
             // Password wajib saat create; opsional saat update (hanya diubah
             // bila diisi). Kekuatan mengikuti Password::defaults() — prod:
             // min 12 + huruf/angka/simbol + uncompromised (AppServiceProvider).
-            'password' => [$this->user ? 'nullable' : 'required', 'string', Password::defaults(), 'max:255'],
+            // 'confirmed' → wajib cocok dgn form.password_confirmation (re-verification
+            // agar admin tidak salah ketik password karyawan dua kali berbeda).
+            // Edit: nullable (kosong = tidak ganti), konfirmasi hanya dicek saat diisi.
+            'password' => [$this->user ? 'nullable' : 'required', 'string', Password::defaults(), 'max:255', 'confirmed'],
             'gender' => [$requiredOrNullable, 'in:male,female'],
             'marital_status' => ['nullable', 'string', Rule::in(array_column(MaritalStatus::cases(), 'value'))],
             'address' => [$requiredOrNullable, 'string', 'max:255'],
@@ -120,7 +126,10 @@ class UserForm extends Form
             'kecamatan_kode' => ['nullable', 'string', 'max:13'],
             'kelurahan_kode' => ['nullable', 'string', 'max:13'],
             'group' => ['nullable', 'string', 'max:255', Rule::in(User::$groups)],
-            'birth_date' => ['nullable', 'date'],
+            // employees.birth_date NOT NULL di DB (migration awal) — 'nullable'
+            // di sini membuat INSERT gagal QueryException 500 saat admin tidak
+            // mengisi field. Samakan dengan StoreEmployeeRequest (API).
+            'birth_date' => [$requiredOrNullable, 'date', 'before:today'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'division_id' => ['nullable', 'exists:divisions,id'],
             'position_id' => ['nullable', 'exists:positions,id'],
@@ -158,6 +167,7 @@ class UserForm extends Form
         $this->email = $user->email;
         $this->phone = $user->phone;
         $this->password = null;
+        $this->password_confirmation = null;
         $this->gender = $user->gender;
         $this->marital_status = $user->employee?->marital_status->value ?? 'single';
         $this->address = $user->address;
@@ -203,19 +213,21 @@ class UserForm extends Form
         $this->ensureManagerDoesNotCreateCycle();
         $this->sanitize();
 
-        $user = DB::transaction(function () {
+        $companyId = $this->resolveCompanyId();
+
+        $user = DB::transaction(function () use ($companyId) {
             $user = User::create([
                 'name' => $this->name,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'group' => $this->group,
                 'manager_id' => $this->manager_id,
-                'company_id' => auth()->user()->company_id,
+                'company_id' => $companyId,
             ]);
 
             $employeeData = $this->employeePayload();
             $employeeData['user_id'] = $user->id;
-            $employeeData['company_id'] = auth()->user()->company_id;
+            $employeeData['company_id'] = $companyId;
             $employeeData['branch_id'] = $this->getDefaultBranchId($employeeData['company_id']);
             $employeeData['employee_number'] = $this->generateEmployeeNumber();
             $employeeData['salary_type'] = 'monthly';
@@ -283,7 +295,9 @@ class UserForm extends Form
         $newPassword = filled($this->password) ? (string) $this->password : null;
         $this->sanitize();
 
-        DB::transaction(function () {
+        $companyId = $this->resolveCompanyId();
+
+        DB::transaction(function () use ($companyId) {
             $this->user->update([
                 'name' => $this->name,
                 'email' => $this->email,
@@ -300,7 +314,7 @@ class UserForm extends Form
                 $this->user->employee->update($employeePayload);
             } elseif ($this->group === 'user') {
                 $employeePayload['user_id'] = $this->user->id;
-                $employeePayload['company_id'] = auth()->user()->company_id;
+                $employeePayload['company_id'] = $companyId;
                 $employeePayload['branch_id'] = $this->getDefaultBranchId($employeePayload['company_id']);
                 $employeePayload['employee_number'] = $this->generateEmployeeNumber();
                 $employeePayload['salary_type'] = 'monthly';
@@ -422,13 +436,44 @@ class UserForm extends Form
         ];
     }
 
+    /**
+     * Resolve company_id untuk karyawan baru/ter-update. Null-safe: super admin
+     * bootstrap (SuperAdminSeeder) tidak terikat company — company_id NULL, dan
+     * sebelumnya dioper langsung ke getDefaultBranchId(int) → TypeError 500 di
+     * setiap submit form tambah karyawan oleh super admin. PRD: single-company
+     * (non-goal multi-tenant) → fallback ke satu-satunya company terdaftar.
+     */
+    private function resolveCompanyId(): int
+    {
+        $companyId = auth()->user()->company_id
+            ?? Company::query()->orderBy('id')->value('id');
+
+        if ($companyId === null) {
+            // Fail loud via validasi — bukan 500, bukan data yatim.
+            throw ValidationException::withMessages([
+                'form.email' => __('No company is configured. Create the company first.'),
+            ]);
+        }
+
+        return (int) $companyId;
+    }
+
     private function getDefaultBranchId(int $companyId): int
     {
-        $branch = Branch::where('company_id', $companyId)
-            ->where('is_main', true)
-            ->first();
+        // Main branch diprioritaskan; tanpa fallback fake id=1 — branch salah
+        // membuat absensi/payroll karyawan nyasar company lain (lebih buruk
+        // daripada gagal simpan).
+        $branchId = Branch::where('company_id', $companyId)
+            ->orderByDesc('is_main')
+            ->value('id');
 
-        return $branch->id ?? Branch::where('company_id', $companyId)->first()->id ?? 1;
+        if ($branchId === null) {
+            throw ValidationException::withMessages([
+                'form.email' => __('No branch is configured for this company. Create a main branch first.'),
+            ]);
+        }
+
+        return (int) $branchId;
     }
 
     private function generateEmployeeNumber(): string

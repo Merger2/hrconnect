@@ -27,6 +27,10 @@
                         <x-forms.input id="edit_password" type="password" class="mt-1 block w-full"
                             wire:model="form.password" placeholder="{{ __('Leave blank to keep current password') }}" />
                         <x-forms.input-error for="form.password" class="mt-2" />
+                        <x-forms.label for="edit_password_confirmation" value="{{ __('Confirm Password') }}" class="mt-3" />
+                        <x-forms.input id="edit_password_confirmation" type="password" class="mt-1 block w-full"
+                            wire:model="form.password_confirmation" />
+                        <x-forms.input-error for="form.password_confirmation" class="mt-2" />
                     </div>
 
                     <div>
