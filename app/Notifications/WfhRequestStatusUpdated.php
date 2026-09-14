@@ -45,10 +45,13 @@ class WfhRequestStatusUpdated extends Notification implements ShouldQueue
             ->line('Tanggal: '.$this->request->date)
             ->line('Status: '.$statusLabel);
 
-        if ($status === 'rejected' && $this->request->rejection_note) {
-            $mail->line('Alasan: '.$this->request->rejection_note);
-        } elseif ($status === 'approved' && $this->request->final_note) {
-            $mail->line('Catatan: '.$this->request->final_note);
+        // Catatan reviewer hidup di kolom review_note (WorkFromHomeRequestService
+        // menulis review_note baik saat approve maupun reject). Sebelumnya membaca
+        // rejection_note/final_note yang TIDAK ADA di tabel → alasan penolakan
+        // tidak pernah tampil di email karyawan (silent degradation).
+        if (filled($this->request->review_note)) {
+            $label = $status === 'rejected' ? 'Alasan: ' : 'Catatan: ';
+            $mail->line($label.$this->request->review_note);
         }
 
         return $mail->action('Lihat Detail', url('/wfh-requests'))

@@ -10,7 +10,6 @@ use App\Support\MultiCompanyService;
 use App\Support\WorkFromHomeRequestService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
