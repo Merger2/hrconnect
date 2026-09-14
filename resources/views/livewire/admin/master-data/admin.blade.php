@@ -352,6 +352,10 @@
                         @error('form.password')
                             <x-forms.input-error for="form.password" class="mt-2" message="{{ $message }}" />
                         @enderror
+                        <x-forms.label for="create_password_confirmation" class="mt-3">{{ __('Confirm Password') }}</x-forms.label>
+                        <x-forms.input id="create_password_confirmation" class="mt-1 block w-full" type="password"
+                            wire:model="credentialConfirmation" placeholder="{{ __('Confirm Password') }}" required
+                            autocomplete="new-password" />
                     </div>
                     <div class="w-full">
                         <x-forms.label for="form.group" value="{{ __('Group') }}" />
@@ -550,6 +554,9 @@
                         @error('form.password')
                             <x-forms.input-error for="form.password" class="mt-2" message="{{ $message }}" />
                         @enderror
+                        <x-forms.label for="edit_password_confirmation" class="mt-3">{{ __('Confirm Password') }}</x-forms.label>
+                        <x-forms.input id="edit_password_confirmation" class="mt-1 block w-full" type="password"
+                            wire:model="credentialConfirmation" placeholder="{{ __('Confirm Password') }}" autocomplete="new-password" />
                     </div>
                 </div>
                 @if ($assignableAdminRoles->isNotEmpty())

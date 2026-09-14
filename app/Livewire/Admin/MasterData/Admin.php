@@ -41,6 +41,8 @@ class Admin extends Component
 
     public ?string $credential = null;
 
+    public ?string $credentialConfirmation = null;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'groupFilter' => ['except' => 'all'],
@@ -67,6 +69,7 @@ class Admin extends Component
         // Password WAJIB diketik admin (2026-08-16) — hapus default 'admin'
         // (kredensial lemah). Validasi form (Password::defaults) menolak kosong.
         $this->credential = null;
+        $this->credentialConfirmation = null;
     }
 
     public function create()
@@ -78,8 +81,10 @@ class Admin extends Component
         }
 
         $this->form->password = $this->credential;
+        $this->form->password_confirmation = $this->credentialConfirmation;
         $this->form->store();
         $this->credential = null;
+        $this->credentialConfirmation = null;
         $this->creating = false;
         $this->banner(__('Created successfully.'));
     }
@@ -89,6 +94,7 @@ class Admin extends Component
         $this->form->resetErrorBag();
         $this->form->reset();
         $this->credential = null;
+        $this->credentialConfirmation = null;
         $this->editing = true;
         /** @var User $user */
         $user = $this->findVisibleAdminOrFail($id);
@@ -104,8 +110,10 @@ class Admin extends Component
         }
 
         $this->form->password = $this->credential;
+        $this->form->password_confirmation = $this->credentialConfirmation;
         $this->form->update();
         $this->credential = null;
+        $this->credentialConfirmation = null;
         $this->editing = false;
         $this->banner(__('Updated successfully.'));
     }

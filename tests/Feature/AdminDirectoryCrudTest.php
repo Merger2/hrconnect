@@ -55,6 +55,7 @@ test('superadmin can create admin account from admin directory', function () {
         ->set('form.email', 'finance-admin@example.com')
         ->set('form.phone', '09090909')
         ->set('credential', 'Admin!2026x')
+        ->set('credentialConfirmation', 'Admin!2026x')
         ->set('form.gender', 'male')
         ->set('form.address', 'Jl. Jend. Sudirman No. 1')
         ->set('form.group', 'admin')
@@ -89,6 +90,7 @@ test('admin directory create validates required name and email before insert', f
         ->set('form.nip', '808080')
         ->set('form.phone', '08080808')
         ->set('credential', 'Admin!2026x')
+        ->set('credentialConfirmation', 'Admin!2026x')
         ->set('form.address', 'Jl. Veteran No. 2')
         ->set('form.group', 'superadmin')
         ->call('create')
@@ -150,11 +152,32 @@ test('superadmin can reset own password from admin directory', function () {
         ->call('edit', $superadmin->id)
         ->set('form.gender', 'male')
         ->set('credential', 'NewOwn!2026x')
+        ->set('credentialConfirmation', 'NewOwn!2026x')
         ->assertSet('credential', 'NewOwn!2026x')
         ->call('update')
         ->assertHasNoErrors();
 
     expect(Hash::check('NewOwn!2026x', $superadmin->fresh()->password))->toBeTrue();
+});
+
+test('admin directory rejects mismatched password confirmation', function () {
+    [$company] = adminDirectoryMasterData();
+    $superadmin = adminDirectorySuperadmin($company);
+
+    $this->actingAs($superadmin);
+
+    Livewire::test(AdminDirectory::class)
+        ->set('form.name', 'Cek Konfirmasi')
+        ->set('form.email', 'cek.konfirmasi@example.com')
+        ->set('form.group', 'admin')
+        ->set('credential', 'Admin!2026x')
+        ->set('credentialConfirmation', 'Berbeda!2026x')
+        ->call('create')
+        ->assertHasErrors(['form.password']);
+
+    $this->assertDatabaseMissing('users', [
+        'email' => 'cek.konfirmasi@example.com',
+    ]);
 });
 
 test('admin directory assigns one selected access role', function () {
