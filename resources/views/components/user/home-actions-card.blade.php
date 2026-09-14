@@ -99,20 +99,20 @@
         @endphp
 
         <div x-data="window.shiftCountdown('{{ $shiftEndTime }}', @js((bool) $hasApprovedOvertime))" class="attendance-panel__helper">
-            <template x-if="endTime && remaining > 0">
+            <template x-if="$data.endTime && $data.remaining > 0">
                 <p>
                     {{ __('Shift ends in') }}:
-                    <span class="font-mono font-bold text-primary-600" x-text="formatted"></span>
+                    <span class="font-mono font-bold text-primary-600" x-text="$data.formatted"></span>
                 </p>
             </template>
-            <template x-if="endTime && remaining <= 0">
+            <template x-if="$data.endTime && $data.remaining <= 0">
                 <p
                     class="animate-pulse"
-                    :class="hasApprovedOvertime ? 'text-amber-500' : 'text-orange-500'">
-                    <span x-text="hasApprovedOvertime ? '{{ __('Overtime') }}' : '{{ __('Clock Out Pending') }}'"></span>
+                    :class="$data.hasApprovedOvertime ? 'text-amber-500' : 'text-orange-500'">
+                    <span x-text="$data.hasApprovedOvertime ? '{{ __('Overtime') }}' : '{{ __('Clock Out Pending') }}'"></span>
                 </p>
             </template>
-            <template x-if="!endTime">
+            <template x-if="!$data.endTime">
                 <p>{{ __('Don\'t forget to clock out when you\'re done.') }}</p>
             </template>
         </div>
